@@ -15,7 +15,6 @@
         </div>
     @endif
 
-    {{-- Cek apakah ada alat yang masa kalibrasinya habis atau hampir habis (<= 30 hari) --}}
     @php
         $alatWarningCount = 0;
         foreach($alat as $item) {
@@ -44,7 +43,6 @@
         </div>
         <div class="card-body">
             
-            {{-- Form Pencarian dan Filter --}}
             <form action="{{ route('alat.index') }}" method="GET" class="row g-2 mb-3 align-items-center">
                 <div class="col-md-4">
                     <div class="input-group input-group-sm">
@@ -74,7 +72,6 @@
             </form>
 
             <div class="table-responsive">
-                {{-- Menggunakan style padding lebih kecil dan text-wrap agar kolom menyesuaikan --}}
                 <table class="table table-bordered table-striped align-middle text-center" style="font-size: 0.73rem;">
                     <thead class="table-dark align-middle">
                         <tr>
@@ -210,7 +207,6 @@
     </div>
 </div>
 
-<!-- Modal Pop-up Preview QR Code Besar & Unduh -->
 <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-center">
@@ -232,7 +228,6 @@
     </div>
 </div>
 
-<!-- SweetAlert2 & Custom QR Modal Script -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 function confirmDelete(button) {

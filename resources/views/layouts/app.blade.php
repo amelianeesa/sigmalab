@@ -33,7 +33,7 @@
             <li class="{{ request()->is('alat*') ? 'active' : '' }}">
                 <a href="{{ route('alat.index') }}"><i class="fas fa-tools"></i> Aset & Kalibrasi</a>
             </li>
-            <li><a href="#"><i class="fas fa-boxes"></i> Inventori Bahan</a></li>
+            <li><a href="#"><i class="fas fa-boxes"></i> Inventori Barang</a></li>
             <li><a href="#"><i class="fas fa-vial"></i> QC & Parameter Uji</a></li>
             <li><a href="#"><i class="fas fa-users"></i> SDM & Kompetensi</a></li>
             <li><a href="#"><i class="fas fa-history"></i> Audit Log</a></li>

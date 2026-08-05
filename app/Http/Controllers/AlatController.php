@@ -132,7 +132,6 @@ class AlatController extends Controller
     {
         $alat = Alat::findOrFail($id);
 
-        // Ubah validasi bagian kalibrasi menjadi 'nullable' agar boleh dikosongkan
         $request->validate([
             'kode_alat' => 'required|string|max:50|unique:alat,kode_alat,' . $id . ',alat_id',
             'nama_alat' => 'required|string|max:100',
@@ -184,7 +183,6 @@ class AlatController extends Controller
             if ($kalibrasiTerakhir) {
                 $kalibrasiTerakhir->update($dataKalibrasi);
             } else {
-                // Hanya buat baru jika ada salah satu input kalibrasi yang diisi, atau langsung buat
                 $dataKalibrasi['alat_id'] = $alat->alat_id;
                 RiwayatKalibrasi::create($dataKalibrasi);
             }
