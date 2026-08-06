@@ -51,17 +51,6 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        .btn-logout {
-            border-color: rgba(255,255,255,.45);
-            color: #fff;
-            transition: background .15s ease, color .15s ease, border-color .15s ease;
-        }
-        .btn-logout:hover,
-        .btn-logout:focus {
-            background: rgba(255,255,255,.95);
-            color: #1d4c7a;
-            border-color: rgba(255,255,255,.85);
-        }
         .card.h-100 .card-body { min-height: 120px; }
         .card .card-body p { word-break: break-word; }
         .module-card { transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease; }
@@ -87,7 +76,7 @@
             </div>
             <form action="{{ route('logout') }}" method="POST" class="m-0">
                 @csrf
-                <button type="submit" class="btn btn-sm btn-outline-light btn-logout px-3 py-2">
+                <button type="submit" class="btn btn-sm btn-outline-light text-white px-3 py-2">
                     <i class="bi bi-box-arrow-right me-1"></i> Logout
                 </button>
             </form>

@@ -51,17 +51,6 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        .btn-logout {
-            border-color: rgba(255,255,255,.45);
-            color: #fff;
-            transition: background .15s ease, color .15s ease, border-color .15s ease;
-        }
-        .btn-logout:hover,
-        .btn-logout:focus {
-            background: rgba(255,255,255,.95);
-            color: #1d4c7a;
-            border-color: rgba(255,255,255,.85);
-        }
         .card.h-100 .card-body { min-height: 120px; }
         .card .card-body p { word-break: break-word; }
         .module-card { transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease; }
@@ -81,13 +70,19 @@
             <div class="mb-0 fw-bold">Sistem Integrasi Manajemen Laboratorium PT Sucofindo</div>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <div class="d-flex align-items-center gap-1 px-3 py-2 rounded-3" style="background: rgba(255,255,255,.95); color: #0f3b68;">
-                <i class="bi bi-person-circle"></i>
-                <span class="fw-semibold">{{ Auth::user()->name ?? Auth::user()->username ?? 'Pengguna' }}</span>
+            <div class="dropdown">
+                <button class="btn btn-light dropdown-toggle border" type="button" data-bs-toggle="dropdown" title="Profil">
+                    <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->name ?? Auth::user()->username ?? 'Pengguna' }}
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="#"><i class="bi bi-person-badge me-2"></i> Profil</a>
+                    </li>
+                </ul>
             </div>
             <form action="{{ route('logout') }}" method="POST" class="m-0">
                 @csrf
-                <button type="submit" class="btn btn-sm btn-outline-light btn-logout px-3 py-2">
+                <button type="submit" class="btn btn-outline-light border text-white">
                     <i class="bi bi-box-arrow-right me-1"></i> Logout
                 </button>
             </form>
