@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('alat_id');
             $table->enum('jenis_kalibrasi', ['internal', 'eksternal']);
             $table->string('no_sertifikat', 100)->nullable();
+            $table->string('interval_kalibrasi', 50)->nullable();
             $table->date('tgl_kalibrasi');
             $table->date('tgl_akhir');
             $table->string('lembaga_kalibrasi', 150)->nullable();

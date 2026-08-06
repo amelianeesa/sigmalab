@@ -31,6 +31,12 @@ class User extends Authenticatable
         return $this->belongsTo(Personil::class, 'personil_id', 'personil_id');
     }
 
+    protected function casts(): array
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_id', 'roles_id');
+    }
+
     public function role()
     {
         return $this->belongsTo(Role::class, 'role_id', 'roles_id');
