@@ -18,12 +18,12 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">Kode Alat (CODE) <span class="text-danger">*</span></label>
-                        <input type="text" name="kode_alat" class="form-control @error('kode_alat') is-invalid @enderror" placeholder="Contoh: CLC1204-10001" required>
+                        <input type="text" name="kode_alat" class="form-control @error('kode_alat') is-invalid @enderror" placeholder="mis. CLC1204-10001" required>
                         @error('kode_alat') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Nama Barang / Alat <span class="text-danger">*</span></label>
-                        <input type="text" name="nama_alat" class="form-control @error('nama_alat') is-invalid @enderror"  placeholder="Contoh: Sulfur Analyzer" required>
+                        <input type="text" name="nama_alat" class="form-control @error('nama_alat') is-invalid @enderror"  placeholder="mis. Sulfur Analyzer" required>
                         @error('nama_alat') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                 </div>
@@ -31,18 +31,18 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">Merk / Tipe</label>
-                        <input type="text" name="merk_tipe" class="form-control" placeholder="Contoh: Labfit CS 1232">
+                        <input type="text" name="merk_tipe" class="form-control" placeholder="mis. Labfit CS 1232">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Serial Number</label>
-                        <input type="text" name="no_seri" class="form-control"  placeholder="Contoh: 17050068">
+                        <input type="text" name="no_seri" class="form-control"  placeholder="mis. 17050068">
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <div class="col-md-4">
                         <label class="form-label">Warna</label>
-                        <input type="text" name="warna" class="form-control"  placeholder="Contoh: WHITE">
+                        <input type="text" name="warna" class="form-control"  placeholder="mis. WHITE">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Ukuran</label>
@@ -80,11 +80,11 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">No. Sertifikat Kalibrasi / Perijinan</label>
-                        <input type="text" name="no_sertifikat" class="form-control" placeholder="Contoh: 20059/ENBPAQ">
+                        <input type="text" name="no_sertifikat" class="form-control" placeholder="mis. 20059/ENBPAQ">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Interval Kalibrasi</label>
-                        <input type="text" name="interval_kalibrasi" class="form-control" placeholder="Contoh: 1 TAHUN">
+                        <input type="text" name="interval_kalibrasi" class="form-control" placeholder="mis. 1 TAHUN">
                     </div>
                 </div>
 
@@ -102,7 +102,7 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">Lembaga Kalibrasi</label>
-                        <input type="text" name="lembaga_kalibrasi" class="form-control" placeholder="Contoh: PT SUCOFINDO CILACAP">
+                        <input type="text" name="lembaga_kalibrasi" class="form-control" placeholder="mis. PT SUCOFINDO CILACAP">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Jenis Kalibrasi</label>
@@ -117,11 +117,11 @@
                 <div class="row mb-3">
                     <div class="col-md-4">
                         <label class="form-label">Range / Kapasitas</label>
-                        <input type="text" name="range_kapasitas" class="form-control" value="{{ old('range_kapasitas') }}" placeholder="Contoh: 0 - 1400 °C">
+                        <input type="text" name="range_kapasitas" class="form-control" value="{{ old('range_kapasitas') }}" placeholder="mis. 0 - 1400 °C">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Faktor Koreksi</label>
-                        <input type="text" name="faktor_koreksi" class="form-control" value="{{ old('faktor_koreksi') }}" placeholder="Contoh: 32 °C">
+                        <input type="text" name="faktor_koreksi" class="form-control" value="{{ old('faktor_koreksi') }}" placeholder="mis. 32 °C">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Signifikan</label>

@@ -7,17 +7,46 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; }
-        #sidebar {
-            width: 260px; height: 100vh; position: fixed; top: 0; left: 0;
-            background-color: #0b1c3d; color: #fff; z-index: 1000;
+        body { 
+            background-color: #f8f9fa; 
         }
-        #sidebar .sidebar-header { padding: 20px; background: #08142c; font-weight: bold; font-size: 1.1rem; }
-        #sidebar ul.components { padding: 10px 0; }
-        #sidebar ul li a { padding: 12px 20px; font-size: 0.95rem; display: block; color: #cfd8dc; text-decoration: none; }
-        #sidebar ul li a:hover, #sidebar ul li.active > a { color: #fff; background: #1e3a6e; }
-        #sidebar ul li a i { margin-right: 10px; }
-        #content { margin-left: 260px; padding: 20px; min-height: 100vh; }
+        #sidebar {
+            width: 260px; 
+            height: 100vh; 
+            position: fixed; 
+            top: 0; 
+            left: 0;
+            background-color: #0b1c3d;
+            color: #fff; 
+            z-index: 1000;
+        }
+        #sidebar .sidebar-header { 
+            padding: 20px; 
+            background: #08142c; 
+            font-weight: bold; 
+            font-size: 1.1rem; 
+        }
+        #sidebar ul.components { 
+            padding: 0px 0; 
+        }
+        #sidebar ul li a { 
+            padding: 12px 20px; 
+            font-size: 0.95rem; 
+            display: block; 
+            color: #cfd8dc; 
+            text-decoration: none; 
+        }
+        #sidebar ul li a:hover, #sidebar ul li.active > a { 
+            color: #fff; 
+            background: #1e3a6e; }
+        #sidebar ul li a i { 
+            margin-right: 10px; 
+        }
+        #content { 
+            margin-left: 260px; 
+            padding: 20px; 
+            min-height: 100vh; 
+        }
     </style>
 </head>
 <body>
@@ -33,8 +62,8 @@
             <li class="{{ request()->is('alat*') ? 'active' : '' }}">
                 <a href="{{ route('alat.index') }}"><i class="fas fa-tools"></i> Aset & Kalibrasi</a>
             </li>
-            <li><a href="#"><i class="fas fa-boxes"></i> Inventori Barang</a></li>
-            <li><a href="#"><i class="fas fa-vial"></i> QC & Parameter Uji</a></li>
+            <li><a href="{{ route('barang.index') }}"><i class="fas fa-boxes"></i> Inventori Barang</a></li>
+            <li><a href="#"><i class="fas fa-vial"></i> Proses</a></li>
             <li><a href="#"><i class="fas fa-users"></i> SDM & Kompetensi</a></li>
             <li><a href="#"><i class="fas fa-history"></i> Audit Log</a></li>
         </ul>
