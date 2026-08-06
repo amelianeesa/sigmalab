@@ -3,8 +3,11 @@
 @section('content')
 <div class="container-fluid px-4">
     <h1 class="mt-4">Manajemen Alat & Kalibrasi</h1>
+    <!-- <a href="{{ route('dashboard') }}" class="btn btn-light border shadow-sm px-3 fw-semibold rounded-pill">
+        <i class="bi bi-arrow-left me-1"></i> Kembali
+    </a> -->
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ url('/') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
         <li class="breadcrumb-item active">Alat & Kalibrasi</li>
     </ol>
 
