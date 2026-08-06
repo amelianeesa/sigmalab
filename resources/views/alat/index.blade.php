@@ -3,8 +3,11 @@
 @section('content')
 <div class="container-fluid px-4">
     <h1 class="mt-4">Manajemen Alat & Kalibrasi</h1>
+    <!-- <a href="{{ route('dashboard') }}" class="btn btn-light border shadow-sm px-3 fw-semibold rounded-pill">
+        <i class="bi bi-arrow-left me-1"></i> Kembali
+    </a> -->
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ url('/') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
         <li class="breadcrumb-item active">Alat & Kalibrasi</li>
     </ol>
 
@@ -43,15 +46,15 @@
         </div>
         <div class="card-body">
             
-            <form action="{{ route('alat.index') }}" method="GET" class="row g-2 mb-3 align-items-center">
-                <div class="col-md-4">
+            <form action="{{ route('alat.index') }}" method="GET" id="filterForm" class="row g-2 mb-3 align-items-center">
+                <div class="col-md-5">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" name="search" class="form-control" placeholder="Cari Nama Alat, Kode, atau Merk..." value="{{ $search ?? '' }}">
+                        <input type="text" name="search" id="searchInput" class="form-control" placeholder="Cari Nama Alat, Kode, atau Merk..." value="{{ $search ?? '' }}" autocomplete="off">
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <select name="filter_status" class="form-select form-select-sm">
+                    <select name="filter_status" id="filterStatus" class="form-select form-select-sm">
                         <option value="">-- Filter Status Kalibrasi --</option>
                         <option value="aktif" {{ (isset($filterStatus) && $filterStatus == 'aktif') ? 'selected' : '' }}>Aktif (> 30 Hari)</option>
                         <option value="segera" {{ (isset($filterStatus) && $filterStatus == 'segera') ? 'selected' : '' }}>Segera Berakhir (&le; 30 Hari)</option>
@@ -59,15 +62,14 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select name="filter_kondisi" class="form-select form-select-sm">
+                    <select name="filter_kondisi" id="filterKondisi" class="form-select form-select-sm">
                         <option value="">-- Filter Kondisi Barang --</option>
                         <option value="baik" {{ (isset($filterKondisi) && $filterKondisi == 'baik') ? 'selected' : '' }}>Baik</option>
                         <option value="rusak" {{ (isset($filterKondisi) && $filterKondisi == 'rusak') ? 'selected' : '' }}>Rusak</option>
                     </select>
                 </div>
-                <div class="col-md-2 d-flex gap-1">
-                    <button type="submit" class="btn btn-dark btn-sm w-50" title="Cari"><i class="fas fa-filter"></i> Filter</button>
-                    <a href="{{ route('alat.index') }}" class="btn btn-outline-secondary btn-sm w-50" title="Reset"><i class="fas fa-sync-alt"></i></a>
+                <div class="col-md-1 d-flex gap-1">
+                    <a href="{{ route('alat.index') }}" class="btn btn-outline-secondary btn-sm w-100" title="Reset"><i class="fas fa-sync-alt"></i></a>
                 </div>
             </form>
 
@@ -97,7 +99,7 @@
                             <th>Ukuran</th>
                             <th>Unit Pemilik</th>
                             <th>Tgl Kalibrasi</th>
-                            <th>Tgl Berakhirnya Masa Kalibrasi</th>
+                            <th>Masa Berakhir<br>Kalibrasi</th>
                             <th>Jenis Kalibrasi</th>
                             <th>Range / Kapasitas</th>
                             <th>Faktor Koreksi</th>
@@ -121,21 +123,13 @@
                                     $statusKalibrasiBadge = '<span class="badge bg-danger mt-1 d-block" style="font-size: 0.65rem;"><i class="fas fa-times-circle"></i> Kedaluarsa</span>';
                                 } elseif ($sisaHari <= 30) {
                                     $statusKalibrasiBadge = '<span class="badge bg-warning text-dark mt-1 d-block" style="font-size: 0.65rem;" title="Sisa ' . $sisaHari . ' hari lagi"><i class="fas fa-clock"></i> Segera Berakhir (' . $sisaHari . 'h)</span>';
-                                } else {
-                                    $statusKalibrasiBadge = '<span class="badge bg-success mt-1 d-block" style="font-size: 0.65rem;"><i class="fas fa-check-circle"></i> Aktif</span>';
                                 }
                             }
 
                             $qrData = "Kode Alat: {$item->kode_alat}\n" .
-                                      "Nama Alat: {$item->nama_alat}\n" .
-                                      "Merk/Tipe: " . ($item->merk_tipe ?? '-') . "\n" .
-                                      "No. Seri: " . ($item->no_seri ?? '-') . "\n" .
-                                      "Kondisi: " . ucfirst($item->kondisi_barang) . "\n" .
-                                      "No. Sertifikat: " . optional($kalibrasiTerakhir)->no_sertifikat . "\n" .
-                                      "Tgl Kalibrasi: " . optional($kalibrasiTerakhir)->tgl_kalibrasi . "\n" .
-                                      "Tgl Berakhir: " . optional($kalibrasiTerakhir)->tgl_akhir;
+                                      "Nama Alat: {$item->nama_alat}\n";
 
-                            $qrSvgCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(60)->generate($qrData);
+                            $qrSvgCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(40)->generate($qrData);
                             $qrSvgLarge = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(250)->generate($qrData);
                         @endphp
                         <tr>
@@ -153,7 +147,7 @@
                                 </div>
                             </td>
                             <td class="fw-bold text-start">{{ $item->nama_alat }}</td>
-                            <td><code>{{ $item->kode_alat }}</code></td>
+                            <td><code class="fw-bold">{{ $item->kode_alat }}</code></td>
                             <td class="text-start">{{ $item->merk_tipe ?? '-' }}</td>
                             <td>{{ $item->no_seri ?? '-' }}</td>
                             <td>{{ $item->warna ?? '-' }}</td>
@@ -246,6 +240,30 @@ function confirmDelete(button) {
         }
     });
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+    const searchInput = document.getElementById('searchInput');
+    const filterStatus = document.getElementById('filterStatus');
+    const filterKondisi = document.getElementById('filterKondisi');
+    const filterForm = document.getElementById('filterForm');
+
+    let timeout = null;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(function() {
+            filterForm.submit();
+        }, 500);
+    });
+
+    filterStatus.addEventListener('change', function() {
+        filterForm.submit();
+    });
+
+    filterKondisi.addEventListener('change', function() {
+        filterForm.submit();
+    });
+});
 
 const qrModal = document.getElementById('qrModal');
 qrModal.addEventListener('show.bs.modal', function (event) {

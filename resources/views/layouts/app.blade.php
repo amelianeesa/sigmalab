@@ -2,12 +2,16 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIGMA-LAB - PT Sucofindo Cilacap</title>
+    <title>Dashboard - SIGMALAB Sucofindo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
         :root{
             --sdm-50: #eef0f1;
             --sdm-500: #1d4c7a;
@@ -60,6 +64,17 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+        .btn-logout {
+            border-color: rgba(255,255,255,.45);
+            color: #fff;
+            transition: background .15s ease, color .15s ease, border-color .15s ease;
+        }
+        .btn-logout:hover,
+        .btn-logout:focus {
+            background: rgba(255,255,255,.95);
+            color: #1d4c7a;
+            border-color: rgba(255,255,255,.85);
+        }
         .card.h-100 .card-body { min-height: 120px; }
         .card .card-body p { word-break: break-word; }
         .module-card { transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease; }
@@ -70,6 +85,7 @@
         .sdm-border { border-color: rgba(76,29,149,0.12); }
     </style>
 </head>
+
 <body>
     <nav id="sidebar">
         <div class="sidebar-header">
@@ -152,7 +168,14 @@
                     @endif
                 </div>
             </div>
-        </nav>
+            <form action="{{ route('logout') }}" method="POST" class="m-0">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-outline-light btn-logout px-3 py-2">
+                    <i class="bi bi-box-arrow-right me-1"></i> Logout
+                </button>
+            </form>
+        </div>
+    </div>
 
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show mx-3" role="alert">
@@ -167,10 +190,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
+    <div id="content">
         @yield('content')
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Live Search Script -->
     <script>

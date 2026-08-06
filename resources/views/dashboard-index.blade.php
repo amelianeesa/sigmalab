@@ -25,7 +25,7 @@
         </div>
 
         <div class="col-12 col-sm-6 col-lg-4">
-            <a href="#" class="text-decoration-none">
+            <a href="{{ route('alat.index') }}" class="text-decoration-none">
                 <div class="card h-100 border-0 shadow-sm module-card border-start border-4 border-sdm-600">
                     <div class="card-body d-flex align-items-center gap-3 p-4">
                         <div class="module-icon bg-icon text-sdm-600">
@@ -41,7 +41,7 @@
         </div>
 
         <div class="col-12 col-sm-6 col-lg-4">
-            <a href="#" class="text-decoration-none">
+            <a href="{{ route('barang.index') }}" class="text-decoration-none">
                 <div class="card h-100 border-0 shadow-sm module-card border-start border-4 border-sdm-600">
                     <div class="card-body d-flex align-items-center gap-3 p-4">
                         <div class="module-icon bg-icon text-sdm-600">

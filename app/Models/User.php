@@ -12,12 +12,7 @@ class User extends Authenticatable
 
     protected $table = 'users';
     protected $primaryKey = 'users_id';
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    
     protected $fillable = [
         'personil_id',
         'username',
@@ -37,10 +32,9 @@ class User extends Authenticatable
     }
 
     protected function casts(): array
+    public function role()
     {
-        return [
-            'password' => 'hashed',
-        ];
+        return $this->belongsTo(Role::class, 'role_id', 'roles_id');
     }
 
     public function role()

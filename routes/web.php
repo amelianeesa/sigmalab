@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SdmController;
 use App\Http\Controllers\AlatController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SdmController;
@@ -10,6 +13,17 @@ use App\Http\Controllers\HasilUjiController;
 use App\Http\Controllers\RiwayatTindakLanjutController;
 use App\Http\Controllers\ReportingController;
 use App\Http\Controllers\RoleSwitcherController;
+
+Route::get('/', [AuthController::class, 'showLogin']);
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'processLogin'])->name('login.process');
+
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'processRegister'])->name('register.process');
+
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+use App\Http\Controllers\BarangController;
 
 Route::get('/', [AuthController::class, 'showLogin']);
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -57,3 +71,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('tindak-lanjut', RiwayatTindakLanjutController::class)->only(['index', 'create', 'store', 'show']);
     Route::get('reporting', [ReportingController::class, 'index'])->name('reporting.index');
 });
+
+    Route::resource('alat', AlatController::class);
+    Route::resource('barang', BarangController::class);
+});
+
+
