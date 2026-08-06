@@ -4,6 +4,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AlatController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SdmController;
+use App\Http\Controllers\ParameterUjiController;
+use App\Http\Controllers\KegiatanController;
+use App\Http\Controllers\HasilUjiController;
+use App\Http\Controllers\RiwayatTindakLanjutController;
+use App\Http\Controllers\ReportingController;
+use App\Http\Controllers\RoleSwitcherController;
 
 Route::get('/', [AuthController::class, 'showLogin']);
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -37,4 +43,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/sdm/{id}/cv', [SdmController::class, 'showCv'])->name('sdm.cv');
 });
 
-Route::resource('alat', AlatController::class);
+Route::get('/login', function () {
+    return redirect('/')->with('error', 'Silakan pilih role dari dropdown "Simulasi Role" di bagian atas untuk login terlebih dahulu.');
+})->name('login');
+
+Route::post('/switch-role', [RoleSwitcherController::class, 'switch'])->name('switch-role');
+
+Route::middleware('auth')->group(function () {
+    Route::resource('alat', AlatController::class);
+    Route::resource('parameter-uji', ParameterUjiController::class);
+    Route::resource('kegiatan', KegiatanController::class);
+    Route::resource('hasil-uji', HasilUjiController::class)->only(['store', 'show']);
+    Route::resource('tindak-lanjut', RiwayatTindakLanjutController::class)->only(['index', 'create', 'store', 'show']);
+    Route::get('reporting', [ReportingController::class, 'index'])->name('reporting.index');
+});

@@ -25,6 +25,7 @@
         #sidebar ul li a { padding: 12px 20px; font-size: 0.95rem; display: block; color: #cfd8dc; text-decoration: none; }
         #sidebar ul li a:hover, #sidebar ul li.active > a { color: #fff; background: #1e3a6e; }
         #sidebar ul li a i { margin-right: 10px; }
+        #sidebar .sidebar-divider { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b; padding: 15px 20px 5px; margin-top: 5px; border-top: 1px solid #1e3a6e; }
         #content { 
             margin-left: 260px; 
             padding: 24px; 
@@ -75,17 +76,37 @@
             <i class="fas fa-atom"></i> SigmaLab<br>
             <small style="font-size: 0.75rem; color: #94a3b8;">PT SUCOFINDO – CILACAP</small>
         </div>
-        <ul class="list-unstyled components">
+        <ul class="list-unstyled components" style="overflow-y: auto; max-height: calc(100vh - 80px);">
             <li class="{{ request()->is('/') || request()->is('dashboard') ? 'active' : '' }}">
                 <a href="{{ route('dashboard') ?? url('/') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
             </li>
+
+            {{-- Modul Tim Lain --}}
+            <li class="sidebar-divider">Modul Umum</li>
             <li class="{{ request()->is('alat*') ? 'active' : '' }}">
                 <a href="{{ route('alat.index') ?? '#' }}"><i class="fas fa-tools"></i> Aset & Kalibrasi</a>
             </li>
             <li><a href="#"><i class="fas fa-boxes"></i> Inventori Barang</a></li>
-            <li><a href="#"><i class="fas fa-vial"></i> QC & Parameter Uji</a></li>
             <li class="{{ request()->is('sdm*') ? 'active' : '' }}"><a href="{{ route('sdm.index') ?? '#' }}"><i class="fas fa-users"></i> SDM & Kompetensi</a></li>
             <li><a href="#"><i class="fas fa-history"></i> Audit Log</a></li>
+
+            {{-- Modul QC & Proses (domain Amel) --}}
+            <li class="sidebar-divider">QC & Proses</li>
+            <li class="{{ request()->is('parameter-uji*') ? 'active' : '' }}">
+                <a href="{{ route('parameter-uji.index') }}"><i class="fas fa-vial"></i> Parameter Uji</a>
+            </li>
+            <li class="{{ request()->routeIs('kegiatan.*') ? 'active' : '' }}">
+                <a href="{{ route('kegiatan.index') }}"><i class="fas fa-clipboard-list"></i> Proses & Hasil Pengujian</a>
+            </li>
+            <li class="{{ request()->is('tindak-lanjut*') ? 'active' : '' }}">
+                <a href="{{ route('tindak-lanjut.index') }}"><i class="fas fa-clipboard-check"></i> Tindak Lanjut</a>
+            </li>
+
+            {{-- Reporting --}}
+            <li class="sidebar-divider">Reporting</li>
+            <li class="{{ request()->is('reporting*') ? 'active' : '' }}">
+                <a href="{{ route('reporting.index') }}"><i class="fas fa-chart-bar"></i> Laporan QC</a>
+            </li>
         </ul>
     </nav>
 
@@ -110,10 +131,115 @@
     </div>
 
     <div id="content">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4 px-3 rounded">
+            <div class="container-fluid">
+                <!-- Role Switcher Form -->
+                <div class="d-flex align-items-center ms-auto">
+                    <span class="me-2 text-muted small">Simulasi Role:</span>
+                    <form action="{{ route('switch-role') }}" method="POST" class="m-0">
+                        @csrf
+                        <select name="role_name" class="form-select form-select-sm fw-bold border-0 bg-light" onchange="this.form.submit()">
+                            <option value="">-- Pilih Role --</option>
+                            @foreach(App\Enums\PeranPengguna::cases() as $role)
+                                <option value="{{ $role->value }}" {{ (Auth::check() && Auth::user()->role && Auth::user()->role->nama_role === $role->value) ? 'selected' : '' }}>
+                                    {{ $role->value }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </form>
+                    @if(Auth::check())
+                        <span class="ms-3 badge bg-primary">Logged in as: {{ Auth::user()->username }}</span>
+                    @endif
+                </div>
+            </div>
+        </nav>
+
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show mx-3" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show mx-3" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
         @yield('content')
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Live Search Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const forms = document.querySelectorAll('.live-search-form');
+        
+        forms.forEach(form => {
+            const inputs = form.querySelectorAll('input, select');
+            const targetSelector = form.dataset.target || '#table-container';
+            const targetContainer = document.querySelector(targetSelector);
+            
+            if (!targetContainer) return;
+            
+            let timeout = null;
+            
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => {
+                        executeSearch(form, targetContainer);
+                    }, 400); // 400ms debounce
+                });
+            });
+            
+            // Tangkap klik pagination agar juga via AJAX
+            targetContainer.addEventListener('click', function(e) {
+                const link = e.target.closest('.pagination a');
+                if (link) {
+                    e.preventDefault();
+                    executeSearch(form, targetContainer, link.href);
+                }
+            });
+        });
+        
+        function executeSearch(form, targetContainer, url = null) {
+            // Visual feedback loading
+            targetContainer.style.opacity = '0.5';
+            
+            const formData = new FormData(form);
+            const searchParams = new URLSearchParams(formData);
+            const fetchUrl = url || `${form.action || window.location.pathname}?${searchParams.toString()}`;
+            
+            // Update URL bar (biar bisa di-copy paste)
+            window.history.pushState({}, '', fetchUrl);
+            
+            fetch(fetchUrl, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const targetSelector = form.dataset.target || '#table-container';
+                const newContent = doc.querySelector(targetSelector);
+                
+                if (newContent) {
+                    targetContainer.innerHTML = newContent.innerHTML;
+                }
+                targetContainer.style.opacity = '1';
+            })
+            .catch(error => {
+                console.error('Live search error:', error);
+                targetContainer.style.opacity = '1';
+            });
+        }
+    });
+    </script>
+    @stack('scripts')
 </body>
 </html>

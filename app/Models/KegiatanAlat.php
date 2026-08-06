@@ -22,4 +22,9 @@ class KegiatanAlat extends Model
     {
         return $this->belongsTo(Alat::class, 'alat_id', 'alat_id');
     }
+
+    public function kegiatan()
+    {
+        return $this->belongsTo(Kegiatan::class, 'kegiatan_id', 'kegiatan_id');
+    }
 }
