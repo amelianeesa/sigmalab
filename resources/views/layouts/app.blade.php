@@ -1,6 +1,4 @@
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -61,6 +59,13 @@
         .sdm-text { color: var(--sdm-600) !important; }
         .sdm-btn { background: var(--sdm-600); border-color: var(--sdm-600); color: #fff; }
         .sdm-border { border-color: rgba(76,29,149,0.12); }
+
+        .dropdown-menu form {
+            margin: 0;
+        }
+        .dropdown-menu form .dropdown-item {
+            padding: 6px 16px;
+        }
     </style>
 </head>
 
@@ -75,12 +80,13 @@
             <button class="btn btn-light dropdown-toggle border" type="button" data-bs-toggle="dropdown" title="Profil">
                 <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->name ?? Auth::user()->username ?? 'Pengguna' }}
             </button>
-            <ul class="dropdown-menu dropdown-menu-end">
+            <ul class="dropdown-menu dropdown-menu-end py-1">
                 <li>
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
-                        <button type="submit" class="dropdown-item text-danger"><i
-                                class="bi bi-box-arrow-right me-2"></i> Logout</button>
+                        <button type="submit" class="dropdown-item text-danger d-flex align-items-center">
+                            <i class="bi bi-box-arrow-right me-2"></i> Logout
+                        </button>
                     </form>
                 </li>
             </ul>
@@ -90,12 +96,8 @@
     <div id="content">
         @yield('content')
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-</body>
-</html>
-

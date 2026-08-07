@@ -26,7 +26,8 @@ class BarangController extends Controller
             $query->where('kondisi', $filterKondisi);
         }
 
-        $barang = $query->get();
+        // Ditambahkan orderBy agar data terbaru/terakhir di-input berada di posisi paling atas
+        $barang = $query->orderBy('barang_id', 'desc')->get();
 
         return view('barang.index', compact('barang', 'search', 'filterKondisi'));
     }
