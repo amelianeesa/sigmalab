@@ -29,7 +29,6 @@
             color: #fff;
         }
 
-        /* Tombol Profil Bergaya Light / Transparan */
         .custom-dropdown-profile .btn {
             background-color: rgba(255, 255, 255, 0.1) !important;
             border: 1px solid rgba(255, 255, 255, 0.35) !important;
@@ -41,7 +40,6 @@
             background-color: rgba(255, 255, 255, 0.2) !important;
         }
 
-        /* Kotak Dropdown Logout Menyatukan Tampilan */
         .custom-dropdown-profile .dropdown-menu {
             background-color: #ffffff !important;
             border: 1px solid rgba(0, 0, 0, 0.15) !important;
@@ -69,6 +67,10 @@
         .card.h-100 .card-body { min-height: 120px; }
         .module-card { transition: transform .12s ease, box-shadow .12s ease; }
         .module-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(15,35,59,.08); }
+        .sdm-highlight { border-color: var(--sdm-600) !important; }
+        .sdm-text { color: var(--sdm-600) !important; }
+        .sdm-btn { background: var(--sdm-600); border-color: var(--sdm-600); color: #fff; }
+        .sdm-border { border-color: rgba(76,29,149,0.12); }
     </style>
 </head>
 
@@ -85,13 +87,12 @@
                 <i class="bi bi-person-circle me-2 fs-5"></i> 
                 <span>{{ Auth::user()->name ?? Auth::user()->username ?? 'Pengguna' }}</span>
             </button>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+            <ul class="dropdown-menu dropdown-menu-end">
                 <li>
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
-                        <button type="submit" class="dropdown-item d-flex align-items-center">
-                            <i class="bi bi-box-arrow-right me-2"></i> Logout
-                        </button>
+                        <button type="submit" class="dropdown-item text-danger"><i
+                                class="bi bi-box-arrow-right me-2"></i> Logout</button>
                     </form>
                 </li>
             </ul>
@@ -101,9 +102,11 @@
     <div id="content">
         @yield('content')
     </div>
-    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </body>
 </html>
+</body>
+</html>
+
