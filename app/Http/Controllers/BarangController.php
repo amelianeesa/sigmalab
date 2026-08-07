@@ -76,7 +76,6 @@ class BarangController extends Controller
         $request->validate([
             'nama_barang' => 'required|string|max:100',
             'satuan' => 'required|string|max:20',
-            'kode_barang' => 'required|string|max:50|unique:barang,kode_barang,' . $id . ',barang_id',
             'minimal_stok' => 'nullable|numeric',
             'saldo_awal' => 'nullable|numeric',
             'penerimaan' => 'nullable|numeric',
@@ -86,7 +85,7 @@ class BarangController extends Controller
             'tgl_exp' => 'nullable|date',
         ]);
 
-        $data = $request->all();
+        $data = $request->except('kode_barang');
 
         $saldoAwal = $data['saldo_awal'] ?? 0;
         $penerimaan = $data['penerimaan'] ?? 0;
@@ -104,5 +103,24 @@ class BarangController extends Controller
         $barang->delete();
 
         return redirect()->route('barang.index')->with('success', 'Data barang persediaan berhasil dihapus.');
+    }
+
+    public function printPeriode(Request $request)
+    {
+        $bulan = $request->input('bulan');
+        $tahun = $request->input('tahun');
+
+        $query = Barang::query();
+
+        // Di sini asumsikan kita menampilkan stok barang pada periode yang dipilih.
+        // Jika ada tabel transaksi (seperti TransaksiBarang), idealnya kita hitung mutasi, 
+        // tapi jika tidak ada, kita tampilkan data barang yang ada.
+        
+        $barang = $query->get();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('barang.cetak-periode', compact('barang', 'bulan', 'tahun'));
+        $pdf->setPaper('A4', 'landscape');
+        
+        return $pdf->download('Laporan_Inventori_Bahan_' . $bulan . '_' . $tahun . '.pdf');
     }
 }

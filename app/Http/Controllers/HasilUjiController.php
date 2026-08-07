@@ -55,7 +55,9 @@ class HasilUjiController extends Controller
         $validated = $request->validate([
             'kegiatan_id' => 'required|exists:kegiatan,kegiatan_id',
             'parameter_uji_id' => 'required|exists:parameter_uji,parameter_uji_id',
-            'nilai_hasil' => 'required|numeric',
+            'nilai_hasil' => 'nullable|numeric',
+            'variabel' => 'nullable|array',
+            'variabel.*' => 'numeric',
         ]);
 
         $kegiatan = Kegiatan::findOrFail($validated['kegiatan_id']);
@@ -63,10 +65,25 @@ class HasilUjiController extends Controller
             return back()->with('error', 'Tidak dapat menambahkan hasil uji karena kegiatan sudah selesai atau dibatalkan.');
         }
 
-        // Otomatis tentukan status inlier/outlier
         $parameter = ParameterUji::findOrFail($validated['parameter_uji_id']);
-        $nilaiHasil = (float) $validated['nilai_hasil'];
+        $nilaiHasil = null;
 
+        // Jika menggunakan form kalkulasi dinamis (variabel dikirim)
+        if (!empty($validated['variabel']) && !empty($parameter->rumus_kalkulasi)) {
+            try {
+                $expressionLanguage = new \Symfony\Component\ExpressionLanguage\ExpressionLanguage();
+                $nilaiHasil = $expressionLanguage->evaluate($parameter->rumus_kalkulasi, $validated['variabel']);
+            } catch (\Exception $e) {
+                return back()->with('error', 'Gagal mengkalkulasi rumus QC: ' . $e->getMessage());
+            }
+        } else {
+            if (!isset($validated['nilai_hasil'])) {
+                return back()->with('error', 'Nilai hasil wajib diisi jika tidak menggunakan rumus.');
+            }
+            $nilaiHasil = (float) $validated['nilai_hasil'];
+        }
+
+        // Otomatis tentukan status inlier/outlier
         if ($nilaiHasil >= $parameter->batas_bawah && $nilaiHasil <= $parameter->batas_atas) {
             $statusBerketerimaan = 'inlier';
         } else {

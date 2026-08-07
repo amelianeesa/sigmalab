@@ -7,6 +7,7 @@ use App\Models\HasilUji;
 use App\Models\RiwayatTindakLanjut;
 use App\Models\ParameterUji;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportingController extends Controller
 {
@@ -50,5 +51,17 @@ class ReportingController extends Controller
             'tindakLanjutPerStatus',
             'topOutlier'
         ));
+    }
+
+    public function exportPdf()
+    {
+        $hasilUjiList = HasilUji::with(['kegiatan', 'parameterUji', 'penginput'])->orderBy('created_at', 'desc')->get();
+        
+        $pdf = Pdf::loadView('reporting.pdf', compact('hasilUjiList'));
+        
+        // Optional: set paper size and orientation
+        $pdf->setPaper('A4', 'landscape');
+        
+        return $pdf->download('Laporan_QC_Laboratorium_' . date('Y-m-d') . '.pdf');
     }
 }

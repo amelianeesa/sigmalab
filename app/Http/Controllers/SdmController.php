@@ -7,6 +7,10 @@ use App\Models\KompetensiPersonil;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Role;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class SdmController extends Controller
 {
@@ -25,25 +29,27 @@ class SdmController extends Controller
             $item->sertifikasiTerakhir = $sertifikasi;
 
             if (! $sertifikasi) {
-                $item->statusSertifikasi = ['label' => 'Belum bersertifikat', 'class' => 'status-empty', 'icon' => 'dash-circle'];
+                $item->statusSertifikasi = ['label' => 'Belum bersertifikat', 'class' => 'bg-light text-dark border', 'icon' => 'dash-circle'];
             } elseif (! $sertifikasi->tanggal_berakhir) {
-                $item->statusSertifikasi = ['label' => 'Aktif', 'class' => 'status-active', 'icon' => 'check-circle'];
+                $item->statusSertifikasi = ['label' => 'Aktif', 'class' => 'bg-success text-white', 'icon' => 'check-circle'];
             } elseif ($sertifikasi->tanggal_berakhir->isPast()) {
-                $item->statusSertifikasi = ['label' => 'Kedaluwarsa', 'class' => 'status-expired', 'icon' => 'x-circle'];
+                $item->statusSertifikasi = ['label' => 'Kedaluwarsa', 'class' => 'bg-danger text-white', 'icon' => 'x-circle'];
             } elseif ($sertifikasi->tanggal_berakhir->lessThanOrEqualTo(today()->addDays(60))) {
-                $item->statusSertifikasi = ['label' => 'Segera berakhir', 'class' => 'status-warning', 'icon' => 'exclamation-circle'];
+                $item->statusSertifikasi = ['label' => 'Segera berakhir', 'class' => 'bg-warning text-dark', 'icon' => 'exclamation-circle'];
             } else {
-                $item->statusSertifikasi = ['label' => 'Aktif', 'class' => 'status-active', 'icon' => 'check-circle'];
+                $item->statusSertifikasi = ['label' => 'Aktif', 'class' => 'bg-success text-white', 'icon' => 'check-circle'];
             }
         });
         $selectedPersonil = $personil->firstWhere('personil_id', request('personil_id'));
+        $roles = Role::all();
 
         return view('sdm.index', compact(
             'personil',
             'selectedPersonil',
             'showInactive',
             'jumlahPersonilAktif',
-            'jumlahPersonilNonaktif'
+            'jumlahPersonilNonaktif',
+            'roles'
         ));
     }
 
@@ -64,6 +70,11 @@ class SdmController extends Controller
             'no_sertifikasi' => 'nullable|string|max:100',
             'tanggal_terbit' => 'nullable|date',
             'tanggal_berakhir' => 'nullable|date|after_or_equal:tanggal_terbit',
+            'buat_akun' => 'nullable',
+            'username' => 'required_with:buat_akun|string|max:50|unique:users,username',
+            'email' => 'required_with:buat_akun|email|max:100|unique:users,email',
+            'password' => 'required_with:buat_akun|string|min:6',
+            'role_id' => 'required_with:buat_akun|exists:roles,roles_id',
         ]);
 
         $cvName = null;
@@ -82,7 +93,7 @@ class SdmController extends Controller
                 'status_aktif' => true,
             ]);
 
-            if ($request->filled('nama_sertifikasi')) {
+            if ($request->filled('nama_sertifikasi') && Auth::user()->role->nama_role !== 'Admin Lab') {
                 $tanggalTerbit = Carbon::parse($request->input('tanggal_terbit') ?: today()->toDateString());
 
                 KompetensiPersonil::create([
@@ -91,6 +102,17 @@ class SdmController extends Controller
                     'no_sertifikasi' => $request->no_sertifikasi,
                     'tanggal_terbit' => $tanggalTerbit->toDateString(),
                     'tanggal_berakhir' => $request->tanggal_berakhir,
+                ]);
+            }
+
+            if ($request->has('buat_akun')) {
+                User::create([
+                    'personil_id' => $personil->personil_id,
+                    'username' => $request->username,
+                    'email' => $request->email,
+                    'password' => Hash::make($request->password),
+                    'role_id' => $request->role_id,
+                    'status_aktif' => true,
                 ]);
             }
         });
@@ -122,7 +144,10 @@ class SdmController extends Controller
             'tanggal_berakhir' => 'nullable|date|after_or_equal:tanggal_terbit',
         ]);
 
+        $userRole = Auth::user()->role->nama_role;
+
         if ($request->hasFile('file_cv')) {
+            abort_if($userRole === 'Admin Lab', 403, 'Admin Lab tidak diizinkan mengunggah/mengubah file CV.');
             if ($personil->file_cv && Storage::disk('local')->exists('public/uploads/cv/' . $personil->file_cv)) {
                 Storage::disk('local')->delete('public/uploads/cv/' . $personil->file_cv);
             }
@@ -139,7 +164,7 @@ class SdmController extends Controller
                 'unit_kerja' => $request->unit_kerja,
             ]);
 
-            if ($request->filled('nama_sertifikasi')) {
+            if ($request->filled('nama_sertifikasi') && $userRole !== 'Admin Lab') {
                 $dataSertifikasi = [
                     'jenis_sertifikasi' => $request->nama_sertifikasi,
                     'no_sertifikasi' => $request->no_sertifikasi,
@@ -159,6 +184,8 @@ class SdmController extends Controller
 
     public function destroy($id)
     {
+        abort_if(Auth::user()->role->nama_role === 'Admin Lab', 403, 'Admin Lab tidak diizinkan menghapus data personil.');
+
         $personil = Personil::findOrFail($id);
         // Soft delete sesuai rancangan database
         $personil->update(['status_aktif' => false]);
@@ -202,6 +229,8 @@ class SdmController extends Controller
 
     public function storeKompetensi(Request $request, $id)
     {
+        abort_if(Auth::user()->role->nama_role === 'Admin Lab', 403, 'Admin Lab tidak diizinkan menambah data sertifikasi.');
+
         $personil = Personil::findOrFail($id);
         $data = $request->validate([
             'jenis_sertifikasi' => 'required|string|max:100',
@@ -218,6 +247,8 @@ class SdmController extends Controller
 
     public function updateKompetensi(Request $request, $id, $kompetensiId)
     {
+        abort_if(Auth::user()->role->nama_role === 'Admin Lab', 403, 'Admin Lab tidak diizinkan mengubah data sertifikasi.');
+
         $personil = Personil::findOrFail($id);
         $kompetensi = $personil->kompetensi()->findOrFail($kompetensiId);
         $data = $request->validate([
@@ -235,6 +266,8 @@ class SdmController extends Controller
 
     public function destroyKompetensi($id, $kompetensiId)
     {
+        abort_if(Auth::user()->role->nama_role === 'Admin Lab', 403, 'Admin Lab tidak diizinkan menghapus data sertifikasi.');
+
         $personil = Personil::findOrFail($id);
         $personil->kompetensi()->findOrFail($kompetensiId)->delete();
 

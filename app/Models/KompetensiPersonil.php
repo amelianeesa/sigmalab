@@ -18,6 +18,7 @@ class KompetensiPersonil extends Model
         'no_sertifikasi',
         'tanggal_terbit',
         'tanggal_berakhir',
+        'file_sertifikat',
     ];
 
     protected $casts = [

@@ -26,15 +26,17 @@ class User extends Authenticatable
         'password',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
+
     public function personil()
     {
         return $this->belongsTo(Personil::class, 'personil_id', 'personil_id');
-    }
-
-    protected function casts(): array
-    public function role()
-    {
-        return $this->belongsTo(Role::class, 'role_id', 'roles_id');
     }
 
     public function role()

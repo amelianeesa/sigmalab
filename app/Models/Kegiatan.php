@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Kegiatan extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $table = 'kegiatan';
     protected $primaryKey = 'kegiatan_id';
@@ -40,5 +42,19 @@ class Kegiatan extends Model
     public function hasilUji()
     {
         return $this->hasMany(HasilUji::class, 'kegiatan_id', 'kegiatan_id');
+    }
+
+    public function transaksiBarang()
+    {
+        return $this->hasMany(TransaksiBarang::class, 'kegiatan_id', 'kegiatan_id');
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => "Kegiatan lab telah di-{$eventName}");
     }
 }

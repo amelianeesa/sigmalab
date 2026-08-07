@@ -4,13 +4,17 @@ namespace App\Policies;
 
 use App\Models\ParameterUji;
 use App\Models\User;
-use App\Enums\PeranPengguna;
 use App\Policies\Concerns\ChecksDomainAccess;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ParameterUjiPolicy
 {
     use HandlesAuthorization, ChecksDomainAccess;
+
+    public function __construct()
+    {
+        $this->kodeModul = 'parameter_uji';
+    }
 
     /**
      * Determine whether the user can view any models.
@@ -33,11 +37,8 @@ class ParameterUjiPolicy
      */
     public function create(User $user): bool
     {
-        return $this->hasFullAccess($user, [
-            PeranPengguna::KOORDINATOR_LAB->value,
-            PeranPengguna::ADMIN_APLIKASI->value,
-            PeranPengguna::DEVELOPER->value,
-        ]);
+        if ($user->role->nama_role === \App\Enums\PeranPengguna::ADMIN_LAB->value) return true;
+        return $this->hasFullAccess($user, 'full');
     }
 
     /**
@@ -45,11 +46,8 @@ class ParameterUjiPolicy
      */
     public function update(User $user, ParameterUji $parameterUji): bool
     {
-        return $this->hasFullAccess($user, [
-            PeranPengguna::KOORDINATOR_LAB->value,
-            PeranPengguna::ADMIN_APLIKASI->value,
-            PeranPengguna::DEVELOPER->value,
-        ]);
+        if ($user->role->nama_role === \App\Enums\PeranPengguna::ADMIN_LAB->value) return true;
+        return $this->hasFullAccess($user, 'full');
     }
 
     /**
@@ -57,10 +55,7 @@ class ParameterUjiPolicy
      */
     public function delete(User $user, ParameterUji $parameterUji): bool
     {
-        return $this->hasFullAccess($user, [
-            PeranPengguna::KOORDINATOR_LAB->value,
-            PeranPengguna::ADMIN_APLIKASI->value,
-            PeranPengguna::DEVELOPER->value,
-        ]);
+        if ($user->role->nama_role === \App\Enums\PeranPengguna::ADMIN_LAB->value) return true;
+        return $this->hasFullAccess($user, 'full');
     }
 }

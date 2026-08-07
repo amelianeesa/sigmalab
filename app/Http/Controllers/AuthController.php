@@ -39,34 +39,7 @@ class AuthController extends Controller
         return back()->withErrors(['username' => 'Username/Email atau Password salah.']);
     }
 
-    public function showRegister()
-    {
-        $roles = Role::all();
-        $personil = Personil::all();
-        return view('auth.register', compact('roles', 'personil'));
-    }
 
-    public function processRegister(Request $request)
-    {
-        $request->validate([
-            'username'    => 'required|string|max:50|unique:users',
-            'email'       => 'required|string|email|max:100|unique:users',
-            'password'    => 'required|string|min:6',
-            'role_id'     => 'required|exists:roles,roles_id',
-            'personil_id' => 'nullable|exists:personil,personil_id', // Ditambahkan validasi aman
-        ]);
-
-        User::create([
-            'personil_id' => !empty($request->personil_id) ? $request->personil_id : null,
-            'username'    => $request->username,
-            'email'       => $request->email,
-            'password'    => Hash::make($request->password),
-            'role_id'     => $request->role_id,
-            'status_aktif'=> 1
-        ]);
-
-        return redirect('/login')->with('success', 'Registrasi berhasil! Silakan login.');
-    }
 
     public function logout(Request $request)
     {

@@ -105,14 +105,14 @@
                                 @foreach($personilList as $personil)
                                 <tr>
                                     <td class="text-center align-middle">
-                                        <input class="form-check-input personil-checkbox" type="checkbox" name="personil_ids[]" value="{{ $personil->pengguna_id }}" id="personil_{{ $personil->pengguna_id }}" {{ in_array($personil->pengguna_id, old('personil_ids', [])) ? 'checked' : '' }}>
+                                        <input class="form-check-input personil-checkbox" type="checkbox" name="personil_ids[]" value="{{ $personil->personil_id }}" id="personil_{{ $personil->personil_id }}" {{ in_array($personil->personil_id, old('personil_ids', [])) ? 'checked' : '' }}>
                                     </td>
                                     <td class="align-middle">
-                                        <label for="personil_{{ $personil->pengguna_id }}" class="mb-0 cursor-pointer">{{ $personil->nama }}</label>
+                                        <label for="personil_{{ $personil->personil_id }}" class="mb-0 cursor-pointer">{{ $personil->nama }}</label>
                                     </td>
                                     <td class="align-middle">{{ $personil->no_induk ?? '-' }}</td>
                                     <td>
-                                        <input type="text" class="form-control form-control-sm" name="personil_peran[{{ $personil->pengguna_id }}]" value="{{ old('personil_peran.'.$personil->pengguna_id, 'Analis') }}" placeholder="Peran (mis: Analis)">
+                                        <input type="text" class="form-control form-control-sm" name="personil_peran[{{ $personil->personil_id }}]" value="{{ old('personil_peran.'.$personil->personil_id, 'Analis') }}" placeholder="Peran (mis: Analis)">
                                     </td>
                                 </tr>
                                 @endforeach
@@ -120,6 +120,56 @@
                         </table>
                     </div>
                     @error('personil_ids')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+                
+                <h5 class="mb-3 text-primary border-bottom pb-2">Bahan Digunakan</h5>
+                
+                <div class="mb-4">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="5%" class="text-center">Pilih</th>
+                                    <th>Nama Barang (Bahan)</th>
+                                    <th>Sisa Stok (Saldo Akhir)</th>
+                                    <th width="20%">Jumlah Digunakan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($barangList as $barang)
+                                @php
+                                    $saldoAkhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
+                                    $habis = $saldoAkhir <= 0;
+                                @endphp
+                                <tr class="{{ $habis ? 'table-danger' : '' }}">
+                                    <td class="text-center align-middle">
+                                        <input class="form-check-input" type="checkbox" name="barang_ids[]" value="{{ $barang->barang_id }}" id="barang_{{ $barang->barang_id }}" {{ in_array($barang->barang_id, old('barang_ids', [])) ? 'checked' : '' }} {{ $habis ? 'disabled' : '' }}>
+                                    </td>
+                                    <td class="align-middle">
+                                        <label for="barang_{{ $barang->barang_id }}" class="mb-0 cursor-pointer {{ $habis ? 'text-muted' : '' }}">
+                                            {{ $barang->nama_barang }} 
+                                            @if($habis)
+                                                <span class="badge bg-danger ms-1">Habis</span>
+                                            @endif
+                                        </label>
+                                    </td>
+                                    <td class="align-middle">
+                                        {{ number_format($saldoAkhir, 0, ',', '.') }} {{ $barang->satuan }}
+                                    </td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" step="0.01" min="0" max="{{ $saldoAkhir }}" class="form-control" name="barang_jumlah[{{ $barang->barang_id }}]" value="{{ old('barang_jumlah.'.$barang->barang_id, '') }}" placeholder="0" {{ $habis ? 'disabled' : '' }}>
+                                            <span class="input-group-text">{{ $barang->satuan }}</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    @error('barang_ids')
                         <div class="text-danger small mt-1">{{ $message }}</div>
                     @enderror
                 </div>

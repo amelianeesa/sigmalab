@@ -133,7 +133,6 @@ class AlatController extends Controller
         $alat = Alat::findOrFail($id);
 
         $request->validate([
-            'kode_alat' => 'required|string|max:50|unique:alat,kode_alat,' . $id . ',alat_id',
             'nama_alat' => 'required|string|max:100',
             'merk_tipe' => 'nullable|string|max:100',
             'no_seri' => 'nullable|string|max:100',
@@ -155,7 +154,6 @@ class AlatController extends Controller
 
         DB::transaction(function () use ($request, $alat) {
             $alat->update([
-                'kode_alat' => $request->kode_alat,
                 'nama_alat' => $request->nama_alat,
                 'merk_tipe' => $request->merk_tipe,
                 'no_seri' => $request->no_seri,

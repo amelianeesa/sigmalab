@@ -38,7 +38,7 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Kode Barang <span class="text-danger">*</span></label>
-                        <input type="text" name="kode_barang" class="form-control" value="{{ old('kode_barang', $barang->kode_barang) }}" placeholder="mis. 1.23.456" required>
+                        <input type="text" name="kode_barang" class="form-control bg-light" value="{{ old('kode_barang', $barang->kode_barang) }}" placeholder="mis. 1.23.456" required readonly>
                     </div>
                 </div>
 

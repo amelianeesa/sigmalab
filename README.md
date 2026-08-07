@@ -1,59 +1,148 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SIGMA-LAB (Sistem Integrasi Manajemen Laboratorium)
+**PT Sucofindo**
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+SIGMA-LAB adalah sebuah sistem informasi berbasis web yang dirancang khusus untuk mendigitalisasi, mengintegrasikan, dan mengelola seluruh aktivitas operasional laboratorium secara *end-to-end*. Sistem ini mencakup manajemen sumber daya manusia, pengelolaan alat dan bahan, *quality control* (QC) hasil pengujian, pelaporan otomatis, hingga pengawasan (*audit log*) dengan keamanan berlapis berbasis peran (*Role-Based Access Control*).
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Fitur dan Modul Utama
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+1. **Modul SDM & Kompetensi**
+   - Manajemen profil personil laboratorium.
+   - Pelacakan riwayat pelatihan, sertifikasi, dan kompetensi staf.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+2. **Modul Alat & Kalibrasi**
+   - Inventarisasi alat-alat lab (kode alat, spesifikasi, lokasi).
+   - Penjadwalan dan *reminder* otomatis masa jatuh tempo kalibrasi alat.
+   - Pencatatan riwayat pemakaian alat pada setiap pengujian.
 
-## Learning Laravel
+3. **Modul Inventori & Bahan**
+   - Pencatatan stok bahan kimia dan reagen secara *real-time*.
+   - Fitur *Auto-Deduction* (Pemotongan otomatis stok bahan saat digunakan untuk pengujian).
+   - Sistem *Alert* visual (kuning/merah) ketika stok mendekati batas minimal.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+4. **Modul Pengadaan Bahan (Procurement)**
+   - Pengajuan permohonan restock bahan yang menipis.
+   - Sistem persetujuan (*Approval*) bertingkat oleh Kepala Bidang.
+   - Penambahan stok otomatis ketika status pengadaan dinyatakan 'Selesai'.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+5. **Modul Quality Control (QC) & Parameter Uji**
+   - Manajemen batas inlier/outlier (batas atas & bawah) tiap parameter.
+   - **Smart Calculation Engine:** Jika parameter memiliki rumus matematika, sistem otomatis mengekstrak variabelnya menjadi *form input* dan melakukan kalkulasi nilai akhir di *backend*.
+   - Penetapan otomatis status Inlier/Outlier pada setiap Hasil Uji.
+   - Investigasi dan Tindak Lanjut (*Follow-up*) untuk hasil yang Outlier.
 
-## Laravel Sponsors
+6. **Modul Reporting & Laporan PDF**
+   - Visualisasi rasio keberterimaan (Inlier vs Outlier) via Dashboard.
+   - Generator dokumen PDF (*Export*) laporan hasil uji secara rapi dengan kop surat berstandar perusahaan.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+7. **Modul Audit Log (CCTV Digital)**
+   - Merekam setiap riwayat *Create*, *Update*, dan *Delete* pada semua tabel krusial.
+   - Fitur X-Ray / Komparasi data yang berubah (menyorot *Data Lama* vs *Data Baru*).
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## 👥 Sistem Peran (*Role-Based Access Control*)
 
-## Contributing
+Sistem ini sangat ketat dalam memisahkan wewenang. Terdapat **7 Role** utama dengan kapabilitas masing-masing:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 1. Admin Aplikasi (Super Admin)
+- **Akses UI:** Sidebar Menu
+- **Wewenang:** 
+  - Memiliki akses konfigurasi sistem paling tinggi.
+  - Dapat mengakses menu SDM & Kompetensi untuk mengatur *user*.
+  - Pemegang hak eksklusif (bersama Kabid) untuk melihat **Audit Log** secara sistem.
 
-## Code of Conduct
+### 2. Admin Lab
+- **Akses UI:** Dashboard Card (Kotak Menu)
+- **Wewenang:** 
+  - Fokus pada manajemen operasional harian.
+  - Memiliki akses penuh (Input/Update) ke **Inventori Bahan**, **Alat & Kalibrasi**, dan pembuatan jadwal **Kegiatan Lab**.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 3. Koordinator Laboratorium
+- **Akses UI:** Dashboard Card (Kotak Menu)
+- **Wewenang:**
+  - Mengawasi berjalannya seluruh proses lab.
+  - Akses penuh ke **Parameter Uji**, pengecekan **Hasil Uji**, serta menentukan dan mengawasi **Tindak Lanjut** atas hasil yang *Outlier*.
+  - Dapat melihat **Audit Log** untuk investigasi internal lab.
 
-## Security Vulnerabilities
+### 4. Analis
+- **Akses UI:** Dashboard Card (Kotak Menu)
+- **Wewenang:**
+  - Peran eksekutor teknis. 
+  - Hanya dapat mengakses **Kegiatan Lab** yang ditugaskan padanya dan melakukan **Input Hasil Uji**.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 5. HR & GA Office
+- **Akses UI:** Dashboard Card (Kotak Menu)
+- **Wewenang:**
+  - Terfokus murni pada **SDM & Kompetensi** (menambah personil baru, mengurus pembaruan lisensi/sertifikasi agar Analis layak melakukan pengujian).
 
-## License
+### 6. Kabid Dukungan Bisnis
+- **Akses UI:** Dashboard Card (Kotak Menu)
+- **Wewenang:**
+  - Pengambil keputusan finansial dan aset.
+  - Memiliki akses kunci untuk melakukan **Persetujuan (Approval) Pengadaan Bahan**.
+  - Berhak melihat **Laporan QC** dan memantau **Audit Log**.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 7. Kabid Inspeksi dan Solusi Perdagangan
+- **Akses UI:** Dashboard Card (Kotak Menu)
+- **Wewenang:**
+  - Pengambil keputusan teknis tertinggi.
+  - Berhak memantau keseluruhan **Reporting/Laporan QC**.
+  - Dapat melihat **Audit Log** untuk memastikan transparansi dan integritas data hasil lab.
+
+---
+
+## 🛠️ Instalasi & Cara Menjalankan (*Developer Guide*)
+
+### Persyaratan Sistem
+- PHP >= 8.2
+- Composer 2.x
+- MySQL >= 8.0 / MariaDB
+- Node.js & NPM
+
+### Langkah-Langkah
+
+1. **Clone & Install Dependencies**
+   ```bash
+   git clone [url-repo]
+   cd sigmalab
+   composer install
+   npm install && npm run build
+   ```
+
+2. **Konfigurasi Environment**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+   *Atur koneksi database Anda di dalam file `.env`.*
+
+3. **Migrasi & Seeding Database**
+   Sistem ini sangat bergantung pada skema *Role* dan *Hak Akses* awal, jadi pastikan Anda menjalankan seeder.
+   ```bash
+   php artisan migrate:fresh --seed
+   ```
+   *(Catatan: Anda dapat mengeksekusi `php set_hak_akses.php` untuk memuat ulang daftar hak akses Audit Log jika diperlukan).*
+
+4. **Storage Link (Untuk upload lampiran/sertifikat)**
+   ```bash
+   php artisan storage:link
+   ```
+
+5. **Jalankan Aplikasi**
+   ```bash
+   php artisan serve
+   ```
+   Akses aplikasi pada `http://localhost:8000`.
+
+---
+
+## 🎨 Teknologi yang Digunakan
+- **Framework Core:** Laravel 10 (PHP 8.2)
+- **Frontend / UI:** Bootstrap 5, Vanilla JS, FontAwesome, Bootstrap Icons
+- **PDF Generator:** `barryvdh/laravel-dompdf`
+- **Audit / Rekam Jejak:** `spatie/laravel-activitylog`
+- **Smart Math Calculator:** `symfony/expression-language`
+
+*(Dikembangkan dan didesain secara kustom untuk menunjang performa operasional PT Sucofindo).*

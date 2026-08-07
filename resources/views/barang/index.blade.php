@@ -8,13 +8,6 @@
         <li class="breadcrumb-item active">Inventori Barang</li>
     </ol>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
     @php
         $barangHabisCount = 0;
         $barangMenipisCount = 0;
@@ -48,7 +41,14 @@
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div><i class="fas fa-boxes me-1"></i> Data Barang Persediaan & Sisa Stock</div>
-            <a href="{{ route('barang.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Tambah Barang</a>
+            <div>
+                <button type="button" class="btn btn-success btn-sm me-1" data-bs-toggle="modal" data-bs-target="#cetakPeriodeModal">
+                    <i class="fas fa-print"></i> Cetak Laporan Periode
+                </button>
+                @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
+                <a href="{{ route('barang.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Tambah Barang</a>
+                @endif
+            </div>
         </div>
         <div class="card-body">
             
@@ -134,12 +134,16 @@
                             </td>
                             <td>{{ $item->tgl_exp ? \Carbon\Carbon::parse($item->tgl_exp)->format('d M Y') : '-' }}</td>
                             <td class="text-nowrap">
-                                <a href="{{ route('barang.edit', $item->barang_id) }}" class="btn btn-warning btn-sm py-0 px-1" title="Edit"><i class="fas fa-edit"></i></a>
-                                <form action="{{ route('barang.destroy', $item->barang_id) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="button" class="btn btn-danger btn-sm py-0 px-1" title="Hapus" onclick="confirmDelete(this)"><i class="fas fa-trash"></i></button>
-                                </form>
+                                @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
+                                    <a href="{{ route('barang.edit', $item->barang_id) }}" class="btn btn-warning btn-sm py-0 px-1" title="Edit"><i class="fas fa-edit"></i></a>
+                                    <form action="{{ route('barang.destroy', $item->barang_id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="button" class="btn btn-danger btn-sm py-0 px-1" title="Hapus" onclick="confirmDelete(this)"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                @else
+                                    -
+                                @endif
                             </td>
                         </tr>
                         @empty
@@ -150,6 +154,50 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cetak Periode -->
+<div class="modal fade" id="cetakPeriodeModal" tabindex="-1" aria-labelledby="cetakPeriodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ route('barang.cetak-periode') }}" method="GET" target="_blank">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fs-6" id="cetakPeriodeModalLabel"><i class="fas fa-print me-2"></i>Cetak Laporan Periode</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="bulan" class="form-label">Bulan</label>
+                        <select name="bulan" id="bulan" class="form-select" required>
+                            @php
+                                $bulans = [
+                                    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                                    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                                    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                                ];
+                            @endphp
+                            @foreach($bulans as $key => $namaBulan)
+                                <option value="{{ $key }}" {{ date('n') == $key ? 'selected' : '' }}>{{ $namaBulan }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tahun" class="form-label">Tahun</label>
+                        <select name="tahun" id="tahun" class="form-select" required>
+                            @php $tahunSekarang = date('Y'); @endphp
+                            @for($i = $tahunSekarang; $i >= 2020; $i--)
+                                <option value="{{ $i }}">{{ $i }}</option>
+                            @endfor
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-file-pdf"></i> Cetak PDF</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

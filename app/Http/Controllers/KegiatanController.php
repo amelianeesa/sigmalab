@@ -6,6 +6,8 @@ use App\Models\Kegiatan;
 use App\Models\Alat;
 use App\Models\Personil;
 use App\Models\ParameterUji;
+use App\Models\Barang;
+use App\Models\TransaksiBarang;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
@@ -19,8 +21,8 @@ class KegiatanController extends Controller
     {
         $this->authorize('viewAny', Kegiatan::class);
 
-        $filterJenis = $request->input('filter_jenis');
-        $filterStatus = $request->input('filter_status');
+        $filterJenis = $request->input('jenis_kegiatan');
+        $filterStatus = $request->input('status_kegiatan');
         $search = $request->input('search');
 
         $query = Kegiatan::with(['pembuatKegiatan', 'alatDigunakan', 'personilTerlibat']);
@@ -48,9 +50,10 @@ class KegiatanController extends Controller
 
         $alatList = Alat::where('kondisi_barang', 'baik')->get();
         $personilList = Personil::where('status_aktif', true)->get();
+        $barangList = Barang::all();
         $nextKodeSampel = $this->generateKodeSampel();
 
-        return view('kegiatan.create', compact('alatList', 'personilList', 'nextKodeSampel'));
+        return view('kegiatan.create', compact('alatList', 'personilList', 'barangList', 'nextKodeSampel'));
     }
 
     public function store(Request $request)
@@ -68,6 +71,9 @@ class KegiatanController extends Controller
             'personil_ids' => 'nullable|array',
             'personil_ids.*' => 'exists:personil,personil_id',
             'personil_peran' => 'nullable|array',
+            'barang_ids' => 'nullable|array',
+            'barang_ids.*' => 'exists:barang,barang_id',
+            'barang_jumlah' => 'nullable|array',
         ]);
 
         DB::transaction(function () use ($request, $validated) {
@@ -95,6 +101,26 @@ class KegiatanController extends Controller
                 }
                 $kegiatan->personilTerlibat()->attach($syncData);
             }
+
+            // Attach barang dan catat transaksi
+            if (!empty($validated['barang_ids'])) {
+                foreach ($validated['barang_ids'] as $barangId) {
+                    $jumlah = (float) $request->input("barang_jumlah.{$barangId}", 0);
+                    if ($jumlah > 0) {
+                        $barang = Barang::find($barangId);
+                        $barang->pengeluaran += $jumlah;
+                        $barang->saldo_akhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
+                        $barang->save();
+
+                        TransaksiBarang::create([
+                            'barang_id' => $barangId,
+                            'kegiatan_id' => $kegiatan->kegiatan_id,
+                            'jumlah_pengeluaran' => $jumlah,
+                            'harga' => $barang->harga_rata ?? 0,
+                        ]);
+                    }
+                }
+            }
         });
 
         return redirect()->route('kegiatan.index')->with('success', 'Kegiatan berhasil dibuat.');
@@ -105,7 +131,7 @@ class KegiatanController extends Controller
         $kegiatan = Kegiatan::findOrFail($id);
         $this->authorize('view', $kegiatan);
 
-        $kegiatan->load(['pembuatKegiatan', 'alatDigunakan', 'personilTerlibat', 'hasilUji.parameterUji', 'hasilUji.tindakLanjut']);
+        $kegiatan->load(['pembuatKegiatan', 'alatDigunakan', 'personilTerlibat', 'hasilUji.parameterUji', 'hasilUji.tindakLanjut', 'transaksiBarang.barang']);
         $parameterList = ParameterUji::where('status_aktif', true)->get();
 
         return view('kegiatan.show', compact('kegiatan', 'parameterList'));
@@ -118,15 +144,21 @@ class KegiatanController extends Controller
 
         $alatList = Alat::where('kondisi_barang', 'baik')->get();
         $personilList = Personil::where('status_aktif', true)->get();
+        $barangList = Barang::all();
         $selectedAlat = $kegiatan->alatDigunakan->pluck('alat_id')->toArray();
         $selectedPersonil = $kegiatan->personilTerlibat->pluck('personil_id')->toArray();
         $personilPeran = $kegiatan->personilTerlibat->pluck('pivot.peran', 'personil_id')->toArray();
+        
+        $transaksis = TransaksiBarang::where('kegiatan_id', $kegiatan->kegiatan_id)->get();
+        $selectedBarang = $transaksis->pluck('barang_id')->toArray();
+        $barangJumlah = $transaksis->pluck('jumlah_pengeluaran', 'barang_id')->toArray();
 
-        return view('kegiatan.edit', compact('kegiatan', 'alatList', 'personilList', 'selectedAlat', 'selectedPersonil', 'personilPeran'));
+        return view('kegiatan.edit', compact('kegiatan', 'alatList', 'personilList', 'barangList', 'selectedAlat', 'selectedPersonil', 'personilPeran', 'selectedBarang', 'barangJumlah'));
     }
 
     public function update(Request $request, $id)
     {
+        abort_if(Auth::user()->role->nama_role === 'Analis', 403, 'Analis tidak diizinkan mengubah data kegiatan.');
         $kegiatan = Kegiatan::findOrFail($id);
         $this->authorize('update', $kegiatan);
 
@@ -141,6 +173,9 @@ class KegiatanController extends Controller
             'personil_ids' => 'nullable|array',
             'personil_ids.*' => 'exists:personil,personil_id',
             'personil_peran' => 'nullable|array',
+            'barang_ids' => 'nullable|array',
+            'barang_ids.*' => 'exists:barang,barang_id',
+            'barang_jumlah' => 'nullable|array',
         ]);
 
         DB::transaction(function () use ($request, $validated, $kegiatan) {
@@ -164,6 +199,38 @@ class KegiatanController extends Controller
                 }
             }
             $kegiatan->personilTerlibat()->sync($syncData);
+
+            // Revert stok barang yang lama
+            $oldTransaksis = TransaksiBarang::where('kegiatan_id', $kegiatan->kegiatan_id)->get();
+            foreach($oldTransaksis as $t) {
+                $b = $t->barang;
+                if ($b) {
+                    $b->pengeluaran -= $t->jumlah_pengeluaran;
+                    $b->saldo_akhir = ($b->saldo_awal + $b->penerimaan) - $b->pengeluaran;
+                    $b->save();
+                }
+            }
+            TransaksiBarang::where('kegiatan_id', $kegiatan->kegiatan_id)->delete();
+
+            // Insert stok barang yang baru
+            if (!empty($validated['barang_ids'])) {
+                foreach ($validated['barang_ids'] as $barangId) {
+                    $jumlah = (float) $request->input("barang_jumlah.{$barangId}", 0);
+                    if ($jumlah > 0) {
+                        $barang = Barang::find($barangId);
+                        $barang->pengeluaran += $jumlah;
+                        $barang->saldo_akhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
+                        $barang->save();
+
+                        TransaksiBarang::create([
+                            'barang_id' => $barangId,
+                            'kegiatan_id' => $kegiatan->kegiatan_id,
+                            'jumlah_pengeluaran' => $jumlah,
+                            'harga' => $barang->harga_rata ?? 0,
+                        ]);
+                    }
+                }
+            }
         });
 
         return redirect()->route('kegiatan.index')->with('success', 'Kegiatan berhasil diperbarui.');
@@ -171,6 +238,7 @@ class KegiatanController extends Controller
 
     public function destroy($id)
     {
+        abort_if(Auth::user()->role->nama_role === 'Analis', 403, 'Analis tidak diizinkan menghapus data kegiatan.');
         $kegiatan = Kegiatan::findOrFail($id);
         $this->authorize('delete', $kegiatan);
 
@@ -184,6 +252,18 @@ class KegiatanController extends Controller
             }
             // Hapus hasil uji
             $kegiatan->hasilUji()->delete();
+
+            // Revert stok barang yang lama
+            $oldTransaksis = TransaksiBarang::where('kegiatan_id', $kegiatan->kegiatan_id)->get();
+            foreach($oldTransaksis as $t) {
+                $b = $t->barang;
+                if ($b) {
+                    $b->pengeluaran -= $t->jumlah_pengeluaran;
+                    $b->saldo_akhir = ($b->saldo_awal + $b->penerimaan) - $b->pengeluaran;
+                    $b->save();
+                }
+            }
+            TransaksiBarang::where('kegiatan_id', $kegiatan->kegiatan_id)->delete();
 
             $kegiatan->delete();
         });

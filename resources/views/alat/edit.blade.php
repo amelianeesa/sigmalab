@@ -19,7 +19,7 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">Kode Alat (CODE) <span class="text-danger">*</span></label>
-                        <input type="text" name="kode_alat" class="form-control @error('kode_alat') is-invalid @enderror" value="{{ old('kode_alat', $alat->kode_alat) }}" required>
+                        <input type="text" name="kode_alat" class="form-control bg-light @error('kode_alat') is-invalid @enderror" value="{{ old('kode_alat', $alat->kode_alat) }}" required readonly>
                         @error('kode_alat') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                     <div class="col-md-6">

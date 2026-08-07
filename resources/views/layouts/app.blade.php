@@ -19,19 +19,21 @@
             --sdm-700: #163d63;
         }
 
-        body { background-color: #f8f9fa; }
+        @php
+            $useSidebar = auth()->check() && auth()->user()->role && in_array(auth()->user()->role->nama_role, ['Admin Aplikasi', 'Admin Lab']);
+        @endphp
+
+        body { background-color: #f8f9fa; overflow-x: hidden; }
+        
         #sidebar {
             width: 260px; height: 100vh; position: fixed; top: 0; left: 0;
-            background-color: #0b1c3d; color: #fff; z-index: 1000;
+            background-color: #0b1c3d; color: #fff; z-index: 1040;
+            transition: transform 0.3s ease;
         }
-        #sidebar .sidebar-header { padding: 20px; background: #08142c; font-weight: bold; font-size: 1.1rem; }
-        #sidebar ul.components { padding: 10px 0; }
-        #sidebar ul li a { padding: 12px 20px; font-size: 0.95rem; display: block; color: #cfd8dc; text-decoration: none; }
-        #sidebar ul li a:hover, #sidebar ul li.active > a { color: #fff; background: #1e3a6e; }
-        #sidebar ul li a i { margin-right: 10px; }
-        #sidebar .sidebar-divider { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b; padding: 15px 20px 5px; margin-top: 5px; border-top: 1px solid #1e3a6e; }
+        
         #content { 
-            margin-left: 260px; 
+            transition: margin-left 0.3s ease;
+            margin-left: {{ $useSidebar ? '260px' : '0' }}; 
             padding: 24px; 
             padding-top: 20px; 
             min-height: 100vh; 
@@ -41,7 +43,8 @@
             background: var(--sdm-600);
             padding: 12px 28px;
             border-bottom: 1px solid var(--sdm-700);
-            margin-left: 260px;
+            transition: margin-left 0.3s ease;
+            margin-left: {{ $useSidebar ? '260px' : '0' }};
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -51,6 +54,32 @@
             min-height: 64px;
             color: #fff;
         }
+
+        /* Sidebar Responsive Toggle CSS */
+        body.sidebar-toggled #sidebar { transform: translateX(-100%); }
+        body.sidebar-toggled #content { margin-left: 0; }
+        body.sidebar-toggled .top-navbar { margin-left: 0; }
+
+        @media (max-width: 991.98px) {
+            #sidebar { transform: translateX(-100%); }
+            #content { margin-left: 0; }
+            .top-navbar { margin-left: 0; }
+            
+            body.sidebar-toggled #sidebar { transform: translateX(0); }
+            body.sidebar-toggled #content { margin-left: 0; }
+            body.sidebar-toggled .top-navbar { margin-left: 0; }
+        }
+
+        #sidebar-overlay {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.5); z-index: 1030;
+        }
+        body.sidebar-toggled #sidebar-overlay { display: block; }
+        @media (min-width: 992px) {
+            body.sidebar-toggled #sidebar-overlay { display: none; }
+        }
+
         .top-navbar .text-secondary { color: rgba(255,255,255,.75) !important; }
         .top-navbar .fw-bold { color: #fff !important; }
         .top-navbar .dropdown .btn {
@@ -64,6 +93,13 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+        #sidebar .sidebar-header { padding: 20px; background: #08142c; font-weight: bold; font-size: 1.1rem; }
+        #sidebar ul.components { padding: 10px 0; }
+        #sidebar ul li a { padding: 12px 20px; font-size: 0.95rem; display: block; color: #cfd8dc; text-decoration: none; }
+        #sidebar ul li a:hover, #sidebar ul li.active > a { color: #fff; background: #1e3a6e; }
+        #sidebar ul li a i { margin-right: 10px; }
+        #sidebar .sidebar-divider { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b; padding: 15px 20px 5px; margin-top: 5px; border-top: 1px solid #1e3a6e; }
+        
         .btn-logout {
             border-color: rgba(255,255,255,.45);
             color: #fff;
@@ -87,6 +123,8 @@
 </head>
 
 <body>
+    @if($useSidebar)
+    <div id="sidebar-overlay" onclick="document.body.classList.remove('sidebar-toggled')"></div>
     <nav id="sidebar">
         <div class="sidebar-header">
             <i class="fas fa-atom"></i> SigmaLab<br>
@@ -97,43 +135,106 @@
                 <a href="{{ route('dashboard') ?? url('/') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
             </li>
 
-            {{-- Modul Tim Lain --}}
+            {{-- Modul Umum --}}
             <li class="sidebar-divider">Modul Umum</li>
+            
+            @modul('alat')
             <li class="{{ request()->is('alat*') ? 'active' : '' }}">
                 <a href="{{ route('alat.index') ?? '#' }}"><i class="fas fa-tools"></i> Aset & Kalibrasi</a>
             </li>
-            <li><a href="#"><i class="fas fa-boxes"></i> Inventori Barang</a></li>
-            <li class="{{ request()->is('sdm*') ? 'active' : '' }}"><a href="{{ route('sdm.index') ?? '#' }}"><i class="fas fa-users"></i> SDM & Kompetensi</a></li>
-            <li><a href="#"><i class="fas fa-history"></i> Audit Log</a></li>
+            @endmodul
 
-            {{-- Modul QC & Proses (domain Amel) --}}
+            @modul('barang')
+            <li class="{{ request()->is('barang*') ? 'active' : '' }}">
+                <a href="{{ route('barang.index') }}"><i class="fas fa-boxes"></i> Inventori Barang</a>
+            </li>
+            @endmodul
+
+            @modul('pengadaan')
+            <li class="{{ request()->is('pengadaan*') ? 'active' : '' }}">
+                <a href="{{ route('pengadaan.index') ?? '#' }}"><i class="fas fa-shopping-cart"></i> Pengadaan Bahan</a>
+            </li>
+            @endmodul
+
+            @modul('sdm')
+            <li class="{{ request()->is('sdm*') ? 'active' : '' }}"><a href="{{ route('sdm.index') ?? '#' }}"><i class="fas fa-users"></i> SDM & Kompetensi</a></li>
+            @endmodul
+
+            @modul('audit_log')
+            <li class="{{ request()->is('audit-log*') ? 'active' : '' }}">
+                <a href="{{ route('audit-log.index') }}"><i class="fas fa-history"></i> Audit Log</a>
+            </li>
+            @endmodul
+
+            @modul('manajemen_pengguna')
+            <li class="sidebar-divider">Konfigurasi</li>
+            <li class="{{ request()->is('hak-akses*') ? 'active' : '' }}">
+                <a href="{{ route('hak-akses.index') }}"><i class="fas fa-user-shield"></i> Manajemen Hak Akses</a>
+            </li>
+            @endmodul
+
+            {{-- Modul QC & Proses --}}
             <li class="sidebar-divider">QC & Proses</li>
+            
+            @modul('parameter_uji')
             <li class="{{ request()->is('parameter-uji*') ? 'active' : '' }}">
                 <a href="{{ route('parameter-uji.index') }}"><i class="fas fa-vial"></i> Parameter Uji</a>
             </li>
+            @endmodul
+
+            @modul('proses_hasil')
             <li class="{{ request()->routeIs('kegiatan.*') ? 'active' : '' }}">
                 <a href="{{ route('kegiatan.index') }}"><i class="fas fa-clipboard-list"></i> Proses & Hasil Pengujian</a>
             </li>
+            @endmodul
+
+            @modul('tindak_lanjut')
             <li class="{{ request()->is('tindak-lanjut*') ? 'active' : '' }}">
                 <a href="{{ route('tindak-lanjut.index') }}"><i class="fas fa-clipboard-check"></i> Tindak Lanjut</a>
             </li>
+            @endmodul
 
             {{-- Reporting --}}
             <li class="sidebar-divider">Reporting</li>
+            @modul('reporting')
             <li class="{{ request()->is('reporting*') ? 'active' : '' }}">
                 <a href="{{ route('reporting.index') }}"><i class="fas fa-chart-bar"></i> Laporan QC</a>
             </li>
+            @endmodul
         </ul>
     </nav>
+    @endif
 
     <div class="top-navbar shadow-sm">
-        <div>
-            <span class="text-uppercase text-secondary fs-7 fw-bold d-block mb-1" style="font-size: 18px; letter-spacing: 1px;">SIGMA-LAB</span>
-            <div class="mb-0 fw-bold">Sistem Integrasi Manajemen Laboratorium PT Sucofindo</div>
+        <div class="d-flex align-items-center">
+            @if($useSidebar)
+            <button class="btn text-white me-3 d-flex align-items-center justify-content-center p-1" id="sidebarToggleBtn" style="border:1px solid rgba(255,255,255,0.3); border-radius:6px; background:rgba(0,0,0,0.1); width:36px; height:36px;" onclick="document.body.classList.toggle('sidebar-toggled')">
+                <i class="fas fa-bars"></i>
+            </button>
+            @endif
+            <div>
+                <span class="text-uppercase text-secondary fs-7 fw-bold d-block mb-1" style="font-size: 18px; letter-spacing: 1px;">SIGMA-LAB</span>
+                <div class="mb-0 fw-bold d-none d-sm-block">Sistem Integrasi Manajemen Laboratorium PT Sucofindo</div>
+            </div>
         </div>
-        <div class="dropdown">
-            <button class="btn btn-light dropdown-toggle border" type="button" data-bs-toggle="dropdown" title="Profil">
-                <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->name ?? Auth::user()->username ?? 'Pengguna' }}
+        <div class="d-flex align-items-center">
+            @if(isset($pendingPengadaan) && $pendingPengadaan > 0)
+                <a href="{{ route('pengadaan.index') }}" class="btn btn-warning position-relative me-3 rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;" title="{{ $pendingPengadaan }} Pengajuan Pengadaan">
+                    <i class="fas fa-bell text-dark"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light">
+                        {{ $pendingPengadaan }}
+                        <span class="visually-hidden">pengadaan belum diproses</span>
+                    </span>
+                </a>
+            @endif
+            <div class="dropdown">
+            <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown" title="Profil" style="border-color: rgba(255,255,255,0.2);">
+                <i class="bi bi-person-circle me-1 text-white"></i> 
+                <div class="d-none d-sm-flex flex-column text-start ms-1 me-1 text-white" style="line-height: 1.2;">
+                    <span class="fw-bold" style="font-size: 0.9rem;">{{ Auth::user()->personil->nama_personil ?? Auth::user()->username ?? 'Pengguna' }}</span>
+                    <small style="font-size: 0.75rem; color: rgba(255,255,255,0.85);">{{ Auth::user()->role->nama_role ?? '-' }}</small>
+                </div>
+                <span class="d-inline d-sm-none text-white">{{ substr(Auth::user()->personil->nama_personil ?? Auth::user()->username ?? 'U', 0, 5) }}</span>
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
                 <li>
@@ -143,40 +244,11 @@
                     </form>
                 </li>
             </ul>
+            </div>
         </div>
     </div>
 
     <div id="content">
-        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4 px-3 rounded">
-            <div class="container-fluid">
-                <!-- Role Switcher Form -->
-                <div class="d-flex align-items-center ms-auto">
-                    <span class="me-2 text-muted small">Simulasi Role:</span>
-                    <form action="{{ route('switch-role') }}" method="POST" class="m-0">
-                        @csrf
-                        <select name="role_name" class="form-select form-select-sm fw-bold border-0 bg-light" onchange="this.form.submit()">
-                            <option value="">-- Pilih Role --</option>
-                            @foreach(App\Enums\PeranPengguna::cases() as $role)
-                                <option value="{{ $role->value }}" {{ (Auth::check() && Auth::user()->role && Auth::user()->role->nama_role === $role->value) ? 'selected' : '' }}>
-                                    {{ $role->value }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </form>
-                    @if(Auth::check())
-                        <span class="ms-3 badge bg-primary">Logged in as: {{ Auth::user()->username }}</span>
-                    @endif
-                </div>
-            </div>
-            <form action="{{ route('logout') }}" method="POST" class="m-0">
-                @csrf
-                <button type="submit" class="btn btn-sm btn-outline-light btn-logout px-3 py-2">
-                    <i class="bi bi-box-arrow-right me-1"></i> Logout
-                </button>
-            </form>
-        </div>
-    </div>
-
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show mx-3" role="alert">
                 {{ session('success') }}
@@ -190,7 +262,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
-    <div id="content">
+
         @yield('content')
     </div>
 

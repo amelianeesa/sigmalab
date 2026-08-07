@@ -11,8 +11,8 @@ enum PeranPengguna: string
     case ANALIS = 'Analis';
     case KOORDINATOR_LAB = 'Koordinator Laboratorium';
     case ADMIN_LAB = 'Admin Lab';
-    case MANAJEMEN = 'Manajemen';
+    case KABID_INSPEKSI = 'Kabid Inspeksi dan Solusi Perdagangan'; 
+    case KABID_DUKUNGAN_BISNIS = 'Kabid Dukungan Bisnis'; 
     case ADMIN_APLIKASI = 'Admin Aplikasi';
-    case HR_GA_OFFICER = 'HR dan GA Officer';
-    case DEVELOPER = 'Developer'; // Untuk testing dropdown
+    case HR_GA_OFFICER = 'HR & GA';
 }

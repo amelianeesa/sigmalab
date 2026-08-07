@@ -11,13 +11,6 @@
         <li class="breadcrumb-item active">Alat & Kalibrasi</li>
     </ol>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
     @php
         $alatWarningCount = 0;
         foreach($alat as $item) {
@@ -42,7 +35,9 @@
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div><i class="fas fa-tools me-1"></i> Data Master Alat & Informasi Kalibrasi</div>
+            @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
             <a href="{{ route('alat.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Tambah Alat</a>
+            @endif
         </div>
         <div class="card-body">
             
@@ -178,15 +173,19 @@
                             <td>{{ ucfirst($signifikan ?? '-') }}</td>
 
                             <td class="text-nowrap">
-                                <a href="{{ route('alat.edit', $item->alat_id) }}" class="btn btn-warning btn-sm" title="Edit"><i class="fas fa-edit"></i></a>
-                                
-                                <form action="{{ route('alat.destroy', $item->alat_id) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="button" class="btn btn-danger btn-sm" title="Hapus" onclick="confirmDelete(this)">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
+                                @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
+                                    <a href="{{ route('alat.edit', $item->alat_id) }}" class="btn btn-warning btn-sm" title="Edit"><i class="fas fa-edit"></i></a>
+                                    
+                                    <form action="{{ route('alat.destroy', $item->alat_id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="button" class="btn btn-danger btn-sm" title="Hapus" onclick="confirmDelete(this)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                @else
+                                    -
+                                @endif
                             </td>
                         </tr>
                         @empty

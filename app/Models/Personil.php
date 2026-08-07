@@ -26,4 +26,14 @@ class Personil extends Model
     {
         return $this->hasMany(KompetensiPersonil::class, 'personil_id', 'personil_id');
     }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'personil_id', 'personil_id');
+    }
+
+    public function kegiatan()
+    {
+        return $this->belongsToMany(Kegiatan::class, 'kegiatan_personil', 'personil_id', 'kegiatan_id');
+    }
 }
