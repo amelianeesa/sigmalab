@@ -33,7 +33,7 @@ class RiwayatTindakLanjutController extends Controller
     {
         $this->authorize('create', RiwayatTindakLanjut::class);
 
-        // List hasil uji outlier yang bisa ditindaklanjuti
+    
         $hasilUjiOutlier = HasilUji::where('status_berketerimaan', 'outlier')
             ->with(['parameterUji', 'kegiatan'])
             ->get();
@@ -74,5 +74,4 @@ class RiwayatTindakLanjutController extends Controller
         return view('tindak-lanjut.show', compact('tindakLanjut'));
     }
 
-    // Tidak ada edit, update, destroy — insert only
 }

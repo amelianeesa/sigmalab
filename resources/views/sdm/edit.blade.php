@@ -83,6 +83,16 @@
                                     <input type="date" name="tanggal_berakhir" class="form-control" value="{{ old('tanggal_berakhir', $sertifikasi?->tanggal_berakhir?->format('Y-m-d')) }}">
                                 </div>
                             </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Ganti File Sertifikat <span class="text-muted fw-normal">(Opsional)</span></label>
+                                <input type="file" name="file_sertifikat" class="form-control" accept="image/*,application/pdf">
+                                @if($sertifikasi && $sertifikasi->file_sertifikat)
+                                    <div class="form-text text-success mt-1">
+                                        <i class="bi bi-check-circle"></i> File saat ini sudah tersimpan.
+                                    </div>
+                                @endif
+                            </div>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center pt-3 border-top">

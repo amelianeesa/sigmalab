@@ -15,7 +15,7 @@ class HakAksesController extends Controller
         $roles = Role::all();
         $modules = Modul::all();
 
-        // Get current hak akses
+
         $hakAksesData = DB::table('hak_akses')->get();
         $matrix = [];
 
@@ -31,7 +31,7 @@ class HakAksesController extends Controller
         $data = $request->input('matrix', []);
         
         DB::transaction(function () use ($data) {
-            // First delete all existing access rights to replace with the new ones
+            
             DB::table('hak_akses')->delete();
 
             $inserts = [];
@@ -54,13 +54,13 @@ class HakAksesController extends Controller
             }
         });
 
-        // Log to spatie activity log manually since this is a DB facade operation
+        
         activity()
             ->causedBy(Auth::user())
             ->event('updated')
             ->log('Memperbarui matriks hak akses seluruh Role');
 
-        // Clear permission cache
+        
         \Illuminate\Support\Facades\Cache::forget('hak_akses_matrix');
 
         return redirect()->route('hak-akses.index')->with('success', 'Konfigurasi hak akses berhasil diperbarui.');

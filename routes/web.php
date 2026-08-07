@@ -16,7 +16,7 @@ use App\Http\Controllers\PengadaanController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\HakAksesController;
 
-// Guest / Auth Routes
+
 Route::get('/', [AuthController::class, 'showLogin']);
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'processLogin'])->name('login.process');
@@ -26,14 +26,14 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::post('/switch-role', [RoleSwitcherController::class, 'switch'])->name('switch-role');
 
-// Authenticated Routes
+
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard', function () {
         return view('dashboard-index');
     })->name('dashboard');
 
-    // SDM & Kompetensi
+    
     Route::get('/sdm', [SdmController::class, 'index'])->name('sdm.index');
     Route::get('/sdm/create', [SdmController::class, 'create'])->name('sdm.create');
     Route::post('/sdm', [SdmController::class, 'store'])->name('sdm.store');
@@ -49,7 +49,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/sdm/{id}/kompetensi/{kompetensiId}', [SdmController::class, 'destroyKompetensi'])->name('sdm.kompetensi.destroy');
     Route::get('/sdm/{id}/cv', [SdmController::class, 'showCv'])->name('sdm.cv');
 
-    // Resources
+   
     Route::resource('alat', AlatController::class);
     Route::get('barang/cetak-periode', [BarangController::class, 'printPeriode'])->name('barang.cetak-periode');
     Route::resource('barang', BarangController::class);
@@ -60,17 +60,17 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('hasil-uji', HasilUjiController::class)->only(['store', 'show']);
     Route::resource('tindak-lanjut', RiwayatTindakLanjutController::class)->only(['index', 'create', 'store', 'show']);
 
-    // Reporting
+   
     Route::get('reporting', [ReportingController::class, 'index'])->name('reporting.index');
     Route::get('reporting/pdf', [ReportingController::class, 'exportPdf'])->name('reporting.pdf');
 
-    // Audit Log
+    
     Route::middleware('modul:audit_log,lihat')->group(function () {
         Route::get('audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
         Route::get('audit-log/{id}', [AuditLogController::class, 'show'])->name('audit-log.show');
     });
 
-    // Manajemen Hak Akses
+    
     Route::middleware('modul:manajemen_pengguna,lihat')->group(function () {
         Route::get('hak-akses', [HakAksesController::class, 'index'])->name('hak-akses.index');
         Route::post('hak-akses', [HakAksesController::class, 'update'])->name('hak-akses.update');

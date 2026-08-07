@@ -2,7 +2,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Personil; // Sesuaikan dengan model Anda
+use App\Models\Personil; 
 use App\Models\KompetensiPersonil;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -70,6 +70,7 @@ class SdmController extends Controller
             'no_sertifikasi' => 'nullable|string|max:100',
             'tanggal_terbit' => 'nullable|date',
             'tanggal_berakhir' => 'nullable|date|after_or_equal:tanggal_terbit',
+            'file_sertifikat' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
             'buat_akun' => 'nullable',
             'username' => 'required_with:buat_akun|string|max:50|unique:users,username',
             'email' => 'required_with:buat_akun|email|max:100|unique:users,email',
@@ -96,12 +97,19 @@ class SdmController extends Controller
             if ($request->filled('nama_sertifikasi') && Auth::user()->role->nama_role !== 'Admin Lab') {
                 $tanggalTerbit = Carbon::parse($request->input('tanggal_terbit') ?: today()->toDateString());
 
+                $sertifikatName = null;
+                if ($request->hasFile('file_sertifikat')) {
+                    $sertifikatName = time() . '_sertifikat_' . $request->file_sertifikat->getClientOriginalName();
+                    Storage::disk('local')->putFileAs('public/uploads/sertifikat', $request->file('file_sertifikat'), $sertifikatName);
+                }
+
                 KompetensiPersonil::create([
                     'personil_id' => $personil->personil_id,
                     'jenis_sertifikasi' => $request->nama_sertifikasi,
                     'no_sertifikasi' => $request->no_sertifikasi,
                     'tanggal_terbit' => $tanggalTerbit->toDateString(),
                     'tanggal_berakhir' => $request->tanggal_berakhir,
+                    'file_sertifikat' => $sertifikatName,
                 ]);
             }
 
@@ -142,6 +150,7 @@ class SdmController extends Controller
             'no_sertifikasi' => 'nullable|string|max:100',
             'tanggal_terbit' => 'nullable|date',
             'tanggal_berakhir' => 'nullable|date|after_or_equal:tanggal_terbit',
+            'file_sertifikat' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         $userRole = Auth::user()->role->nama_role;
@@ -172,6 +181,16 @@ class SdmController extends Controller
                     'tanggal_berakhir' => $request->tanggal_berakhir,
                 ];
 
+                if ($request->hasFile('file_sertifikat')) {
+                    $sertifikasi = $personil->kompetensi()->orderByDesc('tanggal_terbit')->first();
+                    if ($sertifikasi && $sertifikasi->file_sertifikat && Storage::disk('local')->exists('public/uploads/sertifikat/' . $sertifikasi->file_sertifikat)) {
+                        Storage::disk('local')->delete('public/uploads/sertifikat/' . $sertifikasi->file_sertifikat);
+                    }
+                    $sertifikatName = time() . '_sertifikat_' . $request->file_sertifikat->getClientOriginalName();
+                    Storage::disk('local')->putFileAs('public/uploads/sertifikat', $request->file('file_sertifikat'), $sertifikatName);
+                    $dataSertifikasi['file_sertifikat'] = $sertifikatName;
+                }
+
                 $sertifikasi = $personil->kompetensi()->orderByDesc('tanggal_terbit')->first();
                 $sertifikasi
                     ? $sertifikasi->update($dataSertifikasi)
@@ -187,10 +206,10 @@ class SdmController extends Controller
         abort_if(Auth::user()->role->nama_role === 'Admin Lab', 403, 'Admin Lab tidak diizinkan menghapus data personil.');
 
         $personil = Personil::findOrFail($id);
-        // Soft delete sesuai rancangan database
+        
         $personil->update(['status_aktif' => false]);
 
-        return redirect()->route('sdm.index')->with('success', 'Data personil dinonaktifkan (Soft Delete).');
+        return redirect()->route('sdm.index')->with('success', 'Data personil dinonaktifkan.');
     }
 
     public function activate($id)
@@ -237,7 +256,14 @@ class SdmController extends Controller
             'no_sertifikasi' => 'nullable|string|max:100',
             'tanggal_terbit' => 'nullable|date',
             'tanggal_berakhir' => 'nullable|date|after_or_equal:tanggal_terbit',
+            'file_sertifikat' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
+
+        if ($request->hasFile('file_sertifikat')) {
+            $sertifikatName = time() . '_sertifikat_' . $request->file_sertifikat->getClientOriginalName();
+            Storage::disk('local')->putFileAs('public/uploads/sertifikat', $request->file('file_sertifikat'), $sertifikatName);
+            $data['file_sertifikat'] = $sertifikatName;
+        }
 
         $personil->kompetensi()->create($data);
 
@@ -256,7 +282,17 @@ class SdmController extends Controller
             'no_sertifikasi' => 'nullable|string|max:100',
             'tanggal_terbit' => 'nullable|date',
             'tanggal_berakhir' => 'nullable|date|after_or_equal:tanggal_terbit',
+            'file_sertifikat' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
+
+        if ($request->hasFile('file_sertifikat')) {
+            if ($kompetensi->file_sertifikat && Storage::disk('local')->exists('public/uploads/sertifikat/' . $kompetensi->file_sertifikat)) {
+                Storage::disk('local')->delete('public/uploads/sertifikat/' . $kompetensi->file_sertifikat);
+            }
+            $sertifikatName = time() . '_sertifikat_' . $request->file_sertifikat->getClientOriginalName();
+            Storage::disk('local')->putFileAs('public/uploads/sertifikat', $request->file('file_sertifikat'), $sertifikatName);
+            $data['file_sertifikat'] = $sertifikatName;
+        }
 
         $kompetensi->update($data);
 
@@ -269,7 +305,11 @@ class SdmController extends Controller
         abort_if(Auth::user()->role->nama_role === 'Admin Lab', 403, 'Admin Lab tidak diizinkan menghapus data sertifikasi.');
 
         $personil = Personil::findOrFail($id);
-        $personil->kompetensi()->findOrFail($kompetensiId)->delete();
+        $kompetensi = $personil->kompetensi()->findOrFail($kompetensiId);
+        if ($kompetensi->file_sertifikat && Storage::disk('local')->exists('public/uploads/sertifikat/' . $kompetensi->file_sertifikat)) {
+            Storage::disk('local')->delete('public/uploads/sertifikat/' . $kompetensi->file_sertifikat);
+        }
+        $kompetensi->delete();
 
         return redirect()->route('sdm.kompetensi.detail', $personil->personil_id)
             ->with('success', 'Sertifikat berhasil dihapus.');

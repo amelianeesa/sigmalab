@@ -99,11 +99,11 @@ class ParameterUjiController extends Controller
         $this->authorize('delete', $parameterUji);
 
         if ($parameterUji->sudahDipakaiDiHasilUji()) {
-            // Soft deactivate
+
             $parameterUji->update(['status_aktif' => false]);
             return redirect()->route('parameter-uji.index')->with('success', 'Parameter uji dinonaktifkan karena sudah pernah digunakan dalam hasil uji.');
         } else {
-            // Hard delete
+            
             $parameterUji->delete();
             return redirect()->route('parameter-uji.index')->with('success', 'Parameter uji berhasil dihapus permanen.');
         }

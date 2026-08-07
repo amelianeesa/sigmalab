@@ -8,13 +8,17 @@
             <p class="text-muted mb-0">Rekam jejak aktivitas pengguna dan perubahan data dalam sistem.</p>
         </div>
     </div>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Audit Log</li>
+    </ol>
 
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
             <form action="{{ route('audit-log.index') }}" method="GET" class="row g-3 align-items-end">
                 <div class="col-md-3">
                     <label class="form-label text-muted small">Tipe Event</label>
-                    <select name="event" class="form-select form-select-sm">
+                    <select name="event" class="form-select form-select-sm" onchange="this.form.submit()">
                         <option value="">Semua Event</option>
                         <option value="created" {{ request('event') == 'created' ? 'selected' : '' }}>Created (Baru)</option>
                         <option value="updated" {{ request('event') == 'updated' ? 'selected' : '' }}>Updated (Ubah)</option>
@@ -23,10 +27,11 @@
                 </div>
                 <div class="col-md-4">
                     <label class="form-label text-muted small">Filter Entitas / Model (opsional)</label>
-                    <input type="text" name="subject_type" class="form-control form-control-sm" placeholder="Contoh: Barang, Kegiatan" value="{{ request('subject_type') }}">
+                    <input type="text" name="subject_type" class="form-control form-control-sm" placeholder="Contoh: Barang, Kegiatan" value="{{ request('subject_type') }}" onkeyup="clearTimeout(window.searchTimer); window.searchTimer = setTimeout(() => this.form.submit(), 500);">
                 </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-sm btn-primary w-100">Filter Log</button>
+                <div class="col-md-2 d-none d-md-block">
+                    <!-- Tombol Filter disembunyikan karena sudah live-search, tapi tetap bisa digunakan jika perlu -->
+                    <button type="submit" class="btn btn-sm btn-primary w-100 visually-hidden">Filter Log</button>
                 </div>
                 <div class="col-md-2">
                     <a href="{{ route('audit-log.index') }}" class="btn btn-sm btn-secondary w-100">Reset</a>

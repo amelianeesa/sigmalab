@@ -9,9 +9,9 @@ class HakAksesSeeder extends Seeder
 {
     public function run(): void
     {
-        // Ambil pemetaan ID Role
+        
         $roles = DB::table('roles')->pluck('roles_id', 'nama_role');
-        // Ambil pemetaan ID Modul
+        
         $modules = DB::table('modul')->pluck('modul_id', 'kode_modul');
 
         $matrix = [

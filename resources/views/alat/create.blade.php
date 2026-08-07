@@ -195,7 +195,6 @@
         }
 
         function onScanFailure(error) {
-            // handle scan failure, usually better to ignore and keep scanning
         }
     });
 </script>

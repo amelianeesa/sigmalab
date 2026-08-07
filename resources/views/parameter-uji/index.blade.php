@@ -2,9 +2,9 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Parameter Uji</h1>
+    <h1 class="mt-4"><i class="fas fa-vial text-primary me-2"></i>Parameter Uji</h1>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ url('/') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
         <li class="breadcrumb-item active">Parameter Uji</li>
     </ol>
 

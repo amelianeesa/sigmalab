@@ -299,7 +299,7 @@
                 const rumus = selected.getAttribute('data-rumus');
 
                 if(rumus && rumus.trim() !== '') {
-                    // Extract variables from rumus (words starting with letter)
+                    
                     const vars = [...new Set(rumus.match(/[a-zA-Z][a-zA-Z0-9_]*/g) || [])];
                     
                     if(vars.length > 0) {

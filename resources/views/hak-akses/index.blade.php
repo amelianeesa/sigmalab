@@ -8,6 +8,10 @@
             <p class="text-muted mb-0">Atur kewenangan setiap Role terhadap masing-masing Modul sistem secara dinamis.</p>
         </div>
     </div>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Hak Akses</li>
+    </ol>
 
     <div class="card shadow-sm border-0">
         <div class="card-body">

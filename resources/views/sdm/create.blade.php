@@ -8,6 +8,11 @@
             <p class="text-muted mb-0">Profil personil, matriks kompetensi & sertifikasi</p>
         </div>
     </div>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('sdm.index') }}">SDM & Personil</a></li>
+        <li class="breadcrumb-item active">Tambah</li>
+    </ol>
 
 
 
@@ -164,6 +169,12 @@
                             <label class="form-label fw-semibold text-dark small">Tgl Berakhir</label>
                             <input type="date" name="tgl_berakhir" class="form-control form-control-sm py-2" value="{{ old('tgl_berakhir', date('Y-m-d', strtotime('+2 years'))) }}">
                         </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-dark small">Upload File Sertifikat</label>
+                        <input type="file" name="file_sertifikat" class="form-control form-control-sm py-2" accept="image/*,application/pdf">
+                        <div class="form-text text-muted" style="font-size: 11px;">Format yang didukung: JPG, PNG, atau PDF (Maks. 2MB).</div>
                     </div>
 
                     <div class="mb-2">

@@ -112,10 +112,7 @@ class BarangController extends Controller
 
         $query = Barang::query();
 
-        // Di sini asumsikan kita menampilkan stok barang pada periode yang dipilih.
-        // Jika ada tabel transaksi (seperti TransaksiBarang), idealnya kita hitung mutasi, 
-        // tapi jika tidak ada, kita tampilkan data barang yang ada.
-        
+
         $barang = $query->get();
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('barang.cetak-periode', compact('barang', 'bulan', 'tahun'));

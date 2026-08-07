@@ -25,7 +25,6 @@ class PermissionService
 
         $matrix = $this->getAccessMatrix();
 
-        // Check if role has access to this module
         if (!isset($matrix[$user->role_id][$kodeModul])) {
             return false;
         }

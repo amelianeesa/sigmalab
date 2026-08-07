@@ -21,9 +21,7 @@ class DummyDataSeeder extends Seeder
      */
     public function run(): void
     {
-        // =============================================
-        // 1. ROLES
-        // =============================================
+        
         $rolesToInsert = [
             PeranPengguna::ANALIS->value,
             PeranPengguna::KOORDINATOR_LAB->value,
@@ -38,9 +36,7 @@ class DummyDataSeeder extends Seeder
             Role::firstOrCreate(['nama_role' => $roleName]);
         }
 
-        // =============================================
-        // 2. USERS (untuk Role Switcher)
-        // =============================================
+        
         $usersToInsert = [
             ['username' => 'analis_tester', 'email' => 'analis@test.com', 'role' => PeranPengguna::ANALIS->value],
             ['username' => 'koordinator_tester', 'email' => 'koor@test.com', 'role' => PeranPengguna::KOORDINATOR_LAB->value],
@@ -66,9 +62,7 @@ class DummyDataSeeder extends Seeder
             }
         }
 
-        // =============================================
-        // 3. PERSONIL (dummy untuk dipakai di kegiatan)
-        // =============================================
+        
         $personil1 = Personil::firstOrCreate(
             ['no_induk' => 'P-001'],
             ['nama' => 'Budi Santoso', 'jabatan' => 'Analis Kimia', 'unit_kerja' => 'Lab Kimia', 'status_aktif' => true]
@@ -82,9 +76,7 @@ class DummyDataSeeder extends Seeder
             ['nama' => 'Andi Wijaya', 'jabatan' => 'Teknisi Lab', 'unit_kerja' => 'Lab Kimia', 'status_aktif' => true]
         );
 
-        // =============================================
-        // 4. PARAMETER UJI
-        // =============================================
+        
         $paramKadarAir = ParameterUji::firstOrCreate(
             ['nama_parameter' => 'Kadar Air'],
             [
@@ -116,9 +108,7 @@ class DummyDataSeeder extends Seeder
             ]
         );
 
-        // =============================================
-        // 5. KEGIATAN + ATTACH ALAT & PERSONIL
-        // =============================================
+        
         $user = User::where('username', 'koordinator_tester')->first();
         $userId = $user ? $user->users_id : 1;
 
@@ -142,7 +132,7 @@ class DummyDataSeeder extends Seeder
             ]
         );
 
-        // Attach personil
+        
         if ($kegiatan1->personilTerlibat()->count() === 0) {
             $kegiatan1->personilTerlibat()->attach([
                 $personil1->personil_id => ['peran' => 'Analis Utama'],
@@ -156,9 +146,7 @@ class DummyDataSeeder extends Seeder
             ]);
         }
 
-        // =============================================
-        // 6. HASIL UJI (2 inlier, 1 outlier)
-        // =============================================
+        
         $hasilUji1 = HasilUji::firstOrCreate(
             ['kegiatan_id' => $kegiatan1->kegiatan_id, 'parameter_uji_id' => $paramKadarAir->parameter_uji_id],
             ['nilai_hasil' => 8.50, 'status_berketerimaan' => 'inlier', 'diinput_oleh' => $userId, 'created_at' => now()]
@@ -172,9 +160,7 @@ class DummyDataSeeder extends Seeder
             ['nilai_hasil' => 1.85, 'status_berketerimaan' => 'outlier', 'diinput_oleh' => $userId, 'created_at' => now()]
         );
 
-        // =============================================
-        // 7. RIWAYAT TINDAK LANJUT (untuk outlier)
-        // =============================================
+        
         RiwayatTindakLanjut::firstOrCreate(
             ['hasil_uji_id' => $hasilUjiOutlier->hasil_uji_id, 'ditindaklanjuti_oleh' => $userId],
             [

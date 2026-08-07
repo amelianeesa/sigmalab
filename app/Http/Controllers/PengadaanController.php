@@ -22,7 +22,7 @@ class PengadaanController extends Controller
 
     public function index()
     {
-        // Hanya yang punya akses ke modul 'pengadaan' bisa melihat
+    
         if (!$this->permissionService->userHasAccess(Auth::user(), 'pengadaan', 'lihat') && !$this->permissionService->userHasAccess(Auth::user(), 'pengadaan', 'tambah_ubah') && !$this->permissionService->userHasAccess(Auth::user(), 'pengadaan', 'full')) {
             abort(403, 'Anda tidak memiliki akses ke modul pengadaan ini.');
         }
@@ -40,8 +40,7 @@ class PengadaanController extends Controller
             PeranPengguna::ANALIS->value, 
             PeranPengguna::KOORDINATOR_LAB->value, 
             PeranPengguna::ADMIN_LAB->value, 
-            PeranPengguna::ADMIN_APLIKASI->value, 
-            PeranPengguna::KABID_DUKUNGAN_BISNIS->value
+            PeranPengguna::ADMIN_APLIKASI->value
         ];
 
         if (!in_array($roleName, $allowedToRequest)) {
@@ -81,15 +80,17 @@ class PengadaanController extends Controller
             'catatan_approval' => 'nullable|string'
         ]);
 
-        DB::transaction(function () use ($validated, $pengadaan) {
+        $statusLama = $pengadaan->status;
+
+        DB::transaction(function () use ($validated, $pengadaan, $statusLama) {
             $pengadaan->status = $validated['status'];
             $pengadaan->disetujui_oleh = Auth::id();
             $pengadaan->tanggal_keputusan = now()->toDateString();
-            $pengadaan->catatan_approval = $validated['catatan_approval'];
+            $pengadaan->catatan_approval = $validated['catatan_approval'] ?? null;
             $pengadaan->save();
 
-            // Jika status selesai, otomatis tambah saldo_akhir barang lewat penerimaan
-            if ($validated['status'] === 'selesai') {
+            // Jika status disetujui, otomatis tambah saldo_akhir barang lewat penerimaan
+            if ($validated['status'] === 'disetujui' && $statusLama !== 'disetujui') {
                 $barang = $pengadaan->barang;
                 if ($barang) {
                     $barang->penerimaan += $pengadaan->jumlah_diminta;
