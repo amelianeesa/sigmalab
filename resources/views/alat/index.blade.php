@@ -2,12 +2,14 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Manajemen Alat & Kalibrasi</h1>
-    <!-- <a href="{{ route('dashboard') }}" class="btn btn-light border shadow-sm px-3 fw-semibold rounded-pill">
-        <i class="bi bi-arrow-left me-1"></i> Kembali
-    </a> -->
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-2">
+        <h1>Manajemen Alat & Kalibrasi</h1>
+        <!-- <a href="{{ url('dashboard') }}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i> Kembali ke Dashboard
+        </a> -->
+    </div>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ url('dashboard') }}">Dashboard</a></li>
         <li class="breadcrumb-item active">Alat & Kalibrasi</li>
     </ol>
 
@@ -126,8 +128,7 @@
                                 }
                             }
 
-                            $qrData = "Kode Alat: {$item->kode_alat}\n" .
-                                      "Nama Alat: {$item->nama_alat}\n";
+                            $qrData = "Nama Alat: {$item->nama_alat}\nKode Alat: {$item->kode_alat}";
 
                             $qrSvgCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(40)->generate($qrData);
                             $qrSvgLarge = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(250)->generate($qrData);
@@ -208,11 +209,11 @@
                 <h5 class="modal-title fs-6" id="qrModalLabel">QR Code Alat</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body py-4">
-                <h6 id="modalNamaAlat" class="fw-bold text-primary mb-1"></h6>
-                <p id="modalKodeAlat" class="text-muted small mb-3"></p>
-                
-                <div id="modalQrContainer" class="p-3 bg-light d-inline-block shadow-sm rounded mb-3"></div>
+            <div class="modal-body py-4 bg-white">
+                <div id="printCardContainer" class="p-3 bg-white d-inline-block">
+                    <h6 id="modalNamaAlat" class="fw-bold text-dark mb-2"></h6>
+                    <div id="modalQrContainer" class="d-inline-block bg-white mb-1"></div>
+                </div>
             </div>
             <div class="modal-footer justify-content-center">
                 <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
@@ -223,6 +224,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 function confirmDelete(button) {
     Swal.fire({
@@ -273,36 +275,28 @@ qrModal.addEventListener('show.bs.modal', function (event) {
     const kodeAlat = trigger.getAttribute('data-alatkode');
 
     document.getElementById('modalNamaAlat').textContent = namaAlat;
-    document.getElementById('modalKodeAlat').textContent = 'Kode: ' + kodeAlat;
     
     const container = document.getElementById('modalQrContainer');
     container.innerHTML = qrSvg;
 
     const btnDownload = document.getElementById('btnDownloadQr');
     btnDownload.onclick = function() {
-        const svgElement = container.querySelector('svg');
-        const svgString = new XMLSerializer().serializeToString(svgElement);
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const img = new Image();
-
-        img.onload = function() {
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.fillStyle = "#FFFFFF";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0);
-
+        const cardElement = document.getElementById('printCardContainer');
+        
+        html2canvas(cardElement, {
+            backgroundColor: '#ffffff',
+            scale: 2
+        }).then(canvas => {
             const pngUrl = canvas.toDataURL('image/png');
+            const cleanKode = kodeAlat.replace(/[^a-zA-Z0-9]/g, '_');
+            
             const downloadLink = document.createElement('a');
             downloadLink.href = pngUrl;
-            downloadLink.download = 'QRCode-' + kodeAlat.replace(/[^a-zA-Z0-9]/g, '_') + '.png';
+            downloadLink.download = 'QR-' + cleanKode + '.png';
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);
-        };
-
-        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)));
+        });
     };
 });
 </script>
