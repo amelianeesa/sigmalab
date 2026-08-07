@@ -2,10 +2,7 @@
 
 namespace App\Enums;
 
-/**
- * SEMENTARA -- nilai enum ini HARUS disamakan persis dengan isi tabel roles yang dibuat Orang 3.
- * Kalau nanti nilainya beda, ganti di sini saja, satu tempat.
- */
+
 enum PeranPengguna: string
 {
     case ANALIS = 'Analis';

@@ -6,11 +6,18 @@
         <div>
             <h2 class="fw-bold text-dark mb-1">Pengadaan Bahan / Barang</h2>
             <p class="text-muted mb-0">Manajemen permintaan pengadaan barang dan persetujuan Kabid Dukungan Bisnis.</p>
+
         </div>
+        @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value)
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahPengadaanModal">
             <i class="fas fa-plus me-1"></i> Ajukan Pengadaan
         </button>
+        @endif
     </div>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Pengadaan Bahan</li>
+    </ol>
 
     <div class="card shadow-sm border-0">
         <div class="card-body">
@@ -69,7 +76,7 @@
                                                     <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST">
                                                         @csrf
                                                         <input type="hidden" name="status" value="disetujui">
-                                                        <button class="dropdown-item text-info"><i class="fas fa-check me-2"></i>Setujui</button>
+                                                        <button class="dropdown-item text-info" onclick="return confirm('Menyetujui pengajuan ini akan OTOMATIS menambah stok barang. Lanjutkan?')"><i class="fas fa-check me-2"></i>Setujui</button>
                                                     </form>
                                                 </li>
                                                 <li>
@@ -92,7 +99,7 @@
                                                     <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST">
                                                         @csrf
                                                         <input type="hidden" name="status" value="selesai">
-                                                        <button class="dropdown-item text-success" onclick="return confirm('Menandai selesai akan OTOMATIS menambah stok barang. Lanjutkan?')"><i class="fas fa-box-open me-2"></i>Barang Diterima (Selesai)</button>
+                                                        <button class="dropdown-item text-success"><i class="fas fa-box-open me-2"></i>Barang Diterima (Selesai)</button>
                                                     </form>
                                                 </li>
                                             @endif
@@ -126,7 +133,7 @@
     </div>
 </div>
 
-<!-- Modal Tambah Pengajuan -->
+
 <div class="modal fade" id="tambahPengadaanModal" tabindex="-1">
     <div class="modal-dialog">
         <form action="{{ route('pengadaan.store') }}" method="POST" class="modal-content">

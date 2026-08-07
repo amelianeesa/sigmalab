@@ -132,10 +132,10 @@
         </div>
         <ul class="list-unstyled components" style="overflow-y: auto; max-height: calc(100vh - 80px);">
             <li class="{{ request()->is('/') || request()->is('dashboard') ? 'active' : '' }}">
-                <a href="{{ route('dashboard') ?? url('/') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <a href="{{ route('dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
             </li>
 
-            {{-- Modul Umum --}}
+        
             <li class="sidebar-divider">Modul Umum</li>
             
             @modul('alat')
@@ -173,7 +173,7 @@
             </li>
             @endmodul
 
-            {{-- Modul QC & Proses --}}
+        
             <li class="sidebar-divider">QC & Proses</li>
             
             @modul('parameter_uji')
@@ -269,7 +269,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Live Search Script -->
+   
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const forms = document.querySelectorAll('.live-search-form');
@@ -303,14 +303,14 @@
         });
         
         function executeSearch(form, targetContainer, url = null) {
-            // Visual feedback loading
+            
             targetContainer.style.opacity = '0.5';
             
             const formData = new FormData(form);
             const searchParams = new URLSearchParams(formData);
             const fetchUrl = url || `${form.action || window.location.pathname}?${searchParams.toString()}`;
             
-            // Update URL bar (biar bisa di-copy paste)
+            
             window.history.pushState({}, '', fetchUrl);
             
             fetch(fetchUrl, {

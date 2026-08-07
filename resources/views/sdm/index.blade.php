@@ -27,10 +27,13 @@
                 <a href="{{ route('sdm.index') }}" class="btn btn-{{ ! $showInactive ? 'secondary' : 'outline-secondary' }} btn-sm me-1">Aktif <span class="badge bg-light text-dark ms-1">{{ $jumlahPersonilAktif }}</span></a>
                 <a href="{{ route('sdm.index', ['status' => 'nonaktif']) }}" class="btn btn-{{ $showInactive ? 'secondary' : 'outline-secondary' }} btn-sm me-2">Nonaktif <span class="badge bg-light text-dark ms-1">{{ $jumlahPersonilNonaktif }}</span></a>
                 @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambahPersonil">
+                <button type="button" class="btn btn-primary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#modalTambahPersonil">
                     <i class="fas fa-plus"></i> Tambah Personil
                 </button>
                 @endif
+                <div class="d-inline-block">
+                    <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Cari personil..." style="width: 200px;">
+                </div>
             </div>
         </div>
         <div class="card-body">
@@ -84,6 +87,7 @@
                             </td>
                             <td class="text-nowrap">
                                 @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
+                                    <a href="{{ route('sdm.kompetensi.detail', $row->personil_id) }}" class="btn btn-primary btn-sm text-white" title="Detail Sertifikasi"><i class="fas fa-certificate"></i></a>
                                     <a href="{{ route('sdm.edit', $row->personil_id) }}" class="btn btn-warning btn-sm" title="Edit"><i class="fas fa-edit"></i></a>
                                     
                                     @if($showInactive)
@@ -184,6 +188,11 @@
                                 <label class="form-label small fw-semibold">Tanggal Berakhir</label>
                                 <input type="date" name="tanggal_berakhir" class="form-control form-control-sm" value="{{ old('tanggal_berakhir') }}">
                             </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold">Upload File Sertifikat (Opsional)</label>
+                                <input type="file" name="file_sertifikat" class="form-control form-control-sm" accept="image/*,application/pdf">
+                                <div class="form-text text-muted" style="font-size: 0.75rem;">Format: JPG, PNG, PDF (Maks. 2MB).</div>
+                            </div>
                         </div>
                     </div>
 
@@ -231,4 +240,30 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const tableBody = document.querySelector('table tbody');
+        
+        if (searchInput && tableBody) {
+            searchInput.addEventListener('keyup', function(e) {
+                const term = e.target.value.toLowerCase();
+                const rows = tableBody.querySelectorAll('tr');
+                
+                rows.forEach(row => {
+                    // Skip 'Belum ada data' row
+                    if (row.cells.length === 1) return;
+                    
+                    const text = row.textContent.toLowerCase();
+                    if (text.includes(term)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
+    });
+</script>
 @endsection

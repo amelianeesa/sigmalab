@@ -187,10 +187,10 @@ class KegiatanController extends Controller
                 'status_kegiatan' => $validated['status_kegiatan'],
             ]);
 
-            // Sync alat
+            
             $kegiatan->alatDigunakan()->sync($validated['alat_ids'] ?? []);
 
-            // Sync personil with peran
+    
             $syncData = [];
             if (!empty($validated['personil_ids'])) {
                 foreach ($validated['personil_ids'] as $personilId) {
@@ -200,7 +200,7 @@ class KegiatanController extends Controller
             }
             $kegiatan->personilTerlibat()->sync($syncData);
 
-            // Revert stok barang yang lama
+           
             $oldTransaksis = TransaksiBarang::where('kegiatan_id', $kegiatan->kegiatan_id)->get();
             foreach($oldTransaksis as $t) {
                 $b = $t->barang;
@@ -212,7 +212,7 @@ class KegiatanController extends Controller
             }
             TransaksiBarang::where('kegiatan_id', $kegiatan->kegiatan_id)->delete();
 
-            // Insert stok barang yang baru
+            
             if (!empty($validated['barang_ids'])) {
                 foreach ($validated['barang_ids'] as $barangId) {
                     $jumlah = (float) $request->input("barang_jumlah.{$barangId}", 0);
@@ -246,14 +246,14 @@ class KegiatanController extends Controller
             $kegiatan->alatDigunakan()->detach();
             $kegiatan->personilTerlibat()->detach();
             
-            // Hapus semua tindak lanjut yang terkait dengan hasil uji kegiatan ini
+            
             foreach ($kegiatan->hasilUji as $hasil) {
                 $hasil->tindakLanjut()->delete();
             }
-            // Hapus hasil uji
+            
             $kegiatan->hasilUji()->delete();
 
-            // Revert stok barang yang lama
+            
             $oldTransaksis = TransaksiBarang::where('kegiatan_id', $kegiatan->kegiatan_id)->get();
             foreach($oldTransaksis as $t) {
                 $b = $t->barang;

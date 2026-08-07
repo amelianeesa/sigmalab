@@ -88,7 +88,7 @@
             </div>
             @endmodul
 
-            @modul('qc')
+            @modul('parameter_uji')
             <div class="col-12 col-sm-6 col-lg-4">
                 <a href="{{ route('parameter-uji.index') }}" class="text-decoration-none">
                     <div class="card h-100 border-0 shadow-sm module-card border-start border-4 border-sdm-600">
@@ -104,7 +104,9 @@
                     </div>
                 </a>
             </div>
+            @endmodul
 
+            @modul('proses_hasil')
             <div class="col-12 col-sm-6 col-lg-4">
                 <a href="{{ route('kegiatan.index') }}" class="text-decoration-none">
                     <div class="card h-100 border-0 shadow-sm module-card border-start border-4 border-sdm-600">
@@ -120,7 +122,9 @@
                     </div>
                 </a>
             </div>
+            @endmodul
 
+            @modul('tindak_lanjut')
             <div class="col-12 col-sm-6 col-lg-4">
                 <a href="{{ route('tindak-lanjut.index') }}" class="text-decoration-none">
                     <div class="card h-100 border-0 shadow-sm module-card border-start border-4 border-sdm-600">
