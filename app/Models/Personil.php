@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\KompetensiPersonil; 
+use App\Models\KompetensiPersonil;
 
 class Personil extends Model
 {
@@ -16,6 +16,7 @@ class Personil extends Model
     protected $fillable = [
         'nama',
         'jabatan',
+        'kategori_personil', // chemist | analist | preparator | sampler
         'unit_kerja',
         'no_induk',
         'file_cv',

@@ -5,6 +5,7 @@
     <h1 class="mt-4">Parameter Uji</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="{{ url('dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
         <li class="breadcrumb-item active">Parameter Uji</li>
     </ol>
 

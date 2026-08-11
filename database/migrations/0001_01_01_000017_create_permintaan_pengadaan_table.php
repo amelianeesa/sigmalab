@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 
-            $table->foreign('barang_id')->references('barang_id')->on('barang');
+            $table->foreign('barang_id')->references('barang_id')->on('barang')->onDelete('cascade');
             $table->foreign('diajukan_oleh')->references('users_id')->on('users');
             $table->foreign('disetujui_oleh')->references('users_id')->on('users')->nullOnDelete();
         });

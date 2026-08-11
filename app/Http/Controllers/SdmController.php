@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -7,18 +8,25 @@ use App\Models\KompetensiPersonil;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use App\Enums\KategoriPersonil;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
 
 class SdmController extends Controller
 {
     public function index()
     {
         $showInactive = request('status') === 'nonaktif';
-        $personil = Personil::with(['kompetensi' => fn ($query) => $query->orderByDesc('tanggal_terbit')])
-            ->where('status_aktif', ! $showInactive)
+        $kategori = request('kategori'); 
+
+        $personil = Personil::with([
+            'kompetensi' => fn($query) => $query->orderByDesc('tanggal_terbit'),
+            'user',
+        ])
+            ->where('status_aktif', !$showInactive)
+            ->when($kategori, fn($query) => $query->where('kategori_personil', $kategori))
             ->get();
 
         $jumlahPersonilAktif = Personil::where('status_aktif', true)->count();
@@ -27,20 +35,13 @@ class SdmController extends Controller
         $personil->each(function (Personil $item) {
             $sertifikasi = $item->kompetensi->first();
             $item->sertifikasiTerakhir = $sertifikasi;
-
-            if (! $sertifikasi) {
-                $item->statusSertifikasi = ['label' => 'Belum bersertifikat', 'class' => 'bg-light text-dark border', 'icon' => 'dash-circle'];
-            } elseif (! $sertifikasi->tanggal_berakhir) {
-                $item->statusSertifikasi = ['label' => 'Aktif', 'class' => 'bg-success text-white', 'icon' => 'check-circle'];
-            } elseif ($sertifikasi->tanggal_berakhir->isPast()) {
-                $item->statusSertifikasi = ['label' => 'Kedaluwarsa', 'class' => 'bg-danger text-white', 'icon' => 'x-circle'];
-            } elseif ($sertifikasi->tanggal_berakhir->lessThanOrEqualTo(today()->addDays(60))) {
-                $item->statusSertifikasi = ['label' => 'Segera berakhir', 'class' => 'bg-warning text-dark', 'icon' => 'exclamation-circle'];
-            } else {
-                $item->statusSertifikasi = ['label' => 'Aktif', 'class' => 'bg-success text-white', 'icon' => 'check-circle'];
-            }
+            $item->statusSertifikasi = $sertifikasi
+                ? $this->resolveStatusSertifikasi($sertifikasi->tanggal_berakhir)
+                : ['label' => 'Belum bersertifikat', 'class' => 'bg-light text-dark border', 'icon' => 'dash-circle'];
         });
+
         $selectedPersonil = $personil->firstWhere('personil_id', request('personil_id'));
+        $kategoriOptions = KategoriPersonil::options();
         $roles = Role::all();
 
         return view('sdm.index', compact(
@@ -49,13 +50,36 @@ class SdmController extends Controller
             'showInactive',
             'jumlahPersonilAktif',
             'jumlahPersonilNonaktif',
+            'kategori',
+            'kategoriOptions',
             'roles'
         ));
     }
 
+    private function resolveStatusSertifikasi($tanggalBerakhir): array
+    {
+        $tanggalBerakhir = $tanggalBerakhir ? Carbon::parse($tanggalBerakhir) : null;
+
+        if (!$tanggalBerakhir) {
+            return ['label' => 'Aktif', 'class' => 'bg-success text-white', 'icon' => 'check-circle'];
+        }
+
+        if ($tanggalBerakhir->isPast()) {
+            return ['label' => 'Kedaluwarsa', 'class' => 'bg-danger text-white', 'icon' => 'x-circle'];
+        }
+
+        if ($tanggalBerakhir->lessThanOrEqualTo(today()->addDays(60))) {
+            return ['label' => 'Segera Berakhir', 'class' => 'bg-warning text-dark', 'icon' => 'exclamation-circle'];
+        }
+
+        return ['label' => 'Aktif', 'class' => 'bg-success text-white', 'icon' => 'check-circle'];
+    }
+
     public function create()
     {
-        return view('sdm.create');
+        $kategoriOptions = KategoriPersonil::options();
+
+        return view('sdm.create', compact('kategoriOptions'));
     }
 
     public function store(Request $request)
@@ -64,17 +88,13 @@ class SdmController extends Controller
             'no_induk' => 'required|unique:personil,no_induk',
             'nama' => 'required|string|max:100',
             'jabatan' => 'required|string|max:100',
+            'kategori_personil' => 'nullable|in:chemist,analist,preparator,sampler',
             'unit_kerja' => 'required|string|max:100',
             'file_cv' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
             'nama_sertifikasi' => 'nullable|string|max:100',
             'no_sertifikasi' => 'nullable|string|max:100',
             'tanggal_terbit' => 'nullable|date',
             'tanggal_berakhir' => 'nullable|date|after_or_equal:tanggal_terbit',
-            'buat_akun' => 'nullable',
-            'username' => 'required_with:buat_akun|string|max:50|unique:users,username',
-            'email' => 'required_with:buat_akun|email|max:100|unique:users,email',
-            'password' => 'required_with:buat_akun|string|min:6',
-            'role_id' => 'required_with:buat_akun|exists:roles,roles_id',
         ]);
 
         $cvName = null;
@@ -88,6 +108,7 @@ class SdmController extends Controller
                 'no_induk' => $request->no_induk,
                 'nama' => $request->nama,
                 'jabatan' => $request->jabatan,
+                'kategori_personil' => $request->kategori_personil,
                 'unit_kerja' => $request->unit_kerja,
                 'file_cv' => $cvName,
                 'status_aktif' => true,
@@ -104,17 +125,6 @@ class SdmController extends Controller
                     'tanggal_berakhir' => $request->tanggal_berakhir,
                 ]);
             }
-
-            if ($request->has('buat_akun')) {
-                User::create([
-                    'personil_id' => $personil->personil_id,
-                    'username' => $request->username,
-                    'email' => $request->email,
-                    'password' => Hash::make($request->password),
-                    'role_id' => $request->role_id,
-                    'status_aktif' => true,
-                ]);
-            }
         });
 
         return redirect()->route('sdm.index')->with('success', 'Data personil berhasil ditambahkan.');
@@ -122,10 +132,11 @@ class SdmController extends Controller
 
     public function edit($id)
     {
-        $personil = Personil::with(['kompetensi' => fn ($query) => $query->orderByDesc('tanggal_terbit')])->findOrFail($id);
+        $personil = Personil::with(['kompetensi' => fn($query) => $query->orderByDesc('tanggal_terbit')])->findOrFail($id);
         $sertifikasi = $personil->kompetensi->first();
+        $kategoriOptions = KategoriPersonil::options();
 
-        return view('sdm.edit', compact('personil', 'sertifikasi'));
+        return view('sdm.edit', compact('personil', 'sertifikasi', 'kategoriOptions'));
     }
 
     public function update(Request $request, $id)
@@ -136,6 +147,7 @@ class SdmController extends Controller
             'no_induk' => 'required|unique:personil,no_induk,' . $id . ',personil_id',
             'nama' => 'required|string|max:100',
             'jabatan' => 'required|string|max:100',
+            'kategori_personil' => 'nullable|in:chemist,analist,preparator,sampler',
             'unit_kerja' => 'required|string|max:100',
             'file_cv' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
             'nama_sertifikasi' => 'nullable|string|max:100',
@@ -156,11 +168,12 @@ class SdmController extends Controller
             $personil->file_cv = $cvName;
         }
 
-        DB::transaction(function () use ($personil, $request) {
+        DB::transaction(function () use ($personil, $request, $userRole) {
             $personil->update([
                 'no_induk' => $request->no_induk,
                 'nama' => $request->nama,
                 'jabatan' => $request->jabatan,
+                'kategori_personil' => $request->kategori_personil,
                 'unit_kerja' => $request->unit_kerja,
             ]);
 
@@ -200,17 +213,43 @@ class SdmController extends Controller
         return redirect()->route('sdm.index')->with('success', 'Personil berhasil diaktifkan kembali.');
     }
 
+    public function storeAkun(Request $request, $id)
+    {
+        abort_if(Auth::user()->role->nama_role === 'Admin Lab', 403, 'Admin Lab tidak diizinkan membuat akun pengguna.');
+
+        $personil = Personil::findOrFail($id);
+
+        abort_if($personil->user, 409, 'Personil ini sudah memiliki akun login.');
+
+        $data = $request->validate([
+            'username' => 'required|string|max:50|unique:users,username',
+            'email' => 'required|email|max:100|unique:users,email',
+            'password' => 'required|string|min:6',
+            'role_id' => 'required|exists:roles,roles_id',
+        ]);
+
+        User::create([
+            'personil_id' => $personil->personil_id,
+            'username' => $data['username'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+            'role_id' => $data['role_id'],
+            'status_aktif' => true,
+        ]);
+
+        return redirect()->route('sdm.index')->with('success', 'Akun login untuk ' . $personil->nama . ' berhasil dibuat.');
+    }
+
     public function forceDestroy($id)
     {
         $personil = Personil::where('status_aktif', false)->findOrFail($id);
-
-        if (DB::table('kegiatan_personil')->where('personil_id', $personil->personil_id)->exists()) {
-            return redirect()->route('sdm.index', ['status' => 'nonaktif'])
-                ->with('error', 'Personil tidak dapat dihapus permanen karena masih tercatat dalam kegiatan laboratorium.');
-        }
-
         $fileCv = $personil->file_cv;
-        $personil->delete();
+
+        DB::transaction(function () use ($personil) {
+            DB::table('kegiatan_personil')->where('personil_id', $personil->personil_id)->delete();
+
+            $personil->delete();
+        });
 
         if ($fileCv && Storage::disk('local')->exists('public/uploads/cv/' . $fileCv)) {
             Storage::disk('local')->delete('public/uploads/cv/' . $fileCv);
@@ -222,7 +261,12 @@ class SdmController extends Controller
 
     public function kompetensiDetail($id)
     {
-        $personil = Personil::with(['kompetensi' => fn ($query) => $query->orderByDesc('tanggal_terbit')])->findOrFail($id);
+        $personil = Personil::with(['kompetensi' => fn($query) => $query->orderByDesc('tanggal_terbit')])->findOrFail($id);
+
+        $personil->kompetensi->each(function ($komp) {
+            $komp->status = $this->resolveStatusSertifikasi($komp->tanggal_berakhir);
+        });
+
         return view('sdm.kompetensi_detail', compact('personil'));
     }
 
@@ -236,7 +280,14 @@ class SdmController extends Controller
             'no_sertifikasi' => 'nullable|string|max:100',
             'tanggal_terbit' => 'nullable|date',
             'tanggal_berakhir' => 'nullable|date|after_or_equal:tanggal_terbit',
+            'file_sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
+
+        if ($request->hasFile('file_sertifikat')) {
+            $fileName = time() . '_' . $request->file('file_sertifikat')->getClientOriginalName();
+            Storage::disk('local')->putFileAs('public/uploads/sertifikat', $request->file('file_sertifikat'), $fileName);
+            $data['file_sertifikat'] = $fileName;
+        }
 
         $personil->kompetensi()->create($data);
 
@@ -255,7 +306,18 @@ class SdmController extends Controller
             'no_sertifikasi' => 'nullable|string|max:100',
             'tanggal_terbit' => 'nullable|date',
             'tanggal_berakhir' => 'nullable|date|after_or_equal:tanggal_terbit',
+            'file_sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
+
+        if ($request->hasFile('file_sertifikat')) {
+            if ($kompetensi->file_sertifikat && Storage::disk('local')->exists('public/uploads/sertifikat/' . $kompetensi->file_sertifikat)) {
+                Storage::disk('local')->delete('public/uploads/sertifikat/' . $kompetensi->file_sertifikat);
+            }
+
+            $fileName = time() . '_' . $request->file('file_sertifikat')->getClientOriginalName();
+            Storage::disk('local')->putFileAs('public/uploads/sertifikat', $request->file('file_sertifikat'), $fileName);
+            $data['file_sertifikat'] = $fileName;
+        }
 
         $kompetensi->update($data);
 
@@ -274,15 +336,119 @@ class SdmController extends Controller
             ->with('success', 'Sertifikat berhasil dihapus.');
     }
 
+    public function showKompetensiFile($id, $kompetensiId)
+    {
+        $personil = Personil::findOrFail($id);
+        $kompetensi = $personil->kompetensi()->findOrFail($kompetensiId);
+        $path = 'public/uploads/sertifikat/' . $kompetensi->file_sertifikat;
+
+        abort_unless($kompetensi->file_sertifikat && Storage::disk('local')->exists($path), 404, 'File sertifikat tidak ditemukan.');
+
+        $fullPath = Storage::disk('local')->path($path);
+
+        return response()->file($fullPath, [
+            'Content-Disposition' => 'inline; filename="' . $kompetensi->file_sertifikat . '"',
+        ]);
+    }
+
+    public function uploadKompetensiFile(Request $request, $id, $kompetensiId)
+    {
+        abort_if(Auth::user()->role->nama_role === 'Admin Lab', 403, 'Admin Lab tidak diizinkan mengunggah dokumen sertifikasi.');
+
+        $personil = Personil::findOrFail($id);
+        $kompetensi = $personil->kompetensi()->findOrFail($kompetensiId);
+
+        $request->validate([
+            'file_sertifikat' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ]);
+
+        if ($request->hasFile('file_sertifikat')) {
+            if ($kompetensi->file_sertifikat && Storage::disk('local')->exists('public/uploads/sertifikat/' . $kompetensi->file_sertifikat)) {
+                Storage::disk('local')->delete('public/uploads/sertifikat/' . $kompetensi->file_sertifikat);
+            }
+
+            $fileName = time() . '_' . $request->file('file_sertifikat')->getClientOriginalName();
+            Storage::disk('local')->putFileAs('public/uploads/sertifikat', $request->file('file_sertifikat'), $fileName);
+            $kompetensi->update(['file_sertifikat' => $fileName]);
+        }
+
+        return redirect()->route('sdm.kompetensi.detail', $personil->personil_id)
+            ->with('success', 'Dokumen sertifikasi berhasil diunggah.');
+    }
+
     public function showCv($id)
     {
-    $personil = Personil::findOrFail($id);
+        $personil = Personil::findOrFail($id);
         $path = 'public/uploads/cv/' . $personil->file_cv;
 
         abort_unless($personil->file_cv && Storage::disk('local')->exists($path), 404, 'File CV tidak ditemukan.');
 
-        return Storage::disk('local')->response($path, $personil->file_cv, [
+        $fullPath = Storage::disk('local')->path($path);
+
+        return response()->file($fullPath, [
             'Content-Disposition' => 'inline; filename="' . $personil->file_cv . '"',
         ]);
+    }
+    public function competencyMatrix()
+    {
+        $kategori = request('kategori');
+        [$matrix, $jenisSertifikasiList] = $this->buildCompetencyMatrix($kategori);
+        $kategoriOptions = KategoriPersonil::options();
+
+        return view('sdm.competency_matrix', compact('matrix', 'jenisSertifikasiList', 'kategoriOptions', 'kategori'));
+    }
+    public function competencyMatrixPdf()
+    {
+        $kategori = request('kategori');
+        [$matrix, $jenisSertifikasiList] = $this->buildCompetencyMatrix($kategori);
+        $kategoriOptions = KategoriPersonil::options();
+        $tanggalCetak = now()->translatedFormat('d F Y, H:i');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('sdm.competency_matrix_pdf', compact(
+            'matrix',
+            'jenisSertifikasiList',
+            'kategori',
+            'kategoriOptions',
+            'tanggalCetak'
+        ))->setPaper('a4', 'landscape');
+
+        $namaFile = 'Competency Matrix - ' . now()->format('d-m-Y') . '.pdf';
+
+        return $pdf->download($namaFile);
+    }
+
+    private function buildCompetencyMatrix(?string $kategori): array
+    {
+        $personil = Personil::with(['kompetensi'])
+            ->where('status_aktif', true)
+            ->when($kategori, fn($query) => $query->where('kategori_personil', $kategori))
+            ->orderBy('nama')
+            ->get();
+
+        $jenisSertifikasiList = $personil
+            ->flatMap(fn(Personil $p) => $p->kompetensi->pluck('jenis_sertifikasi'))
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
+
+        $matrix = $personil->map(function (Personil $p) use ($jenisSertifikasiList) {
+            $sel = [];
+
+            foreach ($jenisSertifikasiList as $jenis) {
+                $terbaru = $p->kompetensi
+                    ->where('jenis_sertifikasi', $jenis)
+                    ->sortByDesc('tanggal_terbit')
+                    ->first();
+
+                $sel[$jenis] = $terbaru
+                    ? ['status' => $this->resolveStatusSertifikasi($terbaru->tanggal_berakhir), 'kompetensi' => $terbaru]
+                    : null;
+            }
+
+            return ['personil' => $p, 'sel' => $sel];
+        });
+
+        return [$matrix, $jenisSertifikasiList];
     }
 }
