@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Personil;
+use App\Models\Personil; 
 use App\Models\KompetensiPersonil;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;

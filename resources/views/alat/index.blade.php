@@ -3,9 +3,6 @@
 @section('content')
 <div class="container-fluid px-4">
     <h1 class="mt-4">Manajemen Alat & Kalibrasi</h1>
-    <!-- <a href="{{ route('dashboard') }}" class="btn btn-light border shadow-sm px-3 fw-semibold rounded-pill">
-        <i class="bi bi-arrow-left me-1"></i> Kembali
-    </a> -->
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
         <li class="breadcrumb-item active">Alat & Kalibrasi</li>
@@ -121,8 +118,7 @@
                                 }
                             }
 
-                            $qrData = "Kode Alat: {$item->kode_alat}\n" .
-                                      "Nama Alat: {$item->nama_alat}\n";
+                            $qrData = route('alat.qr-kalibrasi', $item->alat_id);
 
                             $qrSvgCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(40)->generate($qrData);
                             $qrSvgLarge = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(250)->generate($qrData);
@@ -141,7 +137,12 @@
                                     {!! $qrSvgCode !!}
                                 </div>
                             </td>
-                            <td class="fw-bold text-start">{{ $item->nama_alat }}</td>
+                            {{-- Nama Barang bisa diklik untuk langsung menuju halaman QR/Detail alat --}}
+                            <td class="fw-bold text-start">
+                                <a href="{{ route('alat.qr-kalibrasi', $item->alat_id) }}" class="text-decoration-none text-primary" title="Buka Detail & QR Alat">
+                                    {{ $item->nama_alat }} <i class="fas fa-external-link-alt ms-1" style="font-size: 0.6rem;"></i>
+                                </a>
+                            </td>
                             <td><code class="fw-bold">{{ $item->kode_alat }}</code></td>
                             <td class="text-start">{{ $item->merk_tipe ?? '-' }}</td>
                             <td>{{ $item->no_seri ?? '-' }}</td>

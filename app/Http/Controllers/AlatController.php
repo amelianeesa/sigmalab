@@ -7,6 +7,9 @@ use App\Models\RiwayatKalibrasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Models\ItemPemeliharaan;
+use App\Models\LogPemeliharaan;
+use Illuminate\Support\Facades\Auth;
 
 class AlatController extends Controller
 {
@@ -85,6 +88,7 @@ class AlatController extends Controller
             'range_kapasitas' => 'nullable|string|max:100',
             'faktor_koreksi' => 'nullable|string|max:100',
             'signifikan' => 'nullable|in:ya,tidak',
+            'catatan_evaluasi' => 'nullable|string',
         ]);
 
         DB::transaction(function () use ($request) {
@@ -100,18 +104,21 @@ class AlatController extends Controller
                 'unit_kerja_pemilik' => $request->unit_kerja_pemilik,
             ]);
 
-            RiwayatKalibrasi::create([
-                'alat_id' => $alat->alat_id,
-                'jenis_kalibrasi' => $request->jenis_kalibrasi,
-                'no_sertifikat' => $request->no_sertifikat,
-                'interval_kalibrasi' => $request->interval_kalibrasi,
-                'tgl_kalibrasi' => $request->tgl_kalibrasi,
-                'tgl_akhir' => $request->tgl_akhir,
-                'lembaga_kalibrasi' => $request->lembaga_kalibrasi,
-                'range_kapasitas' => $request->range_kapasitas,
-                'faktor_koreksi' => $request->faktor_koreksi,
-                'signifikan' => $request->signifikan,
-            ]);
+            if ($request->filled('tgl_kalibrasi')) {
+                RiwayatKalibrasi::create([
+                    'alat_id' => $alat->alat_id,
+                    'jenis_kalibrasi' => $request->jenis_kalibrasi,
+                    'no_sertifikat' => $request->no_sertifikat,
+                    'interval_kalibrasi' => $request->interval_kalibrasi,
+                    'tgl_kalibrasi' => $request->tgl_kalibrasi,
+                    'tgl_akhir' => $request->tgl_akhir,
+                    'lembaga_kalibrasi' => $request->lembaga_kalibrasi,
+                    'range_kapasitas' => $request->range_kapasitas,
+                    'faktor_koreksi' => $request->faktor_koreksi,
+                    'signifikan' => $request->signifikan ?? 'tidak',
+                    'catatan_evaluasi' => $request->catatan_evaluasi,
+                ]);
+            }
         });
 
         return redirect()->route('alat.index')->with('success', 'Data alat beserta informasi kalibrasinya berhasil ditambahkan.');
@@ -150,6 +157,7 @@ class AlatController extends Controller
             'range_kapasitas' => 'nullable|string|max:100',
             'faktor_koreksi' => 'nullable|string|max:100',
             'signifikan' => 'nullable|in:ya,tidak',
+            'catatan_evaluasi' => 'nullable|string',
         ]);
 
         DB::transaction(function () use ($request, $alat) {
@@ -175,14 +183,17 @@ class AlatController extends Controller
                 'lembaga_kalibrasi' => $request->lembaga_kalibrasi,
                 'range_kapasitas' => $request->range_kapasitas,
                 'faktor_koreksi' => $request->faktor_koreksi,
-                'signifikan' => $request->signifikan,
+                'signifikan' => $request->signifikan ?? 'tidak',
+                'catatan_evaluasi' => $request->catatan_evaluasi,
             ];
 
-            if ($kalibrasiTerakhir) {
-                $kalibrasiTerakhir->update($dataKalibrasi);
-            } else {
-                $dataKalibrasi['alat_id'] = $alat->alat_id;
-                RiwayatKalibrasi::create($dataKalibrasi);
+            if ($request->filled('tgl_kalibrasi')) {
+                if ($kalibrasiTerakhir) {
+                    $kalibrasiTerakhir->update($dataKalibrasi);
+                } else {
+                    $dataKalibrasi['alat_id'] = $alat->alat_id;
+                    RiwayatKalibrasi::create($dataKalibrasi);
+                }
             }
         });
 
@@ -198,5 +209,137 @@ class AlatController extends Controller
         $alat->delete();
 
         return redirect()->route('alat.index')->with('success', 'Data alat berhasil dihapus.');
+    }
+
+    public function showQrKalibrasi($id)
+    {
+        $alat = Alat::with(['riwayatKalibrasi' => function($query) {
+            $query->orderBy('tgl_kalibrasi', 'asc');
+        }])->findOrFail($id);
+
+        return view('alat.qr-kalibrasi', compact('alat'));
+    }
+
+    public function storeQrKalibrasi(Request $request, $id)
+    {
+        $request->validate([
+            'jenis_kalibrasi' => 'required|in:internal,eksternal',
+            'no_sertifikat' => 'required|string|max:100',
+            'interval_kalibrasi' => 'required|string|max:50',
+            'tgl_kalibrasi' => 'required|date',
+            'tgl_akhir' => 'required|date|after_or_equal:tgl_kalibrasi',
+            'lembaga_kalibrasi' => 'required|string|max:150',
+            'range_kapasitas' => 'nullable|string|max:100',
+            'faktor_koreksi' => 'nullable|string|max:100',
+            'signifikan' => 'required|in:ya,tidak',
+            'catatan_evaluasi' => 'nullable|string',
+        ]);
+
+        RiwayatKalibrasi::create([
+            'alat_id' => $id,
+            'jenis_kalibrasi' => $request->jenis_kalibrasi,
+            'no_sertifikat' => $request->no_sertifikat,
+            'interval_kalibrasi' => $request->interval_kalibrasi,
+            'tgl_kalibrasi' => $request->tgl_kalibrasi,
+            'tgl_akhir' => $request->tgl_akhir,
+            'lembaga_kalibrasi' => $request->lembaga_kalibrasi,
+            'range_kapasitas' => $request->range_kapasitas,
+            'faktor_koreksi' => $request->faktor_koreksi,
+            'signifikan' => $request->signifikan,
+            'catatan_evaluasi' => $request->catatan_evaluasi,
+        ]);
+
+        return redirect()->route('alat.qr-kalibrasi', $id)->with('success', 'Data riwayat kalibrasi baru berhasil ditambahkan!');
+    }
+
+    public function pemeliharaanBulanan(Request $request, $id)
+    {
+        $alat = Alat::with('itemPemeliharaan')->findOrFail($id);
+        $bulan = $request->input('bulan', date('m'));
+        $tahun = $request->input('tahun', date('Y'));
+
+        $namaPetugasLogin = Auth::user()->name;
+        $logs = LogPemeliharaan::where('alat_id', $id)
+            ->whereYear('tanggal', $tahun)
+            ->whereMonth('tanggal', $bulan)
+            ->get()
+            ->keyBy(function($item) {
+                return $item->item_id . '_' . date('j', strtotime($item->tanggal));
+            });
+
+        return view('alat.pemeliharaan', compact('alat', 'bulan', 'tahun', 'logs', 'namaPetugasLogin'));
+    }
+
+    public function updatePemeliharaanHarian(Request $request, $id)
+    {
+        $request->validate([
+            'tanggal' => 'required|date',
+        ]);
+
+        $tanggal = $request->tanggal;
+
+        if ($request->has('item_id')) {
+            $request->validate([
+                'item_id' => 'required|exists:item_pemeliharaan,item_id',
+                'status' => 'required|boolean'
+            ]);
+
+            LogPemeliharaan::updateOrCreate(
+                [
+                    'alat_id' => $id,
+                    'item_id' => $request->item_id,
+                    'tanggal' => $tanggal,
+                ],
+                [
+                    'status' => $request->status,
+                    'petugas' => Auth::user()->name
+                ]
+            );
+
+            return response()->json(['success' => true, 'message' => 'Status pemeliharaan diperbarui.']);
+        }
+
+        if ($request->has('tindakan') || $request->has('petugas')) {
+            LogPemeliharaan::where('alat_id', $id)
+                ->whereDate('tanggal', $tanggal)
+                ->update([
+                    'tindakan' => $request->tindakan,
+                    'petugas' => $request->petugas
+                ]);
+
+            return response()->json(['success' => true, 'message' => 'Tindakan & petugas diperbarui.']);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Data tidak valid.'], 400);
+    }
+
+    public function editItemPemeliharaan($id)
+    {
+        $alat = Alat::with('itemPemeliharaan')->findOrFail($id);
+        return view('alat.edit-item-pemeliharaan', compact('alat'));
+    }
+
+    public function updateItemPemeliharaan(Request $request, $id)
+    {
+        $request->validate([
+            'items' => 'required|array',
+            'items.*.nomor_urut' => 'required|integer|min:1',
+            'items.*.nama_pemeliharaan' => 'nullable|string|max:255',
+        ]);
+
+        ItemPemeliharaan::where('alat_id', $id)->delete();
+
+        foreach ($request->items as $item) {
+            if (!empty($item['nama_pemeliharaan'])) {
+                ItemPemeliharaan::create([
+                    'alat_id' => $id,
+                    'nomor_urut' => $item['nomor_urut'],
+                    'nama_pemeliharaan' => $item['nama_pemeliharaan'],
+                ]);
+            }
+        }
+
+        return redirect()->route('alat.pemeliharaan', $id)
+            ->with('success', 'Daftar jenis pemeliharaan berhasil diperbarui!');
     }
 }

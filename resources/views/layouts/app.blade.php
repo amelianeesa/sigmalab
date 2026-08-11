@@ -55,7 +55,6 @@
             color: #fff;
         }
 
-        /* Sidebar Responsive Toggle CSS */
         body.sidebar-toggled #sidebar { transform: translateX(-100%); }
         body.sidebar-toggled #content { margin-left: 0; }
         body.sidebar-toggled .top-navbar { margin-left: 0; }
@@ -140,21 +139,21 @@
             
             @modul('alat')
             <li class="{{ request()->is('alat*') ? 'active' : '' }}">
-                <a href="{{ route('alat.index') ?? '#' }}"><i class="fas fa-tools"></i> Aset & Kalibrasi</a>
+                <a href="{{ route('alat.index') ?? '#' }}"><i class="fas fa-tools"></i> Aset</a>
             </li>
             @endmodul
 
             @modul('barang')
             <li class="{{ request()->is('barang*') ? 'active' : '' }}">
-                <a href="{{ route('barang.index') }}"><i class="fas fa-boxes"></i> Inventori Barang</a>
+                <a href="{{ route('barang.index') }}"><i class="fas fa-boxes"></i> Inventori</a>
             </li>
             @endmodul
 
-            @modul('pengadaan')
+            {{-- @modul('pengadaan')
             <li class="{{ request()->is('pengadaan*') ? 'active' : '' }}">
-                <a href="{{ route('pengadaan.index') ?? '#' }}"><i class="fas fa-shopping-cart"></i> Pengadaan Bahan</a>
+                <a href="{{ route('pengadaan.index') ?? '#' }}"><i class="fas fa-shopping-cart"></i> Pengadaan</a>
             </li>
-            @endmodul
+            @endmodul --}}
 
             @modul('sdm')
             <li class="{{ request()->is('sdm*') ? 'active' : '' }}"><a href="{{ route('sdm.index') ?? '#' }}"><i class="fas fa-users"></i> SDM & Kompetensi</a></li>

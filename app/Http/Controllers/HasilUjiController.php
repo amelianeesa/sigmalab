@@ -68,7 +68,6 @@ class HasilUjiController extends Controller
         $parameter = ParameterUji::findOrFail($validated['parameter_uji_id']);
         $nilaiHasil = null;
 
-        // Jika menggunakan form kalkulasi dinamis (variabel dikirim)
         if (!empty($validated['variabel']) && !empty($parameter->rumus_kalkulasi)) {
             try {
                 $expressionLanguage = new \Symfony\Component\ExpressionLanguage\ExpressionLanguage();
@@ -83,7 +82,6 @@ class HasilUjiController extends Controller
             $nilaiHasil = (float) $validated['nilai_hasil'];
         }
 
-        // Otomatis tentukan status inlier/outlier
         if ($nilaiHasil >= $parameter->batas_bawah && $nilaiHasil <= $parameter->batas_atas) {
             $statusBerketerimaan = 'inlier';
         } else {
@@ -117,5 +115,4 @@ class HasilUjiController extends Controller
         return view('hasil-uji.show', compact('hasilUji'));
     }
 
-    // Tidak ada edit, update, destroy — insert only
 }

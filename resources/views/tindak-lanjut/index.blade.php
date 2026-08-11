@@ -1,6 +1,21 @@
 @extends('layouts.app')
 
 @section('content')
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Riwayat Tindak Lanjut</h1>
+        @can('create', App\Models\RiwayatTindakLanjut::class)
+        <a href="{{ route('tindak-lanjut.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="fas fa-plus fa-sm text-white-50"></i> Catat Tindak Lanjut Baru
+        </a>
+        @endcan
+    </div>
+    <div>        
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="{{ url('dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Tindak Lanjut</li>
+        </ol>
+    </div>
     <div class="container-fluid">
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <div>

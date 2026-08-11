@@ -69,7 +69,14 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('kegiatan', KegiatanController::class);
     Route::resource('hasil-uji', HasilUjiController::class)->only(['store', 'show']);
     Route::resource('tindak-lanjut', RiwayatTindakLanjutController::class)->only(['index', 'create', 'store', 'show']);
+    
+    Route::get('/alat/{id}/qr-kalibrasi', [AlatController::class, 'showQrKalibrasi'])->name('alat.qr-kalibrasi');
+    Route::post('/alat/{id}/qr-kalibrasi', [AlatController::class, 'storeQrKalibrasi'])->name('alat.store-qr-kalibrasi');
 
+    Route::get('/alat/{id}/pemeliharaan', [AlatController::class, 'pemeliharaanBulanan'])->name('alat.pemeliharaan');
+    Route::post('/alat/{id}/pemeliharaan/update', [AlatController::class, 'updatePemeliharaanHarian'])->name('alat.pemeliharaan.update');
+    Route::get('/alat/{id}/item-pemeliharaan', [AlatController::class, 'editItemPemeliharaan'])->name('alat.item-pemeliharaan.edit');
+    Route::post('/alat/{id}/item-pemeliharaan', [AlatController::class, 'updateItemPemeliharaan'])->name('alat.item-pemeliharaan.update');
     // Reporting
     Route::get('reporting', [ReportingController::class, 'index'])->name('reporting.index');
     Route::get('reporting/pdf', [ReportingController::class, 'exportPdf'])->name('reporting.pdf');

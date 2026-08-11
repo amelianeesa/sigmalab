@@ -26,7 +26,9 @@ class BarangController extends Controller
             $query->where('kondisi', $filterKondisi);
         }
 
-        $barang = $query->get();
+        // UBAH DARI $query->get(); MENJADI DIURUTKAN DARI YANG TERBARU
+        $barang = $query->latest()->get(); 
+        // Atau bisa juga menggunakan: $query->orderBy('barang_id', 'desc')->get();
 
         return view('barang.index', compact('barang', 'search', 'filterKondisi'));
     }
@@ -56,6 +58,10 @@ class BarangController extends Controller
         $saldoAwal = $data['saldo_awal'] ?? 0;
         $penerimaan = $data['penerimaan'] ?? 0;
         $pengeluaran = $data['pengeluaran'] ?? 0;
+
+        $data['saldo_awal'] = $saldoAwal;
+        $data['penerimaan'] = $penerimaan;
+        $data['pengeluaran'] = $pengeluaran;
         $data['saldo_akhir'] = ($saldoAwal + $penerimaan) - $pengeluaran;
 
         Barang::create($data);
@@ -90,19 +96,28 @@ class BarangController extends Controller
         $saldoAwal = $data['saldo_awal'] ?? 0;
         $penerimaan = $data['penerimaan'] ?? 0;
         $pengeluaran = $data['pengeluaran'] ?? 0;
+
+        $data['saldo_awal'] = $saldoAwal;
+        $data['penerimaan'] = $penerimaan;
+        $data['pengeluaran'] = $pengeluaran;
         $data['saldo_akhir'] = ($saldoAwal + $penerimaan) - $pengeluaran;
 
         $barang->update($data);
 
-        return redirect()->route('barang.index')->with('success', 'Data barang persediaan berhasil diperbarui.');
+        return redirect()->route('barang.index')->with('success', 'Data barang persediaan berhasil diperbarui');
     }
 
     public function destroy($id)
     {
         $barang = Barang::findOrFail($id);
+        if ($barang->transaksiBarang()->count() > 0 || $barang->permintaanPengadaan()->count() > 0) {
+            return redirect()->route('barang.index')
+                ->with('error', 'Data barang tidak bisa dihapus karena masih memiliki riwayat transaksi atau permintaan pengadaan!');
+        }
+
         $barang->delete();
 
-        return redirect()->route('barang.index')->with('success', 'Data barang persediaan berhasil dihapus.');
+        return redirect()->route('barang.index')->with('success', 'Data barang persediaan berhasil dihapus');
     }
 
     public function printPeriode(Request $request)
@@ -111,12 +126,8 @@ class BarangController extends Controller
         $tahun = $request->input('tahun');
 
         $query = Barang::query();
-
-        // Di sini asumsikan kita menampilkan stok barang pada periode yang dipilih.
-        // Jika ada tabel transaksi (seperti TransaksiBarang), idealnya kita hitung mutasi, 
-        // tapi jika tidak ada, kita tampilkan data barang yang ada.
         
-        $barang = $query->get();
+        $barang = $query->latest()->get();
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('barang.cetak-periode', compact('barang', 'bulan', 'tahun'));
         $pdf->setPaper('A4', 'landscape');

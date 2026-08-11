@@ -18,6 +18,14 @@
             <i class="fas fa-file-pdf fa-sm text-white-50"></i> Export Laporan QC (PDF)
         </a>
     </div>
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url('dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Reporting</li>
+            </ol>
+        </nav>
+    </div>
 
     <div class="row">
         <div class="col-xl-3 col-md-6 mb-4">
