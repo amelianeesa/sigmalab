@@ -15,6 +15,7 @@ class Barang extends Model
     protected $table = 'barang';
     protected $primaryKey = 'barang_id';
 
+    protected $guarded = [];
     protected $fillable = [
         'nama_barang',
         'satuan',

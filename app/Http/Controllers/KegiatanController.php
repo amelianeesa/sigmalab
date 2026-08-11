@@ -80,19 +80,17 @@ class KegiatanController extends Controller
             $kegiatan = Kegiatan::create([
                 'nama_kegiatan' => $validated['nama_kegiatan'],
                 'jenis_kegiatan' => $validated['jenis_kegiatan'],
-                'kode_sampel' => $this->generateKodeSampel(), // Selalu generate saat store untuk mencegah duplikasi
+                'kode_sampel' => $this->generateKodeSampel(), 
 
                 'tanggal_kegiatan' => $validated['tanggal_kegiatan'],
                 'status_kegiatan' => $validated['status_kegiatan'],
                 'dibuat_oleh' => Auth::id(),
             ]);
 
-            // Attach alat
             if (!empty($validated['alat_ids'])) {
                 $kegiatan->alatDigunakan()->attach($validated['alat_ids']);
             }
 
-            // Attach personil with peran
             if (!empty($validated['personil_ids'])) {
                 $syncData = [];
                 foreach ($validated['personil_ids'] as $index => $personilId) {
@@ -102,7 +100,6 @@ class KegiatanController extends Controller
                 $kegiatan->personilTerlibat()->attach($syncData);
             }
 
-            // Attach barang dan catat transaksi
             if (!empty($validated['barang_ids'])) {
                 foreach ($validated['barang_ids'] as $barangId) {
                     $jumlah = (float) $request->input("barang_jumlah.{$barangId}", 0);
@@ -187,10 +184,8 @@ class KegiatanController extends Controller
                 'status_kegiatan' => $validated['status_kegiatan'],
             ]);
 
-            // Sync alat
             $kegiatan->alatDigunakan()->sync($validated['alat_ids'] ?? []);
 
-            // Sync personil with peran
             $syncData = [];
             if (!empty($validated['personil_ids'])) {
                 foreach ($validated['personil_ids'] as $personilId) {
@@ -200,7 +195,6 @@ class KegiatanController extends Controller
             }
             $kegiatan->personilTerlibat()->sync($syncData);
 
-            // Revert stok barang yang lama
             $oldTransaksis = TransaksiBarang::where('kegiatan_id', $kegiatan->kegiatan_id)->get();
             foreach($oldTransaksis as $t) {
                 $b = $t->barang;
@@ -212,7 +206,6 @@ class KegiatanController extends Controller
             }
             TransaksiBarang::where('kegiatan_id', $kegiatan->kegiatan_id)->delete();
 
-            // Insert stok barang yang baru
             if (!empty($validated['barang_ids'])) {
                 foreach ($validated['barang_ids'] as $barangId) {
                     $jumlah = (float) $request->input("barang_jumlah.{$barangId}", 0);
@@ -246,14 +239,11 @@ class KegiatanController extends Controller
             $kegiatan->alatDigunakan()->detach();
             $kegiatan->personilTerlibat()->detach();
             
-            // Hapus semua tindak lanjut yang terkait dengan hasil uji kegiatan ini
             foreach ($kegiatan->hasilUji as $hasil) {
                 $hasil->tindakLanjut()->delete();
             }
-            // Hapus hasil uji
             $kegiatan->hasilUji()->delete();
 
-            // Revert stok barang yang lama
             $oldTransaksis = TransaksiBarang::where('kegiatan_id', $kegiatan->kegiatan_id)->get();
             foreach($oldTransaksis as $t) {
                 $b = $t->barang;

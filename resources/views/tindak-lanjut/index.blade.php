@@ -10,6 +10,12 @@
         </a>
         @endcan
     </div>
+    <div>        
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="{{ url('dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item active">Tindak Lanjut</li>
+        </ol>
+    </div>
 
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">

@@ -22,7 +22,6 @@ class PengadaanController extends Controller
 
     public function index()
     {
-        // Hanya yang punya akses ke modul 'pengadaan' bisa melihat
         if (!$this->permissionService->userHasAccess(Auth::user(), 'pengadaan', 'lihat') && !$this->permissionService->userHasAccess(Auth::user(), 'pengadaan', 'tambah_ubah') && !$this->permissionService->userHasAccess(Auth::user(), 'pengadaan', 'full')) {
             abort(403, 'Anda tidak memiliki akses ke modul pengadaan ini.');
         }
@@ -88,7 +87,6 @@ class PengadaanController extends Controller
             $pengadaan->catatan_approval = $validated['catatan_approval'];
             $pengadaan->save();
 
-            // Jika status selesai, otomatis tambah saldo_akhir barang lewat penerimaan
             if ($validated['status'] === 'selesai') {
                 $barang = $pengadaan->barang;
                 if ($barang) {

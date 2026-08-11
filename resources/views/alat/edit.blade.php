@@ -74,39 +74,13 @@
 
                 <hr class="my-4">
 
-                <h5 class="text-primary mb-3"><i class="fas fa-certificate"></i> 2. Informasi Kalibrasi Terakhir (Opsional)</h5>
+                <h5 class="text-primary mb-3"><i class="fas fa-certificate"></i> 2. Informasi Kalibrasi Terakhir</h5>
                 
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">No. Sertifikat Kalibrasi / Perijinan</label>
                         <input type="text" name="no_sertifikat" class="form-control @error('no_sertifikat') is-invalid @enderror" value="{{ old('no_sertifikat', optional($kalibrasiTerakhir)->no_sertifikat) }}">
                         @error('no_sertifikat') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Interval Kalibrasi</label>
-                        <input type="text" name="interval_kalibrasi" class="form-control @error('interval_kalibrasi') is-invalid @enderror" value="{{ old('interval_kalibrasi', optional($kalibrasiTerakhir)->interval_kalibrasi) }}">
-                        @error('interval_kalibrasi') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Tanggal Kalibrasi</label>
-                        <input type="date" name="tgl_kalibrasi" class="form-control @error('tgl_kalibrasi') is-invalid @enderror" value="{{ old('tgl_kalibrasi', optional($kalibrasiTerakhir)->tgl_kalibrasi) }}">
-                        @error('tgl_kalibrasi') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Tanggal Berakhirnya Masa Kalibrasi</label>
-                        <input type="date" name="tgl_akhir" class="form-control @error('tgl_akhir') is-invalid @enderror" value="{{ old('tgl_akhir', optional($kalibrasiTerakhir)->tgl_akhir) }}">
-                        @error('tgl_akhir') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Lembaga Kalibrasi</label>
-                        <input type="text" name="lembaga_kalibrasi" class="form-control @error('lembaga_kalibrasi') is-invalid @enderror" value="{{ old('lembaga_kalibrasi', optional($kalibrasiTerakhir)->lembaga_kalibrasi) }}">
-                        @error('lembaga_kalibrasi') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Jenis Kalibrasi</label>
@@ -121,10 +95,36 @@
 
                 <div class="row mb-3">
                     <div class="col-md-4">
+                        <label class="form-label">Tanggal Kalibrasi</label>
+                        <input type="date" name="tgl_kalibrasi" id="tgl_kalibrasi" class="form-control @error('tgl_kalibrasi') is-invalid @enderror" value="{{ old('tgl_kalibrasi', optional($kalibrasiTerakhir)->tgl_kalibrasi) }}">
+                        @error('tgl_kalibrasi') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Interval Kalibrasi</label>
+                        <input type="text" name="interval_kalibrasi" id="interval_kalibrasi" class="form-control @error('interval_kalibrasi') is-invalid @enderror" value="{{ old('interval_kalibrasi', optional($kalibrasiTerakhir)->interval_kalibrasi) }}" autocomplete="off">
+                        @error('interval_kalibrasi') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tanggal Berakhirnya Masa Kalibrasi</label>
+                        <input type="date" name="tgl_akhir" id="tgl_akhir" class="form-control @error('tgl_akhir') is-invalid @enderror" value="{{ old('tgl_akhir', optional($kalibrasiTerakhir)->tgl_akhir) }}">
+                        @error('tgl_akhir') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Lembaga Kalibrasi</label>
+                        <input type="text" name="lembaga_kalibrasi" class="form-control @error('lembaga_kalibrasi') is-invalid @enderror" value="{{ old('lembaga_kalibrasi', optional($kalibrasiTerakhir)->lembaga_kalibrasi) }}">
+                        @error('lembaga_kalibrasi') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-6">
                         <label class="form-label">Range / Kapasitas</label>
                         <input type="text" name="range_kapasitas" class="form-control @error('range_kapasitas') is-invalid @enderror" value="{{ old('range_kapasitas', optional($kalibrasiTerakhir)->range_kapasitas) }}">
                         @error('range_kapasitas') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
+                </div>
+
+                <div class="row mb-3">
                     <div class="col-md-4">
                         <label class="form-label">Faktor Koreksi</label>
                         <input type="text" name="faktor_koreksi" class="form-control @error('faktor_koreksi') is-invalid @enderror" value="{{ old('faktor_koreksi', optional($kalibrasiTerakhir)->faktor_koreksi) }}">
@@ -133,11 +133,14 @@
                     <div class="col-md-4">
                         <label class="form-label">Signifikan</label>
                         <select name="signifikan" class="form-select @error('signifikan') is-invalid @enderror">
-                            <option value="">-- Pilih --</option>
                             <option value="tidak" {{ old('signifikan', optional($kalibrasiTerakhir)->signifikan) == 'tidak' ? 'selected' : '' }}>Tidak</option>
                             <option value="ya" {{ old('signifikan', optional($kalibrasiTerakhir)->signifikan) == 'ya' ? 'selected' : '' }}>Ya</option>
                         </select>
                         @error('signifikan') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-12 mt-3">
+                        <label class="form-label">Catatan / Evaluasi Kalibrasi</label>
+                        <textarea name="catatan_evaluasi" class="form-control" rows="3" placeholder="Tuliskan catatan evaluasi atau hasil analisis alat di sini...">{{ old('catatan_evaluasi', optional($kalibrasiTerakhir)->catatan_evaluasi) }}</textarea>
                     </div>
                 </div>
 
@@ -149,4 +152,107 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const tglKalibrasiInput = document.getElementById('tgl_kalibrasi');
+    const intervalInput = document.getElementById('interval_kalibrasi');
+    const tglAkhirInput = document.getElementById('tgl_akhir');
+    let isManualEdit = false;
+
+    function updateMinTanggalAkhir() {
+        if (tglKalibrasiInput.value) {
+            tglAkhirInput.min = tglKalibrasiInput.value;
+            if (tglAkhirInput.value && tglAkhirInput.value < tglKalibrasiInput.value) {
+                tglAkhirInput.value = '';
+            }
+        }
+    }
+
+    function hitungTanggalAkhir() {
+        if (isManualEdit) return;
+        const tglVal = tglKalibrasiInput.value;
+        const intervalVal = intervalInput.value.trim().toLowerCase();
+
+        if (!tglVal || !intervalVal) return;
+
+        let tanggal = new Date(tglVal);
+        if (isNaN(tanggal.getTime())) return;
+
+        const match = intervalVal.match(/(\d+)\s*(tahun|bulan|hari)/);
+        if (!match) return;
+
+        const jumlah = parseInt(match[1]);
+        const satuan = match[2];
+
+        if (satuan === 'tahun') {
+            tanggal.setFullYear(tanggal.getFullYear() + jumlah);
+        } else if (satuan === 'bulan') {
+            tanggal.setMonth(tanggal.getMonth() + jumlah);
+        } else if (satuan === 'hari') {
+            tanggal.setDate(tanggal.getDate() + jumlah);
+        }
+
+        let tahun = tanggal.getFullYear();
+        let bulan = String(tanggal.getMonth() + 1).padStart(2, '0');
+        let hari = String(tanggal.getDate()).padStart(2, '0');
+
+        tglAkhirInput.value = `${tahun}-${bulan}-${hari}`;
+    }
+
+    function hitungInterval() {
+        const tglMulaiVal = tglKalibrasiInput.value;
+        const tglAkhirVal = tglAkhirInput.value;
+
+        if (!tglMulaiVal || !tglAkhirVal) return;
+
+        let start = new Date(tglMulaiVal);
+        let end = new Date(tglAkhirVal);
+
+        if (end <= start) return;
+
+        isManualEdit = true;
+        let diffYears = end.getFullYear() - start.getFullYear();
+        let diffMonths = end.getMonth() - start.getMonth() + (diffYears * 12);
+        let diffDays = Math.floor((end - start) / (1000 * 60 * 60 * 24));
+
+        if (diffMonths >= 12 && diffMonths % 12 === 0) {
+            let tahun = diffMonths / 12;
+            intervalInput.value = tahun + " Tahun";
+        } else if (diffMonths > 0) {
+            intervalInput.value = diffMonths + " Bulan";
+        } else {
+            intervalInput.value = diffDays + " Hari";
+        }
+        isManualEdit = false;
+    }
+
+    tglKalibrasiInput.addEventListener('change', function() {
+        updateMinTanggalAkhir();
+        if (tglAkhirInput.value) {
+            hitungInterval();
+        } else {
+            hitungTanggalAkhir();
+        }
+    });
+
+    intervalInput.addEventListener('input', function() {
+        isManualEdit = false;
+        hitungTanggalAkhir();
+    });
+
+    tglAkhirInput.addEventListener('change', function() {
+        if (tglKalibrasiInput.value && tglAkhirInput.value < tglKalibrasiInput.value) {
+            alert("Tanggal berakhir tidak boleh lebih awal dari tanggal kalibrasi!");
+            tglAkhirInput.value = '';
+            return;
+        }
+        hitungInterval();
+    });
+
+    updateMinTanggalAkhir();
+});
+</script>
+@endpush
 @endsection

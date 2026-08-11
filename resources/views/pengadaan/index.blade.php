@@ -6,6 +6,11 @@
         <div>
             <h2 class="fw-bold text-dark mb-1">Pengadaan Bahan / Barang</h2>
             <p class="text-muted mb-0">Manajemen permintaan pengadaan barang dan persetujuan Kabid Dukungan Bisnis.</p>
+            <ol class="breadcrumb mb-4">
+                <li class="breadcrumb-item"><a href="{{ url('dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url('barang') }}">Inventori Barang</a></li>
+                <li class="breadcrumb-item active">Pengadaan</li>
+            </ol>
         </div>
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahPengadaanModal">
             <i class="fas fa-plus me-1"></i> Ajukan Pengadaan

@@ -47,6 +47,10 @@ class Alat extends Model
             ->dontSubmitEmptyLogs()
             ->setDescriptionForEvent(fn(string $eventName) => "Data alat telah di-{$eventName}");
     }
+    public function itemPemeliharaan()
+    {
+        return $this->hasMany(ItemPemeliharaan::class, 'alat_id', 'alat_id')->orderBy('nomor_urut');
+    }
 }
 
 

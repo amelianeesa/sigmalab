@@ -15,7 +15,7 @@
     @else
         <div class="mb-4">
             <h2 class="fw-bold text-dark mb-1">Dashboard Utama</h2>
-            <p class="text-muted mb-0">Pilih fitur yang ingin Anda gunakan untuk mengelola sistem laboratorium.</p>
+            <p class="text-muted mb-0">Pilih fitur yang ingin Anda gunakan untuk mengelola sistem laboratorium</p>
         </div>
 
         <div class="row g-4">
@@ -46,7 +46,7 @@
                                 <i class="bi bi-gear-wide-connected"></i>
                             </div>
                             <div>
-                                <h5 class="fw-semibold mb-1 text-dark">Alat dan Kalibrasi</h5>
+                                <h5 class="fw-semibold mb-1 text-dark">Aset</h5>
                                 <p class="text-muted small mb-0">Kelola data alat laboratorium dan jadwal kalibrasi.</p>
                             </div>
                         </div>
@@ -64,7 +64,7 @@
                                 <i class="bi bi-box-seam"></i>
                             </div>
                             <div>
-                                <h5 class="fw-semibold mb-1 text-dark">Inventori Bahan</h5>
+                                <h5 class="fw-semibold mb-1 text-dark">Inventori</h5>
                                 <p class="text-muted small mb-0">Pengelolaan stok bahan kimia, reagen, dan bahan pendukung.</p>
                             </div>
                         </div>
@@ -79,7 +79,7 @@
                                 <i class="bi bi-cart-plus"></i>
                             </div>
                             <div>
-                                <h5 class="fw-semibold mb-1 text-dark">Pengadaan Bahan</h5>
+                                <h5 class="fw-semibold mb-1 text-dark">Pengadaan</h5>
                                 <p class="text-muted small mb-0">Permintaan stok dan approval pengadaan barang.</p>
                             </div>
                         </div>

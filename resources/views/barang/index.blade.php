@@ -1,5 +1,24 @@
 @extends('layouts.app')
 
+@push('styles')
+<style>
+    .card-header-custom {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+    .table-header-custom {
+        background-color: #212529;
+        color: white;
+    }
+    .table-responsive-custom {
+        font-size: 0.75rem;
+    }
+    .badge-custom-size {
+        font-size: 0.65rem;
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="container-fluid px-4">
     <h1 class="mt-4">Laporan Inventori Barang Persediaan (Stock)</h1>
@@ -33,13 +52,13 @@
             @if($barangMenipisCount > 0)
                 Terdapat <strong>{{ $barangMenipisCount }} barang</strong> yang <strong>Stok Menipis</strong>. 
             @endif
-            Mohon segera lakukan pengecekan.
+            Mohon segera lakukan pengecekan
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div><i class="fas fa-boxes me-1"></i> Data Barang Persediaan & Sisa Stock</div>
             <div>
                 <button type="button" class="btn btn-success btn-sm me-1" data-bs-toggle="modal" data-bs-target="#cetakPeriodeModal">
@@ -72,8 +91,8 @@
             </form>
 
             <div class="table-responsive">
-                <table class="table table-bordered table-striped align-middle text-center" style="font-size: 0.75rem;">
-                    <thead class="table-dark align-middle">
+                <table class="table table-bordered table-striped align-middle text-center table-responsive-custom">
+                    <thead class="table-header-custom align-middle">
                         <tr>
                             <th rowspan="2" style="width: 35px;">No.</th>
                             <th rowspan="2">Nama Barang</th>
@@ -120,9 +139,13 @@
                             <td class="fw-bold {{ $isHabis ? 'text-danger' : '' }}">
                                 {{ number_format($saldoAkhir, 0, ',', '.') }}
                                 @if($isHabis)
-                                    <span class="badge bg-danger mt-1 d-block" style="font-size: 0.65rem;"><i class="fas fa-times-circle"></i> Habis</span>
+                                    <a href="{{ route('pengadaan.index', $item->pengadaan_id ?? 1) }}" class="badge bg-danger mt-1 d-block text-decoration-none text-white shadow-sm badge-custom-size" title="Klik untuk atur stok barang">
+                                        <i class="fas fa-times-circle"></i> Habis
+                                    </a>
                                 @elseif($isMenipis)
-                                    <span class="badge bg-warning text-dark mt-1 d-block" style="font-size: 0.65rem;"><i class="fas fa-exclamation-triangle"></i> Stok Menipis</span>
+                                    <a href="{{ route('pengadaan.index', $item->pengadaan_id ?? 1) }}" class="badge bg-warning text-dark mt-1 d-block text-decoration-none shadow-sm badge-custom-size" title="Klik untuk atur stok barang">
+                                        <i class="fas fa-exclamation-triangle"></i> Stok Menipis
+                                    </a>
                                 @endif
                             </td>
                             <td>Rp {{ number_format($item->harga_rata, 2, ',', '.') }}</td>
@@ -158,7 +181,6 @@
     </div>
 </div>
 
-<!-- Modal Cetak Periode -->
 <div class="modal fade" id="cetakPeriodeModal" tabindex="-1" aria-labelledby="cetakPeriodeModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -202,6 +224,7 @@
     </div>
 </div>
 
+@push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 function confirmDelete(button) {
@@ -240,4 +263,5 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 </script>
+@endpush
 @endsection

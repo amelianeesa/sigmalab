@@ -2,7 +2,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Personil; // Sesuaikan dengan model Anda
+use App\Models\Personil; 
 use App\Models\KompetensiPersonil;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -187,7 +187,6 @@ class SdmController extends Controller
         abort_if(Auth::user()->role->nama_role === 'Admin Lab', 403, 'Admin Lab tidak diizinkan menghapus data personil.');
 
         $personil = Personil::findOrFail($id);
-        // Soft delete sesuai rancangan database
         $personil->update(['status_aktif' => false]);
 
         return redirect()->route('sdm.index')->with('success', 'Data personil dinonaktifkan (Soft Delete).');
