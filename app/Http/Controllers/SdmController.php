@@ -99,7 +99,7 @@ class SdmController extends Controller
 
         $cvName = null;
         if ($request->hasFile('file_cv')) {
-            $cvName = time() . '_' . $request->file_cv->getClientOriginalName();
+            $cvName = $request->file('file_cv')->hashName();
             Storage::disk('local')->putFileAs('public/uploads/cv', $request->file('file_cv'), $cvName);
         }
 
@@ -163,7 +163,7 @@ class SdmController extends Controller
             if ($personil->file_cv && Storage::disk('local')->exists('public/uploads/cv/' . $personil->file_cv)) {
                 Storage::disk('local')->delete('public/uploads/cv/' . $personil->file_cv);
             }
-            $cvName = time() . '_' . $request->file_cv->getClientOriginalName();
+            $cvName = $request->file('file_cv')->hashName();
             Storage::disk('local')->putFileAs('public/uploads/cv', $request->file('file_cv'), $cvName);
             $personil->file_cv = $cvName;
         }
@@ -200,7 +200,14 @@ class SdmController extends Controller
         abort_if(Auth::user()->role->nama_role === 'Admin Lab', 403, 'Admin Lab tidak diizinkan menghapus data personil.');
 
         $personil = Personil::findOrFail($id);
-        $personil->update(['status_aktif' => false]);
+        
+        DB::transaction(function () use ($personil) {
+            // Soft delete sesuai rancangan database
+            $personil->update(['status_aktif' => false]);
+            
+            // Nonaktifkan akun user yang terkait
+            User::where('personil_id', $personil->personil_id)->update(['status_aktif' => false]);
+        });
 
         return redirect()->route('sdm.index')->with('success', 'Data personil dinonaktifkan (Soft Delete).');
     }
@@ -208,7 +215,13 @@ class SdmController extends Controller
     public function activate($id)
     {
         $personil = Personil::findOrFail($id);
-        $personil->update(['status_aktif' => true]);
+        
+        DB::transaction(function () use ($personil) {
+            $personil->update(['status_aktif' => true]);
+            
+            // Aktifkan kembali akun user yang terkait
+            User::where('personil_id', $personil->personil_id)->update(['status_aktif' => true]);
+        });
 
         return redirect()->route('sdm.index')->with('success', 'Personil berhasil diaktifkan kembali.');
     }
@@ -262,12 +275,14 @@ class SdmController extends Controller
     public function kompetensiDetail($id)
     {
         $personil = Personil::with(['kompetensi' => fn($query) => $query->orderByDesc('tanggal_terbit')])->findOrFail($id);
+        
+        $parameterList = \App\Models\ParameterUji::where('status_aktif', true)->orderBy('nama_parameter')->get();
 
         $personil->kompetensi->each(function ($komp) {
             $komp->status = $this->resolveStatusSertifikasi($komp->tanggal_berakhir);
         });
 
-        return view('sdm.kompetensi_detail', compact('personil'));
+        return view('sdm.kompetensi_detail', compact('personil', 'parameterList'));
     }
 
     public function storeKompetensi(Request $request, $id)
@@ -276,6 +291,7 @@ class SdmController extends Controller
 
         $personil = Personil::findOrFail($id);
         $data = $request->validate([
+            'parameter_uji_id' => 'nullable|exists:parameter_uji,parameter_uji_id',
             'jenis_sertifikasi' => 'required|string|max:100',
             'no_sertifikasi' => 'nullable|string|max:100',
             'tanggal_terbit' => 'nullable|date',
@@ -302,6 +318,7 @@ class SdmController extends Controller
         $personil = Personil::findOrFail($id);
         $kompetensi = $personil->kompetensi()->findOrFail($kompetensiId);
         $data = $request->validate([
+            'parameter_uji_id' => 'nullable|exists:parameter_uji,parameter_uji_id',
             'jenis_sertifikasi' => 'required|string|max:100',
             'no_sertifikasi' => 'nullable|string|max:100',
             'tanggal_terbit' => 'nullable|date',
@@ -419,36 +436,39 @@ class SdmController extends Controller
 
     private function buildCompetencyMatrix(?string $kategori): array
     {
-        $personil = Personil::with(['kompetensi'])
+        $personil = Personil::with(['kompetensi.parameterUji'])
             ->where('status_aktif', true)
             ->when($kategori, fn($query) => $query->where('kategori_personil', $kategori))
             ->orderBy('nama')
             ->get();
 
-        $jenisSertifikasiList = $personil
-            ->flatMap(fn(Personil $p) => $p->kompetensi->pluck('jenis_sertifikasi'))
-            ->filter()
-            ->unique()
-            ->sort()
-            ->values();
+        $parameterList = \App\Models\ParameterUji::where('status_aktif', true)->orderBy('nama_parameter')->get();
 
-        $matrix = $personil->map(function (Personil $p) use ($jenisSertifikasiList) {
+        $matrix = $personil->map(function (Personil $p) use ($parameterList) {
             $sel = [];
 
-            foreach ($jenisSertifikasiList as $jenis) {
+            foreach ($parameterList as $parameter) {
                 $terbaru = $p->kompetensi
-                    ->where('jenis_sertifikasi', $jenis)
+                    ->where('parameter_uji_id', $parameter->parameter_uji_id)
                     ->sortByDesc('tanggal_terbit')
                     ->first();
 
-                $sel[$jenis] = $terbaru
+                // Fallback untuk sertifikasi tanpa parameter_uji_id (legacy data)
+                if (!$terbaru) {
+                    $terbaru = $p->kompetensi
+                        ->where('jenis_sertifikasi', $parameter->nama_parameter)
+                        ->sortByDesc('tanggal_terbit')
+                        ->first();
+                }
+
+                $sel[$parameter->nama_parameter] = $terbaru
                     ? ['status' => $this->resolveStatusSertifikasi($terbaru->tanggal_berakhir), 'kompetensi' => $terbaru]
                     : null;
             }
 
-            return ['personil' => $p, 'sel' => $sel];
+            return ['personil' => $p, 'kompetensi' => $sel];
         });
 
-        return [$matrix, $jenisSertifikasiList];
+        return [$matrix, $parameterList->pluck('nama_parameter')->toArray()];
     }
 }

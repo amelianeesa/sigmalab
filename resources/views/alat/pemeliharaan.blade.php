@@ -27,7 +27,7 @@
                 <a href="{{ route('alat.item-pemeliharaan.edit', $alat->alat_id) }}" class="btn btn-warning btn-sm text-dark fw-bold me-1">
                     <i class="fas fa-list-ol me-1"></i> Atur Jenis Pemeliharaan
                 </a>
-                <a href="{{ route('alat.qr-kalibrasi', $alat->alat_id) }}" class="btn btn-light btn-sm">
+                <a href="{{ route('alat.input-kalibrasi', $alat->alat_id) }}" class="btn btn-light btn-sm">
                     <i class="fas fa-arrow-left me-1"></i> Kembali
                 </a>
             </div>

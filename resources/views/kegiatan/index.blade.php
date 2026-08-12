@@ -2,9 +2,36 @@
 
 @section('content')
 <div class="container-fluid">
+    <!-- Shortcut Navigation Buttons for QC Module -->
+    <div class="d-flex flex-wrap gap-3 mb-4 mt-2">
+        @if(Auth::user()->hasModulAccess('parameter_uji'))
+        <a href="{{ route('parameter-uji.index') }}" class="btn btn-primary rounded-pill px-4 shadow-sm text-white fw-bold" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <i class="fas fa-cogs me-2"></i> Parameter Uji
+        </a>
+        @endif
+        
+        @if(Auth::user()->hasModulAccess('tindak_lanjut'))
+        <a href="{{ route('tindak-lanjut.index') }}" class="btn btn-danger rounded-pill px-4 shadow-sm text-white fw-bold" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <i class="fas fa-exclamation-triangle me-2"></i> Tindak Lanjut Outlier
+        </a>
+        @endif
+        
+        @if(Auth::user()->hasModulAccess('reporting'))
+        <a href="{{ route('reporting.index') }}" class="btn btn-success rounded-pill px-4 shadow-sm text-white fw-bold" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <i class="fas fa-file-excel me-2"></i> Laporan QC
+        </a>
+        @endif
+    </div>
+
     <div class="row mb-3">
         <div class="col-12 d-flex justify-content-between align-items-center">
-            <h1 class="h3 mb-0 text-gray-800">Daftar Kegiatan</h1>
+            <!-- <div>
+                <h1 class="h3 mb-0 text-gray-800">Daftar Kegiatan</h1>
+                <ol class="breadcrumb mb-0 mt-2">
+                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Proses & Hasil</li>
+                </ol>
+            </div> -->
             @can('create', App\Models\Kegiatan::class)
                 <a href="{{ route('kegiatan.create') }}" class="btn btn-primary">
                     <i class="fas fa-plus"></i> Tambah Kegiatan

@@ -1,30 +1,19 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
-    <nav aria-label="breadcrumb">
-                    <h1 class="mt-4">Laporan Quality Control</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-        <li class="breadcrumb-item active">Reporting dan Statistik</li>
-    </ol>
-
-
-    </nav>
-
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Reporting & Statistik</h1>
-        <a href="{{ route('reporting.pdf') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-            <i class="fas fa-file-pdf fa-sm text-white-50"></i> Export Laporan QC (PDF)
-        </a>
-    </div>
-    <div>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ url('dashboard') }}">Dashboard</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Reporting</li>
+<div class="container-fluid px-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 mt-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 fw-bold">Laporan Quality Control</h1>
+            <ol class="breadcrumb mb-0 mt-2">
+                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('kegiatan.index') }}" class="text-decoration-none">Verifikasi Mutu</a></li>
+                <li class="breadcrumb-item active">Laporan QC</li>
             </ol>
-        </nav>
+        </div>
+        <a href="{{ route('reporting.pdf') }}" class="d-none d-sm-inline-block btn btn-primary shadow-sm rounded-3 px-3 py-2">
+            <i class="fas fa-file-pdf fa-sm text-white-50 me-1"></i> Export Laporan QC (PDF)
+        </a>
     </div>
 
     <div class="row">
@@ -93,7 +82,7 @@
                 </div>
             </div>
         </div>
->
+
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">

@@ -3,37 +3,20 @@
 @section('content')
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Riwayat Tindak Lanjut</h1>
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Riwayat Tindak Lanjut</h1>
+            <ol class="breadcrumb mb-0 mt-2">
+                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('kegiatan.index') }}" class="text-decoration-none">Verifikasi Mutu</a></li>
+                <li class="breadcrumb-item active">Tindak Lanjut Outlier</li>
+            </ol>
+        </div>
         @can('create', App\Models\RiwayatTindakLanjut::class)
-        <a href="{{ route('tindak-lanjut.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+        <a href="{{ route('tindak-lanjut.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm mt-2 mt-sm-0">
             <i class="fas fa-plus fa-sm text-white-50"></i> Catat Tindak Lanjut Baru
         </a>
         @endcan
     </div>
-    <div>        
-        <ol class="breadcrumb mb-4">
-            <li class="breadcrumb-item"><a href="{{ url('dashboard') }}">Dashboard</a></li>
-            <li class="breadcrumb-item active">Tindak Lanjut</li>
-        </ol>
-    </div>
-    <div class="container-fluid">
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <div>
-                <h1 class="h3 mb-0 text-gray-800">Riwayat Tindak Lanjut</h1>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0 mt-1 bg-transparent p-0">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Riwayat Tindak Lanjut</li>
-                    </ol>
-                </nav>
-            </div>
-
-            @can('create', App\Models\RiwayatTindakLanjut::class)
-                <a href="{{ route('tindak-lanjut.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm mt-2 mt-sm-0">
-                    <i class="fas fa-plus fa-sm text-white-50"></i> Catat Tindak Lanjut Baru
-                </a>
-            @endcan
-        </div>
 
         <div class="card shadow mb-4">
             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">

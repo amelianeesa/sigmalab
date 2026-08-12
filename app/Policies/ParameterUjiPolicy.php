@@ -37,7 +37,7 @@ class ParameterUjiPolicy
      */
     public function create(User $user): bool
     {
-        if ($user->role->nama_role === \App\Enums\PeranPengguna::ADMIN_LAB->value) return true;
+        if (in_array($user->role->nama_role, [\App\Enums\PeranPengguna::ANALIS->value, \App\Enums\PeranPengguna::KOORDINATOR_LAB->value])) return true;
         return $this->hasFullAccess($user, 'full');
     }
 
@@ -46,7 +46,7 @@ class ParameterUjiPolicy
      */
     public function update(User $user, ParameterUji $parameterUji): bool
     {
-        if ($user->role->nama_role === \App\Enums\PeranPengguna::ADMIN_LAB->value) return true;
+        if (in_array($user->role->nama_role, [\App\Enums\PeranPengguna::ANALIS->value, \App\Enums\PeranPengguna::KOORDINATOR_LAB->value])) return true;
         return $this->hasFullAccess($user, 'full');
     }
 
@@ -55,7 +55,7 @@ class ParameterUjiPolicy
      */
     public function delete(User $user, ParameterUji $parameterUji): bool
     {
-        if ($user->role->nama_role === \App\Enums\PeranPengguna::ADMIN_LAB->value) return true;
+        if (in_array($user->role->nama_role, [\App\Enums\PeranPengguna::ANALIS->value, \App\Enums\PeranPengguna::KOORDINATOR_LAB->value])) return true;
         return $this->hasFullAccess($user, 'full');
     }
 }

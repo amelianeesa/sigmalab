@@ -76,17 +76,17 @@ class RbacTest extends TestCase
     {
         $roleAnalis = Role::create(['nama_role' => 'Analis']);
         $roleKoor = Role::create(['nama_role' => 'Koordinator Laboratorium']);
-        $modulQc = Modul::create(['kode_modul' => 'qc', 'nama_modul' => 'QC']);
+        $modulParamUji = Modul::create(['kode_modul' => 'parameter_uji', 'nama_modul' => 'Parameter Uji']);
         
         HakAkses::create([
             'role_id' => $roleAnalis->roles_id,
-            'modul_id' => $modulQc->modul_id,
+            'modul_id' => $modulParamUji->modul_id,
             'level_akses' => 'tambah_ubah'
         ]);
 
         HakAkses::create([
             'role_id' => $roleKoor->roles_id,
-            'modul_id' => $modulQc->modul_id,
+            'modul_id' => $modulParamUji->modul_id,
             'level_akses' => 'full'
         ]);
 
@@ -95,10 +95,10 @@ class RbacTest extends TestCase
 
         $policy = new \App\Policies\ParameterUjiPolicy();
 
-        // Analis should fail (needs 'full' for Parameter Uji creation, but Analis only has 'tambah_ubah' for qc)
+        // Analis should fail (needs 'full' for Parameter Uji creation, but Analis only has 'tambah_ubah' for parameter_uji)
         $this->assertFalse($policy->create($analis));
 
-        // Koordinator should pass (has 'full' for qc)
+        // Koordinator should pass (has 'full' for parameter_uji)
         $this->assertTrue($policy->create($koor));
     }
 }

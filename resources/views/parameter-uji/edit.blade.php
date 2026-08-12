@@ -54,6 +54,34 @@
                     </div>
                 </div>
 
+                <div class="card bg-light mb-3 border-0">
+                    <div class="card-body py-2">
+                        <p class="mb-2 text-muted fw-bold" style="font-size: 0.85rem;"><i class="fas fa-chart-line"></i> Batas Kontrol Digital (Opsional untuk Control Chart)</p>
+                        <div class="row">
+                            <div class="col">
+                                <label class="form-label" style="font-size: 0.8rem;">LCL (Lower Control)</label>
+                                <input type="number" step="0.0001" name="lcl" class="form-control form-control-sm" value="{{ old('lcl', $parameterUji->lcl ? number_format($parameterUji->lcl, 4, '.', '') : '') }}">
+                            </div>
+                            <div class="col">
+                                <label class="form-label" style="font-size: 0.8rem;">UWL Bawah (Warning)</label>
+                                <input type="number" step="0.0001" name="uwl_bawah" class="form-control form-control-sm" value="{{ old('uwl_bawah', $parameterUji->uwl_bawah ? number_format($parameterUji->uwl_bawah, 4, '.', '') : '') }}">
+                            </div>
+                            <div class="col">
+                                <label class="form-label" style="font-size: 0.8rem;">Mean (Rata-rata)</label>
+                                <input type="number" step="0.0001" name="mean" class="form-control form-control-sm" value="{{ old('mean', $parameterUji->mean ? number_format($parameterUji->mean, 4, '.', '') : '') }}">
+                            </div>
+                            <div class="col">
+                                <label class="form-label" style="font-size: 0.8rem;">UWL Atas (Warning)</label>
+                                <input type="number" step="0.0001" name="uwl_atas" class="form-control form-control-sm" value="{{ old('uwl_atas', $parameterUji->uwl_atas ? number_format($parameterUji->uwl_atas, 4, '.', '') : '') }}">
+                            </div>
+                            <div class="col">
+                                <label class="form-label" style="font-size: 0.8rem;">UCL (Upper Control)</label>
+                                <input type="number" step="0.0001" name="ucl" class="form-control form-control-sm" value="{{ old('ucl', $parameterUji->ucl ? number_format($parameterUji->ucl, 4, '.', '') : '') }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row mb-4">
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold">Metode / Kriteria</label>

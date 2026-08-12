@@ -82,6 +82,20 @@
 
                 <h5 class="text-primary mb-3"><i class="fas fa-certificate"></i> Informasi Kalibrasi Terakhir</h5>
                 
+                <div class="alert alert-primary d-flex align-items-center mb-4 border-primary bg-white shadow-sm" style="border-left: 5px solid #0d6efd !important;">
+                    <i class="fas fa-magic fa-2x me-3 text-primary"></i>
+                    <div class="w-100">
+                        <h6 class="mb-1 fw-bold text-primary">Auto-Fill dari Sertifikat (OCR)</h6>
+                        <p class="mb-2 small text-muted">Unggah dokumen PDF sertifikat kalibrasi untuk mengisi form tanggal dan lembaga kalibrasi secara otomatis.</p>
+                        <div class="input-group input-group-sm w-75">
+                            <input type="file" class="form-control" id="sertifikat_ocr" accept=".pdf">
+                            <button class="btn btn-primary" type="button" id="btn_ocr_scan"><i class="fas fa-search me-1"></i> Pindai Dokumen</button>
+                        </div>
+                        <small class="text-danger d-none mt-1" id="ocr_error"></small>
+                        <small class="text-success d-none mt-1" id="ocr_success"></small>
+                    </div>
+                </div>
+                
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">No. Sertifikat Kalibrasi / Perijinan</label>
@@ -296,3 +310,77 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 @endpush
 @endsection
+
+@push('scripts')
+<script>
+    document.getElementById('btn_ocr_scan').addEventListener('click', function() {
+        let fileInput = document.getElementById('sertifikat_ocr');
+        if (!fileInput.files.length) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Perhatian',
+                text: 'Silakan pilih file PDF Sertifikat Kalibrasi terlebih dahulu.',
+            });
+            return;
+        }
+
+        let formData = new FormData();
+        formData.append('sertifikat', fileInput.files[0]);
+        formData.append('_token', '{{ csrf_token() }}');
+
+        let btn = this;
+        let originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Memindai...';
+        btn.disabled = true;
+        
+        let errorEl = document.getElementById('ocr_error');
+        let successEl = document.getElementById('ocr_success');
+        errorEl.classList.add('d-none');
+        successEl.classList.add('d-none');
+
+        fetch('{{ route('alat.parse-sertifikat') }}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+            
+            if (data.success) {
+                if(data.data.tgl_kalibrasi) document.getElementById('tgl_kalibrasi').value = data.data.tgl_kalibrasi;
+                if(data.data.tgl_akhir) document.getElementById('tgl_akhir').value = data.data.tgl_akhir;
+                if(data.data.sertifikat_oleh) {
+                    let lembaga = document.querySelector('input[name="lembaga_kalibrasi"]');
+                    if(lembaga) lembaga.value = data.data.sertifikat_oleh;
+                }
+                
+                successEl.textContent = 'Berhasil membaca dokumen! Form telah diisi.';
+                successEl.classList.remove('d-none');
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Auto-Fill Berhasil',
+                    text: 'Data berhasil diekstrak dari dokumen PDF. Silakan periksa kembali kebenarannya di kolom input.',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 4000
+                });
+            } else {
+                errorEl.textContent = data.message;
+                errorEl.classList.remove('d-none');
+            }
+        })
+        .catch(err => {
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+            errorEl.textContent = 'Terjadi kesalahan sistem saat menghubungi server.';
+            errorEl.classList.remove('d-none');
+        });
+    });
+</script>
+@endpush

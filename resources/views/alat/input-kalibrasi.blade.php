@@ -131,7 +131,7 @@
                     <h6 class="mb-0"><i class="fas fa-plus-circle me-2"></i> Form Input Pengecekan / Kalibrasi Baru</h6>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('alat.store-qr-kalibrasi', $alat->alat_id) }}" method="POST">
+                    <form action="{{ route('alat.store-input-kalibrasi', $alat->alat_id) }}" method="POST">
                         @csrf
                         <div class="row g-3">
                             <div class="col-md-6">

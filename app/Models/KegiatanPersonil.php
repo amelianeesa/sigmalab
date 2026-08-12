@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class KegiatanPersonil extends Model
 {
+    use SoftDeletes;
     public $incrementing = false;
     public $timestamps = false;
 
@@ -27,3 +29,4 @@ class KegiatanPersonil extends Model
         return $this->belongsTo(Personil::class, 'personil_id', 'personil_id');
     }
 }
+

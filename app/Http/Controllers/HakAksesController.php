@@ -30,25 +30,39 @@ class HakAksesController extends Controller
         $data = $request->input('matrix', []);
         
         DB::transaction(function () use ($data) {
-            DB::table('hak_akses')->delete();
+            $upserts = [];
+            $deleteQueries = DB::table('hak_akses');
+            $hasDeletes = false;
 
-            $inserts = [];
             foreach ($data as $roleId => $modules) {
                 foreach ($modules as $modulId => $levelAkses) {
                     if ($levelAkses !== 'none') {
-                        $inserts[] = [
+                        $upserts[] = [
                             'role_id' => $roleId,
                             'modul_id' => $modulId,
                             'level_akses' => $levelAkses,
-                            'created_at' => now(),
-                            'updated_at' => now(),
                         ];
+                    } else {
+                        if (!$hasDeletes) {
+                            $deleteQueries->where(function ($q) use ($roleId, $modulId) {
+                                $q->where('role_id', $roleId)->where('modul_id', $modulId);
+                            });
+                            $hasDeletes = true;
+                        } else {
+                            $deleteQueries->orWhere(function ($q) use ($roleId, $modulId) {
+                                $q->where('role_id', $roleId)->where('modul_id', $modulId);
+                            });
+                        }
                     }
                 }
             }
 
-            if (!empty($inserts)) {
-                DB::table('hak_akses')->insert($inserts);
+            if (!empty($upserts)) {
+                \App\Models\HakAkses::upsert($upserts, ['role_id', 'modul_id'], ['level_akses']);
+            }
+
+            if ($hasDeletes) {
+                $deleteQueries->delete();
             }
         });
 

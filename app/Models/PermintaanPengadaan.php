@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\LogOptions;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class PermintaanPengadaan extends Model
 {
+    use SoftDeletes;
     use HasFactory, LogsActivity;
 
     protected $table = 'permintaan_pengadaan';
@@ -52,7 +54,7 @@ class PermintaanPengadaan extends Model
         return LogOptions::defaults()
             ->logFillable()
             ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
             ->setDescriptionForEvent(fn(string $eventName) => "Permintaan pengadaan telah di-{$eventName}");
     }
 }
+

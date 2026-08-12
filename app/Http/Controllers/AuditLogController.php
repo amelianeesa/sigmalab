@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Spatie\Activitylog\Models\Activity;
-use Illuminate\Support\Facades\Auth;
 
 class AuditLogController extends Controller
 {

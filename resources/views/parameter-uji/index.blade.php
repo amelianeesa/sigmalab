@@ -4,8 +4,8 @@
 <div class="container-fluid px-4">
     <h1 class="mt-4">Parameter Uji</h1>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ url('dashboard') }}">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('kegiatan.index') }}" class="text-decoration-none">Verifikasi Mutu</a></li>
         <li class="breadcrumb-item active">Parameter Uji</li>
     </ol>
 

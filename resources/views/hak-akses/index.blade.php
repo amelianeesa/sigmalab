@@ -5,7 +5,12 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="fw-bold text-dark mb-1">Manajemen Hak Akses</h2>
-            <p class="text-muted mb-0">Atur kewenangan setiap Role terhadap masing-masing Modul sistem secara dinamis.</p>
+            <ol class="breadcrumb mb-1 mt-2">
+                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('sdm.index') }}" class="text-decoration-none">Personel & Kompetensi</a></li>
+                <li class="breadcrumb-item active">Hak Akses</li>
+            </ol>
+            <p class="text-muted mb-0 mt-2">Atur kewenangan setiap Role terhadap masing-masing Modul sistem secara dinamis.</p>
         </div>
     </div>
 

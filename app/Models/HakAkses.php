@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 
 class HakAkses extends Model
 {
+    use SoftDeletes;
     use HasFactory;
 
     protected $table = 'hak_akses';
@@ -42,3 +44,4 @@ class HakAkses extends Model
         return $this->belongsTo(Modul::class, 'modul_id', 'modul_id');
     }
 }
+

@@ -164,7 +164,7 @@
                         </td>
                         @foreach($jenisSertifikasiList as $jenis)
                             @php
-                                $cell = $row['sel'][$jenis];
+                                $cell = $row['kompetensi'][$jenis] ?? null;
                                 $cssClass = 'belum';
                                 $label = 'Belum Pernah';
                                 $keterangan = '';

@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class RiwayatTindakLanjut extends Model
 {
+    use SoftDeletes;
     use HasFactory;
 
     protected $table = 'riwayat_tindak_lanjut';
@@ -35,3 +37,4 @@ class RiwayatTindakLanjut extends Model
         return $this->belongsTo(User::class, 'ditindaklanjuti_oleh', 'users_id');
     }
 }
+

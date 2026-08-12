@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TransaksiBarang extends Model
 {
+    use SoftDeletes;
     use HasFactory;
 
     protected $table = 'transaksi_barang';
@@ -30,3 +32,4 @@ class TransaksiBarang extends Model
         return $this->belongsTo(Kegiatan::class, 'kegiatan_id', 'kegiatan_id');
     }
 }
+

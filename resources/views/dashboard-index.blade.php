@@ -1,218 +1,141 @@
-@php
-    $useSidebar = auth()->check() && auth()->user()->role && auth()->user()->role->nama_role === 'Admin Aplikasi';
-@endphp
-
 @extends('layouts.app')
 
 @section('content')
 <div class="container-fluid px-4 py-4">
-    @if($useSidebar)
-        <div class="text-center py-5 mt-5">
-            <h1 class="display-5 fw-bold text-sdm-600 mb-3">Selamat Datang di SIGMA-LAB</h1>
-            <p class="lead text-muted">Anda masuk sebagai <strong>Admin Aplikasi</strong>.<br>Silakan gunakan navigasi sidebar di sebelah kiri untuk mengelola sistem.</p>
-            <i class="bi bi-gear-wide-connected text-sdm-600 opacity-25 mt-4 d-inline-block" style="font-size: 8rem;"></i>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Monitoring Center</h2>
+            <p class="text-muted mb-0">Selamat datang, Anda login sebagai <strong class="text-primary">{{ $role }}</strong></p>
         </div>
-    @else
-        <div class="mb-4">
-            <h2 class="fw-bold text-dark mb-1">Dashboard Utama</h2>
-            <p class="text-muted mb-0">Pilih fitur yang ingin Anda gunakan untuk mengelola sistem laboratorium</p>
+    </div>
+
+    <!-- Top Summary Cards -->
+    <div class="row g-4 mb-4">
+        
+        {{-- 1. Peringatan Outlier --}}
+        @modul('tindak_lanjut')
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm border-start border-4 border-danger">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1 fs-7 text-uppercase fw-bold">Outlier (Open)</p>
+                            <h3 class="fw-bold mb-0 text-dark">{{ $outliers }}</h3>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{{ route('tindak-lanjut.index') }}" class="text-decoration-none text-danger small fw-semibold">Lihat Detail <i class="fas fa-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
         </div>
+        @endmodul
 
-        <div class="row g-4">
-            @modul('sdm')
-            <div class="col-12 col-sm-6 col-lg-4">
-                <a href="{{ route('sdm.index') }}" class="text-decoration-none">
-                    <div class="card h-100 border-0 shadow-sm module-card border-start border-4 border-sdm-600">
-                        <div class="card-body d-flex align-items-center gap-3 p-4">
-                            <div class="module-icon bg-icon text-sdm-600">
-                                <i class="bi bi-person-badge"></i>
-                            </div>
-                            <div>
-                                <h5 class="fw-semibold mb-1 text-dark">SDM</h5>
-                                <p class="text-muted small mb-2">Kelola personil, kompetensi, sertifikasi, dan hak akses.</p>
-                            </div>
+        {{-- 2. Kegiatan Berjalan --}}
+        @modul('proses_hasil')
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm border-start border-4 border-info">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1 fs-7 text-uppercase fw-bold">Pengujian Aktif</p>
+                            <h3 class="fw-bold mb-0 text-dark">{{ $kegiatanBerjalan }}</h3>
                         </div>
                     </div>
-                </a>
-            </div>
-            @endmodul
-
-            @modul('alat')
-            <div class="col-12 col-sm-6 col-lg-4">
-                <a href="{{ route('alat.index') }}" class="text-decoration-none">
-                    <div class="card h-100 border-0 shadow-sm module-card border-start border-4 border-sdm-600">
-                        <div class="card-body d-flex align-items-center gap-3 p-4">
-                            <div class="module-icon bg-icon text-sdm-600">
-                                <i class="bi bi-gear-wide-connected"></i>
-                            </div>
-                            <div>
-                                <h5 class="fw-semibold mb-1 text-dark">Aset</h5>
-                                <p class="text-muted small mb-0">Kelola data alat laboratorium dan jadwal kalibrasi.</p>
-                            </div>
-                        </div>
+                    <div class="mt-3">
+                        <a href="{{ route('kegiatan.index') }}" class="text-decoration-none text-info small fw-semibold">Buka Modul QC <i class="fas fa-arrow-right ms-1"></i></a>
                     </div>
-                </a>
+                </div>
             </div>
-            @endmodul
-
-            @modul('barang')
-            <div class="col-12 col-sm-6 col-lg-4">
-                <a href="{{ route('barang.index') }}" class="text-decoration-none">
-                    <div class="card h-100 border-0 shadow-sm module-card border-start border-4 border-sdm-600">
-                        <div class="card-body d-flex align-items-center gap-3 p-4">
-                            <div class="module-icon bg-icon text-sdm-600">
-                                <i class="bi bi-box-seam"></i>
-                            </div>
-                            <div>
-                                <h5 class="fw-semibold mb-1 text-dark">Inventori</h5>
-                                <p class="text-muted small mb-0">Pengelolaan stok bahan kimia, reagen, dan bahan pendukung.</p>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4">
-                <a href="{{ route('pengadaan.index') ?? '#' }}" class="text-decoration-none">
-                    <div class="card h-100 border-0 shadow-sm module-card border-start border-4 border-sdm-600">
-                        <div class="card-body d-flex align-items-center gap-3 p-4">
-                            <div class="module-icon bg-icon text-sdm-600">
-                                <i class="bi bi-cart-plus"></i>
-                            </div>
-                            <div>
-                                <h5 class="fw-semibold mb-1 text-dark">Pengadaan</h5>
-                                <p class="text-muted small mb-0">Permintaan stok dan approval pengadaan barang.</p>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            @endmodul
-
-            @modul('qc')
-            <div class="col-12 col-sm-6 col-lg-4">
-                <a href="{{ route('parameter-uji.index') }}" class="text-decoration-none">
-                    <div class="card h-100 border-0 shadow-sm module-card border-start border-4 border-sdm-600">
-                        <div class="card-body d-flex align-items-center gap-3 p-4">
-                            <div class="module-icon bg-icon text-sdm-600">
-                                <i class="bi bi-vial"></i>
-                            </div>
-                            <div>
-                                <h5 class="fw-semibold mb-1 text-dark">Parameter Uji</h5>
-                                <p class="text-muted small mb-0">Kelola master data parameter uji laboratorium.</p>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-12 col-sm-6 col-lg-4">
-                <a href="{{ route('kegiatan.index') }}" class="text-decoration-none">
-                    <div class="card h-100 border-0 shadow-sm module-card border-start border-4 border-sdm-600">
-                        <div class="card-body d-flex align-items-center gap-3 p-4">
-                            <div class="module-icon bg-icon text-sdm-600">
-                                <i class="bi bi-clipboard2-data"></i>
-                            </div>
-                            <div>
-                                <h5 class="fw-semibold mb-1 text-dark">Proses & Hasil</h5>
-                                <p class="text-muted small mb-0">Manajemen kegiatan pengujian, kalibrasi & hasil lab.</p>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-12 col-sm-6 col-lg-4">
-                <a href="{{ route('tindak-lanjut.index') }}" class="text-decoration-none">
-                    <div class="card h-100 border-0 shadow-sm module-card border-start border-4 border-sdm-600">
-                        <div class="card-body d-flex align-items-center gap-3 p-4">
-                            <div class="module-icon bg-icon text-sdm-600">
-                                <i class="bi bi-shield-check"></i>
-                            </div>
-                            <div>
-                                <h5 class="fw-semibold mb-1 text-dark">Tindak Lanjut</h5>
-                                <p class="text-muted small mb-0">Monitoring status tindak lanjut hasil outlier/abnormal.</p>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            @endmodul
-
-            @modul('reporting')
-            <div class="col-12 col-sm-6 col-lg-4">
-                <a href="{{ route('reporting.index') }}" class="text-decoration-none">
-                    <div class="card h-100 border-0 shadow-sm module-card border-start border-4 border-sdm-600">
-                        <div class="card-body d-flex align-items-center gap-3 p-4">
-                            <div class="module-icon bg-icon text-sdm-600">
-                                <i class="bi bi-bar-chart-line"></i>
-                            </div>
-                            <div>
-                                <h5 class="fw-semibold mb-1 text-dark">Laporan QC</h5>
-                                <p class="text-muted small mb-0">Cetak dan tinjau laporan Quality Control laboratorium.</p>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            @endmodul
-
-            @modul('audit_log')
-            <div class="col-12 col-sm-6 col-lg-4">
-                <a href="{{ route('audit-log.index') }}" class="text-decoration-none">
-                    <div class="card h-100 border-0 shadow-sm module-card border-start border-4 border-sdm-600">
-                        <div class="card-body d-flex align-items-center gap-3 p-4">
-                            <div class="module-icon bg-icon text-sdm-600">
-                                <i class="bi bi-journal-text"></i>
-                            </div>
-                            <div>
-                                <h5 class="fw-semibold mb-1 text-dark">Audit Log</h5>
-                                <p class="text-muted small mb-0">Rekam jejak aktivitas sistem dan histori perubahan data.</p>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            @endmodul
         </div>
-    @endif
+        @endmodul
+
+        {{-- 3. Jadwal Kalibrasi H-30 --}}
+        @modul('alat')
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm border-start border-4 border-warning">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1 fs-7 text-uppercase fw-bold">Kalibrasi (H-30)</p>
+                            <h3 class="fw-bold mb-0 text-dark">{{ $tenggatKalibrasi }}</h3>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{{ route('alat.index') }}" class="text-decoration-none text-warning small fw-semibold">Kelola Aset <i class="fas fa-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endmodul
+
+        {{-- 4. Kelengkapan SDM --}}
+        @modul('sdm')
+        <div class="col-12 col-sm-6 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm border-start border-4 border-primary">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="text-muted mb-1 fs-7 text-uppercase fw-bold">SDM (CV Kosong)</p>
+                            <h3 class="fw-bold mb-0 text-dark">{{ $personilBelumLengkap }}</h3>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{{ route('sdm.index') }}" class="text-decoration-none text-primary small fw-semibold">Lengkapi Dokumen <i class="fas fa-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endmodul
+    </div>
+
+    <!-- Second Row (Inventori Alerts) -->
+    <div class="row g-4 mb-4">
+        {{-- 5. Stok Tipis --}}
+        @modul('barang')
+        <div class="col-12 col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h5 class="fw-bold mb-0"><i class="fas fa-box-open text-danger me-2"></i> Stok Kritis</h5>
+                        <span class="badge bg-danger rounded-pill">{{ $stokTipis }}</span>
+                    </div>
+                    <p class="text-muted small mb-3">Terdapat {{ $stokTipis }} item barang/reagen yang berada di bawah batas minimum.</p>
+                    <a href="{{ route('barang.index') }}" class="btn btn-outline-danger btn-sm w-100">Cek Inventori</a>
+                </div>
+            </div>
+        </div>
+        
+        {{-- 6. Kedaluwarsa H-30 --}}
+        <div class="col-12 col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h5 class="fw-bold mb-0"><i class="fas fa-calendar-times text-warning me-2"></i> Akan Kedaluwarsa</h5>
+                        <span class="badge bg-warning text-dark rounded-pill">{{ $barangExp }}</span>
+                    </div>
+                    <p class="text-muted small mb-3">Terdapat {{ $barangExp }} bahan/reagen yang kedaluwarsa dalam 30 hari ke depan.</p>
+                    <a href="{{ route('barang.index') }}" class="btn btn-outline-warning btn-sm w-100">Cek Expired Date</a>
+                </div>
+            </div>
+        </div>
+        @endmodul
+
+        {{-- 7. Pengajuan Pengadaan --}}
+        @modul('pengadaan')
+        <div class="col-12 col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h5 class="fw-bold mb-0"><i class="fas fa-shopping-cart text-primary me-2"></i> Approval Pengadaan</h5>
+                        <span class="badge bg-primary rounded-pill">{{ $pengadaanPending }}</span>
+                    </div>
+                    <p class="text-muted small mb-3">Ada {{ $pengadaanPending }} pengajuan barang/reagen yang butuh persetujuan segera.</p>
+                    <a href="{{ route('pengadaan.index') ?? '#' }}" class="btn btn-outline-primary btn-sm w-100">Proses Pengajuan</a>
+                </div>
+            </div>
+        </div>
+        @endmodul
+    </div>
 </div>
-
-<style>
-    .module-card {
-        transition: transform .18s ease, box-shadow .18s ease;
-    }
-    .module-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 18px 48px rgba(15,35,59,.08);
-    }
-    .module-icon {
-        width: 54px;
-        height: 54px;
-        min-width: 54px;
-        border-radius: 14px;
-        display: grid;
-        place-items: center;
-        font-size: 1.35rem;
-        border: 1px solid rgba(29,76,122,.16);
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.75);
-    }
-    .bg-icon {
-        background-color: #eef4fb !important;
-    }
-    .sdm-card {
-        background-color: #faf5ff;
-    }
-    .text-purple {
-        color: #7e22ce;
-    }
-    .border-sdm-600 {
-        border-color: var(--sdm-600) !important;
-    }
-    .bg-sdm-50 {
-        background-color: var(--sdm-50) !important;
-    }
-    .text-sdm-600 {
-        color: var(--sdm-600) !important;
-    }
-</style>
 @endsection

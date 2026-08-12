@@ -4,13 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\RiwayatKalibrasi;
 use App\Models\KegiatanAlat;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Alat extends Model
 {
+    use SoftDeletes;
     use HasFactory, LogsActivity;
 
     protected $table = 'alat';
@@ -44,15 +46,20 @@ class Alat extends Model
         return LogOptions::defaults()
             ->logFillable()
             ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
             ->setDescriptionForEvent(fn(string $eventName) => "Data alat telah di-{$eventName}");
     }
+    public function kategoriAlat()
+    {
+        return $this->belongsTo(KategoriAlat::class, 'kategori_alat_id', 'kategori_alat_id');
+    }
+
     public function itemPemeliharaan()
     {
-        return $this->hasMany(ItemPemeliharaan::class, 'alat_id', 'alat_id')->orderBy('nomor_urut');
+        return $this->hasManyThrough(ItemPemeliharaan::class, KategoriAlat::class, 'kategori_alat_id', 'kategori_alat_id', 'kategori_alat_id', 'kategori_alat_id');
+    }
+
+    public function riwayatPerbaikan()
+    {
+        return $this->hasMany(RiwayatPerbaikanAlat::class, 'alat_id', 'alat_id');
     }
 }
-
-
-
-

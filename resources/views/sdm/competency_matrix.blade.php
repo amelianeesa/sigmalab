@@ -59,7 +59,7 @@
                                         <div class="text-muted small fw-normal">{{ $row['personil']->jabatan }}</div>
                                     </td>
                                     @foreach($jenisSertifikasiList as $jenis)
-                                        @php $cell = $row['sel'][$jenis]; @endphp
+                                        @php $cell = $row['kompetensi'][$jenis]; @endphp
                                         <td>
                                             @if($cell)
                                                 <a href="{{ route('sdm.kompetensi.detail', $row['personil']->personil_id) }}" class="text-decoration-none" title="Berlaku s.d {{ $cell['kompetensi']->tanggal_berakhir?->format('d-m-Y') ?? 'Tidak Terbatas' }}">

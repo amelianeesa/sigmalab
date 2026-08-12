@@ -5,17 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\LogOptions;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Barang extends Model
 {
+    use SoftDeletes;
     use HasFactory, LogsActivity;
 
     protected $table = 'barang';
     protected $primaryKey = 'barang_id';
 
-    protected $guarded = [];
+
     protected $fillable = [
         'nama_barang',
         'satuan',

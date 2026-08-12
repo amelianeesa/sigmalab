@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
+use App\Enums\PeranPengguna;
 
 class KegiatanController extends Controller
 {
@@ -76,48 +78,96 @@ class KegiatanController extends Controller
             'barang_jumlah' => 'nullable|array',
         ]);
 
-        DB::transaction(function () use ($request, $validated) {
-            $kegiatan = Kegiatan::create([
-                'nama_kegiatan' => $validated['nama_kegiatan'],
-                'jenis_kegiatan' => $validated['jenis_kegiatan'],
-                'kode_sampel' => $this->generateKodeSampel(), 
-
-                'tanggal_kegiatan' => $validated['tanggal_kegiatan'],
-                'status_kegiatan' => $validated['status_kegiatan'],
-                'dibuat_oleh' => Auth::id(),
-            ]);
-
-            if (!empty($validated['alat_ids'])) {
-                $kegiatan->alatDigunakan()->attach($validated['alat_ids']);
+        // Gate 1: Validasi Kalibrasi Alat
+        if (!empty($validated['alat_ids'])) {
+            $alatKedaluwarsa = Alat::whereIn('alat_id', $validated['alat_ids'])
+                ->whereDoesntHave('riwayatKalibrasi', function($query) {
+                    $query->where('tgl_akhir', '>=', now());
+                })->get();
+            
+            if ($alatKedaluwarsa->isNotEmpty()) {
+                $namaAlat = $alatKedaluwarsa->pluck('nama_alat')->join(', ');
+                return back()->withInput()->with('error', "Validasi Gagal (Gate 1): Alat berikut belum dikalibrasi atau masa kalibrasinya sudah kedaluwarsa: {$namaAlat}");
             }
+        }
 
-            if (!empty($validated['personil_ids'])) {
-                $syncData = [];
-                foreach ($validated['personil_ids'] as $index => $personilId) {
-                    $peran = $request->input("personil_peran.{$personilId}", 'Analis');
-                    $syncData[$personilId] = ['peran' => $peran];
-                }
-                $kegiatan->personilTerlibat()->attach($syncData);
+        // Gate 2: Validasi Kompetensi Personel
+        if (!empty($validated['personil_ids'])) {
+            $personelTidakAktif = Personil::whereIn('personil_id', $validated['personil_ids'])
+                ->where('status_aktif', false)->get();
+            
+            if ($personelTidakAktif->isNotEmpty()) {
+                $namaPersonel = $personelTidakAktif->pluck('nama_lengkap')->join(', ');
+                return back()->withInput()->with('error', "Validasi Gagal (Gate 2): Personel berikut berstatus tidak aktif atau kompetensinya dicabut: {$namaPersonel}");
             }
+        }
 
-            if (!empty($validated['barang_ids'])) {
-                foreach ($validated['barang_ids'] as $barangId) {
-                    $jumlah = (float) $request->input("barang_jumlah.{$barangId}", 0);
-                    if ($jumlah > 0) {
-                        $barang = Barang::find($barangId);
-                        $barang->pengeluaran += $jumlah;
-                        $barang->saldo_akhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
-                        $barang->save();
-
-                        TransaksiBarang::create([
-                            'barang_id' => $barangId,
-                            'kegiatan_id' => $kegiatan->kegiatan_id,
-                            'jumlah_pengeluaran' => $jumlah,
-                            'harga' => $barang->harga_rata ?? 0,
-                        ]);
+        // Gate 3: Validasi Stok Bahan/Reagen
+        if (!empty($validated['barang_ids'])) {
+            $barangTidakCukup = [];
+            foreach ($validated['barang_ids'] as $barangId) {
+                $jumlahReq = (float) $request->input("barang_jumlah.{$barangId}", 0);
+                if ($jumlahReq > 0) {
+                    $barang = Barang::find($barangId);
+                    if ($barang && $barang->saldo_akhir < $jumlahReq) {
+                        $barangTidakCukup[] = "{$barang->nama_barang} (Sisa stok: {$barang->saldo_akhir}, Diminta: {$jumlahReq})";
                     }
                 }
             }
+            if (!empty($barangTidakCukup)) {
+                return back()->withInput()->with('error', "Validasi Gagal (Gate 3): Stok bahan berikut tidak mencukupi untuk kegiatan ini: " . implode(' | ', $barangTidakCukup));
+            }
+        }
+
+        $lock = Cache::lock('generate_kode_sampel', 10);
+        $lock->block(10, function () use ($request, $validated) {
+            DB::transaction(function () use ($request, $validated) {
+                $kegiatan = Kegiatan::create([
+                    'nama_kegiatan' => $validated['nama_kegiatan'],
+                    'jenis_kegiatan' => $validated['jenis_kegiatan'],
+                    'kode_sampel' => $this->generateKodeSampel(),
+                    'tanggal_kegiatan' => $validated['tanggal_kegiatan'],
+                    'status_kegiatan' => $validated['status_kegiatan'],
+                    'dibuat_oleh' => Auth::id(),
+                ]);
+
+                // Attach alat
+                if (!empty($validated['alat_ids'])) {
+                    $kegiatan->alatDigunakan()->attach($validated['alat_ids']);
+                }
+
+                // Attach personil with peran
+                if (!empty($validated['personil_ids'])) {
+                    $syncData = [];
+                    foreach ($validated['personil_ids'] as $index => $personilId) {
+                        $peran = $request->input("personil_peran.{$personilId}", 'Analis');
+                        $syncData[$personilId] = ['peran' => $peran];
+                    }
+                    $kegiatan->personilTerlibat()->attach($syncData);
+                }
+
+                // Attach barang dan catat transaksi
+                if (!empty($validated['barang_ids'])) {
+                    foreach ($validated['barang_ids'] as $barangId) {
+                        $jumlah = (float) $request->input("barang_jumlah.{$barangId}", 0);
+                        if ($jumlah > 0) {
+                            $barang = Barang::where('barang_id', $barangId)->lockForUpdate()->first();
+                            if ($barang) {
+                                $barang->pengeluaran += $jumlah;
+                                $barang->saldo_akhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
+                                $barang->save();
+
+                                TransaksiBarang::create([
+                                    'barang_id' => $barangId,
+                                    'kegiatan_id' => $kegiatan->kegiatan_id,
+                                    'jumlah_pengeluaran' => $jumlah,
+                                    'harga' => $barang->harga_rata ?? 0,
+                                ]);
+                            }
+                        }
+                    }
+                }
+            });
         });
 
         return redirect()->route('kegiatan.index')->with('success', 'Kegiatan berhasil dibuat.');
@@ -155,7 +205,6 @@ class KegiatanController extends Controller
 
     public function update(Request $request, $id)
     {
-        abort_if(Auth::user()->role->nama_role === 'Analis', 403, 'Analis tidak diizinkan mengubah data kegiatan.');
         $kegiatan = Kegiatan::findOrFail($id);
         $this->authorize('update', $kegiatan);
 
@@ -197,7 +246,7 @@ class KegiatanController extends Controller
 
             $oldTransaksis = TransaksiBarang::where('kegiatan_id', $kegiatan->kegiatan_id)->get();
             foreach($oldTransaksis as $t) {
-                $b = $t->barang;
+                $b = Barang::where('barang_id', $t->barang_id)->lockForUpdate()->first();
                 if ($b) {
                     $b->pengeluaran -= $t->jumlah_pengeluaran;
                     $b->saldo_akhir = ($b->saldo_awal + $b->penerimaan) - $b->pengeluaran;
@@ -210,17 +259,19 @@ class KegiatanController extends Controller
                 foreach ($validated['barang_ids'] as $barangId) {
                     $jumlah = (float) $request->input("barang_jumlah.{$barangId}", 0);
                     if ($jumlah > 0) {
-                        $barang = Barang::find($barangId);
-                        $barang->pengeluaran += $jumlah;
-                        $barang->saldo_akhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
-                        $barang->save();
+                        $barang = Barang::where('barang_id', $barangId)->lockForUpdate()->first();
+                        if ($barang) {
+                            $barang->pengeluaran += $jumlah;
+                            $barang->saldo_akhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
+                            $barang->save();
 
-                        TransaksiBarang::create([
-                            'barang_id' => $barangId,
-                            'kegiatan_id' => $kegiatan->kegiatan_id,
-                            'jumlah_pengeluaran' => $jumlah,
-                            'harga' => $barang->harga_rata ?? 0,
-                        ]);
+                            TransaksiBarang::create([
+                                'barang_id' => $barangId,
+                                'kegiatan_id' => $kegiatan->kegiatan_id,
+                                'jumlah_pengeluaran' => $jumlah,
+                                'harga' => $barang->harga_rata ?? 0,
+                            ]);
+                        }
                     }
                 }
             }
@@ -231,7 +282,6 @@ class KegiatanController extends Controller
 
     public function destroy($id)
     {
-        abort_if(Auth::user()->role->nama_role === 'Analis', 403, 'Analis tidak diizinkan menghapus data kegiatan.');
         $kegiatan = Kegiatan::findOrFail($id);
         $this->authorize('delete', $kegiatan);
 
@@ -246,7 +296,7 @@ class KegiatanController extends Controller
 
             $oldTransaksis = TransaksiBarang::where('kegiatan_id', $kegiatan->kegiatan_id)->get();
             foreach($oldTransaksis as $t) {
-                $b = $t->barang;
+                $b = Barang::where('barang_id', $t->barang_id)->lockForUpdate()->first();
                 if ($b) {
                     $b->pengeluaran -= $t->jumlah_pengeluaran;
                     $b->saldo_akhir = ($b->saldo_awal + $b->penerimaan) - $b->pengeluaran;

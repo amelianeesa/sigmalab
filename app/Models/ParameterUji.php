@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\LogOptions;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class ParameterUji extends Model
 {
+    use SoftDeletes;
     use HasFactory, LogsActivity;
 
     protected $table = 'parameter_uji';
@@ -21,10 +23,20 @@ class ParameterUji extends Model
         'nilai_acuan',
         'batas_bawah',
         'batas_atas',
+        'lcl',
+        'uwl_bawah',
+        'mean',
+        'uwl_atas',
+        'ucl',
         'metode_kriteria',
         'rumus_kalkulasi',
         'status_aktif',
     ];
+
+    public function getRouteKeyName(): string
+    {
+        return 'parameter_uji_id';
+    }
 
     public function hasilUji()
     {
@@ -45,3 +57,4 @@ class ParameterUji extends Model
             ->setDescriptionForEvent(fn(string $eventName) => "Data parameter uji telah di-{$eventName}");
     }
 }
+

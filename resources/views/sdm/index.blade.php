@@ -2,11 +2,20 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Manajemen SDM & Kompetensi</h1>
+    <!-- <h1 class="mt-4">Manajemen SDM & Kompetensi</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
         <li class="breadcrumb-item active">SDM & Personil</li>
-    </ol>
+    </ol> -->
+
+    <!-- Shortcut Navigation Buttons for SDM Module -->
+    <div class="d-flex flex-wrap gap-3 mb-4 mt-2">
+        @if(Auth::user()->hasModulAccess('manajemen_pengguna'))
+        <a href="{{ route('hak-akses.index') }}" class="btn btn-warning rounded-pill px-4 shadow-sm text-dark fw-bold" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <i class="fas fa-shield-alt me-2"></i> Manajemen Hak Akses
+        </a>
+        @endif
+    </div>
 
     @if($errors->any())
         <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
@@ -101,7 +110,12 @@
                         <tr data-search="{{ $searchHaystack }}">
                             <td>{{ $index + 1 }}</td>
                             <td><code class="fw-bold">{{ $row->no_induk }}</code></td>
-                            <td class="fw-bold text-start">{{ $row->nama }}</td>
+                            <td class="fw-bold text-start">
+                                {{ $row->nama }}
+                                @if(!$row->file_cv)
+                                    <br><span class="badge bg-danger mt-1" style="font-size:0.7rem;"><i class="fas fa-exclamation-circle"></i> Lengkapi CV</span>
+                                @endif
+                            </td>
                             <td>
                                 @if($row->kategori_personil)
                                     <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">

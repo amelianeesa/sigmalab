@@ -8,7 +8,7 @@ use App\Models\User;
 
 class RoleSwitcherController extends Controller
 {
-    public function switch(Request $request)
+    public function switchRole(Request $request)
     {
         $roleName = $request->input('role_name');
 

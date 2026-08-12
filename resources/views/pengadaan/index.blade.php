@@ -6,15 +6,24 @@
         <div>
             <h2 class="fw-bold text-dark mb-1">Pengadaan Bahan / Barang</h2>
             <p class="text-muted mb-0">Manajemen permintaan pengadaan barang dan persetujuan Kabid Dukungan Bisnis.</p>
-            <ol class="breadcrumb mb-4">
-                <li class="breadcrumb-item"><a href="{{ url('dashboard') }}">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="{{ url('barang') }}">Inventori Barang</a></li>
-                <li class="breadcrumb-item active">Pengadaan</li>
+            <ol class="breadcrumb mb-0 mt-2">
+                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('barang.index') }}" class="text-decoration-none">Inventori & Fasilitas</a></li>
+                <li class="breadcrumb-item active">Pengadaan Bahan</li>
             </ol>
         </div>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahPengadaanModal">
-            <i class="fas fa-plus me-1"></i> Ajukan Pengadaan
-        </button>
+        <div class="d-flex gap-2">
+            @if(Auth::user()->role->nama_role === \App\Enums\PeranPengguna::HR_GA_OFFICER->value)
+                <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportPdfModal">
+                    <i class="fas fa-file-pdf me-1"></i> Export PDF
+                </button>
+            @endif
+            @if(Auth::user()->role->nama_role !== \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role !== \App\Enums\PeranPengguna::HR_GA_OFFICER->value)
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahPengadaanModal">
+                    <i class="fas fa-plus me-1"></i> Ajukan Pengadaan
+                </button>
+            @endif
+        </div>
     </div>
 
     <div class="card shadow-sm border-0">
@@ -61,12 +70,12 @@
                                 <td>
                                     @php
                                         $roleName = Auth::user()->role->nama_role ?? '';
-                                        $isKabid = in_array($roleName, [\App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value, \App\Enums\PeranPengguna::ADMIN_APLIKASI->value]);
+                                        $isHrGa = in_array($roleName, [\App\Enums\PeranPengguna::HR_GA_OFFICER->value, \App\Enums\PeranPengguna::ADMIN_APLIKASI->value]);
                                     @endphp
                                     
-                                    @if($isKabid && $p->status != 'selesai' && $p->status != 'ditolak')
+                                    @if($isHrGa && $p->status != 'selesai' && $p->status != 'ditolak')
                                         <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            Aksi Kabid
+                                            Aksi HR & GA
                                         </button>
                                         <ul class="dropdown-menu">
                                             @if($p->status == 'diajukan')
@@ -104,7 +113,7 @@
                                         </ul>
                                     @else
                                         @if($p->status == 'diajukan')
-                                            <span class="text-muted small">Menunggu Kabid</span>
+                                            <span class="text-muted small">Menunggu HR & GA</span>
                                             <form action="{{ route('pengadaan.destroy', $p->permintaan_id) }}" method="POST" class="d-inline ms-1">
                                                 @csrf
                                                 @method('DELETE')
@@ -165,12 +174,47 @@
                     <textarea name="alasan" class="form-control" rows="3" placeholder="Contoh: Stok untuk reagen menipis untuk pengujian air limbah..."></textarea>
                 </div>
                 <div class="alert alert-info py-2 mb-0 mt-3" style="font-size:0.85rem;">
-                    <i class="fas fa-info-circle me-1"></i> Pengajuan ini akan langsung diteruskan ke Kabid Dukungan Bisnis untuk di-*approve*.
+                    <i class="fas fa-info-circle me-1"></i> Pengajuan ini akan langsung diteruskan ke HR & GA Officer untuk di-*approve*.
                 </div>
             </div>
             <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                 <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane me-1"></i> Ajukan</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Modal Export PDF -->
+<div class="modal fade" id="exportPdfModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="{{ route('pengadaan.pdf') }}" method="GET" target="_blank" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Export Laporan Pengadaan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Bulan</label>
+                    <select name="bulan" class="form-select" required>
+                        @for($i=1; $i<=12; $i++)
+                            <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}" {{ date('m') == $i ? 'selected' : '' }}>
+                                {{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}
+                            </option>
+                        @endfor
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Tahun</label>
+                    <select name="tahun" class="form-select" required>
+                        @for($i=date('Y'); $i>=2020; $i--)
+                            <option value="{{ $i }}">{{ $i }}</option>
+                        @endfor
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn btn-success"><i class="fas fa-download me-1"></i> Download PDF</button>
             </div>
         </form>
     </div>

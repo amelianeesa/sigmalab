@@ -75,10 +75,18 @@
                     <div class="row">
                         @foreach($alatList as $alat)
                         <div class="col-md-4 mb-2">
+                            @php
+                                $kalibrasiValid = true;
+                                $kalibrasi = $alat->riwayatKalibrasi()->whereNull('deleted_at')->latest('tgl_akhir')->first();
+                                if(!$kalibrasi || $kalibrasi->tgl_akhir < now()) {
+                                    $kalibrasiValid = false;
+                                }
+                            @endphp
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="alat_ids[]" value="{{ $alat->alat_id }}" id="alat_{{ $alat->alat_id }}" {{ in_array($alat->alat_id, old('alat_ids', $selectedAlat)) ? 'checked' : '' }}>
-                                <label class="form-check-label" for="alat_{{ $alat->alat_id }}">
+                                <input class="form-check-input alat-checkbox" type="checkbox" name="alat_ids[]" value="{{ $alat->alat_id }}" id="alat_{{ $alat->alat_id }}" {{ in_array($alat->alat_id, old('alat_ids', $selectedAlat)) ? 'checked' : '' }} data-nama="{{ $alat->nama_alat }}" data-valid="{{ $kalibrasiValid ? 'true' : 'false' }}">
+                                <label class="form-check-label {{ !$kalibrasiValid ? 'text-danger' : '' }}" for="alat_{{ $alat->alat_id }}">
                                     {{ $alat->nama_alat }} ({{ $alat->kode_alat }})
+                                    @if(!$kalibrasiValid) <i class="fas fa-exclamation-triangle ms-1" title="Kedaluwarsa"></i> @endif
                                 </label>
                             </div>
                         </div>
@@ -165,7 +173,7 @@
                                     </td>
                                     <td>
                                         <div class="input-group input-group-sm">
-                                            <input type="number" step="0.01" min="0" max="{{ $sisaStokRiil }}" class="form-control" name="barang_jumlah[{{ $barang->barang_id }}]" value="{{ old('barang_jumlah.'.$barang->barang_id, $jumlahTerpakai ?: '') }}" placeholder="0" {{ $habis && !$isTerpilih ? 'disabled' : '' }}>
+                                            <input type="number" step="0.01" min="0" class="form-control barang-input" name="barang_jumlah[{{ $barang->barang_id }}]" value="{{ old('barang_jumlah.'.$barang->barang_id, $jumlahTerpakai ?: '') }}" placeholder="0" {{ $habis && !$isTerpilih ? 'disabled' : '' }} data-nama="{{ $barang->nama_barang }}" data-stok="{{ $sisaStokRiil }}">
                                             <span class="input-group-text">{{ $barang->satuan }}</span>
                                         </div>
                                     </td>
@@ -188,3 +196,44 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validasi Live: Alat (Kalibrasi)
+    const alatCheckboxes = document.querySelectorAll('.alat-checkbox');
+    alatCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.checked && this.dataset.valid === 'false') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan Kalibrasi',
+                    text: `Alat ${this.dataset.nama} masa kalibrasinya sudah habis atau belum dikalibrasi. Mohon pilih alat lain.`,
+                    confirmButtonColor: '#d33'
+                });
+                this.checked = false; // Auto uncheck
+            }
+        });
+    });
+
+    // Validasi Live: Bahan (Stok)
+    const barangInputs = document.querySelectorAll('.barang-input');
+    barangInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            const requested = parseFloat(this.value) || 0;
+            const maxStok = parseFloat(this.dataset.stok) || 0;
+            
+            if (requested > maxStok) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Kekurangan Stok',
+                    text: `Stok ${this.dataset.nama} tidak mencukupi! Sisa stok maksimal yang bisa digunakan adalah ${maxStok}.`,
+                    confirmButtonColor: '#f39c12'
+                });
+                this.value = maxStok; // Auto-correct to max available
+            }
+        });
+    });
+});
+</script>
+@endpush

@@ -2,11 +2,11 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Manajemen Alat & Kalibrasi</h1>
+    <!-- <h1 class="mt-4">Manajemen Alat & Kalibrasi</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
         <li class="breadcrumb-item active">Alat & Kalibrasi</li>
-    </ol>
+    </ol> -->
 
     @php
         $alatWarningCount = 0;
@@ -118,7 +118,7 @@
                                 }
                             }
 
-                            $qrData = route('alat.qr-kalibrasi', $item->alat_id);
+                            $qrData = route('alat.public-scan', $item->kode_alat);
 
                             $qrSvgCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(40)->generate($qrData);
                             $qrSvgLarge = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(250)->generate($qrData);
@@ -139,7 +139,7 @@
                             </td>
                             {{-- Nama Barang bisa diklik untuk langsung menuju halaman QR/Detail alat --}}
                             <td class="fw-bold text-start">
-                                <a href="{{ route('alat.qr-kalibrasi', $item->alat_id) }}" class="text-decoration-none text-primary" title="Buka Detail & QR Alat">
+                                <a href="{{ route('alat.input-kalibrasi', $item->alat_id) }}" class="text-decoration-none text-primary" title="Buka Detail & Kalibrasi Alat">
                                     {{ $item->nama_alat }} <i class="fas fa-external-link-alt ms-1" style="font-size: 0.6rem;"></i>
                                 </a>
                             </td>
@@ -174,6 +174,7 @@
                             <td>{{ ucfirst($signifikan ?? '-') }}</td>
 
                             <td class="text-nowrap">
+                                <a href="{{ route('alat.show', $item->alat_id) }}" class="btn btn-info btn-sm text-white" title="Detail"><i class="fas fa-eye"></i></a>
                                 @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
                                     <a href="{{ route('alat.edit', $item->alat_id) }}" class="btn btn-warning btn-sm" title="Edit"><i class="fas fa-edit"></i></a>
                                     

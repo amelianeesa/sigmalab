@@ -39,8 +39,7 @@ class PengadaanController extends Controller
             PeranPengguna::ANALIS->value, 
             PeranPengguna::KOORDINATOR_LAB->value, 
             PeranPengguna::ADMIN_LAB->value, 
-            PeranPengguna::ADMIN_APLIKASI->value, 
-            PeranPengguna::KABID_DUKUNGAN_BISNIS->value
+            PeranPengguna::ADMIN_APLIKASI->value
         ];
 
         if (!in_array($roleName, $allowedToRequest)) {
@@ -62,7 +61,28 @@ class PengadaanController extends Controller
             'tanggal_pengajuan' => now()->toDateString(),
         ]);
 
-        return redirect()->route('pengadaan.index')->with('success', 'Permintaan pengadaan berhasil diajukan dan menunggu persetujuan Kabid.');
+        return redirect()->route('pengadaan.index')->with('success', 'Permintaan pengadaan berhasil diajukan dan menunggu persetujuan HR & GA.');
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $bulan = $request->bulan ?: date('m');
+        $tahun = $request->tahun ?: date('Y');
+
+        $pengadaans = PermintaanPengadaan::with(['barang', 'pemohon', 'penyetuju'])
+            ->whereMonth('tanggal_pengajuan', $bulan)
+            ->whereYear('tanggal_pengajuan', $tahun)
+            ->orderBy('tanggal_pengajuan', 'asc')
+            ->get();
+        $hrgaName = Auth::user()?->personil?->nama ?? Auth::user()?->username ?? 'HR & GA Officer';
+        $kabidUser = \App\Models\User::whereHas('role', function($q) {
+            $q->where('nama_role', \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value);
+        })->first();
+        $kabidName = $kabidUser ? ($kabidUser->personil?->nama ?? $kabidUser->username) : '................................';
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pengadaan.pdf', compact('pengadaans', 'bulan', 'tahun', 'hrgaName', 'kabidName'));
+        
+        return $pdf->download("Laporan_Pengadaan_{$tahun}_{$bulan}.pdf");
     }
 
     public function approve(Request $request, $id)
@@ -71,8 +91,8 @@ class PengadaanController extends Controller
         
         $roleName = Auth::user()->role->nama_role ?? '';
         
-        if (!in_array($roleName, [PeranPengguna::KABID_DUKUNGAN_BISNIS->value, PeranPengguna::ADMIN_APLIKASI->value])) {
-            return back()->with('error', 'Hanya Kabid Dukungan Bisnis yang dapat memproses pengadaan.');
+        if (!in_array($roleName, [PeranPengguna::HR_GA_OFFICER->value, PeranPengguna::ADMIN_APLIKASI->value])) {
+            return back()->with('error', 'Hanya HR & GA yang dapat memproses pengadaan.');
         }
 
         $validated = $request->validate([
@@ -84,11 +104,11 @@ class PengadaanController extends Controller
             $pengadaan->status = $validated['status'];
             $pengadaan->disetujui_oleh = Auth::id();
             $pengadaan->tanggal_keputusan = now()->toDateString();
-            $pengadaan->catatan_approval = $validated['catatan_approval'];
+            $pengadaan->catatan_approval = $validated['catatan_approval'] ?? null;
             $pengadaan->save();
 
             if ($validated['status'] === 'selesai') {
-                $barang = $pengadaan->barang;
+                $barang = Barang::where('barang_id', $pengadaan->barang_id)->lockForUpdate()->first();
                 if ($barang) {
                     $barang->penerimaan += $pengadaan->jumlah_diminta;
                     $barang->saldo_akhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;

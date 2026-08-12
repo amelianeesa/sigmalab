@@ -52,8 +52,7 @@ class BarangController extends Controller
             'kondisi' => 'required|in:baik,rusak',
             'tgl_exp' => 'nullable|date',
         ]);
-
-        $data = $request->all();
+        $data = $request->only(['nama_barang', 'satuan', 'kode_barang', 'minimal_stok', 'saldo_awal', 'penerimaan', 'pengeluaran', 'harga_rata', 'kondisi', 'tgl_exp']);
 
         $saldoAwal = $data['saldo_awal'] ?? 0;
         $penerimaan = $data['penerimaan'] ?? 0;
@@ -124,8 +123,11 @@ class BarangController extends Controller
     {
         $bulan = $request->input('bulan');
         $tahun = $request->input('tahun');
-
         $query = Barang::query();
+
+        if ($bulan && $tahun) {
+            $query->whereYear('created_at', $tahun)->whereMonth('created_at', $bulan);
+        }
         
         $barang = $query->latest()->get();
 

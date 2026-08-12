@@ -21,11 +21,20 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Laporan Inventori Barang Persediaan (Stock)</h1>
+    <!-- <h1 class="mt-4">Laporan Inventori Barang Persediaan (Stock)</h1>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="{{ url('dashboard') }}">Dashboard</a></li>
         <li class="breadcrumb-item active">Inventori Barang</li>
-    </ol>
+    </ol> -->
+
+    <!-- Shortcut Navigation Buttons for Inventori Module -->
+    <div class="d-flex flex-wrap gap-3 mb-4 mt-2">
+        @if(Auth::user()->hasModulAccess('pengadaan'))
+        <a href="{{ route('pengadaan.index') }}" class="btn btn-info rounded-pill px-4 shadow-sm text-white fw-bold" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <i class="fas fa-truck-loading me-2"></i> Cek Pengadaan Barang
+        </a>
+        @endif
+    </div>
 
     @php
         $barangHabisCount = 0;

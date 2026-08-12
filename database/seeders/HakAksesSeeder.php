@@ -15,7 +15,7 @@ class HakAksesSeeder extends Seeder
         $modules = DB::table('modul')->pluck('modul_id', 'kode_modul');
 
         $matrix = [
-            'Admin Lab' => [
+            'Analis Lab' => [
                 'sdm' => 'tambah_ubah',
                 'alat' => 'full',
                 'barang' => 'full',
@@ -24,7 +24,7 @@ class HakAksesSeeder extends Seeder
                 'proses_hasil' => 'tambah_ubah',
                 'tindak_lanjut' => 'tambah_ubah',
                 'reporting' => 'lihat',
-                'manajemen_pengguna' => 'tambah_ubah'
+                'audit_log' => 'lihat'
             ],
             'Koordinator Laboratorium' => [
                 'parameter_uji' => 'full',
@@ -34,41 +34,48 @@ class HakAksesSeeder extends Seeder
                 'barang' => 'lihat',
                 'pengadaan' => 'tambah_ubah',
                 'sdm' => 'lihat',
-                'reporting' => 'lihat'
-            ],
-            'Analis' => [
-                'proses_hasil' => 'tambah_ubah',
-                'alat' => 'lihat',
-                'barang' => 'lihat',
-                'pengadaan' => 'tambah_ubah'
+                'reporting' => 'lihat',
+                'audit_log' => 'lihat'
             ],
             'HR & GA' => [
-                'sdm' => 'full'
+                'sdm' => 'full',
+                'pengadaan' => 'tambah_ubah',
+                'audit_log' => 'lihat'
             ],
             'Kabid Inspeksi dan Solusi Perdagangan' => [
-                'reporting' => 'lihat',
-                'tindak_lanjut' => 'lihat',
+                'sdm' => 'lihat',
+                'alat' => 'lihat',
+                'barang' => 'lihat',
+                'parameter_uji' => 'lihat',
+                'pengadaan' => 'lihat',
                 'proses_hasil' => 'lihat',
+                'tindak_lanjut' => 'lihat',
+                'reporting' => 'lihat',
                 'audit_log' => 'lihat'
             ],
             'Kabid Dukungan Bisnis' => [
-                'pengadaan' => 'tambah_ubah',
-                'reporting' => 'lihat',
+                'sdm' => 'lihat',
+                'alat' => 'lihat',
                 'barang' => 'lihat',
+                'parameter_uji' => 'lihat',
+                'pengadaan' => 'lihat',
+                'proses_hasil' => 'lihat',
+                'tindak_lanjut' => 'lihat',
+                'reporting' => 'lihat',
                 'audit_log' => 'lihat'
             ],
             'Admin Aplikasi' => [
-                'alat' => 'full',
-                'barang' => 'full',
-                'pengadaan' => 'full',
-                'parameter_uji' => 'full',
-                'proses_hasil' => 'full',
-                'tindak_lanjut' => 'full',
-                'sdm' => 'full',
-                'reporting' => 'full',
-                'audit_log' => 'lihat',
                 'manajemen_pengguna' => 'full',
-                'keamanan' => 'full'
+                'keamanan' => 'full',
+                'sdm' => 'lihat',
+                'alat' => 'lihat',
+                'barang' => 'lihat',
+                'parameter_uji' => 'lihat',
+                'pengadaan' => 'lihat',
+                'proses_hasil' => 'lihat',
+                'tindak_lanjut' => 'lihat',
+                'reporting' => 'lihat',
+                'audit_log' => 'lihat'
             ]
         ];
 
