@@ -143,7 +143,7 @@
         <span class="belum">Belum Pernah</span>
     </div>
 
-    @if($jenisSertifikasiList->isEmpty())
+    @if(empty($jenisSertifikasiList))
         <p>Belum ada data sertifikasi yang tercatat untuk membentuk matriks kompetensi.</p>
     @else
         <table class="matrix">
@@ -191,7 +191,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ $jenisSertifikasiList->count() + 1 }}">Belum ada data personil aktif yang ditemukan.</td>
+                        <td colspan="{{ count($jenisSertifikasiList) + 1 }}">Belum ada data personil aktif yang ditemukan.</td>
                     </tr>
                 @endforelse
             </tbody>

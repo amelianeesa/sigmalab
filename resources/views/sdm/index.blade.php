@@ -2,13 +2,6 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <!-- <h1 class="mt-4">Manajemen SDM & Kompetensi</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-        <li class="breadcrumb-item active">SDM & Personil</li>
-    </ol> -->
-
-    <!-- Shortcut Navigation Buttons for SDM Module -->
     <div class="d-flex flex-wrap gap-3 mb-4 mt-2">
         @if(Auth::user()->hasModulAccess('manajemen_pengguna'))
         <a href="{{ route('hak-akses.index') }}" class="btn btn-warning rounded-pill px-4 shadow-sm text-dark fw-bold" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
@@ -30,36 +23,54 @@
     @endif
 
     <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div><i class="fas fa-users me-1"></i> Data Personil & Sertifikasi</div>
-            <div class="d-flex align-items-center flex-wrap gap-2">
-                <form method="GET" action="{{ route('sdm.index') }}" class="d-flex align-items-center">
-                    @if($showInactive)
-                        <input type="hidden" name="status" value="nonaktif">
+        <div class="card-header py-3">
+            <div class="mb-3 fw-bold text-dark fs-6">
+                <i class="fas fa-users me-1"></i> Data Personil & Sertifikasi
+            </div>
+
+            <div class="row g-2 align-items-center">
+                <div class="col-md-3 col-sm-6">
+                    <form method="GET" action="{{ route('sdm.index') }}" class="m-0">
+                        @if($showInactive)
+                            <input type="hidden" name="status" value="nonaktif">
+                        @endif
+                        <select name="kategori" class="form-select form-select-sm w-100" onchange="this.form.submit()">
+                            <option value="">Semua Kategori</option>
+                            @foreach($kategoriOptions as $value => $label)
+                                <option value="{{ $value }}" {{ $kategori === $value ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <a href="{{ route('sdm.competency-matrix') }}" class="btn btn-outline-dark btn-sm w-100 text-truncate">
+                        <i class="bi bi-grid-3x3-gap-fill me-1"></i> Competency Matrix
+                    </a>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    <div class="btn-group w-100" role="group">
+                        <a href="{{ route('sdm.index', array_filter(['kategori' => $kategori])) }}" class="btn btn-{{ ! $showInactive ? 'secondary' : 'outline-secondary' }} btn-sm w-50">
+                            Aktif <span class="badge bg-light text-dark ms-1">{{ $jumlahPersonilAktif }}</span>
+                        </a>
+                        <a href="{{ route('sdm.index', array_filter(['status' => 'nonaktif', 'kategori' => $kategori])) }}" class="btn btn-{{ $showInactive ? 'secondary' : 'outline-secondary' }} btn-sm w-50">
+                            Nonaktif <span class="badge bg-light text-dark ms-1">{{ $jumlahPersonilNonaktif }}</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-md-3 col-sm-6">
+                    @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
+                    <button type="button" class="btn btn-primary btn-sm w-100 text-truncate" data-bs-toggle="modal" data-bs-target="#modalTambahPersonil">
+                        <i class="fas fa-plus me-1"></i> Tambah Personil
+                    </button>
                     @endif
-                    <select name="kategori" class="form-select form-select-sm" style="min-width: 170px;" onchange="this.form.submit()">
-                        <option value="">Semua Kategori</option>
-                        @foreach($kategoriOptions as $value => $label)
-                            <option value="{{ $value }}" {{ $kategori === $value ? 'selected' : '' }}>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </form>
-
-                <a href="{{ route('sdm.competency-matrix') }}" class="btn btn-outline-dark btn-sm me-1">
-                    <i class="bi bi-grid-3x3-gap-fill me-1"></i> Competency Matrix
-                </a>
-
-                <a href="{{ route('sdm.index', array_filter(['kategori' => $kategori])) }}" class="btn btn-{{ ! $showInactive ? 'secondary' : 'outline-secondary' }} btn-sm me-1">Aktif <span class="badge bg-light text-dark ms-1">{{ $jumlahPersonilAktif }}</span></a>
-                <a href="{{ route('sdm.index', array_filter(['status' => 'nonaktif', 'kategori' => $kategori])) }}" class="btn btn-{{ $showInactive ? 'secondary' : 'outline-secondary' }} btn-sm me-2">Nonaktif <span class="badge bg-light text-dark ms-1">{{ $jumlahPersonilNonaktif }}</span></a>
-                @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambahPersonil">
-                    <i class="fas fa-plus"></i> Tambah Personil
-                </button>
-                @endif
+                </div>
             </div>
         </div>
-        <div class="card-body">
 
+        <div class="card-body">
             <div class="mb-3">
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
@@ -95,8 +106,6 @@
                             $sertifikasi = $row->sertifikasiTerakhir;
                             $status = $row->statusSertifikasi;
                             $kategoriLabel = $kategoriOptions[$row->kategori_personil] ?? $row->kategori_personil ?? '';
-                            // String gabungan buat live search — lebih akurat daripada nyari dari innerText tabel
-                            // karena nggak ketimpa markup badge/icon yang ada di dalam sel.
                             $searchHaystack = strtolower(implode(' ', array_filter([
                                 $row->nama,
                                 $row->no_induk,
@@ -217,7 +226,6 @@
                         </tr>
                         @endforelse
 
-                        {{-- Baris ini hanya muncul via JS kalau hasil live search kosong --}}
                         <tr id="noSearchResultRow" style="display:none;">
                             <td colspan="11" class="text-center text-muted py-4">
                                 <i class="bi bi-search me-1"></i>

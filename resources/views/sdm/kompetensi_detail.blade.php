@@ -92,7 +92,6 @@
                                 <button type="button" class="btn btn-warning btn-sm" title="Edit"
                                     data-bs-toggle="modal" data-bs-target="#modalEditSertifikasi"
                                     data-action="{{ route('sdm.kompetensi.update', [$personil->personil_id, $komp->kompetensi_personil_id]) }}"
-                                    data-parameter="{{ $komp->parameter_uji_id }}"
                                     data-jenis="{{ $komp->jenis_sertifikasi }}"
                                     data-no="{{ $komp->no_sertifikasi }}"
                                     data-terbit="{{ $komp->tanggal_terbit?->format('Y-m-d') }}"
@@ -137,18 +136,8 @@
                 </div>
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Terkait Parameter Uji <span class="text-muted fw-normal">(Opsional)</span></label>
-                        <select name="parameter_uji_id" class="form-select form-select-sm" onchange="autoFillJenisSertifikasi(this, 'tambahJenisSertifikasi')">
-                            <option value="">-- Pelatihan Umum / Non-Parameter --</option>
-                            @foreach($parameterList as $param)
-                                <option value="{{ $param->parameter_uji_id }}">{{ $param->nama_parameter }}</option>
-                            @endforeach
-                        </select>
-                        <div class="form-text text-muted" style="font-size: 0.75rem;">Pilih jika sertifikasi ini memberikan kewenangan pengujian parameter tertentu.</div>
-                    </div>
-                    <div class="mb-3">
                         <label class="form-label small fw-semibold">Jenis Sertifikasi / Pelatihan <span class="text-danger">*</span></label>
-                        <input type="text" name="jenis_sertifikasi" id="tambahJenisSertifikasi" class="form-control form-control-sm" placeholder="mis. Pelatihan K3 Laboratorium" required>
+                        <input type="text" name="jenis_sertifikasi" class="form-control form-control-sm" placeholder="mis. Pelatihan K3 Laboratorium" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-semibold">Nomor Sertifikat</label>
@@ -192,15 +181,6 @@
                 </div>
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold">Terkait Parameter Uji <span class="text-muted fw-normal">(Opsional)</span></label>
-                        <select name="parameter_uji_id" id="editParameterUji" class="form-select form-select-sm" onchange="autoFillJenisSertifikasi(this, 'editJenisSertifikasi')">
-                            <option value="">-- Pelatihan Umum / Non-Parameter --</option>
-                            @foreach($parameterList as $param)
-                                <option value="{{ $param->parameter_uji_id }}">{{ $param->nama_parameter }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
                         <label class="form-label small fw-semibold">Jenis Sertifikasi / Pelatihan <span class="text-danger">*</span></label>
                         <input type="text" name="jenis_sertifikasi" id="editJenisSertifikasi" class="form-control form-control-sm" required>
                     </div>
@@ -243,7 +223,6 @@
             const button = event.relatedTarget;
 
             document.getElementById('formEditSertifikasi').action = button.getAttribute('data-action');
-            document.getElementById('editParameterUji').value = button.getAttribute('data-parameter') || '';
             document.getElementById('editJenisSertifikasi').value = button.getAttribute('data-jenis') || '';
             document.getElementById('editNoSertifikasi').value = button.getAttribute('data-no') || '';
             document.getElementById('editTanggalTerbit').value = button.getAttribute('data-terbit') || '';
@@ -255,13 +234,6 @@
                 : 'Belum ada dokumen. Unggah di sini bila tersedia.';
         });
     });
-
-    function autoFillJenisSertifikasi(selectElement, targetId) {
-        const targetInput = document.getElementById(targetId);
-        if (selectElement.value && selectElement.options[selectElement.selectedIndex].text !== '-- Pelatihan Umum / Non-Parameter --') {
-            targetInput.value = selectElement.options[selectElement.selectedIndex].text;
-        }
-    }
 </script>
 @endif
 @endsection

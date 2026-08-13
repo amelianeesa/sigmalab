@@ -236,7 +236,7 @@
             {{-- 2. Personel dan Kompetensi --}}
             @if(Auth::check() && (Auth::user()->hasModulAccess('sdm') || Auth::user()->hasModulAccess('manajemen_pengguna')))
             <li class="{{ request()->is('sdm*') || request()->is('hak-akses*') ? 'active' : '' }}">
-                <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personel & Kompetensi</a>
+                <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personil & Kompetensi</a>
             </li>
             @endif
 
