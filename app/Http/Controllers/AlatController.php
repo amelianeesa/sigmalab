@@ -226,13 +226,16 @@ class AlatController extends Controller
     {
         $alat = Alat::with(['riwayatKalibrasi' => function($query) {
             $query->orderBy('tgl_kalibrasi', 'asc');
-        }])->findOrFail($id);
+        }, 'itemPemeliharaan'])->findOrFail($id);
 
         return view('alat.input-kalibrasi', compact('alat'));
     }
 
     public function storeInputKalibrasi(Request $request, $id)
     {
+        if (!auth()->check()) {
+            return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu!');
+        }
         $request->validate([
             'jenis_kalibrasi' => 'required|in:internal,eksternal',
             'no_sertifikat' => 'required|string|max:100',
@@ -270,6 +273,19 @@ class AlatController extends Controller
         }, 'itemPemeliharaan'])->where('kode_alat', $kode_alat)->firstOrFail();
 
         return view('alat.public-scan', compact('alat'));
+    }
+
+    public function inputKalibrasiByKode($kode_alat)
+    {
+        $alat = Alat::with(['riwayatKalibrasi' => function($query) {
+            $query->orderBy('tgl_kalibrasi', 'asc');
+        }, 'itemPemeliharaan'])->where('kode_alat', $kode_alat)->firstOrFail();
+
+        // if (!auth()->check()) {
+        //     return view('alat.public-scan', compact('alat'));
+        // }
+
+        return view('alat.input-kalibrasi', compact('alat'));
     }
 
     public function pemeliharaanBulanan(Request $request, $id)

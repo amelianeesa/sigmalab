@@ -183,6 +183,30 @@
             color: #1d4c7a;
             border-color: rgba(255,255,255,.85);
         }
+        .pagination svg, 
+        .card-body svg {
+            width: 1rem !important;
+            height: 1rem !important;
+            max-width: 1rem !important;
+            max-height: 1rem !important;
+            display: inline-block;
+        }
+        /* .card-body > div:not(.table-responsive):not(.mt-3) {
+            display: none !important;
+        } */
+
+        /* .card-body > div:has(.pagination) > nav:first-child,
+        .card-body > nav:first-of-type:has(a.previous),
+        .card-body > div > div:has(> a.previous) {
+            display: none !important;
+            
+        } */
+
+        .card-body > div > div.d-flex.justify-content-between.flex-fill.align-items-center.d-sm-none,
+        .card-body > div > nav > div.d-flex.justify-content-between.flex-fill.d-sm-none {
+            display: none !important;
+        }
+
         .card.h-100 .card-body { min-height: 120px; }
         .card .card-body p { word-break: break-word; }
         .module-card { transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease; }
@@ -205,70 +229,74 @@
             }
         }
     </script>
-    <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
-    <nav id="sidebar">
-        <!-- Fungsi toggle dipindah ke header ini -->
-        <div class="sidebar-header d-flex justify-content-between align-items-center" onclick="toggleSidebar()" title="Klik untuk Buka/Tutup Sidebar" style="cursor:pointer;">
-            <div class="d-flex align-items-center gap-2">
-                <!-- Atribut onerror ditambahkan untuk memunculkan placeholder jika gambar gagal dimuat -->
-                <img src="{{ asset('images/logo-sucofindo.png') }}" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=SL&background=0D8ABC&color=fff';" alt="Logo" style="height: 40px; width: auto; object-fit: contain;">
-                <div style="line-height: 1.2;">
-                    <span class="text-dark" style="font-size: 1.2rem; font-weight: 800; letter-spacing: -0.5px;">SIGMA LAB</span><br>
-                    <small class="text-muted fw-bold" style="font-size: 0.7rem;">PT Sucofindo - Cilacap</small>
+    @auth
+        <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+        <nav id="sidebar">
+            <!-- Fungsi toggle dipindah ke header ini -->
+            <div class="sidebar-header d-flex justify-content-between align-items-center" onclick="toggleSidebar()" title="Klik untuk Buka/Tutup Sidebar" style="cursor:pointer;">
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Atribut onerror ditambahkan untuk memunculkan placeholder jika gambar gagal dimuat -->
+                    <img src="{{ asset('images/logo-sucofindo.png') }}" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=SL&background=0D8ABC&color=fff';" alt="Logo" style="height: 40px; width: auto; object-fit: contain;">
+                    <div style="line-height: 1.2;">
+                        <span class="text-dark" style="font-size: 1.2rem; font-weight: 800; letter-spacing: -0.5px;">SIGMA LAB</span><br>
+                        <small class="text-muted fw-bold" style="font-size: 0.7rem;">PT Sucofindo - Cilacap</small>
+                    </div>
                 </div>
+                <!-- Ikon panah kecil opsional untuk memperjelas interaksi -->
+                <i class="fas fa-chevron-left text-muted opacity-50"></i>
             </div>
-            <!-- Ikon panah kecil opsional untuk memperjelas interaksi -->
-            <i class="fas fa-chevron-left text-muted opacity-50"></i>
-        </div>
-        
-        <ul class="list-unstyled components" id="sidebar-accordion" style="overflow-y: auto; max-height: calc(100vh - 80px);">
-            <li class="{{ request()->is('/') || request()->is('dashboard') ? 'active' : '' }}">
-                <a href="{{ route('dashboard') ?? url('/') }}"><i class="fas fa-home"></i> Dashboard</a>
-            </li>
 
-            {{-- 1. Manajemen Peralatan (Aset) --}}
-            @if(Auth::check() && Auth::user()->hasModulAccess('alat'))
-            <li class="{{ request()->is('alat*') ? 'active' : '' }}">
-                <a href="{{ route('alat.index') }}"><i class="fas fa-tools"></i> Manajemen Peralatan</a>
-            </li>
-            @endif
+            <ul class="list-unstyled components" id="sidebar-accordion" style="overflow-y: auto; max-height: calc(100vh - 80px);">
+                <li class="{{ request()->is('/') || request()->is('dashboard') ? 'active' : '' }}">
+                    <a href="{{ route('dashboard') ?? url('/') }}"><i class="fas fa-home"></i> Dashboard</a>
+                </li>
 
-            {{-- 2. Personel dan Kompetensi --}}
-            @if(Auth::check() && (Auth::user()->hasModulAccess('sdm') || Auth::user()->hasModulAccess('manajemen_pengguna')))
-            <li class="{{ request()->is('sdm*') || request()->is('hak-akses*') ? 'active' : '' }}">
-                <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personel & Kompetensi</a>
-            </li>
-            @endif
+                {{-- 1. Manajemen Peralatan (Aset) --}}
+                @if(Auth::check() && Auth::user()->hasModulAccess('alat'))
+                <li class="{{ request()->is('alat*') ? 'active' : '' }}">
+                    <a href="{{ route('alat.index') }}"><i class="fas fa-tools"></i> Manajemen Peralatan</a>
+                </li>
+                @endif
 
-            {{-- 3. Proses dan Hasil Pengujian (QC) --}}
-            @if(Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
-            <li class="{{ request()->is('parameter-uji*') || request()->is('kegiatan*') || request()->is('tindak-lanjut*') || request()->is('reporting*') ? 'active' : '' }}">
-                <a href="{{ route('kegiatan.index') }}"><i class="fas fa-flask"></i> Verifikasi Mutu (QC)</a>
-            </li>
-            @endif
+                {{-- 2. Personel dan Kompetensi --}}
+                @if(Auth::check() && (Auth::user()->hasModulAccess('sdm') || Auth::user()->hasModulAccess('manajemen_pengguna')))
+                <li class="{{ request()->is('sdm*') || request()->is('hak-akses*') ? 'active' : '' }}">
+                    <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personel & Kompetensi</a>
+                </li>
+                @endif
 
-            {{-- 4. Inventori & Fasilitas --}}
-            @if(Auth::check() && (Auth::user()->hasModulAccess('barang') || Auth::user()->hasModulAccess('pengadaan')))
-            <li class="{{ request()->is('barang*') || request()->is('pengadaan*') ? 'active' : '' }}">
-                <a href="{{ route('barang.index') }}"><i class="fas fa-boxes"></i> Inventori & Fasilitas</a>
-            </li>
-            @endif
+                {{-- 3. Proses dan Hasil Pengujian (QC) --}}
+                @if(Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
+                <li class="{{ request()->is('parameter-uji*') || request()->is('kegiatan*') || request()->is('tindak-lanjut*') || request()->is('reporting*') ? 'active' : '' }}">
+                    <a href="{{ route('kegiatan.index') }}"><i class="fas fa-flask"></i> Verifikasi Mutu (QC)</a>
+                </li>
+                @endif
 
-            {{-- 5. Audit Log --}}
-            @if(Auth::check() && Auth::user()->hasModulAccess('audit_log'))
-            <li class="{{ request()->is('audit-log*') ? 'active' : '' }}">
-                <a href="{{ route('audit-log.index') }}"><i class="fas fa-history"></i> Audit Trail</a>
-            </li>
-            @endif
-        </ul>
-    </nav>
+                {{-- 4. Inventori & Fasilitas --}}
+                @if(Auth::check() && (Auth::user()->hasModulAccess('barang') || Auth::user()->hasModulAccess('pengadaan')))
+                <li class="{{ request()->is('barang*') || request()->is('pengadaan*') ? 'active' : '' }}">
+                    <a href="{{ route('barang.index') }}"><i class="fas fa-boxes"></i> Inventori & Fasilitas</a>
+                </li>
+                @endif
+
+                {{-- 5. Audit Log --}}
+                @if(Auth::check() && Auth::user()->hasModulAccess('audit_log'))
+                <li class="{{ request()->is('audit-log*') ? 'active' : '' }}">
+                    <a href="{{ route('audit-log.index') }}"><i class="fas fa-history"></i> Audit Trail</a>
+                </li>
+                @endif
+            </ul>
+        </nav>
+    @endauth
 
     <div class="top-navbar shadow-sm">
         <div class="d-flex align-items-center">
             <!-- Class d-lg-none dihapus agar toggle navbar selalu muncul untuk mengembalikan sidebar -->
-            <button class="btn text-white me-3 d-flex align-items-center justify-content-center p-1" onclick="toggleSidebar()" style="border:1px solid rgba(255,255,255,0.3); border-radius:6px; background:rgba(0,0,0,0.1); width:36px; height:36px;">
-                <i class="fas fa-bars"></i>
-            </button>
+            @auth
+                <button class="btn text-white me-3 d-flex align-items-center justify-content-center p-1" onclick="toggleSidebar()" style="border:1px solid rgba(255,255,255,0.3); border-radius:6px; background:rgba(0,0,0,0.1); width:36px; height:36px;">
+                    <i class="fas fa-bars"></i>
+                </button>
+            @endauth
             <div>
                 <span class="text-uppercase text-secondary fs-7 fw-bold d-block mb-1" style="font-size: 18px; letter-spacing: 1px;">SIGMA-LAB</span>
                 <div class="mb-0 fw-bold d-none d-sm-block">Sistem Integrated General Management Analytics of Lab</div>

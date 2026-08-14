@@ -36,32 +36,41 @@ class PengadaanController extends Controller
     {
         $roleName = Auth::user()->role->nama_role ?? '';
         $allowedToRequest = [
-            PeranPengguna::ANALIS->value, 
-            PeranPengguna::KOORDINATOR_LAB->value, 
-            PeranPengguna::ADMIN_LAB->value, 
-            PeranPengguna::ADMIN_APLIKASI->value
+            'Analis',
+            'Koordinator Laboratorium',
+            'Admin Lab',
+            'Admin Aplikasi'
         ];
 
         if (!in_array($roleName, $allowedToRequest)) {
-            return back()->with('error', 'Anda tidak memiliki izin untuk mengajukan pengadaan.');
+            return back()->with('error', 'Anda tidak memiliki izin untuk mengajukan pengadaan');
         }
 
         $validated = $request->validate([
             'barang_id' => 'required|exists:barang,barang_id',
             'jumlah_diminta' => 'required|numeric|min:0.1',
-            'alasan' => 'nullable|string'
+            'alasan' => 'nullable|string',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048'
         ]);
-
+        $pathFoto = null;
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            // simpan file ke public/uploads/pengadaan
+            $file->move(public_path('uploads/pengadaan'), $filename);
+            $pathFoto = 'uploads/pengadaan/' . $filename;
+        }
         PermintaanPengadaan::create([
             'barang_id' => $validated['barang_id'],
             'jumlah_diminta' => $validated['jumlah_diminta'],
             'alasan' => $validated['alasan'],
+            'foto' => $pathFoto,
             'status' => 'diajukan',
             'diajukan_oleh' => Auth::id(),
             'tanggal_pengajuan' => now()->toDateString(),
         ]);
 
-        return redirect()->route('pengadaan.index')->with('success', 'Permintaan pengadaan berhasil diajukan dan menunggu persetujuan HR & GA.');
+        return redirect()->route('pengadaan.index')->with('success', 'Permintaan pengadaan berhasil diajukan dan menunggu persetujuan HR & GA');
     }
 
     public function exportPdf(Request $request)
@@ -131,7 +140,11 @@ class PengadaanController extends Controller
         $pengadaan = PermintaanPengadaan::findOrFail($id);
         
         if ($pengadaan->status !== 'diajukan') {
-            return back()->with('error', 'Hanya permintaan yang berstatus diajukan yang bisa dihapus.');
+            return back()->with('error', 'Hanya permintaan yang berstatus diajukan yang bisa dihapus');
+        }
+
+        if ($pengadaan->foto && file_exists(public_path($pengadaan->foto))) {
+            @unlink(public_path($pengadaan->foto));
         }
 
         $pengadaan->delete();

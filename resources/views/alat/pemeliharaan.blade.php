@@ -48,7 +48,7 @@
                     <td>: {{ $alat->no_inventaris ?? '-' }}</td>
                 </tr>
                 <tr>
-                    <td class="fw-bold">Lokasi Alat</td>
+                    <td class="fw-bold">Unit Kerja Pemilik</td>
                     <td>: {{ $alat->lokasi_alat ?? $alat->unit_kerja_pemilik ?? '-' }}</td>
                 </tr>
                 <tr>

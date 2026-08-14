@@ -21,6 +21,7 @@ class PermintaanPengadaan extends Model
         'barang_id',
         'jumlah_diminta',
         'alasan',
+        'foto',
         'status',
         'diajukan_oleh',
         'disetujui_oleh',

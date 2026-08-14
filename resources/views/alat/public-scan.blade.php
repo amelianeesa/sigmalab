@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Informasi Alat - SIGMA-LAB</title>
-    <!-- CSS Bootstrap dari CDN (sesuai standar aplikasi) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
@@ -122,7 +121,7 @@
                             </div>
                         @else
                             <div class="alert alert-secondary text-center">
-                                Belum ada riwayat kalibrasi tercatat.
+                                Belum ada riwayat kalibrasi tercatat
                             </div>
                         @endif
                     </div>
@@ -141,7 +140,7 @@
                                 @endforeach
                             </ul>
                         @else
-                            <p class="text-muted mb-0">Belum ada daftar item pemeliharaan untuk alat ini.</p>
+                            <p class="text-muted mb-0">Belum ada daftar item pemeliharaan untuk alat ini</p>
                         @endif
                     </div>
                 </div>

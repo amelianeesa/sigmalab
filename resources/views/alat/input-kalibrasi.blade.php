@@ -23,11 +23,16 @@
 @section('content')
 <div class="container py-1">
     <h1 class="mt-1">Pemeliharaan</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('alat.index') }}">Alat & Kalibrasi</a></li>
-        <li class="breadcrumb-item active">Pemeliharaan</li>
-    </ol>
+    @auth
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('alat.index') }}">Alat & Kalibrasi</a></li>
+            <li class="breadcrumb-item active">Pemeliharaan</li>
+        </ol>
+    @else
+        <p class="text-muted mb-4">Informasi resmi identitas dan status kalibrasi alat laboratorium</p>
+    @endauth
+    
     <div class="row justify-content-center">
         <div class="col-lg-10">
             
@@ -38,12 +43,21 @@
                 </div>
             @endif
 
+            {{-- 1. INFORMASI UTAMA ALAT --}}
             <div class="card custom-card mb-4">
                 <div class="card-header card-header-primary d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> Informasi Alat</h5>
-                    <a href="{{ route('alat.pemeliharaan', $alat->alat_id) }}" class="btn btn-info btn-sm text-white fw-bold shadow-sm">
-                        <i class="fas fa-clipboard-list me-1"></i> Buka Kartu Pemeliharaan Harian
-                    </a>
+                    
+                    {{-- Tombol Buka Kartu Pemeliharaan Harian HANYA MUNCUL JIKA SUDAH LOGIN --}}
+                    @auth
+                        <a href="{{ route('alat.pemeliharaan', $alat->alat_id) }}" class="btn btn-info btn-sm text-white fw-bold shadow-sm">
+                            <i class="fas fa-clipboard-list me-1"></i> Buka Kartu Pemeliharaan Harian
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}?redirect={{ route('alat.pemeliharaan', $alat->alat_id) }}" class="btn btn-light btn-sm text-dark fw-bold shadow-sm">
+                            <i class="fas fa-sign-in-alt me-1"></i> Kartu Pemeliharaan Harian
+                        </a>
+                    @endauth
                 </div>
                 <div class="card-body">
                     <table class="table table-borderless mb-0 table-info-alat" style="font-size: 0.9rem;">
@@ -71,6 +85,7 @@
                 </div>
             </div>
 
+            {{-- 2. RIWAYAT KALIBRASI (Muncul untuk siapa saja / Publik & Admin) --}}
             <div class="card custom-card mb-4">
                 <div class="card-header card-header-dark">
                     <h6 class="mb-0"><i class="fas fa-history me-2"></i> Riwayat History Kalibrasi & Evaluasi</h6>
@@ -126,6 +141,8 @@
                 </div>
             </div>
 
+            {{-- 3. FORM INPUT KALIBRASI BARU (HANYA MUNCUL JIKA SUDAH LOGIN) --}}
+            @auth
             <div class="card custom-card mb-4">
                 <div class="card-header card-header-primary">
                     <h6 class="mb-0"><i class="fas fa-plus-circle me-2"></i> Form Input Pengecekan / Kalibrasi Baru</h6>
@@ -189,6 +206,17 @@
                     </form>
                 </div>
             </div>
+            @else
+            {{-- TAMPILAN JIKA BELUM LOGIN (GUEST / PUBLIK) --}}
+            <div class="alert alert-secondary text-center shadow-sm py-4 mb-4">
+                <i class="fas fa-lock fa-2x mb-2 text-muted"></i>
+                <h5>Form Input Pengecekan / Kalibrasi Dikunci</h5>
+                <p class="text-muted mb-3">Anda sedang mengakses halaman publik. Silakan login terlebih dahulu untuk mengisi form atau membuka kartu pemeliharaan harian</p>
+                <a href="{{ route('login') }}?redirect={{ url()->current() }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-sign-in-alt me-1"></i> Login Sekarang
+                </a>
+            </div>
+            @endauth
 
         </div>
     </div>
@@ -199,6 +227,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const tglKalibrasiInput = document.getElementById('tgl_kalibrasi');
     const intervalInput = document.getElementById('interval_kalibrasi');
     const tglAkhirInput = document.getElementById('tgl_akhir');
+
+    if (!tglKalibrasiInput) return; // Mencegah error jika elemen form tidak ada karena belum login
 
     let isManualEdit = false;
 
