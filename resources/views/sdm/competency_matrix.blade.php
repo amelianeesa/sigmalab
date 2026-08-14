@@ -33,7 +33,7 @@
             </form>
         </div>
         <div class="card-body px-4 pb-4">
-            @if($jenisSertifikasiList->isEmpty())
+            @if(empty($jenisSertifikasiList))
                 <div class="text-center py-5 text-muted">
                     <i class="bi bi-grid-3x3-gap fs-2 d-block mb-2"></i>
                     Belum ada data sertifikasi yang tercatat untuk membentuk matriks kompetensi.
@@ -59,7 +59,7 @@
                                         <div class="text-muted small fw-normal">{{ $row['personil']->jabatan }}</div>
                                     </td>
                                     @foreach($jenisSertifikasiList as $jenis)
-                                        @php $cell = $row['kompetensi'][$jenis]; @endphp
+                                        @php $cell = $row['kompetensi'][$jenis] ?? null; @endphp
                                         <td>
                                             @if($cell)
                                                 <a href="{{ route('sdm.kompetensi.detail', $row['personil']->personil_id) }}" class="text-decoration-none" title="Berlaku s.d {{ $cell['kompetensi']->tanggal_berakhir?->format('d-m-Y') ?? 'Tidak Terbatas' }}">
@@ -77,7 +77,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ $jenisSertifikasiList->count() + 1 }}" class="text-center text-muted py-4">
+                                    <td colspan="{{ count($jenisSertifikasiList) + 1 }}" class="text-center text-muted py-4">
                                         Belum ada data personil aktif yang ditemukan.
                                     </td>
                                 </tr>

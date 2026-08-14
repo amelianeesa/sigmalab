@@ -275,14 +275,12 @@ class SdmController extends Controller
     public function kompetensiDetail($id)
     {
         $personil = Personil::with(['kompetensi' => fn($query) => $query->orderByDesc('tanggal_terbit')])->findOrFail($id);
-        
-        $parameterList = \App\Models\ParameterUji::where('status_aktif', true)->orderBy('nama_parameter')->get();
 
         $personil->kompetensi->each(function ($komp) {
             $komp->status = $this->resolveStatusSertifikasi($komp->tanggal_berakhir);
         });
 
-        return view('sdm.kompetensi_detail', compact('personil', 'parameterList'));
+        return view('sdm.kompetensi_detail', compact('personil'));
     }
 
     public function storeKompetensi(Request $request, $id)
@@ -291,7 +289,6 @@ class SdmController extends Controller
 
         $personil = Personil::findOrFail($id);
         $data = $request->validate([
-            'parameter_uji_id' => 'nullable|exists:parameter_uji,parameter_uji_id',
             'jenis_sertifikasi' => 'required|string|max:100',
             'no_sertifikasi' => 'nullable|string|max:100',
             'tanggal_terbit' => 'nullable|date',
@@ -318,7 +315,6 @@ class SdmController extends Controller
         $personil = Personil::findOrFail($id);
         $kompetensi = $personil->kompetensi()->findOrFail($kompetensiId);
         $data = $request->validate([
-            'parameter_uji_id' => 'nullable|exists:parameter_uji,parameter_uji_id',
             'jenis_sertifikasi' => 'required|string|max:100',
             'no_sertifikasi' => 'nullable|string|max:100',
             'tanggal_terbit' => 'nullable|date',
@@ -406,6 +402,7 @@ class SdmController extends Controller
             'Content-Disposition' => 'inline; filename="' . $personil->file_cv . '"',
         ]);
     }
+
     public function competencyMatrix()
     {
         $kategori = request('kategori');
@@ -414,6 +411,7 @@ class SdmController extends Controller
 
         return view('sdm.competency_matrix', compact('matrix', 'jenisSertifikasiList', 'kategoriOptions', 'kategori'));
     }
+
     public function competencyMatrixPdf()
     {
         $kategori = request('kategori');
@@ -434,34 +432,40 @@ class SdmController extends Controller
         return $pdf->download($namaFile);
     }
 
+    /**
+     * Susun data Competency Matrix dari riwayat sertifikasi/pelatihan yang
+     * BENAR-BENAR pernah diinput di Training Data Record personil
+     * (kolom = nilai unik jenis_sertifikasi), bukan dari master data lain
+     * seperti ParameterUji.
+     */
     private function buildCompetencyMatrix(?string $kategori): array
     {
-        $personil = Personil::with(['kompetensi.parameterUji'])
+        $personil = Personil::with(['kompetensi'])
             ->where('status_aktif', true)
             ->when($kategori, fn($query) => $query->where('kategori_personil', $kategori))
             ->orderBy('nama')
             ->get();
 
-        $parameterList = \App\Models\ParameterUji::where('status_aktif', true)->orderBy('nama_parameter')->get();
+        // Kolom matriks = daftar unik jenis_sertifikasi yang pernah diinput
+        // untuk personil-personil yang tampil di sini.
+        $jenisSertifikasiList = $personil
+            ->flatMap(fn (Personil $p) => $p->kompetensi->pluck('jenis_sertifikasi'))
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values()
+            ->toArray();
 
-        $matrix = $personil->map(function (Personil $p) use ($parameterList) {
+        $matrix = $personil->map(function (Personil $p) use ($jenisSertifikasiList) {
             $sel = [];
 
-            foreach ($parameterList as $parameter) {
+            foreach ($jenisSertifikasiList as $jenis) {
                 $terbaru = $p->kompetensi
-                    ->where('parameter_uji_id', $parameter->parameter_uji_id)
+                    ->where('jenis_sertifikasi', $jenis)
                     ->sortByDesc('tanggal_terbit')
                     ->first();
 
-                // Fallback untuk sertifikasi tanpa parameter_uji_id (legacy data)
-                if (!$terbaru) {
-                    $terbaru = $p->kompetensi
-                        ->where('jenis_sertifikasi', $parameter->nama_parameter)
-                        ->sortByDesc('tanggal_terbit')
-                        ->first();
-                }
-
-                $sel[$parameter->nama_parameter] = $terbaru
+                $sel[$jenis] = $terbaru
                     ? ['status' => $this->resolveStatusSertifikasi($terbaru->tanggal_berakhir), 'kompetensi' => $terbaru]
                     : null;
             }
@@ -469,6 +473,6 @@ class SdmController extends Controller
             return ['personil' => $p, 'kompetensi' => $sel];
         });
 
-        return [$matrix, $parameterList->pluck('nama_parameter')->toArray()];
+        return [$matrix, $jenisSertifikasiList];
     }
 }

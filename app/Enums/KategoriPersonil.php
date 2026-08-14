@@ -1,6 +1,5 @@
 <?php
 
-// Simpan file ini di: app/Enums/KategoriPersonil.php
 
 namespace App\Enums;
 

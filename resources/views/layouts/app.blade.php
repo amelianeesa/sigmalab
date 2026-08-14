@@ -251,6 +251,7 @@
                     <a href="{{ route('dashboard') ?? url('/') }}"><i class="fas fa-home"></i> Dashboard</a>
                 </li>
 
+
                 {{-- 1. Manajemen Peralatan (Aset) --}}
                 @if(Auth::check() && Auth::user()->hasModulAccess('alat'))
                 <li class="{{ request()->is('alat*') ? 'active' : '' }}">
@@ -258,12 +259,12 @@
                 </li>
                 @endif
 
-                {{-- 2. Personel dan Kompetensi --}}
-                @if(Auth::check() && (Auth::user()->hasModulAccess('sdm') || Auth::user()->hasModulAccess('manajemen_pengguna')))
-                <li class="{{ request()->is('sdm*') || request()->is('hak-akses*') ? 'active' : '' }}">
-                    <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personel & Kompetensi</a>
-                </li>
-                @endif
+                 {{-- 2. Personil dan Kompetensi --}}
+                 @if(Auth::check() && (Auth::user()->hasModulAccess('sdm') || Auth::user()->hasModulAccess('manajemen_pengguna')))
+                 <li class="{{ request()->is('sdm*') || request()->is('hak-akses*') ? 'active' : '' }}">
+                     <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personil & Kompetensi</a>
+                 </li>
+                 @endif
 
                 {{-- 3. Proses dan Hasil Pengujian (QC) --}}
                 @if(Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
