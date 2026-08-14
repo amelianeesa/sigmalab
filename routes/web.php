@@ -38,6 +38,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/sdm', [SdmController::class, 'index'])->name('sdm.index');
     Route::get('/sdm/create', [SdmController::class, 'create'])->name('sdm.create');
     Route::post('/sdm', [SdmController::class, 'store'])->name('sdm.store');
+    Route::post('/sdm/kategori', [SdmController::class, 'storeKategori'])->name('sdm.kategori.store');
+    Route::delete('/sdm/kategori/{kode}', [SdmController::class, 'destroyKategori'])->name('sdm.kategori.destroy');
 
     // NOTE: harus didaftarkan sebelum '/sdm/{id}/edit' agar path literal ini
     // tidak pernah ditangkap sebagai parameter {id}.
@@ -50,7 +52,7 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/sdm/{id}/aktifkan', [SdmController::class, 'activate'])->name('sdm.activate');
     Route::delete('/sdm/{id}/permanen', [SdmController::class, 'forceDestroy'])->name('sdm.force-destroy');
     Route::post('/sdm/{id}/akun', [App\Http\Controllers\SdmController::class, 'storeAkun'])
-    ->name('sdm.akun.store');
+        ->name('sdm.akun.store');
 
     Route::get('/sdm/{id}/kompetensi', [SdmController::class, 'kompetensiDetail'])->name('sdm.kompetensi.detail');
     Route::post('/sdm/{id}/kompetensi', [SdmController::class, 'storeKompetensi'])->name('sdm.kompetensi.store');
@@ -72,7 +74,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('kegiatan', KegiatanController::class);
     Route::resource('hasil-uji', HasilUjiController::class)->only(['store', 'show']);
     Route::resource('tindak-lanjut', RiwayatTindakLanjutController::class)->only(['index', 'create', 'store', 'show']);
-    
+
     Route::get('/alat/{id}/input-kalibrasi', [AlatController::class, 'inputKalibrasi'])->name('alat.input-kalibrasi');
     Route::post('/alat/{id}/input-kalibrasi', [AlatController::class, 'storeInputKalibrasi'])->name('alat.store-input-kalibrasi');
 

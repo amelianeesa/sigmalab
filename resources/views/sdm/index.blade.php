@@ -22,6 +22,13 @@
         </div>
     @endif
 
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <div class="card mb-4">
         <div class="card-header py-3">
             <div class="mb-3 fw-bold text-dark fs-6">
@@ -262,7 +269,12 @@
                                 <input type="text" name="no_induk" class="form-control form-control-sm" value="{{ old('no_induk') }}" required>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label small fw-semibold">Kategori Personil</label>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <label class="form-label small fw-semibold mb-1">Kategori Personil</label>
+                                    <button type="button" class="btn btn-link btn-sm p-0 mb-1" data-bs-toggle="modal" data-bs-target="#modalTambahKategori" style="font-size: 0.75rem;">
+                                        <i class="fas fa-plus-circle"></i> Kategori Baru
+                                    </button>
+                                </div>
                                 <select name="kategori_personil" class="form-select form-select-sm">
                                     <option value="">— Pilih Kategori —</option>
                                     @foreach($kategoriOptions as $value => $label)
@@ -314,6 +326,54 @@
                     <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-save me-1"></i> Simpan Data</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalTambahKategori" tabindex="-1" aria-labelledby="modalTambahKategoriLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fs-6" id="modalTambahKategoriLabel"><i class="fas fa-tags me-2"></i>Kelola Kategori Personil</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                @if(count($kategoriOptions))
+                <label class="form-label small fw-semibold mb-2">Kategori Tersedia</label>
+                <ul class="list-group mb-4">
+                    @foreach($kategoriOptions as $kode => $label)
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+                            <span>{{ $label }}</span>
+                            <form action="{{ route('sdm.kategori.destroy', $kode) }}" method="POST" class="m-0"
+                                  onsubmit="return confirm('Hapus kategori &quot;{{ $label }}&quot;? Kategori hanya bisa dihapus jika belum dipakai personil manapun.')">
+                                @csrf
+                                @method('DELETE')
+                                <input type="hidden" name="redirect_to" value="{{ url()->current() }}">
+                                <button type="submit" class="btn btn-outline-danger btn-sm" title="Hapus kategori">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </li>
+                    @endforeach
+                </ul>
+                <hr>
+                @endif
+
+                <form action="{{ route('sdm.kategori.store') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="redirect_to" value="{{ url()->current() }}">
+                    <label class="form-label small fw-semibold">Tambah Kategori Baru</label>
+                    <div class="input-group">
+                        <input type="text" name="nama_kategori" class="form-control form-control-sm" placeholder="mis. Supervisor Lab, QC Inspector" required>
+                        <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-save me-1"></i> Simpan</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+            </div>
         </div>
     </div>
 </div>

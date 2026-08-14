@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Personil;
 use App\Models\KompetensiPersonil;
+use App\Models\KategoriPersonil;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
-use App\Enums\KategoriPersonil;
+use Illuminate\Support\Str;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -88,7 +89,7 @@ class SdmController extends Controller
             'no_induk' => 'required|unique:personil,no_induk',
             'nama' => 'required|string|max:100',
             'jabatan' => 'required|string|max:100',
-            'kategori_personil' => 'nullable|in:chemist,analist,preparator,sampler',
+            'kategori_personil' => 'nullable|exists:kategori_personil,kode',
             'unit_kerja' => 'required|string|max:100',
             'file_cv' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
             'nama_sertifikasi' => 'nullable|string|max:100',
@@ -147,7 +148,7 @@ class SdmController extends Controller
             'no_induk' => 'required|unique:personil,no_induk,' . $id . ',personil_id',
             'nama' => 'required|string|max:100',
             'jabatan' => 'required|string|max:100',
-            'kategori_personil' => 'nullable|in:chemist,analist,preparator,sampler',
+            'kategori_personil' => 'nullable|exists:kategori_personil,kode',
             'unit_kerja' => 'required|string|max:100',
             'file_cv' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
             'nama_sertifikasi' => 'nullable|string|max:100',
@@ -193,6 +194,49 @@ class SdmController extends Controller
         });
 
         return redirect()->route('sdm.index')->with('success', 'Data personil berhasil diperbarui.');
+    }
+
+    /**
+     * Simpan kategori personil baru lewat tombol "+" di form.
+     * Redirect kembali ke halaman asal (pakai field redirect_to).
+     */
+    public function storeKategori(Request $request)
+    {
+        $data = $request->validate([
+            'nama_kategori' => 'required|string|max:100|unique:kategori_personil,nama_kategori',
+            'redirect_to' => 'nullable|string',
+        ]);
+
+        $kode = Str::slug($data['nama_kategori'], '_');
+
+        $kategori = KategoriPersonil::create([
+            'kode' => $kode,
+            'nama_kategori' => $data['nama_kategori'],
+        ]);
+
+        $redirectTo = $request->input('redirect_to') ?: route('sdm.index');
+
+        return redirect($redirectTo)
+            ->with('success', 'Kategori "' . $kategori->nama_kategori . '" berhasil ditambahkan.')
+            ->with('kategori_baru', $kategori->kode);
+    }
+
+    public function destroyKategori(Request $request, $kode)
+    {
+        $kategori = KategoriPersonil::where('kode', $kode)->firstOrFail();
+
+        $dipakai = Personil::where('kategori_personil', $kode)->exists();
+
+        if ($dipakai) {
+            return redirect()->back()->with('error', 'Kategori "' . $kategori->nama_kategori . '" masih dipakai oleh personil, tidak bisa dihapus. Ubah dulu kategori personil yang memakainya.');
+        }
+
+        $namaKategori = $kategori->nama_kategori;
+        $kategori->delete();
+
+        $redirectTo = $request->input('redirect_to') ?: route('sdm.index');
+
+        return redirect($redirectTo)->with('success', 'Kategori "' . $namaKategori . '" berhasil dihapus.');
     }
 
     public function destroy($id)
@@ -440,7 +484,7 @@ class SdmController extends Controller
             ->get();
 
         $jenisSertifikasiList = $personil
-            ->flatMap(fn (Personil $p) => $p->kompetensi->pluck('jenis_sertifikasi'))
+            ->flatMap(fn(Personil $p) => $p->kompetensi->pluck('jenis_sertifikasi'))
             ->filter()
             ->unique()
             ->sort()
