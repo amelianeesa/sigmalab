@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <div class="d-flex flex-wrap gap-3 mb-4 mt-2">
+    <div class="d-flex flex-wrap gap-3 mb-2 mt-1">
         @if(Auth::user()->hasModulAccess('manajemen_pengguna'))
         <a href="{{ route('hak-akses.index') }}" class="btn btn-warning rounded-pill px-4 shadow-sm text-dark fw-bold" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
             <i class="fas fa-shield-alt me-2"></i> Manajemen Hak Akses
@@ -25,6 +25,20 @@
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
             <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @php
+        $personilWarningCount = $personil->filter(function ($row) {
+            $label = $row->statusSertifikasi['label'] ?? '';
+            return in_array($label, ['Segera Berakhir', 'Kedaluwarsa']);
+        })->count();
+    @endphp
+
+    @if($personilWarningCount > 0)
+        <div class="alert alert-warning alert-dismissible fade show shadow-sm" role="alert" style="margin: 0 0 0.5rem 0;">
+            <i class="fas fa-exclamation-triangle me-2"></i> <strong>Perhatian!</strong> Terdapat <strong>{{ $personilWarningCount }} personil</strong> yang masa sertifikasinya sudah kedaluarsa atau akan segera berakhir (dalam 6 bulan ke depan). Mohon segera lakukan pembaruan atau penjadwalan sertifikasi ulang.
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
@@ -291,9 +305,14 @@
                                 <input type="text" name="unit_kerja" class="form-control form-control-sm" value="{{ old('unit_kerja') }}" required>
                             </div>
                             <div class="col-12">
-                                <label class="form-label small fw-semibold">Upload CV</label>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label small fw-semibold mb-0">Upload CV</label>
+                                    <a href="{{ asset('templates/Template_CV_SIGMA-LAB.docx') }}" download class="small text-decoration-none">
+                                        <i class="fas fa-download me-1"></i>Unduh Template CV
+                                    </a>
+                                </div>
                                 <input type="file" name="file_cv" class="form-control form-control-sm" accept="image/*,application/pdf">
-                                <div class="form-text text-muted" style="font-size: 0.75rem;">Format: JPG, PNG, PDF (Maks. 2MB).</div>
+                                <div class="form-text text-muted" style="font-size: 0.75rem;">Format: JPG, PNG, PDF (Maks. 2MB). Isi sesuai template, lalu unggah di sini.</div>
                             </div>
                         </div>
                     </div>
@@ -339,36 +358,36 @@
             </div>
 
             <div class="modal-body p-4">
-                @if(count($kategoriOptions))
-                <label class="form-label small fw-semibold mb-2">Kategori Tersedia</label>
-                <ul class="list-group mb-4">
-                    @foreach($kategoriOptions as $kode => $label)
-                        <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+                <form action="{{ route('sdm.kategori.store') }}" method="POST" class="mb-4">
+                    @csrf
+                    <input type="hidden" name="redirect_to" value="{{ url()->current() }}">
+                    <label class="form-label small fw-semibold">Nama Kategori Baru</label>
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="nama_kategori" class="form-control" placeholder="mis. Supervisor Lab, QC Inspector" required>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Tambah</button>
+                    </div>
+                </form>
+
+                <hr>
+
+                <label class="form-label small fw-semibold text-muted">Kategori Saat Ini</label>
+                <ul class="list-group list-group-flush">
+                    @forelse($kategoriOptions as $kode => $label)
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
                             <span>{{ $label }}</span>
-                            <form action="{{ route('sdm.kategori.destroy', $kode) }}" method="POST" class="m-0"
-                                  onsubmit="return confirm('Hapus kategori &quot;{{ $label }}&quot;? Kategori hanya bisa dihapus jika belum dipakai personil manapun.')">
+                            <form action="{{ route('sdm.kategori.destroy', $kode) }}" method="POST" onsubmit="return confirm('Hapus kategori {{ $label }}?')">
                                 @csrf
                                 @method('DELETE')
                                 <input type="hidden" name="redirect_to" value="{{ url()->current() }}">
-                                <button type="submit" class="btn btn-outline-danger btn-sm" title="Hapus kategori">
-                                    <i class="fas fa-trash-alt"></i>
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus kategori">
+                                    <i class="fas fa-trash"></i>
                                 </button>
                             </form>
                         </li>
-                    @endforeach
+                    @empty
+                        <li class="list-group-item px-0 text-muted small">Belum ada kategori.</li>
+                    @endforelse
                 </ul>
-                <hr>
-                @endif
-
-                <form action="{{ route('sdm.kategori.store') }}" method="POST">
-                    @csrf
-                    <input type="hidden" name="redirect_to" value="{{ url()->current() }}">
-                    <label class="form-label small fw-semibold">Tambah Kategori Baru</label>
-                    <div class="input-group">
-                        <input type="text" name="nama_kategori" class="form-control form-control-sm" placeholder="mis. Supervisor Lab, QC Inspector" required>
-                        <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-save me-1"></i> Simpan</button>
-                    </div>
-                </form>
             </div>
 
             <div class="modal-footer bg-light">

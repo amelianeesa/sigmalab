@@ -24,7 +24,8 @@ class HakAksesSeeder extends Seeder
                 'proses_hasil' => 'tambah_ubah',
                 'tindak_lanjut' => 'tambah_ubah',
                 'reporting' => 'lihat',
-                'audit_log' => 'lihat'
+                'audit_log' => 'lihat',
+                'library_manage' => 'tambah_ubah'
             ],
             'Koordinator Laboratorium' => [
                 'parameter_uji' => 'full',
@@ -35,12 +36,14 @@ class HakAksesSeeder extends Seeder
                 'pengadaan' => 'tambah_ubah',
                 'sdm' => 'lihat',
                 'reporting' => 'lihat',
-                'audit_log' => 'lihat'
+                'audit_log' => 'lihat',
+                'library_manage' => 'lihat'
             ],
             'HR & GA' => [
                 'sdm' => 'full',
                 'pengadaan' => 'tambah_ubah',
-                'audit_log' => 'lihat'
+                'audit_log' => 'lihat',
+                'library_manage' => 'lihat'
             ],
             'Kabid Inspeksi dan Solusi Perdagangan' => [
                 'sdm' => 'lihat',
@@ -51,7 +54,8 @@ class HakAksesSeeder extends Seeder
                 'proses_hasil' => 'lihat',
                 'tindak_lanjut' => 'lihat',
                 'reporting' => 'lihat',
-                'audit_log' => 'lihat'
+                'audit_log' => 'lihat',
+                'library_manage' => 'lihat'
             ],
             'Kabid Dukungan Bisnis' => [
                 'sdm' => 'lihat',
@@ -62,7 +66,8 @@ class HakAksesSeeder extends Seeder
                 'proses_hasil' => 'lihat',
                 'tindak_lanjut' => 'lihat',
                 'reporting' => 'lihat',
-                'audit_log' => 'lihat'
+                'audit_log' => 'lihat',
+                'library_manage' => 'lihat'
             ],
             'Admin Aplikasi' => [
                 'manajemen_pengguna' => 'full',
@@ -75,7 +80,8 @@ class HakAksesSeeder extends Seeder
                 'proses_hasil' => 'lihat',
                 'tindak_lanjut' => 'lihat',
                 'reporting' => 'lihat',
-                'audit_log' => 'lihat'
+                'audit_log' => 'lihat',
+                'library_manage' => 'full'
             ]
         ];
 

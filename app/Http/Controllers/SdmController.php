@@ -33,6 +33,12 @@ class SdmController extends Controller
         $jumlahPersonilAktif = Personil::where('status_aktif', true)->count();
         $jumlahPersonilNonaktif = Personil::where('status_aktif', false)->count();
 
+        $jumlahSertifikasiSegeraHabis = Personil::where('status_aktif', true)
+            ->whereHas('kompetensi', function ($query) {
+                $query->whereNotNull('tanggal_berakhir')
+                    ->where('tanggal_berakhir', '<=', Carbon::now()->addMonths(6));
+            })->count();
+
         $personil->each(function (Personil $item) {
             $sertifikasi = $item->kompetensi->first();
             $item->sertifikasiTerakhir = $sertifikasi;
@@ -51,6 +57,7 @@ class SdmController extends Controller
             'showInactive',
             'jumlahPersonilAktif',
             'jumlahPersonilNonaktif',
+            'jumlahSertifikasiSegeraHabis',
             'kategori',
             'kategoriOptions',
             'roles'
@@ -69,7 +76,7 @@ class SdmController extends Controller
             return ['label' => 'Kedaluwarsa', 'class' => 'bg-danger text-white', 'icon' => 'x-circle'];
         }
 
-        if ($tanggalBerakhir->lessThanOrEqualTo(today()->addDays(60))) {
+        if ($tanggalBerakhir->lessThanOrEqualTo(today()->addMonths(6))) {
             return ['label' => 'Segera Berakhir', 'class' => 'bg-warning text-dark', 'icon' => 'exclamation-circle'];
         }
 
@@ -187,19 +194,21 @@ class SdmController extends Controller
                 ];
 
                 $sertifikasi = $personil->kompetensi()->orderByDesc('tanggal_terbit')->first();
-                $sertifikasi
-                    ? $sertifikasi->update($dataSertifikasi)
-                    : $personil->kompetensi()->create($dataSertifikasi);
+
+                if ($sertifikasi) {
+                    if ((string) $sertifikasi->tanggal_berakhir !== (string) $request->tanggal_berakhir) {
+                        $dataSertifikasi['reminder_terakhir_dikirim'] = null;
+                    }
+                    $sertifikasi->update($dataSertifikasi);
+                } else {
+                    $personil->kompetensi()->create($dataSertifikasi);
+                }
             }
         });
 
         return redirect()->route('sdm.index')->with('success', 'Data personil berhasil diperbarui.');
     }
 
-    /**
-     * Simpan kategori personil baru lewat tombol "+" di form.
-     * Redirect kembali ke halaman asal (pakai field redirect_to).
-     */
     public function storeKategori(Request $request)
     {
         $data = $request->validate([
@@ -360,6 +369,10 @@ class SdmController extends Controller
             'tanggal_berakhir' => 'nullable|date|after_or_equal:tanggal_terbit',
             'file_sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
+
+        if ((string) $kompetensi->tanggal_berakhir !== (string) $request->tanggal_berakhir) {
+            $data['reminder_terakhir_dikirim'] = null;
+        }
 
         if ($request->hasFile('file_sertifikat')) {
             if ($kompetensi->file_sertifikat && Storage::disk('local')->exists('public/uploads/sertifikat/' . $kompetensi->file_sertifikat)) {

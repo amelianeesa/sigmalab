@@ -12,23 +12,26 @@ class CekSertifikasiKadaluwarsa extends Command
 {
     protected $signature = 'sertifikasi:cek-kadaluwarsa';
 
-    protected $description = 'Cek sertifikasi/pelatihan yang akan habis masa berlakunya, kirim email & notifikasi in-app';
+    protected $description = 'Cek sertifikasi/pelatihan yang akan habis dalam 6 bulan, kirim reminder email & notifikasi in-app setiap bulan sampai diperbarui';
 
-    protected int $batasHari = 30;
+    protected int $batasBulan = 6;
 
     public function handle()
     {
-        $this->info('Mengecek sertifikasi yang akan habis dalam ' . $this->batasHari . ' hari...');
+        $this->info('Mengecek sertifikasi yang akan habis dalam ' . $this->batasBulan . ' bulan...');
 
         $data = KompetensiPersonil::with('personil.user')
-            ->where('reminder_terkirim', false)
             ->whereNotNull('tanggal_berakhir')
-            ->whereDate('tanggal_berakhir', '<=', now()->addDays($this->batasHari))
+            ->whereDate('tanggal_berakhir', '<=', now()->addMonths($this->batasBulan))
             ->whereDate('tanggal_berakhir', '>=', now())
+            ->where(function ($query) {
+                $query->whereNull('reminder_terakhir_dikirim')
+                    ->orWhere('reminder_terakhir_dikirim', '<=', now()->subMonth());
+            })
             ->get();
 
         if ($data->isEmpty()) {
-            $this->info('Tidak ada sertifikasi yang perlu diingatkan hari ini.');
+            $this->info('Tidak ada sertifikasi yang perlu diingatkan bulan ini.');
             return;
         }
 
@@ -65,7 +68,7 @@ class CekSertifikasiKadaluwarsa extends Command
                 $notifTerkirim++;
             }
 
-            $item->update(['reminder_terkirim' => true]);
+            $item->update(['reminder_terakhir_dikirim' => now()]);
         }
 
         $this->info("Selesai. {$emailTerkirim} email terkirim, {$notifTerkirim} notifikasi in-app dibuat.");

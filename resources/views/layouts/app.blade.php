@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Dashboard - SIGMALAB Sucofindo</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-sucofindo.png') }}?v=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
@@ -254,7 +255,14 @@
             </li>
             @endif
 
-            {{-- 5. Audit Log --}}
+            {{-- 5. Library Digital --}}
+            @if(Auth::check() && Auth::user()->hasModulAccess('library_manage'))
+            <li class="{{ request()->is('library*') ? 'active' : '' }}">
+                <a href="{{ route('library.index') }}"><i class="fas fa-book-open"></i> Library Digital</a>
+            </li>
+            @endif
+
+            {{-- 6. Audit Log --}}
             @if(Auth::check() && Auth::user()->hasModulAccess('audit_log'))
             <li class="{{ request()->is('audit-log*') ? 'active' : '' }}">
                 <a href="{{ route('audit-log.index') }}"><i class="fas fa-history"></i> Audit Trail</a>

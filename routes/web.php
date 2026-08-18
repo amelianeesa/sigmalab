@@ -71,6 +71,32 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('pengadaan', PengadaanController::class);
     Route::post('/pengadaan/{id}/approve', [PengadaanController::class, 'approve'])->name('pengadaan.approve');
     Route::resource('parameter-uji', ParameterUjiController::class);
+
+    // Rute statis harus didaftarkan sebelum '/library/{id}' agar 'create'
+    // tidak dianggap sebagai ID dokumen.
+    Route::middleware('modul:library_manage,tambah_ubah')->group(function () {
+        Route::get('/library/create', [\App\Http\Controllers\LibraryController::class, 'create'])->name('library.create');
+        Route::get('/library/arsip', [\App\Http\Controllers\LibraryController::class, 'archive'])->name('library.archive');
+    });
+
+    Route::middleware('modul:library_manage,lihat')->group(function () {
+        Route::get('/library', [\App\Http\Controllers\LibraryController::class, 'index'])->name('library.index');
+        Route::get('/library/export/pdf', [\App\Http\Controllers\LibraryController::class, 'exportPdf'])->name('library.export.pdf');
+        Route::get('/library/{id}/versions/{versionId}/download', [\App\Http\Controllers\LibraryController::class, 'downloadVersion'])->name('library.version.download');
+        Route::get('/library/{id}', [\App\Http\Controllers\LibraryController::class, 'show'])->name('library.show');
+        Route::get('/library/{id}/download', [\App\Http\Controllers\LibraryController::class, 'download'])->name('library.download');
+    });
+
+    Route::middleware('modul:library_manage,tambah_ubah')->group(function () {
+        Route::post('/library', [\App\Http\Controllers\LibraryController::class, 'store'])->name('library.store');
+        Route::get('/library/{id}/edit', [\App\Http\Controllers\LibraryController::class, 'edit'])->name('library.edit');
+        Route::put('/library/{id}', [\App\Http\Controllers\LibraryController::class, 'update'])->name('library.update');
+        Route::delete('/library/{id}', [\App\Http\Controllers\LibraryController::class, 'destroy'])->name('library.destroy');
+        Route::patch('/library/{id}/aktifkan', [\App\Http\Controllers\LibraryController::class, 'activate'])->name('library.activate');
+        Route::get('/library/{id}/revisi', [\App\Http\Controllers\LibraryController::class, 'createRevision'])->name('library.revision.create');
+        Route::post('/library/{id}/revisi', [\App\Http\Controllers\LibraryController::class, 'storeRevision'])->name('library.revision.store');
+    });
+
     Route::resource('kegiatan', KegiatanController::class);
     Route::resource('hasil-uji', HasilUjiController::class)->only(['store', 'show']);
     Route::resource('tindak-lanjut', RiwayatTindakLanjutController::class)->only(['index', 'create', 'store', 'show']);

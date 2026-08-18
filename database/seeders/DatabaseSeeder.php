@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
             RolesSeeder::class,
             ModulSeeder::class,
             HakAksesSeeder::class,
+            LibraryCategorySeeder::class,
+            LibraryAccessSeeder::class,
         ]);
 
         User::factory()->create([
