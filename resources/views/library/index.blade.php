@@ -37,20 +37,16 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <button class="btn btn-outline-secondary btn-sm w-100" type="submit">
+                <div class="col-md-4 d-flex gap-2">
+                    <button class="btn btn-outline-secondary btn-sm flex-grow-1" type="submit">
                         <i class="fas fa-filter me-1"></i> Filter
                     </button>
-                </div>
-                @if(!$showArchived)
-                    <div class="col-md-1">
-                        <button type="submit" formaction="{{ route('library.export.pdf') }}" formtarget="_blank" class="btn btn-outline-success btn-sm w-100" title="Cetak Rekap Daftar Induk Dokumen sesuai filter saat ini">
-                            <i class="fas fa-file-pdf"></i>
+                    @if(!$showArchived)
+                        <button type="submit" formaction="{{ route('library.export.pdf') }}" formtarget="_blank" class="btn btn-outline-success btn-sm text-nowrap" title="Cetak Rekap Daftar Induk Dokumen sesuai filter saat ini">
+                            <i class="fas fa-file-pdf me-1"></i> Cetak PDF
                         </button>
-                    </div>
-                @endif
-                <div class="col-md-1">
-                    <a href="{{ $showArchived ? route('library.archive') : route('library.index') }}" class="btn btn-outline-danger btn-sm w-100" title="Reset pencarian dan filter">
+                    @endif
+                    <a href="{{ $showArchived ? route('library.archive') : route('library.index') }}" class="btn btn-outline-danger btn-sm" title="Reset pencarian dan filter">
                         <i class="fas fa-rotate-left"></i>
                     </a>
                 </div>
@@ -116,7 +112,7 @@
             </div>
 
             <div class="d-flex justify-content-center mt-3">
-               {{ $documents->links('pagination::bootstrap-5') }}
+                {{ $documents->links('pagination::bootstrap-5') }}
             </div>
         </div>
     </div>

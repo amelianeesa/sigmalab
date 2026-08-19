@@ -15,7 +15,12 @@ class LibraryController extends Controller
         return $this->renderDocumentList($request, true);
     }
 
-public function exportPdf(Request $request)
+    public function archive(Request $request)
+    {
+        return $this->renderDocumentList($request, false);
+    }
+
+    public function exportPdf(Request $request)
     {
         $documents = LibraryDocument::with(['category', 'versions'])
             ->where('is_active', true)
