@@ -142,7 +142,7 @@
                                         <a href="{{ route('sdm.kompetensi.detail', $row->personil_id) }}" class="text-decoration-none fw-semibold">{{ $sertifikasi->jenis_sertifikasi }}</a>
                                         <small class="text-muted">No: {{ $sertifikasi->no_sertifikasi ?? '-' }}</small>
                                         @if($sertifikasi->file_sertifikat)
-                                            <a href="{{ route('sdm.kompetensi.file', [$row->personil_id, $sertifikasi->kompetensi_personil_id]) }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-xs px-2 py-0" style="font-size: 0.75rem;">
+                                            <a href="{{ route('sdm.kompetensi.file', [$row->personil_id, $sertifikasi->kompetensi_personil_id]) }}?v={{ $sertifikasi->updated_at?->timestamp }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-xs px-2 py-0" style="font-size: 0.75rem;">
                                                 <i class="bi bi-file-earmark-text me-1"></i> Lihat Dokumen
                                             </a>
                                         @endif
@@ -165,7 +165,7 @@
                             </td>
                             <td class="text-nowrap">
                                 @if($row->file_cv)
-                                    <a href="{{ route('sdm.cv', $row->personil_id) }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm" title="Lihat CV">
+                                    <a href="{{ route('sdm.cv', $row->personil_id) }}?v={{ $row->updated_at?->timestamp }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm" title="Lihat CV">
                                         <i class="fas fa-file-pdf"></i> CV
                                     </a>
                                 @else
@@ -385,7 +385,7 @@
         const noResultQuery = document.getElementById('noResultQuery');
         const rows          = document.querySelectorAll('#personilTableBody tr[data-search]');
 
-        if (! searchInput || rows.length === 0) return; 
+        if (! searchInput || rows.length === 0) return;
 
         let debounceTimer = null;
 

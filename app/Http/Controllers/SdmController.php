@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Personil; 
+use App\Models\Personil;
 use App\Models\KompetensiPersonil;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +19,7 @@ class SdmController extends Controller
     public function index()
     {
         $showInactive = request('status') === 'nonaktif';
-        $kategori = request('kategori'); 
+        $kategori = request('kategori');
 
         $personil = Personil::with([
             'kompetensi' => fn($query) => $query->orderByDesc('tanggal_terbit'),
@@ -200,12 +200,9 @@ class SdmController extends Controller
         abort_if(Auth::user()->role->nama_role === 'Admin Lab', 403, 'Admin Lab tidak diizinkan menghapus data personil.');
 
         $personil = Personil::findOrFail($id);
-        
+
         DB::transaction(function () use ($personil) {
-            // Soft delete sesuai rancangan database
             $personil->update(['status_aktif' => false]);
-            
-            // Nonaktifkan akun user yang terkait
             User::where('personil_id', $personil->personil_id)->update(['status_aktif' => false]);
         });
 
@@ -215,11 +212,9 @@ class SdmController extends Controller
     public function activate($id)
     {
         $personil = Personil::findOrFail($id);
-        
+
         DB::transaction(function () use ($personil) {
             $personil->update(['status_aktif' => true]);
-            
-            // Aktifkan kembali akun user yang terkait
             User::where('personil_id', $personil->personil_id)->update(['status_aktif' => true]);
         });
 
@@ -297,7 +292,7 @@ class SdmController extends Controller
         ]);
 
         if ($request->hasFile('file_sertifikat')) {
-            $fileName = time() . '_' . $request->file('file_sertifikat')->getClientOriginalName();
+            $fileName = $request->file('file_sertifikat')->hashName();
             Storage::disk('local')->putFileAs('public/uploads/sertifikat', $request->file('file_sertifikat'), $fileName);
             $data['file_sertifikat'] = $fileName;
         }
@@ -327,7 +322,7 @@ class SdmController extends Controller
                 Storage::disk('local')->delete('public/uploads/sertifikat/' . $kompetensi->file_sertifikat);
             }
 
-            $fileName = time() . '_' . $request->file('file_sertifikat')->getClientOriginalName();
+            $fileName = $request->file('file_sertifikat')->hashName();
             Storage::disk('local')->putFileAs('public/uploads/sertifikat', $request->file('file_sertifikat'), $fileName);
             $data['file_sertifikat'] = $fileName;
         }
@@ -361,6 +356,8 @@ class SdmController extends Controller
 
         return response()->file($fullPath, [
             'Content-Disposition' => 'inline; filename="' . $kompetensi->file_sertifikat . '"',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma' => 'no-cache',
         ]);
     }
 
@@ -380,7 +377,7 @@ class SdmController extends Controller
                 Storage::disk('local')->delete('public/uploads/sertifikat/' . $kompetensi->file_sertifikat);
             }
 
-            $fileName = time() . '_' . $request->file('file_sertifikat')->getClientOriginalName();
+            $fileName = $request->file('file_sertifikat')->hashName();
             Storage::disk('local')->putFileAs('public/uploads/sertifikat', $request->file('file_sertifikat'), $fileName);
             $kompetensi->update(['file_sertifikat' => $fileName]);
         }
@@ -400,6 +397,8 @@ class SdmController extends Controller
 
         return response()->file($fullPath, [
             'Content-Disposition' => 'inline; filename="' . $personil->file_cv . '"',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma' => 'no-cache',
         ]);
     }
 
@@ -446,8 +445,6 @@ class SdmController extends Controller
             ->orderBy('nama')
             ->get();
 
-        // Kolom matriks = daftar unik jenis_sertifikasi yang pernah diinput
-        // untuk personil-personil yang tampil di sini.
         $jenisSertifikasiList = $personil
             ->flatMap(fn (Personil $p) => $p->kompetensi->pluck('jenis_sertifikasi'))
             ->filter()

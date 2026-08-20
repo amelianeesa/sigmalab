@@ -59,7 +59,7 @@
                             @if($personil->file_cv)
                                 <div class="form-text text-success mt-1">
                                     <i class="bi bi-check-circle"></i> CV saat ini sudah tersimpan di sistem.
-                                    <a href="{{ route('sdm.cv', $personil->personil_id) }}" target="_blank" class="ms-1">Lihat CV</a>
+                                    <a href="{{ route('sdm.cv', $personil->personil_id) }}?v={{ $personil->updated_at?->timestamp }}" target="_blank" class="ms-1">Lihat CV</a>
                                 </div>
                             @endif
                         </div>
