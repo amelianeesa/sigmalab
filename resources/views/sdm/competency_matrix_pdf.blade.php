@@ -131,6 +131,10 @@
             <td>: {{ $kategori ? ($kategoriOptions[$kategori] ?? $kategori) : 'Semua Kategori' }}</td>
         </tr>
         <tr>
+            <td><strong>Sertifikasi</strong></td>
+            <td>: {{ $jenisSertifikasi }}</td>
+        </tr>
+        <tr>
             <td><strong>Dicetak pada</strong></td>
             <td>: {{ $tanggalCetak }}</td>
         </tr>
@@ -138,21 +142,17 @@
 
     <div class="legend">
         <span class="aktif">Aktif</span>
-        <span class="segera">Segera Berakhir (&le;60 hari)</span>
+        <span class="segera">Segera Berakhir (&le;6 bulan)</span>
         <span class="kedaluwarsa">Kedaluwarsa</span>
         <span class="belum">Belum Pernah</span>
     </div>
 
-    @if(empty($jenisSertifikasiList))
-        <p>Belum ada data sertifikasi yang tercatat untuk membentuk matriks kompetensi.</p>
-    @else
-        <table class="matrix">
+    <table class="matrix">
             <thead>
                 <tr>
                     <th style="width: 160px;">Nama Personil</th>
-                    @foreach($jenisSertifikasiList as $jenis)
-                        <th>{{ $jenis }}</th>
-                    @endforeach
+                    <th>Status Sertifikasi</th>
+                    <th>Berlaku Sampai</th>
                 </tr>
             </thead>
             <tbody>
@@ -162,41 +162,24 @@
                             <div class="nama">{{ $row['personil']->nama }}</div>
                             <div class="jabatan">{{ $row['personil']->jabatan }}</div>
                         </td>
-                        @foreach($jenisSertifikasiList as $jenis)
-                            @php
-                                $cell = $row['kompetensi'][$jenis] ?? null;
-                                $cssClass = 'belum';
-                                $label = 'Belum Pernah';
-                                $keterangan = '';
-
-                                if ($cell) {
-                                    $label = $cell['status']['label'];
-                                    $keterangan = $cell['kompetensi']->tanggal_berakhir?->format('d-m-Y') ?? 'Tidak Terbatas';
-
-                                    $cssClass = match ($label) {
-                                        'Aktif' => 'aktif',
-                                        'Segera Berakhir' => 'segera',
-                                        'Kedaluwarsa' => 'kedaluwarsa',
-                                        default => 'belum',
-                                    };
-                                }
-                            @endphp
-                            <td class="sel">
-                                <span class="badge {{ $cssClass }}">{{ $label }}</span>
-                                @if($keterangan)
-                                    <div style="font-size: 8px; color: #6b7280; margin-top: 2px;">s.d {{ $keterangan }}</div>
-                                @endif
-                            </td>
-                        @endforeach
+                        @php
+                            $cssClass = match ($row['status']['label'] ?? '') {
+                                'Aktif' => 'aktif',
+                                'Segera Berakhir' => 'segera',
+                                'Kedaluwarsa' => 'kedaluwarsa',
+                                default => 'belum',
+                            };
+                        @endphp
+                        <td class="sel"><span class="badge {{ $cssClass }}">{{ $row['status']['label'] ?? 'Belum Pernah' }}</span></td>
+                        <td class="sel">{{ $row['kompetensi']?->tanggal_berakhir?->format('d-m-Y') ?? '-' }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ count($jenisSertifikasiList) + 1 }}">Belum ada data personil aktif yang ditemukan.</td>
+                        <td colspan="3">Belum ada data personil aktif yang ditemukan.</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
-    @endif
 
     <p class="footer-note">Dokumen ini dihasilkan otomatis oleh SIGMA-LAB — Sistem Integrasi Manajemen Laboratorium PT Sucofindo Cilacap.</p>
 

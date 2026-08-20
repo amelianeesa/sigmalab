@@ -30,7 +30,7 @@
     @endif
 
     @php
-        $personilWarningCount = $personil->filter(function ($row) {
+        $personilWarningCount = $personil->getCollection()->filter(function ($row) {
             $label = $row->statusSertifikasi['label'] ?? '';
             return in_array($label, ['Segera Berakhir', 'Kedaluwarsa']);
         })->count();
@@ -38,7 +38,7 @@
 
     @if($personilWarningCount > 0)
         <div class="alert alert-warning alert-dismissible fade show shadow-sm" role="alert" style="margin: 0 0 0.5rem 0;">
-            <i class="fas fa-exclamation-triangle me-2"></i> <strong>Perhatian!</strong> Terdapat <strong>{{ $personilWarningCount }} personil</strong> yang masa sertifikasinya sudah kedaluarsa atau akan segera berakhir (dalam 6 bulan ke depan). Mohon segera lakukan pembaruan atau penjadwalan sertifikasi ulang.
+            <i class="fas fa-exclamation-triangle me-2"></i> <strong>Perhatian!</strong> Pada halaman ini terdapat <strong>{{ $personilWarningCount }} personil</strong> yang masa sertifikasinya sudah kedaluarsa atau akan segera berakhir (dalam 6 bulan ke depan).
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
@@ -54,6 +54,9 @@
                     <form method="GET" action="{{ route('sdm.index') }}" class="m-0">
                         @if($showInactive)
                             <input type="hidden" name="status" value="nonaktif">
+                        @endif
+                        @if($cari)
+                            <input type="hidden" name="cari" value="{{ $cari }}">
                         @endif
                         <select name="kategori" class="form-select form-select-sm w-100" onchange="this.form.submit()">
                             <option value="">Semua Kategori</option>
@@ -72,10 +75,10 @@
 
                 <div class="col-md-3 col-sm-6">
                     <div class="btn-group w-100" role="group">
-                        <a href="{{ route('sdm.index', array_filter(['kategori' => $kategori])) }}" class="btn btn-{{ ! $showInactive ? 'secondary' : 'outline-secondary' }} btn-sm w-50">
+                        <a href="{{ route('sdm.index', array_filter(['kategori' => $kategori, 'cari' => $cari])) }}" class="btn btn-{{ ! $showInactive ? 'secondary' : 'outline-secondary' }} btn-sm w-50">
                             Aktif <span class="badge bg-light text-dark ms-1">{{ $jumlahPersonilAktif }}</span>
                         </a>
-                        <a href="{{ route('sdm.index', array_filter(['status' => 'nonaktif', 'kategori' => $kategori])) }}" class="btn btn-{{ $showInactive ? 'secondary' : 'outline-secondary' }} btn-sm w-50">
+                        <a href="{{ route('sdm.index', array_filter(['status' => 'nonaktif', 'kategori' => $kategori, 'cari' => $cari])) }}" class="btn btn-{{ $showInactive ? 'secondary' : 'outline-secondary' }} btn-sm w-50">
                             Nonaktif <span class="badge bg-light text-dark ms-1">{{ $jumlahPersonilNonaktif }}</span>
                         </a>
                     </div>
@@ -92,17 +95,22 @@
         </div>
 
         <div class="card-body">
-            <div class="mb-3">
+            <form method="GET" action="{{ route('sdm.index') }}" class="mb-3">
+                @if($showInactive)<input type="hidden" name="status" value="nonaktif">@endif
+                @if($kategori)<input type="hidden" name="kategori" value="{{ $kategori }}">@endif
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                    <input type="text" id="searchPersonil" class="form-control"
+                    <input type="text" name="cari" class="form-control" value="{{ $cari }}"
                            placeholder="Cari nama, no. induk, penempatan, unit kerja, sertifikasi...">
-                    <button class="btn btn-outline-secondary" type="button" id="clearSearchPersonil" title="Bersihkan pencarian">
-                        <i class="bi bi-x-lg"></i>
+                    <button class="btn btn-outline-secondary" type="submit" title="Cari">
+                        <i class="bi bi-search"></i>
                     </button>
+                    <a href="{{ route('sdm.index', array_filter(['status' => $showInactive ? 'nonaktif' : null, 'kategori' => $kategori])) }}" class="btn btn-outline-secondary" title="Bersihkan pencarian">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
                 </div>
-                <small class="text-muted d-block mt-1" id="searchResultInfo"></small>
-            </div>
+                @if($cari)<small class="text-muted d-block mt-1">Hasil pencarian untuk “{{ $cari }}”.</small>@endif
+            </form>
 
             <div class="table-responsive">
                 <table class="table table-bordered table-striped align-middle text-center" style="font-size: 0.85rem;">
@@ -127,18 +135,9 @@
                             $sertifikasi = $row->sertifikasiTerakhir;
                             $status = $row->statusSertifikasi;
                             $kategoriLabel = $kategoriOptions[$row->kategori_personil] ?? $row->kategori_personil ?? '';
-                            $searchHaystack = strtolower(implode(' ', array_filter([
-                                $row->nama,
-                                $row->no_induk,
-                                $row->jabatan,
-                                $row->unit_kerja,
-                                $kategoriLabel,
-                                $sertifikasi->jenis_sertifikasi ?? null,
-                                $sertifikasi->no_sertifikasi ?? null,
-                            ])));
                         @endphp
-                        <tr data-search="{{ $searchHaystack }}">
-                            <td>{{ $index + 1 }}</td>
+                        <tr>
+                            <td>{{ $personil->firstItem() + $index }}</td>
                             <td><code class="fw-bold">{{ $row->no_induk }}</code></td>
                             <td class="fw-bold text-start">
                                 {{ $row->nama }}
@@ -246,16 +245,15 @@
                             </td>
                         </tr>
                         @endforelse
-
-                        <tr id="noSearchResultRow" style="display:none;">
-                            <td colspan="11" class="text-center text-muted py-4">
-                                <i class="bi bi-search me-1"></i>
-                                Tidak ada personil yang cocok dengan pencarian "<span id="noResultQuery" class="fw-semibold"></span>".
-                            </td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
+            @if($personil->hasPages())
+                <div class="d-flex flex-column align-items-center gap-2 mt-3">
+                    <small class="text-muted">Menampilkan {{ $personil->firstItem() }}–{{ $personil->lastItem() }} dari {{ $personil->total() }} personil</small>
+                    {{ $personil->onEachSide(1)->links('pagination::bootstrap-5') }}
+                </div>
+            @endif
         </div>
     </div>
 </div>
@@ -452,60 +450,6 @@
 
             document.getElementById('formBuatAkun').action = '{{ url('/sdm') }}/' + personilId + '/akun';
             document.getElementById('modalBuatAkunNama').textContent = personilNama;
-        });
-    });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const searchInput   = document.getElementById('searchPersonil');
-        const clearBtn      = document.getElementById('clearSearchPersonil');
-        const resultInfo    = document.getElementById('searchResultInfo');
-        const noResultRow   = document.getElementById('noSearchResultRow');
-        const noResultQuery = document.getElementById('noResultQuery');
-        const rows          = document.querySelectorAll('#personilTableBody tr[data-search]');
-
-        if (! searchInput || rows.length === 0) return;
-
-        let debounceTimer = null;
-
-        function applyFilter() {
-            const q = searchInput.value.trim().toLowerCase();
-            let visibleCount = 0;
-
-            rows.forEach(function (row) {
-                const haystack = row.getAttribute('data-search') || '';
-                const match = q === '' || haystack.includes(q);
-                row.style.display = match ? '' : 'none';
-                if (match) visibleCount++;
-            });
-
-            resultInfo.textContent = q === ''
-                ? ''
-                : `Menampilkan ${visibleCount} dari ${rows.length} personil`;
-
-            if (q !== '' && visibleCount === 0) {
-                noResultQuery.textContent = searchInput.value.trim();
-                noResultRow.style.display = '';
-            } else {
-                noResultRow.style.display = 'none';
-            }
-        }
-        searchInput.addEventListener('input', function () {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(applyFilter, 150);
-        });
-
-        clearBtn.addEventListener('click', function () {
-            searchInput.value = '';
-            applyFilter();
-            searchInput.focus();
-        });
-
-        document.addEventListener('keydown', function (e) {
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-                e.preventDefault();
-                searchInput.focus();
-            }
         });
     });
 </script>
