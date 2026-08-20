@@ -85,6 +85,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/library/{id}/versions/{versionId}/download', [\App\Http\Controllers\LibraryController::class, 'downloadVersion'])->name('library.version.download');
         Route::get('/library/{id}', [\App\Http\Controllers\LibraryController::class, 'show'])->name('library.show');
         Route::get('/library/{id}/download', [\App\Http\Controllers\LibraryController::class, 'download'])->name('library.download');
+        Route::get('/library/{id}/preview', [\App\Http\Controllers\LibraryController::class, 'preview'])->name('library.preview');
+
     });
 
     Route::middleware('modul:library_manage,tambah_ubah')->group(function () {

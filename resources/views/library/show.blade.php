@@ -52,9 +52,10 @@
 
                 <div class="col-md-6">
                     <div class="small text-muted">File Aktif</div>
-                    <a href="{{ route('library.download', $document->id) }}" class="btn btn-outline-primary btn-sm mt-1">
-                        <i class="fas fa-file-download me-1"></i> {{ $document->file_name }}
-                    </a>
+                    <div class="d-flex align-items-center gap-2 mt-1 text-dark">
+                        <i class="fas fa-file-alt text-muted"></i>
+                        <span>{{ $document->file_name ?? '-' }}</span>
+                    </div>
                 </div>
                 <div class="col-md-6">
                     <div class="small text-muted">Pembaruan Terakhir</div>

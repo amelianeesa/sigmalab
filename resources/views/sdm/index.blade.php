@@ -193,44 +193,52 @@
                                 @endif
                             </td>
                             <td class="text-nowrap">
-                                <a href="{{ route('sdm.kompetensi.detail', $row->personil_id) }}" class="btn btn-outline-dark btn-sm" title="Training Data Record">
-                                    <i class="fas fa-history"></i>
-                                </a>
+                                @if($showInactive && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
+                                    <form action="{{ route('sdm.activate', $row->personil_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Aktifkan kembali {{ $row->nama }}?')">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-undo me-1"></i> Aktifkan Kembali</button>
+                                    </form>
+                                @else
+                                    <a href="{{ route('sdm.kompetensi.detail', $row->personil_id) }}" class="btn btn-outline-dark btn-sm" title="Training Data Record">
+                                        <i class="fas fa-history me-1"></i> Riwayat
+                                    </a>
+                                @endif
                                 @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
-                                    @unless($row->user)
-                                        <button type="button" class="btn btn-outline-dark btn-sm" title="Buat Akun Login"
-                                            data-bs-toggle="modal" data-bs-target="#modalBuatAkun"
-                                            data-personil-id="{{ $row->personil_id }}"
-                                            data-personil-nama="{{ $row->nama }}">
-                                            <i class="fas fa-user-plus"></i>
+                                    <div class="dropdown d-inline-block">
+                                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Aksi administrasi">
+                                            <i class="fas fa-ellipsis-vertical"></i>
                                         </button>
-                                    @endunless
-                                    <a href="{{ route('sdm.edit', $row->personil_id) }}" class="btn btn-warning btn-sm" title="Edit"><i class="fas fa-edit"></i></a>
-
-                                    @if($showInactive)
-                                        <form action="{{ route('sdm.activate', $row->personil_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Aktifkan kembali {{ $row->nama }}?')">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" class="btn btn-success btn-sm" title="Aktifkan kembali">
-                                                <i class="fas fa-undo"></i>
-                                            </button>
-                                        </form>
-                                        <form action="{{ route('sdm.force-destroy', $row->personil_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus permanen {{ $row->nama }}? Tindakan ini tidak dapat dibatalkan.')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm" title="Hapus permanen">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    @else
-                                        <form action="{{ route('sdm.destroy', $row->personil_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Nonaktifkan {{ $row->nama }}?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm" title="Nonaktifkan">
-                                                <i class="fas fa-pause-circle"></i>
-                                            </button>
-                                        </form>
-                                    @endif
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                            @unless($row->user)
+                                                <li>
+                                                    <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modalBuatAkun"
+                                                        data-personil-id="{{ $row->personil_id }}" data-personil-nama="{{ $row->nama }}">
+                                                        <i class="fas fa-user-plus me-2"></i>Buat Akun Login
+                                                    </button>
+                                                </li>
+                                            @endunless
+                                            <li><a class="dropdown-item" href="{{ route('sdm.edit', $row->personil_id) }}"><i class="fas fa-edit text-warning me-2"></i>Edit Personil</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            @if($showInactive)
+                                                <li>
+                                                    <form action="{{ route('sdm.force-destroy', $row->personil_id) }}" method="POST" onsubmit="return confirm('Hapus permanen {{ $row->nama }}? Tindakan ini tidak dapat dibatalkan.')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="dropdown-item text-danger"><i class="fas fa-trash me-2"></i>Hapus Permanen</button>
+                                                    </form>
+                                                </li>
+                                            @else
+                                                <li>
+                                                    <form action="{{ route('sdm.destroy', $row->personil_id) }}" method="POST" onsubmit="return confirm('Nonaktifkan {{ $row->nama }}?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="dropdown-item text-danger"><i class="fas fa-pause-circle me-2"></i>Nonaktifkan</button>
+                                                    </form>
+                                                </li>
+                                            @endif
+                                        </ul>
+                                    </div>
                                 @endif
                             </td>
                         </tr>

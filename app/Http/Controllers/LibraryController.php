@@ -10,6 +10,16 @@ use Illuminate\Support\Facades\Storage;
 
 class LibraryController extends Controller
 {
+    private array $allowedCategories = ['Dokumen Internal', 'Dokumen Eksternal', 'Formulir', 'SDS'];
+
+    private function getFilteredCategories()
+    {
+        return LibraryCategory::where('is_active', true)
+            ->whereIn('nama_kategori', $this->allowedCategories)
+            ->orderByRaw("FIELD(nama_kategori, 'Dokumen Internal', 'Dokumen Eksternal', 'Formulir', 'SDS')")
+            ->get();
+    }
+
     public function index(Request $request)
     {
         return $this->renderDocumentList($request, true);
@@ -74,7 +84,7 @@ class LibraryController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $categories = LibraryCategory::where('is_active', true)->orderBy('nama_kategori')->get();
+        $categories = $this->getFilteredCategories();
 
         $showArchived = !$isActive;
 
@@ -83,7 +93,7 @@ class LibraryController extends Controller
 
     public function create()
     {
-        $categories = LibraryCategory::where('is_active', true)->orderBy('nama_kategori')->get();
+        $categories = $this->getFilteredCategories();
 
         return view('library.create', compact('categories'));
     }
@@ -151,9 +161,9 @@ class LibraryController extends Controller
 
     public function edit($id)
     {
-        $document = LibraryDocument::with('versions')->where('is_active', true)->findOrFail($id);
-        $categories = LibraryCategory::where('is_active', true)->orderBy('nama_kategori')->get();
-        $latestVersion = $document->versions->sortByDesc('revisi_ke')->first();
+        $document = LibraryDocument::where('is_active', true)->findOrFail($id);
+        $categories = $this->getFilteredCategories();
+        $latestVersion = $document->versions()->orderByDesc('revisi_ke')->first();
 
         return view('library.edit', compact('document', 'categories', 'latestVersion'));
     }
@@ -239,6 +249,17 @@ class LibraryController extends Controller
         $document = LibraryDocument::where('is_active', true)->findOrFail($id);
 
         return $this->downloadFile($document, $document->file_path, $document->file_name, 'Dokumen versi terbaru diunduh.');
+    }
+
+    public function preview($id)
+    {
+        $document = LibraryDocument::where('is_active', true)->findOrFail($id);
+
+        if (!Storage::disk('public')->exists($document->file_path)) {
+            abort(404, 'File tidak ditemukan.');
+        }
+
+        return Storage::disk('public')->response($document->file_path, $document->file_name);
     }
 
     public function downloadVersion($id, $versionId)
