@@ -11,7 +11,7 @@
     <div class="card mb-4">
         <div class="card-header"><i class="fas fa-plus-circle me-1"></i> Form Input Data Master & Kalibrasi</div>
         <div class="card-body">
-            <form action="{{ route('alat.store') }}" method="POST">
+            <form action="{{ route('alat.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 
                 <h5 class="text-primary mb-3"><i class="fas fa-tools"></i> Informasi Spesifikasi Alat</h5>
@@ -100,6 +100,11 @@
                     <div class="col-md-6">
                         <label class="form-label">No. Sertifikat Kalibrasi / Perijinan</label>
                         <input type="text" name="no_sertifikat" class="form-control" placeholder="mis. 20059/ENBPAQ" value="{{ old('no_sertifikat') }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="file_sertifikat" class="form-label">Upload File / Foto Sertifikat Kalibrasi (PDF/Gambar)</label>
+                        <input type="file" name="file_sertifikat" id="file_sertifikat" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="form-text text-muted" style="font-size: 0.75rem;">Format yang diizinkan: PDF, JPG, JPEG, PNG. Maks: 2MB</div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Jenis Kalibrasi</label>

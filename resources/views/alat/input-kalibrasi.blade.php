@@ -48,16 +48,42 @@
                 <div class="card-header card-header-primary d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> Informasi Alat</h5>
                     
-                    {{-- Tombol Buka Kartu Pemeliharaan Harian HANYA MUNCUL JIKA SUDAH LOGIN --}}
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-sm fw-bold dropdown-toggle shadow-sm text-dark" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-download me-1 text-primary"></i> Unduh Laporan
+                            </button>
+                            <ul class="dropdown-menu shadow" aria-labelledby="dropdownMenuButton">
+                                <li>
+                                    <a class="dropdown-item text-danger" href="{{ route('alat.export-pdf', $alat->alat_id) }}" target="_blank">
+                                        <i class="fas fa-file-pdf me-2"></i> PDF
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-success" href="{{ route('alat.export-excel', $alat->alat_id) }}">
+                                        <i class="fas fa-file-excel me-2"></i> Excel
+                                    </a>
+                                </li>
+                                {{-- <li>
+                                    <a class="dropdown-item text-primary" href="{{ route('alat.export-word', $alat->alat_id) }}">
+                                        <i class="fas fa-file-word me-2"></i> Word
+                                    </a>
+                                </li> --}}
+                            </ul>
+                        </div>
+                    {{-- Tombol Buka Kartu Pemeliharaan Harian: Jika Login tampil tombol asli, jika Public tampil tombol arah login --}}
                     @auth
-                        <a href="{{ route('alat.pemeliharaan', $alat->alat_id) }}" class="btn btn-info btn-sm text-white fw-bold shadow-sm">
-                            <i class="fas fa-clipboard-list me-1"></i> Buka Kartu Pemeliharaan Harian
-                        </a>
+                        @if (Route::has('alat.pemeliharaan'))
+                            <a href="{{ route('alat.pemeliharaan', $alat->alat_id) }}" class="btn btn-info btn-sm text-white fw-bold shadow-sm">
+                                <i class="fas fa-clipboard-list me-1"></i> Kartu Pemeliharaan Harian
+                            </a>
+                        @endif
                     @else
-                        <a href="{{ route('login') }}?redirect={{ route('alat.pemeliharaan', $alat->alat_id) }}" class="btn btn-light btn-sm text-dark fw-bold shadow-sm">
-                            <i class="fas fa-sign-in-alt me-1"></i> Kartu Pemeliharaan Harian
+                        <a href="{{ route('login') }}?redirect={{ url()->current() }}" class="btn btn-light btn-sm text-dark fw-bold shadow-sm">
+                            <i class="fas fa-sign-in-alt me-1"></i> Kartu Pemeliharaan Harian ( Login)
                         </a>
                     @endauth
+                </div>
                 </div>
                 <div class="card-body">
                     <table class="table table-borderless mb-0 table-info-alat" style="font-size: 0.9rem;">
@@ -71,7 +97,7 @@
                         </tr>
                         <tr>
                             <td class="fw-bold">Merk / Tipe</td>
-                            <td>: {{ $alat->merk_tipe ?? '-' }}</td>
+                            <td>: {{ $alat->merk ?? $alat->merk_tipe ?? '-' }}</td>
                         </tr>
                         <tr>
                             <td class="fw-bold">Nomor Seri</td>
@@ -79,7 +105,7 @@
                         </tr>
                         <tr>
                             <td class="fw-bold">Unit Kerja Pemilik</td>
-                            <td>: {{ $alat->unit_kerja_pemilik ?? '-' }}</td>
+                            <td>: {{ $alat->unit_pemilik ?? $alat->unit_kerja_pemilik ?? '-' }}</td>
                         </tr>
                     </table>
                 </div>
@@ -96,9 +122,9 @@
                             <thead class="table-secondary">
                                 <tr>
                                     <th>Urutan</th>
-                                    <th>Jenis</th>
+                                    <th>Jenis Kalibrasi</th>
                                     <th>Tanggal Kalibrasi s/d Akhir</th>
-                                    <th>Lembaga & No. Sertifikat</th>
+                                    <th>Lembaga & Sertifikat</th>
                                     <th>Range & Faktor Koreksi</th>
                                     <th>Signifikan</th>
                                     <th>Catatan / Evaluasi</th>
@@ -114,9 +140,17 @@
                                         <small class="text-muted">s/d {{ \Carbon\Carbon::parse($riwayat->tgl_akhir)->format('d/m/Y') }}</small>
                                     </td>
                                     <td class="text-start">
-                                        <strong>{{ $riwayat->lembaga_kalibrasi }}</strong><br>
+                                        <strong>Lembaga: {{ $riwayat->lembaga_kalibrasi }}</strong><br>
                                         <small class="text-muted">Sertifikat: {{ $riwayat->no_sertifikat }}</small>
+                                        @if(!empty($riwayat->file_sertifikat))
+                                            <div class="mt-1">
+                                                <a href="{{ asset('storage/' . $riwayat->file_sertifikat) }}" target="_blank" class="btn btn-outline-primary btn-sm py-0 px-1" style="font-size: 0.65rem;" title="Lihat Sertifikat">
+                                                    <i class="fas fa-file-pdf me-1"></i> Lihat Sertifikat
+                                                </a>
+                                            </div>
+                                        @endif
                                     </td>
+
                                     <td>
                                         <small>Range: {{ $riwayat->range_kapasitas ?? '-' }}</small><br>
                                         <small>Koreksi: {{ $riwayat->faktor_koreksi ?? '-' }}</small>
@@ -141,15 +175,16 @@
                 </div>
             </div>
 
-            {{-- 3. FORM INPUT KALIBRASI BARU (HANYA MUNCUL JIKA SUDAH LOGIN) --}}
+            {{-- 3. FORM INPUT KALIBRASI BARU / TAMPILAN LOGIN UNTUK PUBLIK --}}
             @auth
             <div class="card custom-card mb-4">
                 <div class="card-header card-header-primary">
                     <h6 class="mb-0"><i class="fas fa-plus-circle me-2"></i> Form Input Pengecekan / Kalibrasi Baru</h6>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('alat.store-input-kalibrasi', $alat->alat_id) }}" method="POST">
+                    <form action="{{ route('alat.input-kalibrasi', $alat->alat_id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
+                        <input type="hidden" name="alat_id" value="{{ $alat->alat_id }}">
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Jenis Kalibrasi</label>
@@ -161,6 +196,11 @@
                             <div class="col-md-6">
                                 <label class="form-label">Nomor Sertifikat</label>
                                 <input type="text" name="no_sertifikat" class="form-control" required autocomplete="off">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Upload File / Foto Sertifikat (PDF/Gambar)</label>
+                                <input type="file" name="file_sertifikat" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                                <div class="form-text text-muted" style="font-size: 0.75rem;">Format: PDF, JPG, JPEG, PNG (Maks. 2MB)</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Tanggal Kalibrasi</label>
@@ -207,14 +247,19 @@
                 </div>
             </div>
             @else
-            {{-- TAMPILAN JIKA BELUM LOGIN (GUEST / PUBLIK) --}}
-            <div class="alert alert-secondary text-center shadow-sm py-4 mb-4">
-                <i class="fas fa-lock fa-2x mb-2 text-muted"></i>
-                <h5>Form Input Pengecekan / Kalibrasi Dikunci</h5>
-                <p class="text-muted mb-3">Anda sedang mengakses halaman publik. Silakan login terlebih dahulu untuk mengisi form atau membuka kartu pemeliharaan harian</p>
-                <a href="{{ route('login') }}?redirect={{ url()->current() }}" class="btn btn-primary btn-sm">
-                    <i class="fas fa-sign-in-alt me-1"></i> Login Sekarang
-                </a>
+            {{-- TAMPILAN UNTUK PUBLIK (ADA CARD FORM TAPI DISERTAI TOMBOL LOGIN) --}}
+            <div class="card custom-card mb-4 border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0"><i class="fas fa-lock me-2"></i> Form Input Pengecekan / Kalibrasi Baru</h6>
+                </div>
+                <div class="card-body text-center py-4">
+                    <i class="fas fa-user-lock fa-2x text-muted mb-3"></i>
+                    <h5 class="text-dark">Akses Terbatas</h5>
+                    <p class="text-muted mb-3">Formulir input kalibrasi baru hanya dapat diisi oleh petugas atau admin yang telah masuk ke sistem.</p>
+                    <a href="{{ route('login') }}?redirect={{ url()->current() }}" class="btn btn-primary btn-sm px-4">
+                        <i class="fas fa-sign-in-alt me-1"></i> Login untuk Mengisi Form Kalibrasi
+                    </a>
+                </div>
             </div>
             @endauth
 
@@ -228,7 +273,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const intervalInput = document.getElementById('interval_kalibrasi');
     const tglAkhirInput = document.getElementById('tgl_akhir');
 
-    if (!tglKalibrasiInput) return; // Mencegah error jika elemen form tidak ada karena belum login
+    if (!tglKalibrasiInput) return;
 
     let isManualEdit = false;
 
@@ -301,29 +346,35 @@ document.addEventListener("DOMContentLoaded", function () {
         isManualEdit = false;
     }
 
-    tglKalibrasiInput.addEventListener('change', function() {
-        updateMinTanggalAkhir();
-        if (tglAkhirInput.value) {
-            hitungInterval();
-        } else {
+    if (tglKalibrasiInput) {
+        tglKalibrasiInput.addEventListener('change', function() {
+            updateMinTanggalAkhir();
+            if (tglAkhirInput.value) {
+                hitungInterval();
+            } else {
+                hitungTanggalAkhir();
+            }
+        });
+    }
+
+    if (intervalInput) {
+        intervalInput.addEventListener('input', function() {
+            isManualEdit = false;
             hitungTanggalAkhir();
-        }
-    });
+        });
+    }
 
-    intervalInput.addEventListener('input', function() {
-        isManualEdit = false;
-        hitungTanggalAkhir();
-    });
-
-    tglAkhirInput.addEventListener('change', function() {
-        if (tglKalibrasiInput.value && tglAkhirInput.value < tglKalibrasiInput.value) {
-            alert("Tanggal berakhir tidak boleh lebih awal dari tanggal kalibrasi!");
-            tglAkhirInput.value = '';
-            return;
-        }
-        hitungInterval();
-    });
-    updateMinTanggalAkhir();
+    if (tglAkhirInput) {
+        tglAkhirInput.addEventListener('change', function() {
+            if (tglKalibrasiInput.value && tglAkhirInput.value < tglKalibrasiInput.value) {
+                alert("Tanggal berakhir tidak boleh lebih awal dari tanggal kalibrasi!");
+                tglAkhirInput.value = '';
+                return;
+            }
+            hitungInterval();
+        });
+        updateMinTanggalAkhir();
+    }
 });
 </script>
 @endsection

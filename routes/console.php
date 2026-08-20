@@ -10,4 +10,4 @@ Artisan::command('inspire', function () {
 
 
 Schedule::command('sertifikasi:cek-kadaluwarsa')->dailyAt('08:00');
-
+Schedule::command('kalibrasi:cek-kadaluwarsa')->dailyAt('08:00');

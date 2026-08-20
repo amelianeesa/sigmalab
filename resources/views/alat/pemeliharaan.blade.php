@@ -40,7 +40,7 @@
                     <td>: {{ $alat->nama_alat }} / {{ $alat->kode_alat }}</td>
                 </tr>
                 <tr>
-                    <td class="fw-bold">Merk / Model / No. Seri</td>
+                    <td class="fw-bold">Merk / No. Serial</td>
                     <td>: {{ $alat->merk_tipe ?? '-' }} / {{ $alat->no_seri ?? '-' }}</td>
                 </tr>
                 <tr>
@@ -65,6 +65,9 @@
                                     @foreach($alat->itemPemeliharaan->take($splitLimit) as $item)
                                         <div><strong>{{ $item->nomor_urut }}.</strong> {{ $item->nama_pemeliharaan }}</div>
                                     @endforeach
+                                    @if($totalItems == 0)
+                                        <span class="text-muted">Belum ada jenis pemeliharaan. Silakan klik "Atur Jenis Pemeliharaan".</span>
+                                    @endif
                                 </div>
                                 <div class="col-md-6">
                                     @foreach($alat->itemPemeliharaan->skip($splitLimit) as $item)
@@ -89,12 +92,34 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <input type="number" name="tahun" class="form-control mt-4" value="{{ $tahun }}" onchange="this.form.submit()">
+                    <!-- Input tahun tetap mempertahankan fungsi onchange submit form -->
+                    <input type="number" name="tahun" class="form-control" value="{{ $tahun }}" onchange="this.form.submit()">
                 </div>
+                <!-- Tombol Dropdown Unduh Laporan (PDF & Excel) -->
+                <div class="col-md-6 text-end">
+                    <div class="dropdown">
+                        <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="dropdownDownload" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-download"></i> Unduh Laporan Pemeliharaan
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownDownload">
+                            <li>
+                                <a class="dropdown-item" href="{{ route('alat.pemeliharaan.pdf', ['id' => $alat->alat_id, 'bulan' => $bulan, 'tahun' => $tahun]) }}">
+                                    <i class="fa fa-file-pdf text-danger me-2"></i> PDF
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('alat.pemeliharaan.excel', ['id' => $alat->alat_id, 'bulan' => $bulan, 'tahun' => $tahun]) }}">
+                                    <i class="fa fa-file-excel text-success me-2"></i> Excel
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>             
             </form>
 
             @php
-                $maxKolom = max(10, $totalItems);
+                // Kolom tabel menyesuaikan jumlah item yang diinput (minimal 1 agar layout tidak rusak)
+                $jumlahKolom = max(1, $totalItems);
             @endphp
 
             <div class="table-responsive">
@@ -102,14 +127,18 @@
                     <thead class="table-header-custom">
                         <tr>
                             <th rowspan="2" class="align-middle" style="width: 60px;">Tanggal</th>
-                            <th colspan="{{ $maxKolom }}">Jenis Pemeriksaan / Status *)</th>
+                            <th colspan="{{ $jumlahKolom }}">Jenis Pemeriksaan / Status</th>
                             <th rowspan="2" class="align-middle" style="width: 220px;">Tindakan</th>
                             <th rowspan="2" class="align-middle" style="width: 140px;">Petugas</th>
                         </tr>
                         <tr>
-                            @for($i = 1; $i <= $maxKolom; $i++)
-                                <th style="width: 35px;">{{ $i }}</th>
-                            @endfor
+                            @if($totalItems > 0)
+                                @foreach($alat->itemPemeliharaan as $item)
+                                    <th style="width: 35px;" title="{{ $item->nama_pemeliharaan }}">{{ $item->nomor_urut }}</th>
+                                @endforeach
+                            @else
+                                <th style="width: 35px;">-</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -126,27 +155,27 @@
                             <tr>
                                 <td class="fw-bold bg-light">{{ $d }}</td>
                                 
-                                @for($i = 1; $i <= $maxKolom; $i++)
-                                    @php
-                                        $currentItem = $alat->itemPemeliharaan->firstWhere('nomor_urut', $i);
-                                        $isChecked = false;
-                                        if ($currentItem) {
+                                @if($totalItems > 0)
+                                    @foreach($alat->itemPemeliharaan as $currentItem)
+                                        @php
                                             $key = $currentItem->item_id . '_' . $d;
                                             $isChecked = isset($logs[$key]) && $logs[$key]->status == 1;
-                                        }
-                                    @endphp
-                                    <td>
-                                        @if($isValidDate && $currentItem)
-                                            <input type="checkbox" class="form-check-input pemeliharaan-checkbox" 
-                                                data-item-id="{{ $currentItem->item_id }}" 
-                                                data-tanggal="{{ $dateStr }}" 
-                                                {{ $isChecked ? 'checked' : '' }} 
-                                                style="cursor: pointer;">
-                                        @else
-                                            <span class="text-muted">-</span>
-                                        @endif
-                                    </td>
-                                @endfor
+                                        @endphp
+                                        <td>
+                                            @if($isValidDate)
+                                                <input type="checkbox" class="form-check-input pemeliharaan-checkbox" 
+                                                    data-item-id="{{ $currentItem->item_id }}" 
+                                                    data-tanggal="{{ $dateStr }}" 
+                                                    {{ $isChecked ? 'checked' : '' }} 
+                                                    style="cursor: pointer;">
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
+                                    @endforeach
+                                @else
+                                    <td><span class="text-muted">-</span></td>
+                                @endif
 
                                 <td>
                                     @if($isValidDate)

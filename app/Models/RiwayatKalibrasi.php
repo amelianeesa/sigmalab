@@ -14,11 +14,15 @@ class RiwayatKalibrasi extends Model
     protected $table = 'riwayat_kalibrasi';
     protected $primaryKey = 'riwayat_kalibrasi_id';
     public $timestamps = false;
+    protected $casts = [
+        'tgl_akhir' => 'date',
+    ];
 
     protected $fillable = [
         'alat_id',
         'jenis_kalibrasi',
         'no_sertifikat',
+        'file_sertifikat',
         'interval_kalibrasi',
         'tgl_kalibrasi',
         'tgl_akhir',
@@ -27,6 +31,7 @@ class RiwayatKalibrasi extends Model
         'faktor_koreksi',
         'catatan_evaluasi',
         'signifikan',
+        'reminder_terkirim',
     ];
 
     public function alat()

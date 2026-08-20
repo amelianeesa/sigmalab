@@ -38,7 +38,33 @@
     <div class="container mb-5">
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                
+
+                @php
+                    // Kalibrasi terakhir dipakai untuk status; controller sudah order by tgl_kalibrasi desc
+                    $kalibrasiTerakhir = $alat->riwayatKalibrasi->first();
+                    $statusBadge = 'bg-secondary';
+                    $statusText = 'Belum Ada Kalibrasi';
+
+                    if ($kalibrasiTerakhir && $kalibrasiTerakhir->tgl_akhir) {
+                        $tglAkhir = \Carbon\Carbon::parse($kalibrasiTerakhir->tgl_akhir);
+                        $sisaHari = now()->startOfDay()->diffInDays($tglAkhir, false);
+
+                        if ($sisaHari < 0) {
+                            $statusBadge = 'bg-danger';
+                            $statusText = 'Kalibrasi Jatuh Tempo';
+                        } elseif ($sisaHari <= 30) {
+                            $statusBadge = 'bg-warning text-dark';
+                            $statusText = 'Mendekati Jatuh Tempo (' . $sisaHari . ' hari)';
+                        } else {
+                            $statusBadge = 'bg-success';
+                            $statusText = 'Aktif (Berlaku s/d ' . $tglAkhir->format('d/m/Y') . ')';
+                        }
+                    }
+
+                    // Riwayat lengkap diurutkan dari kalibrasi pertama -> terakhir
+                    $riwayatUrut = $alat->riwayatKalibrasi->sortBy('tgl_kalibrasi')->values();
+                @endphp
+
                 <div class="card card-custom mb-4">
                     <div class="card-body p-4">
                         <h4 class="card-title text-primary border-bottom pb-2 mb-3">Informasi Utama</h4>
@@ -60,34 +86,12 @@
                                 <td>{{ $alat->no_seri ?? '-' }}</td>
                             </tr>
                             <tr>
-                                <td class="fw-bold text-muted">Lokasi</td>
-                                <td>{{ $alat->lokasi ?? '-' }}</td>
+                                <td class="fw-bold text-muted">Unit Kerja Pemilik</td>
+                                <td>{{ $alat->unit_kerja_pemilik ?? '-' }}</td>
                             </tr>
                             <tr>
                                 <td class="fw-bold text-muted">Status</td>
                                 <td>
-                                    @php
-                                        // Cari kalibrasi terakhir
-                                        $kalibrasiTerakhir = $alat->riwayatKalibrasi->first();
-                                        $statusBadge = 'bg-secondary';
-                                        $statusText = 'Belum Ada Kalibrasi';
-                                        
-                                        if ($kalibrasiTerakhir && $kalibrasiTerakhir->tgl_akhir) {
-                                            $tglAkhir = \Carbon\Carbon::parse($kalibrasiTerakhir->tgl_akhir);
-                                            $sisaHari = now()->startOfDay()->diffInDays($tglAkhir, false);
-                                            
-                                            if ($sisaHari < 0) {
-                                                $statusBadge = 'bg-danger';
-                                                $statusText = 'Kalibrasi Jatuh Tempo';
-                                            } elseif ($sisaHari <= 30) {
-                                                $statusBadge = 'bg-warning text-dark';
-                                                $statusText = 'Mendekati Jatuh Tempo (' . $sisaHari . ' hari)';
-                                            } else {
-                                                $statusBadge = 'bg-success';
-                                                $statusText = 'Aktif (Berlaku s/d ' . $tglAkhir->format('d/m/Y') . ')';
-                                            }
-                                        }
-                                    @endphp
                                     <span class="badge {{ $statusBadge }} fs-6">{{ $statusText }}</span>
                                 </td>
                             </tr>
@@ -95,29 +99,66 @@
                     </div>
                 </div>
 
+                {{-- Tombol agar QR bisa langsung dipakai untuk isi form kalibrasi baru --}}
+                <div class="d-grid mb-4">
+                    @auth
+                        <a href="{{ route('alat.input-kalibrasi', $alat->alat_id) }}" class="btn btn-primary btn-lg shadow-sm">
+                            <i class="bi bi-clipboard2-plus me-1"></i> Isi / Update Data Kalibrasi Alat Ini
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}?redirect={{ route('alat.input-kalibrasi', $alat->alat_id) }}" class="btn btn-primary btn-lg shadow-sm">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Login untuk Isi Data Kalibrasi
+                        </a>
+                    @endauth
+                </div>
+
                 <div class="card card-custom mb-4">
                     <div class="card-body p-4">
-                        <h5 class="card-title text-secondary border-bottom pb-2 mb-3"><i class="bi bi-clock-history"></i> Riwayat Kalibrasi Terbaru</h5>
-                        @if($kalibrasiTerakhir)
-                            <div class="alert alert-info bg-light border-info">
-                                <div class="row">
-                                    <div class="col-sm-6 mb-2">
-                                        <small class="text-muted d-block">Nomor Sertifikat</small>
-                                        <strong>{{ $kalibrasiTerakhir->no_sertifikat }}</strong>
-                                    </div>
-                                    <div class="col-sm-6 mb-2">
-                                        <small class="text-muted d-block">Lembaga Kalibrasi</small>
-                                        <strong>{{ $kalibrasiTerakhir->lembaga_kalibrasi }}</strong>
-                                    </div>
-                                    <div class="col-sm-6 mb-2">
-                                        <small class="text-muted d-block">Tanggal Kalibrasi</small>
-                                        <strong>{{ \Carbon\Carbon::parse($kalibrasiTerakhir->tgl_kalibrasi)->format('d F Y') }}</strong>
-                                    </div>
-                                    <div class="col-sm-6 mb-2">
-                                        <small class="text-muted d-block">Berlaku Sampai</small>
-                                        <strong class="{{ (isset($sisaHari) && $sisaHari < 0) ? 'text-danger' : 'text-success' }}">{{ \Carbon\Carbon::parse($kalibrasiTerakhir->tgl_akhir)->format('d F Y') }}</strong>
-                                    </div>
-                                </div>
+                        <h5 class="card-title text-secondary border-bottom pb-2 mb-3"><i class="bi bi-clock-history"></i> Riwayat Kalibrasi Lengkap</h5>
+
+                        @if($riwayatUrut->count() > 0)
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped text-center align-middle" style="font-size: 0.85rem;">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Urutan</th>
+                                            <th>Jenis</th>
+                                            <th>Tanggal Kalibrasi s/d Akhir</th>
+                                            <th>Lembaga & No. Sertifikat</th>
+                                            <th>Signifikan</th>
+                                            <th>Catatan / Evaluasi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($riwayatUrut as $riwayat)
+                                        <tr>
+                                            <td class="fw-bold text-primary">Kalibrasi ke-{{ $loop->iteration }}</td>
+                                            <td><span class="badge bg-info text-dark">{{ ucfirst($riwayat->jenis_kalibrasi) }}</span></td>
+                                            <td>
+                                                {{ \Carbon\Carbon::parse($riwayat->tgl_kalibrasi)->format('d/m/Y') }} <br>
+                                                <small class="text-muted">s/d {{ $riwayat->tgl_akhir ? \Carbon\Carbon::parse($riwayat->tgl_akhir)->format('d/m/Y') : '-' }}</small>
+                                            </td>
+                                            <td class="text-start">
+                                                <strong>{{ $riwayat->lembaga_kalibrasi ?? '-' }}</strong><br>
+                                                <small class="text-muted">Sertifikat: {{ $riwayat->no_sertifikat ?? '-' }}</small>
+                                                @if(!empty($riwayat->file_sertifikat))
+                                                    <div class="mt-1">
+                                                        <a href="{{ asset('storage/' . $riwayat->file_sertifikat) }}" target="_blank" class="btn btn-outline-primary btn-sm py-0 px-1" style="font-size: 0.7rem;" title="Lihat Sertifikat">
+                                                            <i class="bi bi-file-earmark-pdf"></i> Lihat
+                                                        </a>
+                                                    </div>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ $riwayat->signifikan == 'ya' ? 'success' : 'secondary' }}">
+                                                    {{ strtoupper($riwayat->signifikan ?? '-') }}
+                                                </span>
+                                            </td>
+                                            <td class="text-start">{{ $riwayat->catatan_evaluasi ?? '-' }}</td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
                             </div>
                         @else
                             <div class="alert alert-secondary text-center">
@@ -144,10 +185,8 @@
                         @endif
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
-
 </body>
 </html>

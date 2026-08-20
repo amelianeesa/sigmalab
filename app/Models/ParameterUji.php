@@ -56,7 +56,7 @@ class ParameterUji extends Model
         return LogOptions::defaults()
             ->logFillable()
             ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
+            // ->dontSubmitEmptyLogs()
             ->setDescriptionForEvent(fn(string $eventName) => "Data parameter uji telah di-{$eventName}");
     }
 }

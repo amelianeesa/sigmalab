@@ -24,10 +24,15 @@ Route::post('/login', [AuthController::class, 'processLogin'])->name('login.proc
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // public (Bisa diakses tanpa login - Untuk hasil scan QR)
-Route::get('/public/alat/{kode_alat}', [AlatController::class, 'inputKalibrasiByKode'])->name('alat.public-scan');
+Route::get('/public/alat/{kode_alat}', [AlatController::class, 'inputKalibrasiByKode'])->where('kode_alat', '.*')->name('alat.public-scan');
 
 // Halaman input kalibrasi dijadikan publik (bisa dilihat guest, tapi tombol & form dibatasi di blade dengan @auth)
 Route::get('/alat/{id}/input-kalibrasi', [AlatController::class, 'inputKalibrasi'])->name('alat.input-kalibrasi');
+
+// unduh informasi dan riwayat kalibrasi alat
+Route::get('/alat/{id}/export-pdf', [AlatController::class, 'exportPdf'])->name('alat.export-pdf');
+Route::get('/alat/{id}/export-excel', [AlatController::class, 'exportExcel'])->name('alat.export-excel');
+Route::get('/alat/{id}/export-word', [AlatController::class, 'exportWord'])->name('alat.export-word');
 
 // Wajib Login
 Route::middleware(['auth'])->group(function () {
@@ -71,7 +76,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/alat/{id}/item-pemeliharaan', [AlatController::class, 'updateItemPemeliharaan'])->name('alat.item-pemeliharaan.update');
     Route::post('/alat/{id}/perbaikan', [AlatController::class, 'storePerbaikan'])->name('alat.perbaikan.store');
     Route::put('/alat/{id}/perbaikan/{perbaikan_id}', [AlatController::class, 'updatePerbaikan'])->name('alat.perbaikan.update');
-
+    Route::get('/alat/{id}/pemeliharaan/pdf', [AlatController::class, 'exportPemeliharaanPdf'])->name('alat.pemeliharaan.pdf');
+    Route::get('/alat/{id}/pemeliharaan/excel', [AlatController::class, 'exportPemeliharaanExcel'])->name('alat.pemeliharaan.excel');
+    
     // Barang dan Pengadaan
     Route::get('barang/cetak-periode', [BarangController::class, 'printPeriode'])->name('barang.cetak-periode');
     Route::resource('barang', BarangController::class);

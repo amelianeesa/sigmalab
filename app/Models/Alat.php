@@ -7,12 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\RiwayatKalibrasi;
 use App\Models\KegiatanAlat;
+use App\Models\ItemPemeliharaan;
+use App\Models\RiwayatPerbaikanAlat;
 
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
-// use Spatie\Activitylog\Traits\LogsActivity;
-// use Spatie\Activitylog\LogOptions;
-
 
 class Alat extends Model
 {
@@ -45,25 +44,26 @@ class Alat extends Model
         return $this->hasMany(KegiatanAlat::class, 'alat_id', 'alat_id');
     }
 
+    // public function kategoriAlat()
+    // {
+    //     return $this->belongsTo(KategoriAlat::class, 'kategori_alat_id', 'kategori_alat_id');
+    // }
+
+    public function itemPemeliharaan()
+    {
+        return $this->hasMany(ItemPemeliharaan::class, 'alat_id', 'alat_id');
+    }
+
+    public function riwayatPerbaikan()
+    {
+        return $this->hasMany(RiwayatPerbaikanAlat::class, 'alat_id', 'alat_id');
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->logFillable()
             ->logOnlyDirty()
             ->setDescriptionForEvent(fn(string $eventName) => "Data alat telah di-{$eventName}");
-    }
-    public function kategoriAlat()
-    {
-        return $this->belongsTo(KategoriAlat::class, 'kategori_alat_id', 'kategori_alat_id');
-    }
-
-    public function itemPemeliharaan()
-    {
-        return $this->hasManyThrough(ItemPemeliharaan::class, KategoriAlat::class, 'kategori_alat_id', 'kategori_alat_id', 'kategori_alat_id', 'kategori_alat_id');
-    }
-
-    public function riwayatPerbaikan()
-    {
-        return $this->hasMany(RiwayatPerbaikanAlat::class, 'alat_id', 'alat_id');
     }
 }

@@ -56,7 +56,7 @@ class PengadaanController extends Controller
         if ($request->hasFile('foto')) {
             $file = $request->file('foto');
             $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            // simpan file ke public/uploads/pengadaan
+           
             $file->move(public_path('uploads/pengadaan'), $filename);
             $pathFoto = 'uploads/pengadaan/' . $filename;
         }
