@@ -76,7 +76,7 @@
                         </div>
                     </div>
                     <div class="mt-4">
-                        <a href="{{ route('sdm.competency-matrix') }}" class="text-decoration-none text-primary fw-semibold">Cek Sertifikasi <i class="fas fa-arrow-right ms-1"></i></a>
+                        <a href="{{ route('sdm.index') }}" class="text-decoration-none text-primary fw-semibold">Cek Sertifikasi <i class="fas fa-arrow-right ms-1"></i></a>
                     </div>
                 </div>
             </div>

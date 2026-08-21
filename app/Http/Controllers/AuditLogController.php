@@ -19,7 +19,7 @@ class AuditLogController extends Controller
             $query->where('subject_type', 'like', '%' . $request->subject_type . '%');
         }
 
-        $logs = $query->latest()->paginate(20);
+        $logs = $query->latest()->paginate(10)->onEachSide(1);
 
         return view('audit-log.index', compact('logs'));
     }

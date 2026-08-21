@@ -11,10 +11,10 @@
     <div class="card mb-4">
         <div class="card-header"><i class="fas fa-edit me-1"></i> Form Ubah Data Alat & Kalibrasi</div>
         <div class="card-body">
-            <form action="{{ route('alat.update', $alat->alat_id) }}" method="POST">
+            <form action="{{ route('alat.update', $alat->alat_id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
-                
+
                 <h5 class="text-primary mb-3"><i class="fas fa-tools"></i> 1. Informasi Spesifikasi Alat</h5>
                 <div class="row mb-3">
                     <div class="col-md-6">
@@ -75,7 +75,7 @@
                 <hr class="my-4">
 
                 <h5 class="text-primary mb-3"><i class="fas fa-certificate"></i> 2. Informasi Kalibrasi Terakhir</h5>
-                
+
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">No. Sertifikat Kalibrasi / Perijinan</label>
@@ -90,6 +90,27 @@
                             <option value="internal" {{ old('jenis_kalibrasi', optional($kalibrasiTerakhir)->jenis_kalibrasi) == 'internal' ? 'selected' : '' }}>Internal</option>
                         </select>
                         @error('jenis_kalibrasi') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="file_sertifikat" class="form-label">Upload File / Foto Sertifikat (PDF/Gambar)</label>
+                        <input type="file" name="file_sertifikat" id="file_sertifikat" class="form-control @error('file_sertifikat') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="form-text text-muted" style="font-size: 0.75rem;">Format: PDF, JPG, JPEG, PNG. Maks 2MB. Kosongkan kalau tidak mau mengganti file yang sudah ada.</div>
+                        @error('file_sertifikat') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+
+                        @if(!empty(optional($kalibrasiTerakhir)->file_sertifikat))
+                            <div class="mt-2">
+                                <a href="{{ asset('storage/' . $kalibrasiTerakhir->file_sertifikat) }}" target="_blank" class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size: 0.75rem;">
+                                    <i class="fas fa-file-pdf"></i> Lihat Sertifikat Saat Ini
+                                </a>
+                            </div>
+                        @else
+                            <div class="mt-2 text-muted" style="font-size: 0.75rem;">
+                                <i class="fas fa-info-circle"></i> Belum ada file sertifikat tersimpan untuk kalibrasi ini.
+                            </div>
+                        @endif
                     </div>
                 </div>
 

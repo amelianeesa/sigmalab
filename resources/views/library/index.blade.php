@@ -41,32 +41,35 @@
 
     <div class="card library-card shadow-sm border-0">
         <div class="card-body p-3 p-md-4">
-            <form method="GET" action="{{ $showArchived ? route('library.archive') : route('library.index') }}" class="row g-2 mb-3 align-items-center">
+            <form method="GET" action="{{ $showArchived ? route('library.archive') : route('library.index') }}" class="row g-2 mb-3 align-items-end">
                 <div class="col-md-5">
-                    <label for="library-search" class="library-filter-label d-block">Cari dokumen</label>
-                    <input id="library-search" type="search" name="search" value="{{ request('search') }}" class="form-control" placeholder="Nama, nomor, penerbit, atau kategori..." autocomplete="off">
+                    <label for="library-search" class="library-filter-label d-block">Cari Dokumen</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                        <input id="library-search" type="search" name="search" value="{{ request('search') }}" class="form-control border-start-0 ps-0" placeholder="Nama, nomor, penerbit, atau kategori..." autocomplete="off">
+                    </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label for="library-category" class="library-filter-label d-block">Kategori</label>
-                    <select id="library-category" name="category_id" class="form-select">
+                    <select id="library-category" name="category_id" class="form-select" onchange="this.form.submit()">
                         <option value="">Semua Kategori</option>
                         @foreach($categories as $category)
                             <option value="{{ $category->id }}" @selected((string) request('category_id') === (string) $category->id)>{{ $category->nama_kategori }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-4 d-flex gap-2 align-self-end">
-                    <button class="btn btn-primary flex-grow-1" type="submit">
-                        <i class="fas fa-filter me-1"></i> Filter
-                    </button>
-                    @if(!$showArchived)
-                        <button type="submit" formaction="{{ route('library.export.pdf') }}" formtarget="_blank" class="btn btn-outline-success text-nowrap" title="Cetak Rekap Daftar Induk Dokumen sesuai filter saat ini">
-                            <i class="fas fa-file-pdf me-1"></i> Cetak PDF
-                        </button>
-                    @endif
-                    <a href="{{ $showArchived ? route('library.archive') : route('library.index') }}" class="btn btn-outline-secondary" title="Reset pencarian dan filter" aria-label="Reset pencarian dan filter">
-                        <i class="fas fa-rotate-left"></i>
-                    </a>
+                <div class="col-md-3">
+                    <label class="library-filter-label d-block" style="visibility: hidden;">Aksi</label>
+                    <div class="d-flex gap-2">
+                        @if(!$showArchived)
+                            <button type="submit" formaction="{{ route('library.export.pdf') }}" formtarget="_blank" class="btn btn-outline-success flex-grow-1 text-nowrap" title="Cetak Rekap Daftar Induk Dokumen sesuai filter saat ini">
+                                <i class="fas fa-file-pdf me-1"></i>Cetak PDF
+                            </button>
+                        @endif
+                        <a href="{{ $showArchived ? route('library.archive') : route('library.index') }}" class="btn btn-outline-secondary" title="Reset pencarian dan filter" aria-label="Reset pencarian dan filter">
+                            <i class="fas fa-rotate-left"></i>
+                        </a>
+                    </div>
                 </div>
             </form>
 
@@ -117,7 +120,7 @@
                                         <a href="{{ route('library.download', $document->id) }}" class="btn btn-outline-secondary btn-sm library-action-btn" title="Unduh" aria-label="Unduh"><i class="fas fa-download"></i></a>
                                     @if(Auth::user()->hasModulAccess('library_manage', 'tambah_ubah'))
                                         <div class="dropdown d-inline-block">
-                                            <button class="btn btn-outline-secondary btn-sm library-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Aksi lainnya">
+                                            <button class="btn btn-outline-secondary btn-sm library-action-btn" type="button" data-bs-toggle="dropdown" data-bs-strategy="fixed" aria-expanded="false" aria-label="Aksi lainnya">
                                                 <i class="fas fa-ellipsis-vertical"></i>
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end shadow-sm">

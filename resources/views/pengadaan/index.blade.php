@@ -45,10 +45,19 @@
                         @forelse($pengadaans as $p)
                             <tr>
                                 <td class="text-center">{{ $loop->iteration }}</td>
+
                                 <td>
                                     <span class="fw-bold">{{ $p->barang ? $p->barang->nama_barang : 'Barang Dihapus' }}</span><br>
                                     <small class="text-muted">{{ $p->alasan ?? 'Tidak ada alasan khusus' }}</small>
+                                    @if($p->foto)
+                                        <div class="mt-1">
+                                            <a href="{{ asset($p->foto) }}" target="_blank" class="badge bg-light text-primary border text-decoration-none">
+                                                <i class="fas fa-image me-1"></i> Lihat Foto
+                                            </a>
+                                        </div>
+                                    @endif
                                 </td>
+
                                 <td>{{ \Carbon\Carbon::parse($p->tanggal_pengajuan)->format('d M Y') }}</td>
                                 <td>{{ $p->pemohon ? $p->pemohon->username : '-' }}</td>
                                 <td class="text-center fw-bold fs-5 text-primary">
@@ -143,7 +152,8 @@
 <!-- Modal Tambah Pengajuan -->
 <div class="modal fade" id="tambahPengadaanModal" tabindex="-1">
     <div class="modal-dialog">
-        <form action="{{ route('pengadaan.store') }}" method="POST" class="modal-content">
+
+        <form action="{{ route('pengadaan.store') }}" method="POST" enctype="multipart/form-data" class="modal-content">
             @csrf
             <div class="modal-header">
                 <h5 class="modal-title">Form Pengajuan Pengadaan Bahan</h5>
@@ -160,7 +170,7 @@
                                 $isMenipis = $saldoAkhir <= $b->minimal_stok;
                             @endphp
                             <option value="{{ $b->barang_id }}">
-                                {{ $b->nama_barang }} (Stok saat ini: {{ $saldoAkhir }} {{ $b->satuan }}) {{ $isMenipis ? '⚠️' : '' }}
+                                {{ $b->nama_barang }} (Stok saat ini: {{ $saldoAkhir }} {{ $b->satuan }}) {{ $isMenipis ? '' : '' }}
                             </option>
                         @endforeach
                     </select>
@@ -170,8 +180,13 @@
                     <input type="number" step="0.01" min="0.1" name="jumlah_diminta" class="form-control" required placeholder="Contoh: 100">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Alasan / Catatan Kebutuhan</label>
+                    <label class="form-label fw-bold">Catatan Kebutuhan / Spesifikasi Barang</label>
                     <textarea name="alasan" class="form-control" rows="3" placeholder="Contoh: Stok untuk reagen menipis untuk pengujian air limbah..."></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Upload Foto / Referensi Barang <small class="text-muted">(Opsional)</small></label>
+                    <input type="file" name="foto" class="form-control" accept="image/png, image/jpeg, image/jpg, image/webp">
+                    <div class="form-text">Format yang didukung: JPG, JPEG, PNG, WEBP (Maksimal 2MB).</div>
                 </div>
                 <div class="alert alert-info py-2 mb-0 mt-3" style="font-size:0.85rem;">
                     <i class="fas fa-info-circle me-1"></i> Pengajuan ini akan langsung diteruskan ke HR & GA Officer untuk di-*approve*.

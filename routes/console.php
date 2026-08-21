@@ -9,6 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 
-
-Schedule::command('sertifikasi:cek-kadaluwarsa')->monthlyOn(1, '08:00');
+Schedule::command('sertifikasi:cek-kadaluwarsa')->dailyAt('08:00');
 

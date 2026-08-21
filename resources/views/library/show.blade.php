@@ -18,7 +18,7 @@
                 </a>
             @endif
         </div>
-    </div>
+    </div> 
 
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
@@ -51,7 +51,7 @@
                 </div>
 
                 <div class="col-md-6">
-                    <div class="small text-muted">File Aktif</div>
+                    <div class="small text-muted">File</div>
                     <div class="d-flex align-items-center gap-2 mt-1 text-dark">
                         <i class="fas fa-file-alt text-muted"></i>
                         <span>{{ $document->file_name ?? '-' }}</span>

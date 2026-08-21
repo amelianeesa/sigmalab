@@ -31,7 +31,7 @@
     <div class="d-flex flex-wrap gap-3 mb-4 mt-2">
         @if(Auth::user()->hasModulAccess('pengadaan'))
         <a href="{{ route('pengadaan.index') }}" class="btn btn-info rounded-pill px-4 shadow-sm text-white fw-bold" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-            <i class="fas fa-truck-loading me-2"></i> Cek Pengadaan Barang
+            <i class="fas fa-truck-loading me-2"></i> Cek Pengadaan Barang/Bahan
         </a>
         @endif
     </div>
@@ -74,7 +74,7 @@
                     <i class="fas fa-print"></i> Cetak Laporan Periode
                 </button>
                 @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
-                <a href="{{ route('barang.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Tambah Barang</a>
+                <a href="{{ route('barang.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Tambah Barang/Bahan</a>
                 @endif
             </div>
         </div>
@@ -104,9 +104,9 @@
                     <thead class="table-header-custom align-middle">
                         <tr>
                             <th rowspan="2" style="width: 35px;">No.</th>
-                            <th rowspan="2">Nama Barang</th>
+                            <th rowspan="2">Nama Barang/Bahan</th>
                             <th rowspan="2">Satuan</th>
-                            <th rowspan="2">Kode Barang</th>
+                            <th rowspan="2">Kode Barang/Bahan</th>
                             <th rowspan="2">Minimal Stock</th>
                             <th rowspan="2">Saldo Awal</th>
                             <th colspan="2">Jumlah</th>

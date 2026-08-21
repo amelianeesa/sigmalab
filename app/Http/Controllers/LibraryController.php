@@ -54,7 +54,7 @@ class LibraryController extends Controller
 
         $tanggalCetak = \Carbon\Carbon::now('Asia/Jakarta')->locale('id')->translatedFormat('d F Y, H:i');
 
-        $logoPath = public_path('images/logo.png');
+        $logoPath = public_path('images/Logo_Suco_Nobg.png');
         $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('library.daftar-induk-pdf', compact('documents', 'category', 'tanggalCetak', 'logoBase64'))
