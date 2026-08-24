@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Personil;
 use App\Models\KompetensiPersonil;
+use App\Models\KategoriPersonil;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
-use App\Enums\KategoriPersonil;
+use Illuminate\Support\Str;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -20,6 +21,7 @@ class SdmController extends Controller
     {
         $showInactive = request('status') === 'nonaktif';
         $kategori = request('kategori');
+        $cari = trim((string) request('cari'));
 
         $personil = Personil::with([
             'kompetensi' => fn($query) => $query->orderByDesc('tanggal_terbit'),
@@ -27,12 +29,32 @@ class SdmController extends Controller
         ])
             ->where('status_aktif', !$showInactive)
             ->when($kategori, fn($query) => $query->where('kategori_personil', $kategori))
-            ->get();
+            ->when($cari, function ($query) use ($cari) {
+                $query->where(function ($searchQuery) use ($cari) {
+                    $searchQuery->where('nama', 'like', '%' . $cari . '%')
+                        ->orWhere('no_induk', 'like', '%' . $cari . '%')
+                        ->orWhere('jabatan', 'like', '%' . $cari . '%')
+                        ->orWhere('unit_kerja', 'like', '%' . $cari . '%')
+                        ->orWhereHas('kompetensi', function ($kompetensiQuery) use ($cari) {
+                            $kompetensiQuery->where('jenis_sertifikasi', 'like', '%' . $cari . '%')
+                                ->orWhere('no_sertifikasi', 'like', '%' . $cari . '%');
+                        });
+                });
+            })
+            ->orderBy('nama')
+            ->paginate(10)
+            ->withQueryString();
 
         $jumlahPersonilAktif = Personil::where('status_aktif', true)->count();
         $jumlahPersonilNonaktif = Personil::where('status_aktif', false)->count();
 
-        $personil->each(function (Personil $item) {
+        $jumlahSertifikasiSegeraHabis = Personil::where('status_aktif', true)
+            ->whereHas('kompetensi', function ($query) {
+                $query->whereNotNull('tanggal_berakhir')
+                    ->where('tanggal_berakhir', '<=', Carbon::now()->addMonths(6));
+            })->count();
+
+        $personil->getCollection()->each(function (Personil $item) {
             $sertifikasi = $item->kompetensi->first();
             $item->sertifikasiTerakhir = $sertifikasi;
             $item->statusSertifikasi = $sertifikasi
@@ -40,7 +62,7 @@ class SdmController extends Controller
                 : ['label' => 'Belum bersertifikat', 'class' => 'bg-light text-dark border', 'icon' => 'dash-circle'];
         });
 
-        $selectedPersonil = $personil->firstWhere('personil_id', request('personil_id'));
+        $selectedPersonil = $personil->getCollection()->firstWhere('personil_id', request('personil_id'));
         $kategoriOptions = KategoriPersonil::options();
         $roles = Role::all();
 
@@ -50,7 +72,9 @@ class SdmController extends Controller
             'showInactive',
             'jumlahPersonilAktif',
             'jumlahPersonilNonaktif',
+            'jumlahSertifikasiSegeraHabis',
             'kategori',
+            'cari',
             'kategoriOptions',
             'roles'
         ));
@@ -68,7 +92,7 @@ class SdmController extends Controller
             return ['label' => 'Kedaluwarsa', 'class' => 'bg-danger text-white', 'icon' => 'x-circle'];
         }
 
-        if ($tanggalBerakhir->lessThanOrEqualTo(today()->addDays(60))) {
+        if ($tanggalBerakhir->lessThanOrEqualTo(today()->addMonths(6))) {
             return ['label' => 'Segera Berakhir', 'class' => 'bg-warning text-dark', 'icon' => 'exclamation-circle'];
         }
 
@@ -88,7 +112,7 @@ class SdmController extends Controller
             'no_induk' => 'required|unique:personil,no_induk',
             'nama' => 'required|string|max:100',
             'jabatan' => 'required|string|max:100',
-            'kategori_personil' => 'nullable|in:chemist,analist,preparator,sampler',
+            'kategori_personil' => 'nullable|exists:kategori_personil,kode',
             'unit_kerja' => 'required|string|max:100',
             'file_cv' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
             'nama_sertifikasi' => 'nullable|string|max:100',
@@ -147,7 +171,7 @@ class SdmController extends Controller
             'no_induk' => 'required|unique:personil,no_induk,' . $id . ',personil_id',
             'nama' => 'required|string|max:100',
             'jabatan' => 'required|string|max:100',
-            'kategori_personil' => 'nullable|in:chemist,analist,preparator,sampler',
+            'kategori_personil' => 'nullable|exists:kategori_personil,kode',
             'unit_kerja' => 'required|string|max:100',
             'file_cv' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
             'nama_sertifikasi' => 'nullable|string|max:100',
@@ -186,13 +210,58 @@ class SdmController extends Controller
                 ];
 
                 $sertifikasi = $personil->kompetensi()->orderByDesc('tanggal_terbit')->first();
-                $sertifikasi
-                    ? $sertifikasi->update($dataSertifikasi)
-                    : $personil->kompetensi()->create($dataSertifikasi);
+
+                if ($sertifikasi) {
+                    if ((string) $sertifikasi->tanggal_berakhir !== (string) $request->tanggal_berakhir) {
+                        $dataSertifikasi['reminder_terakhir_dikirim'] = null;
+                    }
+                    $sertifikasi->update($dataSertifikasi);
+                } else {
+                    $personil->kompetensi()->create($dataSertifikasi);
+                }
             }
         });
 
         return redirect()->route('sdm.index')->with('success', 'Data personil berhasil diperbarui.');
+    }
+
+    public function storeKategori(Request $request)
+    {
+        $data = $request->validate([
+            'nama_kategori' => 'required|string|max:100|unique:kategori_personil,nama_kategori',
+            'redirect_to' => 'nullable|string',
+        ]);
+
+        $kode = Str::slug($data['nama_kategori'], '_');
+
+        $kategori = KategoriPersonil::create([
+            'kode' => $kode,
+            'nama_kategori' => $data['nama_kategori'],
+        ]);
+
+        $redirectTo = $request->input('redirect_to') ?: route('sdm.index');
+
+        return redirect($redirectTo)
+            ->with('success', 'Kategori "' . $kategori->nama_kategori . '" berhasil ditambahkan.')
+            ->with('kategori_baru', $kategori->kode);
+    }
+
+    public function destroyKategori(Request $request, $kode)
+    {
+        $kategori = KategoriPersonil::where('kode', $kode)->firstOrFail();
+
+        $dipakai = Personil::where('kategori_personil', $kode)->exists();
+
+        if ($dipakai) {
+            return redirect()->back()->with('error', 'Kategori "' . $kategori->nama_kategori . '" masih dipakai oleh personil, tidak bisa dihapus. Ubah dulu kategori personil yang memakainya.');
+        }
+
+        $namaKategori = $kategori->nama_kategori;
+        $kategori->delete();
+
+        $redirectTo = $request->input('redirect_to') ?: route('sdm.index');
+
+        return redirect($redirectTo)->with('success', 'Kategori "' . $namaKategori . '" berhasil dihapus.');
     }
 
     public function destroy($id)
@@ -280,8 +349,6 @@ class SdmController extends Controller
 
     public function storeKompetensi(Request $request, $id)
     {
-        abort_if(Auth::user()->role->nama_role === 'Admin Lab', 403, 'Admin Lab tidak diizinkan menambah data sertifikasi.');
-
         $personil = Personil::findOrFail($id);
         $data = $request->validate([
             'jenis_sertifikasi' => 'required|string|max:100',
@@ -305,8 +372,6 @@ class SdmController extends Controller
 
     public function updateKompetensi(Request $request, $id, $kompetensiId)
     {
-        abort_if(Auth::user()->role->nama_role === 'Admin Lab', 403, 'Admin Lab tidak diizinkan mengubah data sertifikasi.');
-
         $personil = Personil::findOrFail($id);
         $kompetensi = $personil->kompetensi()->findOrFail($kompetensiId);
         $data = $request->validate([
@@ -316,6 +381,10 @@ class SdmController extends Controller
             'tanggal_berakhir' => 'nullable|date|after_or_equal:tanggal_terbit',
             'file_sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
+
+        if ((string) $kompetensi->tanggal_berakhir !== (string) $request->tanggal_berakhir) {
+            $data['reminder_terakhir_dikirim'] = null;
+        }
 
         if ($request->hasFile('file_sertifikat')) {
             if ($kompetensi->file_sertifikat && Storage::disk('local')->exists('public/uploads/sertifikat/' . $kompetensi->file_sertifikat)) {
@@ -335,8 +404,6 @@ class SdmController extends Controller
 
     public function destroyKompetensi($id, $kompetensiId)
     {
-        abort_if(Auth::user()->role->nama_role === 'Admin Lab', 403, 'Admin Lab tidak diizinkan menghapus data sertifikasi.');
-
         $personil = Personil::findOrFail($id);
         $personil->kompetensi()->findOrFail($kompetensiId)->delete();
 
@@ -363,8 +430,6 @@ class SdmController extends Controller
 
     public function uploadKompetensiFile(Request $request, $id, $kompetensiId)
     {
-        abort_if(Auth::user()->role->nama_role === 'Admin Lab', 403, 'Admin Lab tidak diizinkan mengunggah dokumen sertifikasi.');
-
         $personil = Personil::findOrFail($id);
         $kompetensi = $personil->kompetensi()->findOrFail($kompetensiId);
 
@@ -405,71 +470,78 @@ class SdmController extends Controller
     public function competencyMatrix()
     {
         $kategori = request('kategori');
-        [$matrix, $jenisSertifikasiList] = $this->buildCompetencyMatrix($kategori);
+        $jenisSertifikasi = request('sertifikasi');
         $kategoriOptions = KategoriPersonil::options();
+        $jenisSertifikasiOptions = $this->jenisSertifikasiOptions($kategori);
+        $matrix = $jenisSertifikasi
+            ? $this->buildCompetencyMatrix($kategori, $jenisSertifikasi)
+            : collect();
 
-        return view('sdm.competency_matrix', compact('matrix', 'jenisSertifikasiList', 'kategoriOptions', 'kategori'));
+        return view('sdm.competency_matrix', compact(
+            'matrix',
+            'kategoriOptions',
+            'kategori',
+            'jenisSertifikasi',
+            'jenisSertifikasiOptions'
+        ));
     }
 
     public function competencyMatrixPdf()
     {
         $kategori = request('kategori');
-        [$matrix, $jenisSertifikasiList] = $this->buildCompetencyMatrix($kategori);
+        $jenisSertifikasi = request('sertifikasi');
+        abort_unless($jenisSertifikasi, 404);
+
+        $matrix = $this->buildCompetencyMatrix($kategori, $jenisSertifikasi);
         $kategoriOptions = KategoriPersonil::options();
         $tanggalCetak = now()->translatedFormat('d F Y, H:i');
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('sdm.competency_matrix_pdf', compact(
             'matrix',
-            'jenisSertifikasiList',
             'kategori',
+            'jenisSertifikasi',
             'kategoriOptions',
             'tanggalCetak'
-        ))->setPaper('a4', 'landscape');
+        ))->setPaper('a4');
 
         $namaFile = 'Competency Matrix - ' . now()->format('d-m-Y') . '.pdf';
 
         return $pdf->download($namaFile);
     }
 
-    /**
-     * Susun data Competency Matrix dari riwayat sertifikasi/pelatihan yang
-     * BENAR-BENAR pernah diinput di Training Data Record personil
-     * (kolom = nilai unik jenis_sertifikasi), bukan dari master data lain
-     * seperti ParameterUji.
-     */
-    private function buildCompetencyMatrix(?string $kategori): array
+    private function jenisSertifikasiOptions(?string $kategori)
     {
-        $personil = Personil::with(['kompetensi'])
+        return KompetensiPersonil::query()
+            ->whereHas('personil', function ($query) use ($kategori) {
+                $query->where('status_aktif', true)
+                    ->when($kategori, fn($personilQuery) => $personilQuery->where('kategori_personil', $kategori));
+            })
+            ->whereNotNull('jenis_sertifikasi')
+            ->where('jenis_sertifikasi', '!=', '')
+            ->distinct()
+            ->orderBy('jenis_sertifikasi')
+            ->pluck('jenis_sertifikasi');
+    }
+
+    private function buildCompetencyMatrix(?string $kategori, string $jenisSertifikasi)
+    {
+        $personil = Personil::with(['kompetensi' => function ($query) use ($jenisSertifikasi) {
+            $query->where('jenis_sertifikasi', $jenisSertifikasi)
+                ->orderByDesc('tanggal_terbit');
+        }])
             ->where('status_aktif', true)
             ->when($kategori, fn($query) => $query->where('kategori_personil', $kategori))
             ->orderBy('nama')
             ->get();
 
-        $jenisSertifikasiList = $personil
-            ->flatMap(fn (Personil $p) => $p->kompetensi->pluck('jenis_sertifikasi'))
-            ->filter()
-            ->unique()
-            ->sort()
-            ->values()
-            ->toArray();
+        return $personil->map(function (Personil $p) {
+            $kompetensi = $p->kompetensi->first();
 
-        $matrix = $personil->map(function (Personil $p) use ($jenisSertifikasiList) {
-            $sel = [];
-
-            foreach ($jenisSertifikasiList as $jenis) {
-                $terbaru = $p->kompetensi
-                    ->where('jenis_sertifikasi', $jenis)
-                    ->sortByDesc('tanggal_terbit')
-                    ->first();
-
-                $sel[$jenis] = $terbaru
-                    ? ['status' => $this->resolveStatusSertifikasi($terbaru->tanggal_berakhir), 'kompetensi' => $terbaru]
-                    : null;
-            }
-
-            return ['personil' => $p, 'kompetensi' => $sel];
+            return [
+                'personil' => $p,
+                'kompetensi' => $kompetensi,
+                'status' => $kompetensi ? $this->resolveStatusSertifikasi($kompetensi->tanggal_berakhir) : null,
+            ];
         });
-
-        return [$matrix, $jenisSertifikasiList];
     }
 }

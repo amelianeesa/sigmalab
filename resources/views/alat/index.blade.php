@@ -2,12 +2,6 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <!-- <h1 class="mt-4">Manajemen Alat & Kalibrasi</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-        <li class="breadcrumb-item active">Alat & Kalibrasi</li>
-    </ol> -->
-
     @php
         $alatWarningCount = 0;
         foreach($alat as $item) {
@@ -171,9 +165,9 @@
                                 @endif
                             </td>
                             <td>{{ $kalibrasiTerakhir->interval_kalibrasi ?? '-' }}</td>
-                            <td>{{ $kalibrasiTerakhir->tgl_kalibrasi ? \Carbon\Carbon::parse($kalibrasiTerakhir->tgl_kalibrasi)->format('d-m-Y') : '-' }}</td>
+                            <td>{{ $kalibrasiTerakhir?->tgl_kalibrasi ? \Carbon\Carbon::parse($kalibrasiTerakhir->tgl_kalibrasi)->format('d-m-Y') : '-' }}</td>
                             <td>
-                                {{ $kalibrasiTerakhir->tgl_akhir ? \Carbon\Carbon::parse($kalibrasiTerakhir->tgl_akhir)->format('d-m-Y') : '-' }}
+                                {{ $kalibrasiTerakhir?->tgl_akhir ? \Carbon\Carbon::parse($kalibrasiTerakhir->tgl_akhir)->format('d-m-Y') : '-' }}
                                 {!! $statusKalibrasiBadge !!}
                             </td>
                             <td>{{ $item->unit_kerja_pemilik ?? '-' }}</td>

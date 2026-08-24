@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <div class="d-flex flex-wrap gap-3 mb-4 mt-2">
+    <div class="d-flex flex-wrap gap-3 mb-2 mt-1">
         @if(Auth::user()->hasModulAccess('manajemen_pengguna'))
         <a href="{{ route('hak-akses.index') }}" class="btn btn-warning rounded-pill px-4 shadow-sm text-dark fw-bold" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
             <i class="fas fa-shield-alt me-2"></i> Manajemen Hak Akses
@@ -22,6 +22,27 @@
         </div>
     @endif
 
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @php
+        $personilWarningCount = $personil->getCollection()->filter(function ($row) {
+            $label = $row->statusSertifikasi['label'] ?? '';
+            return in_array($label, ['Segera Berakhir', 'Kedaluwarsa']);
+        })->count();
+    @endphp
+
+    @if($personilWarningCount > 0)
+        <div class="alert alert-warning alert-dismissible fade show shadow-sm" role="alert" style="margin: 0 0 0.5rem 0;">
+            <i class="fas fa-exclamation-triangle me-2"></i> <strong>Perhatian!</strong> Pada halaman ini terdapat <strong>{{ $personilWarningCount }} personil</strong> yang masa sertifikasinya sudah kedaluarsa atau akan segera berakhir (dalam 6 bulan ke depan).
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <div class="card mb-4">
         <div class="card-header py-3">
             <div class="mb-3 fw-bold text-dark fs-6">
@@ -33,6 +54,9 @@
                     <form method="GET" action="{{ route('sdm.index') }}" class="m-0">
                         @if($showInactive)
                             <input type="hidden" name="status" value="nonaktif">
+                        @endif
+                        @if($cari)
+                            <input type="hidden" name="cari" value="{{ $cari }}">
                         @endif
                         <select name="kategori" class="form-select form-select-sm w-100" onchange="this.form.submit()">
                             <option value="">Semua Kategori</option>
@@ -51,10 +75,10 @@
 
                 <div class="col-md-3 col-sm-6">
                     <div class="btn-group w-100" role="group">
-                        <a href="{{ route('sdm.index', array_filter(['kategori' => $kategori])) }}" class="btn btn-{{ ! $showInactive ? 'secondary' : 'outline-secondary' }} btn-sm w-50">
+                        <a href="{{ route('sdm.index', array_filter(['kategori' => $kategori, 'cari' => $cari])) }}" class="btn btn-{{ ! $showInactive ? 'secondary' : 'outline-secondary' }} btn-sm w-50">
                             Aktif <span class="badge bg-light text-dark ms-1">{{ $jumlahPersonilAktif }}</span>
                         </a>
-                        <a href="{{ route('sdm.index', array_filter(['status' => 'nonaktif', 'kategori' => $kategori])) }}" class="btn btn-{{ $showInactive ? 'secondary' : 'outline-secondary' }} btn-sm w-50">
+                        <a href="{{ route('sdm.index', array_filter(['status' => 'nonaktif', 'kategori' => $kategori, 'cari' => $cari])) }}" class="btn btn-{{ $showInactive ? 'secondary' : 'outline-secondary' }} btn-sm w-50">
                             Nonaktif <span class="badge bg-light text-dark ms-1">{{ $jumlahPersonilNonaktif }}</span>
                         </a>
                     </div>
@@ -71,17 +95,22 @@
         </div>
 
         <div class="card-body">
-            <div class="mb-3">
+            <form method="GET" action="{{ route('sdm.index') }}" class="mb-3">
+                @if($showInactive)<input type="hidden" name="status" value="nonaktif">@endif
+                @if($kategori)<input type="hidden" name="kategori" value="{{ $kategori }}">@endif
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                    <input type="text" id="searchPersonil" class="form-control"
+                    <input type="text" name="cari" class="form-control" value="{{ $cari }}"
                            placeholder="Cari nama, no. induk, penempatan, unit kerja, sertifikasi...">
-                    <button class="btn btn-outline-secondary" type="button" id="clearSearchPersonil" title="Bersihkan pencarian">
-                        <i class="bi bi-x-lg"></i>
+                    <button class="btn btn-outline-secondary" type="submit" title="Cari">
+                        <i class="bi bi-search"></i>
                     </button>
+                    <a href="{{ route('sdm.index', array_filter(['status' => $showInactive ? 'nonaktif' : null, 'kategori' => $kategori])) }}" class="btn btn-outline-secondary" title="Bersihkan pencarian">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
                 </div>
-                <small class="text-muted d-block mt-1" id="searchResultInfo"></small>
-            </div>
+                @if($cari)<small class="text-muted d-block mt-1">Hasil pencarian untuk “{{ $cari }}”.</small>@endif
+            </form>
 
             <div class="table-responsive">
                 <table class="table table-bordered table-striped align-middle text-center" style="font-size: 0.85rem;">
@@ -106,18 +135,9 @@
                             $sertifikasi = $row->sertifikasiTerakhir;
                             $status = $row->statusSertifikasi;
                             $kategoriLabel = $kategoriOptions[$row->kategori_personil] ?? $row->kategori_personil ?? '';
-                            $searchHaystack = strtolower(implode(' ', array_filter([
-                                $row->nama,
-                                $row->no_induk,
-                                $row->jabatan,
-                                $row->unit_kerja,
-                                $kategoriLabel,
-                                $sertifikasi->jenis_sertifikasi ?? null,
-                                $sertifikasi->no_sertifikasi ?? null,
-                            ])));
                         @endphp
-                        <tr data-search="{{ $searchHaystack }}">
-                            <td>{{ $index + 1 }}</td>
+                        <tr>
+                            <td>{{ $personil->firstItem() + $index }}</td>
                             <td><code class="fw-bold">{{ $row->no_induk }}</code></td>
                             <td class="fw-bold text-start">
                                 {{ $row->nama }}
@@ -173,44 +193,52 @@
                                 @endif
                             </td>
                             <td class="text-nowrap">
-                                <a href="{{ route('sdm.kompetensi.detail', $row->personil_id) }}" class="btn btn-outline-dark btn-sm" title="Training Data Record">
-                                    <i class="fas fa-history"></i>
-                                </a>
+                                @if($showInactive && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
+                                    <form action="{{ route('sdm.activate', $row->personil_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Aktifkan kembali {{ $row->nama }}?')">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-undo me-1"></i> Aktifkan Kembali</button>
+                                    </form>
+                                @else
+                                    <a href="{{ route('sdm.kompetensi.detail', $row->personil_id) }}" class="btn btn-outline-dark btn-sm" title="Training Data Record">
+                                        <i class="fas fa-history me-1"></i> Riwayat
+                                    </a>
+                                @endif
                                 @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
-                                    @unless($row->user)
-                                        <button type="button" class="btn btn-outline-dark btn-sm" title="Buat Akun Login"
-                                            data-bs-toggle="modal" data-bs-target="#modalBuatAkun"
-                                            data-personil-id="{{ $row->personil_id }}"
-                                            data-personil-nama="{{ $row->nama }}">
-                                            <i class="fas fa-user-plus"></i>
+                                    <div class="dropdown d-inline-block">
+                                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Aksi administrasi">
+                                            <i class="fas fa-ellipsis-vertical"></i>
                                         </button>
-                                    @endunless
-                                    <a href="{{ route('sdm.edit', $row->personil_id) }}" class="btn btn-warning btn-sm" title="Edit"><i class="fas fa-edit"></i></a>
-
-                                    @if($showInactive)
-                                        <form action="{{ route('sdm.activate', $row->personil_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Aktifkan kembali {{ $row->nama }}?')">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" class="btn btn-success btn-sm" title="Aktifkan kembali">
-                                                <i class="fas fa-undo"></i>
-                                            </button>
-                                        </form>
-                                        <form action="{{ route('sdm.force-destroy', $row->personil_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus permanen {{ $row->nama }}? Tindakan ini tidak dapat dibatalkan.')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm" title="Hapus permanen">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    @else
-                                        <form action="{{ route('sdm.destroy', $row->personil_id) }}" method="POST" class="d-inline" onsubmit="return confirm('Nonaktifkan {{ $row->nama }}?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm" title="Nonaktifkan">
-                                                <i class="fas fa-pause-circle"></i>
-                                            </button>
-                                        </form>
-                                    @endif
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                            @unless($row->user)
+                                                <li>
+                                                    <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modalBuatAkun"
+                                                        data-personil-id="{{ $row->personil_id }}" data-personil-nama="{{ $row->nama }}">
+                                                        <i class="fas fa-user-plus me-2"></i>Buat Akun Login
+                                                    </button>
+                                                </li>
+                                            @endunless
+                                            <li><a class="dropdown-item" href="{{ route('sdm.edit', $row->personil_id) }}"><i class="fas fa-edit text-warning me-2"></i>Edit Personil</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            @if($showInactive)
+                                                <li>
+                                                    <form action="{{ route('sdm.force-destroy', $row->personil_id) }}" method="POST" onsubmit="return confirm('Hapus permanen {{ $row->nama }}? Tindakan ini tidak dapat dibatalkan.')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="dropdown-item text-danger"><i class="fas fa-trash me-2"></i>Hapus Permanen</button>
+                                                    </form>
+                                                </li>
+                                            @else
+                                                <li>
+                                                    <form action="{{ route('sdm.destroy', $row->personil_id) }}" method="POST" onsubmit="return confirm('Nonaktifkan {{ $row->nama }}?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="dropdown-item text-danger"><i class="fas fa-pause-circle me-2"></i>Nonaktifkan</button>
+                                                    </form>
+                                                </li>
+                                            @endif
+                                        </ul>
+                                    </div>
                                 @endif
                             </td>
                         </tr>
@@ -225,16 +253,15 @@
                             </td>
                         </tr>
                         @endforelse
-
-                        <tr id="noSearchResultRow" style="display:none;">
-                            <td colspan="11" class="text-center text-muted py-4">
-                                <i class="bi bi-search me-1"></i>
-                                Tidak ada personil yang cocok dengan pencarian "<span id="noResultQuery" class="fw-semibold"></span>".
-                            </td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
+            @if($personil->hasPages())
+                <div class="d-flex flex-column align-items-center gap-2 mt-3">
+                    <small class="text-muted">Menampilkan {{ $personil->firstItem() }}–{{ $personil->lastItem() }} dari {{ $personil->total() }} personil</small>
+                    {{ $personil->onEachSide(1)->links('pagination::bootstrap-5') }}
+                </div>
+            @endif
         </div>
     </div>
 </div>
@@ -262,7 +289,12 @@
                                 <input type="text" name="no_induk" class="form-control form-control-sm" value="{{ old('no_induk') }}" required>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label small fw-semibold">Kategori Personil</label>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <label class="form-label small fw-semibold mb-1">Kategori Personil</label>
+                                    <button type="button" class="btn btn-link btn-sm p-0 mb-1" data-bs-toggle="modal" data-bs-target="#modalTambahKategori" style="font-size: 0.75rem;">
+                                        <i class="fas fa-plus-circle"></i> Kategori Baru
+                                    </button>
+                                </div>
                                 <select name="kategori_personil" class="form-select form-select-sm">
                                     <option value="">— Pilih Kategori —</option>
                                     @foreach($kategoriOptions as $value => $label)
@@ -279,9 +311,14 @@
                                 <input type="text" name="unit_kerja" class="form-control form-control-sm" value="{{ old('unit_kerja') }}" required>
                             </div>
                             <div class="col-12">
-                                <label class="form-label small fw-semibold">Upload CV</label>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label small fw-semibold mb-0">Upload CV</label>
+                                    <a href="{{ asset('templates/Template_CV_SIGMA-LAB.docx') }}" download class="small text-decoration-none">
+                                        <i class="fas fa-download me-1"></i>Unduh Template CV
+                                    </a>
+                                </div>
                                 <input type="file" name="file_cv" class="form-control form-control-sm" accept="image/*,application/pdf">
-                                <div class="form-text text-muted" style="font-size: 0.75rem;">Format: JPG, PNG, PDF (Maks. 2MB).</div>
+                                <div class="form-text text-muted" style="font-size: 0.75rem;">Format: JPG, PNG, PDF (Maks. 2MB). Isi sesuai template, lalu unggah di sini.</div>
                             </div>
                         </div>
                     </div>
@@ -314,6 +351,54 @@
                     <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-save me-1"></i> Simpan Data</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalTambahKategori" tabindex="-1" aria-labelledby="modalTambahKategoriLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fs-6" id="modalTambahKategoriLabel"><i class="fas fa-tags me-2"></i>Kelola Kategori Personil</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <form action="{{ route('sdm.kategori.store') }}" method="POST" class="mb-4">
+                    @csrf
+                    <input type="hidden" name="redirect_to" value="{{ url()->current() }}">
+                    <label class="form-label small fw-semibold">Nama Kategori Baru</label>
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="nama_kategori" class="form-control" placeholder="mis. Supervisor Lab, QC Inspector" required>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Tambah</button>
+                    </div>
+                </form>
+
+                <hr>
+
+                <label class="form-label small fw-semibold text-muted">Kategori Saat Ini</label>
+                <ul class="list-group list-group-flush">
+                    @forelse($kategoriOptions as $kode => $label)
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                            <span>{{ $label }}</span>
+                            <form action="{{ route('sdm.kategori.destroy', $kode) }}" method="POST" onsubmit="return confirm('Hapus kategori {{ $label }}?')">
+                                @csrf
+                                @method('DELETE')
+                                <input type="hidden" name="redirect_to" value="{{ url()->current() }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus kategori">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </li>
+                    @empty
+                        <li class="list-group-item px-0 text-muted small">Belum ada kategori.</li>
+                    @endforelse
+                </ul>
+            </div>
+
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+            </div>
         </div>
     </div>
 </div>
@@ -373,60 +458,6 @@
 
             document.getElementById('formBuatAkun').action = '{{ url('/sdm') }}/' + personilId + '/akun';
             document.getElementById('modalBuatAkunNama').textContent = personilNama;
-        });
-    });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const searchInput   = document.getElementById('searchPersonil');
-        const clearBtn      = document.getElementById('clearSearchPersonil');
-        const resultInfo    = document.getElementById('searchResultInfo');
-        const noResultRow   = document.getElementById('noSearchResultRow');
-        const noResultQuery = document.getElementById('noResultQuery');
-        const rows          = document.querySelectorAll('#personilTableBody tr[data-search]');
-
-        if (! searchInput || rows.length === 0) return;
-
-        let debounceTimer = null;
-
-        function applyFilter() {
-            const q = searchInput.value.trim().toLowerCase();
-            let visibleCount = 0;
-
-            rows.forEach(function (row) {
-                const haystack = row.getAttribute('data-search') || '';
-                const match = q === '' || haystack.includes(q);
-                row.style.display = match ? '' : 'none';
-                if (match) visibleCount++;
-            });
-
-            resultInfo.textContent = q === ''
-                ? ''
-                : `Menampilkan ${visibleCount} dari ${rows.length} personil`;
-
-            if (q !== '' && visibleCount === 0) {
-                noResultQuery.textContent = searchInput.value.trim();
-                noResultRow.style.display = '';
-            } else {
-                noResultRow.style.display = 'none';
-            }
-        }
-        searchInput.addEventListener('input', function () {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(applyFilter, 150);
-        });
-
-        clearBtn.addEventListener('click', function () {
-            searchInput.value = '';
-            applyFilter();
-            searchInput.focus();
-        });
-
-        document.addEventListener('keydown', function (e) {
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-                e.preventDefault();
-                searchInput.focus();
-            }
         });
     });
 </script>
