@@ -38,20 +38,8 @@ class BarangController extends Controller
         return view('barang.create');
     }
 
-    public function store(Request $request)
+    public function store(\App\Http\Requests\BarangRequest $request)
     {
-        $request->validate([
-            'nama_barang' => 'required|string|max:100',
-            'satuan' => 'required|string|max:20',
-            'kode_barang' => 'required|string|max:50|unique:barang,kode_barang',
-            'minimal_stok' => 'nullable|numeric',
-            'saldo_awal' => 'nullable|numeric',
-            'penerimaan' => 'nullable|numeric',
-            'pengeluaran' => 'nullable|numeric',
-            'harga_rata' => 'nullable|numeric',
-            'kondisi' => 'required|in:baik,rusak',
-            'tgl_exp' => 'nullable|date',
-        ]);
         $data = $request->only(['nama_barang', 'satuan', 'kode_barang', 'minimal_stok', 'saldo_awal', 'penerimaan', 'pengeluaran', 'harga_rata', 'kondisi', 'tgl_exp']);
 
         $saldoAwal = $data['saldo_awal'] ?? 0;
@@ -74,21 +62,9 @@ class BarangController extends Controller
         return view('barang.edit', compact('barang'));
     }
 
-    public function update(Request $request, $id)
+    public function update(\App\Http\Requests\BarangRequest $request, $id)
     {
         $barang = Barang::findOrFail($id);
-
-        $request->validate([
-            'nama_barang' => 'required|string|max:100',
-            'satuan' => 'required|string|max:20',
-            'minimal_stok' => 'nullable|numeric',
-            'saldo_awal' => 'nullable|numeric',
-            'penerimaan' => 'nullable|numeric',
-            'pengeluaran' => 'nullable|numeric',
-            'harga_rata' => 'nullable|numeric',
-            'kondisi' => 'required|in:baik,rusak',
-            'tgl_exp' => 'nullable|date',
-        ]);
 
         $data = $request->except('kode_barang');
 

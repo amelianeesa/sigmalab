@@ -27,7 +27,6 @@ class DummyDataSeeder extends Seeder
         $rolesToInsert = [
             PeranPengguna::ANALIS->value,
             PeranPengguna::KOORDINATOR_LAB->value,
-            PeranPengguna::ADMIN_LAB->value,
             PeranPengguna::ADMIN_APLIKASI->value,
             PeranPengguna::HR_GA_OFFICER->value,
             PeranPengguna::KABID_DUKUNGAN_BISNIS->value,
@@ -44,7 +43,6 @@ class DummyDataSeeder extends Seeder
         $usersToInsert = [
             ['username' => 'analis_tester', 'email' => 'analis@test.com', 'role' => PeranPengguna::ANALIS->value],
             ['username' => 'koordinator_tester', 'email' => 'koor@test.com', 'role' => PeranPengguna::KOORDINATOR_LAB->value],
-            ['username' => 'adminlab_tester', 'email' => 'adminlab@test.com', 'role' => PeranPengguna::ADMIN_LAB->value],
             ['username' => 'adminaplikasi_tester', 'email' => 'adminaplikasi@test.com', 'role' => PeranPengguna::ADMIN_APLIKASI->value],
             ['username' => 'hrga_tester', 'email' => 'hrga@test.com', 'role' => PeranPengguna::HR_GA_OFFICER->value],
             ['username' => 'kabiddukbis_tester', 'email' => 'kabiddukbis@test.com', 'role' => PeranPengguna::KABID_DUKUNGAN_BISNIS->value],
@@ -83,38 +81,47 @@ class DummyDataSeeder extends Seeder
         );
 
         // =============================================
-        // 4. PARAMETER UJI
+        // 4. PARAMETER UJI (13 Parameter Batu Bara)
         // =============================================
-        $paramKadarAir = ParameterUji::firstOrCreate(
-            ['nama_parameter' => 'Kadar Air'],
-            [
-                'satuan' => '%', 'nilai_acuan' => 10.00,
-                'batas_bawah' => 0.00, 'batas_atas' => 15.00,
-                'metode_kriteria' => 'SNI 01-2891-1992',
-                'rumus_kalkulasi' => '(W1 - W2) / W * 100',
-                'status_aktif' => true,
-            ]
-        );
-        $paramPh = ParameterUji::firstOrCreate(
-            ['nama_parameter' => 'pH'],
-            [
-                'satuan' => '-', 'nilai_acuan' => 7.00,
-                'batas_bawah' => 6.50, 'batas_atas' => 8.50,
-                'metode_kriteria' => 'SNI 06-6989.11-2004',
-                'rumus_kalkulasi' => null,
-                'status_aktif' => true,
-            ]
-        );
-        $paramSulfur = ParameterUji::firstOrCreate(
-            ['nama_parameter' => 'Total Sulfur'],
-            [
-                'satuan' => '%', 'nilai_acuan' => 0.50,
-                'batas_bawah' => 0.00, 'batas_atas' => 1.00,
-                'metode_kriteria' => 'ASTM D4294',
-                'rumus_kalkulasi' => null,
-                'status_aktif' => true,
-            ]
-        );
+        $paramsData = [
+            // PROXIMATE ANALYSIS
+            ['nama_parameter' => 'IM', 'kategori_parameter' => 'Proximate Analysis', 'satuan' => '%', 'variabel_input' => ['M1_D1', 'M2_D1', 'M3_D1', 'M1_D2', 'M2_D2', 'M3_D2'], 'rumus_kalkulasi' => 'CUSTOM_IM', 'dependensi_parameter' => [], 'nilai_acuan' => 10],
+            ['nama_parameter' => 'ASH', 'kategori_parameter' => 'Proximate Analysis', 'satuan' => '%', 'variabel_input' => ['M1', 'M2', 'M3'], 'rumus_kalkulasi' => '((M3-M1)/(M2-M1))*100', 'dependensi_parameter' => [], 'nilai_acuan' => 5],
+            ['nama_parameter' => 'VM', 'kategori_parameter' => 'Proximate Analysis', 'satuan' => '%', 'variabel_input' => ['M1', 'M2', 'M3'], 'rumus_kalkulasi' => '((M2-M3)/(M2-M1))*100 - IM', 'dependensi_parameter' => ['IM'], 'nilai_acuan' => 40],
+            
+            // ULTIMATE ANALYSIS
+            ['nama_parameter' => 'C', 'kategori_parameter' => 'Ultimate Analysis', 'satuan' => '%', 'variabel_input' => ['Nilai'], 'rumus_kalkulasi' => 'Nilai', 'dependensi_parameter' => [], 'nilai_acuan' => 65],
+            ['nama_parameter' => 'H', 'kategori_parameter' => 'Ultimate Analysis', 'satuan' => '%', 'variabel_input' => ['Nilai'], 'rumus_kalkulasi' => 'Nilai', 'dependensi_parameter' => [], 'nilai_acuan' => 4],
+            ['nama_parameter' => 'N', 'kategori_parameter' => 'Ultimate Analysis', 'satuan' => '%', 'variabel_input' => ['Nilai'], 'rumus_kalkulasi' => 'Nilai', 'dependensi_parameter' => [], 'nilai_acuan' => 1],
+
+            // CALORIFIC VALUE & SULFUR
+            ['nama_parameter' => 'CV', 'kategori_parameter' => 'Calorific Value & Sulfur', 'satuan' => 'cal/g', 'variabel_input' => ['Crucible', 'SampleMass', 'Ee', 't', 'Titrant', 'FuseLength'], 'rumus_kalkulasi' => '((t*Ee)-Titrant-FuseLength-(TS*10))/SampleMass', 'dependensi_parameter' => ['TS'], 'nilai_acuan' => 5500],
+            ['nama_parameter' => 'TS', 'kategori_parameter' => 'Calorific Value & Sulfur', 'satuan' => '%', 'variabel_input' => ['M1', 'M2', 'Titrant'], 'rumus_kalkulasi' => '(Titrant * 0.1) / (M2-M1)', 'dependensi_parameter' => [], 'nilai_acuan' => 0.5],
+
+            // ASH BEHAVIOUR & PHYSICAL
+            ['nama_parameter' => 'AFT-IDT', 'kategori_parameter' => 'Ash Behaviour & Physical', 'satuan' => '°C', 'variabel_input' => ['Nilai'], 'rumus_kalkulasi' => 'Nilai', 'dependensi_parameter' => [], 'nilai_acuan' => 1100],
+            ['nama_parameter' => 'AFT-ST', 'kategori_parameter' => 'Ash Behaviour & Physical', 'satuan' => '°C', 'variabel_input' => ['Nilai'], 'rumus_kalkulasi' => 'Nilai', 'dependensi_parameter' => [], 'nilai_acuan' => 1200],
+            ['nama_parameter' => 'AFT-HT', 'kategori_parameter' => 'Ash Behaviour & Physical', 'satuan' => '°C', 'variabel_input' => ['Nilai'], 'rumus_kalkulasi' => 'Nilai', 'dependensi_parameter' => [], 'nilai_acuan' => 1250],
+            ['nama_parameter' => 'AFT-FT', 'kategori_parameter' => 'Ash Behaviour & Physical', 'satuan' => '°C', 'variabel_input' => ['Nilai'], 'rumus_kalkulasi' => 'Nilai', 'dependensi_parameter' => [], 'nilai_acuan' => 1300],
+            ['nama_parameter' => 'HGI', 'kategori_parameter' => 'Ash Behaviour & Physical', 'satuan' => 'Index', 'variabel_input' => ['Mass'], 'rumus_kalkulasi' => '13 + (6.93 * Mass)', 'dependensi_parameter' => [], 'nilai_acuan' => 50],
+        ];
+
+        $paramsMap = [];
+        foreach ($paramsData as $p) {
+            $paramsMap[$p['nama_parameter']] = ParameterUji::firstOrCreate(
+                ['nama_parameter' => $p['nama_parameter']],
+                [
+                    'satuan' => $p['satuan'],
+                    'kategori_parameter' => $p['kategori_parameter'],
+                    'nilai_acuan' => $p['nilai_acuan'],
+                    'batas_bawah' => 0, 'batas_atas' => 9999,
+                    'variabel_input' => $p['variabel_input'],
+                    'rumus_kalkulasi' => $p['rumus_kalkulasi'],
+                    'dependensi_parameter' => $p['dependensi_parameter'],
+                    'status_aktif' => true,
+                ]
+            );
+        }
 
         // =============================================
         // 5. KEGIATAN + ATTACH ALAT & PERSONIL
@@ -160,15 +167,15 @@ class DummyDataSeeder extends Seeder
         // 6. HASIL UJI (2 inlier, 1 outlier)
         // =============================================
         $hasilUji1 = HasilUji::firstOrCreate(
-            ['kegiatan_id' => $kegiatan1->kegiatan_id, 'parameter_uji_id' => $paramKadarAir->parameter_uji_id],
-            ['nilai_hasil' => 8.50, 'status_berketerimaan' => 'inlier', 'diinput_oleh' => $userId, 'created_at' => now()]
+            ['kegiatan_id' => $kegiatan1->kegiatan_id, 'parameter_uji_id' => $paramsMap['IM']->parameter_uji_id],
+            ['nilai_hasil' => 14.60, 'status_berketerimaan' => 'inlier', 'diinput_oleh' => $userId, 'created_at' => now()]
         );
         $hasilUji2 = HasilUji::firstOrCreate(
-            ['kegiatan_id' => $kegiatan1->kegiatan_id, 'parameter_uji_id' => $paramPh->parameter_uji_id],
-            ['nilai_hasil' => 7.20, 'status_berketerimaan' => 'inlier', 'diinput_oleh' => $userId, 'created_at' => now()]
+            ['kegiatan_id' => $kegiatan1->kegiatan_id, 'parameter_uji_id' => $paramsMap['ASH']->parameter_uji_id],
+            ['nilai_hasil' => 5.20, 'status_berketerimaan' => 'inlier', 'diinput_oleh' => $userId, 'created_at' => now()]
         );
         $hasilUjiOutlier = HasilUji::firstOrCreate(
-            ['kegiatan_id' => $kegiatan1->kegiatan_id, 'parameter_uji_id' => $paramSulfur->parameter_uji_id],
+            ['kegiatan_id' => $kegiatan1->kegiatan_id, 'parameter_uji_id' => $paramsMap['TS']->parameter_uji_id],
             ['nilai_hasil' => 1.85, 'status_berketerimaan' => 'outlier', 'diinput_oleh' => $userId, 'created_at' => now()]
         );
 

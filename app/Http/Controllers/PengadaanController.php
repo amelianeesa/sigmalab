@@ -32,9 +32,10 @@ class PengadaanController extends Controller
         return view('pengadaan.index', compact('pengadaans', 'barangList'));
     }
 
-    public function store(Request $request)
+    public function store(\App\Http\Requests\StorePengadaanRequest $request)
     {
         $roleName = Auth::user()->role->nama_role ?? '';
+
         $allowedToRequest = [
             PeranPengguna::ANALIS->value, 
             PeranPengguna::KOORDINATOR_LAB->value, 
@@ -46,11 +47,7 @@ class PengadaanController extends Controller
             return back()->with('error', 'Anda tidak memiliki izin untuk mengajukan pengadaan.');
         }
 
-        $validated = $request->validate([
-            'barang_id' => 'required|exists:barang,barang_id',
-            'jumlah_diminta' => 'required|numeric|min:0.1',
-            'alasan' => 'nullable|string'
-        ]);
+        $validated = $request->validated();
 
         PermintaanPengadaan::create([
             'barang_id' => $validated['barang_id'],
@@ -85,7 +82,7 @@ class PengadaanController extends Controller
         return $pdf->download("Laporan_Pengadaan_{$tahun}_{$bulan}.pdf");
     }
 
-    public function approve(Request $request, $id)
+    public function approve(\App\Http\Requests\ApprovePengadaanRequest $request, $id)
     {
         $pengadaan = PermintaanPengadaan::findOrFail($id);
         
@@ -95,10 +92,7 @@ class PengadaanController extends Controller
             return back()->with('error', 'Hanya HR & GA yang dapat memproses pengadaan.');
         }
 
-        $validated = $request->validate([
-            'status' => 'required|in:disetujui,ditolak,diproses,selesai',
-            'catatan_approval' => 'nullable|string'
-        ]);
+        $validated = $request->validated();
 
         DB::transaction(function () use ($validated, $pengadaan) {
             $pengadaan->status = $validated['status'];
@@ -108,17 +102,10 @@ class PengadaanController extends Controller
             $pengadaan->save();
 
             if ($validated['status'] === 'selesai') {
-                $barang = Barang::where('barang_id', $pengadaan->barang_id)->lockForUpdate()->first();
+                $inventoryService = app(\App\Services\InventoryService::class);
+                $barang = Barang::find($pengadaan->barang_id);
                 if ($barang) {
-                    $barang->penerimaan += $pengadaan->jumlah_diminta;
-                    $barang->saldo_akhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
-                    $barang->save();
-
-                    TransaksiBarang::create([
-                        'barang_id' => $barang->barang_id,
-                        'jumlah_penerimaan' => $pengadaan->jumlah_diminta,
-                        'harga' => $barang->harga_rata ?? 0,
-                    ]);
+                    $inventoryService->addStock($barang, $pengadaan->jumlah_diminta);
                 }
             }
         });

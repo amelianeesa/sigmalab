@@ -2,11 +2,11 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <!-- <h1 class="mt-4">Manajemen Alat & Kalibrasi</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+    <!-- <ol class="breadcrumb mb-1 mt-3">
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
         <li class="breadcrumb-item active">Alat & Kalibrasi</li>
-    </ol> -->
+    </ol>
+    <h1 class="mb-4">Manajemen Alat & Kalibrasi</h1> -->
 
     @php
         $alatWarningCount = 0;
@@ -38,7 +38,7 @@
         </div>
         <div class="card-body">
             
-            <form action="{{ route('alat.index') }}" method="GET" id="filterForm" class="row g-2 mb-3 align-items-center">
+            <form action="{{ route('alat.index') }}" method="GET" id="filterForm" class="row g-2 mb-3 align-items-center live-search-form" data-target="#table-container">
                 <div class="col-md-5">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
@@ -65,7 +65,7 @@
                 </div>
             </form>
 
-            <div class="table-responsive">
+            <div class="table-responsive" id="table-container">
                 <table class="table table-bordered table-striped align-middle text-center" style="font-size: 0.73rem;">
                     <thead class="table-dark align-middle">
                         <tr>
@@ -181,7 +181,7 @@
                                     <form action="{{ route('alat.destroy', $item->alat_id) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="button" class="btn btn-danger btn-sm" title="Hapus" onclick="confirmDelete(this)">
+                                        <button type="button" class="btn btn-danger btn-sm" title="Hapus" data-confirm-delete="Data alat beserta riwayat kalibrasinya akan dihapus permanen!">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
@@ -223,24 +223,6 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-function confirmDelete(button) {
-    Swal.fire({
-        title: 'Apakah Anda yakin?',
-        text: "Data alat beserta riwayat kalibrasinya akan dihapus permanen!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Ya, Hapus!',
-        cancelButtonText: 'Batal'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            button.closest('form').submit();
-        }
-    });
-}
 
 document.addEventListener("DOMContentLoaded", function() {
     const searchInput = document.getElementById('searchInput');

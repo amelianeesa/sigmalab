@@ -6,13 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class KompetensiPersonil extends Model
+class KompetensiPersonil extends BaseModel
 {
     use SoftDeletes;
     use HasFactory;
 
     protected $table = 'kompetensi_personil'; 
-    protected $primaryKey = 'kompetensi_personil_id';
     
     protected $fillable = [
         'personil_id',
@@ -36,7 +35,4 @@ class KompetensiPersonil extends Model
 
     public function parameterUji()
     {
-        return $this->belongsTo(ParameterUji::class, 'parameter_uji_id', 'parameter_uji_id');
-    }
-}
-
+        return $this->belongsTo(ParameterUji::class, 'parameter_uji_id', 'parameter_uji_id'}

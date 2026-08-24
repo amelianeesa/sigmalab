@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsStandardActivity;
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 
-class RiwayatPerbaikanAlat extends Model
+class RiwayatPerbaikanAlat extends BaseModel
 {
     use SoftDeletes, LogsActivity;
 
     protected $table = 'riwayat_perbaikan_alat';
-    protected $primaryKey = 'riwayat_perbaikan_id';
 
     protected $fillable = [
         'alat_id',
@@ -44,11 +45,4 @@ class RiwayatPerbaikanAlat extends Model
         return $this->belongsTo(User::class, 'diverifikasi_oleh', 'users_id');
     }
 
-    public function getActivitylogOptions(): \Spatie\Activitylog\Support\LogOptions
-    {
-        return \Spatie\Activitylog\Support\LogOptions::defaults()
-            ->logFillable()
-            ->logOnlyDirty()
-            ->setDescriptionForEvent(fn(string $eventName) => "Data riwayat perbaikan alat telah di-{$eventName}");
-    }
 }

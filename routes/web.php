@@ -15,6 +15,7 @@ use App\Http\Controllers\RoleSwitcherController;
 use App\Http\Controllers\PengadaanController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\HakAksesController;
+use App\Http\Controllers\NotifikasiController;
 
 // Guest / Auth Routes
 Route::get('/', [AuthController::class, 'showLogin']);
@@ -68,20 +69,25 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pengadaan/export-pdf', [PengadaanController::class, 'exportPdf'])->name('pengadaan.pdf');
     Route::resource('pengadaan', PengadaanController::class);
     Route::post('/pengadaan/{id}/approve', [PengadaanController::class, 'approve'])->name('pengadaan.approve');
+    Route::get('/parameter-uji/{parameter_uji}/calculate-stats', [ParameterUjiController::class, 'calculateHistoricalStats'])->name('parameter-uji.calculate-stats');
+    Route::get('/parameter-uji/{parameter_uji}/control-chart', [ParameterUjiController::class, 'controlChart'])->name('parameter-uji.control-chart');
     Route::resource('parameter-uji', ParameterUjiController::class);
     Route::resource('kegiatan', KegiatanController::class);
-    Route::resource('hasil-uji', HasilUjiController::class)->only(['store', 'show']);
-    Route::resource('tindak-lanjut', RiwayatTindakLanjutController::class)->only(['index', 'create', 'store', 'show']);
+    Route::resource('hasil-uji', HasilUjiController::class);
+    Route::post('/hasil-uji/{id}/override', [HasilUjiController::class, 'overrideWestgard'])->name('hasil-uji.override');
+    Route::resource('tindak-lanjut', RiwayatTindakLanjutController::class)->except(['destroy']);
+    Route::post('/tindak-lanjut/{id}/komentar', [RiwayatTindakLanjutController::class, 'storeKomentar'])->name('tindak-lanjut.komentar.store');
     
-    Route::get('/alat/{id}/input-kalibrasi', [AlatController::class, 'inputKalibrasi'])->name('alat.input-kalibrasi');
-    Route::post('/alat/{id}/input-kalibrasi', [AlatController::class, 'storeInputKalibrasi'])->name('alat.store-input-kalibrasi');
-
-    Route::get('/alat/{id}/pemeliharaan', [AlatController::class, 'pemeliharaanBulanan'])->name('alat.pemeliharaan');
-    Route::post('/alat/{id}/pemeliharaan/update', [AlatController::class, 'updatePemeliharaanHarian'])->name('alat.pemeliharaan.update');
-    Route::get('/alat/{id}/item-pemeliharaan', [AlatController::class, 'editItemPemeliharaan'])->name('alat.item-pemeliharaan.edit');
-    Route::post('/alat/{id}/item-pemeliharaan', [AlatController::class, 'updateItemPemeliharaan'])->name('alat.item-pemeliharaan.update');
-    Route::post('/alat/{id}/perbaikan', [AlatController::class, 'storePerbaikan'])->name('alat.perbaikan.store');
-    Route::put('/alat/{id}/perbaikan/{perbaikan_id}', [AlatController::class, 'updatePerbaikan'])->name('alat.perbaikan.update');
+    Route::prefix('alat/{id}')->controller(AlatController::class)->name('alat.')->group(function () {
+        Route::get('input-kalibrasi', 'inputKalibrasi')->name('input-kalibrasi');
+        Route::post('input-kalibrasi', 'storeInputKalibrasi')->name('store-input-kalibrasi');
+        Route::get('pemeliharaan', 'pemeliharaanBulanan')->name('pemeliharaan');
+        Route::post('pemeliharaan/update', 'updatePemeliharaanHarian')->name('pemeliharaan.update');
+        Route::get('item-pemeliharaan', 'editItemPemeliharaan')->name('item-pemeliharaan.edit');
+        Route::post('item-pemeliharaan', 'updateItemPemeliharaan')->name('item-pemeliharaan.update');
+        Route::post('perbaikan', 'storePerbaikan')->name('perbaikan.store');
+        Route::put('perbaikan/{perbaikan_id}', 'updatePerbaikan')->name('perbaikan.update');
+    });
     // Reporting
     Route::get('reporting', [ReportingController::class, 'index'])->name('reporting.index');
     Route::get('reporting/pdf', [ReportingController::class, 'exportPdf'])->name('reporting.pdf');
@@ -97,4 +103,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('hak-akses', [HakAksesController::class, 'index'])->name('hak-akses.index');
         Route::post('hak-akses', [HakAksesController::class, 'update'])->name('hak-akses.update');
     });
+
+    // Notifikasi
+    Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
+    Route::post('/notifikasi/{id}/read', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.read');
+    Route::post('/notifikasi/read-all', [NotifikasiController::class, 'markAllAsRead'])->name('notifikasi.read-all');
+    Route::get('/notifikasi/unread-count', [NotifikasiController::class, 'getUnreadCount'])->name('notifikasi.unread-count');
+
+    // Inhouse Control
+    Route::match(['get', 'post'], '/inhouse-control/cetak', [HasilUjiController::class, 'cetakInhouseControl'])->name('hasil-uji.inhouse-control.cetak');
+    Route::get('/inhouse-control', [HasilUjiController::class, 'inhouseControl'])->name('hasil-uji.inhouse-control');
+    Route::post('/hasil-uji/{id}/override-evaluasi', [HasilUjiController::class, 'overrideEvaluasi'])->name('hasil-uji.override-evaluasi');
 });

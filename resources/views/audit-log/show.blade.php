@@ -65,11 +65,21 @@
 
         <div class="col-md-7 mb-4">
             <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Visualisasi Data Berubah</h6>
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Visualisasi Data Berubah (Sesi Ini)</h6>
+                    <span class="badge bg-secondary">{{ $batchLogs->count() }} Aktivitas</span>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
+                <div class="card-body p-0" style="max-height: 500px; overflow-y: auto;">
+                    @foreach($batchLogs as $index => $bLog)
+                    <div class="bg-light p-2 border-bottom fw-bold d-flex justify-content-between">
+                        <span>
+                            #{{ $index + 1 }} - {{ $bLog->description }}
+                        </span>
+                        <span class="text-muted small">
+                            {{ $bLog->subject_type }} (ID: {{ $bLog->subject_id }})
+                        </span>
+                    </div>
+                    <div class="table-responsive mb-3">
                         <table class="table table-bordered mb-0">
                             <thead class="table-light">
                                 <tr>
@@ -80,7 +90,7 @@
                             </thead>
                             <tbody>
                                 @php
-                                    $properties = $log->properties;
+                                    $properties = $bLog->attribute_changes;
                                     $oldData = $properties['old'] ?? [];
                                     $newData = $properties['attributes'] ?? [];
                                     
@@ -94,7 +104,7 @@
                                         $newVal = array_key_exists($key, $newData) ? $newData[$key] : '-';
                                         
                                         // Highlight differences
-                                        $isChanged = ($log->event === 'updated' && $oldVal != $newVal);
+                                        $isChanged = ($bLog->event === 'updated' && $oldVal != $newVal);
                                     @endphp
                                     <tr class="{{ $isChanged ? 'table-warning' : '' }}">
                                         <td class="fw-bold">{{ $key }}</td>
@@ -107,12 +117,13 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="text-center py-3 text-muted">Tidak ada detail data yang direkam (hanya log statis).</td>
+                                        <td colspan="3" class="text-center py-3 text-muted">Tidak ada detail data yang direkam.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
+                    @endforeach
                 </div>
             </div>
         </div>

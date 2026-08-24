@@ -2,11 +2,11 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Tambah Alat & Informasi Kalibrasi</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ route('alat.index') }}">Alat</a></li>
+    <ol class="breadcrumb mb-1 mt-3">
+        <li class="breadcrumb-item"><a href="{{ route('alat.index') }}" class="text-decoration-none">Alat</a></li>
         <li class="breadcrumb-item active">Tambah</li>
     </ol>
+    <h1 class="mb-4">Tambah Alat & Informasi Kalibrasi</h1>
 
     <div class="card mb-4">
         <div class="card-header"><i class="fas fa-plus-circle me-1"></i> Form Input Data Master & Kalibrasi</div>

@@ -4,13 +4,13 @@
 <div class="container-fluid px-4 py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold text-dark mb-1">Pengadaan Bahan / Barang</h2>
-            <p class="text-muted mb-0">Manajemen permintaan pengadaan barang dan persetujuan Kabid Dukungan Bisnis.</p>
-            <ol class="breadcrumb mb-0 mt-2">
+            <ol class="breadcrumb mb-1 mt-3">
                 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
                 <li class="breadcrumb-item"><a href="{{ route('barang.index') }}" class="text-decoration-none">Inventori & Fasilitas</a></li>
                 <li class="breadcrumb-item active">Pengadaan Bahan</li>
             </ol>
+            <h2 class="fw-bold text-dark mb-1">Pengadaan Bahan / Barang</h2>
+            <p class="text-muted mb-0">Manajemen permintaan pengadaan barang dan persetujuan Kabid Dukungan Bisnis.</p>
         </div>
         <div class="d-flex gap-2">
             @if(Auth::user()->role->nama_role === \App\Enums\PeranPengguna::HR_GA_OFFICER->value)

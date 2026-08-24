@@ -19,6 +19,11 @@ class AuditLogController extends Controller
             $query->where('subject_type', 'like', '%' . $request->subject_type . '%');
         }
 
+        $subquery = Activity::selectRaw('MAX(id) as id')
+            ->groupByRaw('COALESCE(batch_uuid, CAST(id AS CHAR))');
+            
+        $query->whereIn('id', $subquery);
+
         $logs = $query->latest()->paginate(20);
 
         return view('audit-log.index', compact('logs'));
@@ -27,7 +32,15 @@ class AuditLogController extends Controller
     public function show($id)
     {
         $log = Activity::with(['causer.personil', 'causer.role'])->findOrFail($id);
+        
+        $batchLogs = collect([$log]);
+        if ($log->batch_uuid) {
+            $batchLogs = Activity::with(['causer.personil', 'causer.role'])
+                ->where('batch_uuid', $log->batch_uuid)
+                ->orderBy('id', 'asc')
+                ->get();
+        }
 
-        return view('audit-log.show', compact('log'));
+        return view('audit-log.show', compact('log', 'batchLogs'));
     }
 }

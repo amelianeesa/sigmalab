@@ -2,32 +2,40 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsStandardActivity;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Models\Concerns\HasActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
-class HasilUji extends Model
+class HasilUji extends BaseModel
 {
     use SoftDeletes;
-    use HasFactory, LogsActivity;
+    use HasFactory, HasActivity;
 
     protected $table = 'hasil_uji';
-    protected $primaryKey = 'hasil_uji_id';
-    public $timestamps = false;
+    const UPDATED_AT = null;
 
     protected $fillable = [
         'kegiatan_id',
         'parameter_uji_id',
         'nilai_hasil',
         'status_berketerimaan',
+        'kode_aturan_dilanggar',
+        'override_status',
+        'override_kode',
+        'keterangan_override',
+        'z_score',
+        'data_mentah',
         'diinput_oleh',
         'created_at',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
+        'data_mentah' => 'array',
     ];
 
     public function parameterUji()
@@ -50,13 +58,9 @@ class HasilUji extends Model
         return $this->hasMany(RiwayatTindakLanjut::class, 'hasil_uji_id', 'hasil_uji_id');
     }
 
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logFillable()
-            ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => "Hasil uji lab telah di-{$eventName}");
-    }
-}
 
+    public function scopePending($query) { return $query->where('status_berketerimaan', 'pending'); }
+    public function scopeInlier($query) { return $query->where('status_berketerimaan', 'inlier'); }
+    public function scopeOutlier($query) { return $query->where('status_berketerimaan', 'outlier'); }
+    public function scopeGagalDuplo($query) { return $query->where('status_berketerimaan', 'gagal_duplo'); }
+}

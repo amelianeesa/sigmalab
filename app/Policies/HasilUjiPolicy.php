@@ -35,5 +35,8 @@ class HasilUjiPolicy
         return $this->hasFullAccess($user, 'tambah_ubah');
     }
 
-    // Tidak ada update & delete — insert only
+    public function update(User $user, HasilUji $hasilUji): bool
+    {
+        return $this->hasFullAccess($user, 'tambah_ubah');
+    }
 }

@@ -34,29 +34,11 @@ class AlatController extends Controller
             $query->where('kondisi_barang', $filterKondisi);
         }
 
-        $alatList = $query->latest()->get();
-
         if ($filterStatus) {
-            $alatList = $alatList->filter(function($item) use ($filterStatus) {
-                $kalibrasiTerakhir = $item->riwayatKalibrasi->sortByDesc('tgl_kalibrasi')->first();
-                if (!$kalibrasiTerakhir || !$kalibrasiTerakhir->tgl_akhir) {
-                    return false;
-                }
-                
-                $tglAkhir = Carbon::parse($kalibrasiTerakhir->tgl_akhir);
-                $sekarang = Carbon::now()->startOfDay();
-                $sisaHari = $sekarang->diffInDays($tglAkhir, false);
-
-                if ($filterStatus == 'kedaluarsa') {
-                    return $sisaHari < 0;
-                } elseif ($filterStatus == 'segera') {
-                    return $sisaHari >= 0 && $sisaHari <= 30;
-                } elseif ($filterStatus == 'aktif') {
-                    return $sisaHari > 30;
-                }
-                return true;
-            });
+            $query->filterStatusKalibrasi($filterStatus);
         }
+
+        $alatList = $query->latest()->get();
 
         $alat = $alatList;
 
@@ -68,30 +50,8 @@ class AlatController extends Controller
         return view('alat.create');
     }
 
-    public function store(Request $request)
+    public function store(\App\Http\Requests\AlatRequest $request)
     {
-        $request->validate([
-            'kode_alat' => 'required|string|max:50|unique:alat,kode_alat',
-            'nama_alat' => 'required|string|max:100',
-            'merk_tipe' => 'nullable|string|max:100',
-            'no_seri' => 'nullable|string|max:100',
-            'warna' => 'nullable|string|max:30',
-            'ukuran' => 'nullable|string|max:50',
-            'kondisi_barang' => 'required|in:baik,rusak',
-            'status_barang' => 'required|in:terpakai,idle',
-            'unit_kerja_pemilik' => 'nullable|string|max:100',
-            'no_sertifikat' => 'nullable|string|max:100',
-            'interval_kalibrasi' => 'nullable|string|max:50',
-            'tgl_kalibrasi' => 'nullable|date',
-            'tgl_akhir' => 'nullable|date',
-            'lembaga_kalibrasi' => 'nullable|string|max:150',
-            'jenis_kalibrasi' => 'nullable|in:internal,eksternal',
-            'range_kapasitas' => 'nullable|string|max:100',
-            'faktor_koreksi' => 'nullable|string|max:100',
-            'signifikan' => 'nullable|in:ya,tidak',
-            'catatan_evaluasi' => 'nullable|string',
-        ]);
-
         DB::transaction(function () use ($request) {
             $alat = Alat::create([
                 'kode_alat' => $request->kode_alat,
@@ -136,30 +96,9 @@ class AlatController extends Controller
         return view('alat.edit', compact('alat', 'kalibrasiTerakhir'));
     }
 
-    public function update(Request $request, $id)
+    public function update(\App\Http\Requests\AlatRequest $request, $id)
     {
         $alat = Alat::findOrFail($id);
-
-        $request->validate([
-            'nama_alat' => 'required|string|max:100',
-            'merk_tipe' => 'nullable|string|max:100',
-            'no_seri' => 'nullable|string|max:100',
-            'warna' => 'nullable|string|max:30',
-            'ukuran' => 'nullable|string|max:50',
-            'kondisi_barang' => 'required|in:baik,rusak',
-            'status_barang' => 'required|in:terpakai,idle',
-            'unit_kerja_pemilik' => 'nullable|string|max:100',
-            'no_sertifikat' => 'nullable|string|max:100',
-            'interval_kalibrasi' => 'nullable|string|max:50',
-            'tgl_kalibrasi' => 'nullable|date',
-            'tgl_akhir' => 'nullable|date',
-            'lembaga_kalibrasi' => 'nullable|string|max:150',
-            'jenis_kalibrasi' => 'nullable|in:internal,eksternal',
-            'range_kapasitas' => 'nullable|string|max:100',
-            'faktor_koreksi' => 'nullable|string|max:100',
-            'signifikan' => 'nullable|in:ya,tidak',
-            'catatan_evaluasi' => 'nullable|string',
-        ]);
 
         DB::transaction(function () use ($request, $alat) {
             $alat->update([
@@ -214,7 +153,7 @@ class AlatController extends Controller
 
     public function show($id)
     {
-        $alat = Alat::with(['riwayatKalibrasi', 'kegiatanAlat.kegiatan.personil', 'riwayatPerbaikan.pelapor', 'riwayatPerbaikan.verifikator'])->findOrFail($id);
+        $alat = Alat::with(['riwayatKalibrasi', 'kegiatanAlat.kegiatan.personilTerlibat', 'riwayatPerbaikan.pelapor', 'riwayatPerbaikan.verifikator'])->findOrFail($id);
         
         // Cek apakah alat sedang dalam perbaikan
         $sedangDiperbaiki = $alat->riwayatPerbaikan()->whereIn('status_perbaikan', ['Belum Diperbaiki', 'Dalam Perbaikan'])->first();

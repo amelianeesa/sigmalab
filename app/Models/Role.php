@@ -6,13 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Role extends Model
+class Role extends BaseModel
 {
     use SoftDeletes;
     use HasFactory;
 
     protected $table = 'roles';          
-    protected $primaryKey = 'roles_id';   
 
     protected $fillable = [
         'nama_role',
@@ -20,6 +19,4 @@ class Role extends Model
 
     public function users()
     {
-        return $this->hasMany(User::class, 'role_id', 'roles_id');
-    }
-}
+        return $this->hasMany(User::class, 'role_id', 'roles_id'}

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsStandardActivity;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 use Illuminate\Database\Eloquent\Model;
@@ -9,13 +11,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
-class Barang extends Model
+class Barang extends BaseModel
 {
     use SoftDeletes;
     use HasFactory, LogsActivity;
 
     protected $table = 'barang';
-    protected $primaryKey = 'barang_id';
 
 
     protected $fillable = [
@@ -43,12 +44,4 @@ class Barang extends Model
         return $this->hasMany(PermintaanPengadaan::class, 'barang_id', 'barang_id');
     }
 
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logFillable()
-            ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => "Data barang telah di-{$eventName}");
-    }
 }

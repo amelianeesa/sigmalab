@@ -7,191 +7,11 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        body {
-            background-color: #f8f9fa;
-            overflow-x: hidden;
+        :root {
+            --sidebar-width: {{ auth()->check() ? '260px' : '0' }};
         }
-
-        :root{
-            --sdm-50: #eef0f1;
-            --sdm-500: #1d4c7a;
-            --sdm-600: #1d4c7a;
-            --sdm-700: #163d63;
-        }
-
-        @php
-            $useSidebar = auth()->check();
-        @endphp
-        
-        #sidebar { 
-            min-width: 260px; max-width: 260px; 
-            height: 100vh; position: fixed; top: 0; left: 0; 
-            background-color: #ffffff; color: #334155; z-index: 1040;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 4px 0 24px rgba(0,0,0,0.03);
-            border-right: none;
-        }
-
-        #content { 
-            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-left: {{ $useSidebar ? '260px' : '0' }}; 
-            padding: 24px; 
-            padding-top: 20px; 
-            min-height: 100vh; 
-        }
-
-        .top-navbar {
-            background: var(--sdm-600);
-            padding: 12px 28px;
-            border-bottom: 1px solid var(--sdm-700);
-            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-left: {{ $useSidebar ? '260px' : '0' }};
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1020;
-            min-height: 64px;
-            color: #fff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        body.sidebar-toggled #sidebar { transform: translateX(-100%); }
-        body.sidebar-toggled #content { margin-left: 0; }
-        body.sidebar-toggled .top-navbar { margin-left: 0; }
-
-        @media (max-width: 991.98px) {
-            #sidebar { transform: translateX(-100%); }
-            #content { margin-left: 0; }
-            .top-navbar { margin-left: 0; }
-            body.sidebar-toggled #sidebar { transform: translateX(0); box-shadow: 0 0 15px rgba(0,0,0,0.1); }
-            body.sidebar-toggled #content { margin-left: 0; }
-            body.sidebar-toggled .top-navbar { margin-left: 0; }
-            body.sidebar-toggled #sidebar-overlay { display: block; }
-        }
-
-        #sidebar-overlay { display: none; position: fixed; width: 100vw; height: 100vh; background: rgba(15,23,42,0.4); z-index: 1030; top: 0; left: 0; cursor: pointer; transition: opacity .2s ease; backdrop-filter: blur(2px); }
-        
-        #sidebar .sidebar-header { 
-            padding: 22px 20px; 
-            border-bottom: 1px solid #f1f5f9; 
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-        #sidebar .sidebar-header:hover {
-            background-color: #f8fafc;
-        }
-
-        #sidebar ul.components { padding: 20px 0; }
-        
-        /* Premium Menu Item Styles */
-        #sidebar ul li a { 
-            padding: 12px 20px 12px 24px; 
-            font-size: 0.92rem; 
-            font-weight: 500;
-            display: flex; align-items: center; gap: 12px;
-            color: #64748b; 
-            text-decoration: none; 
-            transition: all 0.2s ease; 
-            border-left: 3px solid transparent; 
-            margin-right: 12px; 
-            border-radius: 0 8px 8px 0; 
-            margin-bottom: 2px;
-        }
-        
-        #sidebar ul li a:hover { 
-            color: #2563eb; 
-            background: #eff6ff; 
-            transform: translateX(4px); 
-        }
-        
-        #sidebar ul li.active > a { 
-            color: #1d4ed8; 
-            background: #eff6ff; 
-            border-left-color: #2563eb; 
-            font-weight: 600; 
-        }
-        
-        #sidebar ul li a i { font-size: 1.1rem; opacity: 0.75; margin-right: 10px; }
-        #sidebar ul li a:hover i, #sidebar ul li.active > a i { opacity: 1; color: #2563eb; }
-        
-        /* Subtle Dividers */
-        #sidebar .sidebar-divider { 
-            font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; 
-            color: #94a3b8; padding: 18px 24px 8px; margin-top: 5px; 
-        }
-
-        /* Sidebar Dropdown Accordion */
-        #sidebar ul li > a.dropdown-toggle::after {
-            display: inline-block;
-            margin-left: 0.255em;
-            vertical-align: 0.255em;
-            content: "\f107"; /* FontAwesome caret-down */
-            font-family: "Font Awesome 5 Free";
-            font-weight: 900;
-            border: none;
-            transition: transform 0.2s ease;
-        }
-        #sidebar ul li > a.dropdown-toggle[aria-expanded="true"]::after {
-            transform: rotate(-180deg);
-        }
-        #sidebar ul.collapse li a {
-            padding-left: 3rem !important;
-            font-size: 0.92rem;
-            background: #f8fafc;
-            border-left: 4px solid transparent;
-        }
-        #sidebar ul.collapse li.active > a {
-            background: #eff6ff;
-            border-left-color: #2563eb;
-            color: #1d4ed8;
-            font-weight: 600;
-        }
-        #sidebar ul.collapse li a:hover {
-            transform: none;
-            padding-left: 3.25rem !important;
-            transition: padding-left 0.2s ease, background 0.2s ease, color 0.2s ease;
-        }
-        
-        @media (min-width: 992px) {
-            body.sidebar-toggled #sidebar-overlay { display: none; }
-        }
-
-        .top-navbar .text-secondary { color: rgba(255,255,255,.75) !important; }
-        .top-navbar .fw-bold { color: #fff !important; }
-        .top-navbar .dropdown .btn {
-            background: rgba(255,255,255,.12);
-            color: #fff;
-            border-color: rgba(255,255,255,.18);
-        }
-        .top-navbar .dropdown button {
-            max-width: 220px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
-        .btn-logout {
-            border-color: rgba(255,255,255,.45);
-            color: #fff;
-            transition: background .15s ease, color .15s ease, border-color .15s ease;
-        }
-        .btn-logout:hover,
-        .btn-logout:focus {
-            background: rgba(255,255,255,.95);
-            color: #1d4c7a;
-            border-color: rgba(255,255,255,.85);
-        }
-        .card.h-100 .card-body { min-height: 120px; }
-        .card .card-body p { word-break: break-word; }
-        .module-card { transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease; }
-        .module-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(15,35,59,.08); }
-        .sdm-highlight { border-color: var(--sdm-600) !important; }
-        .sdm-text { color: var(--sdm-600) !important; }
-        .sdm-btn { background: var(--sdm-600); border-color: var(--sdm-600); color: #fff; }
-        .sdm-border { border-color: rgba(76,29,149,0.12); }
     </style>
+    <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
 </head>
 
 <body>
@@ -234,15 +54,15 @@
             @endif
 
             {{-- 2. Personel dan Kompetensi --}}
-            @if(Auth::check() && (Auth::user()->hasModulAccess('sdm') || Auth::user()->hasModulAccess('manajemen_pengguna')))
-            <li class="{{ request()->is('sdm*') || request()->is('hak-akses*') ? 'active' : '' }}">
+            @if(Auth::check() && Auth::user()->hasModulAccess('sdm'))
+            <li class="{{ request()->is('sdm*') ? 'active' : '' }}">
                 <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personel & Kompetensi</a>
             </li>
             @endif
 
             {{-- 3. Proses dan Hasil Pengujian (QC) --}}
             @if(Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
-            <li class="{{ request()->is('parameter-uji*') || request()->is('kegiatan*') || request()->is('tindak-lanjut*') || request()->is('reporting*') ? 'active' : '' }}">
+            <li class="{{ request()->is('parameter-uji*') || request()->is('kegiatan*') || request()->is('inhouse-control*') || request()->is('tindak-lanjut*') || request()->is('reporting*') ? 'active' : '' }}">
                 <a href="{{ route('kegiatan.index') }}"><i class="fas fa-flask"></i> Verifikasi Mutu (QC)</a>
             </li>
             @endif
@@ -250,7 +70,7 @@
             {{-- 4. Inventori & Fasilitas --}}
             @if(Auth::check() && (Auth::user()->hasModulAccess('barang') || Auth::user()->hasModulAccess('pengadaan')))
             <li class="{{ request()->is('barang*') || request()->is('pengadaan*') ? 'active' : '' }}">
-                <a href="{{ route('barang.index') }}"><i class="fas fa-boxes"></i> Inventori & Fasilitas</a>
+                <a href="{{ Auth::user()->hasModulAccess('barang') ? route('barang.index') : route('pengadaan.index') }}"><i class="fas fa-boxes"></i> Inventori & Fasilitas</a>
             </li>
             @endif
 
@@ -260,13 +80,20 @@
                 <a href="{{ route('audit-log.index') }}"><i class="fas fa-history"></i> Audit Trail</a>
             </li>
             @endif
+
+            {{-- 6. Pengaturan Sistem --}}
+            @if(Auth::check() && Auth::user()->hasModulAccess('manajemen_pengguna'))
+            <li class="{{ request()->is('hak-akses*') ? 'active' : '' }}">
+                <a href="{{ route('hak-akses.index') }}"><i class="fas fa-user-shield"></i> Pengaturan Akses</a>
+            </li>
+            @endif
         </ul>
     </nav>
 
     <div class="top-navbar shadow-sm">
         <div class="d-flex align-items-center">
-            <!-- Class d-lg-none dihapus agar toggle navbar selalu muncul untuk mengembalikan sidebar -->
-            <button class="btn text-white me-3 d-flex align-items-center justify-content-center p-1" onclick="toggleSidebar()" style="border:1px solid rgba(255,255,255,0.3); border-radius:6px; background:rgba(0,0,0,0.1); width:36px; height:36px;">
+            <!-- Toggle ini hanya muncul di HP/Mobile (d-lg-none) -->
+            <button class="btn text-white me-3 d-flex d-lg-none align-items-center justify-content-center p-1" onclick="toggleSidebar()" style="border:1px solid rgba(255,255,255,0.3); border-radius:6px; background:rgba(0,0,0,0.1); width:36px; height:36px;">
                 <i class="fas fa-bars"></i>
             </button>
             <div>
@@ -275,15 +102,49 @@
             </div>
         </div>
         <div class="d-flex align-items-center">
-            @if(isset($pendingPengadaan) && $pendingPengadaan > 0)
-                <a href="{{ route('pengadaan.index') }}" class="btn btn-warning position-relative me-3 rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;" title="{{ $pendingPengadaan }} Pengajuan Pengadaan">
+            <div class="dropdown me-3">
+                <a href="#" class="btn btn-warning position-relative rounded-circle p-2 d-flex align-items-center justify-content-center dropdown-toggle" style="width: 38px; height: 38px;" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="fas fa-bell text-dark"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light">
-                        {{ $pendingPengadaan }}
-                        <span class="visually-hidden">pengadaan belum diproses</span>
-                    </span>
+                    @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light">
+                            {{ $unreadNotifCount > 99 ? '99+' : $unreadNotifCount }}
+                            <span class="visually-hidden">unread messages</span>
+                        </span>
+                    @endif
                 </a>
-            @endif
+                <ul class="dropdown-menu dropdown-menu-end shadow" style="width: 300px; max-height: 400px; overflow-y: auto;">
+                    <li><h6 class="dropdown-header">Notifikasi Terbaru</h6></li>
+                    @if(isset($recentNotifs) && $recentNotifs->count() > 0)
+                        @foreach($recentNotifs as $notif)
+                            <li>
+                                <a class="dropdown-item d-flex align-items-start py-2 border-bottom text-wrap" href="#">
+                                    <div class="me-3 mt-1">
+                                        @if($notif->jenis_notifikasi == 'qc')
+                                            <i class="fas fa-flask text-primary"></i>
+                                        @elseif($notif->jenis_notifikasi == 'kalibrasi')
+                                            <i class="fas fa-tools text-warning"></i>
+                                        @elseif($notif->jenis_notifikasi == 'stok')
+                                            <i class="fas fa-box text-success"></i>
+                                        @elseif($notif->jenis_notifikasi == 'sertifikasi')
+                                            <i class="fas fa-certificate text-danger"></i>
+                                        @else
+                                            <i class="fas fa-bell text-secondary"></i>
+                                        @endif
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <p class="mb-0" style="font-size: 0.85rem;">{{ \Illuminate\Support\Str::limit($notif->pesan, 80) }}</p>
+                                        <small class="text-muted" style="font-size: 0.75rem;">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</small>
+                                    </div>
+                                </a>
+                            </li>
+                        @endforeach
+                    @else
+                        <li><span class="dropdown-item text-center text-muted py-3">Tidak ada notifikasi baru</span></li>
+                    @endif
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-center text-primary fw-bold" href="{{ route('notifikasi.index') }}">Lihat Semua Notifikasi</a></li>
+                </ul>
+            </div>
             <div class="dropdown">
             <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown" title="Profil" style="border-color: rgba(255,255,255,0.2);">
                 <i class="bi bi-person-circle me-1 text-white"></i> 
@@ -336,6 +197,33 @@
                 localStorage.setItem('desktopSidebarState', isCollapsed ? 'collapsed' : 'expanded');
             }
         }
+    </script>
+
+    <!-- Global Delete Confirmation (SweetAlert2) -->
+    <script>
+    function confirmDelete(button, customText) {
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: customText || 'Data akan dihapus permanen!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                button.closest('form').submit();
+            }
+        });
+    }
+    // Delegated listener for buttons with data-confirm-delete attribute
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('[data-confirm-delete]');
+        if (!btn) return;
+        e.preventDefault();
+        confirmDelete(btn, btn.dataset.confirmDelete || undefined);
+    });
     </script>
 
     <!-- Live Search Script -->

@@ -15,6 +15,10 @@
             <i class="fas fa-exclamation-triangle me-2"></i> Tindak Lanjut Outlier
         </a>
         @endif
+
+        <a href="{{ route('hasil-uji.inhouse-control') }}" class="btn btn-warning text-dark rounded-pill px-4 shadow-sm fw-bold" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <i class="fas fa-chart-line me-2"></i> Inhouse Control
+        </a>
         
         @if(Auth::user()->hasModulAccess('reporting'))
         <a href="{{ route('reporting.index') }}" class="btn btn-success rounded-pill px-4 shadow-sm text-white fw-bold" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
@@ -26,11 +30,11 @@
     <div class="row mb-3">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <!-- <div>
-                <h1 class="h3 mb-0 text-gray-800">Daftar Kegiatan</h1>
-                <ol class="breadcrumb mb-0 mt-2">
+                <ol class="breadcrumb mb-1 mt-3">
                     <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
                     <li class="breadcrumb-item active">Proses & Hasil</li>
                 </ol>
+    <h1 class="h3 mb-0 text-gray-800">Daftar Kegiatan</h1>
             </div> -->
             @can('create', App\Models\Kegiatan::class)
                 <a href="{{ route('kegiatan.create') }}" class="btn btn-primary">
@@ -133,7 +137,7 @@
                                     <form action="{{ route('kegiatan.destroy', $kegiatan->kegiatan_id) }}" method="POST" class="d-inline form-delete">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="button" class="btn btn-sm btn-danger btn-delete" title="Hapus">
+                                        <button type="button" class="btn btn-sm btn-danger" title="Hapus" data-confirm-delete="Data kegiatan yang dihapus tidak dapat dikembalikan!">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
@@ -156,32 +160,5 @@
     </div>
 </div>
 
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const deleteButtons = document.querySelectorAll('.btn-delete');
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function (e) {
-                e.preventDefault();
-                const form = this.closest('form');
-                
-                Swal.fire({
-                    title: 'Apakah Anda yakin?',
-                    text: "Data kegiatan yang dihapus tidak dapat dikembalikan!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Ya, hapus!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit();
-                    }
-                });
-            });
-        });
-    });
-</script>
-@endpush
+
 @endsection

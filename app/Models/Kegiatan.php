@@ -2,19 +2,20 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsStandardActivity;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
-class Kegiatan extends Model
+class Kegiatan extends BaseModel
 {
     use SoftDeletes;
     use HasFactory, LogsActivity;
 
     protected $table = 'kegiatan';
-    protected $primaryKey = 'kegiatan_id';
 
     protected $fillable = [
         'nama_kegiatan',
@@ -51,13 +52,8 @@ class Kegiatan extends Model
         return $this->hasMany(TransaksiBarang::class, 'kegiatan_id', 'kegiatan_id');
     }
 
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logFillable()
-            ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => "Kegiatan lab telah di-{$eventName}");
-    }
-}
 
+    public function scopeBerjalan($query) { return $query->where('status_kegiatan', 'berjalan'); }
+    public function scopeDraft($query) { return $query->where('status_kegiatan', 'draft'); }
+    public function scopeSelesai($query) { return $query->where('status_kegiatan', 'selesai'); }
+}

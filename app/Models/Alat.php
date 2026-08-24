@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsStandardActivity;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,13 +12,12 @@ use App\Models\KegiatanAlat;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
-class Alat extends Model
+class Alat extends BaseModel
 {
     use SoftDeletes;
     use HasFactory, LogsActivity;
 
     protected $table = 'alat';
-    protected $primaryKey = 'alat_id';
 
     protected $fillable = [
         'kode_alat',
@@ -41,12 +42,7 @@ class Alat extends Model
         return $this->hasMany(KegiatanAlat::class, 'alat_id', 'alat_id');
     }
 
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logFillable()
-            ->logOnlyDirty()
-            ->setDescriptionForEvent(fn(string $eventName) => "Data alat telah di-{$eventName}");
+");
     }
     public function kategoriAlat()
     {
@@ -61,5 +57,31 @@ class Alat extends Model
     public function riwayatPerbaikan()
     {
         return $this->hasMany(RiwayatPerbaikanAlat::class, 'alat_id', 'alat_id');
+    }
+
+    public function scopeFilterStatusKalibrasi($query, $status)
+    {
+        if (!$status) return $query;
+
+        return $query->whereHas('riwayatKalibrasi', function ($q) use ($status) {
+            // Only look at the latest calibration record per alat
+            $q->whereIn('kalibrasi_id', function ($sub) {
+                $sub->selectRaw('MAX(kalibrasi_id)')
+                    ->from('riwayat_kalibrasi')
+                    ->whereNull('deleted_at')
+                    ->groupBy('alat_id');
+            });
+
+            $sekarang = \Carbon\Carbon::now()->startOfDay();
+            $batasBulanDepan = \Carbon\Carbon::now()->startOfDay()->addDays(30);
+
+            if ($status == 'kedaluarsa') {
+                $q->whereNotNull('tgl_akhir')->where('tgl_akhir', '<', $sekarang);
+            } elseif ($status == 'segera') {
+                $q->whereNotNull('tgl_akhir')->whereBetween('tgl_akhir', [$sekarang, $batasBulanDepan]);
+            } elseif ($status == 'aktif') {
+                $q->whereNotNull('tgl_akhir')->where('tgl_akhir', '>', $batasBulanDepan);
+            }
+        });
     }
 }

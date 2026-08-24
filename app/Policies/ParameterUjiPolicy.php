@@ -32,13 +32,20 @@ class ParameterUjiPolicy
         return true;
     }
 
+    private function hasParameterAccess(User $user): bool
+    {
+        return in_array($user->role->nama_role, [
+            \App\Enums\PeranPengguna::ANALIS->value, 
+            \App\Enums\PeranPengguna::KOORDINATOR_LAB->value
+        ]) || $this->hasFullAccess($user, 'full');
+    }
+
     /**
      * Determine whether the user can create models.
      */
     public function create(User $user): bool
     {
-        if (in_array($user->role->nama_role, [\App\Enums\PeranPengguna::ANALIS->value, \App\Enums\PeranPengguna::KOORDINATOR_LAB->value])) return true;
-        return $this->hasFullAccess($user, 'full');
+        return $this->hasParameterAccess($user);
     }
 
     /**
@@ -46,8 +53,7 @@ class ParameterUjiPolicy
      */
     public function update(User $user, ParameterUji $parameterUji): bool
     {
-        if (in_array($user->role->nama_role, [\App\Enums\PeranPengguna::ANALIS->value, \App\Enums\PeranPengguna::KOORDINATOR_LAB->value])) return true;
-        return $this->hasFullAccess($user, 'full');
+        return $this->hasParameterAccess($user);
     }
 
     /**
@@ -55,7 +61,6 @@ class ParameterUjiPolicy
      */
     public function delete(User $user, ParameterUji $parameterUji): bool
     {
-        if (in_array($user->role->nama_role, [\App\Enums\PeranPengguna::ANALIS->value, \App\Enums\PeranPengguna::KOORDINATOR_LAB->value])) return true;
-        return $this->hasFullAccess($user, 'full');
+        return $this->hasParameterAccess($user);
     }
 }

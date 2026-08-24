@@ -2,6 +2,15 @@
 
 @section('content')
 <div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('kegiatan.index') }}" class="text-decoration-none">Verifikasi Mutu</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Tambah Kegiatan</li>
+        </ol>
+    </nav>
+
     <div class="row mb-3">
         <div class="col-12">
             <h1 class="h3 mb-0 text-gray-800">Tambah Kegiatan</h1>
@@ -132,6 +141,97 @@
                     @enderror
                 </div>
                 
+                <h5 class="mb-3 text-primary border-bottom pb-2 mt-5">Parameter Uji yang Dilakukan</h5>
+                
+                <div class="mb-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="metode_verifikasi" class="form-label fw-bold">Metode Verifikasi Mutu <span class="text-danger">*</span></label>
+                            <select id="metode_verifikasi" name="metode_verifikasi" class="form-select border-primary" required>
+                                <option value="">-- Pilih Metode Verifikasi --</option>
+                                <option value="in_house" {{ old('metode_verifikasi') == 'in_house' ? 'selected' : '' }}>In-House Control (Statistik Lab)</option>
+                                <option value="crm" {{ old('metode_verifikasi') == 'crm' ? 'selected' : '' }}>CRM (Sertifikat Pabrik)</option>
+                            </select>
+                            <small class="text-muted">Pilih metode untuk menampilkan daftar parameter uji yang sesuai.</small>
+                        </div>
+                    </div>
+
+                    <div id="parameter-container" style="display: none;">
+                        <p class="text-muted small mb-3">Pilih parameter uji yang akan dilakukan. Sistem hanya menampilkan parameter yang sesuai dengan metode terpilih.</p>
+                        
+                        <!-- Panel In-House -->
+                        <div id="pane-inhouse" style="display: none;">
+                            <div class="row">
+                                @php
+                                    $inhouseParams = $parameterList->where('jenis_kontrol', '!=', 'crm')->groupBy('kategori_parameter');
+                                @endphp
+                                @forelse($inhouseParams as $kategori => $params)
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100 border-light shadow-sm">
+                                        <div class="card-header bg-light py-2">
+                                            <h6 class="m-0 font-weight-bold text-secondary">{{ $kategori ?: 'Lain-lain' }}</h6>
+                                        </div>
+                                        <div class="card-body py-2">
+                                            @foreach($params as $param)
+                                            <div class="form-check mb-1">
+                                                <input class="form-check-input param-checkbox param-inhouse" type="checkbox" name="parameter_uji_ids[]" value="{{ $param->parameter_uji_id }}" id="param_{{ $param->parameter_uji_id }}" {{ in_array($param->parameter_uji_id, old('parameter_uji_ids', [])) ? 'checked' : '' }}>
+                                                <label class="form-check-label cursor-pointer" for="param_{{ $param->parameter_uji_id }}">
+                                                    {{ $param->nama_parameter }}
+                                                    @if($param->dependensi_parameter)
+                                                        <span class="badge bg-warning text-dark ms-1" style="font-size: 0.6rem;" title="Membutuhkan: {{ implode(', ', $param->dependensi_parameter) }}">Butuh Dependensi</span>
+                                                    @endif
+                                                </label>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                                @empty
+                                <div class="col-12">
+                                    <div class="alert alert-info">Belum ada parameter In-House Control yang terdaftar.</div>
+                                </div>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        <!-- Panel CRM -->
+                        <div id="pane-crm" style="display: none;">
+                            <div class="row">
+                                @php
+                                    $crmParams = $parameterList->where('jenis_kontrol', 'crm')->groupBy('kategori_parameter');
+                                @endphp
+                                @forelse($crmParams as $kategori => $params)
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100 border-info shadow-sm">
+                                        <div class="card-header bg-info bg-opacity-10 py-2">
+                                            <h6 class="m-0 font-weight-bold text-info">{{ $kategori ?: 'Lain-lain' }}</h6>
+                                        </div>
+                                        <div class="card-body py-2">
+                                            @foreach($params as $param)
+                                            <div class="form-check mb-1">
+                                                <input class="form-check-input param-checkbox param-crm" type="checkbox" name="parameter_uji_ids[]" value="{{ $param->parameter_uji_id }}" id="param_{{ $param->parameter_uji_id }}" {{ in_array($param->parameter_uji_id, old('parameter_uji_ids', [])) ? 'checked' : '' }}>
+                                                <label class="form-check-label cursor-pointer" for="param_{{ $param->parameter_uji_id }}">
+                                                    {{ $param->nama_parameter }}
+                                                </label>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                                @empty
+                                <div class="col-12">
+                                    <div class="alert alert-secondary"><i class="fas fa-info-circle me-1"></i> Belum ada parameter CRM yang terdaftar. Anda dapat membuat parameter CRM baru di menu <strong>Master Data > Parameter Uji</strong>.</div>
+                                </div>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
+                    
+                    @error('parameter_uji_ids')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+                
                 <h5 class="mb-3 text-primary border-bottom pb-2">Bahan Digunakan</h5>
                 
                 <div class="mb-4">
@@ -229,6 +329,38 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    // Logic Filter Parameter berdasarkan Metode Verifikasi
+    const selMetode = document.getElementById('metode_verifikasi');
+    const paramContainer = document.getElementById('parameter-container');
+    const paneInhouse = document.getElementById('pane-inhouse');
+    const paneCrm = document.getElementById('pane-crm');
+    
+    function updateParameterVisibility() {
+        const val = selMetode.value;
+        
+        if (!val) {
+            paramContainer.style.display = 'none';
+            paneInhouse.style.display = 'none';
+            paneCrm.style.display = 'none';
+        } else {
+            paramContainer.style.display = 'block';
+            if (val === 'in_house') {
+                paneInhouse.style.display = 'block';
+                paneCrm.style.display = 'none';
+                // Uncheck CRM params
+                document.querySelectorAll('.param-crm').forEach(cb => cb.checked = false);
+            } else if (val === 'crm') {
+                paneInhouse.style.display = 'none';
+                paneCrm.style.display = 'block';
+                // Uncheck In-House params
+                document.querySelectorAll('.param-inhouse').forEach(cb => cb.checked = false);
+            }
+        }
+    }
+    
+    selMetode.addEventListener('change', updateParameterVisibility);
+    // Jalankan sekali saat load (untuk handle validasi failed / old input)
+    updateParameterVisibility();
 });
 </script>
 @endpush

@@ -5,11 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class ItemPemeliharaan extends Model
+class ItemPemeliharaan extends BaseModel
 {
     use SoftDeletes;
     protected $table = 'item_pemeliharaan';
-    protected $primaryKey = 'item_id';
     protected $fillable = ['alat_id', 'nomor_urut', 'nama_pemeliharaan'];
 
     public function kategoriAlat()
@@ -19,6 +18,4 @@ class ItemPemeliharaan extends Model
 
     public function logs()
     {
-        return $this->hasMany(LogPemeliharaan::class, 'item_id', 'item_id');
-    }
-}
+        return $this->hasMany(LogPemeliharaan::class, 'item_id', 'item_id'}

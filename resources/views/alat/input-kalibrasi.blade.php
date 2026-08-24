@@ -22,12 +22,12 @@
 
 @section('content')
 <div class="container py-1">
-    <h1 class="mt-1">Pemeliharaan</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('alat.index') }}">Alat & Kalibrasi</a></li>
+    <ol class="breadcrumb mb-1 mt-3">
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('alat.index') }}" class="text-decoration-none">Alat & Kalibrasi</a></li>
         <li class="breadcrumb-item active">Pemeliharaan</li>
     </ol>
+    <h1 class="mb-3">Pemeliharaan</h1>
     <div class="row justify-content-center">
         <div class="col-lg-10">
             

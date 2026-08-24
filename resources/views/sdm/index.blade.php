@@ -2,19 +2,15 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <!-- <h1 class="mt-4">Manajemen SDM & Kompetensi</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+    <!-- <ol class="breadcrumb mb-1 mt-3">
+        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
         <li class="breadcrumb-item active">SDM & Personil</li>
-    </ol> -->
+    </ol>
+    <h1 class="mb-4">Manajemen SDM & Kompetensi</h1> -->
 
     <!-- Shortcut Navigation Buttons for SDM Module -->
     <div class="d-flex flex-wrap gap-3 mb-4 mt-2">
-        @if(Auth::user()->hasModulAccess('manajemen_pengguna'))
-        <a href="{{ route('hak-akses.index') }}" class="btn btn-warning rounded-pill px-4 shadow-sm text-dark fw-bold" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-            <i class="fas fa-shield-alt me-2"></i> Manajemen Hak Akses
-        </a>
-        @endif
+        <!-- Shortcut bisa ditambahkan di sini jika diperlukan ke depannya -->
     </div>
 
     @if($errors->any())

@@ -2,11 +2,11 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Inventori Barang</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ route('barang.index') }}">Inventori Barang</a></li>
+    <ol class="breadcrumb mb-1 mt-3">
+        <li class="breadcrumb-item"><a href="{{ route('barang.index') }}" class="text-decoration-none">Inventori Barang</a></li>
         <li class="breadcrumb-item active">Edit Barang</li>
     </ol>
+    <h1 class="mb-4">Inventori Barang</h1>
 
     <div class="card mb-4">
         <div class="card-header"><i class="fas fa-edit me-1"></i> Form Edit Data Barang Persediaan</div>

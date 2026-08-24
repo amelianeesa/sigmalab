@@ -21,11 +21,11 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <!-- <h1 class="mt-4">Laporan Inventori Barang Persediaan (Stock)</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ url('dashboard') }}">Dashboard</a></li>
+    <!-- <ol class="breadcrumb mb-1 mt-3">
+        <li class="breadcrumb-item"><a href="{{ url('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
         <li class="breadcrumb-item active">Inventori Barang</li>
-    </ol> -->
+    </ol>
+    <h1 class="mb-4">Laporan Inventori Barang Persediaan (Stock)</h1> -->
 
     <!-- Shortcut Navigation Buttons for Inventori Module -->
     <div class="d-flex flex-wrap gap-3 mb-4 mt-2">
@@ -80,7 +80,7 @@
         </div>
         <div class="card-body">
             
-            <form action="{{ route('barang.index') }}" method="GET" id="filterForm" class="row g-2 mb-3 align-items-center">
+            <form action="{{ route('barang.index') }}" method="GET" id="filterForm" class="row g-2 mb-3 align-items-center live-search-form" data-target="#table-container">
                 <div class="col-md-7">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
@@ -99,7 +99,7 @@
                 </div>
             </form>
 
-            <div class="table-responsive">
+            <div class="table-responsive" id="table-container">
                 <table class="table table-bordered table-striped align-middle text-center table-responsive-custom">
                     <thead class="table-header-custom align-middle">
                         <tr>
@@ -171,7 +171,7 @@
                                     <form action="{{ route('barang.destroy', $item->barang_id) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="button" class="btn btn-danger btn-sm py-0 px-1" title="Hapus" onclick="confirmDelete(this)"><i class="fas fa-trash"></i></button>
+                                        <button type="button" class="btn btn-danger btn-sm py-0 px-1" title="Hapus" data-confirm-delete="Data barang akan dihapus permanen!"><i class="fas fa-trash"></i></button>
                                     </form>
                                 @else
                                     -
@@ -234,25 +234,6 @@
 </div>
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-function confirmDelete(button) {
-    Swal.fire({
-        title: 'Apakah Anda yakin?',
-        text: "Data barang akan dihapus permanen!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Ya, Hapus!',
-        cancelButtonText: 'Batal'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            button.closest('form').submit();
-        }
-    });
-}
-
 document.addEventListener("DOMContentLoaded", function() {
     const searchInput = document.getElementById('searchInput');
     const filterKondisi = document.getElementById('filterKondisi');

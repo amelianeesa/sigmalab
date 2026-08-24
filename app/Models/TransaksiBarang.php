@@ -6,13 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class TransaksiBarang extends Model
+class TransaksiBarang extends BaseModel
 {
     use SoftDeletes;
     use HasFactory;
 
     protected $table = 'transaksi_barang';
-    protected $primaryKey = 'transaksi_id';
 
     protected $fillable = [
         'barang_id',
@@ -29,7 +28,4 @@ class TransaksiBarang extends Model
 
     public function kegiatan()
     {
-        return $this->belongsTo(Kegiatan::class, 'kegiatan_id', 'kegiatan_id');
-    }
-}
-
+        return $this->belongsTo(Kegiatan::class, 'kegiatan_id', 'kegiatan_id'}
