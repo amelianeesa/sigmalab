@@ -37,7 +37,12 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Kode Barang <span class="text-danger">*</span></label>
-                        <input type="text" name="kode_barang" class="form-control" placeholder="mis. 1.23.456" required>
+                        <div class="input-group">
+                            <input type="text" id="kode_barang_input" name="kode_barang" class="form-control" placeholder="mis. 1.23.456" required>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#scannerModal" title="Scan Barcode">
+                                <i class="fas fa-qrcode"></i> Scan
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -90,4 +95,58 @@
         </div>
     </div>
 </div>
+
+<!-- Scanner Modal -->
+<div class="modal fade" id="scannerModal" tabindex="-1" aria-labelledby="scannerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fs-6" id="scannerModalLabel"><i class="fas fa-qrcode me-2"></i>Scan Barcode / QR Code</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="reader" width="100%"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const scannerModal = document.getElementById('scannerModal');
+        let html5QrcodeScanner = null;
+
+        scannerModal.addEventListener('shown.bs.modal', function () {
+            html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, /* verbose= */ false);
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        });
+
+        scannerModal.addEventListener('hidden.bs.modal', function () {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear().catch(error => {
+                    console.error("Failed to clear html5QrcodeScanner. ", error);
+                });
+            }
+        });
+
+        function onScanSuccess(decodedText, decodedResult) {
+            document.getElementById('kode_barang_input').value = decodedText;
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear();
+            }
+            const modal = bootstrap.Modal.getInstance(scannerModal);
+            modal.hide();
+        }
+
+        function onScanFailure(error) {
+            // handle scan failure, usually better to ignore and keep scanning
+        }
+    });
+</script>
+@endpush
 @endsection

@@ -75,7 +75,7 @@
     </div>
 
     <div class="row">
-        <div class="col-md-6 mb-4">
+        <div class="col-md-4 mb-4">
             <div class="card shadow h-100">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">Alat Digunakan</h6>
@@ -109,7 +109,7 @@
             </div>
         </div>
 
-        <div class="col-md-6 mb-4">
+        <div class="col-md-4 mb-4">
             <div class="card shadow h-100">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">Personil Terlibat</h6>
@@ -144,6 +144,40 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Bahan Digunakan</h6>
+                </div>
+                <div class="card-body">
+                    @if($kegiatan->transaksiBarang->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th width="10%" class="text-center">No</th>
+                                        <th>Nama Bahan</th>
+                                        <th class="text-center">Jumlah Dipakai</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($kegiatan->transaksiBarang as $transaksi)
+                                        <tr>
+                                            <td class="text-center">{{ $loop->iteration }}</td>
+                                            <td>{{ $transaksi->barang ? $transaksi->barang->nama_barang : '-' }}</td>
+                                            <td class="text-center">{{ (float) $transaksi->jumlah_pengeluaran }} {{ $transaksi->barang ? $transaksi->barang->satuan : '' }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <div class="alert alert-info">Belum ada bahan yang dicatat penggunaannya.</div>
+                    @endif
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row">
@@ -169,19 +203,19 @@
                                 <select name="parameter_uji_id" class="form-select" required>
                                     <option value="">-- Pilih Parameter --</option>
                                     @foreach($parameterList as $param)
-                                        <option value="{{ $param->parameter_uji_id }}">
+                                        <option value="{{ $param->parameter_uji_id }}" data-rumus="{{ $param->rumus_kalkulasi ?? '' }}">
                                             {{ $param->nama_parameter }} (Batas: {{ $param->batas_bawah }} - {{ $param->batas_atas }} {{ $param->satuan }})
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-7" id="dynamicInputContainer">
                                 <label class="form-label fw-bold">Nilai Hasil <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <input type="number" step="0.0001" name="nilai_hasil" class="form-control" required placeholder="Contoh: 15.5">
+                                    <input type="number" step="0.0001" name="nilai_hasil" class="form-control" id="nilai_hasil_input" required placeholder="Contoh: 15.5">
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-12 mt-3">
                                 <button type="submit" class="btn btn-primary w-100">
                                     <i class="fas fa-save me-1"></i> Simpan Hasil
                                 </button>
@@ -252,3 +286,59 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const paramSelect = document.querySelector('select[name="parameter_uji_id"]');
+        const container = document.getElementById('dynamicInputContainer');
+
+        if(paramSelect) {
+            paramSelect.addEventListener('change', function() {
+                const selected = this.options[this.selectedIndex];
+                const rumus = selected.getAttribute('data-rumus');
+
+                if(rumus && rumus.trim() !== '') {
+                    // Extract variables from rumus (words starting with letter)
+                    const vars = [...new Set(rumus.match(/[a-zA-Z][a-zA-Z0-9_]*/g) || [])];
+                    
+                    if(vars.length > 0) {
+                        let html = `<div class="p-3 bg-white border rounded shadow-sm">
+                            <div class="mb-2"><span class="badge bg-info text-dark">Rumus: ${rumus}</span></div>
+                            <div class="row g-2">`;
+                        
+                        vars.forEach(v => {
+                            html += `
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-primary small mb-1">${v} <span class="text-danger">*</span></label>
+                                    <input type="number" step="0.0001" name="variabel[${v}]" class="form-control form-control-sm" required placeholder="Nilai ${v}">
+                                </div>
+                            `;
+                        });
+                        
+                        html += `</div></div>`;
+                        container.innerHTML = html;
+                        container.classList.remove('col-md-7');
+                        container.classList.add('col-md-12');
+                    } else {
+                        renderNormalInput();
+                    }
+                } else {
+                    renderNormalInput();
+                }
+            });
+        }
+
+        function renderNormalInput() {
+            container.innerHTML = `
+                <label class="form-label fw-bold">Nilai Hasil <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <input type="number" step="0.0001" name="nilai_hasil" class="form-control" required placeholder="Contoh: 15.5">
+                </div>
+            `;
+            container.classList.remove('col-md-12');
+            container.classList.add('col-md-7');
+        }
+    });
+</script>
+@endpush

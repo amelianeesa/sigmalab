@@ -12,6 +12,11 @@ class RiwayatTindakLanjutPolicy
 {
     use HandlesAuthorization, ChecksDomainAccess;
 
+    public function __construct()
+    {
+        $this->kodeModul = 'tindak_lanjut';
+    }
+
     public function viewAny(User $user): bool
     {
         return true;
@@ -24,11 +29,7 @@ class RiwayatTindakLanjutPolicy
 
     public function create(User $user): bool
     {
-        return $this->hasFullAccess($user, [
-            PeranPengguna::KOORDINATOR_LAB->value,
-            PeranPengguna::ADMIN_APLIKASI->value,
-            PeranPengguna::DEVELOPER->value,
-        ]);
+        return $this->hasFullAccess($user, 'tambah_ubah');
     }
 
     // Tidak ada update & delete — insert only

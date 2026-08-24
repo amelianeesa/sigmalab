@@ -4,10 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
+// use Spatie\Activitylog\Traits\LogsActivity;
+// use Spatie\Activitylog\LogOptions;
+
 
 class HasilUji extends Model
 {
-    use HasFactory;
+    use SoftDeletes;
+    use HasFactory, LogsActivity;
 
     protected $table = 'hasil_uji';
     protected $primaryKey = 'hasil_uji_id';
@@ -45,4 +53,14 @@ class HasilUji extends Model
     {
         return $this->hasMany(RiwayatTindakLanjut::class, 'hasil_uji_id', 'hasil_uji_id');
     }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            // ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => "Hasil uji lab telah di-{$eventName}");
+    }
 }
+

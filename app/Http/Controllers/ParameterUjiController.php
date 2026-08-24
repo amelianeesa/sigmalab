@@ -51,6 +51,11 @@ class ParameterUjiController extends Controller
             'nilai_acuan' => 'required|numeric',
             'batas_bawah' => 'required|numeric',
             'batas_atas' => 'required|numeric',
+            'lcl' => 'nullable|numeric',
+            'uwl_bawah' => 'nullable|numeric',
+            'mean' => 'nullable|numeric',
+            'uwl_atas' => 'nullable|numeric',
+            'ucl' => 'nullable|numeric',
             'metode_kriteria' => 'nullable|string|max:50',
             'rumus_kalkulasi' => 'nullable|string',
         ]);
@@ -84,6 +89,11 @@ class ParameterUjiController extends Controller
             'nilai_acuan' => 'required|numeric',
             'batas_bawah' => 'required|numeric',
             'batas_atas' => 'required|numeric',
+            'lcl' => 'nullable|numeric',
+            'uwl_bawah' => 'nullable|numeric',
+            'mean' => 'nullable|numeric',
+            'uwl_atas' => 'nullable|numeric',
+            'ucl' => 'nullable|numeric',
             'metode_kriteria' => 'nullable|string|max:50',
             'rumus_kalkulasi' => 'nullable|string',
             'status_aktif' => 'boolean',
@@ -99,11 +109,9 @@ class ParameterUjiController extends Controller
         $this->authorize('delete', $parameterUji);
 
         if ($parameterUji->sudahDipakaiDiHasilUji()) {
-            // Soft deactivate
             $parameterUji->update(['status_aktif' => false]);
             return redirect()->route('parameter-uji.index')->with('success', 'Parameter uji dinonaktifkan karena sudah pernah digunakan dalam hasil uji.');
         } else {
-            // Hard delete
             $parameterUji->delete();
             return redirect()->route('parameter-uji.index')->with('success', 'Parameter uji berhasil dihapus permanen.');
         }

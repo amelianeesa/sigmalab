@@ -12,6 +12,11 @@ class KegiatanPolicy
 {
     use HandlesAuthorization, ChecksDomainAccess;
 
+    public function __construct()
+    {
+        $this->kodeModul = 'proses_hasil';
+    }
+
     public function viewAny(User $user): bool
     {
         return true;
@@ -24,12 +29,7 @@ class KegiatanPolicy
 
     public function create(User $user): bool
     {
-        return $this->hasFullAccess($user, [
-            PeranPengguna::ANALIS->value,
-            PeranPengguna::KOORDINATOR_LAB->value,
-            PeranPengguna::ADMIN_APLIKASI->value,
-            PeranPengguna::DEVELOPER->value,
-        ]);
+        return $this->hasFullAccess($user, 'tambah_ubah');
     }
 
     public function update(User $user, Kegiatan $kegiatan): bool
@@ -38,12 +38,7 @@ class KegiatanPolicy
             return false;
         }
 
-        return $this->hasFullAccess($user, [
-            PeranPengguna::ANALIS->value,
-            PeranPengguna::KOORDINATOR_LAB->value,
-            PeranPengguna::ADMIN_APLIKASI->value,
-            PeranPengguna::DEVELOPER->value,
-        ]);
+        return $this->hasFullAccess($user, 'tambah_ubah');
     }
 
     public function delete(User $user, Kegiatan $kegiatan): bool
@@ -53,11 +48,6 @@ class KegiatanPolicy
             return false;
         }
 
-        return $this->hasFullAccess($user, [
-            PeranPengguna::ANALIS->value,
-            PeranPengguna::KOORDINATOR_LAB->value,
-            PeranPengguna::ADMIN_APLIKASI->value,
-            PeranPengguna::DEVELOPER->value,
-        ]);
+        return $this->hasFullAccess($user, 'tambah_ubah');
     }
 }

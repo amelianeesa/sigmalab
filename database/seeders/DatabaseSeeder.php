@@ -16,8 +16,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('roles')->insert([
-            'nama_role' => 'Administrator',
+        $this->call([
+            RolesSeeder::class,
+            ModulSeeder::class,
+            HakAksesSeeder::class,
         ]);
 
         User::factory()->create([
@@ -72,6 +74,7 @@ class DatabaseSeeder extends Seeder
                 'warna' => 'GREY',
                 'kondisi_barang' => 'baik',
                 'status_barang' => 'idle',
+                'unit_kerja_pemilik' => 'SCI CILACAP',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -96,6 +99,7 @@ class DatabaseSeeder extends Seeder
                 'kode_barang' => '1.12.0005',
                 'minimal_stok' => '50.0000',
                 'kondisi' => 'baik',
+                'tgl_exp' => null,
                 'harga_rata' => '6399.0000',
                 'saldo_akhir' => '0.0000',
                 'created_at' => now(),
@@ -107,6 +111,7 @@ class DatabaseSeeder extends Seeder
                 'kode_barang' => '2.21.1083',
                 'minimal_stok' => '200.0000',
                 'kondisi' => 'baik',
+                'tgl_exp' => null,
                 'harga_rata' => '3688.5000',
                 'saldo_akhir' => '100.0000',
                 'created_at' => now(),
@@ -118,6 +123,7 @@ class DatabaseSeeder extends Seeder
                 'kode_barang' => '2.21.1082',
                 'minimal_stok' => '200.0000',
                 'kondisi' => 'baik',
+                'tgl_exp' => null,
                 'harga_rata' => '2122.9100',
                 'saldo_akhir' => '100.0000',
                 'created_at' => now(),
@@ -129,6 +135,7 @@ class DatabaseSeeder extends Seeder
                 'kode_barang' => '2.21.1084',
                 'minimal_stok' => '200.0000',
                 'kondisi' => 'baik',
+                'tgl_exp' => null,
                 'harga_rata' => '2787.5300',
                 'saldo_akhir' => '300.0000',
                 'created_at' => now(),
@@ -140,6 +147,7 @@ class DatabaseSeeder extends Seeder
                 'kode_barang' => '2.21.1085',
                 'minimal_stok' => '200.0000',
                 'kondisi' => 'baik',
+                'tgl_exp' => null,
                 'harga_rata' => '2544.7600',
                 'saldo_akhir' => '200.0000',
                 'created_at' => now(),
@@ -151,6 +159,7 @@ class DatabaseSeeder extends Seeder
                 'kode_barang' => '2.21.1086',
                 'minimal_stok' => '200.0000',
                 'kondisi' => 'baik',
+                'tgl_exp' => null,
                 'harga_rata' => '1554.0000',
                 'saldo_akhir' => '200.0000',
                 'created_at' => now(),
@@ -162,6 +171,7 @@ class DatabaseSeeder extends Seeder
                 'kode_barang' => '2.21.1087',
                 'minimal_stok' => '200.0000',
                 'kondisi' => 'baik',
+                'tgl_exp' => null,
                 'harga_rata' => '1285.0000',
                 'saldo_akhir' => '0.0000',
                 'created_at' => now(),

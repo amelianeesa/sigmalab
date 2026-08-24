@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 
-            $table->foreign('barang_id')->references('barang_id')->on('barang');
+            $table->foreign('barang_id')->references('barang_id')->on('barang')->cascadeOnDelete();
             $table->foreign('kegiatan_id')->references('kegiatan_id')->on('kegiatan')->nullOnDelete();
         });
     }

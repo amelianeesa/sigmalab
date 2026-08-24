@@ -34,13 +34,23 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Jabatan</label>
-                                <input type="text" name="jabatan" class="form-control" value="{{ old('jabatan', $personil->jabatan) }}" required>
+                                <label class="form-label fw-semibold">Kategori Personil</label>
+                                <select name="kategori_personil" class="form-select">
+                                    <option value="">— Pilih Kategori —</option>
+                                    @foreach($kategoriOptions as $value => $label)
+                                        <option value="{{ $value }}" {{ old('kategori_personil', $personil->kategori_personil) == $value ? 'selected' : '' }}>{{ $label }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Unit Kerja</label>
-                                <input type="text" name="unit_kerja" class="form-control" value="{{ old('unit_kerja', $personil->unit_kerja) }}" required>
+                                <label class="form-label fw-semibold">Penempatan</label>
+                                <input type="text" name="jabatan" class="form-control" value="{{ old('jabatan', $personil->jabatan) }}" required>
                             </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Unit Kerja</label>
+                            <input type="text" name="unit_kerja" class="form-control" value="{{ old('unit_kerja', $personil->unit_kerja) }}" required>
                         </div>
 
                         <div class="mb-4">
@@ -49,7 +59,7 @@
                             @if($personil->file_cv)
                                 <div class="form-text text-success mt-1">
                                     <i class="bi bi-check-circle"></i> CV saat ini sudah tersimpan di sistem.
-                                    <a href="{{ route('sdm.cv', $personil->personil_id) }}" target="_blank" class="ms-1">Lihat CV</a>
+                                    <a href="{{ route('sdm.cv', $personil->personil_id) }}?v={{ $personil->updated_at?->timestamp }}" target="_blank" class="ms-1">Lihat CV</a>
                                 </div>
                             @endif
                         </div>

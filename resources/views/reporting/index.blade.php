@@ -1,21 +1,22 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">Dashboard</li>
-            <li class="breadcrumb-item active" aria-current="page">Reporting</li>
-        </ol>
-    </nav>
-
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Reporting & Statistik</h1>
+<div class="container-fluid px-4">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 mt-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 fw-bold">Laporan Quality Control</h1>
+            <ol class="breadcrumb mb-0 mt-2">
+                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('kegiatan.index') }}" class="text-decoration-none">Verifikasi Mutu</a></li>
+                <li class="breadcrumb-item active">Laporan QC</li>
+            </ol>
+        </div>
+        <a href="{{ route('reporting.pdf') }}" class="d-none d-sm-inline-block btn btn-primary shadow-sm rounded-3 px-3 py-2">
+            <i class="fas fa-file-pdf fa-sm text-white-50 me-1"></i> Export Laporan QC (PDF)
+        </a>
     </div>
 
-    <!-- Cards Row -->
     <div class="row">
-        <!-- Total Kegiatan Card -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
@@ -39,7 +40,6 @@
             </div>
         </div>
 
-        <!-- Total Hasil Uji Card -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
@@ -61,7 +61,6 @@
             </div>
         </div>
 
-        <!-- Tindak Lanjut Card -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-info shadow h-100 py-2">
                 <div class="card-body">
@@ -84,7 +83,6 @@
             </div>
         </div>
 
-        <!-- Rasio Keberterimaan Card -->
         <div class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
@@ -113,7 +111,6 @@
         </div>
     </div>
 
-    <!-- Content Row -->
     <div class="row">
         <div class="col-lg-12 mb-4">
             <div class="card shadow mb-4">

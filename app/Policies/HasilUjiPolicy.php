@@ -12,6 +12,11 @@ class HasilUjiPolicy
 {
     use HandlesAuthorization, ChecksDomainAccess;
 
+    public function __construct()
+    {
+        $this->kodeModul = 'proses_hasil';
+    }
+
     public function viewAny(User $user): bool
     {
         return true;
@@ -27,12 +32,7 @@ class HasilUjiPolicy
      */
     public function create(User $user): bool
     {
-        return $this->hasFullAccess($user, [
-            PeranPengguna::ANALIS->value,
-            PeranPengguna::KOORDINATOR_LAB->value,
-            PeranPengguna::ADMIN_APLIKASI->value,
-            PeranPengguna::DEVELOPER->value,
-        ]);
+        return $this->hasFullAccess($user, 'tambah_ubah');
     }
 
     // Tidak ada update & delete — insert only

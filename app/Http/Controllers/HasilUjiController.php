@@ -55,7 +55,9 @@ class HasilUjiController extends Controller
         $validated = $request->validate([
             'kegiatan_id' => 'required|exists:kegiatan,kegiatan_id',
             'parameter_uji_id' => 'required|exists:parameter_uji,parameter_uji_id',
-            'nilai_hasil' => 'required|numeric',
+            'nilai_hasil' => 'nullable|numeric',
+            'variabel' => 'nullable|array',
+            'variabel.*' => 'numeric',
         ]);
 
         $kegiatan = Kegiatan::findOrFail($validated['kegiatan_id']);
@@ -63,17 +65,34 @@ class HasilUjiController extends Controller
             return back()->with('error', 'Tidak dapat menambahkan hasil uji karena kegiatan sudah selesai atau dibatalkan.');
         }
 
-        // Otomatis tentukan status inlier/outlier
         $parameter = ParameterUji::findOrFail($validated['parameter_uji_id']);
-        $nilaiHasil = (float) $validated['nilai_hasil'];
+        $nilaiHasil = null;
 
-        if ($nilaiHasil >= $parameter->batas_bawah && $nilaiHasil <= $parameter->batas_atas) {
+        if (!empty($validated['variabel']) && !empty($parameter->rumus_kalkulasi)) {
+            try {
+                $expressionLanguage = new \Symfony\Component\ExpressionLanguage\ExpressionLanguage();
+                $nilaiHasil = $expressionLanguage->evaluate($parameter->rumus_kalkulasi, $validated['variabel']);
+            } catch (\Exception $e) {
+                return back()->with('error', 'Gagal mengkalkulasi rumus QC: ' . $e->getMessage());
+            }
+        } else {
+            if (!isset($validated['nilai_hasil'])) {
+                return back()->with('error', 'Nilai hasil wajib diisi jika tidak menggunakan rumus.');
+            }
+            $nilaiHasil = (float) $validated['nilai_hasil'];
+        }
+
+        // Gunakan LCL/UCL jika ada, fallback ke batas_bawah/batas_atas jika tidak ada
+        $batasBawah = $parameter->lcl ?? $parameter->batas_bawah;
+        $batasAtas = $parameter->ucl ?? $parameter->batas_atas;
+
+        if ($nilaiHasil >= $batasBawah && $nilaiHasil <= $batasAtas) {
             $statusBerketerimaan = 'inlier';
         } else {
             $statusBerketerimaan = 'outlier';
         }
 
-        HasilUji::create([
+        $hasilUji = HasilUji::create([
             'kegiatan_id' => $validated['kegiatan_id'],
             'parameter_uji_id' => $validated['parameter_uji_id'],
             'nilai_hasil' => $nilaiHasil,
@@ -84,7 +103,23 @@ class HasilUjiController extends Controller
 
         $message = "Hasil uji berhasil disimpan. Status: " . strtoupper($statusBerketerimaan);
         if ($statusBerketerimaan === 'outlier') {
-            $message .= " — Nilai di luar batas ({$parameter->batas_bawah} - {$parameter->batas_atas}). Perlu tindak lanjut.";
+            $message .= " — Nilai di luar batas kendali ({$batasBawah} - {$batasAtas}). Tindak lanjut telah dibuat.";
+
+            // 1. Auto Create Tindak Lanjut
+            \App\Models\RiwayatTindakLanjut::create([
+                'hasil_uji_id' => $hasilUji->hasil_uji_id,
+                'status_tindak_lanjut' => 'open',
+                'created_at' => now(),
+            ]);
+
+            // 2. Auto Notification (Using DB facade just in case model is missing)
+            \Illuminate\Support\Facades\DB::table('notifikasi')->insert([
+                'users_id' => Auth::id(), // Notifikasi ditujukan ke Koordinator/Penginput
+                'jenis_notifikasi' => 'qc',
+                'pesan' => "Peringatan Outlier pada kegiatan {$kegiatan->kode_sampel}, parameter {$parameter->nama_parameter}.",
+                'is_read' => false,
+                'created_at' => now(),
+            ]);
         }
 
         return redirect()->route('kegiatan.show', $validated['kegiatan_id'])->with('success', $message);
@@ -100,5 +135,4 @@ class HasilUjiController extends Controller
         return view('hasil-uji.show', compact('hasilUji'));
     }
 
-    // Tidak ada edit, update, destroy — insert only
 }

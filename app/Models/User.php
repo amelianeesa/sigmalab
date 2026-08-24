@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+    use SoftDeletes;
     use HasFactory, Notifiable;
 
     protected $table = 'users';
@@ -26,19 +29,26 @@ class User extends Authenticatable
         'password',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'status_aktif' => 'boolean',
+        ];
+    }
+
     public function personil()
     {
         return $this->belongsTo(Personil::class, 'personil_id', 'personil_id');
     }
 
-    protected function casts(): array
     public function role()
     {
         return $this->belongsTo(Role::class, 'role_id', 'roles_id');
     }
 
-    public function role()
+    public function hasModulAccess(string $kodeModul, string $minLevel = 'lihat'): bool
     {
-        return $this->belongsTo(Role::class, 'role_id', 'roles_id');
+        return app(\App\Services\PermissionService::class)->userHasAccess($this, $kodeModul, $minLevel);
     }
 }
+

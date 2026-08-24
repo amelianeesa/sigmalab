@@ -221,18 +221,40 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Password</label>
-                            <input type="password" name="password" class="form-control" required>
+                            <div class="input-group">
+                                <input type="password" name="password" id="password" class="form-control" required style="border-right: none;">
+                                <button type="button" class="input-group-text bg-white" id="togglePassword" style="border-left: none; cursor: pointer; border-color: #d7e1ea;">
+                                    <i class="bi bi-eye-slash" id="toggleIcon"></i>
+                                </button>
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-auth w-100">Masuk</button>
                     </form>
 
                     <div class="text-center mt-4">
-                        <small class="text-muted">Belum punya akun? <a href="{{ route('register') }}" class="auth-link">Daftar di sini</a></small>
+                        <small class="text-muted">Jika Anda belum memiliki akun, hubungi HR & GA.</small>
                     </div>
                     <div class="auth-footer">© PT Sucofindo Cilacap</div>
                 </div>
             </div>
         </div>
     </div>
+    <script>
+        const togglePassword = document.getElementById('togglePassword');
+        const password = document.getElementById('password');
+        const toggleIcon = document.getElementById('toggleIcon');
+
+        togglePassword.addEventListener('click', function (e) {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            if (type === 'password') {
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+            } else {
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+            }
+        });
+    </script>
 </body>
 </html>
