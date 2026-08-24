@@ -65,6 +65,7 @@
                         <select name="kondisi_barang" class="form-select" required>
                             <option value="">--Pilih Kondisi--</option>
                             <option value="baik" {{ old('kondisi_barang') == 'baik' ? 'selected' : '' }}>Baik</option>
+                            <option value="perbaikan" {{ old('kondisi_barang') == 'perbaikan' ? 'selected' : '' }}>Perbaikan</option>
                             <option value="rusak" {{ old('kondisi_barang') == 'rusak' ? 'selected' : '' }}>Rusak</option>
                         </select>
                     </div>
@@ -102,14 +103,14 @@
                         <input type="text" name="no_sertifikat" class="form-control" placeholder="mis. 20059/ENBPAQ" value="{{ old('no_sertifikat') }}">
                     </div>
                     <div class="mb-3">
-                        <label for="file_sertifikat" class="form-label">Upload File / Foto Sertifikat Kalibrasi (PDF/Gambar)</label>
+                        <label for="file_sertifikat" class="form-label">Upload File / Foto Sertifikat Kalibrasi <small class="text-muted">(PDF/Gambar)</small></label>
                         <input type="file" name="file_sertifikat" id="file_sertifikat" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png">
                         <div class="form-text text-muted" style="font-size: 0.75rem;">Format yang diizinkan: PDF, JPG, JPEG, PNG. Maks: 2MB</div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Jenis Kalibrasi</label>
                         <select name="jenis_kalibrasi" class="form-select">
-                            <option value="">--Pilih Jenis Kalibrasi--</option>
+                            <option>--Pilih Jenis Kalibrasi--</option>
                             <option value="eksternal" {{ old('jenis_kalibrasi') == 'eksternal' ? 'selected' : '' }}>Eksternal</option>
                             <option value="internal" {{ old('jenis_kalibrasi') == 'internal' ? 'selected' : '' }}>Internal</option>
                         </select>
@@ -123,7 +124,7 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Interval Kalibrasi</label>
-                        <input type="text" name="interval_kalibrasi" id="interval_kalibrasi" class="form-control" placeholder="Contoh: 1 Tahun" value="{{ old('interval_kalibrasi') }}" autocomplete="off">
+                        <input type="text" name="interval_kalibrasi" id="interval_kalibrasi" class="form-control" placeholder="mis. 1 Tahun" value="{{ old('interval_kalibrasi') }}" autocomplete="off">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Tanggal Berakhirnya Masa Kalibrasi</label>
@@ -134,7 +135,7 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">Lembaga Kalibrasi</label>
-                        <input type="text" name="lembaga_kalibrasi" class="form-control" placeholder="mis. PT SUCOFINDO CILACAP" value="{{ old('lembaga_kalibrasi') }}">
+                        <input type="text" name="lembaga_kalibrasi" class="form-control" placeholder="mis. PT SUCOFINDO" value="{{ old('lembaga_kalibrasi') }}">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Range / Kapasitas</label>
@@ -147,13 +148,23 @@
                         <label class="form-label">Faktor Koreksi</label>
                         <input type="text" name="faktor_koreksi" class="form-control" placeholder="mis. 32 °C" value="{{ old('faktor_koreksi') }}">
                     </div>
+
                     <div class="col-md-6">
                         <label class="form-label">Signifikan</label>
                         <select name="signifikan" class="form-select">
-                            <option value="tidak" {{ old('signifikan') == 'tidak' ? 'selected' : '' }}>Tidak</option>
+                            <option>--Pilih Signifikan--</option>
                             <option value="ya" {{ old('signifikan') == 'ya' ? 'selected' : '' }}>Ya</option>
+                            <option value="tidak" {{ old('signifikan') == 'tidak' ? 'selected' : '' }}>Tidak</option>
+
                         </select>
                     </div>
+                    {{-- <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label class="form-label">Dokumen Faktor Koreksi <small class="text-muted">(PDF/Gambar)</small></label>
+                            <input type="file" name="file_faktor_koreksi" class="form-control" accept=".pdf,image/*">
+                            <small class="text-muted">Maksimal ukuran file 2MB.</small>
+                        </div>
+                    </div> --}}
                     <div class="col-md-12 mt-3">
                         <label class="form-label">Catatan / Evaluasi Kalibrasi</label>
                         <textarea name="catatan_evaluasi" class="form-control" rows="3" placeholder="Tuliskan catatan evaluasi atau hasil analisis alat di sini...">{{ old('catatan_evaluasi') }}</textarea>

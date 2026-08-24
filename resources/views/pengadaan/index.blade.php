@@ -31,12 +31,12 @@
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
-                        <tr>
+                        <tr class="text-center">
                             <th width="5%" class="text-center">No</th>
                             <th>Nama Barang</th>
-                            <th>Tgl Pengajuan</th>
+                            <th>Tanggal Pengajuan</th>
                             <th>Diajukan Oleh</th>
-                            <th class="text-center">Jml Diminta</th>
+                            <th>Jumlah Diminta</th>
                             <th>Status</th>
                             <th>Persetujuan (Aksi)</th>
                         </tr>
@@ -77,64 +77,122 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @php
-                                        $roleName = Auth::user()->role->nama_role ?? '';
-                                        $isHrGa = in_array($roleName, [\App\Enums\PeranPengguna::HR_GA_OFFICER->value, \App\Enums\PeranPengguna::ADMIN_APLIKASI->value]);
-                                    @endphp
+                                    <div class="d-flex flex-column gap-2">
+                                        @php
+                                            $roleName = Auth::user()->role->nama_role ?? '';
+                                            $isHrGa = in_array($roleName, [\App\Enums\PeranPengguna::HR_GA_OFFICER->value, \App\Enums\PeranPengguna::ADMIN_APLIKASI->value]);
+                                        @endphp
                                     
-                                    @if($isHrGa && $p->status != 'selesai' && $p->status != 'ditolak')
-                                        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                            Aksi HR & GA
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            @if($p->status == 'diajukan')
-                                                <li>
-                                                    <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST">
-                                                        @csrf
-                                                        <input type="hidden" name="status" value="disetujui">
-                                                        <button class="dropdown-item text-info"><i class="fas fa-check me-2"></i>Setujui</button>
-                                                    </form>
-                                                </li>
-                                                <li>
-                                                    <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST">
-                                                        @csrf
-                                                        <input type="hidden" name="status" value="ditolak">
-                                                        <button class="dropdown-item text-danger"><i class="fas fa-times me-2"></i>Tolak</button>
-                                                    </form>
-                                                </li>
-                                            @elseif($p->status == 'disetujui')
-                                                <li>
-                                                    <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST">
-                                                        @csrf
-                                                        <input type="hidden" name="status" value="diproses">
-                                                        <button class="dropdown-item text-warning"><i class="fas fa-spinner me-2"></i>Ubah jadi Diproses</button>
-                                                    </form>
-                                                </li>
-                                            @elseif($p->status == 'diproses')
-                                                <li>
-                                                    <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST">
-                                                        @csrf
-                                                        <input type="hidden" name="status" value="selesai">
-                                                        <button class="dropdown-item text-success" onclick="return confirm('Menandai selesai akan OTOMATIS menambah stok barang. Lanjutkan?')"><i class="fas fa-box-open me-2"></i>Barang Diterima (Selesai)</button>
-                                                    </form>
-                                                </li>
-                                            @endif
-                                        </ul>
-                                    @else
-                                        @if($p->status == 'diajukan')
-                                            <span class="text-muted small">Menunggu HR & GA</span>
-                                            <form action="{{ route('pengadaan.destroy', $p->permintaan_id) }}" method="POST" class="d-inline ms-1">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Batalkan pengajuan?')"><i class="fas fa-trash"></i></button>
-                                            </form>
-                                        @else
-                                            <span class="text-muted small">
-                                                Tgl: {{ $p->tanggal_keputusan ? \Carbon\Carbon::parse($p->tanggal_keputusan)->format('d/m/Y') : '-' }}<br>
-                                                Oleh: {{ $p->penyetuju ? $p->penyetuju->username : '-' }}
-                                            </span>
+                                        @if($isHrGa && $p->status != 'selesai' && $p->status != 'ditolak')
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-primary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    Aksi HR & GA
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    @if($p->status == 'diajukan')
+                                                        <li>
+                                                            <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST">
+                                                                @csrf
+                                                                <input type="hidden" name="status" value="disetujui">
+                                                                <button class="dropdown-item text-info"><i class="fas fa-check me-2"></i>Setujui</button>
+                                                            </form>
+                                                        </li>
+                                                        <li>
+                                                            <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST">
+                                                                @csrf
+                                                                <input type="hidden" name="status" value="ditolak">
+                                                                <button class="dropdown-item text-danger"><i class="fas fa-times me-2"></i>Tolak</button>
+                                                            </form>
+                                                        </li>
+                                                    @elseif($p->status == 'disetujui')
+                                                        <li>
+                                                            <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST">
+                                                                @csrf
+                                                                <input type="hidden" name="status" value="diproses">
+                                                                <button class="dropdown-item text-warning"><i class="fas fa-spinner me-2"></i>Ubah jadi Diproses</button>
+                                                            </form>
+                                                        </li>
+                                                    @elseif($p->status == 'diproses')
+                                                        <li>
+                                                            <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST">
+                                                                @csrf
+                                                                <input type="hidden" name="status" value="disetujui">
+                                                                <button class="dropdown-item text-info"><i class="fas fa-undo me-2"></i>Kembalikan ke Disetujui</button>
+                                                            </form>
+                                                        </li>
+                                                    @endif
+                                                </ul>
+                                            </div>
                                         @endif
-                                    @endif
+
+                                        <!-- Bagian Tombol Konfirmasi Diterima / Lihat Bukti -->
+                                        @if($p->status == 'selesai' || $p->foto_diterima)
+                                            <div class="p-2 border rounded bg-light">
+                                                <span class="badge bg-success mb-1">Selesai</span><br>
+                                                <small class="fw-bold text-dark">Penerima: {{ $p->nama_penerima ?? '-' }}</small><br>
+                                                <a href="{{ asset($p->foto_diterima) }}" target="_blank" class="btn btn-sm btn-info mt-1 text-decoration-none text-white py-0 px-2 w-100" style="font-size: 0.75rem;">
+                                                    <i class="fas fa-image"></i> Lihat Bukti
+                                                </a>
+                                                <div class="text-muted mt-1" style="font-size: 10px;">
+                                                    <i class="far fa-clock"></i> {{ $p->waktu_diterima ? \Carbon\Carbon::parse($p->waktu_diterima)->format('d/m/Y H:i') : '-' }}
+                                                </div>
+                                            </div>
+                                        @elseif($p->status == 'disetujui' || $p->status == 'diproses')
+                                            <button type="button" class="btn btn-sm btn-warning fw-bold w-100 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTerima{{ $p->permintaan_id }}" style="font-size: 0.75rem;">
+                                                <i class="fas fa-camera me-1"></i> Konfirmasi Diterima
+                                            </button>
+
+                                            <!-- Modal Konfirmasi Terima, Nama Penerima & Tanggal Expired -->
+                                            <div class="modal fade" id="modalTerima{{ $p->permintaan_id }}" tabindex="-1">
+                                                <div class="modal-dialog">
+                                                    <form action="{{ route('pengadaan.terima', $p->permintaan_id) }}" method="POST" enctype="multipart/form-data" class="modal-content text-start">
+                                                        @csrf
+                                                        <div class="modal-header bg-dark text-white">
+                                                            <h5 class="modal-title fs-6"><i class="fas fa-box-open me-2"></i>Konfirmasi Barang Diterima</h5>
+                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="mb-3">
+                                                                <label class="form-label fw-bold">Nama Penerima Barang <span class="text-danger">*</span></label>
+                                                                <input type="text" name="nama_penerima" class="form-control" required placeholder="Masukkan nama lengkap penerima...">
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label fw-bold">Bukti Foto Penerimaan <span class="text-danger">*</span></label>
+                                                                <input type="file" name="foto_diterima" class="form-control" accept="image/*" capture="environment" required>
+                                                                <small class="text-muted">Format yang didukung: JPG, JPEG, PNG, WEBP (Maksimal 2MB)</small>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label class="form-label fw-bold">Tanggal Expired Barang Baru <span class="text-danger">*</span></label>
+                                                                <input type="date" name="tgl_exp" class="form-control" required>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer bg-light">
+                                                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                                                            <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-save me-1"></i> Simpan & Update Stok</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        @if(!$isHrGa && $p->status == 'diajukan')
+                                            <div>
+                                                <span class="text-muted small">Menunggu HR & GA</span>
+                                                <form action="{{ route('pengadaan.destroy', $p->permintaan_id) }}" method="POST" class="d-inline ms-1">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Batalkan pengajuan?')"><i class="fas fa-trash"></i></button>
+                                                </form>
+                                            </div>
+                                        @elseif(!$isHrGa && $p->status != 'diajukan' && $p->status != 'disetujui' && $p->status != 'diproses')
+                                            <div>
+                                                <span class="text-muted small">
+                                                    Tgl: {{ $p->tanggal_keputusan ? \Carbon\Carbon::parse($p->tanggal_keputusan)->format('d/m/Y') : '-' }}<br>
+                                                    Oleh: {{ $p->penyetuju ? $p->penyetuju->username : '-' }}
+                                                </span>
+                                            </div>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -152,7 +210,6 @@
 <!-- Modal Tambah Pengajuan -->
 <div class="modal fade" id="tambahPengadaanModal" tabindex="-1">
     <div class="modal-dialog">
-
         <form action="{{ route('pengadaan.store') }}" method="POST" enctype="multipart/form-data" class="modal-content">
             @csrf
             <div class="modal-header">
@@ -167,10 +224,9 @@
                         @foreach($barangList as $b)
                             @php
                                 $saldoAkhir = ($b->saldo_awal + $b->penerimaan) - $b->pengeluaran;
-                                $isMenipis = $saldoAkhir <= $b->minimal_stok;
                             @endphp
                             <option value="{{ $b->barang_id }}">
-                                {{ $b->nama_barang }} (Stok saat ini: {{ $saldoAkhir }} {{ $b->satuan }}) {{ $isMenipis ? '' : '' }}
+                                {{ $b->nama_barang }} (Stok saat ini: {{ $saldoAkhir }} {{ $b->satuan }})
                             </option>
                         @endforeach
                     </select>
@@ -185,8 +241,8 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold">Upload Foto / Referensi Barang <small class="text-muted">(Opsional)</small></label>
-                    <input type="file" name="foto" class="form-control" accept="image/png, image/jpeg, image/jpg, image/webp">
-                    <div class="form-text">Format yang didukung: JPG, JPEG, PNG, WEBP (Maksimal 2MB).</div>
+                    <input type="file" name="foto" class="form-control" accept="image/png, image/jpeg, image/jpg, image/webp" capture="environment">
+                    <div class="form-text">Format yang didukung: JPG, JPEG, PNG, WEBP (Maksimal 2MB)</div>
                 </div>
                 <div class="alert alert-info py-2 mb-0 mt-3" style="font-size:0.85rem;">
                     <i class="fas fa-info-circle me-1"></i> Pengajuan ini akan langsung diteruskan ke HR & GA Officer untuk di-*approve*.
@@ -199,6 +255,7 @@
         </form>
     </div>
 </div>
+
 <!-- Modal Export PDF -->
 <div class="modal fade" id="exportPdfModal" tabindex="-1">
     <div class="modal-dialog">

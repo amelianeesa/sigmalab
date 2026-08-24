@@ -94,7 +94,7 @@ class AlatController extends Controller
             'no_seri' => 'nullable|string|max:100',
             'warna' => 'nullable|string|max:30',
             'ukuran' => 'nullable|string|max:50',
-            'kondisi_barang' => 'required|in:baik,rusak',
+            'kondisi_barang' => 'required|in:baik,rusak,perbaikan',
             'status_barang' => 'required|in:terpakai,idle',
             'unit_kerja_pemilik' => 'nullable|string|max:100',
             'no_sertifikat' => 'nullable|string|max:100',
@@ -106,6 +106,7 @@ class AlatController extends Controller
             'jenis_kalibrasi' => 'nullable|in:internal,eksternal',
             'range_kapasitas' => 'nullable|string|max:100',
             'faktor_koreksi' => 'nullable|string|max:100',
+            'file_faktor_koreksi' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:2048',
             'signifikan' => 'nullable|in:ya,tidak',
             'catatan_evaluasi' => 'nullable|string',
         ]);
@@ -139,9 +140,13 @@ class AlatController extends Controller
                 ];
                 if ($request->hasFile('file_sertifikat')) {
                     $path = $request->file('file_sertifikat')->store('sertifikat_kalibrasi', 'public');
-                    // dd($path);
                     $dataKalibrasi['file_sertifikat'] = $path;
                 }
+                if ($request->hasFile('file_faktor_koreksi')) {
+                    $pathFaktor = $request->file('file_faktor_koreksi')->store('faktor_koreksi', 'public');
+                    $dataKalibrasi['file_faktor_koreksi'] = $pathFaktor;
+                }
+
                 RiwayatKalibrasi::create($dataKalibrasi);
             }
         });
@@ -170,7 +175,7 @@ class AlatController extends Controller
             'no_seri' => 'nullable|string|max:100',
             'warna' => 'nullable|string|max:30',
             'ukuran' => 'nullable|string|max:50',
-            'kondisi_barang' => 'required|in:baik,rusak',
+            'kondisi_barang' => 'required|in:baik,rusak,perbaikan',
             'status_barang' => 'required|in:terpakai,idle',
             'unit_kerja_pemilik' => 'nullable|string|max:100',
             'no_sertifikat' => 'nullable|string|max:100',
@@ -182,11 +187,17 @@ class AlatController extends Controller
             'jenis_kalibrasi' => 'nullable|in:internal,eksternal',
             'range_kapasitas' => 'nullable|string|max:100',
             'faktor_koreksi' => 'nullable|string|max:100',
+            'file_faktor_koreksi' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'signifikan' => 'nullable|in:ya,tidak',
             'catatan_evaluasi' => 'nullable|string',
         ]);
 
-        DB::transaction(function () use ($request, $alat) {
+        $statusBarang = $request->status_barang;
+        if (in_array($request->kondisi_barang, ['rusak', 'perbaikan'])) {
+            $statusBarang = 'idle';
+        }
+
+        DB::transaction(function () use ($request, $alat, $statusBarang) {
             $alat->update([
                 'nama_alat' => $request->nama_alat,
                 'merk_tipe' => $request->merk_tipe,
@@ -194,7 +205,7 @@ class AlatController extends Controller
                 'warna' => $request->warna,
                 'ukuran' => $request->ukuran,
                 'kondisi_barang' => $request->kondisi_barang,
-                'status_barang' => $request->status_barang,
+                'status_barang' => $statusBarang,
                 'unit_kerja_pemilik' => $request->unit_kerja_pemilik,
             ]);
 
@@ -215,9 +226,14 @@ class AlatController extends Controller
 
             if ($request->hasFile('file_sertifikat')) {
                 $path = $request->file('file_sertifikat')->store('sertifikat_kalibrasi', 'public');
-                // dd($path);
                 $dataKalibrasi['file_sertifikat'] = $path;
             }
+            
+            if ($request->hasFile('file_faktor_koreksi')) {
+                $pathFaktor = $request->file('file_faktor_koreksi')->store('faktor_koreksi', 'public');
+                $dataKalibrasi['file_faktor_koreksi'] = $pathFaktor;
+            }
+        
 
             if ($request->filled('tgl_kalibrasi')) {
                 if ($kalibrasiTerakhir) {
@@ -680,13 +696,13 @@ class AlatController extends Controller
                 $lastColIndex = 1 + $totalItems + 2; 
                 $lastColChar = Coordinate::stringFromColumnIndex($lastColIndex);
 
-                // 1. Bersihkan background area atas (baris 1-9)
+                //Bersihkan background area atas
                 $sheet->getStyle('A1:' . $lastColChar . '9')->applyFromArray([
                     'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFFFFFFF']],
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_NONE]],
                 ]);
 
-                // 2. Garis pembatas utama di bawah baris 3
+                //Garis pembatas utama
                 $sheet->getStyle('A3:' . $lastColChar . '3')->applyFromArray([
                     'borders' => [
                         'bottom' => [
@@ -696,7 +712,7 @@ class AlatController extends Controller
                     ]
                 ]);
 
-                // 3. Styling Header Tabel (Baris 11 & 12) - Sampai tanggal 31
+                // 3. Styling Header Tabel
                 $headerStartRow = 11;
                 $endRow = $headerStartRow + 1 + 31; 
 
@@ -706,7 +722,7 @@ class AlatController extends Controller
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                 ]);
 
-                // 4. Border untuk seluruh sel data harian sampai 31
+                //Border untuk seluruh sel data harian
                 $sheet->getStyle('A' . ($headerStartRow + 2) . ':' . $lastColChar . $endRow)->applyFromArray([
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                     'alignment' => ['vertical' => 'center', 'horizontal' => 'center'],
@@ -717,7 +733,7 @@ class AlatController extends Controller
 
             public function columnWidths(): array {
                 $widths = [
-                    'A' => 11 // Kolom A Tanggal
+                    'A' => 11 // Kolom Tanggal
                 ];
                 
                 foreach($this->alat->itemPemeliharaan as $index => $item) {
@@ -743,20 +759,20 @@ class AlatController extends Controller
                     AfterSheet::class => function(AfterSheet $event) {
                         $sheet = $event->sheet->getDelegate();
                         
-                        // Header Utama (Baris 1 & 2)
+                        // Header Utama
                         $sheet->setCellValue('A1', 'KARTU PEMELIHARAAN PERALATAN');
                         $sheet->setCellValue('A2', 'SIGMA-LAB PT SUCOFINDO');
                         
                         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
                         $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(11);
                         
-                        // Info Detail Alat (Baris 4 sampai 7)
+                        // Info Detail Alat
                         $sheet->mergeCells('A4:B4'); $sheet->setCellValue('A4', 'Nama / Kode Peralatan'); $sheet->setCellValue('C4', ': ' . $this->alat->nama_alat . ' / ' . $this->alat->kode_alat);
                         $sheet->mergeCells('A5:B5'); $sheet->setCellValue('A5', 'Merk/No. Serial'); $sheet->setCellValue('C5', ': ' . ($this->alat->merk_tipe ?? '-') . ' / ' . ($this->alat->no_seri ?? '-'));
                         $sheet->mergeCells('A6:B6'); $sheet->setCellValue('A6', 'No. Inventaris'); $sheet->setCellValue('C6', ': ' . ($this->alat->no_inventaris ?? '-'));
                         $sheet->mergeCells('A7:B7'); $sheet->setCellValue('A7', 'Unit Kerja Pemilik'); $sheet->setCellValue('C7', ': ' . ($this->alat->lokasi_alat ?? $this->alat->unit_kerja_pemilik ?? '-'));
                         
-                        // Jenis Pemeliharaan (Baris 8)
+                        // Jenis Pemeliharaan
                         $sheet->mergeCells('A8:B8'); $sheet->setCellValue('A8', 'Jenis Pemeliharaan'); 
                         $totalItems = $this->alat->itemPemeliharaan->count();
                         if ($totalItems > 0) {
@@ -777,7 +793,7 @@ class AlatController extends Controller
 
                         $sheet->getStyle('A4:C9')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
 
-                        // --- HEADER TABEL DINAMIS (Baris 11 & 12) ---
+                        // header tabel
                         $sheet->mergeCells('A11:A12');
                         $sheet->setCellValue('A11', 'Tanggal');
 
@@ -812,7 +828,6 @@ class AlatController extends Controller
                         $sheet->mergeCells($petugasColLetter . '11:' . $petugasColLetter . '12');
                         $sheet->setCellValue($petugasColLetter . '11', 'Petugas');
 
-                        // --- PENGISIAN DATA HARIAN (Selalu 1 sampai 31) ---
                         $rawLogs = LogPemeliharaan::where('alat_id', $this->alat->alat_id)
                             ->whereMonth('tanggal', $this->bulan)
                             ->whereYear('tanggal', $this->tahun)
@@ -850,7 +865,7 @@ class AlatController extends Controller
                             $rowNum++;
                         }
 
-                        // Logo Perusahaan diletakkan di kolom paling kanan atas dengan posisi rata kanan
+                        // Logo
                         if (file_exists(public_path('images/Logo_Suco_Nobg.png'))) {
                             $drawing = new Drawing();
                             $drawing->setPath(public_path('images/Logo_Suco_Nobg.png'));
@@ -861,7 +876,6 @@ class AlatController extends Controller
                             $drawing->setWorksheet($sheet);
                         }
 
-                        // --- PENGATURAN AGAR PAS DI 1 HALAMAN FISIK ---
                         $sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
                         $sheet->getPageSetup()->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4);
                         
@@ -876,8 +890,6 @@ class AlatController extends Controller
         }, $fileName);
     }
 
-
-                        
     public function storePerbaikan(Request $request, $id)
     {
         $request->validate([
@@ -888,16 +900,19 @@ class AlatController extends Controller
         $alat = Alat::findOrFail($id);
 
         RiwayatPerbaikanAlat::create([
-            'alat_id' => $alat->alat_id,
+            'alat_id' => $alat-> alat_id,
             'tanggal_rusak' => $request->tanggal_rusak,
             'deskripsi_kerusakan' => $request->deskripsi_kerusakan,
             'dilaporkan_oleh' => Auth::id(),
             'status_perbaikan' => 'Belum Diperbaiki'
         ]);
 
-        $alat->update(['kondisi_barang' => 'Rusak']);
+        $alat->update([
+            'kondisi_barang' => 'perbaikan',
+            'status_barang' => 'idle'
+        ]);
 
-        return redirect()->back()->with('success', 'Laporan kerusakan alat berhasil dicatat.');
+        return redirect()->back()->with('success', 'Laporan kerusakan alat berhasil dicatat');
     }
 
     public function updatePerbaikan(Request $request, $id, $perbaikan_id)
@@ -921,8 +936,21 @@ class AlatController extends Controller
             }
             
             if ($request->status_perbaikan === 'Selesai') {
-                $alat->update(['kondisi_barang' => 'Baik']);
+                $alat->update([
+                    'kondisi_barang' => 'baik',
+                    'status_barang' => 'idle' 
+            ]);
+            }elseif ($request->status_perbaikan === 'Tidak Bisa Diperbaiki') {
+                $alat->update([
+                    'kondisi_barang' => 'rusak',
+                    'status_barang' => 'idle'
+            ]);
             }
+        }elseif ($request->status_perbaikan === 'Dalam Perbaikan') {
+            $alat->update([
+                'kondisi_barang' => 'perbaikan',
+                'status_barang' => 'idle'
+        ]);
         }
 
         $perbaikan->update([
@@ -931,6 +959,6 @@ class AlatController extends Controller
             'tanggal_selesai' => $request->tanggal_selesai ?? $perbaikan->tanggal_selesai,
         ]);
 
-        return redirect()->back()->with('success', 'Status perbaikan berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Status perbaikan berhasil diperbarui');
     }
 }

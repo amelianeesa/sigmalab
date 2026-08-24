@@ -51,6 +51,7 @@
                     <select name="filter_kondisi" id="filterKondisi" class="form-select form-select-sm">
                         <option value="">-- Filter Kondisi Alat --</option>
                         <option value="baik" {{ (isset($filterKondisi) && $filterKondisi == 'baik') ? 'selected' : '' }}>Baik</option>
+                        <option value="perbaikan" {{ (isset($filterKondisi) && $filterKondisi == 'perbaikan') ? 'selected' : '' }}>Perbaikan</option>
                         <option value="rusak" {{ (isset($filterKondisi) && $filterKondisi == 'rusak') ? 'selected' : '' }}>Rusak</option>
                     </select>
                 </div>
@@ -70,11 +71,11 @@
                             <th colspan="5">Spesifikasi</th>
                             <th rowspan="2">Kondisi Alat</th>
                             <th rowspan="2">Status Alat</th>
-                            <th rowspan="2" style="min-width: 120px;">No. Sertifikat/<br>Perijinan</th>
+                            <th rowspan="2" style="min-width: 105px;">No. Sertifikat/<br>Perijinan</th>
                             <th rowspan="2">Interval Kalibrasi</th>
                             <th colspan="2">Periode Kalibrasi/<br>Perijinan</th>
-                            <th rowspan="2" style="min-width: 110px;">Unit Kerja Pemilik</th>
-                            <th rowspan="2">Lembaga Kalibrasi</th>
+                            <th rowspan="2" style="min-width: 105px;">Unit Kerja Pemilik</th>
+                            <th rowspan="2" style="min-width: 105px;">Lembaga Kalibrasi</th>
                             <th colspan="4">Kalibrasi</th>
                             <th rowspan="2">Aksi</th>
                         </tr>
@@ -87,9 +88,9 @@
                             <th style="min-width: 100px;">Tgl Kalibrasi</th>
                             <th style="min-width: 110px;">Masa Berakhir<br>Kalibrasi</th>
                             <th style="min-width: 100px;">Jenis Kalibrasi</th>
-                            <th>Range / Kapasitas</th>
-                            <th>Faktor Koreksi</th>
-                            <th>Signifikan (Ya/Tidak)</th>
+                            <th style="min-width: 80px;">Range / Kapasitas</th>
+                            <th style="min-width: 95px;">Faktor Koreksi</th>
+                            <th style="min-width: 80px;">Signifikan (Ya/Tidak)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -158,7 +159,7 @@
                                 @if(!empty($kalibrasiTerakhir->file_sertifikat))
                                     <div class="mt-1">
                                         <a href="{{ asset('storage/' . $kalibrasiTerakhir->file_sertifikat) }}" target="_blank" class="btn btn-outline-primary btn-sm py-0 px-1" style="font-size: 0.65rem;" title="Lihat Sertifikat">
-                                            <i class="fas fa-file-pdf"></i> Lihat Sertifikat
+                                            <i class="fas fa-file-alt"></i> Lihat Sertifikat
                                         </a>
                                     </div>
                                 @endif
@@ -173,7 +174,16 @@
                             <td>{{ $kalibrasiTerakhir->lembaga_kalibrasi ?? '-' }}</td>
                             <td>{{ $jenisKalibrasi ? ucfirst($jenisKalibrasi) : '-' }}</td>
                             <td>{{ $kalibrasiTerakhir->range_kapasitas ?? '-' }}</td>
-                            <td>{{ $kalibrasiTerakhir->faktor_koreksi ?? '-' }}</td>
+                            <td>{{ $kalibrasiTerakhir->faktor_koreksi ?? '-' }}
+                                {{-- @if(!empty($kalibrasiTerakhir->file_faktor_koreksi))
+                                    <div class="mt-1">
+                                        <a href="{{ asset('storage/' . $kalibrasiTerakhir->file_faktor_koreksi) }}" target="_blank" class="btn btn-outline-primary btn-sm py-0 px-1" style="font-size: 0.65rem;" title="Lihat Dokumen Faktor Koreksi">
+                                            <i class="fas fa-file-alt"></i> Lihat Koreksi
+                                        </a>
+                                    </div>
+                                @endif --}}
+                            </td>
+
                             <td>{{ ucfirst($signifikan ?? '-') }}</td>
 
                             <td class="text-nowrap">

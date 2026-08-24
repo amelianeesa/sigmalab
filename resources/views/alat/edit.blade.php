@@ -19,7 +19,7 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">Kode Alat (CODE) <span class="text-danger">*</span></label>
-                        <input type="text" name="kode_alat" class="form-control bg-light @error('kode_alat') is-invalid @enderror" value="{{ old('kode_alat', $alat->kode_alat) }}" required readonly>
+                        <input type="text" name="kode_alat" class="form-control  @error('kode_alat') is-invalid @enderror" value="{{ old('kode_alat', $alat->kode_alat) }}" required>
                         @error('kode_alat') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                     <div class="col-md-6">
@@ -60,6 +60,7 @@
                         <label class="form-label">Kondisi Barang</label>
                         <select name="kondisi_barang" class="form-select">
                             <option value="baik" {{ old('kondisi_barang', $alat->kondisi_barang) == 'baik' ? 'selected' : '' }}>Baik</option>
+                            <option value="perbaikan" {{ old('kondisi_barang', $alat->kondisi_barang) == 'perbaikan' ? 'selected' : '' }}>Perbaikan</option>
                             <option value="rusak" {{ old('kondisi_barang', $alat->kondisi_barang) == 'rusak' ? 'selected' : '' }}>Rusak</option>
                         </select>
                     </div>
@@ -95,20 +96,20 @@
 
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <label for="file_sertifikat" class="form-label">Upload File / Foto Sertifikat (PDF/Gambar)</label>
+                        <label for="file_sertifikat" class="form-label">Upload File / Foto Sertifikat <small class="text-muted">PDF/Gambar</small></label>
                         <input type="file" name="file_sertifikat" id="file_sertifikat" class="form-control @error('file_sertifikat') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
-                        <div class="form-text text-muted" style="font-size: 0.75rem;">Format: PDF, JPG, JPEG, PNG. Maks 2MB. Kosongkan kalau tidak mau mengganti file yang sudah ada.</div>
+                        <div class="form-text text-muted" style="font-size: 0.75rem;">Format: PDF, JPG, JPEG, PNG. Maks 2MB. Kosongkan jika tidak ingin mengubah dokumen</div>
                         @error('file_sertifikat') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
 
                         @if(!empty(optional($kalibrasiTerakhir)->file_sertifikat))
                             <div class="mt-2">
                                 <a href="{{ asset('storage/' . $kalibrasiTerakhir->file_sertifikat) }}" target="_blank" class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size: 0.75rem;">
-                                    <i class="fas fa-file-pdf"></i> Lihat Sertifikat Saat Ini
+                                    <i class="fas fa-file-alt"></i> Lihat Sertifikat Saat Ini
                                 </a>
                             </div>
                         @else
                             <div class="mt-2 text-muted" style="font-size: 0.75rem;">
-                                <i class="fas fa-info-circle"></i> Belum ada file sertifikat tersimpan untuk kalibrasi ini.
+                                <i class="fas fa-info-circle"></i> Belum ada file sertifikat tersimpan
                             </div>
                         @endif
                     </div>
@@ -117,7 +118,7 @@
                 <div class="row mb-3">
                     <div class="col-md-4">
                         <label class="form-label">Tanggal Kalibrasi</label>
-                        <input type="date" name="tgl_kalibrasi" id="tgl_kalibrasi" class="form-control @error('tgl_kalibrasi') is-invalid @enderror" value="{{ old('tgl_kalibrasi', optional($kalibrasiTerakhir)->tgl_kalibrasi) }}">
+                        <input type="date" name="tgl_kalibrasi" id="tgl_kalibrasi" class="form-control @error('tgl_kalibrasi') is-invalid @enderror" value="{{ old('tgl_kalibrasi', optional($kalibrasiTerakhir)->tgl_kalibrasi ? \Carbon\Carbon::parse($kalibrasiTerakhir->tgl_kalibrasi)->format('Y-m-d') : '') }}">
                         @error('tgl_kalibrasi') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                     <div class="col-md-4">
@@ -127,7 +128,7 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Tanggal Berakhirnya Masa Kalibrasi</label>
-                        <input type="date" name="tgl_akhir" id="tgl_akhir" class="form-control @error('tgl_akhir') is-invalid @enderror" value="{{ old('tgl_akhir', optional($kalibrasiTerakhir)->tgl_akhir) }}">
+                        <input type="date" name="tgl_akhir" id="tgl_akhir" class="form-control @error('tgl_akhir') is-invalid @enderror" value="{{ old('tgl_akhir', optional($kalibrasiTerakhir)->tgl_akhir ? \Carbon\Carbon::parse($kalibrasiTerakhir->tgl_akhir)->format('Y-m-d') : '') }}">
                         @error('tgl_akhir') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                 </div>
@@ -146,20 +147,46 @@
                 </div>
 
                 <div class="row mb-3">
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label">Faktor Koreksi</label>
                         <input type="text" name="faktor_koreksi" class="form-control @error('faktor_koreksi') is-invalid @enderror" value="{{ old('faktor_koreksi', optional($kalibrasiTerakhir)->faktor_koreksi) }}">
                         @error('faktor_koreksi') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label">Signifikan</label>
                         <select name="signifikan" class="form-select @error('signifikan') is-invalid @enderror">
-                            <option value="tidak" {{ old('signifikan', optional($kalibrasiTerakhir)->signifikan) == 'tidak' ? 'selected' : '' }}>Tidak</option>
+                            <option value="">--Pilih Signifikan--</option>
                             <option value="ya" {{ old('signifikan', optional($kalibrasiTerakhir)->signifikan) == 'ya' ? 'selected' : '' }}>Ya</option>
+                            <option value="tidak" {{ old('signifikan', optional($kalibrasiTerakhir)->signifikan) == 'tidak' ? 'selected' : '' }}>Tidak</option>
                         </select>
                         @error('signifikan') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
-                    <div class="col-md-12 mt-3">
+                </div>
+
+                <!-- Bagian Input Dokumen Faktor Koreksi -->
+                {{-- <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label for="file_faktor_koreksi" class="form-label">Dokumen Faktor Koreksi <small class="text-muted">PDF/Gambar</small></label>
+                        <input type="file" name="file_faktor_koreksi" id="file_faktor_koreksi" class="form-control @error('file_faktor_koreksi') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="form-text text-muted" style="font-size: 0.75rem;">Format: PDF, JPG, JPEG, PNG. Maks 2MB. Kosongkan jika tidak ingin mengubah dokumen</div>
+                        @error('file_faktor_koreksi') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+
+                        @if(!empty(optional($kalibrasiTerakhir)->file_faktor_koreksi))
+                            <div class="mt-2">
+                                <a href="{{ asset('storage/' . $kalibrasiTerakhir->file_faktor_koreksi) }}" target="_blank" class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size: 0.75rem;">
+                                    <i class="fas fa-file-alt"></i> Lihat Koreksi Saat Ini
+                                </a>
+                            </div>
+                        @else
+                            <div class="mt-2 text-muted" style="font-size: 0.75rem;">
+                                <i class="fas fa-info-circle"></i> Belum ada dokumen faktor koreksi tersimpan
+                            </div>
+                        @endif
+                    </div>
+                </div> --}}
+
+                <div class="row mb-3">
+                    <div class="col-md-12 mt-2">
                         <label class="form-label">Catatan / Evaluasi Kalibrasi</label>
                         <textarea name="catatan_evaluasi" class="form-control" rows="3" placeholder="Tuliskan catatan evaluasi atau hasil analisis alat di sini...">{{ old('catatan_evaluasi', optional($kalibrasiTerakhir)->catatan_evaluasi) }}</textarea>
                     </div>
