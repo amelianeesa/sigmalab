@@ -141,19 +141,28 @@
                                     </td>
                                     <td class="text-start">
                                         <strong>Lembaga: {{ $riwayat->lembaga_kalibrasi }}</strong><br>
-                                        <small class="text-muted">Sertifikat: {{ $riwayat->no_sertifikat }}</small>
+                                        <small class="text-muted">Sertifikat: {{ $riwayat->no_sertifikat }}
                                         @if(!empty($riwayat->file_sertifikat))
                                             <div class="mt-1">
                                                 <a href="{{ asset('storage/' . $riwayat->file_sertifikat) }}" target="_blank" class="btn btn-outline-primary btn-sm py-0 px-1" style="font-size: 0.65rem;" title="Lihat Sertifikat">
-                                                    <i class="fas fa-file-pdf me-1"></i> Lihat Sertifikat
+                                                    <i class="fas fa-file-alt me-1"></i> Lihat Sertifikat
                                                 </a>
                                             </div>
                                         @endif
+                                        </small>
                                     </td>
 
                                     <td>
                                         <small>Range: {{ $riwayat->range_kapasitas ?? '-' }}</small><br>
-                                        <small>Koreksi: {{ $riwayat->faktor_koreksi ?? '-' }}</small>
+                                        <small>Koreksi: {{ $riwayat->faktor_koreksi ?? '-' }}
+                                        @if(!empty($riwayat->file_faktor_koreksi))
+                                        <div class="mt-1">
+                                            <a href="{{ asset('storage/' . $riwayat->file_faktor_koreksi) }}" target="_blank" class="btn btn-outline-primary btn-sm py-0 px-1" style="font-size: 0.65rem;" title="Lihat Dokumen Faktor Koreksi">
+                                                <i class="fas fa-file-alt"></i> Lihat Koreksi
+                                            </a>
+                                        </div>
+                                    @endif    
+                                    </small>                                    
                                     </td>
                                     <td>
                                         <span class="badge bg-{{ $riwayat->signifikan == 'ya' ? 'success' : 'secondary' }}">
@@ -189,6 +198,7 @@
                             <div class="col-md-6">
                                 <label class="form-label">Jenis Kalibrasi</label>
                                 <select name="jenis_kalibrasi" class="form-select" required>
+                                    <option>--Pilih Jenis--</option>
                                     <option value="internal">Internal</option>
                                     <option value="eksternal">Eksternal</option>
                                 </select>
@@ -198,7 +208,7 @@
                                 <input type="text" name="no_sertifikat" class="form-control" required autocomplete="off">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Upload File / Foto Sertifikat (PDF/Gambar)</label>
+                                <label class="form-label">Upload File Sertifikat <small class="text-muted">(PDF/Gambar)</small></label>
                                 <input type="file" name="file_sertifikat" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
                                 <div class="form-text text-muted" style="font-size: 0.75rem;">Format: PDF, JPG, JPEG, PNG (Maks. 2MB)</div>
                             </div>
@@ -225,12 +235,19 @@
                             <div class="col-md-4">
                                 <label class="form-label">Faktor Koreksi</label>
                                 <input type="text" name="faktor_koreksi" class="form-control" autocomplete="off">
+                                {{-- <div class="col-md-6"> --}}
+                                    <label for="file_faktor_koreksi" class="form-label">Upload File Koreksi <small class="text-muted">(PDF/Gambar)</small></label>
+                                    <input type="file" name="file_faktor_koreksi" id="file_faktor_koreksi" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                                    <div class="form-text text-muted" style="font-size: 0.75rem;">Format: PDF, JPG, PNG (Maks. 2MB)</div>
+                                {{-- </div> --}}
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Signifikan</label>
                                 <select name="signifikan" class="form-select" required>
-                                    <option value="tidak">Tidak</option>
+                                    <option>--Pilih Signifikan--</option>
                                     <option value="ya">Ya</option>
+                                    <option value="tidak">Tidak</option>
+                                    
                                 </select>
                             </div>
                             <div class="col-md-12">

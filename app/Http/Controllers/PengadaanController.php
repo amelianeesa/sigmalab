@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Services\PermissionService;
 use App\Enums\PeranPengguna;
+use Carbon\Carbon;
 
 class PengadaanController extends Controller
 {
@@ -134,6 +135,55 @@ class PengadaanController extends Controller
 
         return redirect()->route('pengadaan.index')->with('success', 'Status pengadaan berhasil diupdate.');
     }
+
+    public function konfirmasiTerima(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'foto_diterima' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'nama_penerima' => 'required|string|max:100',
+            'tgl_exp' => 'required|date',
+        ]);
+
+        $pengadaan = PermintaanPengadaan::findOrFail($id);
+        if (!in_array($pengadaan->status, ['disetujui', 'diproses'])) {
+            return back()->with('error', 'Pengadaan harus disetujui atau diproses terlebih dahulu sebelum dikonfirmasi.');
+        }
+
+        DB::transaction(function () use ($request, $pengadaan) {
+            $file = $request->file('foto_diterima');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/pengadaan'), $filename);
+            $pathFoto = 'uploads/pengadaan/' . $filename;
+
+            $pengadaan->foto_diterima = $pathFoto;
+            $pengadaan->nama_penerima = $request->nama_penerima;
+            $pengadaan->waktu_diterima = Carbon::now('Asia/Jakarta');
+            $pengadaan->status = 'selesai';
+            $pengadaan->save();
+
+            $barang = Barang::where('barang_id', $pengadaan->barang_id)->lockForUpdate()->first();
+            if ($barang) {
+                $barang->penerimaan += $pengadaan->jumlah_diminta;
+                $barang->saldo_akhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
+                
+                // $barang->tgl_exp = $request->tgl_exp; // Update tanggal expired sesuai fisik baru
+                // Logika cerdas: Jika tgl_exp barang yang baru lebih awal dari tgl_exp lama (atau tgl_exp lama kosong), 
+                // maka perbarui tgl_exp utama agar mencerminkan barang yang paling cepat expired (FEFO).
+                if (empty($barang->tgl_exp) || $request->tgl_exp < $barang->tgl_exp) {
+                    $barang->tgl_exp = $request->tgl_exp;
+                }
+                $barang->save();    
+                TransaksiBarang::create([
+                    'barang_id' => $barang->barang_id,
+                    'jumlah_penerimaan' => $pengadaan->jumlah_diminta,
+                    'harga' => $barang->harga_rata ?? 0,
+                    'tgl_exp' => $request->tgl_exp,
+                ]);
+            }
+        });
+
+        return back()->with('success', 'Konfirmasi penerimaan berhasil!');
+    }    
 
     public function destroy($id)
     {

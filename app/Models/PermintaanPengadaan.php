@@ -32,11 +32,15 @@ class PermintaanPengadaan extends Model
         'tanggal_pengajuan',
         'tanggal_keputusan',
         'catatan_approval',
+        'foto_diterima', 
+        'nama_penerima', 
+        'waktu_diterima',
     ];
 
     protected $casts = [
         'tanggal_pengajuan' => 'date',
         'tanggal_keputusan' => 'date',
+        'waktu_diterima' => 'datetime'
     ];
 
     public function barang()

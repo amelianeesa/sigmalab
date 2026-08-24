@@ -29,6 +29,7 @@ class RiwayatKalibrasi extends Model
         'lembaga_kalibrasi',
         'range_kapasitas',
         'faktor_koreksi',
+        'file_faktor_koreksi',
         'catatan_evaluasi',
         'signifikan',
         'reminder_terkirim',

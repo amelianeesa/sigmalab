@@ -85,7 +85,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pengadaan/export-pdf', [PengadaanController::class, 'exportPdf'])->name('pengadaan.pdf');
     Route::resource('pengadaan', PengadaanController::class);
     Route::post('/pengadaan/{id}/approve', [PengadaanController::class, 'approve'])->name('pengadaan.approve');
-    
+    Route::post('/pengadaan/{id}/terima', [PengadaanController::class, 'konfirmasiTerima'])->name('pengadaan.terima');
+    Route::post('/barang/{id}/pengeluaran', [BarangController::class, 'storePengeluaran'])->name('barang.pengeluaran');
+
     Route::resource('parameter-uji', ParameterUjiController::class);
     Route::resource('kegiatan', KegiatanController::class);
     Route::resource('hasil-uji', HasilUjiController::class)->only(['store', 'show']);
