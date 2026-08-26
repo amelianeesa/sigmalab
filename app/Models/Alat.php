@@ -41,9 +41,6 @@ class Alat extends BaseModel
     {
         return $this->hasMany(KegiatanAlat::class, 'alat_id', 'alat_id');
     }
-
-");
-    }
     public function kategoriAlat()
     {
         return $this->belongsTo(KategoriAlat::class, 'kategori_alat_id', 'kategori_alat_id');

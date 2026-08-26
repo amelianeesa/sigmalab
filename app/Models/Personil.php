@@ -36,4 +36,6 @@ class Personil extends BaseModel
 
     public function kegiatan()
     {
-        return $this->belongsToMany(Kegiatan::class, 'kegiatan_personil', 'personil_id', 'kegiatan_id'}
+        return $this->belongsToMany(Kegiatan::class, 'kegiatan_personil', 'personil_id', 'kegiatan_id');
+    }
+}

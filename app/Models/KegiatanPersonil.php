@@ -25,4 +25,7 @@ class KegiatanPersonil extends BaseModel
 
     public function personil()
     {
-        return $this->belongsTo(Personil::class, 'personil_id', 'personil_id'}
+        return $this->belongsTo(Personil::class, 'personil_id', 'personil_id');
+    }
+}
+

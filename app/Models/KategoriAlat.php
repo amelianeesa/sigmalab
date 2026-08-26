@@ -20,4 +20,7 @@ class KategoriAlat extends BaseModel
 
     public function itemPemeliharaan()
     {
-        return $this->hasMany(ItemPemeliharaan::class, 'kategori_alat_id', 'kategori_alat_id'}
+        return $this->hasMany(ItemPemeliharaan::class, 'kategori_alat_id', 'kategori_alat_id');
+    }
+}
+

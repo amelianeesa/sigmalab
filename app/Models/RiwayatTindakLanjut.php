@@ -38,4 +38,6 @@ class RiwayatTindakLanjut extends BaseModel
 
     public function komentars()
     {
-        return $this->hasMany(TindakLanjutKomentar::class, 'riwayat_tindak_lanjut_id', 'riwayat_tindak_lanjut_id'}
+        return $this->hasMany(TindakLanjutKomentar::class, 'riwayat_tindak_lanjut_id', 'riwayat_tindak_lanjut_id');
+    }
+}

@@ -18,4 +18,7 @@ class ItemPemeliharaan extends BaseModel
 
     public function logs()
     {
-        return $this->hasMany(LogPemeliharaan::class, 'item_id', 'item_id'}
+        return $this->hasMany(LogPemeliharaan::class, 'item_id', 'item_id');
+    }
+}
+

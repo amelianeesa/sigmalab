@@ -26,4 +26,7 @@ class KegiatanAlat extends BaseModel
 
     public function kegiatan()
     {
-        return $this->belongsTo(Kegiatan::class, 'kegiatan_id', 'kegiatan_id'}
+        return $this->belongsTo(Kegiatan::class, 'kegiatan_id', 'kegiatan_id');
+    }
+}
+

@@ -30,4 +30,7 @@ class RiwayatKalibrasi extends BaseModel
 
     public function alat()
     {
-        return $this->belongsTo(Alat::class, 'alat_id', 'alat_id'}
+        return $this->belongsTo(Alat::class, 'alat_id', 'alat_id');
+    }
+}
+

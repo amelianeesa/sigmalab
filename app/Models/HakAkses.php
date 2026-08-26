@@ -41,4 +41,7 @@ class HakAkses extends BaseModel
 
     public function modul()
     {
-        return $this->belongsTo(Modul::class, 'modul_id', 'modul_id'}
+        return $this->belongsTo(Modul::class, 'modul_id', 'modul_id');
+    }
+}
+

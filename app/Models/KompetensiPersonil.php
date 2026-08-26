@@ -35,4 +35,7 @@ class KompetensiPersonil extends BaseModel
 
     public function parameterUji()
     {
-        return $this->belongsTo(ParameterUji::class, 'parameter_uji_id', 'parameter_uji_id'}
+        return $this->belongsTo(ParameterUji::class, 'parameter_uji_id', 'parameter_uji_id');
+    }
+}
+
