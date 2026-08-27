@@ -53,7 +53,7 @@
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="text-muted mb-2 fs-7 text-uppercase fw-bold">Kalibrasi (H-30)</p>
+                            <p class="text-muted mb-2 fs-7 text-uppercase fw-bold">Peralatan & Kalibrasi</p>
                             <h2 class="fw-bold mb-0 text-dark">{{ $tenggatKalibrasi }}</h2>
                         </div>
                     </div>

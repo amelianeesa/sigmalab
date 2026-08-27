@@ -22,7 +22,7 @@ class DashboardController extends Controller
         $outliers = RiwayatTindakLanjut::whereIn('status_tindak_lanjut', ['belum_ditindaklanjuti', 'dalam_investigasi'])->count();
 
         $tenggatKalibrasi = Alat::whereHas('riwayatKalibrasi', function($query) {
-            $query->where('tgl_akhir', '<=', Carbon::now()->addDays(30));
+            $query->where('tgl_akhir', '<=', Carbon::now()->addDays(180));
         })->count();
 
         $stokTipis = Barang::whereColumn('saldo_akhir', '<', 'minimal_stok')->count();
@@ -35,7 +35,7 @@ class DashboardController extends Controller
 
         $pengadaanPending = PermintaanPengadaan::where('status', 'diajukan')->count();
 
-        $barangExp = Barang::whereNotNull('tgl_exp')->where('tgl_exp', '<=', Carbon::now()->addDays(30))->count();
+        $barangExp = Barang::whereNotNull('tgl_exp')->where('tgl_exp', '<=', Carbon::now()->addDays(180))->count();
 
         $kegiatanBerjalan = Kegiatan::whereIn('status_kegiatan', ['draft', 'berjalan'])->count();
 
