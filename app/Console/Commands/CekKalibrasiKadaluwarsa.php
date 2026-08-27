@@ -35,7 +35,7 @@ class CekKalibrasiKadaluwarsa extends Command
 
             if (!$notifTerakhir) {
                 $users = User::whereHas('role', function($q) { 
-                    $q->where('nama_role', 'Admin Lab')
+                    $q->where('nama_role', 'HR & GA')
                       ->orWhere('nama_role', 'Analis Lab'); 
                 })->get();
 
