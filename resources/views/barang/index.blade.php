@@ -226,7 +226,7 @@
             <div class="modal-body">
                 <div class="table-responsive">
                     <table class="table table-sm table-bordered align-middle">
-                        <<thead class="table-header-custom text-center" style="font-size: 0.85rem;">
+                        <thead class="table-header-custom text-center" style="font-size: 0.85rem;">
                             <tr>
                                 <th>Tanggal Masuk</th>
                                 <th>Sisa Stok Batch</th>
