@@ -13,7 +13,7 @@
         </div>
 
         <div style="padding:24px;">
-            <h3 style="color:#c0392b; margin-top:0;">⚠️ Peringatan: Masa Kalibrasi Alat Akan Habis</h3>
+            <h3 style="color:#c0392b; margin-top:0;">Peringatan: Masa Kalibrasi Alat Akan Habis</h3>
 
             <p>Halo,</p>
             <p>Berikut ini adalah data peralatan laboratorium yang akan segera berakhir masa kalibrasinya:</p>
@@ -41,7 +41,7 @@
                 </tr>
                 <tr>
                     <td style="padding:8px; border:1px solid #ddd; background:#f9f9f9;"><b>Masa Berlaku Berakhir</b></td>
-                    <td style="padding:8px; border:1px solid #ddd; color:#c0392b;"><b>{{ $kalibrasi->tgl_akhir ? $kalibrasi->tgl_akhir->format('d-m-Y') : '-' }}</b></td>
+                    <td style="padding:8px; border:1px solid #ddd; color:#c0392b;"><b>{{ $kalibrasi->tgl_akhir ? \Carbon\Carbon::parse($kalibrasi->tgl_akhir)->format('d-m-Y') : '-' }}</b></td>
                 </tr>
             </table>
 

@@ -9,7 +9,7 @@
             if ($kalibrasi && $kalibrasi->tgl_akhir) {
                 $tglAkhir = \Carbon\Carbon::parse($kalibrasi->tgl_akhir);
                 $sisaHari = \Carbon\Carbon::now()->startOfDay()->diffInDays($tglAkhir, false);
-                if ($sisaHari <= 30) {
+                if ($sisaHari <= 180) {
                     $alatWarningCount++;
                 }
             }
@@ -18,7 +18,7 @@
 
     @if($alatWarningCount > 0)
         <div class="alert alert-warning alert-dismissible fade show shadow-sm" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i> <strong>Perhatian!</strong> Terdapat <strong>{{ $alatWarningCount }} alat</strong> yang masa kalibrasinya sudah kedaluarsa atau akan segera berakhir (dalam 30 hari ke depan). Mohon segera jadwalkan kalibrasi ulang.
+            <i class="fas fa-exclamation-triangle me-2"></i> <strong>Perhatian!</strong> Terdapat <strong>{{ $alatWarningCount }} alat</strong> yang masa kalibrasinya sudah kadaluwarsa atau akan segera berakhir (dalam 180 hari ke depan). Mohon segera jadwalkan kalibrasi ulang
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
@@ -42,9 +42,9 @@
                 <div class="col-md-3">
                     <select name="filter_status" id="filterStatus" class="form-select form-select-sm">
                         <option value="">-- Filter Status Kalibrasi --</option>
-                        <option value="aktif" {{ (isset($filterStatus) && $filterStatus == 'aktif') ? 'selected' : '' }}>Aktif (> 30 Hari)</option>
-                        <option value="segera" {{ (isset($filterStatus) && $filterStatus == 'segera') ? 'selected' : '' }}>Segera Berakhir (&le; 30 Hari)</option>
-                        <option value="kedaluarsa" {{ (isset($filterStatus) && $filterStatus == 'kedaluarsa') ? 'selected' : '' }}>Kedaluarsa</option>
+                        <option value="aktif" {{ (isset($filterStatus) && $filterStatus == 'aktif') ? 'selected' : '' }}>Aktif (> 180 Hari)</option>
+                        <option value="segera" {{ (isset($filterStatus) && $filterStatus == 'segera') ? 'selected' : '' }}>Segera Berakhir (&le; 180 Hari)</option>
+                        <option value="kedaluarsa" {{ (isset($filterStatus) && $filterStatus == 'kedaluarsa') ? 'selected' : '' }}>Kadalwuarsa</option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -108,7 +108,7 @@
 
                                 if ($sisaHari < 0) {
                                     $statusKalibrasiBadge = '<span class="badge bg-danger mt-1 d-block px-2 py-1" style="font-size: 0.62rem;"><i class="fas fa-times-circle"></i> Kedaluarsa</span>';
-                                } elseif ($sisaHari <= 30) {
+                                } elseif ($sisaHari <= 180) {
                                     $statusKalibrasiBadge = '<span class="badge bg-warning text-dark mt-1 d-block px-2 py-1" style="font-size: 0.62rem;" title="Sisa ' . $sisaHari . ' hari lagi"><i class="fas fa-clock"></i> Segera Berakhir (' . $sisaHari . 'h)</span>';
                                 }
                             }

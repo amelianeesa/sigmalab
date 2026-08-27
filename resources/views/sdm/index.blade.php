@@ -313,7 +313,7 @@
                             <div class="col-12">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <label class="form-label small fw-semibold mb-0">Upload CV</label>
-                                    <a href="{{ asset('templates/Template_CV_SIGMA-LAB.docx') }}" download class="small text-decoration-none">
+                                    <a href="{{ asset('templates/' . rawurlencode('Template_CV_PT SUCOFINDO.docx')) }}" download class="small text-decoration-none">
                                         <i class="fas fa-download me-1"></i>Unduh Template CV
                                     </a>
                                 </div>

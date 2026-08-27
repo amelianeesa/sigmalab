@@ -102,11 +102,6 @@
                         <label class="form-label">No. Sertifikat Kalibrasi / Perijinan</label>
                         <input type="text" name="no_sertifikat" class="form-control" placeholder="mis. 20059/ENBPAQ" value="{{ old('no_sertifikat') }}">
                     </div>
-                    <div class="mb-3">
-                        <label for="file_sertifikat" class="form-label">Upload File / Foto Sertifikat Kalibrasi <small class="text-muted">(PDF/Gambar)</small></label>
-                        <input type="file" name="file_sertifikat" id="file_sertifikat" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png">
-                        <div class="form-text text-muted" style="font-size: 0.75rem;">Format yang diizinkan: PDF, JPG, JPEG, PNG. Maks: 2MB</div>
-                    </div>
                     <div class="col-md-6">
                         <label class="form-label">Jenis Kalibrasi</label>
                         <select name="jenis_kalibrasi" class="form-select">
@@ -114,6 +109,18 @@
                             <option value="eksternal" {{ old('jenis_kalibrasi') == 'eksternal' ? 'selected' : '' }}>Eksternal</option>
                             <option value="internal" {{ old('jenis_kalibrasi') == 'internal' ? 'selected' : '' }}>Internal</option>
                         </select>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="file_sertifikat" class="form-label">Upload File / Foto Sertifikat Kalibrasi <small class="text-muted">(PDF/Gambar)</small></label>
+                        <input type="file" name="file_sertifikat" id="file_sertifikat" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png">
+                        <div class="form-text text-muted" style="font-size: 0.75rem;">Format yang diizinkan: PDF, JPG, JPEG, PNG. Maks: 2MB</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Lembaga Kalibrasi</label>
+                        <input type="text" name="lembaga_kalibrasi" class="form-control" placeholder="mis. PT SUCOFINDO" value="{{ old('lembaga_kalibrasi') }}">
                     </div>
                 </div>
 
@@ -133,31 +140,25 @@
                 </div>
 
                 <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Lembaga Kalibrasi</label>
-                        <input type="text" name="lembaga_kalibrasi" class="form-control" placeholder="mis. PT SUCOFINDO" value="{{ old('lembaga_kalibrasi') }}">
-                    </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Range / Kapasitas</label>
                         <input type="text" name="range_kapasitas" class="form-control" placeholder="mis. 0 - 1400 °C" value="{{ old('range_kapasitas') }}">
                     </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Faktor Koreksi</label>
                         <input type="text" name="faktor_koreksi" class="form-control" placeholder="mis. 32 °C" value="{{ old('faktor_koreksi') }}">
                     </div>
-
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Signifikan</label>
                         <select name="signifikan" class="form-select">
                             <option>--Pilih Signifikan--</option>
                             <option value="ya" {{ old('signifikan') == 'ya' ? 'selected' : '' }}>Ya</option>
                             <option value="tidak" {{ old('signifikan') == 'tidak' ? 'selected' : '' }}>Tidak</option>
-
                         </select>
                     </div>
+                </div>
+
+                <div class="row mb-3">
                     {{-- <div class="row mb-3">
                         <div class="col-md-12">
                             <label class="form-label">Dokumen Faktor Koreksi <small class="text-muted">(PDF/Gambar)</small></label>

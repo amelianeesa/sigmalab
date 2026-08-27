@@ -67,9 +67,9 @@ class AlatController extends Controller
                 if ($filterStatus == 'kedaluarsa') {
                     return $sisaHari < 0;
                 } elseif ($filterStatus == 'segera') {
-                    return $sisaHari >= 0 && $sisaHari <= 30;
+                    return $sisaHari >= 0 && $sisaHari <= 180;
                 } elseif ($filterStatus == 'aktif') {
-                    return $sisaHari > 30;
+                    return $sisaHari > 180;
                 }
                 return true;
             });
@@ -106,7 +106,7 @@ class AlatController extends Controller
             'jenis_kalibrasi' => 'nullable|in:internal,eksternal',
             'range_kapasitas' => 'nullable|string|max:100',
             'faktor_koreksi' => 'nullable|string|max:100',
-            'file_faktor_koreksi' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:2048',
+            // 'file_faktor_koreksi' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:2048',
             'signifikan' => 'nullable|in:ya,tidak',
             'catatan_evaluasi' => 'nullable|string',
         ]);
@@ -142,10 +142,10 @@ class AlatController extends Controller
                     $path = $request->file('file_sertifikat')->store('sertifikat_kalibrasi', 'public');
                     $dataKalibrasi['file_sertifikat'] = $path;
                 }
-                if ($request->hasFile('file_faktor_koreksi')) {
-                    $pathFaktor = $request->file('file_faktor_koreksi')->store('faktor_koreksi', 'public');
-                    $dataKalibrasi['file_faktor_koreksi'] = $pathFaktor;
-                }
+                // if ($request->hasFile('file_faktor_koreksi')) {
+                //     $pathFaktor = $request->file('file_faktor_koreksi')->store('faktor_koreksi', 'public');
+                //     $dataKalibrasi['file_faktor_koreksi'] = $pathFaktor;
+                // }
 
                 RiwayatKalibrasi::create($dataKalibrasi);
             }
@@ -187,7 +187,7 @@ class AlatController extends Controller
             'jenis_kalibrasi' => 'nullable|in:internal,eksternal',
             'range_kapasitas' => 'nullable|string|max:100',
             'faktor_koreksi' => 'nullable|string|max:100',
-            'file_faktor_koreksi' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            // 'file_faktor_koreksi' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'signifikan' => 'nullable|in:ya,tidak',
             'catatan_evaluasi' => 'nullable|string',
         ]);
@@ -229,10 +229,10 @@ class AlatController extends Controller
                 $dataKalibrasi['file_sertifikat'] = $path;
             }
             
-            if ($request->hasFile('file_faktor_koreksi')) {
-                $pathFaktor = $request->file('file_faktor_koreksi')->store('faktor_koreksi', 'public');
-                $dataKalibrasi['file_faktor_koreksi'] = $pathFaktor;
-            }
+            // if ($request->hasFile('file_faktor_koreksi')) {
+            //     $pathFaktor = $request->file('file_faktor_koreksi')->store('faktor_koreksi', 'public');
+            //     $dataKalibrasi['file_faktor_koreksi'] = $pathFaktor;
+            // }
         
 
             if ($request->filled('tgl_kalibrasi')) {

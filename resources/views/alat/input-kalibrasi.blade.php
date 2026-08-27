@@ -155,13 +155,13 @@
                                     <td>
                                         <small>Range: {{ $riwayat->range_kapasitas ?? '-' }}</small><br>
                                         <small>Koreksi: {{ $riwayat->faktor_koreksi ?? '-' }}
-                                        @if(!empty($riwayat->file_faktor_koreksi))
+                                        {{-- @if(!empty($riwayat->file_faktor_koreksi))
                                         <div class="mt-1">
                                             <a href="{{ asset('storage/' . $riwayat->file_faktor_koreksi) }}" target="_blank" class="btn btn-outline-primary btn-sm py-0 px-1" style="font-size: 0.65rem;" title="Lihat Dokumen Faktor Koreksi">
                                                 <i class="fas fa-file-alt"></i> Lihat Koreksi
                                             </a>
                                         </div>
-                                    @endif    
+                                    @endif     --}}
                                     </small>                                    
                                     </td>
                                     <td>
@@ -228,20 +228,20 @@
                                 <label class="form-label">Lembaga Kalibrasi</label>
                                 <input type="text" name="lembaga_kalibrasi" class="form-control" required autocomplete="off">
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">Range Kapasitas</label>
                                 <input type="text" name="range_kapasitas" class="form-control" placeholder="Contoh: 1-90" autocomplete="off">
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">Faktor Koreksi</label>
                                 <input type="text" name="faktor_koreksi" class="form-control" autocomplete="off">
                                 {{-- <div class="col-md-6"> --}}
-                                    <label for="file_faktor_koreksi" class="form-label">Upload File Koreksi <small class="text-muted">(PDF/Gambar)</small></label>
+                                    {{-- <label for="file_faktor_koreksi" class="form-label">Upload File Koreksi <small class="text-muted">(PDF/Gambar)</small></label>
                                     <input type="file" name="file_faktor_koreksi" id="file_faktor_koreksi" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
-                                    <div class="form-text text-muted" style="font-size: 0.75rem;">Format: PDF, JPG, PNG (Maks. 2MB)</div>
+                                    <div class="form-text text-muted" style="font-size: 0.75rem;">Format: PDF, JPG, PNG (Maks. 2MB)</div> --}}
                                 {{-- </div> --}}
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">Signifikan</label>
                                 <select name="signifikan" class="form-select" required>
                                     <option>--Pilih Signifikan--</option>

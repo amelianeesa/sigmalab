@@ -113,6 +113,11 @@
                             </div>
                         @endif
                     </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Lembaga Kalibrasi</label>
+                        <input type="text" name="lembaga_kalibrasi" class="form-control @error('lembaga_kalibrasi') is-invalid @enderror" value="{{ old('lembaga_kalibrasi', optional($kalibrasiTerakhir)->lembaga_kalibrasi) }}">
+                        @error('lembaga_kalibrasi') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
                 </div>
 
                 <div class="row mb-3">
@@ -134,25 +139,18 @@
                 </div>
 
                 <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Lembaga Kalibrasi</label>
-                        <input type="text" name="lembaga_kalibrasi" class="form-control @error('lembaga_kalibrasi') is-invalid @enderror" value="{{ old('lembaga_kalibrasi', optional($kalibrasiTerakhir)->lembaga_kalibrasi) }}">
-                        @error('lembaga_kalibrasi') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                    </div>
-                    <div class="col-md-6">
+
+                    <div class="col-md-4">
                         <label class="form-label">Range / Kapasitas</label>
                         <input type="text" name="range_kapasitas" class="form-control @error('range_kapasitas') is-invalid @enderror" value="{{ old('range_kapasitas', optional($kalibrasiTerakhir)->range_kapasitas) }}">
                         @error('range_kapasitas') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Faktor Koreksi</label>
                         <input type="text" name="faktor_koreksi" class="form-control @error('faktor_koreksi') is-invalid @enderror" value="{{ old('faktor_koreksi', optional($kalibrasiTerakhir)->faktor_koreksi) }}">
                         @error('faktor_koreksi') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Signifikan</label>
                         <select name="signifikan" class="form-select @error('signifikan') is-invalid @enderror">
                             <option value="">--Pilih Signifikan--</option>
@@ -161,6 +159,11 @@
                         </select>
                         @error('signifikan') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
+                </div>
+
+                <div class="row mb-3">
+
+
                 </div>
 
                 <!-- Bagian Input Dokumen Faktor Koreksi -->

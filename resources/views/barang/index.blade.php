@@ -1,14 +1,19 @@
 @extends('layouts.app')
 
-@push('styles')
+@section('content')
+
 <style>
     .card-header-custom {
         background-color: #f8f9fa;
         font-weight: bold;
     }
-    .table-header-custom {
-        background-color: #212529;
-        color: white;
+    /* Memaksa background dan teks header tabel menjadi hitam */
+    .table-header-custom, 
+    .table-header-custom th, 
+    .table-header-custom tr {
+        background-color: #212529 !important;
+        color: #ffffff !important;
+        border-color: #454d55 !important;
     }
     .table-responsive-custom {
         font-size: 0.75rem;
@@ -17,9 +22,7 @@
         font-size: 0.65rem;
     }
 </style>
-@endpush
 
-@section('content')
 <div class="container-fluid px-4">
     <!-- <h1 class="mt-4">Laporan Inventori Barang Persediaan (Stock)</h1>
     <ol class="breadcrumb mb-4">
@@ -100,21 +103,21 @@
 
             <div class="table-responsive">
                 <table class="table table-bordered table-striped align-middle text-center table-responsive-custom">
-                    <thead class="table-header-custom align-middle">
+                    <thead class="table-header-custom text-center">
                         <tr>
-                            <th rowspan="2" style="width: 35px;">No.</th>
-                            <th rowspan="2">Nama Barang/Bahan</th>
-                            <th rowspan="2">Satuan</th>
-                            <th rowspan="2">Kode Barang/Bahan</th>
-                            <th rowspan="2">Minimal Stock</th>
-                            <th rowspan="2">Saldo Awal</th>
-                            <th colspan="2">Jumlah</th>
-                            <th rowspan="2">Saldo Akhir<br><small>(Sisa Stock)</small></th>
-                            <th rowspan="2">Harga Rata-rata Tertimbang</th>
-                            <th rowspan="2">Nilai</th>
-                            <th rowspan="2">Kondisi</th>
-                            <th rowspan="2">Tanggal Expired Date</th>
-                            <th rowspan="2" style="width: 80px;">Aksi</th>
+                            <th rowspan="2" class="text-center align-middle"style="width: 35px;">No.</th>
+                            <th rowspan="2" class="text-center align-middle">Nama Barang/Bahan</th>
+                            <th rowspan="2" class="text-center align-middle">Satuan</th>
+                            <th rowspan="2" class="text-center align-middle">Kode Barang/Bahan</th>
+                            <th rowspan="2" class="text-center align-middle">Minimal Stock</th>
+                            <th rowspan="2" class="text-center align-middle">Saldo Awal</th>
+                            <th colspan="2" class="text-center align-middle">Jumlah</th>
+                            <th rowspan="2" class="text-center align-middle">Saldo Akhir<br><small>(Sisa Stock)</small></th>
+                            <th rowspan="2" class="text-center align-middle">Harga Rata-rata Tertimbang</th>
+                            <th rowspan="2" class="text-center align-middle">Nilai</th>
+                            <th rowspan="2" class="text-center align-middle">Kondisi</th>
+                            <th rowspan="2" class="text-center align-middle">Tanggal Expired Date</th>
+                            <th rowspan="2" class="text-center align-middle" style="width: 80px;">Aksi</th>
                         </tr>
                         <tr>
                             <th>Penerimaan</th>
@@ -223,7 +226,7 @@
             <div class="modal-body">
                 <div class="table-responsive">
                     <table class="table table-sm table-bordered align-middle">
-                        <thead class="table-light text-center" style="font-size: 0.85rem;">
+                        <<thead class="table-header-custom text-center" style="font-size: 0.85rem;">
                             <tr>
                                 <th>Tanggal Masuk</th>
                                 <th>Sisa Stok Batch</th>
