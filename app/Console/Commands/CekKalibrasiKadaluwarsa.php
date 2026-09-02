@@ -14,7 +14,7 @@ class CekKalibrasiKadaluwarsa extends Command
 {
     protected $signature = 'kalibrasi:cek-kadaluwarsa';
     protected $description = 'Kirim pengingat kalibrasi berkala setiap 1 bulan sekali dalam rentang H-6 bulan';
-
+ 
     public function handle()
     {
         $batasHari = 180; 
@@ -42,6 +42,7 @@ class CekKalibrasiKadaluwarsa extends Command
                 foreach ($users as $user) {
                     if ($user->email) {
                         Mail::to($user->email)->send(new KalibrasiAkanHabis($item));
+                        // $this->info("Email pengingat dikirim ke: {$user->email} untuk alat: {$item->alat->nama_alat}");
                     }
                     
                     DB::table('notifikasi')->insert([
@@ -55,6 +56,7 @@ class CekKalibrasiKadaluwarsa extends Command
                 }
 
                 $this->info("Notifikasi berkala berhasil dikirim untuk alat: " . $item->alat->nama_alat);
+                // $this->line("--------------------------------------------------");
             }
         }
 

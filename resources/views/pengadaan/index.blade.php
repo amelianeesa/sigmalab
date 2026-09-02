@@ -162,8 +162,8 @@
                                                                 <small class="text-muted">Format yang didukung: JPG, JPEG, PNG, WEBP (Maksimal 2MB)</small>
                                                             </div>
                                                             <div class="mb-3">
-                                                                <label class="form-label fw-bold">Tanggal Expired Barang Baru <span class="text-danger">*</span></label>
-                                                                <input type="date" name="tgl_exp" class="form-control" required>
+                                                                <label class="form-label fw-bold">Tanggal Expired Barang Baru</label>
+                                                                <input type="date" name="tgl_exp" class="form-control">
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer bg-light">

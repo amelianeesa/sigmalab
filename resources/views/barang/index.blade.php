@@ -35,6 +35,9 @@
         <a href="{{ route('pengadaan.index') }}" class="btn btn-info rounded-pill px-4 shadow-sm text-white fw-bold" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
             <i class="fas fa-truck-loading me-2"></i> Cek Pengadaan Barang/Bahan
         </a>
+        <a href="{{ route('inventori.monitoring.index') }}" class="btn btn-success ms-2">
+            <i class="fas fa-thermometer-half me-1"></i> Monitoring Ruangan
+        </a>
         @endif
     </div>
 

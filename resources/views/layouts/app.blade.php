@@ -217,6 +217,8 @@
         .sdm-btn { background: var(--sdm-600); border-color: var(--sdm-600); color: #fff; }
         .sdm-border { border-color: rgba(76,29,149,0.12); }
     </style>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -363,6 +365,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <!-- Sidebar State Script -->
     <script>
         function toggleSidebar() {
@@ -441,5 +444,7 @@
     });
     </script>
     @stack('scripts')
+
+
 </body>
 </html>

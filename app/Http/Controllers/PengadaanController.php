@@ -141,7 +141,7 @@ class PengadaanController extends Controller
         $validated = $request->validate([
             'foto_diterima' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
             'nama_penerima' => 'required|string|max:100',
-            'tgl_exp' => 'required|date',
+            'tgl_exp' => 'nullable|date',
         ]);
 
         $pengadaan = PermintaanPengadaan::findOrFail($id);

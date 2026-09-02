@@ -15,6 +15,7 @@ use App\Http\Controllers\RoleSwitcherController;
 use App\Http\Controllers\PengadaanController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\HakAksesController;
+use App\Http\Controllers\MonitoringRuanganController;
 
 // Guest / Auth Routes
 Route::get('/', [AuthController::class, 'showLogin']);
@@ -90,6 +91,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/pengadaan/{id}/approve', [PengadaanController::class, 'approve'])->name('pengadaan.approve');
     Route::post('/pengadaan/{id}/terima', [PengadaanController::class, 'konfirmasiTerima'])->name('pengadaan.terima');
     Route::post('/barang/{id}/pengeluaran', [BarangController::class, 'storePengeluaran'])->name('barang.pengeluaran');
+
+    //monitoring ruangan
+    Route::prefix('inventori')->name('inventori.')->group(function () {
+        Route::get('/monitoring-ruangan', [MonitoringRuanganController::class, 'index'])->name('monitoring.index');
+        Route::post('/monitoring-ruangan/update', [MonitoringRuanganController::class, 'updateBaris'])->name('monitoring.update');
+    });
 
     Route::resource('parameter-uji', ParameterUjiController::class);
 
