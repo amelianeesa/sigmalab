@@ -86,7 +86,6 @@
 
         #sidebar ul.components { padding: 20px 0; }
         
-        /* Premium Menu Item Styles */
         #sidebar ul li a { 
             padding: 12px 20px 12px 24px; 
             font-size: 0.92rem; 
@@ -117,18 +116,16 @@
         #sidebar ul li a i { font-size: 1.1rem; opacity: 0.75; margin-right: 10px; }
         #sidebar ul li a:hover i, #sidebar ul li.active > a i { opacity: 1; color: #2563eb; }
         
-        /* Subtle Dividers */
         #sidebar .sidebar-divider { 
             font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; 
             color: #94a3b8; padding: 18px 24px 8px; margin-top: 5px; 
         }
 
-        /* Sidebar Dropdown Accordion */
         #sidebar ul li > a.dropdown-toggle::after {
             display: inline-block;
             margin-left: 0.255em;
             vertical-align: 0.255em;
-            content: "\f107"; /* FontAwesome caret-down */
+            content: "\f107";
             font-family: "Font Awesome 5 Free";
             font-weight: 900;
             border: none;
@@ -192,16 +189,6 @@
             max-height: 1rem !important;
             display: inline-block;
         }
-        /* .card-body > div:not(.table-responsive):not(.mt-3) {
-            display: none !important;
-        } */
-
-        /* .card-body > div:has(.pagination) > nav:first-child,
-        .card-body > nav:first-of-type:has(a.previous),
-        .card-body > div > div:has(> a.previous) {
-            display: none !important;
-            
-        } */
 
         .card-body > div > div.d-flex.justify-content-between.flex-fill.align-items-center.d-sm-none,
         .card-body > div > nav > div.d-flex.justify-content-between.flex-fill.d-sm-none {
@@ -221,8 +208,6 @@
 
 <body>
     <script>
-        // Mencegah FOUC (Flash of Unstyled Content) saat load/refresh
-        // Script ini dieksekusi sebelum elemen lain dimuat
         if (window.innerWidth >= 992) {
             const sidebarState = localStorage.getItem('desktopSidebarState');
             if (sidebarState === 'collapsed') {
@@ -233,17 +218,14 @@
     @auth
         <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
         <nav id="sidebar">
-            <!-- Fungsi toggle dipindah ke header ini -->
             <div class="sidebar-header d-flex justify-content-between align-items-center" onclick="toggleSidebar()" title="Klik untuk Buka/Tutup Sidebar" style="cursor:pointer;">
                 <div class="d-flex align-items-center gap-2">
-                    <!-- Atribut onerror ditambahkan untuk memunculkan placeholder jika gambar gagal dimuat -->
                     <img src="{{ asset('images/logo-sucofindo.png') }}" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=SL&background=0D8ABC&color=fff';" alt="Logo" style="height: 40px; width: auto; object-fit: contain;">
                     <div style="line-height: 1.2;">
                         <span class="text-dark" style="font-size: 1.2rem; font-weight: 800; letter-spacing: -0.5px;">SIGMA LAB</span><br>
                         <small class="text-muted fw-bold" style="font-size: 0.7rem;">PT Sucofindo - Cilacap</small>
                     </div>
                 </div>
-                <!-- Ikon panah kecil opsional untuk memperjelas interaksi -->
                 <i class="fas fa-chevron-left text-muted opacity-50"></i>
             </div>
 
@@ -252,20 +234,19 @@
                     <a href="{{ route('dashboard') ?? url('/') }}"><i class="fas fa-home"></i> Dashboard</a>
                 </li>
 
-
                 {{-- 1. Manajemen Peralatan (Aset) --}}
-                @if(Auth::check() && Auth::user()->hasModulAccess('alat'))
+                @if(Auth::check() && (Auth::user()->hasModulAccess('alat') || (Auth::user()->role && Auth::user()->role->nama_role == 'HR & GA')))
                 <li class="{{ request()->is('alat*') ? 'active' : '' }}">
                     <a href="{{ route('alat.index') }}"><i class="fas fa-tools"></i> Manajemen Peralatan</a>
                 </li>
                 @endif
 
-                 {{-- 2. Personil dan Kompetensi --}}
-                 @if(Auth::check() && (Auth::user()->hasModulAccess('sdm') || Auth::user()->hasModulAccess('manajemen_pengguna')))
-                 <li class="{{ request()->is('sdm*') || request()->is('hak-akses*') ? 'active' : '' }}">
-                     <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personil & Kompetensi</a>
-                 </li>
-                 @endif
+                {{-- 2. Personil dan Kompetensi --}}
+                @if(Auth::check() && (Auth::user()->hasModulAccess('sdm') || Auth::user()->hasModulAccess('manajemen_pengguna')))
+                <li class="{{ request()->is('sdm*') || request()->is('hak-akses*') ? 'active' : '' }}">
+                    <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personil & Kompetensi</a>
+                </li>
+                @endif
 
                 {{-- 3. Proses dan Hasil Pengujian (QC) --}}
                 @if(Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
@@ -288,19 +269,18 @@
                 </li>
                 @endif
 
-            {{-- 5. Audit Log --}}
-            @if(Auth::check() && Auth::user()->hasModulAccess('audit_log'))
-            <li class="{{ request()->is('audit-log*') ? 'active' : '' }}">
-                <a href="{{ route('audit-log.index') }}"><i class="fas fa-history"></i> Audit Trail</a>
-            </li>
-            @endif
-        </ul>
-    </nav>
+                {{-- 6. Audit Log --}}
+                @if(Auth::check() && Auth::user()->hasModulAccess('audit_log'))
+                <li class="{{ request()->is('audit-log*') ? 'active' : '' }}">
+                    <a href="{{ route('audit-log.index') }}"><i class="fas fa-history"></i> Audit Trail</a>
+                </li>
+                @endif
+            </ul>
+        </nav>
     @endauth
 
     <div class="top-navbar shadow-sm">
         <div class="d-flex align-items-center">
-            <!-- Class d-lg-none dihapus agar toggle navbar selalu muncul untuk mengembalikan sidebar -->
             @auth
                 <button class="btn text-white me-3 d-flex align-items-center justify-content-center p-1" onclick="toggleSidebar()" style="border:1px solid rgba(255,255,255,0.3); border-radius:6px; background:rgba(0,0,0,0.1); width:36px; height:36px;">
                     <i class="fas fa-bars"></i>
@@ -363,11 +343,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <!-- Sidebar State Script -->
     <script>
         function toggleSidebar() {
             document.body.classList.toggle('sidebar-toggled');
-            // Hanya simpan state untuk tampilan desktop (>= 992px)
             if (window.innerWidth >= 992) {
                 const isCollapsed = document.body.classList.contains('sidebar-toggled');
                 localStorage.setItem('desktopSidebarState', isCollapsed ? 'collapsed' : 'expanded');
@@ -375,7 +353,6 @@
         }
     </script>
 
-    <!-- Live Search Script -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const forms = document.querySelectorAll('.live-search-form');
@@ -394,7 +371,7 @@
                     clearTimeout(timeout);
                     timeout = setTimeout(() => {
                         executeSearch(form, targetContainer);
-                    }, 400); // 400ms debounce
+                    }, 400);
                 });
             });
             

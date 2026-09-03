@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class KelolaUserController extends Controller
-{
+{ 
     public function index(Request $request)
     {
         $cari = trim((string) $request->input('cari'));

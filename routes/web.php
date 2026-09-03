@@ -16,17 +16,14 @@ use App\Http\Controllers\PengadaanController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\HakAksesController;
 
-// Guest / Auth Routes
 Route::get('/', [AuthController::class, 'showLogin']);
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'processLogin'])->name('login.process')->middleware('throttle:5,1');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// public (Bisa diakses tanpa login - Untuk hasil scan QR)
 Route::get('/public/alat/{kode_alat}', [AlatController::class, 'inputKalibrasiByKode'])->where('kode_alat', '.*')->name('alat.public-scan');
 
-// Halaman input kalibrasi dijadikan publik (bisa dilihat guest, tapi tombol & form dibatasi di blade dengan @auth)
 Route::get('/alat/{id}/input-kalibrasi', [AlatController::class, 'inputKalibrasi'])->name('alat.input-kalibrasi');
 
 // unduh informasi dan riwayat kalibrasi alat
@@ -34,7 +31,7 @@ Route::get('/alat/{id}/export-pdf', [AlatController::class, 'exportPdf'])->name(
 Route::get('/alat/{id}/export-excel', [AlatController::class, 'exportExcel'])->name('alat.export-excel');
 Route::get('/alat/{id}/export-word', [AlatController::class, 'exportWord'])->name('alat.export-word');
 
-// Wajib Login
+// ini harus login dulu
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
@@ -82,7 +79,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/alat/{id}/pemeliharaan/pdf', [AlatController::class, 'exportPemeliharaanPdf'])->name('alat.pemeliharaan.pdf');
     Route::get('/alat/{id}/pemeliharaan/excel', [AlatController::class, 'exportPemeliharaanExcel'])->name('alat.pemeliharaan.excel');
     
-    // Barang dan Pengadaan
+    // barang dan pengadaan
     Route::get('barang/cetak-periode', [BarangController::class, 'printPeriode'])->name('barang.cetak-periode');
     Route::resource('barang', BarangController::class);
     Route::get('/pengadaan/export-pdf', [PengadaanController::class, 'exportPdf'])->name('pengadaan.pdf');
@@ -93,8 +90,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('parameter-uji', ParameterUjiController::class);
 
-    // Rute statis harus didaftarkan sebelum '/library/{id}' agar 'create'
-    // tidak dianggap sebagai ID dokumen.
     Route::middleware('modul:library_manage,tambah_ubah')->group(function () {
         Route::get('/library/create', [\App\Http\Controllers\LibraryController::class, 'create'])->name('library.create');
         Route::get('/library/arsip', [\App\Http\Controllers\LibraryController::class, 'archive'])->name('library.archive');
@@ -133,17 +128,15 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/alat/{id}/item-pemeliharaan', [AlatController::class, 'updateItemPemeliharaan'])->name('alat.item-pemeliharaan.update');
     Route::post('/alat/{id}/perbaikan', [AlatController::class, 'storePerbaikan'])->name('alat.perbaikan.store');
     Route::put('/alat/{id}/perbaikan/{perbaikan_id}', [AlatController::class, 'updatePerbaikan'])->name('alat.perbaikan.update');
-    // Reporting
+  
     Route::get('reporting', [ReportingController::class, 'index'])->name('reporting.index');
     Route::get('reporting/pdf', [ReportingController::class, 'exportPdf'])->name('reporting.pdf');
 
-    // Audit Log
     Route::middleware('modul:audit_log,lihat')->group(function () {
         Route::get('audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
         Route::get('audit-log/{id}', [AuditLogController::class, 'show'])->name('audit-log.show');
     });
 
-    // Manajemen Hak Akses
     Route::middleware('modul:manajemen_pengguna,lihat')->group(function () {
         Route::get('hak-akses', [HakAksesController::class, 'index'])->name('hak-akses.index');
         Route::post('hak-akses', [HakAksesController::class, 'update'])->name('hak-akses.update');

@@ -10,9 +10,7 @@
     </div>
 
     <div class="row g-4 mb-4">
-
-        @modul('tindak_lanjut')
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-sm-6 col-lg-3">
             <div class="card h-100 border-0 shadow-sm border-start border-4 border-danger">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center justify-content-between">
@@ -27,10 +25,8 @@
                 </div>
             </div>
         </div>
-        @endmodul
 
-        @modul('proses_hasil')
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-sm-6 col-lg-3">
             <div class="card h-100 border-0 shadow-sm border-start border-4 border-info">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center justify-content-between">
@@ -45,10 +41,7 @@
                 </div>
             </div>
         </div>
-        @endmodul
-
-        @modul('alat')
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-sm-6 col-lg-3">
             <div class="card h-100 border-0 shadow-sm border-start border-4 border-warning">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center justify-content-between">
@@ -63,10 +56,8 @@
                 </div>
             </div>
         </div>
-        @endmodul
 
-        @modul('sdm')
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-sm-6 col-lg-3">
             <div class="card h-100 border-0 shadow-sm border-start border-4 border-primary">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-center justify-content-between">
@@ -81,11 +72,9 @@
                 </div>
             </div>
         </div>
-        @endmodul
     </div>
 
     <div class="row g-4 mb-4">
-        @modul('barang')
         <div class="col-12 col-md-4">
             <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body">
@@ -111,9 +100,7 @@
                 </div>
             </div>
         </div>
-        @endmodul
 
-        @modul('pengadaan')
         <div class="col-12 col-md-4">
             <div class="card h-100 border-0 shadow-sm">
                 <div class="card-body">
@@ -126,7 +113,6 @@
                 </div>
             </div>
         </div>
-        @endmodul
     </div>
 </div>
 @endsection
