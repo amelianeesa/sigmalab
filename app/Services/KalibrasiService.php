@@ -2,61 +2,42 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\DB;
+use App\Models\TitikKalibrasi;
 
 class KalibrasiService
 {
-    public function hitungKoreksi(string $codeAlat, string $parameter, float $nilaiPembacaan): float
+    public function hitungKoreksi($alatId, $kategori, $pembacaanInput)
     {
-        // Ambil data acuan kalibrasi dari database (misal tabel alat_thermo_kalibrasi)
-        $titikKalibrasi = DB::table('alat_thermo_kalibrasi')
-            ->where('code_alat', $codeAlat)
-            ->where('parameter', $parameter)
+        $titik = TitikKalibrasi::where('alat_id', $alatId)
+            ->where('kategori', $kategori)
             ->orderBy('equipment_reading', 'asc')
             ->get();
 
-        if ($titikKalibrasi->isEmpty()) {
-            return $nilaiPembacaan; // Fallback jika belum ada data tabel kalibrasi
+        if ($titik->isEmpty()) {
+            return $pembacaanInput; 
         }
 
-        $palingBawah = $titikKalibrasi->first();
-        $palingAtas = $titikKalibrasi->last();
-
-        if ($nilaiPembacaan <= $palingBawah->equipment_reading) {
-            return (float) $palingBawah->standard_reading;
-        }
-        if ($nilaiPembacaan >= $palingAtas->equipment_reading) {
-            return (float) $palingAtas->standard_reading;
+        if ($pembacaanInput <= $titik->first()->equipment_reading) {
+            return $titik->first()->standard_reading;
         }
 
-        $lower = null;
-        $upper = null;
+        if ($pembacaanInput >= $titik->last()->equipment_reading) {
+            return $titik->last()->standard_reading;
+        }
 
-        for ($i = 0; $i < count($titikKalibrasi) - 1; $i++) {
-            if ($nilaiPembacaan >= $titikKalibrasi[$i]->equipment_reading && $nilaiPembacaan <= $titikKalibrasi[$i+1]->equipment_reading) {
-                $lower = $titikKalibrasi[$i];
-                $upper = $titikKalibrasi[$i+1];
-                break;
+        // Rumus Interpolasi Linear: Y = Y1 + ((X - X1) / (X2 - X1)) * (Y2 - Y1)
+        for ($i = 0; $i < count($titik) - 1; $i++) {
+            $x1 = $titik[$i]->equipment_reading;
+            $y1 = $titik[$i]->standard_reading;
+            $x2 = $titik[$i + 1]->equipment_reading;
+            $y2 = $titik[$i + 1]->standard_reading;
+
+            if ($pembacaanInput >= $x1 && $pembacaanInput <= $x2) {
+                $hasil = $y1 + (($pembacaanInput - $x1) / ($x2 - $x1)) * ($y2 - $y1);
+                return round($hasil, 2);
             }
         }
 
-        if (!$lower || !$upper) {
-            return $nilaiPembacaan;
-        }
-
-        // Rumus Interpolasi Linear
-        $x = $nilaiPembacaan;
-        $x1 = $lower->equipment_reading;
-        $x2 = $upper->equipment_reading;
-        $y1 = $lower->standard_reading;
-        $y2 = $upper->standard_reading;
-
-        if ($x2 == $x1) {
-            return (float) $y1;
-        }
-
-        $y = $y1 + ($x - $x1) * (($y2 - $y1) / ($x2 - $x1));
-
-        return round($y, 2);
+        return $pembacaanInput;
     }
 }

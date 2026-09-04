@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class KelolaUserController extends Controller
 {
@@ -93,10 +94,9 @@ class KelolaUserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        abort_if($user->users_id === auth()->id(), 403, 'Anda tidak dapat menghapus akun Anda sendiri.');
-
+        abort_if($user->users_id === Auth::id(), 403, 'Anda tidak dapat menghapus akun Anda sendiri');
         $user->forceDelete();
 
-        return redirect()->route('kelola-user.index')->with('success', 'Akun berhasil dihapus permanen.');
+        return redirect()->route('kelola-user.index')->with('success', 'Akun berhasil dihapus permanen');
     }
 }

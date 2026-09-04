@@ -4,11 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class MonitoringRuangan extends Model
+class TitikKalibrasi extends Model
 {
-    protected $table = 'monitoring_ruangan';
-    protected $primaryKey = 'monitoring_id';
-    protected $guarded = ['monitoring_id'];
+    protected $table = 'titik_kalibrasi';
+    protected $primaryKey = 'titik_kalibrasi_id';
+    protected $guarded = ['titik_kalibrasi_id'];
 
     public function alat()
     {

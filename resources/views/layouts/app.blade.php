@@ -4,9 +4,15 @@
     <meta charset="UTF-8">
     <title>Dashboard - SIGMALAB Sucofindo</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo-sucofindo.png') }}?v=1">
+   
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+
     <style>
         body {
             background-color: #f8f9fa;
@@ -223,8 +229,6 @@
 
 <body>
     <script>
-        // Mencegah FOUC (Flash of Unstyled Content) saat load/refresh
-        // Script ini dieksekusi sebelum elemen lain dimuat
         if (window.innerWidth >= 992) {
             const sidebarState = localStorage.getItem('desktopSidebarState');
             if (sidebarState === 'collapsed') {
@@ -235,17 +239,14 @@
     @auth
         <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
         <nav id="sidebar">
-            <!-- Fungsi toggle dipindah ke header ini -->
             <div class="sidebar-header d-flex justify-content-between align-items-center" onclick="toggleSidebar()" title="Klik untuk Buka/Tutup Sidebar" style="cursor:pointer;">
                 <div class="d-flex align-items-center gap-2">
-                    <!-- Atribut onerror ditambahkan untuk memunculkan placeholder jika gambar gagal dimuat -->
                     <img src="{{ asset('images/logo-sucofindo.png') }}" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=SL&background=0D8ABC&color=fff';" alt="Logo" style="height: 40px; width: auto; object-fit: contain;">
                     <div style="line-height: 1.2;">
                         <span class="text-dark" style="font-size: 1.2rem; font-weight: 800; letter-spacing: -0.5px;">SIGMA LAB</span><br>
                         <small class="text-muted fw-bold" style="font-size: 0.7rem;">PT Sucofindo - Cilacap</small>
                     </div>
                 </div>
-                <!-- Ikon panah kecil opsional untuk memperjelas interaksi -->
                 <i class="fas fa-chevron-left text-muted opacity-50"></i>
             </div>
 
@@ -255,42 +256,36 @@
                 </li>
 
 
-                {{-- 1. Manajemen Peralatan (Aset) --}}
                 @if(Auth::check() && Auth::user()->hasModulAccess('alat'))
                 <li class="{{ request()->is('alat*') ? 'active' : '' }}">
                     <a href="{{ route('alat.index') }}"><i class="fas fa-tools"></i> Manajemen Peralatan</a>
                 </li>
                 @endif
 
-                 {{-- 2. Personil dan Kompetensi --}}
                  @if(Auth::check() && (Auth::user()->hasModulAccess('sdm') || Auth::user()->hasModulAccess('manajemen_pengguna')))
                  <li class="{{ request()->is('sdm*') || request()->is('hak-akses*') ? 'active' : '' }}">
                      <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personil & Kompetensi</a>
                  </li>
                  @endif
 
-                {{-- 3. Proses dan Hasil Pengujian (QC) --}}
                 @if(Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
                 <li class="{{ request()->is('parameter-uji*') || request()->is('kegiatan*') || request()->is('tindak-lanjut*') || request()->is('reporting*') ? 'active' : '' }}">
                     <a href="{{ route('kegiatan.index') }}"><i class="fas fa-flask"></i> Verifikasi Mutu (QC)</a>
                 </li>
                 @endif
 
-                {{-- 4. Inventori & Fasilitas --}}
                 @if(Auth::check() && (Auth::user()->hasModulAccess('barang') || Auth::user()->hasModulAccess('pengadaan')))
                 <li class="{{ request()->is('barang*') || request()->is('pengadaan*') ? 'active' : '' }}">
                     <a href="{{ route('barang.index') }}"><i class="fas fa-boxes"></i> Inventori & Fasilitas</a>
                 </li>
                 @endif
 
-                {{-- 5. Library Digital --}}
                 @if(Auth::check() && Auth::user()->hasModulAccess('library_manage'))
                 <li class="{{ request()->is('library*') ? 'active' : '' }}">
                     <a href="{{ route('library.index') }}"><i class="fas fa-book-open"></i> Library Digital</a>
                 </li>
                 @endif
 
-            {{-- 5. Audit Log --}}
             @if(Auth::check() && Auth::user()->hasModulAccess('audit_log'))
             <li class="{{ request()->is('audit-log*') ? 'active' : '' }}">
                 <a href="{{ route('audit-log.index') }}"><i class="fas fa-history"></i> Audit Trail</a>
@@ -302,7 +297,6 @@
 
     <div class="top-navbar shadow-sm">
         <div class="d-flex align-items-center">
-            <!-- Class d-lg-none dihapus agar toggle navbar selalu muncul untuk mengembalikan sidebar -->
             @auth
                 <button class="btn text-white me-3 d-flex align-items-center justify-content-center p-1" onclick="toggleSidebar()" style="border:1px solid rgba(255,255,255,0.3); border-radius:6px; background:rgba(0,0,0,0.1); width:36px; height:36px;">
                     <i class="fas fa-bars"></i>
@@ -370,7 +364,6 @@
     <script>
         function toggleSidebar() {
             document.body.classList.toggle('sidebar-toggled');
-            // Hanya simpan state untuk tampilan desktop (>= 992px)
             if (window.innerWidth >= 992) {
                 const isCollapsed = document.body.classList.contains('sidebar-toggled');
                 localStorage.setItem('desktopSidebarState', isCollapsed ? 'collapsed' : 'expanded');
@@ -444,7 +437,20 @@
     });
     </script>
     @stack('scripts')
+    <script>
+        $(document).ready(function() {
+            // Mengubah semua elemen select dengan class tertentu atau secara umum 
+            // menjadi Select2 dengan tema Bootstrap 5 yang rapi
+            $('.select2-alat, #selectAlat').select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: '-- Pilih Alat --',
+                allowClear: true
+            });
+        });
+    </script>
 
+    @stack('scripts')
 
 </body>
 </html>

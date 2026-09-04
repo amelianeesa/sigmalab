@@ -95,7 +95,12 @@ Route::middleware(['auth'])->group(function () {
     //monitoring ruangan
     Route::prefix('inventori')->name('inventori.')->group(function () {
         Route::get('/monitoring-ruangan', [MonitoringRuanganController::class, 'index'])->name('monitoring.index');
-        Route::post('/monitoring-ruangan/update', [MonitoringRuanganController::class, 'updateBaris'])->name('monitoring.update');
+        Route::post('/monitoring-ruangan/update', [MonitoringRuanganController::class, 'updateBaris'])->name('monitoring.updateBaris');
+        Route::post('/monitoring-ruangan/update-persyaratan', [MonitoringRuanganController::class, 'updatePersyaratan'])->name('monitoring.updatePersyaratan');
+        Route::get('/monitoring-ruangan/export-pdf', [MonitoringRuanganController::class, 'exportPdf'])->name('monitoring.exportPdf');
+        Route::post('/monitoring-ruangan/kalibrasi/{alatId}', [MonitoringRuanganController::class, 'storeTitikKalibrasi'])->name('monitoring.storeKalibrasi');
+        Route::delete('/monitoring-ruangan/kalibrasi-item/{id}', [MonitoringRuanganController::class, 'destroyTitikKalibrasi'])->name('monitoring.destroyKalibrasi');
+        // Route::post('/inventori/monitoring-ruangan/sync-kalibrasi/{alatId}', [MonitoringRuanganController::class, 'syncKalibrasi'])->name('inventori.monitoring.syncKalibrasi');
     });
 
     Route::resource('parameter-uji', ParameterUjiController::class);
