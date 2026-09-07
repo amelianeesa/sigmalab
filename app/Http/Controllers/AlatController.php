@@ -89,6 +89,7 @@ class AlatController extends Controller
     {
         $request->validate([
             'kode_alat' => 'required|string|max:50|unique:alat,kode_alat',
+            'no_inventaris' => 'nullable|string|max:255',
             'nama_alat' => 'required|string|max:100',
             'merk_tipe' => 'nullable|string|max:100',
             'no_seri' => 'nullable|string|max:100',
@@ -114,6 +115,7 @@ class AlatController extends Controller
         DB::transaction(function () use ($request) {
             $alat = Alat::create([
                 'kode_alat' => $request->kode_alat,
+                'no_inventaris' => $request->no_inventaris,
                 'nama_alat' => $request->nama_alat,
                 'merk_tipe' => $request->merk_tipe,
                 'no_seri' => $request->no_seri,
@@ -170,6 +172,7 @@ class AlatController extends Controller
         $alat = Alat::findOrFail($id);
 
         $request->validate([
+            'no_inventaris' => 'nullable|string|max:255',
             'nama_alat' => 'required|string|max:100',
             'merk_tipe' => 'nullable|string|max:100',
             'no_seri' => 'nullable|string|max:100',
@@ -200,6 +203,7 @@ class AlatController extends Controller
         DB::transaction(function () use ($request, $alat, $statusBarang) {
             $alat->update([
                 'nama_alat' => $request->nama_alat,
+                'no_inventaris' => $request->no_inventaris,
                 'merk_tipe' => $request->merk_tipe,
                 'no_seri' => $request->no_seri,
                 'warna' => $request->warna,

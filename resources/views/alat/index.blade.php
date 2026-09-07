@@ -26,9 +26,16 @@
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div><i class="fas fa-tools me-1"></i> Data Master Alat & Informasi Kalibrasi</div>
-            @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
-            <a href="{{ route('alat.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Tambah Alat</a>
-            @endif
+            
+            <div class="d-flex align-items-center gap-2">
+                <a href="{{ route('inventori.monitoring.index') }}" class="btn btn-success btn-sm fw-bold">
+                    <i class="fas fa-thermometer-half me-1"></i> Monitoring Ruangan
+                </a>
+
+                @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
+                <a href="{{ route('alat.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Tambah Alat</a>
+                @endif
+            </div>
         </div>
         <div class="card-body">
 
@@ -68,6 +75,7 @@
                             <th rowspan="2" style="width: 80px;">QR Code</th>
                             <th rowspan="2">Nama Alat</th>
                             <th rowspan="2">CODE</th>
+                            <th rowspan="2" style="min-width: 105px;">No. Inventaris</th>
                             <th colspan="5">Spesifikasi</th>
                             <th rowspan="2">Kondisi Alat</th>
                             <th rowspan="2">Status Alat</th>
@@ -138,6 +146,8 @@
                                 </a>
                             </td>
                             <td><code class="fw-bold">{{ $item->kode_alat }}</code></td>
+                            <td>{{ $item->no_inventaris ?? '-' }}</td>
+                            {{-- <td>{{ $kalibrasiTerakhir->interval_kalibrasi ?? '-' }}</td> --}}
                             <td class="text-center">{{ $item->merk_tipe ?? '-' }}</td>
                             <td>{{ $item->no_seri ?? '-' }}</td>
                             <td>{{ $item->warna ?? '-' }}</td>

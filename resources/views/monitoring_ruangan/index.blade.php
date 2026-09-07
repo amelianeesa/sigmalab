@@ -21,7 +21,15 @@
 @section('content')
 <div class="container-fluid px-4 py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-dark fs-4">Pencatatan Monitoring Suhu dan Kelembaban Udara</h2>
+        <div>
+            <h2 class="fw-bold text-dark fs-4 mb-1">Pencatatan Monitoring Suhu dan Kelembaban Udara</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0" style="font-size: 0.85rem;">
+                    <li class="breadcrumb-item"><a href="{{ url('alat') }}" class="text-decoration-none">Peralatan</a></li>
+                    <li class="breadcrumb-item active text-muted" aria-current="page">Monitoring Ruangan</li>
+                </ol>
+            </nav>
+        </div>     
         <div>
             <a href="{{ route('inventori.monitoring.index') }}" class="btn btn-outline-primary btn-sm me-2"><i class="fas fa-sync-alt me-1"></i> Refresh Data</a>
             @if(isset($alatId) && $alatId && isset($ruangan) && $ruangan)
@@ -639,10 +647,22 @@
         $(document).on('submit', '.form-monitoring', function(e) {
             let sudahAda = $(this).data('sudah-ada');
             if (sudahAda === true || sudahAda === 'true') {
-                let konfirmasi = confirm("Yakin ingin mengubah data?");
-                if (!konfirmasi) {
-                    e.preventDefault(); // Batalkan submit jika user klik Cancel
-                }
+                e.preventDefault(); // Tahan submit form sementara
+                let form = this;
+                Swal.fire({
+                    title: 'Konfirmasi Perubahan',
+                    text: "Yakin ingin mengubah data?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#198754', // Warna hijau selaras tombol simpan
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, Ubah!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
             }
         });
 

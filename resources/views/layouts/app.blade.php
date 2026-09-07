@@ -256,11 +256,41 @@
                 </li>
 
 
-                @if(Auth::check() && Auth::user()->hasModulAccess('alat'))
+                {{-- @if(Auth::check() && Auth::user()->hasModulAccess('alat'))
                 <li class="{{ request()->is('alat*') ? 'active' : '' }}">
-                    <a href="{{ route('alat.index') }}"><i class="fas fa-tools"></i> Manajemen Peralatan</a>
+                    <a href="{{ route('alat.index') }}"><i class="fas fa-tools"></i>Peralatan & Monitoring</a>
+                </li>
+                @endif --}}
+                @if(Auth::check() && Auth::user()->hasModulAccess('alat'))
+                <li class="nav-item">
+                    <a class="nav-link d-flex justify-content-between align-items-center {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') ? 'active' : 'collapsed' }}" 
+                       data-bs-toggle="collapse" 
+                       href="#menuManajemenPeralatan" 
+                       role="button" 
+                       aria-expanded="{{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') ? 'true' : 'false' }}" 
+                       aria-controls="menuManajemenPeralatan">
+                       
+                        <span><i class="fas fa-tools me-2"></i> Peralatan & Monitoring</span>
+                        <i class="fas fa-chevron-down small"></i>
+                    </a>
+                
+                    <div class="collapse {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') ? 'show' : '' }}" id="menuManajemenPeralatan">
+                        <ul class="nav flex-column ms-3 ps-2 border-start mt-1" style="font-size: 0.9rem;">
+                            <li class="nav-item">
+                                <a class="nav-link py-1 {{ request()->is('alat*') && !request()->routeIs('inventori.monitoring.*') ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('alat.index') }}">
+                                    <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Data Alat & Kalibrasi
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link py-1 {{ request()->routeIs('inventori.monitoring.*') ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('inventori.monitoring.index') }}">
+                                    <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Monitoring Ruangan
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
                 @endif
+                
 
                  @if(Auth::check() && (Auth::user()->hasModulAccess('sdm') || Auth::user()->hasModulAccess('manajemen_pengguna')))
                  <li class="{{ request()->is('sdm*') || request()->is('hak-akses*') ? 'active' : '' }}">
@@ -276,7 +306,7 @@
 
                 @if(Auth::check() && (Auth::user()->hasModulAccess('barang') || Auth::user()->hasModulAccess('pengadaan')))
                 <li class="{{ request()->is('barang*') || request()->is('pengadaan*') ? 'active' : '' }}">
-                    <a href="{{ route('barang.index') }}"><i class="fas fa-boxes"></i> Inventori & Fasilitas</a>
+                    <a href="{{ route('barang.index') }}"><i class="fas fa-boxes"></i> Inventori Bahan/Barang</a>
                 </li>
                 @endif
 

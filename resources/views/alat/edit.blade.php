@@ -30,17 +30,23 @@
                 </div>
 
                 <div class="row mb-3">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <label class="form-label">No. Inventaris</label>
+                        <input type="text" name="no_inventaris" class="form-control @error('no_inventaris') is-invalid @enderror" placeholder="mis. INV-001" value="{{ old('no_inventaris', $alat->no_inventaris) }}">
+                        @error('no_inventaris') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-4">
                         <label class="form-label">Merk / Tipe</label>
                         <input type="text" name="merk_tipe" class="form-control" value="{{ old('merk_tipe', $alat->merk_tipe) }}">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Serial Number</label>
                         <input type="text" name="no_seri" class="form-control" value="{{ old('no_seri', $alat->no_seri) }}">
                     </div>
                 </div>
 
                 <div class="row mb-3">
+
                     <div class="col-md-4">
                         <label class="form-label">Warna</label>
                         <input type="text" name="warna" class="form-control" value="{{ old('warna', $alat->warna) }}">

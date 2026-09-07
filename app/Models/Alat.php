@@ -23,6 +23,7 @@ class Alat extends Model
 
     protected $fillable = [
         'kode_alat',
+        'no_inventaris',
         'nama_alat',
         'merk_tipe',
         'no_seri',

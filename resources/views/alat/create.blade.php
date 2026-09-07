@@ -26,19 +26,24 @@
                         </div>
                         @error('kode_alat') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
+
                     <div class="col-md-6">
                         <label class="form-label">Nama Barang / Alat <span class="text-danger">*</span></label>
                         <input type="text" name="nama_alat" class="form-control @error('nama_alat') is-invalid @enderror" placeholder="mis. Sulfur Analyzer" value="{{ old('nama_alat') }}" required>
                         @error('nama_alat') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
-                </div>
-
+                </div>    
                 <div class="row mb-3">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <label class="form-label">No. Inventaris</label>
+                        <input type="text" name="no_inventaris" class="form-control @error('no_inventaris') is-invalid @enderror" placeholder="mis. INV-001" value="{{ old('no_inventaris') }}">
+                        @error('no_inventaris') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-4">
                         <label class="form-label">Merk / Tipe</label>
                         <input type="text" name="merk_tipe" class="form-control" placeholder="mis. Labfit CS 1232" value="{{ old('merk_tipe') }}">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label">Serial Number</label>
                         <input type="text" name="no_seri" class="form-control" placeholder="mis. 17050068" value="{{ old('no_seri') }}">
                     </div>
