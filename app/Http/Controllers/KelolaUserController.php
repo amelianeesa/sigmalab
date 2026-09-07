@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
 class KelolaUserController extends Controller
-{
+{ 
     public function index(Request $request)
     {
         $cari = trim((string) $request->input('cari'));

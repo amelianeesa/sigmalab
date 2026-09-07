@@ -92,7 +92,6 @@
 
         #sidebar ul.components { padding: 20px 0; }
         
-        /* Premium Menu Item Styles */
         #sidebar ul li a { 
             padding: 12px 20px 12px 24px; 
             font-size: 0.92rem; 
@@ -123,18 +122,16 @@
         #sidebar ul li a i { font-size: 1.1rem; opacity: 0.75; margin-right: 10px; }
         #sidebar ul li a:hover i, #sidebar ul li.active > a i { opacity: 1; color: #2563eb; }
         
-        /* Subtle Dividers */
         #sidebar .sidebar-divider { 
             font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; 
             color: #94a3b8; padding: 18px 24px 8px; margin-top: 5px; 
         }
 
-        /* Sidebar Dropdown Accordion */
         #sidebar ul li > a.dropdown-toggle::after {
             display: inline-block;
             margin-left: 0.255em;
             vertical-align: 0.255em;
-            content: "\f107"; /* FontAwesome caret-down */
+            content: "\f107";
             font-family: "Font Awesome 5 Free";
             font-weight: 900;
             border: none;
@@ -198,16 +195,6 @@
             max-height: 1rem !important;
             display: inline-block;
         }
-        /* .card-body > div:not(.table-responsive):not(.mt-3) {
-            display: none !important;
-        } */
-
-        /* .card-body > div:has(.pagination) > nav:first-child,
-        .card-body > nav:first-of-type:has(a.previous),
-        .card-body > div > div:has(> a.previous) {
-            display: none !important;
-            
-        } */
 
         .card-body > div > div.d-flex.justify-content-between.flex-fill.align-items-center.d-sm-none,
         .card-body > div > nav > div.d-flex.justify-content-between.flex-fill.d-sm-none {
@@ -256,11 +243,12 @@
                 </li>
 
 
-                {{-- @if(Auth::check() && Auth::user()->hasModulAccess('alat'))
+                {{-- 1. Manajemen Peralatan (Aset) --}}
+                @if(Auth::check() && (Auth::user()->hasModulAccess('alat') || (Auth::user()->role && Auth::user()->role->nama_role == 'HR & GA')))
                 <li class="{{ request()->is('alat*') ? 'active' : '' }}">
                     <a href="{{ route('alat.index') }}"><i class="fas fa-tools"></i>Peralatan & Monitoring</a>
                 </li>
-                @endif --}}
+                @endif 
                 @if(Auth::check() && Auth::user()->hasModulAccess('alat'))
                 <li class="nav-item">
                     <a class="nav-link d-flex justify-content-between align-items-center {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') ? 'active' : 'collapsed' }}" 
@@ -291,12 +279,12 @@
                 </li>
                 @endif
                 
-
                  @if(Auth::check() && (Auth::user()->hasModulAccess('sdm') || Auth::user()->hasModulAccess('manajemen_pengguna')))
                  <li class="{{ request()->is('sdm*') || request()->is('hak-akses*') ? 'active' : '' }}">
                      <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personil & Kompetensi</a>
                  </li>
                  @endif
+
 
                 @if(Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
                 <li class="{{ request()->is('parameter-uji*') || request()->is('kegiatan*') || request()->is('tindak-lanjut*') || request()->is('reporting*') ? 'active' : '' }}">
@@ -316,13 +304,15 @@
                 </li>
                 @endif
 
-            @if(Auth::check() && Auth::user()->hasModulAccess('audit_log'))
-            <li class="{{ request()->is('audit-log*') ? 'active' : '' }}">
-                <a href="{{ route('audit-log.index') }}"><i class="fas fa-history"></i> Audit Trail</a>
-            </li>
-            @endif
-        </ul>
-    </nav>
+
+                {{-- 6. Audit Log --}}
+                @if(Auth::check() && Auth::user()->hasModulAccess('audit_log'))
+                <li class="{{ request()->is('audit-log*') ? 'active' : '' }}">
+                    <a href="{{ route('audit-log.index') }}"><i class="fas fa-history"></i> Audit Trail</a>
+                </li>
+                @endif
+            </ul>
+        </nav>
     @endauth
 
     <div class="top-navbar shadow-sm">
@@ -389,8 +379,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
+
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <!-- Sidebar State Script -->
+
     <script>
         function toggleSidebar() {
             document.body.classList.toggle('sidebar-toggled');
@@ -401,7 +392,6 @@
         }
     </script>
 
-    <!-- Live Search Script -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const forms = document.querySelectorAll('.live-search-form');
@@ -420,7 +410,7 @@
                     clearTimeout(timeout);
                     timeout = setTimeout(() => {
                         executeSearch(form, targetContainer);
-                    }, 400); // 400ms debounce
+                    }, 400);
                 });
             });
             

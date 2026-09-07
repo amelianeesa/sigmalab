@@ -39,9 +39,8 @@
     </div>
 
 
-    <div class="card border-0 shadow-sm mb-4 bg-light">
+    <div class="card border-0 shadow-sm mb-2 bg-light">
         <div class="card-body p-3">
-            <!-- HEADER DENGAN TOMBOL COLLAPSE (BUKA/TUTUP) -->
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="fw-bold text-dark fs-6 mb-1"><i class="fas fa-sliders-h text-primary me-2"></i>Manajemen Titik Acuan Kalibrasi</h5>
@@ -51,6 +50,7 @@
                     <i class="fas fa-chevron-down me-1"></i> Sembunyikan / Tampilkan
                 </button>
             </div>
+            <div class="collapse show mt-3" id="collapseTitikAcuan">
             @if(isset($alatAktif) && $alatAktif)
                 @php 
                     $idAlat = $alatAktif->alat_id ?? $alatAktif->id; 
@@ -61,7 +61,7 @@
 
                     $isExpired   = $alatAktif->tanggal_expired && \Carbon\Carbon::now()->gt($alatAktif->tanggal_expired);
                 @endphp
-                <div class="collapse show mt-3" id="collapseTitikAcuan">
+                {{-- <div class="collapse show mt-3" id="collapseTitikAcuan"> --}}
                     <div class="bg-white p-3 rounded border shadow-sm mb-3">
                         <div class="row align-items-center g-3">
                             <div class="col-md-6">
@@ -185,7 +185,7 @@
                             </div>
                         </div>
                     </div>
-
+               
                     <div class="mt-3 text-end">
                         <button type="submit" class="btn btn-success px-4 py-2"><i class="fas fa-save me-1"></i> Simpan Semua Titik Acuan</button>
                     </div>

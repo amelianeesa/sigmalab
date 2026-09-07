@@ -257,7 +257,7 @@ class SdmController extends Controller
         }
 
         $namaKategori = $kategori->nama_kategori;
-        $kategori->delete();
+        $kategori->forceDelete();
 
         $redirectTo = $request->input('redirect_to') ?: route('sdm.index');
 
