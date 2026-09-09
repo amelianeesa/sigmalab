@@ -8,8 +8,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
+// use Spatie\Activitylog\Traits\LogsActivity;
+// use Spatie\Activitylog\LogOptions;
+
 
 class PermintaanPengadaan extends BaseModel
 {
@@ -22,17 +26,22 @@ class PermintaanPengadaan extends BaseModel
         'barang_id',
         'jumlah_diminta',
         'alasan',
+        'foto',
         'status',
         'diajukan_oleh',
         'disetujui_oleh',
         'tanggal_pengajuan',
         'tanggal_keputusan',
         'catatan_approval',
+        'foto_diterima', 
+        'nama_penerima', 
+        'waktu_diterima',
     ];
 
     protected $casts = [
         'tanggal_pengajuan' => 'date',
         'tanggal_keputusan' => 'date',
+        'waktu_diterima' => 'datetime'
     ];
 
     public function barang()

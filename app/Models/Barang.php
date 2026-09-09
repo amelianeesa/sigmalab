@@ -8,8 +8,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
+// use Spatie\Activitylog\Traits\LogsActivity;
+// use Spatie\Activitylog\LogOptions;
+
 
 class Barang extends BaseModel
 {
@@ -44,4 +48,12 @@ class Barang extends BaseModel
         return $this->hasMany(PermintaanPengadaan::class, 'barang_id', 'barang_id');
     }
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            // ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => "Data barang telah di-{$eventName}");
+    }
 }

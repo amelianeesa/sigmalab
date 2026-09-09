@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Services\PermissionService;
 use App\Enums\PeranPengguna;
+use Carbon\Carbon;
 
 class PengadaanController extends Controller
 {
@@ -37,28 +38,41 @@ class PengadaanController extends Controller
         $roleName = Auth::user()->role->nama_role ?? '';
 
         $allowedToRequest = [
-            PeranPengguna::ANALIS->value, 
-            PeranPengguna::KOORDINATOR_LAB->value, 
-            PeranPengguna::ADMIN_LAB->value, 
-            PeranPengguna::ADMIN_APLIKASI->value
+            'Analis',
+            'Koordinator Laboratorium',
+            'Admin Lab',
+            'Admin Aplikasi'
         ];
 
         if (!in_array($roleName, $allowedToRequest)) {
-            return back()->with('error', 'Anda tidak memiliki izin untuk mengajukan pengadaan.');
+            return back()->with('error', 'Anda tidak memiliki izin untuk mengajukan pengadaan');
         }
 
-        $validated = $request->validated();
-
+        $validated = $request->validate([
+            'barang_id' => 'required|exists:barang,barang_id',
+            'jumlah_diminta' => 'required|numeric|min:0.1',
+            'alasan' => 'nullable|string',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048'
+        ]);
+        $pathFoto = null;
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+           
+            $file->move(public_path('uploads/pengadaan'), $filename);
+            $pathFoto = 'uploads/pengadaan/' . $filename;
+        }
         PermintaanPengadaan::create([
             'barang_id' => $validated['barang_id'],
             'jumlah_diminta' => $validated['jumlah_diminta'],
             'alasan' => $validated['alasan'],
+            'foto' => $pathFoto,
             'status' => 'diajukan',
             'diajukan_oleh' => Auth::id(),
             'tanggal_pengajuan' => now()->toDateString(),
         ]);
 
-        return redirect()->route('pengadaan.index')->with('success', 'Permintaan pengadaan berhasil diajukan dan menunggu persetujuan HR & GA.');
+        return redirect()->route('pengadaan.index')->with('success', 'Permintaan pengadaan berhasil diajukan dan menunggu persetujuan HR & GA');
     }
 
     public function exportPdf(Request $request)
@@ -113,12 +127,65 @@ class PengadaanController extends Controller
         return redirect()->route('pengadaan.index')->with('success', 'Status pengadaan berhasil diupdate.');
     }
 
+    public function konfirmasiTerima(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'foto_diterima' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'nama_penerima' => 'required|string|max:100',
+            'tgl_exp' => 'nullable|date',
+        ]);
+
+        $pengadaan = PermintaanPengadaan::findOrFail($id);
+        if (!in_array($pengadaan->status, ['disetujui', 'diproses'])) {
+            return back()->with('error', 'Pengadaan harus disetujui atau diproses terlebih dahulu sebelum dikonfirmasi.');
+        }
+
+        DB::transaction(function () use ($request, $pengadaan) {
+            $file = $request->file('foto_diterima');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/pengadaan'), $filename);
+            $pathFoto = 'uploads/pengadaan/' . $filename;
+
+            $pengadaan->foto_diterima = $pathFoto;
+            $pengadaan->nama_penerima = $request->nama_penerima;
+            $pengadaan->waktu_diterima = Carbon::now('Asia/Jakarta');
+            $pengadaan->status = 'selesai';
+            $pengadaan->save();
+
+            $barang = Barang::where('barang_id', $pengadaan->barang_id)->lockForUpdate()->first();
+            if ($barang) {
+                $barang->penerimaan += $pengadaan->jumlah_diminta;
+                $barang->saldo_akhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
+                
+                // $barang->tgl_exp = $request->tgl_exp; // Update tanggal expired sesuai fisik baru
+                // Logika cerdas: Jika tgl_exp barang yang baru lebih awal dari tgl_exp lama (atau tgl_exp lama kosong), 
+                // maka perbarui tgl_exp utama agar mencerminkan barang yang paling cepat expired (FEFO).
+                if (empty($barang->tgl_exp) || $request->tgl_exp < $barang->tgl_exp) {
+                    $barang->tgl_exp = $request->tgl_exp;
+                }
+                $barang->save();    
+                TransaksiBarang::create([
+                    'barang_id' => $barang->barang_id,
+                    'jumlah_penerimaan' => $pengadaan->jumlah_diminta,
+                    'harga' => $barang->harga_rata ?? 0,
+                    'tgl_exp' => $request->tgl_exp,
+                ]);
+            }
+        });
+
+        return back()->with('success', 'Konfirmasi penerimaan berhasil!');
+    }    
+
     public function destroy($id)
     {
         $pengadaan = PermintaanPengadaan::findOrFail($id);
         
         if ($pengadaan->status !== 'diajukan') {
-            return back()->with('error', 'Hanya permintaan yang berstatus diajukan yang bisa dihapus.');
+            return back()->with('error', 'Hanya permintaan yang berstatus diajukan yang bisa dihapus');
+        }
+
+        if ($pengadaan->foto && file_exists(public_path($pengadaan->foto))) {
+            @unlink(public_path($pengadaan->foto));
         }
 
         $pengadaan->delete();

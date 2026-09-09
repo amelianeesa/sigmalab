@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Auth; 
 use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
@@ -37,6 +38,11 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrapFive();
 
         \Illuminate\Support\Facades\View::composer('layouts.app', function ($view) {
+            if (Auth::check() && in_array(Auth::user()->role->nama_role ?? '', [\App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value, \App\Enums\PeranPengguna::ADMIN_APLIKASI->value])) {
+                $pendingPengadaan = \App\Models\PermintaanPengadaan::where('status', 'diajukan')->count();
+                $view->with('pendingPengadaan', $pendingPengadaan);
+            } else {
+                $view->with('pendingPengadaan', 0);
             $pendingPengadaan = 0;
             $unreadNotifCount = 0;
             $recentNotifs = collect();
@@ -63,7 +69,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         \Illuminate\Support\Facades\Blade::if('modul', function (string $kodeModul, string $minLevel = 'lihat') {
-            return auth()->check() && app(\App\Services\PermissionService::class)->userHasAccess(auth()->user(), $kodeModul, $minLevel);
+            return Auth::check() && app(\App\Services\PermissionService::class)->userHasAccess(Auth::user(), $kodeModul, $minLevel);
         });
     }
 }

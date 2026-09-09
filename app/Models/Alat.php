@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\RiwayatKalibrasi;
 use App\Models\KegiatanAlat;
+use App\Models\ItemPemeliharaan;
+use App\Models\RiwayatPerbaikanAlat;
+
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
@@ -21,6 +24,7 @@ class Alat extends BaseModel
 
     protected $fillable = [
         'kode_alat',
+        'no_inventaris',
         'nama_alat',
         'merk_tipe',
         'no_seri',
@@ -41,14 +45,15 @@ class Alat extends BaseModel
     {
         return $this->hasMany(KegiatanAlat::class, 'alat_id', 'alat_id');
     }
-    public function kategoriAlat()
-    {
-        return $this->belongsTo(KategoriAlat::class, 'kategori_alat_id', 'kategori_alat_id');
-    }
+
+    // public function kategoriAlat()
+    // {
+    //     return $this->belongsTo(KategoriAlat::class, 'kategori_alat_id', 'kategori_alat_id');
+    // }
 
     public function itemPemeliharaan()
     {
-        return $this->hasManyThrough(ItemPemeliharaan::class, KategoriAlat::class, 'kategori_alat_id', 'kategori_alat_id', 'kategori_alat_id', 'kategori_alat_id');
+        return $this->hasMany(ItemPemeliharaan::class, 'alat_id', 'alat_id');
     }
 
     public function riwayatPerbaikan()
@@ -56,28 +61,11 @@ class Alat extends BaseModel
         return $this->hasMany(RiwayatPerbaikanAlat::class, 'alat_id', 'alat_id');
     }
 
-    public function scopeFilterStatusKalibrasi($query, $status)
+    public function getActivitylogOptions(): LogOptions
     {
-        if (!$status) return $query;
-
-        return $query->whereHas('riwayatKalibrasi', function ($q) use ($status) {
-            $q->whereIn('kalibrasi_id', function ($sub) {
-                $sub->selectRaw('MAX(kalibrasi_id)')
-                    ->from('riwayat_kalibrasi')
-                    ->whereNull('deleted_at')
-                    ->groupBy('alat_id');
-            });
-
-            $sekarang = \Carbon\Carbon::now()->startOfDay();
-            $batasBulanDepan = \Carbon\Carbon::now()->startOfDay()->addDays(30);
-
-            if ($status == 'kedaluarsa') {
-                $q->whereNotNull('tgl_akhir')->where('tgl_akhir', '<', $sekarang);
-            } elseif ($status == 'segera') {
-                $q->whereNotNull('tgl_akhir')->whereBetween('tgl_akhir', [$sekarang, $batasBulanDepan]);
-            } elseif ($status == 'aktif') {
-                $q->whereNotNull('tgl_akhir')->where('tgl_akhir', '>', $batasBulanDepan);
-            }
-        });
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn(string $eventName) => "Data alat telah di-{$eventName}");
     }
 }

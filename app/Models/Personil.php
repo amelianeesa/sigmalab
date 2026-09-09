@@ -17,7 +17,7 @@ class Personil extends BaseModel
     protected $fillable = [
         'nama',
         'jabatan',
-        'kategori_personil', // chemist | analist | preparator | sampler
+        'kategori_personil',
         'unit_kerja',
         'no_induk',
         'file_cv',

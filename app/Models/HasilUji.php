@@ -7,8 +7,12 @@ use App\Models\Concerns\LogsStandardActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\Models\Concerns\HasActivity;
+
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
+// use Spatie\Activitylog\Traits\LogsActivity;
+// use Spatie\Activitylog\LogOptions;
+
 
 class HasilUji extends BaseModel
 {
@@ -59,6 +63,15 @@ class HasilUji extends BaseModel
         return $this->hasMany(RiwayatTindakLanjut::class, 'hasil_uji_id', 'hasil_uji_id');
     }
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            // ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => "Hasil uji lab telah di-{$eventName}");
+    }
+}
 
     public function scopePending($query) { return $query->where('status_berketerimaan',
         'crm_katalog_id', 'pending'); }

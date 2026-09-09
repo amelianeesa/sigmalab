@@ -21,6 +21,7 @@ class KompetensiPersonil extends BaseModel
         'tanggal_terbit',
         'tanggal_berakhir',
         'file_sertifikat',
+        'reminder_terkirim',
     ];
 
     protected $casts = [
@@ -37,5 +38,13 @@ class KompetensiPersonil extends BaseModel
     {
         return $this->belongsTo(ParameterUji::class, 'parameter_uji_id', 'parameter_uji_id');
     }
-}
 
+    protected static function booted()
+    {
+        static::updating(function (KompetensiPersonil $item) {
+            if ($item->isDirty('tanggal_berakhir')) {
+                $item->reminder_terkirim = false;
+            }
+        });
+    }
+}

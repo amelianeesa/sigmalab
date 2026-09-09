@@ -90,13 +90,13 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center py-4 text-muted">Belum ada rekam jejak yang tercatat.</td>
+                                <td colspan="6" class="text-center py-4 text-muted">Belum ada rekam jejak yang tercatat</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
-            <div class="mt-3">
+            <div class="mt-4 d-flex justify-content-center">
                 {{ $logs->withQueryString()->links() }}
             </div>
         </div>

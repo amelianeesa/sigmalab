@@ -19,6 +19,7 @@ class TransaksiBarang extends BaseModel
         'jumlah_penerimaan',
         'jumlah_pengeluaran',
         'harga',
+        'tgl_exp',
     ];
 
     public function barang()

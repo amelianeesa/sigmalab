@@ -13,19 +13,25 @@ class RiwayatKalibrasi extends BaseModel
 
     protected $table = 'riwayat_kalibrasi';
     public $timestamps = false;
+    protected $casts = [
+        'tgl_akhir' => 'date',
+    ];
 
     protected $fillable = [
         'alat_id',
         'jenis_kalibrasi',
         'no_sertifikat',
+        'file_sertifikat',
         'interval_kalibrasi',
         'tgl_kalibrasi',
         'tgl_akhir',
         'lembaga_kalibrasi',
         'range_kapasitas',
         'faktor_koreksi',
+        'file_faktor_koreksi',
         'catatan_evaluasi',
         'signifikan',
+        'reminder_terkirim',
     ];
 
     public function alat()

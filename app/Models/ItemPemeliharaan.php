@@ -11,14 +11,17 @@ class ItemPemeliharaan extends BaseModel
     protected $table = 'item_pemeliharaan';
     protected $fillable = ['alat_id', 'nomor_urut', 'nama_pemeliharaan'];
 
-    public function kategoriAlat()
+    public function alat()
     {
-        return $this->belongsTo(KategoriAlat::class, 'kategori_alat_id', 'kategori_alat_id');
+        return $this->belongsTo(Alat::class, 'alat_id', 'alat_id');
     }
+    // public function kategoriAlat()
+    // {
+    //     return $this->belongsTo(KategoriAlat::class, 'kategori_alat_id', 'kategori_alat_id');
+    // }
 
     public function logs()
     {
         return $this->hasMany(LogPemeliharaan::class, 'item_id', 'item_id');
     }
 }
-

@@ -6,7 +6,11 @@ use App\Models\Concerns\LogsStandardActivity;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
+// use Spatie\Activitylog\Traits\LogsActivity;
+
+
 
 class RiwayatPerbaikanAlat extends BaseModel
 {

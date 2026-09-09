@@ -8,8 +8,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
+// use Spatie\Activitylog\Traits\LogsActivity;
+// use Spatie\Activitylog\LogOptions;
 
 class ParameterUji extends BaseModel
 {
@@ -66,6 +69,11 @@ class ParameterUji extends BaseModel
 
     public function hasInhouseLimits(): bool
     {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            // ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => "Data parameter uji telah di-{$eventName}");
         return !is_null($this->mean) && !is_null($this->sd);
     }
 

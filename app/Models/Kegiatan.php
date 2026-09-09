@@ -7,8 +7,12 @@ use App\Models\Concerns\LogsStandardActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
+// use Spatie\Activitylog\Traits\LogsActivity;
+// use Spatie\Activitylog\LogOptions;
+
 
 class Kegiatan extends BaseModel
 {
@@ -59,6 +63,10 @@ class Kegiatan extends BaseModel
 
     public function crmKatalog()
     {
-        return $this->belongsTo(CrmKatalog::class, 'crm_katalog_id');
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            // ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => "Kegiatan lab telah di-{$eventName}");
     }
 }

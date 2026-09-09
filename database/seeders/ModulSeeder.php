@@ -21,6 +21,7 @@ class ModulSeeder extends Seeder
             'audit_log' => 'Audit Log',
             'manajemen_pengguna' => 'Manajemen Pengguna',
             'keamanan' => 'Keamanan',
+            'library_manage' => 'Library Digital',
         ];
 
         foreach ($modules as $kode => $nama) {
