@@ -2,9 +2,21 @@
 
 @section('content')
 <div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('kegiatan.index') }}" class="text-decoration-none">Verifikasi Mutu</a></li>
+            @if($hasilUji->kegiatan)
+                <li class="breadcrumb-item"><a href="{{ route('kegiatan.show', $hasilUji->kegiatan_id) }}" class="text-decoration-none">{{ $hasilUji->kegiatan->nama_kegiatan }}</a></li>
+            @endif
+            <li class="breadcrumb-item active" aria-current="page">Detail Hasil Uji</li>
+        </ol>
+    </nav>
+
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Detail Hasil Uji</h1>
-        <a href="{{ route('hasil-uji.index') }}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
+        <a href="{{ url()->previous() !== url()->current() ? url()->previous() : ($hasilUji->kegiatan ? route('kegiatan.show', $hasilUji->kegiatan_id) : route('dashboard')) }}" class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm">
             <i class="fas fa-arrow-left fa-sm text-white-50"></i> Kembali
         </a>
     </div>
@@ -39,7 +51,21 @@
                         </tr>
                         <tr>
                             <th>Nilai Hasil</th>
-                            <td class="font-weight-bold">{{ $hasilUji->nilai_hasil }}</td>
+                            <td class="font-weight-bold">{{ $hasilUji->nilai_hasil ?? 'Belum ada (Pending)' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Data Mentah (Raw Variables)</th>
+                            <td>
+                                @if(is_array($hasilUji->data_mentah) && count($hasilUji->data_mentah) > 0)
+                                    <ul class="mb-0 ps-3">
+                                        @foreach($hasilUji->data_mentah as $key => $val)
+                                            <li><strong>{{ $key }}:</strong> {{ $val }}</li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <span class="text-muted">Tidak ada data mentah.</span>
+                                @endif
+                            </td>
                         </tr>
                         <tr>
                             <th>Status Berketerimaan</th>
@@ -48,6 +74,8 @@
                                     <span class="badge bg-success fs-6">Inlier</span>
                                 @elseif(strtolower($hasilUji->status_berketerimaan) == 'outlier')
                                     <span class="badge bg-danger fs-6">Outlier</span>
+                                @elseif(strtolower($hasilUji->status_berketerimaan) == 'pending')
+                                    <span class="badge bg-warning text-dark fs-6"><i class="fas fa-clock"></i> Menunggu Dependensi</span>
                                 @else
                                     <span class="badge bg-secondary fs-6">{{ $hasilUji->status_berketerimaan }}</span>
                                 @endif

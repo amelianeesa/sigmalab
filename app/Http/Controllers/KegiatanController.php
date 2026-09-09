@@ -21,29 +21,8 @@ class KegiatanController extends Controller
 
     public function index(Request $request)
     {
-        $this->authorize('viewAny', Kegiatan::class);
-
-        $filterJenis = $request->input('jenis_kegiatan');
-        $filterStatus = $request->input('status_kegiatan');
-        $search = $request->input('search');
-
-        $query = Kegiatan::with(['pembuatKegiatan', 'alatDigunakan', 'personilTerlibat']);
-
-        if ($search) {
-            $query->where('kode_sampel', 'LIKE', "%{$search}%");
-        }
-
-        if ($filterJenis) {
-            $query->where('jenis_kegiatan', $filterJenis);
-        }
-
-        if ($filterStatus) {
-            $query->where('status_kegiatan', $filterStatus);
-        }
-
-        $kegiatans = $query->latest()->paginate(10);
-
-        return view('kegiatan.index', compact('kegiatans', 'filterJenis', 'filterStatus', 'search'));
+        // Redirect to the new unified Verifikasi Mutu dashboard
+        return redirect()->route('verifikasi-mutu.index');
     }
 
     public function create()
@@ -53,30 +32,18 @@ class KegiatanController extends Controller
         $alatList = Alat::where('kondisi_barang', 'baik')->get();
         $personilList = Personil::where('status_aktif', true)->get();
         $barangList = Barang::all();
+        $parameterList = ParameterUji::where('status_aktif', true)->get();
         $nextKodeSampel = $this->generateKodeSampel();
+        $crmKatalogList = \App\Models\CrmKatalog::with('sertifikats')->where('is_active', true)->get();
 
-        return view('kegiatan.create', compact('alatList', 'personilList', 'barangList', 'nextKodeSampel'));
+        return view('kegiatan.create', compact('alatList', 'personilList', 'barangList', 'parameterList', 'nextKodeSampel', 'crmKatalogList'));
     }
 
-    public function store(Request $request)
+    public function store(\App\Http\Requests\KegiatanRequest $request)
     {
         $this->authorize('create', Kegiatan::class);
 
-        $validated = $request->validate([
-            'nama_kegiatan' => 'required|string|max:255',
-            'jenis_kegiatan' => 'required|in:pengujian,kalibrasi',
-            'kode_sampel' => 'nullable|string|max:50',
-            'tanggal_kegiatan' => 'required|date',
-            'status_kegiatan' => 'required|in:draft,berjalan,selesai,dibatalkan',
-            'alat_ids' => 'nullable|array',
-            'alat_ids.*' => 'exists:alat,alat_id',
-            'personil_ids' => 'nullable|array',
-            'personil_ids.*' => 'exists:personil,personil_id',
-            'personil_peran' => 'nullable|array',
-            'barang_ids' => 'nullable|array',
-            'barang_ids.*' => 'exists:barang,barang_id',
-            'barang_jumlah' => 'nullable|array',
-        ]);
+        $validated = $request->validated();
 
         // Gate 1: Validasi Kalibrasi Alat
         if (!empty($validated['alat_ids'])) {
@@ -124,10 +91,10 @@ class KegiatanController extends Controller
             DB::transaction(function () use ($request, $validated) {
                 $kegiatan = Kegiatan::create([
                     'nama_kegiatan' => $validated['nama_kegiatan'],
-                    'jenis_kegiatan' => $validated['jenis_kegiatan'],
-                    'kode_sampel' => $this->generateKodeSampel(),
+                                        'kode_sampel' => $this->generateKodeSampel(),
                     'tanggal_kegiatan' => $validated['tanggal_kegiatan'],
                     'status_kegiatan' => $validated['status_kegiatan'],
+                    
                     'dibuat_oleh' => Auth::id(),
                 ]);
 
@@ -148,29 +115,64 @@ class KegiatanController extends Controller
 
                 // Attach barang dan catat transaksi
                 if (!empty($validated['barang_ids'])) {
+                    $inventoryService = app(\App\Services\InventoryService::class);
                     foreach ($validated['barang_ids'] as $barangId) {
                         $jumlah = (float) $request->input("barang_jumlah.{$barangId}", 0);
                         if ($jumlah > 0) {
-                            $barang = Barang::where('barang_id', $barangId)->lockForUpdate()->first();
+                            $barang = Barang::find($barangId);
                             if ($barang) {
-                                $barang->pengeluaran += $jumlah;
-                                $barang->saldo_akhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
-                                $barang->save();
-
-                                TransaksiBarang::create([
-                                    'barang_id' => $barangId,
-                                    'kegiatan_id' => $kegiatan->kegiatan_id,
-                                    'jumlah_pengeluaran' => $jumlah,
-                                    'harga' => $barang->harga_rata ?? 0,
-                                ]);
+                                $inventoryService->deductStock($barang, $jumlah, $kegiatan->kegiatan_id);
                             }
                         }
                     }
                 }
+                
+                // Pre-populate HasilUji
+                $hasilData = [];
+                if (!empty($validated['normal_parameter_uji_ids'])) {
+                    foreach ($validated['normal_parameter_uji_ids'] as $paramId) {
+                        $hasilData[] = [
+                            'kegiatan_id' => $kegiatan->kegiatan_id,
+                            'parameter_uji_id' => $paramId,
+                            'jenis_kontrol' => 'normal', // Sampel klien
+                            'status_berketerimaan' => 'belum_diuji',
+                            'diinput_oleh' => Auth::id(),
+                            'created_at' => now(),
+                        ];
+                    }
+                }
+                if (!empty($validated['inhouse_parameter_uji_ids'])) {
+                    foreach ($validated['inhouse_parameter_uji_ids'] as $paramId) {
+                        $hasilData[] = [
+                            'kegiatan_id' => $kegiatan->kegiatan_id,
+                            'parameter_uji_id' => $paramId,
+                            'jenis_kontrol' => 'in_house',
+                            'status_berketerimaan' => 'belum_diuji',
+                            'diinput_oleh' => Auth::id(),
+                            'created_at' => now(),
+                        ];
+                    }
+                }
+                if (!empty($validated['crm_parameter_uji_ids'])) {
+                    foreach ($validated['crm_parameter_uji_ids'] as $paramId) {
+                        $hasilData[] = [
+                            'kegiatan_id' => $kegiatan->kegiatan_id,
+                            'parameter_uji_id' => $paramId,
+                            'jenis_kontrol' => 'crm',
+                            'crm_katalog_id' => $request->input("crm_katalog_ids.{$paramId}"),
+                            'status_berketerimaan' => 'belum_diuji',
+                            'diinput_oleh' => Auth::id(),
+                            'created_at' => now(),
+                        ];
+                    }
+                }
+                if (!empty($hasilData)) {
+                    \App\Models\HasilUji::insert($hasilData);
+                }
             });
         });
 
-        return redirect()->route('kegiatan.index')->with('success', 'Kegiatan berhasil dibuat.');
+        return redirect()->route('verifikasi-mutu.index')->with('success', 'Kegiatan berhasil dibuat.');
     }
 
     public function show($id)
@@ -200,37 +202,31 @@ class KegiatanController extends Controller
         $selectedBarang = $transaksis->pluck('barang_id')->toArray();
         $barangJumlah = $transaksis->pluck('jumlah_pengeluaran', 'barang_id')->toArray();
 
-        return view('kegiatan.edit', compact('kegiatan', 'alatList', 'personilList', 'barangList', 'selectedAlat', 'selectedPersonil', 'personilPeran', 'selectedBarang', 'barangJumlah'));
+        // Parameter Uji
+        $parameterList = \App\Models\ParameterUji::where('status_aktif', true)->get();
+        $selectedNormal = \App\Models\HasilUji::where('kegiatan_id', $kegiatan->kegiatan_id)->where('jenis_kontrol', 'normal')->pluck('parameter_uji_id')->toArray();
+        $selectedInhouse = \App\Models\HasilUji::where('kegiatan_id', $kegiatan->kegiatan_id)->where('jenis_kontrol', 'in_house')->pluck('parameter_uji_id')->toArray();
+        $selectedCrm = \App\Models\HasilUji::where('kegiatan_id', $kegiatan->kegiatan_id)->where('jenis_kontrol', 'crm')->pluck('parameter_uji_id')->toArray();
+        $selectedCrmKatalogs = \App\Models\HasilUji::where('kegiatan_id', $kegiatan->kegiatan_id)->where('jenis_kontrol', 'crm')->pluck('crm_katalog_id', 'parameter_uji_id')->toArray();
+        $crmKatalogList = \App\Models\CrmKatalog::with('sertifikats')->where('is_active', true)->get();
+
+        return view('kegiatan.edit', compact('kegiatan', 'alatList', 'personilList', 'barangList', 'selectedAlat', 'selectedPersonil', 'personilPeran', 'selectedBarang', 'barangJumlah', 'parameterList', 'selectedNormal', 'selectedInhouse', 'selectedCrm', 'selectedCrmKatalogs', 'crmKatalogList'));
     }
 
-    public function update(Request $request, $id)
+    public function update(\App\Http\Requests\KegiatanRequest $request, $id)
     {
         $kegiatan = Kegiatan::findOrFail($id);
         $this->authorize('update', $kegiatan);
 
-        $validated = $request->validate([
-            'nama_kegiatan' => 'required|string|max:255',
-            'jenis_kegiatan' => 'required|in:pengujian,kalibrasi',
-            'kode_sampel' => 'nullable|string|max:50',
-            'tanggal_kegiatan' => 'required|date',
-            'status_kegiatan' => 'required|in:draft,berjalan,selesai,dibatalkan',
-            'alat_ids' => 'nullable|array',
-            'alat_ids.*' => 'exists:alat,alat_id',
-            'personil_ids' => 'nullable|array',
-            'personil_ids.*' => 'exists:personil,personil_id',
-            'personil_peran' => 'nullable|array',
-            'barang_ids' => 'nullable|array',
-            'barang_ids.*' => 'exists:barang,barang_id',
-            'barang_jumlah' => 'nullable|array',
-        ]);
+        $validated = $request->validated();
 
         DB::transaction(function () use ($request, $validated, $kegiatan) {
             $kegiatan->update([
                 'nama_kegiatan' => $validated['nama_kegiatan'],
-                'jenis_kegiatan' => $validated['jenis_kegiatan'],
-                'kode_sampel' => $validated['kode_sampel'],
+                                'kode_sampel' => $validated['kode_sampel'],
                 'tanggal_kegiatan' => $validated['tanggal_kegiatan'],
                 'status_kegiatan' => $validated['status_kegiatan'],
+                
             ]);
 
             $kegiatan->alatDigunakan()->sync($validated['alat_ids'] ?? []);
@@ -244,40 +240,83 @@ class KegiatanController extends Controller
             }
             $kegiatan->personilTerlibat()->sync($syncData);
 
+            $inventoryService = app(\App\Services\InventoryService::class);
             $oldTransaksis = TransaksiBarang::where('kegiatan_id', $kegiatan->kegiatan_id)->get();
             foreach($oldTransaksis as $t) {
-                $b = Barang::where('barang_id', $t->barang_id)->lockForUpdate()->first();
-                if ($b) {
-                    $b->pengeluaran -= $t->jumlah_pengeluaran;
-                    $b->saldo_akhir = ($b->saldo_awal + $b->penerimaan) - $b->pengeluaran;
-                    $b->save();
-                }
+                $inventoryService->rollbackTransaction($t);
             }
-            TransaksiBarang::where('kegiatan_id', $kegiatan->kegiatan_id)->delete();
 
             if (!empty($validated['barang_ids'])) {
                 foreach ($validated['barang_ids'] as $barangId) {
                     $jumlah = (float) $request->input("barang_jumlah.{$barangId}", 0);
                     if ($jumlah > 0) {
-                        $barang = Barang::where('barang_id', $barangId)->lockForUpdate()->first();
+                        $barang = Barang::find($barangId);
                         if ($barang) {
-                            $barang->pengeluaran += $jumlah;
-                            $barang->saldo_akhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
-                            $barang->save();
-
-                            TransaksiBarang::create([
-                                'barang_id' => $barangId,
-                                'kegiatan_id' => $kegiatan->kegiatan_id,
-                                'jumlah_pengeluaran' => $jumlah,
-                                'harga' => $barang->harga_rata ?? 0,
-                            ]);
+                            $inventoryService->deductStock($barang, $jumlah, $kegiatan->kegiatan_id);
                         }
                     }
                 }
+            } // End if barang_ids
+                
+            // Add-Only Sync for Parameter Uji (Penambahan Susulan)
+            $hasilData = [];
+            
+            if (!empty($validated['parameter_uji_ids'])) {
+                if (!empty($validated['is_normal'])) {
+                    $existingNormal = \App\Models\HasilUji::where('kegiatan_id', $kegiatan->kegiatan_id)->where('jenis_kontrol', 'normal')->pluck('parameter_uji_id')->toArray();
+                    $newNormal = array_diff($validated['parameter_uji_ids'], $existingNormal);
+                    foreach ($newNormal as $paramId) {
+                        $hasilData[] = [
+                            'kegiatan_id' => $kegiatan->kegiatan_id,
+                            'parameter_uji_id' => $paramId,
+                            'jenis_kontrol' => 'normal',
+                            'status_berketerimaan' => 'belum_diuji',
+                            'diinput_oleh' => Auth::id(),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
+                }
+
+                if (!empty($validated['is_inhouse'])) {
+                    $existingInhouse = \App\Models\HasilUji::where('kegiatan_id', $kegiatan->kegiatan_id)->where('jenis_kontrol', 'in_house')->pluck('parameter_uji_id')->toArray();
+                    $newInhouse = array_diff($validated['parameter_uji_ids'], $existingInhouse);
+                    foreach ($newInhouse as $paramId) {
+                        $hasilData[] = [
+                            'kegiatan_id' => $kegiatan->kegiatan_id,
+                            'parameter_uji_id' => $paramId,
+                            'jenis_kontrol' => 'in_house',
+                            'status_berketerimaan' => 'belum_diuji',
+                            'diinput_oleh' => Auth::id(),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
+                }
+                
+                if (!empty($validated['is_crm'])) {
+                    $existingCrm = \App\Models\HasilUji::where('kegiatan_id', $kegiatan->kegiatan_id)->where('jenis_kontrol', 'crm')->pluck('parameter_uji_id')->toArray();
+                    $newCrm = array_diff($validated['parameter_uji_ids'], $existingCrm);
+                    foreach ($newCrm as $paramId) {
+                        $hasilData[] = [
+                            'kegiatan_id' => $kegiatan->kegiatan_id,
+                            'parameter_uji_id' => $paramId,
+                            'jenis_kontrol' => 'crm',
+                            'crm_katalog_id' => $request->input("crm_katalog_ids.{$paramId}"),
+                            'status_berketerimaan' => 'belum_diuji',
+                            'diinput_oleh' => Auth::id(),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
+                }
+            }
+            if (!empty($hasilData)) {
+                \App\Models\HasilUji::insert($hasilData);
             }
         });
 
-        return redirect()->route('kegiatan.index')->with('success', 'Kegiatan berhasil diperbarui.');
+        return redirect()->route('verifikasi-mutu.index')->with('success', 'Kegiatan berhasil diperbarui.');
     }
 
     public function destroy($id)
@@ -294,21 +333,41 @@ class KegiatanController extends Controller
             }
             $kegiatan->hasilUji()->delete();
 
+            $inventoryService = app(\App\Services\InventoryService::class);
             $oldTransaksis = TransaksiBarang::where('kegiatan_id', $kegiatan->kegiatan_id)->get();
             foreach($oldTransaksis as $t) {
-                $b = Barang::where('barang_id', $t->barang_id)->lockForUpdate()->first();
-                if ($b) {
-                    $b->pengeluaran -= $t->jumlah_pengeluaran;
-                    $b->saldo_akhir = ($b->saldo_awal + $b->penerimaan) - $b->pengeluaran;
-                    $b->save();
-                }
+                $inventoryService->rollbackTransaction($t);
             }
-            TransaksiBarang::where('kegiatan_id', $kegiatan->kegiatan_id)->delete();
 
             $kegiatan->delete();
         });
 
-        return redirect()->route('kegiatan.index')->with('success', 'Kegiatan berhasil dihapus.');
+        return redirect()->route('verifikasi-mutu.index')->with('success', 'Kegiatan berhasil dihapus.');
+    }
+
+    public function unlock($id)
+    {
+        $kegiatan = Kegiatan::findOrFail($id);
+        
+        // Authorization: only specific roles can unlock
+        if (!auth()->user()->hasRole(['koordinator_lab', 'manajer_teknis', 'admin'])) {
+            abort(403, 'Anda tidak memiliki hak akses untuk membuka kunci kegiatan.');
+        }
+
+        if ($kegiatan->status_kegiatan !== 'selesai') {
+            return back()->with('error', 'Kegiatan ini tidak dalam status Selesai.');
+        }
+
+        $kegiatan->status_kegiatan = 'proses';
+        $kegiatan->save();
+
+        activity()
+            ->performedOn($kegiatan)
+            ->causedBy(auth()->user())
+            ->log("Membuka kunci (revisi) kegiatan pengujian.");
+
+        return redirect()->route('kegiatan.show', $kegiatan->kegiatan_id)
+            ->with('success', 'Kegiatan berhasil dibuka kembali untuk revisi (Status: Proses).');
     }
 
     private function generateKodeSampel()

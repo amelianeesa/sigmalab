@@ -4,18 +4,13 @@
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <div>
-            <h1 class="h3 mb-0 text-gray-800">Riwayat Tindak Lanjut</h1>
-            <ol class="breadcrumb mb-0 mt-2">
+            <ol class="breadcrumb mb-1 mt-3">
                 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
                 <li class="breadcrumb-item"><a href="{{ route('kegiatan.index') }}" class="text-decoration-none">Verifikasi Mutu</a></li>
                 <li class="breadcrumb-item active">Tindak Lanjut Outlier</li>
             </ol>
+    <h1 class="h3 mb-0 text-gray-800">Riwayat Tindak Lanjut</h1>
         </div>
-        @can('create', App\Models\RiwayatTindakLanjut::class)
-        <a href="{{ route('tindak-lanjut.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm mt-2 mt-sm-0">
-            <i class="fas fa-plus fa-sm text-white-50"></i> Catat Tindak Lanjut Baru
-        </a>
-        @endcan
     </div>
 
         <div class="card shadow mb-4">
@@ -38,9 +33,8 @@
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>Hasil Uji ID</th>
+                                <th>Kode Sampel</th>
                                 <th>Parameter Uji</th>
-                                <th>Kegiatan (Kode Sampel)</th>
                                 <th>Status Tindak Lanjut</th>
                                 <th>Ditindaklanjuti Oleh</th>
                                 <th>Tanggal</th>
@@ -51,9 +45,8 @@
                             @forelse($riwayat as $index => $item)
                                 <tr>
                                     <td>{{ $riwayat->firstItem() + $index }}</td>
-                                    <td>{{ $item->hasil_uji_id }}</td>
-                                    <td>{{ $item->hasilUji->parameterUji->nama_parameter ?? '-' }}</td>
-                                    <td>{{ $item->hasilUji->kegiatan->kode_sampel ?? '-' }}</td>
+                                    <td><span class="fw-bold text-dark">{{ $item->hasilUji->kegiatan->kode_sampel ?? '-' }}</span></td>
+                                    <td><span class="text-primary fw-bold">{{ $item->hasilUji->parameterUji->nama_parameter ?? '-' }}</span></td>
                                     <td>
                                         @if($item->status_tindak_lanjut == 'belum_ditindaklanjuti')
                                             <span class="badge bg-warning">Belum Ditindaklanjuti</span>

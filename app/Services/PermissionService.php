@@ -47,6 +47,7 @@ class PermissionService
         return Cache::rememberForever('hak_akses_matrix', function () {
             $aksesList = DB::table('hak_akses')
                 ->join('modul', 'hak_akses.modul_id', '=', 'modul.modul_id')
+                ->whereNull('hak_akses.deleted_at')
                 ->select('hak_akses.role_id', 'modul.kode_modul', 'hak_akses.level_akses')
                 ->get();
 

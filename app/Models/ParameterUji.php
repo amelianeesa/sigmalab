@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsStandardActivity;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 use Illuminate\Database\Eloquent\Model;
@@ -12,18 +14,18 @@ use Spatie\Activitylog\Support\LogOptions;
 // use Spatie\Activitylog\Traits\LogsActivity;
 // use Spatie\Activitylog\LogOptions;
 
-class ParameterUji extends Model
+class ParameterUji extends BaseModel
 {
     use SoftDeletes;
     use HasFactory, LogsActivity;
 
     protected $table = 'parameter_uji';
-    protected $primaryKey = 'parameter_uji_id';
 
     protected $fillable = [
         'nama_parameter',
         'satuan',
-        'nilai_acuan',
+        'kategori_parameter',
+                'nilai_acuan',
         'batas_bawah',
         'batas_atas',
         'lcl',
@@ -31,9 +33,23 @@ class ParameterUji extends Model
         'mean',
         'uwl_atas',
         'ucl',
+        'sd',
+
+        'aturan_aktif',
         'metode_kriteria',
         'rumus_kalkulasi',
+        'langkah_kalkulasi',
+        'variabel_input',
+        'dependensi_parameter',
         'status_aktif',
+        'toleransi_duplo',
+    ];
+
+    protected $casts = [
+        'aturan_aktif' => 'array',
+        'variabel_input' => 'array',
+        'dependensi_parameter' => 'array',
+        'langkah_kalkulasi' => 'array',
     ];
 
     public function getRouteKeyName(): string
@@ -51,13 +67,18 @@ class ParameterUji extends Model
         return $this->hasilUji()->exists();
     }
 
-    public function getActivitylogOptions(): LogOptions
+    public function hasInhouseLimits(): bool
     {
         return LogOptions::defaults()
             ->logFillable()
             ->logOnlyDirty()
             // ->dontSubmitEmptyLogs()
             ->setDescriptionForEvent(fn(string $eventName) => "Data parameter uji telah di-{$eventName}");
+        return !is_null($this->mean) && !is_null($this->sd);
+    }
+
+    public function sertifikatCrm()
+    {
+        return $this->hasMany(CrmSertifikat::class, 'parameter_uji_id', 'parameter_uji_id');
     }
 }
-

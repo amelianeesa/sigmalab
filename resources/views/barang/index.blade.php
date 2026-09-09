@@ -24,11 +24,11 @@
 </style>
 
 <div class="container-fluid px-4">
-    <!-- <h1 class="mt-4">Laporan Inventori Barang Persediaan (Stock)</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ url('dashboard') }}">Dashboard</a></li>
+    <!-- <ol class="breadcrumb mb-1 mt-3">
+        <li class="breadcrumb-item"><a href="{{ url('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
         <li class="breadcrumb-item active">Inventori Barang</li>
-    </ol> -->
+    </ol>
+    <h1 class="mb-4">Laporan Inventori Barang Persediaan (Stock)</h1> -->
 
     <div class="d-flex flex-wrap gap-3 mb-4 mt-2">
         @if(Auth::user()->hasModulAccess('pengadaan'))
@@ -85,7 +85,7 @@
         </div>
         <div class="card-body">
             
-            <form action="{{ route('barang.index') }}" method="GET" id="filterForm" class="row g-2 mb-3 align-items-center">
+            <form action="{{ route('barang.index') }}" method="GET" id="filterForm" class="row g-2 mb-3 align-items-center live-search-form" data-target="#table-container">
                 <div class="col-md-7">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
@@ -104,7 +104,7 @@
                 </div>
             </form>
 
-            <div class="table-responsive">
+            <div class="table-responsive" id="table-container">
                 <table class="table table-bordered table-striped align-middle text-center table-responsive-custom">
                     <thead class="table-header-custom text-center">
                         <tr>

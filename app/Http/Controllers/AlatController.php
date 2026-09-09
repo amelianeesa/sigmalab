@@ -51,8 +51,6 @@ class AlatController extends Controller
             $query->where('kondisi_barang', $filterKondisi);
         }
 
-        $alatList = $query->latest()->get();
-
         if ($filterStatus) {
             $alatList = $alatList->filter(function($item) use ($filterStatus) {
                 $kalibrasiTerakhir = $item->riwayatKalibrasi->sortByDesc('tgl_kalibrasi')->first();
@@ -75,6 +73,8 @@ class AlatController extends Controller
             });
         }
 
+        $alatList = $query->latest()->get();
+
         $alat = $alatList;
 
         return view('alat.index', compact('alat', 'search', 'filterStatus', 'filterKondisi'));
@@ -85,7 +85,7 @@ class AlatController extends Controller
         return view('alat.create');
     }
 
-    public function store(Request $request)
+    public function store(\App\Http\Requests\AlatRequest $request)
     {
         $request->validate([
             'kode_alat' => 'required|string|max:50|unique:alat,kode_alat',
@@ -167,7 +167,7 @@ class AlatController extends Controller
         return view('alat.edit', compact('alat', 'kalibrasiTerakhir'));
     }
 
-    public function update(Request $request, $id)
+    public function update(\App\Http\Requests\AlatRequest $request, $id)
     {
         $alat = Alat::findOrFail($id);
 
@@ -265,7 +265,7 @@ class AlatController extends Controller
 
     public function show($id)
     {
-        $alat = Alat::with(['riwayatKalibrasi', 'kegiatanAlat.kegiatan.personil', 'riwayatPerbaikan.pelapor', 'riwayatPerbaikan.verifikator'])->findOrFail($id);
+        $alat = Alat::with(['riwayatKalibrasi', 'kegiatanAlat.kegiatan.personilTerlibat', 'riwayatPerbaikan.pelapor', 'riwayatPerbaikan.verifikator'])->findOrFail($id);
         
         $sedangDiperbaiki = $alat->riwayatPerbaikan()->whereIn('status_perbaikan', ['Belum Diperbaiki', 'Dalam Perbaikan'])->first();
 

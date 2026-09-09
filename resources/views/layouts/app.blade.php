@@ -14,9 +14,8 @@
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
 
     <style>
-        body {
-            background-color: #f8f9fa;
-            overflow-x: hidden;
+        :root {
+            --sidebar-width: {{ auth()->check() ? '260px' : '0' }};
         }
 
         :root{
@@ -212,6 +211,8 @@
     </style>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    </style>
+    <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
 </head>
 
 <body>
@@ -322,21 +323,98 @@
                     <i class="fas fa-bars"></i>
                 </button>
             @endauth
+            {{-- 2. Personel dan Kompetensi --}}
+            @if(Auth::check() && Auth::user()->hasModulAccess('sdm'))
+            <li class="{{ request()->is('sdm*') ? 'active' : '' }}">
+                <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personel & Kompetensi</a>
+            </li>
+            @endif
+
+            {{-- 3. Proses dan Hasil Pengujian (QC) --}}
+            @if(Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
+            <li class="{{ request()->is('verifikasi-mutu*') || request()->is('qc-inhouse*') || request()->is('parameter-uji*') || request()->is('kegiatan*') || request()->is('inhouse-control*') || request()->is('tindak-lanjut*') || request()->is('reporting*') ? 'active' : '' }}">
+                <a href="{{ route('verifikasi-mutu.index') }}"><i class="fas fa-flask"></i> Verifikasi Mutu (QC)</a>
+            </li>
+            @endif
+
+            {{-- 4. Inventori & Fasilitas --}}
+            @if(Auth::check() && (Auth::user()->hasModulAccess('barang') || Auth::user()->hasModulAccess('pengadaan')))
+            <li class="{{ request()->is('barang*') || request()->is('pengadaan*') ? 'active' : '' }}">
+                <a href="{{ Auth::user()->hasModulAccess('barang') ? route('barang.index') : route('pengadaan.index') }}"><i class="fas fa-boxes"></i> Inventori & Fasilitas</a>
+            </li>
+            @endif
+
+            {{-- 5. Audit Log --}}
+            @if(Auth::check() && Auth::user()->hasModulAccess('audit_log'))
+            <li class="{{ request()->is('audit-log*') ? 'active' : '' }}">
+                <a href="{{ route('audit-log.index') }}"><i class="fas fa-history"></i> Audit Trail</a>
+            </li>
+            @endif
+
+            {{-- 6. Pengaturan Sistem --}}
+            @if(Auth::check() && Auth::user()->hasModulAccess('manajemen_pengguna'))
+            <li class="{{ request()->is('hak-akses*') ? 'active' : '' }}">
+                <a href="{{ route('hak-akses.index') }}"><i class="fas fa-user-shield"></i> Pengaturan Akses</a>
+            </li>
+            @endif
+        </ul>
+    </nav>
+
+    <div class="top-navbar shadow-sm">
+        <div class="d-flex align-items-center">
+            <!-- Toggle ini hanya muncul di HP/Mobile (d-lg-none) -->
+            <button class="btn text-white me-3 d-flex d-lg-none align-items-center justify-content-center p-1" onclick="toggleSidebar()" style="border:1px solid rgba(255,255,255,0.3); border-radius:6px; background:rgba(0,0,0,0.1); width:36px; height:36px;">
+                <i class="fas fa-bars"></i>
+            </button>
             <div>
                 <span class="text-uppercase text-secondary fs-7 fw-bold d-block mb-1" style="font-size: 18px; letter-spacing: 1px;">SIGMA-LAB</span>
                 <div class="mb-0 fw-bold d-none d-sm-block">Sistem Integrated General Management Analytics of Lab</div>
             </div>
         </div>
         <div class="d-flex align-items-center">
-            @if(isset($pendingPengadaan) && $pendingPengadaan > 0)
-                <a href="{{ route('pengadaan.index') }}" class="btn btn-warning position-relative me-3 rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;" title="{{ $pendingPengadaan }} Pengajuan Pengadaan">
+            <div class="dropdown me-3">
+                <a href="#" class="btn btn-warning position-relative rounded-circle p-2 d-flex align-items-center justify-content-center dropdown-toggle" style="width: 38px; height: 38px;" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="fas fa-bell text-dark"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light">
-                        {{ $pendingPengadaan }}
-                        <span class="visually-hidden">pengadaan belum diproses</span>
-                    </span>
+                    @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light">
+                            {{ $unreadNotifCount > 99 ? '99+' : $unreadNotifCount }}
+                            <span class="visually-hidden">unread messages</span>
+                        </span>
+                    @endif
                 </a>
-            @endif
+                <ul class="dropdown-menu dropdown-menu-end shadow" style="width: 300px; max-height: 400px; overflow-y: auto;">
+                    <li><h6 class="dropdown-header">Notifikasi Terbaru</h6></li>
+                    @if(isset($recentNotifs) && $recentNotifs->count() > 0)
+                        @foreach($recentNotifs as $notif)
+                            <li>
+                                <a class="dropdown-item d-flex align-items-start py-2 border-bottom text-wrap" href="#">
+                                    <div class="me-3 mt-1">
+                                        @if($notif->jenis_notifikasi == 'qc')
+                                            <i class="fas fa-flask text-primary"></i>
+                                        @elseif($notif->jenis_notifikasi == 'kalibrasi')
+                                            <i class="fas fa-tools text-warning"></i>
+                                        @elseif($notif->jenis_notifikasi == 'stok')
+                                            <i class="fas fa-box text-success"></i>
+                                        @elseif($notif->jenis_notifikasi == 'sertifikasi')
+                                            <i class="fas fa-certificate text-danger"></i>
+                                        @else
+                                            <i class="fas fa-bell text-secondary"></i>
+                                        @endif
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <p class="mb-0" style="font-size: 0.85rem;">{{ \Illuminate\Support\Str::limit($notif->pesan, 80) }}</p>
+                                        <small class="text-muted" style="font-size: 0.75rem;">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</small>
+                                    </div>
+                                </a>
+                            </li>
+                        @endforeach
+                    @else
+                        <li><span class="dropdown-item text-center text-muted py-3">Tidak ada notifikasi baru</span></li>
+                    @endif
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-center text-primary fw-bold" href="{{ route('notifikasi.index') }}">Lihat Semua Notifikasi</a></li>
+                </ul>
+            </div>
             <div class="dropdown">
             <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown" title="Profil" style="border-color: rgba(255,255,255,0.2);">
                 <i class="bi bi-person-circle me-1 text-white"></i> 
@@ -392,6 +470,34 @@
         }
     </script>
 
+    <!-- Global Delete Confirmation (SweetAlert2) -->
+    <script>
+    function confirmDelete(button, customText) {
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: customText || 'Data akan dihapus permanen!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                button.closest('form').submit();
+            }
+        });
+    }
+    // Delegated listener for buttons with data-confirm-delete attribute
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('[data-confirm-delete]');
+        if (!btn) return;
+        e.preventDefault();
+        confirmDelete(btn, btn.dataset.confirmDelete || undefined);
+    });
+    </script>
+
+    <!-- Live Search Script -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const forms = document.querySelectorAll('.live-search-form');

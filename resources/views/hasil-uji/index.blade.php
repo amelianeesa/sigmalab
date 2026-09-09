@@ -78,6 +78,8 @@
                                     <span class="badge bg-success">Inlier</span>
                                 @elseif(strtolower($item->status_berketerimaan) == 'outlier')
                                     <span class="badge bg-danger">Outlier</span>
+                                @elseif(strtolower($item->status_berketerimaan) == 'pending')
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> Menunggu Dependensi</span>
                                 @else
                                     <span class="badge bg-secondary">{{ $item->status_berketerimaan }}</span>
                                 @endif

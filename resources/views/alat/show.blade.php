@@ -4,12 +4,12 @@
 <div class="container-fluid px-4 py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold text-dark mb-1">Detail Alat: {{ $alat->nama_alat }}</h2>
-            <ol class="breadcrumb mb-0 mt-2">
+            <ol class="breadcrumb mb-1 mt-3">
                 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
                 <li class="breadcrumb-item"><a href="{{ route('alat.index') }}" class="text-decoration-none">Manajemen Peralatan</a></li>
                 <li class="breadcrumb-item active">{{ $alat->kode_alat }}</li>
             </ol>
+    <h2 class="fw-bold text-dark mb-1">Detail Alat: {{ $alat->nama_alat }}</h2>
         </div>
         <div>
             <a href="{{ route('alat.index') }}" class="btn btn-outline-secondary shadow-sm rounded-pill px-3">
@@ -120,7 +120,13 @@
                                                     <strong>{{ $ka->kegiatan->no_order ?? $ka->kegiatan->kode_sampel }}</strong><br>
                                                     <span class="text-muted small">{{ ucfirst($ka->kegiatan->jenis_kegiatan) }}</span>
                                                 </td>
-                                                <td>{{ $ka->kegiatan->personil->nama_personil ?? 'N/A' }}</td>
+                                                <td>
+                                                    @if($ka->kegiatan->personilTerlibat && $ka->kegiatan->personilTerlibat->count() > 0)
+                                                        {{ $ka->kegiatan->personilTerlibat->pluck('nama')->implode(', ') }}
+                                                    @else
+                                                        N/A
+                                                    @endif
+                                                </td>
                                                 <td>
                                                     <span class="badge bg-{{ $ka->kegiatan->status_kegiatan == 'selesai' ? 'success' : ($ka->kegiatan->status_kegiatan == 'berjalan' ? 'primary' : 'secondary') }}">
                                                         {{ ucfirst($ka->kegiatan->status_kegiatan) }}

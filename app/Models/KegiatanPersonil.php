@@ -5,10 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class KegiatanPersonil extends Model
+class KegiatanPersonil extends BaseModel
 {
     use SoftDeletes;
-    public $incrementing = false;
     public $timestamps = false;
 
     protected $table = 'kegiatan_personil';

@@ -2,12 +2,12 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Parameter Uji</h1>
-    <ol class="breadcrumb mb-4">
+    <ol class="breadcrumb mb-1 mt-3">
         <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
         <li class="breadcrumb-item"><a href="{{ route('kegiatan.index') }}" class="text-decoration-none">Verifikasi Mutu</a></li>
         <li class="breadcrumb-item active">Parameter Uji</li>
     </ol>
+    <h1 class="mb-4">Parameter Uji</h1>
 
 
 
@@ -57,7 +57,9 @@
                             @forelse($parameterUji as $index => $item)
                             <tr>
                                 <td class="text-center">{{ $parameterUji->firstItem() + $index }}</td>
-                                <td class="fw-bold">{{ $item->nama_parameter }}</td>
+                                <td class="fw-bold">
+                                    {{ $item->nama_parameter }}
+                                </td>
                                 <td class="text-center">{{ $item->satuan }}</td>
                                 <td class="text-center">{{ number_format($item->nilai_acuan, 2) }}</td>
                                 <td class="text-center">{{ number_format($item->batas_bawah, 2) }} - {{ number_format($item->batas_atas, 2) }}</td>
@@ -80,7 +82,7 @@
                                         <form action="{{ route('parameter-uji.destroy', $item->parameter_uji_id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="button" class="btn btn-danger btn-sm" title="Hapus / Nonaktifkan" onclick="confirmDelete(this)">
+                                            <button type="button" class="btn btn-danger btn-sm" title="Hapus / Nonaktifkan" data-confirm-delete="Jika parameter uji sudah digunakan di Hasil Uji, maka hanya akan di-nonaktifkan. Lanjutkan?">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
@@ -103,23 +105,5 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-function confirmDelete(button) {
-    Swal.fire({
-        title: 'Konfirmasi Hapus',
-        text: "Jika parameter uji sudah digunakan di Hasil Uji, maka hanya akan di-nonaktifkan. Lanjutkan?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Ya, Lanjutkan',
-        cancelButtonText: 'Batal'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            button.closest('form').submit();
-        }
-    });
-}
-</script>
+
 @endsection
