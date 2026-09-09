@@ -23,6 +23,7 @@ class HasilUji extends BaseModel
         'parameter_uji_id',
         'nilai_hasil',
         'status_berketerimaan',
+        'crm_katalog_id',
         'kode_aturan_dilanggar',
         'override_status',
         'override_kode',
@@ -59,8 +60,12 @@ class HasilUji extends BaseModel
     }
 
 
-    public function scopePending($query) { return $query->where('status_berketerimaan', 'pending'); }
-    public function scopeInlier($query) { return $query->where('status_berketerimaan', 'inlier'); }
-    public function scopeOutlier($query) { return $query->where('status_berketerimaan', 'outlier'); }
-    public function scopeGagalDuplo($query) { return $query->where('status_berketerimaan', 'gagal_duplo'); }
+    public function scopePending($query) { return $query->where('status_berketerimaan',
+        'crm_katalog_id', 'pending'); }
+    public function scopeInlier($query) { return $query->where('status_berketerimaan',
+        'crm_katalog_id', 'inlier'); }
+    public function scopeOutlier($query) { return $query->where('status_berketerimaan',
+        'crm_katalog_id', 'outlier'); }
+    public function scopeGagalDuplo($query) { return $query->where('status_berketerimaan',
+        'crm_katalog_id', 'gagal_duplo'); }
 }

@@ -40,24 +40,29 @@
                     </div>
                 </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label fw-bold text-primary"><i class="fas fa-sliders-h me-1"></i> Jenis Kontrol Mutu</label>
-                        <select id="jenis_kontrol" name="jenis_kontrol" class="form-select bg-light">
-                            <option value="in_house" {{ old('jenis_kontrol', $parameterUji->jenis_kontrol) == 'crm' ? '' : 'selected' }}>Statistik Lab (In-House Control) - Menggunakan Mean & SD</option>
-                            <option value="crm" {{ old('jenis_kontrol', $parameterUji->jenis_kontrol) == 'crm' ? 'selected' : '' }}>Sertifikat Pabrik (CRM) - Input Manual Nilai Mutlak</option>
-                        </select>
-                        <small class="text-muted">Pilih mode In-House agar sistem menghitung Batas Peringatan/Gagal (Westgard) secara otomatis.</small>
-                    </div>
-                </div>
+                
 
-                <div class="card bg-light mb-3 border-0" id="cardInHouse">
+                                <ul class="nav nav-tabs mb-4" id="configTabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active fw-bold" id="inhouse-tab" data-bs-toggle="tab" href="#inhouse" role="tab">In-House Control & Pengaturan Umum</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-bold" id="crm-tab" data-bs-toggle="tab" href="#crm" role="tab">Sertifikat Pabrik (CRM)</a>
+                    </li>
+                </ul>
+                <div class="tab-content border-start border-end border-bottom p-4 mb-4" id="configTabsContent" style="margin-top: -25px; background: white;">
+                    <div class="tab-pane fade show active" id="inhouse" role="tabpanel">
+
+                <div class="card bg-light mb-3 border-0">
                     <div class="card-body py-2">
                         <p class="mb-2 text-muted fw-bold" style="font-size: 0.85rem;"><i class="fas fa-chart-line"></i> Input Data Statistik (In-House)</p>
                         <div class="alert alert-info py-1 px-2 mb-2 d-flex justify-content-between align-items-center" style="font-size: 0.8rem;">
                             <span>Sistem dapat menghitung <strong>Mean (Rata-rata)</strong> dan <strong>SD (Standar Deviasi)</strong> secara otomatis dari kumpulan baris data histori pengujian (setara dengan rumus <code>AVERAGE</code> dan <code>STDEV</code> di Excel).</span>
-                            <button type="button" class="btn btn-sm btn-primary py-0" id="btnCalculateStats">
+                                                        <button type="button" class="btn btn-sm btn-primary py-0" id="btnCalculateStats">
                                 <i class="fas fa-magic"></i> Hitung dari Histori
+                            </button>
+                            <button type="button" class="btn btn-sm btn-warning py-0 text-dark fw-bold ms-2" id="btnUseCrm">
+                                <i class="fas fa-certificate"></i> Gunakan Nilai CRM
                             </button>
                         </div>
                         <div class="row mb-3">
@@ -108,7 +113,45 @@
                 </div>
 
                 <script>
-                    document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if there is a hash in the URL and switch tab
+    if(window.location.hash) {
+        var hash = window.location.hash;
+        // Search for either button or a tag with href or data-bs-target matching the hash
+        var tabTrigger = document.querySelector('[data-bs-target="' + hash + '"]') || document.querySelector('[href="' + hash + '"]');
+        if (tabTrigger) {
+            var tab = new bootstrap.Tab(tabTrigger);
+            tab.show();
+        }
+    }
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-delete-crm').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const lot = this.dataset.lot;
+            if (confirm(`Apakah Anda yakin ingin menghapus botol CRM Lot ${lot} ini? Penghapusan ini bersifat permanen dan akan menghapus nilai sertifikatnya di semua parameter.`)) {
+                fetch(`/parameter-uji/crm-katalog/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Botol CRM berhasil dihapus.');
+                        window.location.reload();
+                    } else {
+                        alert('Gagal menghapus: ' + data.message);
+                    }
+                });
+            }
+        });
+    });
                         const inputMean = document.getElementById('inputMean');
                         const inputSd = document.getElementById('inputSd');
                         const calcLcl = document.getElementById('calcLcl');
@@ -120,73 +163,63 @@
                         const inputBatasBawah = document.getElementById('inputBatasBawah');
                         const inputBatasAtas = document.getElementById('inputBatasAtas');
                         
-                        const jenisKontrol = document.getElementById('jenis_kontrol');
-                        const cardInHouse = document.getElementById('cardInHouse');
+                        
 
-                        function toggleMode() {
-                            if (jenisKontrol.value === 'in_house') {
-                                cardInHouse.style.display = 'block';
-                                inputAcuan.readOnly = true;
-                                inputBatasBawah.readOnly = true;
-                                inputBatasAtas.readOnly = true;
-                                inputAcuan.classList.add('bg-light');
-                                inputBatasBawah.classList.add('bg-light');
-                                inputBatasAtas.classList.add('bg-light');
-                            } else {
-                                cardInHouse.style.display = 'none';
-                                inputAcuan.readOnly = false;
-                                inputBatasBawah.readOnly = false;
-                                inputBatasAtas.readOnly = false;
-                                inputAcuan.classList.remove('bg-light');
-                                inputBatasBawah.classList.remove('bg-light');
-                                inputBatasAtas.classList.remove('bg-light');
-                                
-                                // Reset statistic fields
-                                inputMean.value = '';
-                                inputSd.value = '';
-                                calculateLimits();
-                            }
-                        }
-
+                                                const btnCalculateStats = document.getElementById('btnCalculateStats');
+                        
                         function calculateLimits() {
-                            const mean = parseFloat(inputMean.value);
-                            const sd = parseFloat(inputSd.value);
+                            const mean = parseFloat(inputMean.value) || 0;
+                            const sd = parseFloat(inputSd.value) || 0;
+                            
+                            if (calcLcl) calcLcl.textContent = (mean - 3 * sd).toFixed(4);
+                            if (calcUwlBawah) calcUwlBawah.textContent = (mean - 2 * sd).toFixed(4);
+                            if (calcUwlAtas) calcUwlAtas.textContent = (mean + 2 * sd).toFixed(4);
+                            if (calcUcl) calcUcl.textContent = (mean + 3 * sd).toFixed(4);
 
-                            if (!isNaN(mean) && !isNaN(sd) && sd > 0) {
-                                calcLcl.value = (mean - (3 * sd)).toFixed(4);
-                                calcUwlBawah.value = (mean - (2 * sd)).toFixed(4);
-                                calcUwlAtas.value = (mean + (2 * sd)).toFixed(4);
-                                calcUcl.value = (mean + (3 * sd)).toFixed(4);
-                                
-                                // Auto sync to main inputs if in_house
-                                if (jenisKontrol.value === 'in_house') {
-                                    inputAcuan.value = mean.toFixed(4);
-                                    inputBatasBawah.value = calcLcl.value;
-                                    inputBatasAtas.value = calcUcl.value;
-                                }
-                            } else {
-                                calcLcl.value = '';
-                                calcUwlBawah.value = '';
-                                calcUwlAtas.value = '';
-                                calcUcl.value = '';
-                                
-                                if (jenisKontrol.value === 'in_house') {
-                                    inputAcuan.value = '';
-                                    inputBatasBawah.value = '';
-                                    inputBatasAtas.value = '';
-                                }
+                            if (mean !== 0) {
+                                inputAcuan.value = mean.toFixed(4);
+                                inputBatasBawah.value = (mean - 3 * sd).toFixed(4);
+                                inputBatasAtas.value = (mean + 3 * sd).toFixed(4);
                             }
                         }
-
-                        jenisKontrol.addEventListener('change', toggleMode);
+                        
                         inputMean.addEventListener('input', calculateLimits);
                         inputSd.addEventListener('input', calculateLimits);
-                        
-                        // Initialization - use DB value
-                        jenisKontrol.value = '{{ old('jenis_kontrol', $parameterUji->jenis_kontrol ?? 'in_house') }}';
-                        toggleMode();
 
-                        const btnCalculateStats = document.getElementById('btnCalculateStats');
+                        const btnUseCrm = document.getElementById('btnUseCrm');
+                        if (btnUseCrm) {
+                            btnUseCrm.addEventListener('click', function() {
+                                const certVals = document.querySelectorAll('input[name*="[cert_value]"]');
+                                const certUs = document.querySelectorAll('input[name*="[cert_u]"]');
+                                let found = false;
+                                for (let i = 0; i < certVals.length; i++) {
+                                    const val = parseFloat(certVals[i].value);
+                                    const u = parseFloat(certUs[i].value) || 0;
+                                    if (!isNaN(val)) {
+                                        inputAcuan.value = val.toFixed(4);
+                                        inputBatasBawah.value = (val - u).toFixed(4);
+                                        inputBatasAtas.value = (val + u).toFixed(4);
+                                        
+                                        // Also clear mean and SD since we are using CRM
+                                        inputMean.value = 0;
+                                        inputSd.value = 0;
+                                        if (calcLcl) {
+                                            calcLcl.textContent = '0';
+                                            calcUwlBawah.textContent = '0';
+                                            calcUwlAtas.textContent = '0';
+                                            calcUcl.textContent = '0';
+                                        }
+                                        
+                                        alert('Berhasil! Nilai Acuan, Batas Bawah, dan Batas Atas telah diisi otomatis menggunakan nilai Sertifikat CRM.');
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                if (!found) {
+                                    alert('Tidak ada nilai Sertifikat CRM yang terisi. Silakan isi nilai sertifikat di tab CRM terlebih dahulu.');
+                                }
+                            });
+                        }
                         if (btnCalculateStats) {
                             btnCalculateStats.addEventListener('click', function() {
                                 const originalText = this.innerHTML;
@@ -317,6 +350,60 @@
                     </div>
                 </div>
 
+                                    </div> <!-- end inhouse tab -->
+                    
+                    <div class="tab-pane fade" id="crm" role="tabpanel">
+                        <p class="mb-3 text-muted fw-bold" style="font-size: 0.85rem;"><i class="fas fa-certificate"></i> Pengaturan Nilai Sertifikat per Lot CRM</p>
+                        <div class="alert alert-warning py-1 px-2 mb-3 d-flex justify-content-between align-items-center" style="font-size: 0.8rem;">
+                            <span>Anda dapat mengisi nilai Sertifikat (Cert Value) dan Uncertainty (U) untuk masing-masing kode Lot CRM yang saat ini aktif. Nilai ini akan digunakan untuk mengevaluasi akurasi hasil uji.</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="m-0 font-weight-bold text-secondary">Daftar Botol / Lot CRM</h6>
+                            <button type="button" class="btn btn-sm btn-info text-white fw-bold" data-bs-toggle="modal" data-bs-target="#modalAddCrm">
+                                <i class="fas fa-plus"></i> Tambah Lot CRM
+                            </button>
+                        </div>
+                        
+                        @if(isset($katalogCrmList) && $katalogCrmList->count() > 0)
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Kode Lot CRM</th>
+                                            <th>Produsen / Jenis</th>
+                                            <th class="text-center" style="width: 25%">Nilai Sertifikat (Cert Value)</th>
+                                            <th class="text-center" style="width: 25%">Uncertainty (U)</th>
+                                            <th class="text-center" style="width: 10%">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($katalogCrmList as $katalog)
+                                            @php
+                                                $sert = $parameterUji->sertifikatCrm->where('crm_katalog_id', $katalog->id)->first();
+                                            @endphp
+                                            <tr>
+                                                <td class="align-middle fw-bold">{{ $katalog->nomor_lot }}</td>
+                                                <td class="align-middle">{{ $katalog->produsen ? $katalog->produsen . " - " : "" }}{{ $katalog->nama_produk }}</td>
+                                                <td>
+                                                    <input type="number" step="0.0001" name="crm_sertifikat[{{ $katalog->id }}][cert_value]" class="form-control form-control-sm" value="{{ $sert ? number_format($sert->cert_value, 4, '.', '') : '' }}" placeholder="Contoh: 9.5000">
+                                                </td>
+                                                <td>
+                                                    <input type="number" step="0.0001" name="crm_sertifikat[{{ $katalog->id }}][cert_u]" class="form-control form-control-sm" value="{{ $sert && $sert->cert_u ? number_format($sert->cert_u, 4, '.', '') : '' }}" placeholder="Contoh: 0.0500">
+                                                  </td>
+                                                  <td class="text-center align-middle">
+                                                      <button type="button" class="btn btn-sm btn-outline-danger btn-delete-crm" data-id="{{ $katalog->id }}" data-lot="{{ $katalog->nomor_lot }}">
+                                                          <i class="fas fa-trash"></i>
+                                                      </button>
+                                                  </td>
+                                              </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </div> <!-- end crm tab -->
+                </div> <!-- end tab content -->
+
                 <div class="d-flex justify-content-end gap-2">
                     <a href="{{ route('parameter-uji.index') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
                     <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan Perubahan</button>
@@ -325,4 +412,168 @@
         </div>
     </div>
 </div>
+
+
+<!-- Modal Tambah CRM -->
+<div class="modal fade" id="modalAddCrm" tabindex="-1" aria-labelledby="modalAddCrmLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title" id="modalAddCrmLabel"><i class="fas fa-certificate"></i> Tambah Lot CRM Baru</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formAddCrm">
+          <input type="hidden" id="crm_parameter_uji_id" value="{{ $parameterUji->parameter_uji_id }}">
+          
+          <div class="mb-3">
+            <label class="form-label fw-bold">Nomor Lot / Kode Sampel <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="crm_nomor_lot" required>
+          </div>
+          
+          <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Produsen / Brand</label>
+                <input type="text" class="form-control" id="crm_produsen" placeholder="Contoh: Alpha Resources">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Jenis / Tipe Material <span class="text-danger">*</span></label>
+                <select class="form-select" id="crm_nama_produk" required>
+                    <option value="" disabled selected>Pilih Tipe Material...</option>
+                    <option value="lignite coal standard">Lignite Coal Standard</option>
+                    <option value="sub-bituminous coal standard">Sub-Bituminous Coal Standard</option>
+                    <option value="bituminous coal standard">Bituminous Coal Standard</option>
+                    <option value="lainnya">Lainnya...</option>
+                </select>
+              </div>
+          </div>
+          
+          <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Nilai Sertifikat (Cert Value)</label>
+                <input type="number" step="0.0001" class="form-control" id="crm_cert_value" placeholder="Contoh: 9.5000">
+                <small class="text-muted">Untuk parameter ini</small>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Ketidakpastian (U)</label>
+                <input type="number" step="0.0001" class="form-control" id="crm_cert_u" placeholder="Contoh: 0.0500">
+              </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Tanggal Kadaluarsa (Exp)</label>
+            <input type="date" class="form-control" id="crm_tanggal_expired">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-info text-white" id="btnSaveCrm">Simpan CRM</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if there is a hash in the URL and switch tab
+    if(window.location.hash) {
+        var hash = window.location.hash;
+        // Search for either button or a tag with href or data-bs-target matching the hash
+        var tabTrigger = document.querySelector('[data-bs-target="' + hash + '"]') || document.querySelector('[href="' + hash + '"]');
+        if (tabTrigger) {
+            var tab = new bootstrap.Tab(tabTrigger);
+            tab.show();
+        }
+    }
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-delete-crm').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.dataset.id;
+            const lot = this.dataset.lot;
+            if (confirm(`Apakah Anda yakin ingin menghapus botol CRM Lot ${lot} ini? Penghapusan ini bersifat permanen dan akan menghapus nilai sertifikatnya di semua parameter.`)) {
+                fetch(`/parameter-uji/crm-katalog/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Botol CRM berhasil dihapus.');
+                        window.location.reload();
+                    } else {
+                        alert('Gagal menghapus: ' + data.message);
+                    }
+                });
+            }
+        });
+    });
+    const btnSaveCrm = document.getElementById('btnSaveCrm');
+    if (btnSaveCrm) {
+        btnSaveCrm.addEventListener('click', function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
+            
+            // Validate required fields
+            const noLot = document.getElementById('crm_nomor_lot').value;
+            const namaProd = document.getElementById('crm_nama_produk').value;
+            const paramId = document.getElementById('crm_parameter_uji_id').value;
+            
+            if (!noLot || !namaProd) {
+                alert('Nomor Lot dan Jenis Material wajib diisi!');
+                return;
+            }
+            if (!paramId) {
+                alert('Parameter Uji ID belum tersedia. Harap simpan Parameter Uji terlebih dahulu sebelum menambah Lot CRM.');
+                return;
+            }
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            btn.disabled = true;
+
+            const data = {
+                _token: '{{ csrf_token() }}',
+                nomor_lot: noLot,
+                nama_produk: namaProd,
+                produsen: document.getElementById('crm_produsen').value,
+                tanggal_expired: document.getElementById('crm_tanggal_expired').value,
+                cert_value: document.getElementById('crm_cert_value').value,
+                cert_u: document.getElementById('crm_cert_u').value,
+                parameter_uji_id: paramId
+            };
+
+            fetch('{{ route('parameter-uji.store-crm') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(res => {
+                if (res.success) {
+                    alert('CRM Baru berhasil ditambahkan beserta nilai sertifikatnya! Halaman akan dimuat ulang.');
+                    window.location.reload();
+                } else {
+                    alert('Gagal menambahkan CRM: ' + (res.message || 'Cek kembali isian Anda.'));
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            })
+            .catch(err => {
+                alert('Terjadi kesalahan sistem.');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        });
+    }
+});
+</script>
 @endsection

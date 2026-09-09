@@ -19,7 +19,7 @@ class Kegiatan extends BaseModel
 
     protected $fillable = [
         'nama_kegiatan',
-        'jenis_kegiatan',
+        'metode_verifikasi',
         'kode_sampel',
         'tanggal_kegiatan',
         'status_kegiatan',
@@ -56,4 +56,9 @@ class Kegiatan extends BaseModel
     public function scopeBerjalan($query) { return $query->where('status_kegiatan', 'berjalan'); }
     public function scopeDraft($query) { return $query->where('status_kegiatan', 'draft'); }
     public function scopeSelesai($query) { return $query->where('status_kegiatan', 'selesai'); }
+
+    public function crmKatalog()
+    {
+        return $this->belongsTo(CrmKatalog::class, 'crm_katalog_id');
+    }
 }

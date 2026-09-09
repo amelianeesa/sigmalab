@@ -2,201 +2,122 @@
 
 namespace App\Services;
 
-use App\Models\HasilUji;
-use App\Models\ParameterUji;
+use Illuminate\Support\Collection;
 
-/**
- * Westgard Multi-Rule Quality Control Engine
- *
- * Mengevaluasi nilai kontrol baru berdasarkan 6 aturan Westgard secara bertingkat:
- * 1-2s (warning) → 1-3s → 2-2s → R-4s → 4-1s → 10x̄
- *
- * Referensi: James O. Westgard, "Basic QC Practices", 4th Edition
- */
 class WestgardService
 {
     /**
-     * Evaluasi nilai kontrol baru terhadap aturan Westgard.
+     * Evaluasi nilai pengujian harian QC menggunakan Westgard Rules
      *
-     * @param float        $nilaiBaru    Nilai hasil uji yang baru diinput
-     * @param ParameterUji $parameter    Parameter uji beserta mean, sd, dan aturan_aktif
-     * @return array{status: string, kode: ?string, z_score: ?float, pesan: ?string}
+     * @param float $d1 Nilai uji 1 (Simplo)
+     * @param float|null $d2 Nilai uji 2 (Duplo)
+     * @param float $mean Nilai rata-rata target (dari Homogenitas)
+     * @param float $sd Nilai standar deviasi (dari Homogenitas)
+     * @param Collection $history 9 data QcHarian terakhir untuk parameter dan batch yang sama (diurutkan descending / terbaru di index 0)
+     * @return array
      */
-    public function evaluate(float $nilaiBaru, ParameterUji $parameter): array
+    public function evaluate(float $d1, ?float $d2, float $mean, float $sd, Collection $history): array
     {
-        // Periksa apakah mean dan sd sudah dikonfigurasi
-        if (empty($parameter->mean) || empty($parameter->sd) || $parameter->sd == 0) {
-            // Fallback ke logika LCL/UCL sederhana (mode lama)
-            return $this->fallbackEvaluation($nilaiBaru, $parameter);
-        }
+        // Hitung nilai akhir pengujian hari ini
+        $nilaiAkhir = $d2 !== null ? ($d1 + $d2) / 2 : $d1;
 
-        $mean = (float) $parameter->mean;
-        $sd   = (float) $parameter->sd;
+        // Jarak dari mean
+        $diff = abs($nilaiAkhir - $mean);
 
-        // Langkah 0: Hitung Z-Score
-        $z = ($nilaiBaru - $mean) / $sd;
-        
-        // Mencegah error DB "Numeric value out of range" untuk tipe decimal(8,4)
-        if ($z > 9999.9999) $z = 9999.9999;
-        if ($z < -9999.9999) $z = -9999.9999;
-
-        // Langkah 1: Cek Warning 1-2s
-        if (abs($z) <= 2) {
+        // 1. GATEKEEPER: Rule 1_2s
+        // Jika nilai tidak melampaui 2SD, langsung Inlier
+        if ($diff <= 2 * $sd) {
             return [
-                'status'  => 'inlier',
-                'kode'    => null,
-                'z_score' => round($z, 4),
-                'pesan'   => null,
+                'status' => 'inlier',
+                'rule' => null,
+                'message' => 'In-Control (Data normal)',
+                'nilai_akhir' => $nilaiAkhir
             ];
         }
 
-        // Warning 1-2s terpicu! Ambil histori untuk evaluasi lanjutan
-        $aturanAktif = $parameter->aturan_aktif ?? ['1-3s', '2-2s', 'R-4s', '4-1s', '10x'];
-        $histori     = $this->getHistoriZScores($parameter, $mean, $sd, 10);
+        // --- RENTETAN ATURAN PENOLAKAN (REJECTION RULES) ---
 
-        // Langkah 2: Evaluasi 5 aturan secara berurutan
-        // Aturan 1-3s: Satu titik data melewati ±3 SD
-        if (in_array('1-3s', $aturanAktif) && abs($z) > 3) {
+        // 2. Rule 1_3s
+        // Apakah titik ini melampaui 3SD?
+        if ($diff > 3 * $sd) {
             return [
-                'status'  => 'outlier',
-                'kode'    => '1-3s',
-                'z_score' => round($z, 4),
-                'pesan'   => 'Pelanggaran 1₃s — Nilai melewati ±3 SD. Kemungkinan gross error. Hasil TIDAK boleh dikeluarkan.',
+                'status' => 'outlier',
+                'rule' => '1_3s',
+                'message' => 'Outlier: Titik data melampaui batas 3SD',
+                'nilai_akhir' => $nilaiAkhir
             ];
         }
 
-        // Aturan 2-2s: Dua titik berturut-turut melewati ±2 SD di sisi yang sama
-        if (in_array('2-2s', $aturanAktif) && count($histori) >= 1) {
-            $zSebelum = $histori[0];
-            if (
-                ($z > 2 && $zSebelum > 2) ||
-                ($z < -2 && $zSebelum < -2)
-            ) {
-                return [
-                    'status'  => 'outlier',
-                    'kode'    => '2-2s',
-                    'z_score' => round($z, 4),
-                    'pesan'   => 'Pelanggaran 2₂s — Dua nilai berturut-turut melewati ±2 SD di sisi yang sama. Terdeteksi systematic error.',
-                ];
+        // 3. Rule 2_2s
+        // Apakah 2 titik berturut-turut melebihi +2SD atau -2SD?
+        if ($history->count() >= 1) {
+            $last = (float)$history->first()->nilai_akhir;
+            if ($nilaiAkhir > $mean + 2 * $sd && $last > $mean + 2 * $sd) {
+                return ['status' => 'outlier', 'rule' => '2_2s', 'message' => 'Outlier: 2 titik berturut-turut melebihi +2SD', 'nilai_akhir' => $nilaiAkhir];
+            }
+            if ($nilaiAkhir < $mean - 2 * $sd && $last < $mean - 2 * $sd) {
+                return ['status' => 'outlier', 'rule' => '2_2s', 'message' => 'Outlier: 2 titik berturut-turut melebihi -2SD', 'nilai_akhir' => $nilaiAkhir];
             }
         }
 
-        // Aturan R-4s: Selisih antara dua titik berturut-turut > 4 SD
-        if (in_array('R-4s', $aturanAktif) && count($histori) >= 1) {
-            $zSebelum = $histori[0];
-            if (abs($z - $zSebelum) > 4) {
-                return [
-                    'status'  => 'outlier',
-                    'kode'    => 'R-4s',
-                    'z_score' => round($z, 4),
-                    'pesan'   => 'Pelanggaran R₄s — Selisih dua nilai berturut-turut melebihi 4 SD. Terdeteksi random error.',
-                ];
+        // 4. Rule R_4s
+        // Apakah selisih antara D1 dan D2 lebih dari 4SD?
+        if ($d2 !== null) {
+            if (abs($d1 - $d2) > 4 * $sd) {
+                return ['status' => 'outlier', 'rule' => 'R_4s', 'message' => 'Outlier: Selisih rentang antara D1 dan D2 melebihi 4SD', 'nilai_akhir' => $nilaiAkhir];
             }
         }
 
-        // Aturan 4-1s: 4 titik terakhir berturut-turut melewati ±1 SD di sisi yang sama
-        if (in_array('4-1s', $aturanAktif) && count($histori) >= 3) {
-            $empat = array_merge([$z], array_slice($histori, 0, 3));
-            $semuaPositif = true;
-            $semuaNegatif = true;
-            foreach ($empat as $val) {
-                if ($val <= 1) $semuaPositif = false;
-                if ($val >= -1) $semuaNegatif = false;
+        // 5. Rule 4_1s
+        // Apakah 4 titik berturut-turut lebih dari +1SD atau -1SD?
+        if ($history->count() >= 3) {
+            $points = [$nilaiAkhir, 
+                       (float)$history[0]->nilai_akhir, 
+                       (float)$history[1]->nilai_akhir, 
+                       (float)$history[2]->nilai_akhir];
+            
+            $allAbove = true;
+            $allBelow = true;
+            foreach ($points as $p) {
+                if ($p <= $mean + $sd) $allAbove = false;
+                if ($p >= $mean - $sd) $allBelow = false;
             }
-            if ($semuaPositif || $semuaNegatif) {
-                return [
-                    'status'  => 'outlier',
-                    'kode'    => '4-1s',
-                    'z_score' => round($z, 4),
-                    'pesan'   => 'Pelanggaran 4₁s — 4 nilai berturut-turut melewati ±1 SD di sisi yang sama. Terdeteksi bias analitik — pertimbangkan kalibrasi ulang.',
-                ];
+            if ($allAbove) {
+                return ['status' => 'outlier', 'rule' => '4_1s', 'message' => 'Outlier: 4 titik berturut-turut melebihi +1SD', 'nilai_akhir' => $nilaiAkhir];
             }
-        }
-
-        // Aturan 10x̄: 10 titik terakhir berturut-turut di sisi yang sama dari mean
-        if (in_array('10x', $aturanAktif) && count($histori) >= 9) {
-            $sepuluh = array_merge([$z], array_slice($histori, 0, 9));
-            $semuaDiAtas = true;
-            $semuaDiBawah = true;
-            foreach ($sepuluh as $val) {
-                if ($val <= 0) $semuaDiAtas = false;
-                if ($val >= 0) $semuaDiBawah = false;
-            }
-            if ($semuaDiAtas || $semuaDiBawah) {
-                return [
-                    'status'  => 'outlier',
-                    'kode'    => '10x',
-                    'z_score' => round($z, 4),
-                    'pesan'   => 'Pelanggaran 10x̄ — 10 nilai berturut-turut berada di sisi yang sama dari mean. Terdeteksi shift/trend.',
-                ];
+            if ($allBelow) {
+                return ['status' => 'outlier', 'rule' => '4_1s', 'message' => 'Outlier: 4 titik berturut-turut melebihi -1SD', 'nilai_akhir' => $nilaiAkhir];
             }
         }
 
-        // Semua aturan "No" → false alarm, tetap In-Control
+        // 6. Rule 10_x
+        // Apakah 10 titik berturut-turut berada di satu sisi dari Mean?
+        if ($history->count() >= 9) {
+            $points = [$nilaiAkhir];
+            for ($i = 0; $i < 9; $i++) {
+                $points[] = (float)$history[$i]->nilai_akhir;
+            }
+            
+            $allAbove = true;
+            $allBelow = true;
+            foreach ($points as $p) {
+                if ($p <= $mean) $allAbove = false;
+                if ($p >= $mean) $allBelow = false;
+            }
+            if ($allAbove) {
+                return ['status' => 'outlier', 'rule' => '10_x', 'message' => 'Outlier: 10 titik berturut-turut berada di atas Mean', 'nilai_akhir' => $nilaiAkhir];
+            }
+            if ($allBelow) {
+                return ['status' => 'outlier', 'rule' => '10_x', 'message' => 'Outlier: 10 titik berturut-turut berada di bawah Mean', 'nilai_akhir' => $nilaiAkhir];
+            }
+        }
+
+        // 7. Jika gerbang 1_2s tertembus tapi TIDAK ADA SATU PUN rejection rule yang tertembus
         return [
-            'status'  => 'inlier',
-            'kode'    => '1-2s',  // Tandai bahwa sempat memicu warning 1-2s
-            'z_score' => round($z, 4),
-            'pesan'   => null,
-        ];
-    }
-
-    /**
-     * Ambil z-score dari N data histori terakhir untuk parameter yang sama.
-     * Diurutkan dari yang paling baru ke paling lama.
-     *
-     * @return float[]
-     */
-    private function getHistoriZScores(ParameterUji $parameter, float $mean, float $sd, int $limit): array
-    {
-        $hasilList = HasilUji::where('parameter_uji_id', $parameter->parameter_uji_id)
-            ->whereNotNull('nilai_hasil')
-            ->orderByDesc('created_at')
-            ->limit($limit)
-            ->pluck('nilai_hasil');
-
-        return $hasilList->map(function ($nilai) use ($mean, $sd) {
-            return ($nilai - $mean) / $sd;
-        })->toArray();
-    }
-
-    /**
-     * Evaluasi fallback menggunakan LCL/UCL atau batas_bawah/batas_atas
-     * (untuk parameter yang belum dikonfigurasi mean & SD-nya).
-     */
-    private function fallbackEvaluation(float $nilaiBaru, ParameterUji $parameter): array
-    {
-        $batasBawah = $parameter->lcl ?? $parameter->batas_bawah;
-        $batasAtas  = $parameter->ucl ?? $parameter->batas_atas;
-
-        // Jika tidak ada batas sama sekali, anggap inlier
-        if (is_null($batasBawah) && is_null($batasAtas)) {
-            return [
-                'status'  => 'inlier',
-                'kode'    => null,
-                'z_score' => null,
-                'pesan'   => null,
-            ];
-        }
-
-        $inBounds = true;
-        if (!is_null($batasBawah) && $nilaiBaru < $batasBawah) $inBounds = false;
-        if (!is_null($batasAtas)  && $nilaiBaru > $batasAtas)  $inBounds = false;
-
-        if ($inBounds) {
-            return [
-                'status'  => 'inlier',
-                'kode'    => null,
-                'z_score' => null,
-                'pesan'   => null,
-            ];
-        }
-
-        return [
-            'status'  => 'outlier',
-            'kode'    => null,
-            'z_score' => null,
-            'pesan'   => "Nilai di luar batas kendali ({$batasBawah} - {$batasAtas}).",
+            'status' => 'warning',
+            'rule' => '1_2s',
+            'message' => 'Warning (1_2s): Titik melebihi 2SD namun lolos uji penolakan (murni variasi acak)',
+            'nilai_akhir' => $nilaiAkhir
         ];
     }
 }

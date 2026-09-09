@@ -7,7 +7,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
             <li class="breadcrumb-item"><a href="{{ route('kegiatan.index') }}" class="text-decoration-underline text-primary text-decoration-none">Verifikasi Mutu</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('hasil-uji.inhouse-control') }}" class="text-decoration-none">Inhouse Control</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('hasil-uji.inhouse-control') }}" class="text-decoration-none">Monitoring QC</a></li>
             @if($selectedParameter)
                 <li class="breadcrumb-item active" aria-current="page">{{ $selectedParameter->nama_parameter }}</li>
             @endif
@@ -25,26 +25,22 @@
         </div>
         <div class="card-body">
             <form action="{{ url()->current() }}" method="GET" class="row g-3 align-items-end">
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label for="parameter_uji_id" class="form-label">Parameter Uji</label>
                     <select class="form-select" id="parameter_uji_id" name="parameter_uji_id" required>
                         <option value="">-- Pilih Parameter --</option>
-                        <optgroup label="In-House Control">
-                            @foreach($parameterList->where('jenis_kontrol', '!=', 'crm') as $param)
-                                <option value="{{ $param->parameter_uji_id }}" {{ request('parameter_uji_id') == $param->parameter_uji_id ? 'selected' : '' }}>
-                                    {{ $param->nama_parameter }} ({{ $param->satuan }})
-                                </option>
-                            @endforeach
-                        </optgroup>
-                        @if($parameterList->where('jenis_kontrol', 'crm')->count() > 0)
-                        <optgroup label="CRM (Sertifikat Pabrik)">
-                            @foreach($parameterList->where('jenis_kontrol', 'crm') as $param)
-                                <option value="{{ $param->parameter_uji_id }}" {{ request('parameter_uji_id') == $param->parameter_uji_id ? 'selected' : '' }}>
-                                    {{ $param->nama_parameter }} ({{ $param->satuan }})
-                                </option>
-                            @endforeach
-                        </optgroup>
-                        @endif
+                        @foreach($parameterList as $param)
+                            <option value="{{ $param->parameter_uji_id }}" {{ request('parameter_uji_id') == $param->parameter_uji_id ? 'selected' : '' }}>
+                                {{ $param->nama_parameter }} ({{ $param->satuan }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="jenis_grafik" class="form-label">Jenis Grafik</label>
+                    <select class="form-select" id="jenis_grafik" name="jenis_grafik" required>
+                        <option value="in_house" {{ request('jenis_grafik', 'in_house') == 'in_house' ? 'selected' : '' }}>In-House (Levy-Jennings)</option>
+                        <option value="crm" {{ request('jenis_grafik') == 'crm' ? 'selected' : '' }}>CRM (Akurasi % Recovery)</option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -352,6 +348,7 @@
                         pointRadius: 0,
                         fill: false
                     },
+                    @if(request('jenis_grafik') != 'crm')
                     {
                         label: '+1 SD',
                         data: p1sdData,
@@ -388,8 +385,9 @@
                         pointRadius: 0,
                         fill: false
                     },
+                    @endif
                     {
-                        label: '+3 SD (UCL)',
+                        label: '{{ request('jenis_grafik') == 'crm' ? 'Batas Atas Recovery' : '+3 SD (UCL)' }}',
                         data: p3sdData,
                         borderColor: '#dc3545',
                         borderWidth: 2,
@@ -398,7 +396,7 @@
                         fill: false
                     },
                     {
-                        label: '-3 SD (LCL)',
+                        label: '{{ request('jenis_grafik') == 'crm' ? 'Batas Bawah Recovery' : '-3 SD (LCL)' }}',
                         data: m3sdData,
                         borderColor: '#dc3545',
                         borderWidth: 2,

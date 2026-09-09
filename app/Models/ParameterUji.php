@@ -22,8 +22,7 @@ class ParameterUji extends BaseModel
         'nama_parameter',
         'satuan',
         'kategori_parameter',
-        'jenis_kontrol',
-        'nilai_acuan',
+                'nilai_acuan',
         'batas_bawah',
         'batas_atas',
         'lcl',
@@ -32,6 +31,7 @@ class ParameterUji extends BaseModel
         'uwl_atas',
         'ucl',
         'sd',
+
         'aturan_aktif',
         'metode_kriteria',
         'rumus_kalkulasi',
@@ -64,4 +64,13 @@ class ParameterUji extends BaseModel
         return $this->hasilUji()->exists();
     }
 
+    public function hasInhouseLimits(): bool
+    {
+        return !is_null($this->mean) && !is_null($this->sd);
+    }
+
+    public function sertifikatCrm()
+    {
+        return $this->hasMany(CrmSertifikat::class, 'parameter_uji_id', 'parameter_uji_id');
+    }
 }

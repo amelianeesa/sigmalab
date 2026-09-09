@@ -62,8 +62,8 @@
 
             {{-- 3. Proses dan Hasil Pengujian (QC) --}}
             @if(Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
-            <li class="{{ request()->is('parameter-uji*') || request()->is('kegiatan*') || request()->is('inhouse-control*') || request()->is('tindak-lanjut*') || request()->is('reporting*') ? 'active' : '' }}">
-                <a href="{{ route('kegiatan.index') }}"><i class="fas fa-flask"></i> Verifikasi Mutu (QC)</a>
+            <li class="{{ request()->is('verifikasi-mutu*') || request()->is('qc-inhouse*') || request()->is('parameter-uji*') || request()->is('kegiatan*') || request()->is('inhouse-control*') || request()->is('tindak-lanjut*') || request()->is('reporting*') ? 'active' : '' }}">
+                <a href="{{ route('verifikasi-mutu.index') }}"><i class="fas fa-flask"></i> Verifikasi Mutu (QC)</a>
             </li>
             @endif
 

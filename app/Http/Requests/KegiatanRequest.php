@@ -7,24 +7,16 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class KegiatanRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
             'nama_kegiatan' => 'required|string|max:255',
-            'jenis_kegiatan' => 'required|in:pengujian,kalibrasi',
+            'crm_katalog_id' => 'required_with:crm_parameter_uji_ids|nullable|exists:crm_katalog,id',
             'kode_sampel' => 'nullable|string|max:50',
             'tanggal_kegiatan' => 'required|date',
             'status_kegiatan' => 'required|in:draft,berjalan,selesai,dibatalkan',
@@ -36,8 +28,17 @@ class KegiatanRequest extends FormRequest
             'barang_ids' => 'nullable|array',
             'barang_ids.*' => 'exists:barang,barang_id',
             'barang_jumlah' => 'nullable|array',
-            'parameter_uji_ids' => 'nullable|array',
-            'parameter_uji_ids.*' => 'exists:parameter_uji,parameter_uji_id',
+            'inhouse_parameter_uji_ids' => 'nullable|array',
+            'inhouse_parameter_uji_ids.*' => 'exists:parameter_uji,parameter_uji_id',
+            'crm_parameter_uji_ids' => 'nullable|array',
+            'crm_parameter_uji_ids.*' => 'exists:parameter_uji,parameter_uji_id',
+        ];
+    }
+    
+    public function messages(): array
+    {
+        return [
+            'crm_katalog_id.required_with' => 'Anda harus memilih Botol CRM (Sertifikat Pabrik) jika ada parameter CRM yang dipilih.',
         ];
     }
 }

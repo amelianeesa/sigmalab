@@ -51,28 +51,31 @@
                 @php
                     $vars = $hasilUji->parameterUji->variabel_input ?? [];
                     $deps = $hasilUji->parameterUji->dependensi_parameter ?? [];
+                    $ucl = $hasilUji->parameterUji->ucl ?? 'null';
+                    $lcl = $hasilUji->parameterUji->lcl ?? 'null';
                 @endphp
 
-                @if($hasilUji->parameterUji->rumus_kalkulasi === 'CUSTOM_IM')
-                    <div class="p-3 mb-3 bg-light rounded border">
-                        <h5 class="mb-3 text-primary border-bottom pb-2">
-                            Data Mentah - Inherent Moisture (Duplo)
-                        </h5>
+                                  @if($hasilUji->parameterUji->rumus_kalkulasi === 'CUSTOM_IM')
+                      <div id="runsContainer">
+                          <div class="run-block p-3 mb-3 bg-light rounded border" data-run-index="0">
+                              <h5 class="mb-3 text-primary border-bottom pb-2 run-title">
+                                  Data Mentah - Inherent Moisture (Duplo) - Run 1
+                              </h5>
                         <div class="row">
                             <!-- Dish 1 -->
                             <div class="col-md-6 border-end">
                                 <h6 class="text-secondary font-weight-bold mb-3">DISH 1</h6>
                                 <div class="mb-3">
                                     <label class="form-label">M1 (Massa Cawan Kosong) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[M1_D1]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][M1_D1]" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">A (Massa Sampel) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[A_D1]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][A_D1]" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">M3 (Massa Cawan + Kering) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[M3_D1]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][M3_D1]" required>
                                 </div>
                             </div>
                             <!-- Dish 2 -->
@@ -80,20 +83,52 @@
                                 <h6 class="text-secondary font-weight-bold mb-3">DISH 2</h6>
                                 <div class="mb-3">
                                     <label class="form-label">M1 (Massa Cawan Kosong) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[M1_D2]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][M1_D2]" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">A (Massa Sampel) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[A_D2]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][A_D2]" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">M3 (Massa Cawan + Kering) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[M3_D2]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][M3_D2]" required>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                @elseif($hasilUji->parameterUji->rumus_kalkulasi === 'CUSTOM_ASH')
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="card border-info">
+                                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center py-2">
+                                        <h6 class="m-0 fw-bold"><i class="fas fa-calculator me-1"></i> Pratinjau Hasil Kalkulasi IM (ad)</h6>
+                                        <button type="button" class="btn btn-sm btn-light text-info fw-bold btn-preview-im">Hitung Sekarang</button>
+                                    </div>
+                                    <div class="card-body bg-light text-start preview-box-im" style="display:none;">
+                                        <div class="row">
+                                              <div class="col-md-4 text-center">
+                                                  <small class="text-muted d-block fw-bold border-bottom pb-1 mb-2">Dish 1</small>
+                                                  <div class="small">M2 (M1+A) = <span class="text-primary fw-bold resM2_D1">-</span></div>
+                                                  <div class="small mb-1">B (M3-M1) = <span class="text-primary fw-bold resB_D1">-</span></div>
+                                                  <div class="mt-2 text-dark fw-bold">M% = <span class="text-primary fs-5 resD1">-</span></div>
+                                              </div>
+                                              <div class="col-md-4 border-start border-end text-center">
+                                                  <small class="text-muted d-block fw-bold border-bottom pb-1 mb-2">Dish 2</small>
+                                                  <div class="small">M2 (M1+A) = <span class="text-primary fw-bold resM2_D2">-</span></div>
+                                                  <div class="small mb-1">B (M3-M1) = <span class="text-primary fw-bold resB_D2">-</span></div>
+                                                  <div class="mt-2 text-dark fw-bold">M% = <span class="text-primary fs-5 resD2">-</span></div>
+                                              </div>
+                                              <div class="col-md-4 text-center">
+                                                  <small class="text-muted d-block fw-bold border-bottom pb-1">Rata-Rata Final</small>
+                                                  <h4 class="text-success fw-bold mb-0 mt-3 resFinal">-</h4>
+                                              </div>
+                                          </div>
+                                        <div id="resWarning_0" class="res-warning mt-3 text-start"></div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                      </div> <!-- end run-block -->
+                      </div> <!-- end runsContainer -->
+                  @elseif($hasilUji->parameterUji->rumus_kalkulasi === 'CUSTOM_ASH')
                     <div class="p-3 mb-3 bg-light rounded border">
                         <h5 class="mb-3 text-primary border-bottom pb-2">
                             Data Mentah - Ash Content (Duplo)
@@ -110,15 +145,15 @@
                                 <h6 class="text-secondary font-weight-bold mb-3">DISH 1</h6>
                                 <div class="mb-3">
                                     <label class="form-label">M1 (Massa Cawan Kosong) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[M1_D1]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][M1_D1]" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">M2-M1 (Massa Sampel) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[M2M1_D1]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][M2M1_D1]" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">M3 (Massa Cawan + Abu) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[M3_D1]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][M3_D1]" required>
                                 </div>
                             </div>
                             <!-- Dish 2 -->
@@ -126,15 +161,15 @@
                                 <h6 class="text-secondary font-weight-bold mb-3">DISH 2</h6>
                                 <div class="mb-3">
                                     <label class="form-label">M1 (Massa Cawan Kosong) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[M1_D2]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][M1_D2]" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">M2-M1 (Massa Sampel) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[M2M1_D2]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][M2M1_D2]" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">M3 (Massa Cawan + Abu) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[M3_D2]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][M3_D2]" required>
                                 </div>
                             </div>
                         </div>
@@ -156,15 +191,15 @@
                                 <h6 class="text-secondary font-weight-bold mb-3">DISH 1</h6>
                                 <div class="mb-3">
                                     <label class="form-label">M1 (Massa Cawan Kosong) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[M1_D1]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][M1_D1]" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">M2-M1 (Massa Sampel) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[M2M1_D1]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][M2M1_D1]" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">M3 (Massa Cawan + Residu) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[M3_D1]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][M3_D1]" required>
                                 </div>
                             </div>
                             <!-- Dish 2 -->
@@ -172,15 +207,15 @@
                                 <h6 class="text-secondary font-weight-bold mb-3">DISH 2</h6>
                                 <div class="mb-3">
                                     <label class="form-label">M1 (Massa Cawan Kosong) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[M1_D2]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][M1_D2]" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">M2-M1 (Massa Sampel) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[M2M1_D2]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][M2M1_D2]" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">M3 (Massa Cawan + Residu) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[M3_D2]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][M3_D2]" required>
                                 </div>
                             </div>
                             </div>
@@ -200,14 +235,14 @@
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">Reference Value (%db) <span class="text-danger">*</span></label>
-                                <input type="number" step="0.01" class="form-control" name="variabel[reference_value]" required
+                                <input type="number" step="0.01" class="form-control" name="runs[0][variabel][reference_value]" required
                                     value="{{ old('variabel.reference_value', $hasilUji->data_mentah['reference_value'] ?? '') }}"
                                     placeholder="Masukkan nilai referensi metode standar">
                                 <small class="text-muted">Nilai acuan dari CRM / inter-lab / metode standar</small>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-bold">IM Average (%) <small class="text-muted">(opsional)</small></label>
-                                <input type="number" step="0.0001" class="form-control" name="variabel[IM_Average]"
+                                <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][IM_Average]"
                                     value="{{ old('variabel.IM_Average', $hasilUji->data_mentah['IM_Average'] ?? '') }}"
                                     placeholder="Rata-rata IM untuk %db">
                                 <small class="text-muted">Jika kosong, sistem pakai nilai IM dari kegiatan ini</small>
@@ -230,19 +265,19 @@
                                             <td class="fw-bold {{ $r % 2 == 1 ? 'text-primary' : 'text-secondary' }}">{{ $r }}</td>
                                             <td>
                                                 <input type="number" step="0.0001" class="form-control form-control-sm"
-                                                    name="variabel[M1_R{{ $r }}]"
+                                                    name="runs[0][variabel][M1_R{{ $r }}]"
                                                     value="{{ old("variabel.M1_R{$r}", $hasilUji->data_mentah["M1_R{$r}"] ?? '') }}"
                                                     {{ $r <= 2 ? 'required' : '' }}>
                                             </td>
                                             <td>
                                                 <input type="number" step="0.0001" class="form-control form-control-sm"
-                                                    name="variabel[M2M1_R{{ $r }}]"
+                                                    name="runs[0][variabel][M2M1_R{{ $r }}]"
                                                     value="{{ old("variabel.M2M1_R{$r}", $hasilUji->data_mentah["M2M1_R{$r}"] ?? '') }}"
                                                     {{ $r <= 2 ? 'required' : '' }}>
                                             </td>
                                             <td>
                                                 <input type="number" step="0.0001" class="form-control form-control-sm"
-                                                    name="variabel[M3_R{{ $r }}]"
+                                                    name="runs[0][variabel][M3_R{{ $r }}]"
                                                     value="{{ old("variabel.M3_R{$r}", $hasilUji->data_mentah["M3_R{$r}"] ?? '') }}"
                                                     {{ $r <= 2 ? 'required' : '' }}>
                                             </td>
@@ -270,11 +305,11 @@
                                 <h6 class="text-secondary font-weight-bold mb-3">PENGUJIAN 1</h6>
                                 <div class="mb-3">
                                     <label class="form-label">Massa Sampel (gram) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[Massa_D1]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][Massa_D1]" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">TS % (adb) - Instrumen <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[TS_adb_D1]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][TS_adb_D1]" required>
                                 </div>
                             </div>
                             <!-- Dish 2 -->
@@ -282,11 +317,11 @@
                                 <h6 class="text-secondary font-weight-bold mb-3">PENGUJIAN 2</h6>
                                 <div class="mb-3">
                                     <label class="form-label">Massa Sampel (gram) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[Massa_D2]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][Massa_D2]" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">TS % (adb) - Instrumen <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control" name="variabel[TS_adb_D2]" required>
+                                    <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][TS_adb_D2]" required>
                                 </div>
                             </div>
                         </div>
@@ -313,51 +348,51 @@
                                 <div class="row mb-2">
                                     <div class="col-6">
                                         <label class="form-label small fw-bold">Vessel No <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control form-control-sm" name="variabel[Vessel_D1]" required>
+                                        <input type="text" class="form-control form-control-sm" name="runs[0][variabel][Vessel_D1]" required>
                                     </div>
                                     <div class="col-6">
                                         <label class="form-label small fw-bold">Call ID <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control form-control-sm" name="variabel[Call_ID_D1]" required>
+                                        <input type="text" class="form-control form-control-sm" name="runs[0][variabel][Call_ID_D1]" required>
                                     </div>
                                 </div>
                                 <div class="row mb-2">
                                     <div class="col-6">
                                         <label class="form-label small fw-bold">Crucible Mass (g) <span class="text-danger">*</span></label>
-                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="variabel[Crucible_D1]" required>
+                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="runs[0][variabel][Crucible_D1]" required>
                                     </div>
                                     <div class="col-6">
                                         <label class="form-label small fw-bold">Sample Mass (g) <span class="text-danger">*</span></label>
-                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="variabel[Massa_D1]" required>
+                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="runs[0][variabel][Massa_D1]" required>
                                     </div>
                                 </div>
                                 <div class="row mb-2">
                                     <div class="col-6">
                                         <label class="form-label small fw-bold">Primary Result <span class="text-danger">*</span></label>
-                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="variabel[Primary_D1]" required>
+                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="runs[0][variabel][Primary_D1]" required>
                                     </div>
                                     <div class="col-6">
                                         <label class="form-label small fw-bold">Ee (cal/℃) <span class="text-danger">*</span></label>
-                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="variabel[Ee_D1]" required>
+                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="runs[0][variabel][Ee_D1]" required>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-4">
                                         <label class="form-label small fw-bold">t (℃) <span class="text-danger">*</span></label>
-                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="variabel[t_D1]" required>
+                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="runs[0][variabel][t_D1]" required>
                                     </div>
                                     <div class="col-4">
                                         <label class="form-label small fw-bold">Titrant (ml) <span class="text-danger">*</span></label>
-                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="variabel[Titrant_D1]" required>
+                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="runs[0][variabel][Titrant_D1]" required>
                                     </div>
                                     <div class="col-4">
                                         <label class="form-label small fw-bold">Fuse (cm) <span class="text-danger">*</span></label>
-                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="variabel[Fuse_D1]" required>
+                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="runs[0][variabel][Fuse_D1]" required>
                                     </div>
                                 </div>
                                 
                                 <div class="bg-primary text-white p-2 rounded mb-3">
                                     <label class="form-label small fw-bold mb-0">Final Result (cal/g), adb <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control form-control-sm fw-bold mt-1" name="variabel[Final_adb_D1]" required placeholder="Input dari alat">
+                                    <input type="number" step="0.0001" class="form-control form-control-sm fw-bold mt-1" name="runs[0][variabel][Final_adb_D1]" required placeholder="Input dari alat">
                                 </div>
                             </div>
                             
@@ -368,51 +403,51 @@
                                 <div class="row mb-2">
                                     <div class="col-6">
                                         <label class="form-label small fw-bold">Vessel No <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control form-control-sm" name="variabel[Vessel_D2]" required>
+                                        <input type="text" class="form-control form-control-sm" name="runs[0][variabel][Vessel_D2]" required>
                                     </div>
                                     <div class="col-6">
                                         <label class="form-label small fw-bold">Call ID <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control form-control-sm" name="variabel[Call_ID_D2]" required>
+                                        <input type="text" class="form-control form-control-sm" name="runs[0][variabel][Call_ID_D2]" required>
                                     </div>
                                 </div>
                                 <div class="row mb-2">
                                     <div class="col-6">
                                         <label class="form-label small fw-bold">Crucible Mass (g) <span class="text-danger">*</span></label>
-                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="variabel[Crucible_D2]" required>
+                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="runs[0][variabel][Crucible_D2]" required>
                                     </div>
                                     <div class="col-6">
                                         <label class="form-label small fw-bold">Sample Mass (g) <span class="text-danger">*</span></label>
-                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="variabel[Massa_D2]" required>
+                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="runs[0][variabel][Massa_D2]" required>
                                     </div>
                                 </div>
                                 <div class="row mb-2">
                                     <div class="col-6">
                                         <label class="form-label small fw-bold">Primary Result <span class="text-danger">*</span></label>
-                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="variabel[Primary_D2]" required>
+                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="runs[0][variabel][Primary_D2]" required>
                                     </div>
                                     <div class="col-6">
                                         <label class="form-label small fw-bold">Ee (cal/℃) <span class="text-danger">*</span></label>
-                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="variabel[Ee_D2]" required>
+                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="runs[0][variabel][Ee_D2]" required>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-4">
                                         <label class="form-label small fw-bold">t (℃) <span class="text-danger">*</span></label>
-                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="variabel[t_D2]" required>
+                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="runs[0][variabel][t_D2]" required>
                                     </div>
                                     <div class="col-4">
                                         <label class="form-label small fw-bold">Titrant (ml) <span class="text-danger">*</span></label>
-                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="variabel[Titrant_D2]" required>
+                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="runs[0][variabel][Titrant_D2]" required>
                                     </div>
                                     <div class="col-4">
                                         <label class="form-label small fw-bold">Fuse (cm) <span class="text-danger">*</span></label>
-                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="variabel[Fuse_D2]" required>
+                                        <input type="number" step="0.0001" class="form-control form-control-sm" name="runs[0][variabel][Fuse_D2]" required>
                                     </div>
                                 </div>
                                 
                                 <div class="bg-primary text-white p-2 rounded mb-3">
                                     <label class="form-label small fw-bold mb-0">Final Result (cal/g), adb <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.0001" class="form-control form-control-sm fw-bold mt-1" name="variabel[Final_adb_D2]" required placeholder="Input dari alat">
+                                    <input type="number" step="0.0001" class="form-control form-control-sm fw-bold mt-1" name="runs[0][variabel][Final_adb_D2]" required placeholder="Input dari alat">
                                 </div>
                             </div>
                         </div>
@@ -425,7 +460,7 @@
                         
                         <div class="mb-4 col-md-4">
                             <label class="form-label fw-bold">Atmosphere (Kondisi Gas) <span class="text-danger">*</span></label>
-                            <select name="variabel[Atmosphere]" class="form-select" required>
+                            <select name="runs[0][variabel][Atmosphere]" class="form-select" required>
                                 <option value="Reducing">Reducing</option>
                                 <option value="Oxidizing">Oxidizing</option>
                             </select>
@@ -437,19 +472,19 @@
                                 <h6 class="text-secondary font-weight-bold mb-3 border-bottom pb-1"><i class="fas fa-thermometer-half"></i> PENGUJIAN 1</h6>
                                 <div class="mb-2">
                                     <label class="form-label small fw-bold">IDT (℃) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.1" class="form-control form-control-sm" name="variabel[IDT_D1]" required>
+                                    <input type="number" step="0.1" class="form-control form-control-sm" name="runs[0][variabel][IDT_D1]" required>
                                 </div>
                                 <div class="mb-2">
                                     <label class="form-label small fw-bold">ST (℃) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.1" class="form-control form-control-sm" name="variabel[ST_D1]" required>
+                                    <input type="number" step="0.1" class="form-control form-control-sm" name="runs[0][variabel][ST_D1]" required>
                                 </div>
                                 <div class="mb-2">
                                     <label class="form-label small fw-bold">HT (℃) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.1" class="form-control form-control-sm" name="variabel[HT_D1]" required>
+                                    <input type="number" step="0.1" class="form-control form-control-sm" name="runs[0][variabel][HT_D1]" required>
                                 </div>
                                 <div class="mb-2">
                                     <label class="form-label small fw-bold">FT (℃) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.1" class="form-control form-control-sm" name="variabel[FT_D1]" required>
+                                    <input type="number" step="0.1" class="form-control form-control-sm" name="runs[0][variabel][FT_D1]" required>
                                 </div>
                             </div>
                             
@@ -458,19 +493,19 @@
                                 <h6 class="text-secondary font-weight-bold mb-3 border-bottom pb-1"><i class="fas fa-thermometer-half"></i> PENGUJIAN 2</h6>
                                 <div class="mb-2">
                                     <label class="form-label small fw-bold">IDT (℃) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.1" class="form-control form-control-sm" name="variabel[IDT_D2]" required>
+                                    <input type="number" step="0.1" class="form-control form-control-sm" name="runs[0][variabel][IDT_D2]" required>
                                 </div>
                                 <div class="mb-2">
                                     <label class="form-label small fw-bold">ST (℃) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.1" class="form-control form-control-sm" name="variabel[ST_D2]" required>
+                                    <input type="number" step="0.1" class="form-control form-control-sm" name="runs[0][variabel][ST_D2]" required>
                                 </div>
                                 <div class="mb-2">
                                     <label class="form-label small fw-bold">HT (℃) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.1" class="form-control form-control-sm" name="variabel[HT_D2]" required>
+                                    <input type="number" step="0.1" class="form-control form-control-sm" name="runs[0][variabel][HT_D2]" required>
                                 </div>
                                 <div class="mb-2">
                                     <label class="form-label small fw-bold">FT (℃) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.1" class="form-control form-control-sm" name="variabel[FT_D2]" required>
+                                    <input type="number" step="0.1" class="form-control form-control-sm" name="runs[0][variabel][FT_D2]" required>
                                 </div>
                             </div>
                         </div>
@@ -487,19 +522,19 @@
                                 <h6 class="text-secondary font-weight-bold mb-3 border-bottom pb-1"><i class="fas fa-flask"></i> PENGUJIAN 1</h6>
                                 <div class="mb-2">
                                     <label class="form-label small fw-bold">Weight (mg) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.01" class="form-control form-control-sm" name="variabel[Weight_D1]" required>
+                                    <input type="number" step="0.01" class="form-control form-control-sm" name="runs[0][variabel][Weight_D1]" required>
                                 </div>
                                 <div class="mb-2">
                                     <label class="form-label small fw-bold">Carbon, C (% db) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.01" class="form-control form-control-sm" name="variabel[C_D1]" required>
+                                    <input type="number" step="0.01" class="form-control form-control-sm" name="runs[0][variabel][C_D1]" required>
                                 </div>
                                 <div class="mb-2">
                                     <label class="form-label small fw-bold">Hydrogen, H (% db) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.01" class="form-control form-control-sm" name="variabel[H_D1]" required>
+                                    <input type="number" step="0.01" class="form-control form-control-sm" name="runs[0][variabel][H_D1]" required>
                                 </div>
                                 <div class="mb-2">
                                     <label class="form-label small fw-bold">Nitrogen, N (% db) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.01" class="form-control form-control-sm" name="variabel[N_D1]" required>
+                                    <input type="number" step="0.01" class="form-control form-control-sm" name="runs[0][variabel][N_D1]" required>
                                 </div>
                             </div>
                             
@@ -508,19 +543,19 @@
                                 <h6 class="text-secondary font-weight-bold mb-3 border-bottom pb-1"><i class="fas fa-flask"></i> PENGUJIAN 2</h6>
                                 <div class="mb-2">
                                     <label class="form-label small fw-bold">Weight (mg) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.01" class="form-control form-control-sm" name="variabel[Weight_D2]" required>
+                                    <input type="number" step="0.01" class="form-control form-control-sm" name="runs[0][variabel][Weight_D2]" required>
                                 </div>
                                 <div class="mb-2">
                                     <label class="form-label small fw-bold">Carbon, C (% db) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.01" class="form-control form-control-sm" name="variabel[C_D2]" required>
+                                    <input type="number" step="0.01" class="form-control form-control-sm" name="runs[0][variabel][C_D2]" required>
                                 </div>
                                 <div class="mb-2">
                                     <label class="form-label small fw-bold">Hydrogen, H (% db) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.01" class="form-control form-control-sm" name="variabel[H_D2]" required>
+                                    <input type="number" step="0.01" class="form-control form-control-sm" name="runs[0][variabel][H_D2]" required>
                                 </div>
                                 <div class="mb-2">
                                     <label class="form-label small fw-bold">Nitrogen, N (% db) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.01" class="form-control form-control-sm" name="variabel[N_D2]" required>
+                                    <input type="number" step="0.01" class="form-control form-control-sm" name="runs[0][variabel][N_D2]" required>
                                 </div>
                             </div>
                         </div>
@@ -540,7 +575,7 @@
                             @foreach($vars as $v)
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">{{ $v }} <span class="text-danger">*</span></label>
-                                <input type="number" step="0.0001" class="form-control" name="variabel[{{ $v }}]" required>
+                                <input type="number" step="0.0001" class="form-control" name="runs[0][variabel][{{ $v }}]" required>
                             </div>
                             @endforeach
                         </div>
@@ -569,4 +604,91 @@
     </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('btn-preview-im')) {
+            const runBlock = e.target.closest('.run-block');
+            if(!runBlock) return;
+            const index = runBlock.getAttribute('data-run-index');
+            
+            const m1_d1 = parseFloat(runBlock.querySelector('input[name="runs['+index+'][variabel][M1_D1]"]').value);
+            const a_d1 = parseFloat(runBlock.querySelector('input[name="runs['+index+'][variabel][A_D1]"]').value);
+            const m3_d1 = parseFloat(runBlock.querySelector('input[name="runs['+index+'][variabel][M3_D1]"]').value);
+            
+            const m1_d2 = parseFloat(runBlock.querySelector('input[name="runs['+index+'][variabel][M1_D2]"]').value);
+            const a_d2 = parseFloat(runBlock.querySelector('input[name="runs['+index+'][variabel][A_D2]"]').value);
+            const m3_d2 = parseFloat(runBlock.querySelector('input[name="runs['+index+'][variabel][M3_D2]"]').value);
+            
+            if (isNaN(m1_d1) || isNaN(a_d1) || isNaN(m3_d1) || isNaN(m1_d2) || isNaN(a_d2) || isNaN(m3_d2)) {
+                alert("Harap isi seluruh field Dish 1 dan Dish 2 dengan angka sebelum menekan tombol Hitung.");
+                return;
+            }
+            
+            const m2_d1 = m1_d1 + a_d1;
+            const b_d1 = m3_d1 - m1_d1;
+            const im1 = ((a_d1 - b_d1) / a_d1) * 100;
+            
+            const m2_d2 = m1_d2 + a_d2;
+            const b_d2 = m3_d2 - m1_d2;
+            const im2 = ((a_d2 - b_d2) / a_d2) * 100;
+            
+            const final = (im1 + im2) / 2;
+            const selisih = Math.abs(im1 - im2);
+            
+            runBlock.querySelector('.preview-box-im').style.display = 'block';
+            
+            runBlock.querySelector('.resM2_D1').innerText = m2_d1.toFixed(4);
+            runBlock.querySelector('.resB_D1').innerText = b_d1.toFixed(4);
+            runBlock.querySelector('.resD1').innerText = im1.toFixed(4) + ' %';
+            
+            runBlock.querySelector('.resM2_D2').innerText = m2_d2.toFixed(4);
+            runBlock.querySelector('.resB_D2').innerText = b_d2.toFixed(4);
+            runBlock.querySelector('.resD2').innerText = im2.toFixed(4) + ' %';
+            
+            runBlock.querySelector('.resFinal').innerText = final.toFixed(4) + ' %';
+            
+            const warningBox = runBlock.querySelector('.res-warning');
+            // Warning box dihilangkan sesuai permintaan
+            warningBox.innerHTML = '<div class="alert alert-info mb-0 py-2"><i class="fas fa-info-circle me-1"></i> Kalkulasi selesai. Silakan klik <strong>Simpan Data Pengujian</strong> untuk mengevaluasi status batas kendali (Inlier/Outlier).</div>';
+        }
+        
+        if (e.target && e.target.classList.contains('btn-add-run')) {
+            e.target.style.display = 'none'; // hide the button so they don't click it twice
+            
+            const container = document.getElementById('runsContainer');
+            const blocks = container.querySelectorAll('.run-block');
+            const lastBlock = blocks[blocks.length - 1];
+            
+            // Clone the block
+            const newBlock = lastBlock.cloneNode(true);
+            const newIndex = blocks.length; // next index
+            
+            newBlock.setAttribute('data-run-index', newIndex);
+            newBlock.querySelector('.run-title').innerText = 'Data Mentah - Inherent Moisture (Duplo) - Run ' + (newIndex + 1);
+            
+            // Update names of all inputs
+            const inputs = newBlock.querySelectorAll('input');
+            inputs.forEach(inp => {
+                const oldName = inp.getAttribute('name');
+                if (oldName) {
+                    const newName = oldName.replace(/runs\[\d+\]/, 'runs[' + newIndex + ']');
+                    inp.setAttribute('name', newName);
+                }
+                inp.value = ''; // clear value
+            });
+            
+            // Reset preview box
+            newBlock.querySelector('.preview-box-im').style.display = 'none';
+            newBlock.querySelector('.res-warning').innerHTML = '';
+            
+            // Append and scroll
+            container.appendChild(newBlock);
+            newBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+
+});
+</script>
 @endsection

@@ -61,7 +61,6 @@ class Alat extends BaseModel
         if (!$status) return $query;
 
         return $query->whereHas('riwayatKalibrasi', function ($q) use ($status) {
-            // Only look at the latest calibration record per alat
             $q->whereIn('kalibrasi_id', function ($sub) {
                 $sub->selectRaw('MAX(kalibrasi_id)')
                     ->from('riwayat_kalibrasi')

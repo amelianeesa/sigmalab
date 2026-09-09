@@ -11,20 +11,23 @@ class HasilUjiService
 {
     protected $calculationService;
     protected $westgardService;
+    protected $crmService;
     protected $notificationService;
 
     public function __construct(
         CalculationService $calculationService,
         WestgardService $westgardService,
+        CrmService $crmService,
         NotificationService $notificationService
     ) {
         $this->calculationService = $calculationService;
         $this->westgardService = $westgardService;
+        $this->crmService = $crmService;
         $this->notificationService = $notificationService;
     }
 
     /**
-     * Memproses data mentah hasil uji, melakukan kalkulasi, evaluasi Westgard, 
+     * Memproses data mentah hasil uji, melakukan kalkulasi, evaluasi In-house/CRM, 
      * dan menangani pembuatan tindak lanjut serta notifikasi jika terjadi kegagalan.
      *
      * @param HasilUji $hasilUji
@@ -60,6 +63,7 @@ class HasilUjiService
             $newHasil->data_mentah = null;
             $newHasil->nilai_hasil = null;
             $newHasil->status_berketerimaan = 'belum_diuji';
+            $newHasil->run_ke = $hasilUji->run_ke + 1;
             $newHasil->save();
 
             // Auto Create Tindak Lanjut
@@ -71,7 +75,7 @@ class HasilUjiService
             ]);
 
             // Notifikasi
-            $pesanNotif = "⚠️ Gagal Duplo pada kegiatan {$kegiatan->kode_sampel}, parameter {$parameter->nama_parameter}. " . $calcResult['message'];
+            $pesanNotif = "?? Gagal Duplo pada kegiatan {$kegiatan->kode_sampel}, parameter {$parameter->nama_parameter}. " . $calcResult['message'];
             $this->notificationService->notifyRoles($pesanNotif, 'qc', [
                 PeranPengguna::ANALIS->value,
                 PeranPengguna::KOORDINATOR_LAB->value,
@@ -93,30 +97,87 @@ class HasilUjiService
         $nilaiHasil = (float) $calcResult['nilai'];
         $hasilUji->nilai_hasil = $nilaiHasil;
 
-        // WESTGARD EVALUATION
-        $evaluasi = $this->westgardService->evaluate($nilaiHasil, $parameter);
+        // EVALUATION ROUTING
+        if ($hasilUji->jenis_kontrol === 'crm') {
+            $certValue = null;
+            $certU = null;
+            
+            if ($kegiatan->crm_katalog_id) {
+                $sertifikat = \App\Models\CrmSertifikat::where('crm_katalog_id', $kegiatan->crm_katalog_id)
+                    ->where('parameter_uji_id', $parameter->parameter_uji_id)
+                    ->first();
+                if ($sertifikat) {
+                    $certValue = $sertifikat->cert_value;
+                    $certU = $sertifikat->cert_u;
+                }
+            }
 
-        $hasilUji->status_berketerimaan  = $evaluasi['status'];
-        $hasilUji->kode_aturan_dilanggar = $evaluasi['kode'];
-        $hasilUji->z_score               = $evaluasi['z_score'];
+            $evaluasi = $this->crmService->evaluate($nilaiHasil, $certValue, $certU);
+            
+            $hasilUji->status_berketerimaan  = $evaluasi['status_berketerimaan'];
+            $hasilUji->kode_aturan_dilanggar = $evaluasi['kode_aturan_dilanggar'];
+            
+            if ($evaluasi['kode_aturan_dilanggar'] === 'NO_LIMITS') {
+                $pesanGagal = "Gagal memproses data karena Sertifikat True Value CRM kosong atau Lot CRM tidak dipilih pada kegiatan ini.";
+            } else {
+                $pesanGagal = "Nilai di luar rentang absolut Sertifikat CRM.";
+            }
+        } else {
+            $evaluasi = $this->westgardService->evaluate($nilaiHasil, $parameter);
+            
+            $hasilUji->status_berketerimaan  = $evaluasi['status'];
+            $hasilUji->kode_aturan_dilanggar = $evaluasi['kode'];
+            $hasilUji->z_score               = $evaluasi['z_score'] ?? null;
+            
+            $pesanGagal = $evaluasi['pesan'] ?? 'Nilai di luar batas kendali.';
+        }
+
         $hasilUji->save();
 
-        $message = "Hasil uji berhasil disimpan. Status: " . strtoupper($evaluasi['status']);
+        $statusText = strtoupper($hasilUji->status_berketerimaan);
+        if ($statusText === 'DITOLAK') $statusText = 'OUTLIER'; // Normalize UI text
+        
+        $message = "Hasil uji berhasil disimpan. Status: " . $statusText;
 
-        if ($evaluasi['status'] === 'outlier') {
-            $kodeLabel = $evaluasi['kode'] ? " [{$evaluasi['kode']}]" : '';
-            $message .= " — OUT-OF-CONTROL{$kodeLabel}. " . ($evaluasi['pesan'] ?? 'Tindak lanjut telah dibuat.');
+        // Auto-resolve Kegiatan to 'selesai' if all parameters are inlier
+        if ($hasilUji->status_berketerimaan === 'inlier') {
+            $totalParams = $kegiatan->hasilUji()->select('parameter_uji_id')->distinct()->count();
+            $inlierParams = $kegiatan->hasilUji()
+                ->where('status_berketerimaan', 'inlier')
+                ->select('parameter_uji_id')
+                ->distinct()
+                ->count();
+                
+            if ($totalParams > 0 && $inlierParams === $totalParams) {
+                if ($kegiatan->status_kegiatan !== 'selesai') {
+                    $kegiatan->status_kegiatan = 'selesai';
+                    $kegiatan->save();
+                    
+                    $notifMsg = "✅ Pengujian Sampel {$kegiatan->kode_sampel} telah Selesai (Semua Parameter Inlier). Siap untuk ditinjau.";
+                    $this->notificationService->notifyRoles($notifMsg, 'qc', [
+                        PeranPengguna::KOORDINATOR_LAB->value,
+                        PeranPengguna::MANAJER_TEKNIS->value,
+                    ]);
+                    
+                    $message .= " (Semua parameter selesai, status sampel diubah menjadi Selesai).";
+                }
+            }
+        }
+
+        if ($hasilUji->status_berketerimaan === 'outlier' || $hasilUji->status_berketerimaan === 'ditolak') {
+            $kodeLabel = $hasilUji->kode_aturan_dilanggar ? " [{$hasilUji->kode_aturan_dilanggar}]" : '';
+            $message .= " � OUT-OF-CONTROL$kodeLabel. Tindak lanjut telah dibuat.";
 
             // Auto Create Tindak Lanjut
             RiwayatTindakLanjut::create([
                 'hasil_uji_id'        => $hasilUji->hasil_uji_id,
                 'status_tindak_lanjut' => 'belum_ditindaklanjuti',
-                'catatan_investigasi'  => "Terdeteksi pelanggaran aturan Westgard{$kodeLabel}: " . ($evaluasi['pesan'] ?? 'Nilai di luar batas kendali.'),
+                'catatan_investigasi'  => "Terdeteksi pelanggaran QC$kodeLabel: " . $pesanGagal,
                 'created_at'           => now(),
             ]);
 
             // Notifikasi
-            $pesanNotif = "⚠️ Out-of-Control{$kodeLabel} pada kegiatan {$kegiatan->kode_sampel}, parameter {$parameter->nama_parameter}. " . ($evaluasi['pesan'] ?? '');
+            $pesanNotif = "?? Out-of-Control$kodeLabel pada kegiatan {$kegiatan->kode_sampel}, parameter {$parameter->nama_parameter}. " . $pesanGagal;
             $this->notificationService->notifyRoles($pesanNotif, 'qc', [
                 PeranPengguna::ANALIS->value,
                 PeranPengguna::KOORDINATOR_LAB->value,

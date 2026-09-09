@@ -71,9 +71,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/pengadaan/{id}/approve', [PengadaanController::class, 'approve'])->name('pengadaan.approve');
     Route::get('/parameter-uji/{parameter_uji}/calculate-stats', [ParameterUjiController::class, 'calculateHistoricalStats'])->name('parameter-uji.calculate-stats');
     Route::get('/parameter-uji/{parameter_uji}/control-chart', [ParameterUjiController::class, 'controlChart'])->name('parameter-uji.control-chart');
+    Route::match(['get', 'post'], 'parameter-uji/{parameter_uji}/cetak', [ParameterUjiController::class, 'cetakControlChart'])->name('parameter-uji.cetak-control-chart');
     Route::resource('parameter-uji', ParameterUjiController::class);
+    Route::post('/parameter-uji/crm-katalog', [ParameterUjiController::class, 'storeCrmKatalog'])->name('parameter-uji.store-crm');
+    Route::delete('/parameter-uji/crm-katalog/{id}', [ParameterUjiController::class, 'destroyCrmKatalog'])->name('parameter-uji.destroy-crm');
     Route::resource('kegiatan', KegiatanController::class);
+    Route::post('/kegiatan/{id}/unlock', [KegiatanController::class, 'unlock'])->name('kegiatan.unlock');
     Route::resource('hasil-uji', HasilUjiController::class);
+    Route::post('/hasil-uji/{id}/retest', [HasilUjiController::class, 'retest'])->name('hasil-uji.retest');
     Route::post('/hasil-uji/{id}/override', [HasilUjiController::class, 'overrideWestgard'])->name('hasil-uji.override');
     Route::resource('tindak-lanjut', RiwayatTindakLanjutController::class)->except(['destroy']);
     Route::post('/tindak-lanjut/{id}/komentar', [RiwayatTindakLanjutController::class, 'storeKomentar'])->name('tindak-lanjut.komentar.store');
@@ -111,7 +116,50 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/notifikasi/unread-count', [NotifikasiController::class, 'getUnreadCount'])->name('notifikasi.unread-count');
 
     // Inhouse Control
-    Route::match(['get', 'post'], '/inhouse-control/cetak', [HasilUjiController::class, 'cetakInhouseControl'])->name('hasil-uji.inhouse-control.cetak');
-    Route::get('/inhouse-control', [HasilUjiController::class, 'inhouseControl'])->name('hasil-uji.inhouse-control');
-    Route::post('/hasil-uji/{id}/override-evaluasi', [HasilUjiController::class, 'overrideEvaluasi'])->name('hasil-uji.override-evaluasi');
+        Route::post('/hasil-uji/{id}/override-evaluasi', [HasilUjiController::class, 'overrideEvaluasi'])->name('hasil-uji.override-evaluasi');
+
+    // =============================================
+    // Verifikasi Mutu — Portal & QC In-House
+    // =============================================
+    Route::get('verifikasi-mutu', [\App\Http\Controllers\VerifikasiMutuController::class, 'index'])->name('verifikasi-mutu.index');
+
+    Route::prefix('qc-inhouse')->name('qc-inhouse.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\QcInhouseController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\QcInhouseController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\QcInhouseController::class, 'store'])->name('store');
+        Route::get('/{id}', [\App\Http\Controllers\QcInhouseController::class, 'show'])->name('show');
+        
+        // Tahap 2: Preparasi
+        Route::get('/{id}/preparasi', [\App\Http\Controllers\QcInhouseController::class, 'showPreparasi'])->name('preparasi');
+        Route::post('/{id}/preparasi', [\App\Http\Controllers\QcInhouseController::class, 'storePreparasi'])->name('preparasi.store');
+        Route::get('/{id}/cetak-label', [\App\Http\Controllers\QcInhouseController::class, 'cetakLabel'])->name('cetak-label');
+        
+        // Tahap 3: Uji Homogenitas
+        Route::get('/{id}/instruksi-homogenitas', [\App\Http\Controllers\QcInhouseController::class, 'showInstruksiHomogenitas'])->name('instruksi-homogenitas');
+        Route::get('/{id}/homogenitas', [\App\Http\Controllers\QcInhouseController::class, 'showHomogenitas'])->name('homogenitas');
+        Route::post('/{id}/homogenitas', [\App\Http\Controllers\QcInhouseController::class, 'storeHomogenitas'])->name('homogenitas.store');
+        
+        // Tahap 4: Penetapan Nilai Target
+        Route::get('/{id}/penetapan-target', [\App\Http\Controllers\QcInhouseController::class, 'showPenetapanTarget'])->name('penetapan-target');
+        Route::post('/{id}/penetapan-target', [\App\Http\Controllers\QcInhouseController::class, 'storePenetapanTarget'])->name('penetapan-target.store');
+        
+        // Tahap 5: Uji Stabilitas
+        Route::get('/{id}/stabilitas', [\App\Http\Controllers\QcInhouseController::class, 'showStabilitas'])->name('stabilitas');
+        Route::post('/{id}/stabilitas', [\App\Http\Controllers\QcInhouseController::class, 'storeStabilitas'])->name('stabilitas.store');
+
+        // Tahap 6: Aktivasi
+        Route::post('/{id}/aktifkan', [\App\Http\Controllers\QcInhouseController::class, 'aktifkan'])->name('aktifkan');
+    });
+
+    // =============================================
+    // Verifikasi Mutu - Pengujian Harian QC
+    // =============================================
+    Route::prefix('qc-harian')->name('qc-harian.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\QcHarianController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\QcHarianController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\QcHarianController::class, 'store'])->name('store');
+        Route::get('/{parameter_uji_id}/chart', [\App\Http\Controllers\QcHarianController::class, 'chart'])->name('chart');
+        Route::get('/{id}/investigasi', [\App\Http\Controllers\QcHarianController::class, 'investigasi'])->name('investigasi');
+        Route::post('/{id}/investigasi', [\App\Http\Controllers\QcHarianController::class, 'storeInvestigasi'])->name('investigasi.store');
+    });
 });

@@ -59,9 +59,6 @@
                                 <td class="text-center">{{ $parameterUji->firstItem() + $index }}</td>
                                 <td class="fw-bold">
                                     {{ $item->nama_parameter }}
-                                    @if($item->jenis_kontrol === 'crm')
-                                        <span class="badge bg-info ms-1" style="font-size: 0.65rem;">CRM</span>
-                                    @endif
                                 </td>
                                 <td class="text-center">{{ $item->satuan }}</td>
                                 <td class="text-center">{{ number_format($item->nilai_acuan, 2) }}</td>
@@ -76,7 +73,6 @@
                                 </td>
                                 <td class="text-center text-nowrap">
                                     <a href="{{ route('parameter-uji.show', $item->parameter_uji_id) }}" class="btn btn-info btn-sm text-white" title="Detail"><i class="fas fa-eye"></i></a>
-                                    <a href="{{ route('parameter-uji.control-chart', $item->parameter_uji_id) }}" class="btn btn-secondary btn-sm" title="Control Chart"><i class="fas fa-chart-line"></i></a>
                                     
                                     @can('update', $item)
                                         <a href="{{ route('parameter-uji.edit', $item->parameter_uji_id) }}" class="btn btn-warning btn-sm" title="Edit"><i class="fas fa-edit"></i></a>

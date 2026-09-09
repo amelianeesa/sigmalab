@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             ModulSeeder::class,
             HakAksesSeeder::class,
             DummyDataSeeder::class,
+            TabelAngkaAcakSeeder::class,
         ]);
 
         User::factory()->create([

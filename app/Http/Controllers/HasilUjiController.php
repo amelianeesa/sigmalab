@@ -75,35 +75,99 @@ class HasilUjiController extends Controller
         return view('hasil-uji.edit', compact('hasilUji'));
     }
 
+    public function retest(Request $request, $id)
+    {
+        $this->authorize('create', HasilUji::class);
+
+        $oldHasilUji = HasilUji::findOrFail($id);
+        
+        // Pastikan hanya bisa retest jika status sebelumnya adalah outlier atau ditolak
+        if (!in_array(strtolower($oldHasilUji->status_berketerimaan), ['outlier', 'ditolak'])) {
+            return back()->with('error', 'Hanya data yang berstatus Outlier yang dapat diuji ulang.');
+        }
+        
+        // Cek max run (misal max 3x uji ulang)
+        if ($oldHasilUji->run_ke >= 3) {
+            return back()->with('error', 'Batas maksimal uji ulang (Run 3) telah tercapai untuk parameter ini.');
+        }
+
+        DB::transaction(function () use ($oldHasilUji) {
+            $newHasil = $oldHasilUji->replicate(['data_mentah', 'nilai_hasil', 'z_score', 'kode_aturan_dilanggar', 'override_status', 'override_kode', 'keterangan_override']);
+            
+            $newHasil->run_ke = $oldHasilUji->run_ke + 1;
+            $newHasil->status_berketerimaan = 'belum_diuji';
+            $newHasil->diinput_oleh = Auth::id();
+            $newHasil->save();
+        });
+
+        return redirect()->route('kegiatan.show', $oldHasilUji->kegiatan_id)
+            ->with('success', 'Baris Uji Ulang (Run ' . ($oldHasilUji->run_ke + 1) . ') berhasil dibuat. Silakan input data pengujian.');
+    }
+
     public function update(Request $request, $id)
     {
         $this->authorize('create', HasilUji::class);
 
         $hasilUji = HasilUji::findOrFail($id);
 
-        $validated = $request->validate([
-            'nilai_hasil' => 'nullable|numeric',
-            'variabel' => 'nullable|array',
-        ]);
-
         if (in_array($hasilUji->kegiatan->status_kegiatan, ['selesai', 'dibatalkan'])) {
             return back()->with('error', 'Tidak dapat menginput hasil uji karena kegiatan sudah selesai atau dibatalkan.');
         }
 
-        $result = $this->hasilUjiService->processResult($hasilUji, $validated);
-
-        if ($result['type'] === 'warning' || $result['type'] === 'success') {
-            return redirect()->route('kegiatan.show', $hasilUji->kegiatan_id)
-                ->with($result['type'], $result['message']);
-        } elseif ($result['type'] === 'error') {
-            if (str_contains($result['message'], 'Tindak Lanjut')) {
-                return redirect()->route('kegiatan.show', $hasilUji->kegiatan_id)
-                    ->with('error', $result['message']);
+        if ($request->has('runs')) {
+            $runsData = $request->input('runs');
+            $currentHasil = $hasilUji;
+            $totalRuns = count($runsData);
+            $lastResult = null;
+            
+            foreach ($runsData as $index => $runData) {
+                if (!$currentHasil) break;
+                
+                $val = [
+                    'nilai_hasil' => $runData['nilai_hasil'] ?? null,
+                    'variabel' => $runData['variabel'] ?? [],
+                ];
+                
+                $lastResult = $this->hasilUjiService->processResult($currentHasil, $val);
+                
+                if ($index < $totalRuns - 1) {
+                    // Fetch the clone created by processResult
+                    $currentHasil = \App\Models\HasilUji::where('kegiatan_id', $currentHasil->kegiatan_id)
+                        ->where('parameter_uji_id', $currentHasil->parameter_uji_id)
+                        ->where('run_ke', $currentHasil->run_ke + 1)
+                        ->first();
+                }
             }
-            return back()->with('error', $result['message']);
-        }
+            
+            // Redirect based on the LAST result
+            if ($lastResult && $lastResult['type'] === 'error' && !str_contains($lastResult['message'], 'Tindak Lanjut')) {
+                return back()->with('error', $lastResult['message']);
+            }
+            
+            return redirect()->route('kegiatan.show', $hasilUji->kegiatan_id)->with('success', 'Semua data run berhasil disimpan secara berurutan.');
+            
+        } else {
+            // Fallback for old single form
+            $validated = $request->validate([
+                'nilai_hasil' => 'nullable|numeric',
+                'variabel' => 'nullable|array',
+            ]);
 
-        return redirect()->route('kegiatan.show', $hasilUji->kegiatan_id)->with('success', 'Tersimpan.');
+            $result = $this->hasilUjiService->processResult($hasilUji, $validated);
+
+            if ($result['type'] === 'warning' || $result['type'] === 'success') {
+                return redirect()->route('kegiatan.show', $hasilUji->kegiatan_id)
+                    ->with($result['type'], $result['message']);
+            } elseif ($result['type'] === 'error') {
+                if (str_contains($result['message'], 'Tindak Lanjut')) {
+                    return redirect()->route('kegiatan.show', $hasilUji->kegiatan_id)
+                        ->with('error', $result['message']);
+                }
+                return back()->with('error', $result['message']);
+            }
+
+            return redirect()->route('kegiatan.show', $hasilUji->kegiatan_id)->with('success', 'Tersimpan.');
+        }
     }
 
     public function show($id)
@@ -139,53 +203,7 @@ class HasilUjiController extends Controller
     /**
      * Menampilkan data untuk Levy-Jennings Inhouse Control Chart.
      */
-    public function inhouseControl(Request $request)
-    {
-        $this->authorize('viewAny', HasilUji::class);
-
-        $allowedParams = ['IM', 'ASH', 'VM', 'Bias Test VM (Pt)', 'Total Sulfur (TS)', 'Calorific Value (CV)', 'Ash Fusion Temperature (AFT)', 'CHN (Carbon, Hydrogen, Nitrogen)'];
-        $parameterList = ParameterUji::where('status_aktif', true)
-            ->whereIn('nama_parameter', $allowedParams)
-            ->orderBy('nama_parameter')
-            ->get();
-
-        $data = $this->chartDataService->prepareInhouseControlData($request, false);
-
-        return view($data['viewName'], [
-            'parameterList' => $parameterList,
-            'selectedParameter' => $data['selectedParameter'],
-            'chartData' => $data['chartData'],
-            'hasilList' => $data['hasilList']
-        ]);
-    }
-
-    /**
-     * Cetak Laporan Inhouse Control (PDF)
-     */
-    public function cetakInhouseControl(Request $request)
-    {
-        $this->authorize('viewAny', HasilUji::class);
-
-        $request->validate([
-            'parameter_uji_id' => 'required|exists:parameter_uji,parameter_uji_id',
-            'tanggal_mulai' => 'nullable|date',
-            'tanggal_akhir' => 'nullable|date',
-        ]);
-
-        $data = $this->chartDataService->prepareInhouseControlData($request, true);
-
-        $chartImage = $request->input('chart_image');
-        $selectedParameter = $data['selectedParameter'];
-        $hasilList = $data['hasilList'];
-        $stats = $data['stats'];
-
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView($data['pdfView'], compact('selectedParameter', 'hasilList', 'stats', 'request', 'chartImage'));
-        $pdf->setPaper('a4', 'landscape');
-        
-        $filename = 'Inhouse_Control_' . str_replace(' ', '_', $selectedParameter->nama_parameter) . '_' . date('YmdHis') . '.pdf';
-        
-        return $pdf->stream($filename);
-    }
+    
 
     public function overrideEvaluasi(Request $request, $id)
     {

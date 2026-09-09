@@ -6,7 +6,7 @@
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('kegiatan.index') }}" class="text-decoration-none">Verifikasi Mutu</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('verifikasi-mutu.index') }}" class="text-decoration-none">Verifikasi Mutu</a></li>
             <li class="breadcrumb-item active" aria-current="page">{{ $kegiatan->nama_kegiatan }}</li>
         </ol>
     </nav>
@@ -20,7 +20,7 @@
                         <i class="fas fa-edit"></i> Edit
                     </a>
                 @endcan
-                <a href="{{ route('kegiatan.index') }}" class="btn btn-secondary">
+                <a href="{{ route('verifikasi-mutu.index') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Kembali
                 </a>
             </div>
@@ -198,8 +198,18 @@
                 
                 <div class="card-body bg-light border-bottom">
                     @if(in_array($kegiatan->status_kegiatan, ['selesai', 'dibatalkan']))
-                        <div class="alert alert-warning m-0">
-                            <i class="fas fa-lock me-2"></i> Kegiatan ini sudah <strong>{{ ucfirst($kegiatan->status_kegiatan) }}</strong>. Anda tidak dapat mengisi hasil uji.
+                        <div class="alert alert-warning m-0 d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-lock me-2"></i> Kegiatan ini sudah <strong>{{ ucfirst($kegiatan->status_kegiatan) }}</strong>. Seluruh data telah terkunci.
+                            </div>
+                            @if($kegiatan->status_kegiatan === 'selesai' && auth()->user()->hasRole(['koordinator_lab', 'manajer_teknis', 'admin']))
+                                <form action="{{ route('kegiatan.unlock', $kegiatan->kegiatan_id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-danger fw-bold shadow-sm" onclick="return confirm('Anda yakin ingin membuka kunci kegiatan ini untuk revisi? Status akan kembali menjadi Proses.')">
+                                        <i class="fas fa-unlock me-1"></i> Buka Kunci (Revisi)
+                                    </button>
+                                </form>
+                            @endif
                         </div>
                     @else
                         @can('create', App\Models\HasilUji::class)
@@ -222,6 +232,7 @@
                                     <tr>
                                         <th width="5%" class="text-center">No</th>
                                         <th>Parameter Uji</th>
+                                        <th class="text-center">Jenis Kontrol</th>
                                         <th class="text-center">Hasil</th>
                                         <th class="text-center">Standar (Min - Max)</th>
                                         <th class="text-center">Status</th>
@@ -236,14 +247,8 @@
                                     @endphp
                                     @foreach($groupedHasil as $paramId => $group)
                                         @php
-                                            $hasPassed = $group->whereIn('status_berketerimaan', ['inlier', 'outlier'])->count() > 0;
-                                            if ($hasPassed) {
-                                                $displayGroup = $group->reject(function($h) {
-                                                    return in_array(strtolower($h->status_berketerimaan), ['belum_diuji', 'pending']);
-                                                })->values();
-                                            } else {
-                                                $displayGroup = $group->values();
-                                            }
+                                            $displayGroup = $group->values();
+                                            $hasPassed = false; // Disable old logic
                                         @endphp
                                         @foreach($displayGroup as $index => $hasil)
                                             <tr>
@@ -255,16 +260,43 @@
                                                     </td>
                                                 @endif
                                                 <td class="text-center align-middle">
+                                                    @if($hasil->jenis_kontrol === 'crm')
+                                                        <span class="badge bg-purple text-white" style="background-color: #6f42c1;">CRM</span>
+                                                    @elseif($hasil->jenis_kontrol === 'in_house')
+                                                        <span class="badge bg-info text-white">In-House</span>
+                                                    @else
+                                                        <span class="badge bg-secondary text-white">Reguler</span>
+                                                    @endif
+                                                    @if($hasil->run_ke > 1)
+                                                        <div class="mt-1"><span class="badge bg-secondary" style="font-size: 0.65rem;">Run {{ $hasil->run_ke }}</span></div>
+                                                    @endif
+                                                </td>
+                                                <td class="text-center align-middle">
                                                     @if(is_null($hasil->nilai_hasil))
                                                         <span class="text-muted fst-italic">Belum diinput</span>
                                                     @else
                                                         <span class="{{ $hasil->status_berketerimaan === 'gagal_duplo' ? 'text-danger text-decoration-line-through' : 'fs-5 fw-bold' }}">
-                                                            {{ number_format($hasil->nilai_hasil, 4) }}
+                                                            {{ number_format($hasil->nilai_hasil, 4, '.', '') }}
                                                         </span>
                                                     @endif
                                                 </td>
                                                 <td class="text-center align-middle">
-                                                    {{ $hasil->parameterUji ? $hasil->parameterUji->batas_bawah . ' - ' . $hasil->parameterUji->batas_atas : '-' }}
+                                                    @if($hasil->jenis_kontrol === 'crm' && $kegiatan->crm_katalog_id)
+                                                        @php
+                                                            $sertifikat = \App\Models\CrmSertifikat::where('crm_katalog_id', $kegiatan->crm_katalog_id)
+                                                                ->where('parameter_uji_id', $hasil->parameter_uji_id)
+                                                                ->first();
+                                                        @endphp
+                                                        @if($sertifikat)
+                                                            <span class="text-primary fw-bold" title="Batas Sertifikat CRM">
+                                                                {{ number_format($sertifikat->cert_value - $sertifikat->cert_u, 4, '.', '') }} - {{ number_format($sertifikat->cert_value + $sertifikat->cert_u, 4, '.', '') }}
+                                                            </span>
+                                                        @else
+                                                            <span class="text-danger"><i class="fas fa-exclamation-circle" title="Sertifikat CRM tidak ditemukan untuk Parameter ini"></i> Error</span>
+                                                        @endif
+                                                    @else
+                                                        {{ $hasil->parameterUji ? number_format($hasil->parameterUji->batas_bawah, 4, '.', '') . ' - ' . number_format($hasil->parameterUji->batas_atas, 4, '.', '') : '-' }}
+                                                    @endif
                                                 </td>
                                                 <td class="text-center align-middle">
                                                     @if(strtolower($hasil->status_berketerimaan) == 'pending')
@@ -290,15 +322,27 @@
                                                             </button>
                                                         @else
                                                             @can('create', App\Models\HasilUji::class)
-                                                            <a href="{{ route('hasil-uji.edit', $hasil->hasil_uji_id) }}" class="btn btn-sm btn-primary" title="Input Data">
-                                                                <i class="fas fa-keyboard"></i> Input Data
-                                                            </a>
+                                                                @if($hasil->jenis_kontrol === 'in_house' && empty($hasil->parameterUji->sampel_inhouse_id))
+                                                                    <button type="button" class="btn btn-sm btn-warning text-dark fw-bold btn-butuh-acuan" 
+                                                                            data-param-id="{{ $hasil->parameter_uji_id }}" 
+                                                                            data-param-nama="{{ $hasil->parameterUji->nama_parameter }}"
+                                                                            title="Nilai Acuan Belum Tersedia">
+                                                                        <i class="fas fa-exclamation-triangle"></i> Butuh Nilai Acuan
+                                                                    </button>
+                                                                @else
+                                                                    <a href="{{ route('hasil-uji.edit', $hasil->hasil_uji_id) }}" class="btn btn-sm btn-primary" title="Input Data">
+                                                                        <i class="fas fa-keyboard"></i> Input Data
+                                                                    </a>
+                                                                @endif
                                                             @endcan
                                                         @endif
                                                     @else
-                                                        <a href="{{ route('hasil-uji.show', $hasil->hasil_uji_id) }}" class="btn btn-sm btn-info text-white" title="Detail">
-                                                            <i class="fas fa-eye"></i> Detail
-                                                        </a>
+                                                        <div class="d-flex flex-column gap-1">
+                                                            <a href="{{ route('hasil-uji.show', $hasil->hasil_uji_id) }}" class="btn btn-sm btn-info text-white" title="Detail">
+                                                                <i class="fas fa-eye"></i> Detail
+                                                            </a>
+
+                                                        </div>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -372,6 +416,39 @@
             container.classList.remove('col-md-12');
             container.classList.add('col-md-7');
         }
+
+        // Smart Intercept untuk Butuh Acuan
+        const btnAcuan = document.querySelectorAll('.btn-butuh-acuan');
+        btnAcuan.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const paramNama = this.getAttribute('data-param-nama');
+                const paramId = this.getAttribute('data-param-id');
+                
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Nilai Acuan Belum Tersedia',
+                    text: `Pengujian harian tidak dapat dilakukan karena Parameter ${paramNama} belum memiliki Nilai Acuan In-House. Bagaimana Anda ingin menyelesaikannya?`,
+                    showCancelButton: true,
+                    showDenyButton: true,
+                    confirmButtonText: '<i class="fas fa-flask"></i> Mulai Uji Homogenitas Baru',
+                    denyButtonText: '<i class="fas fa-history"></i> Input Nilai Historis',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#3085d6',
+                    denyButtonColor: '#ffc107',
+                    customClass: {
+                        denyButton: 'text-dark fw-bold'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Redirect to Create In-House (Normal Flow)
+                        window.location.href = `{{ route('qc-inhouse.create') }}?parameter_uji_id=${paramId}`;
+                    } else if (result.isDenied) {
+                        // Redirect to Parameter Uji Edit (Historical Bypass)
+                        window.location.href = `{{ url('parameter-uji') }}/${paramId}/edit`;
+                    }
+                });
+            });
+        });
     });
 </script>
 @endpush
