@@ -41,12 +41,14 @@
 
     <div class="card library-card shadow-sm border-0">
         <div class="card-body p-3 p-md-4">
-            <form method="GET" action="{{ $showArchived ? route('library.archive') : route('library.index') }}" class="row g-2 mb-3 align-items-end">
+            <form id="library-filter-form" method="GET" action="{{ $showArchived ? route('library.archive') : route('library.index') }}" class="row g-2 mb-3 align-items-end">
                 <div class="col-md-5">
                     <label for="library-search" class="library-filter-label d-block">Cari Dokumen</label>
                     <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-                        <input id="library-search" type="search" name="search" value="{{ request('search') }}" class="form-control border-start-0 ps-0" placeholder="Nama, nomor, penerbit, atau kategori..." autocomplete="off">
+                        <input id="library-search" type="search" name="search" value="{{ request('search') }}" class="form-control" placeholder="Nama, nomor, penerbit, atau kategori..." autocomplete="off">
+                        <button type="submit" class="btn btn-primary px-3 fw-semibold" title="Cari Dokumen">
+                            Cari
+                        </button>
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -62,7 +64,7 @@
                     <label class="library-filter-label d-block" style="visibility: hidden;">Aksi</label>
                     <div class="d-flex gap-2">
                         @if(!$showArchived)
-                            <button type="submit" formaction="{{ route('library.export.pdf') }}" formtarget="_blank" class="btn btn-outline-success flex-grow-1 text-nowrap" title="Cetak Rekap Daftar Induk Dokumen sesuai filter saat ini">
+                            <button type="button" onclick="exportPdf(document.getElementById('library-filter-form'))" class="btn btn-outline-success flex-grow-1 text-nowrap" title="Cetak Rekap Daftar Induk Dokumen sesuai filter saat ini">
                                 <i class="fas fa-file-pdf me-1"></i>Cetak PDF
                             </button>
                         @endif
@@ -172,6 +174,18 @@
 
 @push('scripts')
 <script>
+    function exportPdf(form) {
+        const originalAction = form.action;
+        const originalTarget = form.target;
+
+        form.action = "{{ route('library.export.pdf') }}";
+        form.target = "_blank";
+        form.submit();
+
+        form.action = originalAction;
+        form.target = originalTarget;
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const modalPreview = document.getElementById('modalPreviewDokumen');
         if (!modalPreview) return;
