@@ -245,11 +245,6 @@
 
                 {{-- 1. Manajemen Peralatan (Aset) --}}
                 @if(Auth::check() && (Auth::user()->hasModulAccess('alat') || (Auth::user()->role && Auth::user()->role->nama_role == 'HR & GA')))
-                <li class="{{ request()->is('alat*') ? 'active' : '' }}">
-                    <a href="{{ route('alat.index') }}"><i class="fas fa-tools"></i>Peralatan & Monitoring</a>
-                </li>
-                @endif 
-                @if(Auth::check() && Auth::user()->hasModulAccess('alat'))
                 <li class="nav-item">
                     <a class="nav-link d-flex justify-content-between align-items-center {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') ? 'active' : 'collapsed' }}" 
                        data-bs-toggle="collapse" 
@@ -459,8 +454,7 @@
     @stack('scripts')
     <script>
         $(document).ready(function() {
-            // Mengubah semua elemen select dengan class tertentu atau secara umum 
-            // menjadi Select2 dengan tema Bootstrap 5 yang rapi
+
             $('.select2-alat, #selectAlat').select2({
                 theme: 'bootstrap-5',
                 width: '100%',

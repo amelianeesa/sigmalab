@@ -156,8 +156,8 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware('modul:manajemen_pengguna,tambah_ubah')->group(function () {
-    Route::post('kelola-user', [\App\Http\Controllers\KelolaUserController::class, 'store'])->name('kelola-user.store');
-    Route::put('kelola-user/{id}', [\App\Http\Controllers\KelolaUserController::class, 'update'])->name('kelola-user.update');
-    Route::delete('kelola-user/{id}', [\App\Http\Controllers\KelolaUserController::class, 'destroy'])->name('kelola-user.destroy');
-});
+        Route::post('kelola-user', [\App\Http\Controllers\KelolaUserController::class, 'store'])->name('kelola-user.store');
+        Route::put('kelola-user/{id}', [\App\Http\Controllers\KelolaUserController::class, 'update'])->name('kelola-user.update');
+        Route::delete('kelola-user/{id}', [\App\Http\Controllers\KelolaUserController::class, 'destroy'])->name('kelola-user.destroy');
+    });
 });

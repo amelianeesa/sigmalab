@@ -2,18 +2,27 @@
 
 @section('content')
     <div class="container-fluid px-4">
-         <div class="d-flex flex-wrap gap-3 mb-2 mt-1">
-        @if(Auth::user()->hasModulAccess('manajemen_pengguna'))
-        <a href="{{ route('hak-akses.index') }}" class="btn btn-warning rounded-pill px-4 shadow-sm text-dark fw-bold" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-            <i class="fas fa-shield-alt me-2"></i> Manajemen Hak Akses
-        </a>
-        @endif
-        @if(Auth::user()->role && Auth::user()->role->nama_role === \App\Enums\PeranPengguna::HR_GA_OFFICER->value)
-    <a href="{{ route('kelola-user.index') }}" class="btn rounded-pill px-4 shadow-sm text-white fw-bold" style="background-color: #0d3b66; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-        <i class="fas fa-user-gear me-2"></i> Kelola User
-    </a>
-    @endif
-    </div>
+        <div class="d-flex flex-wrap gap-3 mb-2 mt-1">
+            @if(Auth::user()->hasModulAccess('manajemen_pengguna'))
+                <a href="{{ route('hak-akses.index') }}" class="btn btn-warning rounded-pill px-4 shadow-sm text-dark fw-bold"
+                    style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.transform='translateY(0)'">
+                    <i class="fas fa-shield-alt me-2"></i> Manajemen Hak Akses
+                </a>
+            @endif
+            @if(
+                    Auth::user()->role && in_array(Auth::user()->role->nama_role, [
+                        \App\Enums\PeranPengguna::HR_GA_OFFICER->value,
+                        \App\Enums\PeranPengguna::ADMIN_APLIKASI->value
+                    ])
+                )
+                <a href="{{ route('kelola-user.index') }}" class="btn rounded-pill px-4 shadow-sm text-white fw-bold"
+                    style="background-color: #0d3b66; transition: transform 0.2s;"
+                    onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <i class="fas fa-user-gear me-2"></i> Kelola User
+                </a>
+            @endif
+        </div>
 
         @if($errors->any())
             <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
