@@ -19,7 +19,7 @@
                     <div class="col-md-6">
                         <label class="form-label">Kode Alat (CODE) <span class="text-danger">*</span></label>
                         <div class="input-group">
-                            <input type="text" id="kode_alat_input" name="kode_alat" class="form-control @error('kode_alat') is-invalid @enderror" placeholder="mis. CLC1204-10001" value="{{ old('kode_alat') }}" required>
+                            <input type="text" id="kode_alat_input" name="kode_alat" class="form-control @error('kode_alat') is-invalid @enderror" placeholder="mis. CLC1204-10001" value="{{ old('kode_alat') }}">
                             <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#scannerModal" title="Scan Barcode">
                                 <i class="fas fa-qrcode"></i> Scan
                             </button>
@@ -110,7 +110,7 @@
                     <div class="col-md-6">
                         <label class="form-label">Jenis Kalibrasi</label>
                         <select name="jenis_kalibrasi" class="form-select">
-                            <option>--Pilih Jenis Kalibrasi--</option>
+                            <option value="">--Pilih Jenis Kalibrasi--</option>
                             <option value="eksternal" {{ old('jenis_kalibrasi') == 'eksternal' ? 'selected' : '' }}>Eksternal</option>
                             <option value="internal" {{ old('jenis_kalibrasi') == 'internal' ? 'selected' : '' }}>Internal</option>
                         </select>
@@ -156,7 +156,7 @@
                     <div class="col-md-4">
                         <label class="form-label">Signifikan</label>
                         <select name="signifikan" class="form-select">
-                            <option>--Pilih Signifikan--</option>
+                            <option value="">--Pilih Signifikan--</option>
                             <option value="ya" {{ old('signifikan') == 'ya' ? 'selected' : '' }}>Ya</option>
                             <option value="tidak" {{ old('signifikan') == 'tidak' ? 'selected' : '' }}>Tidak</option>
                         </select>
