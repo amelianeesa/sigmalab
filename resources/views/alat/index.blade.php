@@ -233,14 +233,16 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body py-4">
-                <h6 id="modalNamaAlat" class="fw-bold text-primary mb-1"></h6>
-                <p id="modalKodeAlat" class="text-muted small mb-3"></p>
+                <div id="qrCardContainer" class="p-3 bg-white d-inline-block rounded shadow-sm">
+                    <h6 id="modalNamaAlat" class="fw-bold text-primary mb-1"></h6>
+                    <p id="modalKodeAlat" class="text-muted small mb-3"></p>
 
-                <div id="modalQrContainer" class="p-3 bg-light d-inline-block shadow-sm rounded mb-3"></div>
+                    <div id="modalQrContainer" class="p-3 bg-light d-inline-block shadow-sm rounded"></div>
+                </div>   
             </div>
             <div class="modal-footer justify-content-center">
                 <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
-                <button type="button" id="btnDownloadQr" class="btn btn-success btn-sm"><i class="fas fa-download"></i> Unduh QR Code</button>
+                <button type="button" id="btnDownloadQr" class="btn btn-success btn-sm"><i class="fas fa-download me-1"></i> Unduh QR Code</button>
             </div>
         </div>
     </div>
@@ -289,8 +291,8 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
-const qrModal = document.getElementById('qrModal');
-qrModal.addEventListener('show.bs.modal', function (event) {
+    const qrModal = document.getElementById('qrModal');
+    qrModal.addEventListener('show.bs.modal', function (event) {
     const trigger = event.relatedTarget;
     const qrSvg = trigger.getAttribute('data-qrsvg');
     const namaAlat = trigger.getAttribute('data-alatanama');
@@ -304,29 +306,23 @@ qrModal.addEventListener('show.bs.modal', function (event) {
 
     const btnDownload = document.getElementById('btnDownloadQr');
     btnDownload.onclick = function() {
-        const svgElement = container.querySelector('svg');
-        const svgString = new XMLSerializer().serializeToString(svgElement);
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const img = new Image();
+        const cardElement = document.getElementById('qrCardContainer');
+        const kodeAlatVal = kodeAlat.replace(/[^a-zA-Z0-9]/g, '_');
 
-        img.onload = function() {
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.fillStyle = "#FFFFFF";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0);
-
+        html2canvas(cardElement, {
+            scale: 3, 
+            backgroundColor: '#ffffff'
+        }).then(canvas => {
             const pngUrl = canvas.toDataURL('image/png');
             const downloadLink = document.createElement('a');
             downloadLink.href = pngUrl;
-            downloadLink.download = 'QRCode-' + kodeAlat.replace(/[^a-zA-Z0-9]/g, '_') + '.png';
+            downloadLink.download = 'QRCode-' + kodeAlatVal + '.png';
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);
-        };
-
-        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)));
+        }).catch(error => {
+            console.error('Gagal mendownload QR Code:', error);
+        });
     };
 });
 </script>

@@ -95,6 +95,50 @@ class MonitoringRuanganController extends Controller
         ));
     }
 
+    // public function storeTitikKalibrasi(Request $request, $alatId)
+    // {
+    //     $request->validate([
+    //         'tanggal_kalibrasi' => 'required|date',
+    //         'tanggal_expired' => 'required|date|after_or_equal:tanggal_kalibrasi',
+    //     ]);
+
+    //     $tglKalibrasi = $request->tanggal_kalibrasi;
+    //     $tglExpired = $request->tanggal_expired;
+
+    //     if ($request->has('humidity_equipment')) {
+    //         foreach ($request->humidity_equipment as $index => $eq) {
+    //             if (!is_null($eq) && !is_null($request->humidity_standard[$index])) {
+    //                 TitikKalibrasi::create([
+    //                     'alat_id' => $alatId,
+    //                     'kategori' => 'humidity',
+    //                     'equipment_reading' => $eq,
+    //                     'standard_reading' => $request->humidity_standard[$index],
+    //                     'tanggal_kalibrasi' => $tglKalibrasi,
+    //                     'tanggal_expired' => $tglExpired,
+    //                 ]);
+    //             }
+    //         }
+    //     }
+
+    //     // Simpan data Temperature jika ada yang diisi
+    //     if ($request->has('temperature_equipment')) {
+    //         foreach ($request->temperature_equipment as $index => $eq) {
+    //             if (!is_null($eq) && !is_null($request->temperature_standard[$index])) {
+    //                 TitikKalibrasi::create([
+    //                     'alat_id' => $alatId,
+    //                     'kategori' => 'temperature',
+    //                     'equipment_reading' => $eq,
+    //                     'standard_reading' => $request->temperature_standard[$index],
+    //                     'tanggal_kalibrasi' => $tglKalibrasi,
+    //                     'tanggal_expired' => $tglExpired,
+    //                 ]);
+    //             }
+    //         }
+    //     }
+
+    //     return redirect()->back()->with('success', 'Titik acuan kalibrasi Humidity & Temperature berhasil disimpan!');
+    // }
+
     public function storeTitikKalibrasi(Request $request, $alatId)
     {
         $request->validate([
@@ -139,7 +183,7 @@ class MonitoringRuanganController extends Controller
 
         return redirect()->back()->with('success', 'Titik acuan kalibrasi Humidity & Temperature berhasil disimpan!');
     }
-
+    
     public function destroyTitikKalibrasi($id)
     {
         $titik = TitikKalibrasi::findOrFail($id);

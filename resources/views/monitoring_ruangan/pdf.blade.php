@@ -4,6 +4,26 @@
     <meta charset="UTF-8">
     <title>{{ $tahun }}_{{ $bulan }}_Rekap Pencatatan Monitoring Suhu & Kelembaban</title>
     <style>
+        /* @page {
+            size: A4 portrait;
+            margin: 10mm 12mm 18mm 12mm; */
+
+            /* Memindahkan tanggal & nama file ke footer kiri bawah */
+            /* @bottom-left {
+                content: "Tanggal cetak: {{ date('d/m/Y H:i') }}   |   {{ $tahun }}_{{ $bulan }}_Rekap Pencatatan Monitoring Suhu & Kelembaban";
+                font-family: Arial, sans-serif;
+                font-size: 8pt;
+                color: #555;
+            } */
+
+            /* Nomor halaman di footer kanan bawah (menghilangkan URL otomatis) */
+            /* @bottom-right {
+                content: counter(page) " / " counter(pages);
+                font-family: Arial, sans-serif;
+                font-size: 8pt;
+                color: #555;
+            }
+        } */
         body {
             font-family: Arial, sans-serif;
             font-size: 11px;

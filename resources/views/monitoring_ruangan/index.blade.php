@@ -45,7 +45,7 @@
                 <div>
                     <h5 class="fw-bold text-dark fs-6 mb-1"><i class="fas fa-sliders-h text-primary me-2"></i>Manajemen Titik Acuan Kalibrasi</h5>
                     <p class="text-muted small mb-0">Klik tombol di sebelah kanan untuk membuka atau menyembunyikan detail titik acuan.</p>
-                </div>
+                </div>      
                 <button class="btn btn-outline-secondary btn-sm fw-bold px-3 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTitikAcuan" aria-expanded="false" aria-controls="collapseTitikAcuan">
                     <i class="fas fa-chevron-down me-1"></i> Sembunyikan / Tampilkan
                 </button>
@@ -61,17 +61,19 @@
 
                     $isExpired   = $alatAktif->tanggal_expired && \Carbon\Carbon::now()->gt($alatAktif->tanggal_expired);
                 @endphp
+                <form action="{{ route('inventori.monitoring.storeKalibrasi', $idAlat) }}" method="POST">
+                    @csrf
                 {{-- <div class="collapse show mt-3" id="collapseTitikAcuan"> --}}
                     <div class="bg-white p-3 rounded border shadow-sm mb-3">
                         <div class="row align-items-center g-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold text-secondary mb-1" style="font-size: 11px;"><i class="fas fa-calendar-alt text-primary me-1"></i> TANGGAL KALIBRASI ALAT</label>
-                                <input type="text" value="{{ $tglKalibVal }}" class="form-control form-control-sm bg-light fw-bold text-dark" readonly>
+                                <input type="date" name="tanggal_kalibrasi" value="{{ $tglKalibVal }}" class="form-control form-control-sm bg-light fw-bold text-dark" readonly>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold text-secondary mb-1" style="font-size: 11px;"><i class="fas fa-hourglass-end text-danger me-1"></i> MASA BERLAKU (EXPIRED DATE)</label>
                                 <div class="input-group input-group-sm">
-                                    <input type="text" value="{{ $tglExpVal }}" class="form-control bg-light fw-bold text-dark" readonly>
+                                    <input type="date" name="tanggal_expired" value="{{ $tglExpVal }}" class="form-control bg-light fw-bold text-dark" readonly>
                                     @if($alatAktif->tanggal_expired)
                                         @if($isExpired)
                                             <span class="badge bg-danger d-flex align-items-center px-3" style="font-size: 10px;"><i class="fas fa-exclamation-triangle me-1"></i> EXPIRED</span>
@@ -85,8 +87,8 @@
                     </div>
                     
                 
-                <form action="{{ route('inventori.monitoring.storeKalibrasi', $idAlat) }}" method="POST">
-                    @csrf
+                {{-- <form action="{{ route('inventori.monitoring.storeKalibrasi', $idAlat) }}" method="POST">
+                    @csrf --}}
 
                     <div class="row g-3">
                         <!-- Kolom Kiri: SUHU -->
@@ -666,7 +668,7 @@
             }
         });
 
-        $(document).on('click', '#tambahHumidity', function(e) {
+        $(document).off('click', '#tambahHumidity').on('click', '#tambahHumidity', function(e) {
             e.preventDefault();
             let row = `<tr>
                 <td><input type="number" step="0.01" name="humidity_equipment[]" class="form-control form-control-sm text-center" placeholder="0.00"></td>
@@ -676,7 +678,7 @@
             $('#tabelHumidity tbody').append(row);
         });
 
-        $(document).on('click', '#tambahTemperature', function(e) {
+        $(document).off('click', '#tambahTemperature').on('click', '#tambahTemperature', function(e) {
             e.preventDefault();
             let row = `<tr>
                 <td><input type="number" step="0.01" name="temperature_equipment[]" class="form-control form-control-sm text-center" placeholder="0.00"></td>

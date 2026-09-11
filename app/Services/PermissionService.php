@@ -25,7 +25,6 @@ class PermissionService
 
         $matrix = $this->getAccessMatrix();
 
-        // Check if role has access to this module
         if (!isset($matrix[$user->role_id][$kodeModul])) {
             return false;
         }
@@ -33,7 +32,7 @@ class PermissionService
         $userLevel = $matrix[$user->role_id][$kodeModul];
 
         $userLevelValue = self::LEVELS[$userLevel] ?? 0;
-        $minLevelValue = self::LEVELS[$minLevel] ?? 99; // Default to high value if unknown
+        $minLevelValue = self::LEVELS[$minLevel] ?? 99; 
 
         return $userLevelValue >= $minLevelValue;
     }
