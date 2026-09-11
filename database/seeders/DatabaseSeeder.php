@@ -22,6 +22,8 @@ class DatabaseSeeder extends Seeder
             HakAksesSeeder::class,
             LibraryCategorySeeder::class,
             LibraryAccessSeeder::class,
+            DummyDataSeeder::class,
+            TabelAngkaAcakSeeder::class,
         ]);
 
         User::factory()->create([

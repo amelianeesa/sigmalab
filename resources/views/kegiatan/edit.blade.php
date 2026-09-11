@@ -2,6 +2,16 @@
 
 @section('content')
 <div class="container-fluid">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('verifikasi-mutu.index') }}" class="text-decoration-none">Verifikasi Mutu</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('kegiatan.show', $kegiatan->kegiatan_id) }}" class="text-decoration-none">{{ $kegiatan->nama_kegiatan }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Edit Kegiatan</li>
+        </ol>
+    </nav>
+
     <div class="row mb-3">
         <div class="col-12">
             <h1 class="h3 mb-0 text-gray-800">Edit Kegiatan</h1>
@@ -25,17 +35,6 @@
                 </div>
 
                 <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="jenis_kegiatan" class="form-label">Jenis Kegiatan <span class="text-danger">*</span></label>
-                        <select class="form-select @error('jenis_kegiatan') is-invalid @enderror" id="jenis_kegiatan" name="jenis_kegiatan" required>
-                            <option value="">Pilih Jenis Kegiatan</option>
-                            <option value="pengujian" {{ old('jenis_kegiatan', $kegiatan->jenis_kegiatan) == 'pengujian' ? 'selected' : '' }}>Pengujian</option>
-                            <option value="kalibrasi" {{ old('jenis_kegiatan', $kegiatan->jenis_kegiatan) == 'kalibrasi' ? 'selected' : '' }}>Kalibrasi</option>
-                        </select>
-                        @error('jenis_kegiatan')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
                     
                     <div class="col-md-6">
                         <label for="kode_sampel" class="form-label">Kode Sampel</label>
@@ -187,9 +186,79 @@
                     @enderror
                 </div>
                 
-                <div class="d-flex justify-content-end gap-2">
-                    <a href="{{ route('kegiatan.index') }}" class="btn btn-secondary">Kembali</a>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan Perubahan</button>
+                <div class="mb-4 mt-5">
+<!-- Matrix Parameters Start -->
+                    <div id="parameter-container">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 30%;">Nama Parameter Uji</th>
+                                        <th class="text-center" style="width: 20%;">Sampel Klien (Reguler)</th>
+                                        <th class="text-center" style="width: 20%;">In-House Control</th>
+                                        <th class="text-center" style="width: 30%;">Sertifikat CRM</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($parameterList as $param)
+                                    <tr>
+                                        <td>{{ $param->nama_parameter }}</td>
+                                        <td class="text-center">
+                                            <input class="form-check-input param-checkbox param-normal" type="checkbox" name="normal_parameter_uji_ids[]" value="{{ $param->parameter_uji_id }}" id="param_normal_{{ $param->parameter_uji_id }}" {{ in_array($param->parameter_uji_id, old('normal_parameter_uji_ids', $selectedNormal ?? [])) ? 'checked' : '' }} style="transform: scale(1.3);">
+                                        </td>
+                                        <td class="text-center">
+                                            <input class="form-check-input param-checkbox param-inhouse" type="checkbox" name="inhouse_parameter_uji_ids[]" value="{{ $param->parameter_uji_id }}" id="param_inhouse_{{ $param->parameter_uji_id }}" {{ in_array($param->parameter_uji_id, old('inhouse_parameter_uji_ids', $selectedInhouse ?? [])) ? 'checked' : '' }} style="transform: scale(1.3);">
+                                        </td>
+                                                                                  <td class="text-center">
+                                              <div class="d-flex align-items-center justify-content-center">
+                                                  <input class="form-check-input param-checkbox param-crm me-2" type="checkbox" name="crm_parameter_uji_ids[]" value="{{ $param->parameter_uji_id }}" id="param_crm_{{ $param->parameter_uji_id }}" {{ in_array($param->parameter_uji_id, old('crm_parameter_uji_ids', $selectedCrm ?? [])) ? 'checked' : '' }} style="transform: scale(1.3);" {{ in_array($param->parameter_uji_id, $selectedCrm ?? []) ? 'onclick="return false;" style="pointer-events:none; opacity:0.6;"' : '' }}>
+                                                  
+                                                  <div class="crm-dropdown-wrapper" id="crm_wrapper_{{ $param->parameter_uji_id }}" style="display: none; width: 100%; max-width: 250px;">
+                                                      <select class="form-select form-select-sm" name="crm_katalog_ids[{{ $param->parameter_uji_id }}]" id="crm_select_{{ $param->parameter_uji_id }}" {{ in_array($param->parameter_uji_id, $selectedCrm ?? []) ? 'disabled' : '' }}>
+                                                          <option value="">-- Pilih Botol CRM --</option>
+                                                          @foreach($crmKatalogList as $katalog)
+                                                              @php
+                                                                  $isExpired = $katalog->tanggal_expired && \Carbon\Carbon::parse($katalog->tanggal_expired)->isPast();
+                                                                  $hasParam = $katalog->sertifikats->contains('parameter_uji_id', $param->parameter_uji_id);
+                                                                  $isSelected = isset($selectedCrmKatalogs[$param->parameter_uji_id]) && $selectedCrmKatalogs[$param->parameter_uji_id] == $katalog->id;
+                                                              @endphp
+                                                              @if($hasParam)
+                                                                  <option value="{{ $katalog->id }}" data-expired="{{ $isExpired ? 'true' : 'false' }}" {{ $isSelected ? 'selected' : '' }}>
+                                                                      {{ $katalog->nomor_lot }} - {{ $katalog->nama_produk }} {{ $isExpired ? '(KADALUARSA)' : '' }}
+                                                                  </option>
+                                                              @endif
+                                                          @endforeach
+                                                      </select>
+                                                  </div>
+                                              </div>
+                                          </td>
+                                    </tr>
+                                    @empty
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted">Belum ada parameter uji yang terdaftar di master data.</td>
+                                    </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    @error('inhouse_parameter_uji_ids')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
+                    @error('crm_parameter_uji_ids')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
+                    <!-- Matrix Parameters End -->
+                    
+                    <div class="alert alert-info mt-2" style="font-size: 0.85rem;">
+                        <i class="fas fa-info-circle me-1"></i> <strong>Keamanan Data (Add-Only):</strong> Anda dapat mencentang parameter baru untuk ditambah ke Kegiatan ini. Menghapus centang pada parameter yang sudah terdaftar <b>tidak akan</b> menghapus data hasil ujinya.
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="{{ route('verifikasi-mutu.index') }}" class="btn btn-secondary">Kembali</a>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Perbarui</button>
                 </div>
             </form>
         </div>
@@ -234,6 +303,44 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+        // Logic Matrix CRM
+    if (crmSelect) {
+        crmSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption && selectedOption.dataset.expired === 'true') {
+                alert('⚠ PERINGATAN KRITIS: Botol CRM yang Anda pilih sudah melewati Tanggal Kadaluarsa (Expired)! Sistem sangat tidak menyarankan penggunaan botol ini untuk uji akurasi. Silakan gunakan botol Lot lain yang masih valid atau buat botol baru.');
+            }
+        });
+    }
 });
+
+      // Logic Matrix CRM (NEW PER-ROW)
+      const crmCheckboxes = document.querySelectorAll('.param-crm');
+      
+      function updateCrmDropdowns() {
+          crmCheckboxes.forEach(cb => {
+              const paramId = cb.value;
+              const wrapper = document.getElementById('crm_wrapper_' + paramId);
+              const select = document.getElementById('crm_select_' + paramId);
+              
+              if (cb.checked) {
+                  if (wrapper) wrapper.style.display = 'block';
+                  if (select && !select.disabled) {
+                      select.setAttribute('required', 'required');
+                  }
+              } else {
+                  if (wrapper) wrapper.style.display = 'none';
+                  if (select && !select.disabled) {
+                      select.removeAttribute('required');
+                      select.value = "";
+                  }
+              }
+          });
+      }
+      
+      if(crmCheckboxes.length > 0) {
+          crmCheckboxes.forEach(cb => cb.addEventListener('change', updateCrmDropdowns));
+          updateCrmDropdowns();
+      }
 </script>
 @endpush

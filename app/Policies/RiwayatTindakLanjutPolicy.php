@@ -32,5 +32,9 @@ class RiwayatTindakLanjutPolicy
         return $this->hasFullAccess($user, 'tambah_ubah');
     }
 
-    // Tidak ada update & delete — insert only
+    public function update(User $user, RiwayatTindakLanjut $riwayatTindakLanjut): bool
+    {
+        // Analis dan Koordinator Lab (yang memiliki akses tambah_ubah) bisa merubah status dan kesimpulan akhir
+        return $this->hasFullAccess($user, 'tambah_ubah');
+    }
 }

@@ -12,14 +12,11 @@
     
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
 
     <style>
-        body {
-            background-color: #f8f9fa;
-            overflow-x: hidden;
-        }
-
-        :root{
+        :root {
+            --sidebar-width: {{ auth()->check() ? '260px' : '0' }};
             --sdm-50: #eef0f1;
             --sdm-500: #1d4c7a;
             --sdm-600: #1d4c7a;
@@ -86,9 +83,7 @@
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
-        #sidebar .sidebar-header:hover {
-            background-color: #f8fafc;
-        }
+        #sidebar .sidebar-header:hover { background-color: #f8fafc; }
 
         #sidebar ul.components { padding: 20px 0; }
         
@@ -121,43 +116,7 @@
         
         #sidebar ul li a i { font-size: 1.1rem; opacity: 0.75; margin-right: 10px; }
         #sidebar ul li a:hover i, #sidebar ul li.active > a i { opacity: 1; color: #2563eb; }
-        
-        #sidebar .sidebar-divider { 
-            font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; 
-            color: #94a3b8; padding: 18px 24px 8px; margin-top: 5px; 
-        }
 
-        #sidebar ul li > a.dropdown-toggle::after {
-            display: inline-block;
-            margin-left: 0.255em;
-            vertical-align: 0.255em;
-            content: "\f107";
-            font-family: "Font Awesome 5 Free";
-            font-weight: 900;
-            border: none;
-            transition: transform 0.2s ease;
-        }
-        #sidebar ul li > a.dropdown-toggle[aria-expanded="true"]::after {
-            transform: rotate(-180deg);
-        }
-        #sidebar ul.collapse li a {
-            padding-left: 3rem !important;
-            font-size: 0.92rem;
-            background: #f8fafc;
-            border-left: 4px solid transparent;
-        }
-        #sidebar ul.collapse li.active > a {
-            background: #eff6ff;
-            border-left-color: #2563eb;
-            color: #1d4ed8;
-            font-weight: 600;
-        }
-        #sidebar ul.collapse li a:hover {
-            transform: none;
-            padding-left: 3.25rem !important;
-            transition: padding-left 0.2s ease, background 0.2s ease, color 0.2s ease;
-        }
-        
         @media (min-width: 992px) {
             body.sidebar-toggled #sidebar-overlay { display: none; }
         }
@@ -169,49 +128,13 @@
             color: #fff;
             border-color: rgba(255,255,255,.18);
         }
-        .top-navbar .dropdown button {
-            max-width: 220px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
         
-        .btn-logout {
-            border-color: rgba(255,255,255,.45);
-            color: #fff;
-            transition: background .15s ease, color .15s ease, border-color .15s ease;
-        }
-        .btn-logout:hover,
-        .btn-logout:focus {
-            background: rgba(255,255,255,.95);
-            color: #1d4c7a;
-            border-color: rgba(255,255,255,.85);
-        }
-        .pagination svg, 
-        .card-body svg {
-            width: 1rem !important;
-            height: 1rem !important;
-            max-width: 1rem !important;
-            max-height: 1rem !important;
+        .pagination svg, .card-body svg {
+            width: 1rem !important; height: 1rem !important;
+            max-width: 1rem !important; max-height: 1rem !important;
             display: inline-block;
         }
-
-        .card-body > div > div.d-flex.justify-content-between.flex-fill.align-items-center.d-sm-none,
-        .card-body > div > nav > div.d-flex.justify-content-between.flex-fill.d-sm-none {
-            display: none !important;
-        }
-
-        .card.h-100 .card-body { min-height: 120px; }
-        .card .card-body p { word-break: break-word; }
-        .module-card { transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease; }
-        .module-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(15,35,59,.08); }
-        .sdm-highlight { border-color: var(--sdm-600) !important; }
-        .sdm-text { color: var(--sdm-600) !important; }
-        .sdm-btn { background: var(--sdm-600); border-color: var(--sdm-600); color: #fff; }
-        .sdm-border { border-color: rgba(76,29,149,0.12); }
     </style>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -223,6 +146,7 @@
             }
         }
     </script>
+
     @auth
         <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
         <nav id="sidebar">
@@ -242,17 +166,21 @@
                     <a href="{{ route('dashboard') ?? url('/') }}"><i class="fas fa-home"></i> Dashboard</a>
                 </li>
 
-
-                {{-- 1. Manajemen Peralatan (Aset) --}}
+                {{-- 1. Manajemen Peralatan
+                @if(Auth::check() && (Auth::user()->hasModulAccess('alat') || (Auth::user()->role && Auth::user()->role->nama_role == 'HR & GA')))
+                <li class="{{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') ? 'active' : '' }}">
+                    <a href="{{ route('alat.index') }}"><i class="fas fa-tools"></i> Manajemen Peralatan</a>
+                </li>
+                @endif --}}
+                {{-- 1. Peralatan & Monitoring --}}
                 @if(Auth::check() && (Auth::user()->hasModulAccess('alat') || (Auth::user()->role && Auth::user()->role->nama_role == 'HR & GA')))
                 <li class="nav-item">
-                    <a class="nav-link d-flex justify-content-between align-items-center {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') ? 'active' : 'collapsed' }}" 
+                    <a class="nav-link d-flex justify-content-between align-items-center {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') ? 'active text-primary fw-bold' : 'collapsed' }}" 
                        data-bs-toggle="collapse" 
                        href="#menuManajemenPeralatan" 
                        role="button" 
                        aria-expanded="{{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') ? 'true' : 'false' }}" 
                        aria-controls="menuManajemenPeralatan">
-                       
                         <span><i class="fas fa-tools me-2"></i> Peralatan & Monitoring</span>
                         <i class="fas fa-chevron-down small"></i>
                     </a>
@@ -274,33 +202,35 @@
                 </li>
                 @endif
                 
-                 @if(Auth::check() && (Auth::user()->hasModulAccess('sdm') || Auth::user()->hasModulAccess('manajemen_pengguna')))
-                 <li class="{{ request()->is('sdm*') || request()->is('hak-akses*') ? 'active' : '' }}">
-                     <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personil & Kompetensi</a>
-                 </li>
-                 @endif
+                {{-- 2. Personil & Kompetensi --}}
+                @if(Auth::check() && (Auth::user()->hasModulAccess('sdm') || Auth::user()->hasModulAccess('manajemen_pengguna')))
+                <li class="{{ request()->is('sdm*') || request()->is('hak-akses*') ? 'active' : '' }}">
+                    <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personil & Kompetensi</a>
+                </li>
+                @endif
 
-
+                {{-- 3. Verifikasi Mutu (QC) --}}
                 @if(Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
                 <li class="{{ request()->is('parameter-uji*') || request()->is('kegiatan*') || request()->is('tindak-lanjut*') || request()->is('reporting*') ? 'active' : '' }}">
                     <a href="{{ route('kegiatan.index') }}"><i class="fas fa-flask"></i> Verifikasi Mutu (QC)</a>
                 </li>
                 @endif
 
+                {{-- 4. Inventori Bahan/Barang --}}
                 @if(Auth::check() && (Auth::user()->hasModulAccess('barang') || Auth::user()->hasModulAccess('pengadaan')))
                 <li class="{{ request()->is('barang*') || request()->is('pengadaan*') ? 'active' : '' }}">
                     <a href="{{ route('barang.index') }}"><i class="fas fa-boxes"></i> Inventori Bahan/Barang</a>
                 </li>
                 @endif
 
+                {{-- 5. Library Digital --}}
                 @if(Auth::check() && Auth::user()->hasModulAccess('library_manage'))
                 <li class="{{ request()->is('library*') ? 'active' : '' }}">
                     <a href="{{ route('library.index') }}"><i class="fas fa-book-open"></i> Library Digital</a>
                 </li>
                 @endif
 
-
-                {{-- 6. Audit Log --}}
+                {{-- 6. Audit Trail --}}
                 @if(Auth::check() && Auth::user()->hasModulAccess('audit_log'))
                 <li class="{{ request()->is('audit-log*') ? 'active' : '' }}">
                     <a href="{{ route('audit-log.index') }}"><i class="fas fa-history"></i> Audit Trail</a>
@@ -310,6 +240,7 @@
         </nav>
     @endauth
 
+    {{-- TOP NAVBAR UTAMA --}}
     <div class="top-navbar shadow-sm">
         <div class="d-flex align-items-center">
             @auth
@@ -322,34 +253,72 @@
                 <div class="mb-0 fw-bold d-none d-sm-block">Sistem Integrated General Management Analytics of Lab</div>
             </div>
         </div>
+
         <div class="d-flex align-items-center">
-            @if(isset($pendingPengadaan) && $pendingPengadaan > 0)
-                <a href="{{ route('pengadaan.index') }}" class="btn btn-warning position-relative me-3 rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;" title="{{ $pendingPengadaan }} Pengajuan Pengadaan">
-                    <i class="fas fa-bell text-dark"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light">
-                        {{ $pendingPengadaan }}
-                        <span class="visually-hidden">pengadaan belum diproses</span>
-                    </span>
+            @auth
+            {{-- Dropdown Notifikasi --}}
+            <div class="dropdown me-3">
+                <a href="#" class="btn btn-warning position-relative rounded-circle p-2 d-flex align-items-center justify-content-center dropdown-toggle" style="width: 38px; height: 38px;" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-bell text-white"></i>
+                    @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light">
+                            {{ $unreadNotifCount > 99 ? '99+' : $unreadNotifCount }}
+                            <span class="visually-hidden">unread messages</span>
+                        </span>
+                    @endif
                 </a>
-            @endif
-            <div class="dropdown">
-            <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown" title="Profil" style="border-color: rgba(255,255,255,0.2);">
-                <i class="bi bi-person-circle me-1 text-white"></i> 
-                <div class="d-none d-sm-flex flex-column text-start ms-1 me-1 text-white" style="line-height: 1.2;">
-                    <span class="fw-bold" style="font-size: 0.9rem;">{{ Auth::user()->personil->nama_personil ?? Auth::user()->username ?? 'Pengguna' }}</span>
-                    <small style="font-size: 0.75rem; color: rgba(255,255,255,0.85);">{{ Auth::user()->role->nama_role ?? '-' }}</small>
-                </div>
-                <span class="d-inline d-sm-none text-white">{{ substr(Auth::user()->personil->nama_personil ?? Auth::user()->username ?? 'U', 0, 5) }}</span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li>
-                    <form action="{{ route('logout') }}" method="POST">
-                        @csrf
-                        <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i> Logout</button>
-                    </form>
-                </li>
-            </ul>
+                <ul class="dropdown-menu dropdown-menu-end shadow" style="width: 300px; max-height: 400px; overflow-y: auto;">
+                    <li><h6 class="dropdown-header">Notifikasi Terbaru</h6></li>
+                    @if(isset($recentNotifs) && $recentNotifs->count() > 0)
+                        @foreach($recentNotifs as $notif)
+                            <li>
+                                <a class="dropdown-item d-flex align-items-start py-2 border-bottom text-wrap" href="#">
+                                    <div class="me-3 mt-1">
+                                        @if($notif->jenis_notifikasi == 'qc')
+                                            <i class="fas fa-flask text-primary"></i>
+                                        @elseif($notif->jenis_notifikasi == 'kalibrasi')
+                                            <i class="fas fa-tools text-warning"></i>
+                                        @elseif($notif->jenis_notifikasi == 'stok')
+                                            <i class="fas fa-box text-success"></i>
+                                        @elseif($notif->jenis_notifikasi == 'sertifikasi')
+                                            <i class="fas fa-certificate text-danger"></i>
+                                        @else
+                                            <i class="fas fa-bell text-secondary"></i>
+                                        @endif
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <p class="mb-0" style="font-size: 0.85rem;">{{ \Illuminate\Support\Str::limit($notif->pesan, 80) }}</p>
+                                        <small class="text-muted" style="font-size: 0.75rem;">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</small>
+                                    </div>
+                                </a>
+                            </li>
+                        @endforeach
+                    @else
+                        <li><span class="dropdown-item text-center text-muted py-3">Tidak ada notifikasi baru</span></li>
+                    @endif
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-center text-primary fw-bold" href="{{ route('notifikasi.index') }}">Lihat Semua Notifikasi</a></li>
+                </ul>
             </div>
+
+            <div class="dropdown">
+                <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown" title="Profil" style="border-color: rgba(255,255,255,0.2);">
+                    <i class="bi bi-person-circle me-1 text-white"></i> 
+                    <div class="d-none d-sm-flex flex-column text-start ms-1 me-1 text-white" style="line-height: 1.2;">
+                        <span class="fw-bold" style="font-size: 0.9rem;">{{ Auth::user()->personil->nama_personil ?? Auth::user()->username ?? 'Pengguna' }}</span>
+                        <small style="font-size: 0.75rem; color: rgba(255,255,255,0.85);">{{ Auth::user()->role->nama_role ?? '-' }}</small>
+                    </div>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i> Logout</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+            @endauth
         </div>
     </div>
 
@@ -373,8 +342,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
@@ -388,73 +355,32 @@
     </script>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const forms = document.querySelectorAll('.live-search-form');
-        
-        forms.forEach(form => {
-            const inputs = form.querySelectorAll('input, select');
-            const targetSelector = form.dataset.target || '#table-container';
-            const targetContainer = document.querySelector(targetSelector);
-            
-            if (!targetContainer) return;
-            
-            let timeout = null;
-            
-            inputs.forEach(input => {
-                input.addEventListener('input', function() {
-                    clearTimeout(timeout);
-                    timeout = setTimeout(() => {
-                        executeSearch(form, targetContainer);
-                    }, 400);
-                });
-            });
-            
-            targetContainer.addEventListener('click', function(e) {
-                const link = e.target.closest('.pagination a');
-                if (link) {
-                    e.preventDefault();
-                    executeSearch(form, targetContainer, link.href);
-                }
-            });
+    function confirmDelete(button, customText) {
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: customText || 'Data akan dihapus permanen!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                button.closest('form').submit();
+            }
         });
-        
-        function executeSearch(form, targetContainer, url = null) {
-            targetContainer.style.opacity = '0.5';
-            
-            const formData = new FormData(form);
-            const searchParams = new URLSearchParams(formData);
-            const fetchUrl = url || `${form.action || window.location.pathname}?${searchParams.toString()}`;
-            
-            window.history.pushState({}, '', fetchUrl);
-            
-            fetch(fetchUrl, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.text())
-            .then(html => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const targetSelector = form.dataset.target || '#table-container';
-                const newContent = doc.querySelector(targetSelector);
-                
-                if (newContent) {
-                    targetContainer.innerHTML = newContent.innerHTML;
-                }
-                targetContainer.style.opacity = '1';
-            })
-            .catch(error => {
-                console.error('Live search error:', error);
-                targetContainer.style.opacity = '1';
-            });
-        }
+    }
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('[data-confirm-delete]');
+        if (!btn) return;
+        e.preventDefault();
+        confirmDelete(btn, btn.dataset.confirmDelete || undefined);
     });
     </script>
-    @stack('scripts')
+
     <script>
         $(document).ready(function() {
-
             $('.select2-alat, #selectAlat').select2({
                 theme: 'bootstrap-5',
                 width: '100%',
@@ -465,6 +391,5 @@
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     @stack('scripts')
-
 </body>
 </html>

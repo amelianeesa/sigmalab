@@ -6,12 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class KategoriAlat extends Model
+class KategoriAlat extends BaseModel
 {
     use HasFactory, SoftDeletes;
 
     protected $table = 'kategori_alat';
-    protected $primaryKey = 'kategori_alat_id';
     protected $guarded = [];
 
     public function alat()
@@ -24,3 +23,4 @@ class KategoriAlat extends Model
         return $this->hasMany(ItemPemeliharaan::class, 'kategori_alat_id', 'kategori_alat_id');
     }
 }
+

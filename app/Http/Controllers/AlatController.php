@@ -52,7 +52,6 @@ class AlatController extends Controller
         }
 
         $alatList = $query->latest()->get();
-
         if ($filterStatus) {
             $alatList = $alatList->filter(function($item) use ($filterStatus) {
                 $kalibrasiTerakhir = $item->riwayatKalibrasi->sortByDesc('tgl_kalibrasi')->first();
@@ -75,6 +74,8 @@ class AlatController extends Controller
             });
         }
 
+        $alatList = $query->latest()->get();
+
         $alat = $alatList;
 
         return view('alat.index', compact('alat', 'search', 'filterStatus', 'filterKondisi'));
@@ -86,78 +87,8 @@ class AlatController extends Controller
     }
 
     // public function store(Request $request)
-    // {
-    //     $request->validate([
-    //         'kode_alat' => 'required|string|max:50|unique:alat,kode_alat',
-    //         'no_inventaris' => 'nullable|string|max:255',
-    //         'nama_alat' => 'required|string|max:100',
-    //         'merk_tipe' => 'nullable|string|max:100',
-    //         'no_seri' => 'nullable|string|max:100',
-    //         'warna' => 'nullable|string|max:30',
-    //         'ukuran' => 'nullable|string|max:50',
-    //         'kondisi_barang' => 'required|in:baik,rusak,perbaikan',
-    //         'status_barang' => 'required|in:terpakai,idle',
-    //         'unit_kerja_pemilik' => 'nullable|string|max:100',
 
-    //         'no_sertifikat' => 'nullable|string|max:100',
-    //         'file_sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-    //         'interval_kalibrasi' => 'nullable|string|max:50',
-    //         'tgl_kalibrasi' => 'nullable|date',
-    //         'tgl_akhir' => 'nullable|date',
-    //         'lembaga_kalibrasi' => 'nullable|string|max:150',
-    //         'jenis_kalibrasi' => 'nullable|in:internal,eksternal',
-    //         'range_kapasitas' => 'nullable|string|max:100',
-    //         'faktor_koreksi' => 'nullable|string|max:100',
-    //         // 'file_faktor_koreksi' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:2048',
-    //         'signifikan' => 'nullable|in:ya,tidak',
-    //         'catatan_evaluasi' => 'nullable|string',
-    //     ]);
-
-    //     DB::transaction(function () use ($request) {
-    //         $alat = Alat::create([
-    //             'kode_alat' => $request->kode_alat,
-    //             'no_inventaris' => $request->no_inventaris,
-    //             'nama_alat' => $request->nama_alat,
-    //             'merk_tipe' => $request->merk_tipe,
-    //             'no_seri' => $request->no_seri,
-    //             'warna' => $request->warna,
-    //             'ukuran' => $request->ukuran,
-    //             'kondisi_barang' => $request->kondisi_barang,
-    //             'status_barang' => $request->status_barang,
-    //             'unit_kerja_pemilik' => $request->unit_kerja_pemilik,
-    //         ]);
-
-    //         if ($request->filled('tgl_kalibrasi')) {
-    //             $dataKalibrasi = [
-    //                 'alat_id' => $alat->alat_id,
-    //                 'jenis_kalibrasi' => $request->jenis_kalibrasi,
-    //                 'no_sertifikat' => $request->no_sertifikat,
-    //                 'interval_kalibrasi' => $request->interval_kalibrasi,
-    //                 'tgl_kalibrasi' => $request->tgl_kalibrasi,
-    //                 'tgl_akhir' => $request->tgl_akhir,
-    //                 'lembaga_kalibrasi' => $request->lembaga_kalibrasi,
-    //                 'range_kapasitas' => $request->range_kapasitas,
-    //                 'faktor_koreksi' => $request->faktor_koreksi,
-    //                 'signifikan' => $request->signifikan ?? 'tidak',
-    //                 'catatan_evaluasi' => $request->catatan_evaluasi,
-    //             ];
-    //             if ($request->hasFile('file_sertifikat')) {
-    //                 $path = $request->file('file_sertifikat')->store('sertifikat_kalibrasi', 'public');
-    //                 $dataKalibrasi['file_sertifikat'] = $path;
-    //             }
-    //             // if ($request->hasFile('file_faktor_koreksi')) {
-    //             //     $pathFaktor = $request->file('file_faktor_koreksi')->store('faktor_koreksi', 'public');
-    //             //     $dataKalibrasi['file_faktor_koreksi'] = $pathFaktor;
-    //             // }
-
-    //             RiwayatKalibrasi::create($dataKalibrasi);
-    //         }
-    //     });
-
-    //     return redirect()->route('alat.index')->with('success', 'Data alat beserta informasi kalibrasinya berhasil ditambahkan');
-    // }
-
-    public function store(Request $request)
+    public function store(\App\Http\Requests\AlatRequest $request)
     {
         $request->validate([
             'kode_alat' => 'required|string|max:50|unique:alat,kode_alat',
@@ -236,7 +167,7 @@ class AlatController extends Controller
         return view('alat.edit', compact('alat', 'kalibrasiTerakhir'));
     }
 
-    public function update(Request $request, $id)
+    public function update(\App\Http\Requests\AlatRequest $request, $id)
     {
         $alat = Alat::findOrFail($id);
 
@@ -306,7 +237,7 @@ class AlatController extends Controller
             //     $pathFaktor = $request->file('file_faktor_koreksi')->store('faktor_koreksi', 'public');
             //     $dataKalibrasi['file_faktor_koreksi'] = $pathFaktor;
             // }
-        
+            $kalibrasiTerakhir = \App\Models\RiwayatKalibrasi::where('alat_id', $alat->alat_id)->latest('tgl_kalibrasi')->first();
 
             if ($request->filled('tgl_kalibrasi')) {
                 if ($kalibrasiTerakhir) {
@@ -334,7 +265,7 @@ class AlatController extends Controller
 
     public function show($id)
     {
-        $alat = Alat::with(['riwayatKalibrasi', 'kegiatanAlat.kegiatan.personil', 'riwayatPerbaikan.pelapor', 'riwayatPerbaikan.verifikator'])->findOrFail($id);
+        $alat = Alat::with(['riwayatKalibrasi', 'kegiatanAlat.kegiatan.personilTerlibat', 'riwayatPerbaikan.pelapor', 'riwayatPerbaikan.verifikator'])->findOrFail($id);
         
         $sedangDiperbaiki = $alat->riwayatPerbaikan()->whereIn('status_perbaikan', ['Belum Diperbaiki', 'Dalam Perbaikan'])->first();
 

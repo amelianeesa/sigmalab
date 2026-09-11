@@ -51,4 +51,3 @@ class User extends Authenticatable
         return app(\App\Services\PermissionService::class)->userHasAccess($this, $kodeModul, $minLevel);
     }
 }
-

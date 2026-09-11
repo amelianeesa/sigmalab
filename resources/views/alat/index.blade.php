@@ -67,7 +67,7 @@
                 </div>
             </form>
 
-            <div class="table-responsive">
+            <div class="table-responsive" id="table-container">
                 <table class="table table-bordered table-striped align-middle text-center" style="font-size: 0.73rem;">
                     <thead class="table-dark align-middle">
                         <tr>
@@ -204,7 +204,7 @@
                                     <form action="{{ route('alat.destroy', $item->alat_id) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="button" class="btn btn-danger btn-sm" title="Hapus" onclick="confirmDelete(this)">
+                                        <button type="button" class="btn btn-danger btn-sm" title="Hapus" data-confirm-delete="Data alat beserta riwayat kalibrasinya akan dihapus permanen!">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
@@ -248,25 +248,7 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-function confirmDelete(button) {
-    Swal.fire({
-        title: 'Apakah Anda yakin?',
-        text: "Data alat beserta riwayat kalibrasinya akan dihapus permanen!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Ya, Hapus!',
-        cancelButtonText: 'Batal'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            button.closest('form').submit();
-        }
-    });
-}
-
 document.addEventListener("DOMContentLoaded", function() {
     const searchInput = document.getElementById('searchInput');
     const filterStatus = document.getElementById('filterStatus');
@@ -291,8 +273,8 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
-    const qrModal = document.getElementById('qrModal');
-    qrModal.addEventListener('show.bs.modal', function (event) {
+const qrModal = document.getElementById('qrModal');
+qrModal.addEventListener('show.bs.modal', function (event) {
     const trigger = event.relatedTarget;
     const qrSvg = trigger.getAttribute('data-qrsvg');
     const namaAlat = trigger.getAttribute('data-alatanama');

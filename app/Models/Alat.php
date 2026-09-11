@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsStandardActivity;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,13 +15,12 @@ use App\Models\RiwayatPerbaikanAlat;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 
-class Alat extends Model
+class Alat extends BaseModel
 {
     use SoftDeletes;
     use HasFactory, LogsActivity;
 
     protected $table = 'alat';
-    protected $primaryKey = 'alat_id';
 
     protected $fillable = [
         'kode_alat',

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsStandardActivity;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -12,26 +14,33 @@ use Spatie\Activitylog\Support\LogOptions;
 // use Spatie\Activitylog\LogOptions;
 
 
-class HasilUji extends Model
+class HasilUji extends BaseModel
 {
     use SoftDeletes;
     use HasFactory, LogsActivity;
 
     protected $table = 'hasil_uji';
-    protected $primaryKey = 'hasil_uji_id';
-    public $timestamps = false;
+    const UPDATED_AT = null;
 
     protected $fillable = [
         'kegiatan_id',
         'parameter_uji_id',
         'nilai_hasil',
         'status_berketerimaan',
+        'crm_katalog_id',
+        'kode_aturan_dilanggar',
+        'override_status',
+        'override_kode',
+        'keterangan_override',
+        'z_score',
+        'data_mentah',
         'diinput_oleh',
         'created_at',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
+        'data_mentah' => 'array',
     ];
 
     public function parameterUji()
@@ -62,5 +71,14 @@ class HasilUji extends Model
             // ->dontSubmitEmptyLogs()
             ->setDescriptionForEvent(fn(string $eventName) => "Hasil uji lab telah di-{$eventName}");
     }
-}
 
+
+    public function scopePending($query) { return $query->where('status_berketerimaan',
+        'crm_katalog_id', 'pending'); }
+    public function scopeInlier($query) { return $query->where('status_berketerimaan',
+        'crm_katalog_id', 'inlier'); }
+    public function scopeOutlier($query) { return $query->where('status_berketerimaan',
+        'crm_katalog_id', 'outlier'); }
+    public function scopeGagalDuplo($query) { return $query->where('status_berketerimaan',
+        'crm_katalog_id', 'gagal_duplo'); }
+}

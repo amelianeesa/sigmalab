@@ -6,13 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class RiwayatKalibrasi extends Model
+class RiwayatKalibrasi extends BaseModel
 {
     use SoftDeletes;
     use HasFactory;
 
     protected $table = 'riwayat_kalibrasi';
-    protected $primaryKey = 'riwayat_kalibrasi_id';
     public $timestamps = false;
     protected $casts = [
         'tgl_akhir' => 'date',
@@ -40,3 +39,4 @@ class RiwayatKalibrasi extends Model
         return $this->belongsTo(Alat::class, 'alat_id', 'alat_id');
     }
 }
+

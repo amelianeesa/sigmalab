@@ -7,13 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\KompetensiPersonil;
 
-class Personil extends Model
+class Personil extends BaseModel
 {
     use SoftDeletes;
     use HasFactory;
 
     protected $table = 'personil';
-    protected $primaryKey = 'personil_id';
 
     protected $fillable = [
         'nama',

@@ -6,14 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class RiwayatTindakLanjut extends Model
+class RiwayatTindakLanjut extends BaseModel
 {
     use SoftDeletes;
     use HasFactory;
 
     protected $table = 'riwayat_tindak_lanjut';
-    protected $primaryKey = 'riwayat_tindak_lanjut_id';
-    public $timestamps = false;
+    const UPDATED_AT = null;
 
     protected $fillable = [
         'hasil_uji_id',
@@ -36,5 +35,9 @@ class RiwayatTindakLanjut extends Model
     {
         return $this->belongsTo(User::class, 'ditindaklanjuti_oleh', 'users_id');
     }
-}
 
+    public function komentars()
+    {
+        return $this->hasMany(TindakLanjutKomentar::class, 'riwayat_tindak_lanjut_id', 'riwayat_tindak_lanjut_id');
+    }
+}

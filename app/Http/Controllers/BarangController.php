@@ -40,7 +40,7 @@ class BarangController extends Controller
         return view('barang.create');
     }
 
-    public function store(Request $request)
+    public function store(\App\Http\Requests\BarangRequest $request)
     {
         $request->validate([
             'nama_barang' => 'required|string|max:100',
@@ -89,7 +89,7 @@ class BarangController extends Controller
         return view('barang.edit', compact('barang'));
     }
 
-    public function update(Request $request, $id)
+    public function update(\App\Http\Requests\BarangRequest $request, $id)
     {
         $barang = Barang::findOrFail($id);
 
