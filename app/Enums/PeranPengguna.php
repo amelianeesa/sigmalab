@@ -10,8 +10,9 @@ enum PeranPengguna: string
 {
     case KOORDINATOR_LAB = 'Koordinator Laboratorium';
     case ANALIS = 'Analis Lab';
-    case KABID_INSPEKSI = 'Kabid Inspeksi dan Solusi Perdagangan'; 
-    case KABID_DUKUNGAN_BISNIS = 'Kabid Dukungan Bisnis'; 
-    case HR_GA_OFFICER = 'HR & GA';
+    case HR_OFFICER = 'HR';
+    case GA_OFFICER = 'GA';
+    case KABID_INSPEKSI = 'Kabid Inspeksi dan Solusi Perdagangan';
+    case KABID_DUKUNGAN_BISNIS = 'Kabid Dukungan Bisnis';
     case ADMIN_APLIKASI = 'Admin Aplikasi';
 }

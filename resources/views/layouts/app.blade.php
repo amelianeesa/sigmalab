@@ -235,7 +235,7 @@
                 </li>
 
                 {{-- 1. Manajemen Peralatan (Aset) --}}
-                @if(Auth::check() && (Auth::user()->hasModulAccess('alat') || (Auth::user()->role && Auth::user()->role->nama_role == 'HR & GA')))
+              @if(Auth::check() && (Auth::user()->hasModulAccess('alat') || (Auth::user()->role && (Auth::user()->role->nama_role == 'HR' || Auth::user()->role->nama_role == 'GA'))))
                 <li class="{{ request()->is('alat*') ? 'active' : '' }}">
                     <a href="{{ route('alat.index') }}"><i class="fas fa-tools"></i> Manajemen Peralatan</a>
                 </li>
