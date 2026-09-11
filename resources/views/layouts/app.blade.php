@@ -255,7 +255,6 @@
                 </li>
                 @endif
 
-                {{-- 4. Inventori & Fasilitas --}}
                 @if(Auth::check() && (Auth::user()->hasModulAccess('barang') || Auth::user()->hasModulAccess('pengadaan')))
                 <li class="{{ request()->is('barang*') || request()->is('pengadaan*') ? 'active' : '' }}">
                     <a href="{{ route('barang.index') }}"><i class="fas fa-boxes"></i> Inventori & Fasilitas</a>

@@ -147,10 +147,10 @@
                     </div>
                     <div class="mb-2">
                         <label class="form-label small fw-semibold">Dokumen Sertifikat</label>
-                        <input type="file" name="file_sertifikat" class="form-control form-control-sm" accept="image/*,application/pdf">
+                        <input type="file"  name="file_sertifikat" class="form-control form-control-sm" accept="image/*,application/pdf">
                         <div class="form-text text-muted" style="font-size: 0.75rem;">Format: JPG, PNG, PDF (Maks. 2MB). Boleh dikosongkan, bisa diunggah menyusul.</div>
                     </div>
-                </div>
+                </div>  
                 <div class="modal-footer bg-white">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
                     <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-save me-1"></i> Simpan</button>

@@ -13,12 +13,12 @@
             </ol>
         </div>
         <div class="d-flex gap-2">
-            @if(Auth::user()->role->nama_role === \App\Enums\PeranPengguna::HR_GA_OFFICER->value)
+            @if(Auth::user()->role->nama_role === \App\Enums\PeranPengguna::GA_OFFICER->value)
                 <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#exportPdfModal">
                     <i class="fas fa-file-pdf me-1"></i> Export PDF
                 </button>
             @endif
-            @if(Auth::user()->role->nama_role !== \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role !== \App\Enums\PeranPengguna::HR_GA_OFFICER->value)
+            @if(Auth::user()->role->nama_role !== \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role !== \App\Enums\PeranPengguna::GA_OFFICER->value)
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahPengadaanModal">
                     <i class="fas fa-plus me-1"></i> Ajukan Pengadaan
                 </button>
@@ -80,13 +80,13 @@
                                     <div class="d-flex flex-column gap-2">
                                         @php
                                             $roleName = Auth::user()->role->nama_role ?? '';
-                                            $isHrGa = in_array($roleName, [\App\Enums\PeranPengguna::HR_GA_OFFICER->value, \App\Enums\PeranPengguna::ADMIN_APLIKASI->value]);
+                                            $isHrGa = in_array($roleName, [\App\Enums\PeranPengguna::GA_OFFICER->value, \App\Enums\PeranPengguna::ADMIN_APLIKASI->value]);
                                         @endphp
                                     
                                         @if($isHrGa && $p->status != 'selesai' && $p->status != 'ditolak')
                                             <div class="dropdown">
                                                 <button class="btn btn-sm btn-outline-primary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    Aksi HR & GA
+                                                    Aksi GA
                                                 </button>
                                                 <ul class="dropdown-menu">
                                                     @if($p->status == 'diajukan')
@@ -177,7 +177,7 @@
 
                                         @if(!$isHrGa && $p->status == 'diajukan')
                                             <div>
-                                                <span class="text-muted small">Menunggu HR & GA</span>
+                                                <span class="text-muted small">Menunggu GA</span>
                                                 <form action="{{ route('pengadaan.destroy', $p->permintaan_id) }}" method="POST" class="d-inline ms-1">
                                                     @csrf
                                                     @method('DELETE')
@@ -245,7 +245,7 @@
                     <div class="form-text">Format yang didukung: JPG, JPEG, PNG, WEBP (Maksimal 2MB)</div>
                 </div>
                 <div class="alert alert-info py-2 mb-0 mt-3" style="font-size:0.85rem;">
-                    <i class="fas fa-info-circle me-1"></i> Pengajuan ini akan langsung diteruskan ke HR & GA Officer untuk di-*approve*.
+                    <i class="fas fa-info-circle me-1"></i> Pengajuan ini akan langsung diteruskan ke GA Officer untuk di-*approve*.
                 </div>
             </div>
             <div class="modal-footer bg-light">
