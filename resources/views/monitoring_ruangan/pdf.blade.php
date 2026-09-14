@@ -4,26 +4,6 @@
     <meta charset="UTF-8">
     <title>{{ $tahun }}_{{ $bulan }}_Rekap Pencatatan Monitoring Suhu & Kelembaban</title>
     <style>
-        /* @page {
-            size: A4 portrait;
-            margin: 10mm 12mm 18mm 12mm; */
-
-            /* Memindahkan tanggal & nama file ke footer kiri bawah */
-            /* @bottom-left {
-                content: "Tanggal cetak: {{ date('d/m/Y H:i') }}   |   {{ $tahun }}_{{ $bulan }}_Rekap Pencatatan Monitoring Suhu & Kelembaban";
-                font-family: Arial, sans-serif;
-                font-size: 8pt;
-                color: #555;
-            } */
-
-            /* Nomor halaman di footer kanan bawah (menghilangkan URL otomatis) */
-            /* @bottom-right {
-                content: counter(page) " / " counter(pages);
-                font-family: Arial, sans-serif;
-                font-size: 8pt;
-                color: #555;
-            }
-        } */
         body {
             font-family: Arial, sans-serif;
             font-size: 11px;
@@ -59,7 +39,7 @@
         .main-table th, .main-table td {
             border: 1px solid #000;
             padding: 3px 2px;
-            font-size: 10px;
+            font-size: 9px;
         }
         .main-table th {
             background-color: #f2f2f2;
@@ -80,6 +60,7 @@
             $maxHum  = $titikList->where('kategori', 'humidity')->max('equipment_reading');
         }
     @endphp
+
     <table class="header-table">
         <tr>
             <td style="vertical-align: bottom;">
@@ -120,8 +101,8 @@
                 <th rowspan="3" style="width: 25px;">Tanggal</th>
                 <th rowspan="2" colspan="2" style="width: 60px;">Waktu Pencatatan</th>
                 <th colspan="8">Hasil Pengukuran</th>
-                <th colspan="2" rowspan="2" style="width: 50px;">Paraf</th>
-                <th rowspan="3" style="width: 90px;">Keterangan</th>
+                <th colspan="2" rowspan="2">Status</th>
+                <th colspan="2" rowspan="2" style="width: 60px;">Paraf</th>
             </tr>
             <tr>
                 <th colspan="4">Suhu (°C)</th>
@@ -131,15 +112,17 @@
                 <th style="width: 30px;">Pagi</th>
                 <th style="width: 30px;">Sore</th>
                 <th>Pembacaan 1</th>
-                <th>Terkoreksi 1</th>
+                <th>Koreksi 1</th>
                 <th>Pembacaan 2</th>
-                <th>Terkoreksi 2</th>
+                <th>Koreksi 2</th>
                 <th>Pembacaan 1</th>
-                <th>Terkoreksi 1</th>
+                <th>Koreksi 1</th>
                 <th>Pembacaan 2</th>
-                <th>Terkoreksi 2</th>
-                <th style="width: 25px;">1</th>
-                <th style="width: 25px;">2</th>
+                <th>Koreksi 2</th>
+                <th style="width: 30px;">Diterima</th>
+                <th style="width: 30px;">Ditolak</th>
+                <th style="width: 30px;">1</th>
+                <th style="width: 30px;">2</th>
             </tr>
         </thead>
         <tbody>
@@ -169,13 +152,16 @@
                     <td style="{{ $isH2Out ? 'color: red; font-weight: bold;' : '' }}">{{ $row?->kelembaban_pembacaan_2 ?? '' }}</td>
                     <td>{{ $isH2Out ? '-' : ($row?->kelembaban_terkoreksi_2 ?? '') }}</td>
                     
-                    <td>{{ $row?->paraf_1 ? '✓' : '' }}</td>
-                    <td>{{ $row?->paraf_2 ? '✓' : '' }}</td>
-                    <td style="text-align: left; padding-left: 5px;">{{ $row?->keterangan ?? '' }}</td>
+                    <!-- Status Diterima / Ditolak -->
+                    <td>{{ ($row?->status == 'Diterima') ? '✓' : '' }}</td>
+                    <td>{{ ($row?->status == 'Ditolak') ? '✓' : '' }}</td>
+
+                    <!-- Paraf 1 & 2 (Menampilkan Nama User) -->
+                    <td style="font-size: 7px;">{{ $row?->paraf_1 ?? '' }}</td>
+                    <td style="font-size: 7px;">{{ $row?->paraf_2 ?? '' }}</td>
                 </tr>
             @endfor
         </tbody>
     </table>
-
 </body>
 </html>

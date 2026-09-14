@@ -98,6 +98,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/monitoring-ruangan/export-pdf', [MonitoringRuanganController::class, 'exportPdf'])->name('monitoring.exportPdf');
         Route::post('/monitoring-ruangan/kalibrasi/{alatId}', [MonitoringRuanganController::class, 'storeTitikKalibrasi'])->name('monitoring.storeKalibrasi');
         Route::delete('/monitoring-ruangan/kalibrasi-item/{id}', [MonitoringRuanganController::class, 'destroyTitikKalibrasi'])->name('monitoring.destroyKalibrasi');
+        Route::post('/monitoring-ruangan/upload-referensi', [MonitoringRuanganController::class, 'uploadReferensi'])->name('monitoring.uploadReferensi');
+        Route::put('/monitoring-ruangan/referensi/{id}', [MonitoringRuanganController::class, 'updateReferensi'])->name('monitoring.updateReferensi');
+        Route::delete('/monitoring-ruangan/referensi/{id}', [MonitoringRuanganController::class, 'destroyReferensi'])->name('monitoring.destroyReferensi');
         // Route::post('/inventori/monitoring-ruangan/sync-kalibrasi/{alatId}', [MonitoringRuanganController::class, 'syncKalibrasi'])->name('inventori.monitoring.syncKalibrasi');
     });
 
