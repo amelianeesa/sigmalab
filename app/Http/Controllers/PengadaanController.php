@@ -5,12 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\PermintaanPengadaan;
 use App\Models\Barang;
 use App\Models\TransaksiBarang;
+use App\Models\User;
+use App\Services\PermissionService;
+use App\Enums\PeranPengguna;
+use App\Http\Requests\StorePengadaanRequest;
+use App\Http\Requests\ApprovePengadaanRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Services\PermissionService;
-use App\Enums\PeranPengguna;
+use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PengadaanController extends Controller
 {
@@ -23,56 +28,205 @@ class PengadaanController extends Controller
 
     public function index()
     {
-        if (!$this->permissionService->userHasAccess(Auth::user(), 'pengadaan', 'lihat') && !$this->permissionService->userHasAccess(Auth::user(), 'pengadaan', 'tambah_ubah') && !$this->permissionService->userHasAccess(Auth::user(), 'pengadaan', 'full')) {
+        if (
+            !$this->permissionService->userHasAccess(Auth::user(), 'pengadaan', 'lihat') &&
+            !$this->permissionService->userHasAccess(Auth::user(), 'pengadaan', 'tambah_ubah') &&
+            !$this->permissionService->userHasAccess(Auth::user(), 'pengadaan', 'full')
+        ) {
             abort(403, 'Anda tidak memiliki akses ke modul pengadaan ini.');
         }
 
-        $pengadaans = PermintaanPengadaan::with(['barang', 'pemohon', 'penyetuju'])->orderBy('created_at', 'desc')->get();
-        $barangList = Barang::all();
+        $pengadaans = PermintaanPengadaan::with(['barang', 'pemohon', 'penyetuju'])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        return view('pengadaan.index', compact('pengadaans', 'barangList'));
+        $barangList = Barang::all();
+        $currentUserRole = strtolower(Auth::user()->role->nama_role ?? '');
+
+        return view('pengadaan.index', compact('pengadaans', 'barangList', 'currentUserRole'));
     }
 
-    public function store(\App\Http\Requests\StorePengadaanRequest $request)
+    public function store(StorePengadaanRequest $request)
     {
-        $roleName = Auth::user()->role->nama_role ?? '';
+        $roleName = strtolower(Auth::user()->role->nama_role ?? '');
 
         $allowedToRequest = [
-            'Analis',
-            'Koordinator Laboratorium',
-            'Admin Lab',
-            'Admin Aplikasi'
+            strtolower(PeranPengguna::ANALIS->value),
+            strtolower(PeranPengguna::KOORDINATOR_LAB->value),
+            strtolower(PeranPengguna::GA_OFFICER->value),
+            strtolower(PeranPengguna::ADMIN_APLIKASI->value),
         ];
 
-        if (!in_array($roleName, $allowedToRequest)) {
-            return back()->with('error', 'Anda tidak memiliki izin untuk mengajukan pengadaan');
+        if (!in_array($roleName, $allowedToRequest) && !str_contains($roleName, 'analis') && !str_contains($roleName, 'koor')) {
+            return back()->with('error', 'Anda tidak memiliki izin untuk mengajukan pengadaan.');
         }
 
-        $validated = $request->validate([
-            'barang_id' => 'required|exists:barang,barang_id',
-            'jumlah_diminta' => 'required|numeric|min:0.1',
-            'alasan' => 'nullable|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048'
-        ]);
+        $validated = $request->validated();
+
         $pathFoto = null;
         if ($request->hasFile('foto')) {
             $file = $request->file('foto');
             $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-           
             $file->move(public_path('uploads/pengadaan'), $filename);
             $pathFoto = 'uploads/pengadaan/' . $filename;
         }
-        PermintaanPengadaan::create([
+
+        // Analis wajib lewat persetujuan Koordinator dulu.
+        // Koordinator (dan GA/Admin) yang mengajukan langsung diteruskan ke GA.
+        if (str_contains($roleName, 'analis')) {
+            $statusAwal = 'menunggu_koordinator';
+            $pesanSukses = 'Pengajuan berhasil dibuat dan menunggu persetujuan Koordinator Lab.';
+        } else {
+            $statusAwal = 'menunggu_ga';
+            $pesanSukses = 'Pengajuan berhasil diajukan dan langsung diteruskan ke GA.';
+        }
+
+        $pengadaan = PermintaanPengadaan::create([
             'barang_id' => $validated['barang_id'],
             'jumlah_diminta' => $validated['jumlah_diminta'],
-            'alasan' => $validated['alasan'],
+            'alasan' => $validated['alasan'] ?? null,
             'foto' => $pathFoto,
-            'status' => 'diajukan',
+            'status' => $statusAwal,
             'diajukan_oleh' => Auth::id(),
-            'tanggal_pengajuan' => now()->toDateString(),
+            'tanggal_pengajuan' => Carbon::now()->toDateString(),
         ]);
 
-        return redirect()->route('pengadaan.index')->with('success', 'Permintaan pengadaan berhasil diajukan dan menunggu persetujuan HR & GA');
+        if ($statusAwal === 'menunggu_koordinator') {
+            // Analis mengajukan -> Koordinator Lab diberi tahu untuk menyetujui.
+            $this->notifikasiKeKoordinator($pengadaan, 'Pengajuan baru memerlukan persetujuan Anda.');
+        } else {
+            // Koordinator/GA mengajukan langsung -> notifikasi pengajuan diteruskan ke GA (to) & Kabid (cc).
+            $this->kirimEmailNotifikasiKeGAAndCC($pengadaan);
+            $this->notifikasiInAppGAAndKabid($pengadaan, 'Pengajuan pengadaan baru membutuhkan persetujuan GA.');
+        }
+
+        return redirect()->route('pengadaan.index')->with('success', $pesanSukses);
+    }
+
+    public function approve(ApprovePengadaanRequest $request, $id)
+    {
+        $pengadaan = PermintaanPengadaan::findOrFail($id);
+        $roleName = strtolower(Auth::user()->role->nama_role ?? '');
+        $validated = $request->validated();
+        $statusBaru = $validated['status'];
+
+        $isKoor = str_contains($roleName, 'koor');
+        $isGaOrAdmin = str_contains($roleName, 'ga') || str_contains($roleName, 'admin');
+
+        DB::transaction(function () use ($validated, $pengadaan, $roleName, $statusBaru, $isKoor, $isGaOrAdmin) {
+
+            $labelPeranPenolak = $isKoor ? 'Ditolak oleh: Koordinator Lab' : 'Ditolak oleh: GA Officer';
+            $catatanAsli = $validated['catatan_approval'] ?? 'Tidak ada alasan spesifik.';
+            $catatanLengkapPenolakan = "{$labelPeranPenolak}. Alasan: {$catatanAsli}";
+
+            if ($statusBaru === 'ditolak') {
+                if ($isKoor && $pengadaan->status !== 'menunggu_koordinator') {
+                    throw new \Exception('Koordinator hanya bisa menolak pengajuan yang berstatus menunggu koordinator.');
+                }
+                if ($isGaOrAdmin && $pengadaan->status !== 'menunggu_ga') {
+                    throw new \Exception('GA hanya bisa menolak pengajuan yang berstatus menunggu GA.');
+                }
+
+                $pengadaan->status = 'ditolak';
+                $pengadaan->disetujui_oleh = Auth::id();
+                $pengadaan->tanggal_keputusan = Carbon::now()->toDateString();
+                $pengadaan->catatan_approval = $catatanLengkapPenolakan;
+                $pengadaan->save();
+
+                $this->notifikasiPenolakanKeKoordinator($pengadaan);
+                return;
+            }
+
+            if ($isKoor) {
+                if ($pengadaan->status !== 'menunggu_koordinator') {
+                    throw new \Exception('Pengadaan ini tidak dalam posisi menunggu persetujuan Koordinator.');
+                }
+
+                $pengadaan->status = 'menunggu_ga';
+                $pengadaan->save();
+
+                // Koordinator menyetujui -> pengajuan diteruskan ke GA (to) & Kabid (cc).
+                $this->kirimEmailNotifikasiKeGAAndCC($pengadaan);
+                $this->notifikasiInAppGAAndKabid($pengadaan, 'Pengajuan telah disetujui Koordinator dan menunggu persetujuan GA.');
+            } elseif ($isGaOrAdmin) {
+
+                $transisiValid = [
+                    'menunggu_ga' => ['disetujui'],
+                    'disetujui'   => ['diproses'],
+                ];
+
+                if (
+                    !isset($transisiValid[$pengadaan->status]) ||
+                    !in_array($statusBaru, $transisiValid[$pengadaan->status])
+                ) {
+                    throw new \Exception("Transisi status dari '{$pengadaan->status}' ke '{$statusBaru}' tidak diizinkan.");
+                }
+
+                $pengadaan->status = $statusBaru;
+                $pengadaan->disetujui_oleh = Auth::id();
+                $pengadaan->tanggal_keputusan = Carbon::now()->toDateString();
+                $pengadaan->catatan_approval = $validated['catatan_approval'] ?? $pengadaan->catatan_approval;
+                $pengadaan->save();
+            } else {
+                throw new \Exception('Anda tidak memiliki izin untuk memproses persetujuan ini.');
+            }
+        });
+
+        return redirect()->route('pengadaan.index')->with('success', 'Status pengadaan berhasil diperbarui.');
+    }
+
+    public function konfirmasiTerima(Request $request, $id)
+    {
+        $request->validate([
+            'foto_diterima' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'nama_penerima' => 'required|string|max:100',
+            'tgl_exp' => 'nullable|date',
+        ]);
+
+        $pengadaan = PermintaanPengadaan::findOrFail($id);
+
+        if (!in_array($pengadaan->status, ['disetujui', 'diproses'])) {
+            return back()->with('error', 'Pengadaan harus disetujui atau diproses terlebih dahulu sebelum dikonfirmasi.');
+        }
+
+        DB::transaction(function () use ($request, $pengadaan) {
+            $pathFoto = null;
+            if ($request->hasFile('foto_diterima')) {
+                $file = $request->file('foto_diterima');
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/pengadaan'), $filename);
+                $pathFoto = 'uploads/pengadaan/' . $filename;
+            }
+
+            $pengadaan->foto_diterima = $pathFoto;
+            $pengadaan->nama_penerima = $request->nama_penerima;
+            $pengadaan->waktu_diterima = Carbon::now('Asia/Jakarta');
+            $pengadaan->status = 'selesai';
+            $pengadaan->save();
+
+            $barang = Barang::where('barang_id', $pengadaan->barang_id)->lockForUpdate()->first();
+            if ($barang) {
+                $barang->penerimaan += $pengadaan->jumlah_diminta;
+                $barang->saldo_akhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
+
+                if ($request->filled('tgl_exp')) {
+                    if (empty($barang->tgl_exp) || $request->tgl_exp < $barang->tgl_exp) {
+                        $barang->tgl_exp = $request->tgl_exp;
+                    }
+                }
+
+                $barang->save();
+
+                TransaksiBarang::create([
+                    'barang_id' => $barang->barang_id,
+                    'jumlah_penerimaan' => $pengadaan->jumlah_diminta,
+                    'harga' => $barang->harga_rata ?? 0,
+                    'tgl_exp' => $request->tgl_exp,
+                ]);
+            }
+        });
+
+        return back()->with('success', 'Konfirmasi penerimaan berhasil!');
     }
 
     public function exportPdf(Request $request)
@@ -85,110 +239,147 @@ class PengadaanController extends Controller
             ->whereYear('tanggal_pengajuan', $tahun)
             ->orderBy('tanggal_pengajuan', 'asc')
             ->get();
+
         $hrgaName = Auth::user()?->personil?->nama ?? Auth::user()?->username ?? 'HR & GA Officer';
-        $kabidUser = \App\Models\User::whereHas('role', function($q) {
-            $q->where('nama_role', \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value);
+
+        $kabidUser = User::whereHas('role', function ($q) {
+            $q->where('nama_role', PeranPengguna::KABID_DUKUNGAN_BISNIS->value);
         })->first();
+
         $kabidName = $kabidUser ? ($kabidUser->personil?->nama ?? $kabidUser->username) : '................................';
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pengadaan.pdf', compact('pengadaans', 'bulan', 'tahun', 'hrgaName', 'kabidName'));
-        
+        $pdf = Pdf::loadView('pengadaan.pdf', compact('pengadaans', 'bulan', 'tahun', 'hrgaName', 'kabidName'));
+
         return $pdf->download("Laporan_Pengadaan_{$tahun}_{$bulan}.pdf");
     }
-
-    public function approve(\App\Http\Requests\ApprovePengadaanRequest $request, $id)
-    {
-        $pengadaan = PermintaanPengadaan::findOrFail($id);
-        
-        $roleName = Auth::user()->role->nama_role ?? '';
-        
-        if (!in_array($roleName, [PeranPengguna::HR_GA_OFFICER->value, PeranPengguna::ADMIN_APLIKASI->value])) {
-            return back()->with('error', 'Hanya HR & GA yang dapat memproses pengadaan.');
-        }
-
-        $validated = $request->validated();
-
-        DB::transaction(function () use ($validated, $pengadaan) {
-            $pengadaan->status = $validated['status'];
-            $pengadaan->disetujui_oleh = Auth::id();
-            $pengadaan->tanggal_keputusan = now()->toDateString();
-            $pengadaan->catatan_approval = $validated['catatan_approval'] ?? null;
-            $pengadaan->save();
-
-            if ($validated['status'] === 'selesai') {
-                $inventoryService = app(\App\Services\InventoryService::class);
-                $barang = Barang::find($pengadaan->barang_id);
-                if ($barang) {
-                    $inventoryService->addStock($barang, $pengadaan->jumlah_diminta);
-                }
-            }
-        });
-
-        return redirect()->route('pengadaan.index')->with('success', 'Status pengadaan berhasil diupdate.');
-    }
-
-    public function konfirmasiTerima(Request $request, $id)
-    {
-        $validated = $request->validate([
-            'foto_diterima' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'nama_penerima' => 'required|string|max:100',
-            'tgl_exp' => 'nullable|date',
-        ]);
-
-        $pengadaan = PermintaanPengadaan::findOrFail($id);
-        if (!in_array($pengadaan->status, ['disetujui', 'diproses'])) {
-            return back()->with('error', 'Pengadaan harus disetujui atau diproses terlebih dahulu sebelum dikonfirmasi.');
-        }
-
-        DB::transaction(function () use ($request, $pengadaan) {
-            $file = $request->file('foto_diterima');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/pengadaan'), $filename);
-            $pathFoto = 'uploads/pengadaan/' . $filename;
-
-            $pengadaan->foto_diterima = $pathFoto;
-            $pengadaan->nama_penerima = $request->nama_penerima;
-            $pengadaan->waktu_diterima = Carbon::now('Asia/Jakarta');
-            $pengadaan->status = 'selesai';
-            $pengadaan->save();
-
-            $barang = Barang::where('barang_id', $pengadaan->barang_id)->lockForUpdate()->first();
-            if ($barang) {
-                $barang->penerimaan += $pengadaan->jumlah_diminta;
-                $barang->saldo_akhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
-                
-                // $barang->tgl_exp = $request->tgl_exp; // Update tanggal expired sesuai fisik baru
-                // Logika cerdas: Jika tgl_exp barang yang baru lebih awal dari tgl_exp lama (atau tgl_exp lama kosong), 
-                // maka perbarui tgl_exp utama agar mencerminkan barang yang paling cepat expired (FEFO).
-                if (empty($barang->tgl_exp) || $request->tgl_exp < $barang->tgl_exp) {
-                    $barang->tgl_exp = $request->tgl_exp;
-                }
-                $barang->save();    
-                TransaksiBarang::create([
-                    'barang_id' => $barang->barang_id,
-                    'jumlah_penerimaan' => $pengadaan->jumlah_diminta,
-                    'harga' => $barang->harga_rata ?? 0,
-                    'tgl_exp' => $request->tgl_exp,
-                ]);
-            }
-        });
-
-        return back()->with('success', 'Konfirmasi penerimaan berhasil!');
-    }    
 
     public function destroy($id)
     {
         $pengadaan = PermintaanPengadaan::findOrFail($id);
-        
-        if ($pengadaan->status !== 'diajukan') {
-            return back()->with('error', 'Hanya permintaan yang berstatus diajukan yang bisa dihapus');
+        $roleName = Auth::user()->role->nama_role ?? '';
+        $isAdminAplikasi = $roleName === PeranPengguna::ADMIN_APLIKASI->value;
+
+        if (!$isAdminAplikasi && !in_array($pengadaan->status, ['diajukan', 'menunggu_koordinator'])) {
+            return back()->with('error', 'Hanya permintaan yang belum diproses yang bisa dibatalkan.');
+        }
+
+        if (!$isAdminAplikasi && $pengadaan->diajukan_oleh !== Auth::id()) {
+            return back()->with('error', 'Anda tidak memiliki izin untuk membatalkan pengajuan ini.');
         }
 
         if ($pengadaan->foto && file_exists(public_path($pengadaan->foto))) {
             @unlink(public_path($pengadaan->foto));
         }
 
+        if ($pengadaan->foto_diterima && file_exists(public_path($pengadaan->foto_diterima))) {
+            @unlink(public_path($pengadaan->foto_diterima));
+        }
+
         $pengadaan->delete();
-        return redirect()->route('pengadaan.index')->with('success', 'Permintaan berhasil dibatalkan.');
+
+        $pesan = $isAdminAplikasi ? 'Data pengadaan berhasil dihapus permanen.' : 'Permintaan berhasil dibatalkan.';
+
+        return redirect()->route('pengadaan.index')->with('success', $pesan);
+    }
+
+    /**
+     * Aturan #1: notifikasi pengajuan pengadaan ke GA -> to: GA, cc: Kabid Inspeksi & Kabid Dukungan Bisnis.
+     * Sebelumnya nama role di-hardcode ('Kabid Inspeksi') dan tidak cocok dengan nama role asli di
+     * tabel roles ('Kabid Inspeksi dan Solusi Perdagangan'), jadi CC-nya tidak pernah terkirim.
+     * Sekarang pakai Enum PeranPengguna supaya selalu sinkron dengan tabel roles.
+     */
+    private function kirimEmailNotifikasiKeGAAndCC($pengadaan)
+    {
+        $emailGA = User::whereHas('role', function ($q) {
+            $q->where('nama_role', PeranPengguna::GA_OFFICER->value);
+        })->pluck('email')->filter()->toArray();
+
+        $emailKabid = User::whereHas('role', function ($q) {
+            $q->whereIn('nama_role', [
+                PeranPengguna::KABID_INSPEKSI->value,
+                PeranPengguna::KABID_DUKUNGAN_BISNIS->value,
+            ]);
+        })->pluck('email')->filter()->toArray();
+
+        if (!empty($emailGA)) {
+            $mail = Mail::to($emailGA);
+            if (!empty($emailKabid)) {
+                $mail->cc($emailKabid);
+            }
+
+            if (class_exists('\App\Mail\PengajuanPengadaanMail')) {
+                $mail->send(new \App\Mail\PengajuanPengadaanMail($pengadaan));
+            }
+        }
+    }
+
+    /**
+     * Notifikasi in-app (lonceng) untuk GA + Kabid Inspeksi + Kabid Dukungan Bisnis,
+     * dikirim setiap kali ada pengajuan pengadaan yang siap diproses GA.
+     */
+    private function notifikasiInAppGAAndKabid($pengadaan, $pesan)
+    {
+        $users = User::whereHas('role', function ($q) {
+            $q->whereIn('nama_role', [
+                PeranPengguna::GA_OFFICER->value,
+                PeranPengguna::KABID_INSPEKSI->value,
+                PeranPengguna::KABID_DUKUNGAN_BISNIS->value,
+            ]);
+        })->get();
+
+        foreach ($users as $user) {
+            DB::table('notifikasi')->insert([
+                'users_id' => $user->users_id,
+                'jenis_notifikasi' => 'stok',
+                'pesan' => "{$pesan} (Barang: {$pengadaan->barang->nama_barang})",
+                'is_read' => 0,
+                'created_at' => now(),
+            ]);
+        }
+    }
+
+    /**
+     * Aturan #2: saat Analis mengajukan pengadaan, Koordinator Lab diberi notifikasi untuk menyetujui.
+     * Nama role sebelumnya campur ('Koordinator Lab', 'Koordinator Laboratorium', 'koordinator_tester')
+     * — hanya salah satu yang benar-benar cocok dengan tabel roles. Disederhanakan pakai Enum.
+     */
+    private function notifikasiKeKoordinator($pengadaan, $pesan)
+    {
+        $koordinators = User::whereHas('role', function ($q) {
+            $q->where('nama_role', PeranPengguna::KOORDINATOR_LAB->value);
+        })->get();
+
+        foreach ($koordinators as $koor) {
+            DB::table('notifikasi')->insert([
+                'users_id' => $koor->users_id,
+                'jenis_notifikasi' => 'stok',
+                'pesan' => "{$pesan} (Barang: {$pengadaan->barang->nama_barang})",
+                'is_read' => 0,
+                'created_at' => now(),
+            ]);
+        }
+    }
+
+    private function notifikasiPenolakanKeKoordinator($pengadaan)
+    {
+        $koordinators = User::whereHas('role', function ($q) {
+            $q->where('nama_role', PeranPengguna::KOORDINATOR_LAB->value);
+        })->get();
+
+        $pesanPenolakan = "Pengajuan pengadaan barang \"{$pengadaan->barang->nama_barang}\" DITOLAK. Detail: {$pengadaan->catatan_approval}";
+
+        foreach ($koordinators as $koor) {
+            DB::table('notifikasi')->insert([
+                'users_id' => $koor->users_id,
+                'jenis_notifikasi' => 'stok',
+                'pesan' => $pesanPenolakan,
+                'is_read' => 0,
+                'created_at' => now(),
+            ]);
+
+            if ($koor->email && class_exists('\App\Mail\PenolakanPengadaanMail')) {
+                Mail::to($koor->email)->send(new \App\Mail\PenolakanPengadaanMail($pengadaan, $pesanPenolakan));
+            }
+        }
     }
 }

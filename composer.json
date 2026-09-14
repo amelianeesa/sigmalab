@@ -13,7 +13,7 @@
         "maatwebsite/excel": "^4.0",
         "simplesoftwareio/simple-qrcode": "^4.2",
         "smalot/pdfparser": "^2.12",
-        "spatie/laravel-activitylog": "^5.0",
+        "spatie/laravel-activitylog": "^5.1",
         "symfony/expression-language": "^8.1"
     },
     "require-dev": {

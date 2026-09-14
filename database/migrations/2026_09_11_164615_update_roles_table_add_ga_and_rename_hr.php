@@ -16,13 +16,16 @@ return new class extends Migration
             ->where('roles_id', 3)
             ->update(['nama_role' => 'HR', 'updated_at' => now()]);
 
-        DB::table('roles')->insert([
-            'roles_id' => 7,
-            'nama_role' => 'GA',
-            'created_at' => now(),
-            'updated_at' => now(),
-            'deleted_at' => NULL
-        ]);
+        // Menggunakan updateOrInsert agar aman dari error duplikat primary key
+        DB::table('roles')->updateOrInsert(
+            ['roles_id' => 7],
+            [
+                'nama_role' => 'GA',
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => NULL
+            ]
+        );
     }
 
     /**

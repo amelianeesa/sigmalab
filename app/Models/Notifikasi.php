@@ -4,6 +4,7 @@ namespace App\Models;
 
 class Notifikasi extends BaseModel
 {
+    const UPDATED_AT = null;
     protected $table = 'notifikasi';
 
     protected $fillable = [

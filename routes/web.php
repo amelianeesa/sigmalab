@@ -68,7 +68,7 @@ Route::middleware(['auth'])->group(function () {
     // Resources
     Route::post('/alat/parse-sertifikat', [AlatController::class, 'parseSertifikat'])->name('alat.parse-sertifikat');
     Route::resource('alat', AlatController::class);
-   
+    
     // alat
     Route::post('/alat/{id}/input-kalibrasi', [AlatController::class, 'storeInputKalibrasi'])->name('alat.store-input-kalibrasi');
 
@@ -84,10 +84,10 @@ Route::middleware(['auth'])->group(function () {
     // barang dan pengadaan
     Route::get('barang/cetak-periode', [BarangController::class, 'printPeriode'])->name('barang.cetak-periode');
     Route::resource('barang', BarangController::class);
-    Route::get('/pengadaan/export-pdf', [PengadaanController::class, 'exportPdf'])->name('pengadaan.pdf');
+    Route::get('/pengadaan/export-pdf', [PengadaanController::class, 'exportPdf'])->name('pengadaan.exportPdf');
     Route::resource('pengadaan', PengadaanController::class);
     Route::post('/pengadaan/{id}/approve', [PengadaanController::class, 'approve'])->name('pengadaan.approve');
-    Route::post('/pengadaan/{id}/terima', [PengadaanController::class, 'konfirmasiTerima'])->name('pengadaan.terima');
+    Route::post('/pengadaan/{id}/terima', [PengadaanController::class, 'konfirmasiTerima'])->name('pengadaan.konfirmasiTerima');
     Route::post('/barang/{id}/pengeluaran', [BarangController::class, 'storePengeluaran'])->name('barang.pengeluaran');
 
     //monitoring ruangan
@@ -192,7 +192,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/notifikasi/unread-count', [NotifikasiController::class, 'getUnreadCount'])->name('notifikasi.unread-count');
 
     // Inhouse Control
-        Route::post('/hasil-uji/{id}/override-evaluasi', [HasilUjiController::class, 'overrideEvaluasi'])->name('hasil-uji.override-evaluasi');
+    Route::post('/hasil-uji/{id}/override-evaluasi', [HasilUjiController::class, 'overrideEvaluasi'])->name('hasil-uji.override-evaluasi');
 
     // =============================================
     // Verifikasi Mutu — Portal & QC In-House
@@ -238,4 +238,3 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}/investigasi', [\App\Http\Controllers\QcHarianController::class, 'investigasi'])->name('investigasi');
         Route::post('/{id}/investigasi', [\App\Http\Controllers\QcHarianController::class, 'storeInvestigasi'])->name('investigasi.store');
     });
-
