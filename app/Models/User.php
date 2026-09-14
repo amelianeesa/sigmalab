@@ -48,6 +48,9 @@ class User extends Authenticatable
 
     public function hasModulAccess(string $kodeModul, string $minLevel = 'lihat'): bool
     {
+        if ($this->role && in_array($this->role->nama_role, ['HR', 'GA'])) {
+            return true;
+        }
         return app(\App\Services\PermissionService::class)->userHasAccess($this, $kodeModul, $minLevel);
     }
 }

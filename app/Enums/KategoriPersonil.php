@@ -20,9 +20,6 @@ enum KategoriPersonil: string
         };
     }
 
-    /**
-     * Dipakai untuk isi <select> di form maupun dropdown filter.
-     */
     public static function options(): array
     {
         return [
