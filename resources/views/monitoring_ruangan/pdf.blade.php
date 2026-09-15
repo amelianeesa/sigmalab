@@ -4,32 +4,36 @@
     <meta charset="UTF-8">
     <title>{{ $tahun }}_{{ $bulan }}_Rekap Pencatatan Monitoring Suhu & Kelembaban</title>
     <style>
+        @page {
+            size: A4 landscape;
+            margin: 10mm 15mm;
+        }
         body {
             font-family: Arial, sans-serif;
-            font-size: 11px;
+            font-size: 12px;
             color: #000;
-            margin: 8px 12px;
+            margin: 0;
+            padding: 0;
         }
         .header-table {
             width: 100%;
-            margin-bottom: 4px;
+            margin-bottom: 8px;
             border-bottom: 2px solid #000;
-            padding-bottom: 4px;
+            padding-bottom: 6px;
         }
         .title {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
-            line-height: 1.2;
+            line-height: 1.3;
             margin: 0;
-            padding-top: 11px;
         }
         .info-table {
             width: 100%;
-            margin-bottom: 8px;
-            font-size: 11px;
+            margin-bottom: 12px;
+            font-size: 12px;
         }
         .info-table td {
-            padding: 1px 0;
+            padding: 2px 0;
         }
         .main-table {
             width: 100%;
@@ -38,11 +42,12 @@
         }
         .main-table th, .main-table td {
             border: 1px solid #000;
-            padding: 3px 2px;
-            font-size: 9px;
+            padding: 5px 4px;
+            font-size: 11px;
         }
         .main-table th {
             background-color: #f2f2f2;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -64,17 +69,17 @@
     <table class="header-table">
         <tr>
             <td style="vertical-align: bottom;">
-                <div class="title">PENCATATAN MONITORING SUHU<br>DAN KELEMBABAN UDARA</div>
+                <div class="title">PENCATATAN MONITORING SUHU DAN KELEMBABAN UDARA</div>
             </td>
             <td align="right" style="vertical-align: bottom;">
-                <img src="{{ asset('images/Logo_Suco_Nobg.png') }}" alt="Logo Sucofindo" style="height: 60px; width: auto; display: block; margin-bottom: 0px;">
+                <img src="{{ asset('images/Logo_Suco_Nobg.png') }}" alt="Logo Sucofindo" style="height: 55px; width: auto; display: block;">
             </td>
         </tr>
     </table>
 
     <table class="info-table">
         <tr>
-            <td style="width: 120px;"><strong>Bulan/Tahun</strong></td>
+            <td style="width: 120px;"><strong>Bulan / Tahun</strong></td>
             <td style="width: 10px;">:</td>
             <td>{{ $bulan }} / {{ $tahun }}</td>
         </tr>
@@ -98,19 +103,19 @@
     <table class="main-table">
         <thead>
             <tr>
-                <th rowspan="3" style="width: 25px;">Tanggal</th>
-                <th rowspan="2" colspan="2" style="width: 60px;">Waktu Pencatatan</th>
+                <th rowspan="3" style="width: 35px;">Tanggal</th>
+                <th rowspan="2" colspan="2" style="width: 90px;">Waktu Pencatatan</th>
                 <th colspan="8">Hasil Pengukuran</th>
-                <th colspan="2" rowspan="2">Status</th>
-                <th colspan="2" rowspan="2" style="width: 60px;">Paraf</th>
+                <th colspan="2" rowspan="2" style="width: 70px;">Status</th>
+                <th colspan="2" rowspan="2" style="width: 120px;">Paraf</th>
             </tr>
             <tr>
                 <th colspan="4">Suhu (°C)</th>
                 <th colspan="4">Kelembaban (%)</th>
             </tr>
             <tr>
-                <th style="width: 30px;">Pagi</th>
-                <th style="width: 30px;">Sore</th>
+                <th style="width: 45px;">Pagi</th>
+                <th style="width: 45px;">Sore</th>
                 <th>Pembacaan 1</th>
                 <th>Koreksi 1</th>
                 <th>Pembacaan 2</th>
@@ -119,10 +124,10 @@
                 <th>Koreksi 1</th>
                 <th>Pembacaan 2</th>
                 <th>Koreksi 2</th>
-                <th style="width: 30px;">Diterima</th>
-                <th style="width: 30px;">Ditolak</th>
-                <th style="width: 30px;">1</th>
-                <th style="width: 30px;">2</th>
+                <th style="width: 35px;">Diterima</th>
+                <th style="width: 35px;">Ditolak</th>
+                <th style="width: 60px;">1</th>
+                <th style="width: 60px;">2</th>
             </tr>
         </thead>
         <tbody>
@@ -156,9 +161,9 @@
                     <td>{{ ($row?->status == 'Diterima') ? '✓' : '' }}</td>
                     <td>{{ ($row?->status == 'Ditolak') ? '✓' : '' }}</td>
 
-                    <!-- Paraf 1 & 2 (Menampilkan Nama User) -->
-                    <td style="font-size: 7px;">{{ $row?->paraf_1 ?? '' }}</td>
-                    <td style="font-size: 7px;">{{ $row?->paraf_2 ?? '' }}</td>
+                    <!-- Paraf 1 & 2 -->
+                    <td style="font-size: 10px;">{{ $row?->paraf_1 ?? '' }}</td>
+                    <td style="font-size: 10px;">{{ $row?->paraf_2 ?? '' }}</td>
                 </tr>
             @endfor
         </tbody>

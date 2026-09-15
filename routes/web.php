@@ -17,6 +17,7 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\HakAksesController;
 use App\Http\Controllers\MonitoringRuanganController;
 use App\Http\Controllers\NotifikasiController;
+use App\Http\Controllers\EvaluasiKalibrasiController;
 
 Route::get('/', [AuthController::class, 'showLogin']);
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -33,11 +34,15 @@ Route::get('/alat/{id}/export-pdf', [AlatController::class, 'exportPdf'])->name(
 Route::get('/alat/{id}/export-excel', [AlatController::class, 'exportExcel'])->name('alat.export-excel');
 Route::get('/alat/{id}/export-word', [AlatController::class, 'exportWord'])->name('alat.export-word');
 
+
+
 // ini harus login dulu
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
     Route::post('/switch-role', [RoleSwitcherController::class, 'switchRole'])->name('switch-role');
+
+    Route::resource('evaluasi-kalibrasi', EvaluasiKalibrasiController::class);
 
     // SDM & Kompetensi
     Route::get('/sdm', [SdmController::class, 'index'])->name('sdm.index');
@@ -80,7 +85,6 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/alat/{id}/perbaikan/{perbaikan_id}', [AlatController::class, 'updatePerbaikan'])->name('alat.perbaikan.update');
     Route::get('/alat/{id}/pemeliharaan/pdf', [AlatController::class, 'exportPemeliharaanPdf'])->name('alat.pemeliharaan.pdf');
     Route::get('/alat/{id}/pemeliharaan/excel', [AlatController::class, 'exportPemeliharaanExcel'])->name('alat.pemeliharaan.excel');
-    
     // barang dan pengadaan
     Route::get('barang/cetak-periode', [BarangController::class, 'printPeriode'])->name('barang.cetak-periode');
     Route::resource('barang', BarangController::class);
@@ -197,9 +201,6 @@ Route::middleware(['auth'])->group(function () {
     // Inhouse Control
         Route::post('/hasil-uji/{id}/override-evaluasi', [HasilUjiController::class, 'overrideEvaluasi'])->name('hasil-uji.override-evaluasi');
 
-    // =============================================
-    // Verifikasi Mutu — Portal & QC In-House
-    // =============================================
     Route::get('verifikasi-mutu', [\App\Http\Controllers\VerifikasiMutuController::class, 'index'])->name('verifikasi-mutu.index');
 
     Route::prefix('qc-inhouse')->name('qc-inhouse.')->group(function () {

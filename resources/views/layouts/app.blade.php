@@ -169,7 +169,7 @@
 
                 {{-- 1. Peralatan & Monitoring --}}
                 {{-- @if(Auth::check() && (Auth::user()->hasModulAccess('alat') || (Auth::user()->role && Auth::user()->role->nama_role == 'HR & GA'))) --}}
-                @if(Auth::check() && (Auth::user()->hasModulAccess('alat') || (Auth::user()->role && (Auth::user()->role->nama_role == 'HR' || Auth::user()->role->nama_role == 'GA'))))
+                {{-- @if(Auth::check() && (Auth::user()->hasModulAccess('alat') || (Auth::user()->role && (Auth::user()->role->nama_role == 'HR' || Auth::user()->role->nama_role == 'GA'))))
                 <li class="nav-item">
                     <a class="nav-link d-flex justify-content-between align-items-center {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') ? 'active text-primary fw-bold' : 'collapsed' }}" 
                        data-bs-toggle="collapse" 
@@ -196,7 +196,42 @@
                         </ul>
                     </div>
                 </li>
-                @endif
+                @endif --}}
+
+                {{-- 1. Peralatan & Monitoring --}}
+@if(Auth::check() && (Auth::user()->hasModulAccess('alat') || (Auth::user()->role && (Auth::user()->role->nama_role == 'HR' || Auth::user()->role->nama_role == 'GA'))))
+<li class="nav-item">
+    <a class="nav-link d-flex justify-content-between align-items-center {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') || request()->routeIs('evaluasi-kalibrasi.*') ? 'active text-primary fw-bold' : 'collapsed' }}" 
+       data-bs-toggle="collapse" 
+       href="#menuManajemenPeralatan" 
+       role="button" 
+       aria-expanded="{{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') || request()->routeIs('evaluasi-kalibrasi.*') ? 'true' : 'false' }}" 
+       aria-controls="menuManajemenPeralatan">
+        <span><i class="fas fa-tools me-2"></i> Peralatan & Monitoring</span>
+        <i class="fas fa-chevron-down small"></i>
+    </a>
+
+    <div class="collapse {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') || request()->routeIs('evaluasi-kalibrasi.*') ? 'show' : '' }}" id="menuManajemenPeralatan">
+        <ul class="nav flex-column ms-3 ps-2 border-start mt-1" style="font-size: 0.9rem;">
+            <li class="nav-item">
+                <a class="nav-link py-1 {{ request()->is('alat*') && !request()->routeIs('inventori.monitoring.*') && !request()->routeIs('evaluasi-kalibrasi.*') ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('alat.index') }}">
+                    <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Data Alat & Kalibrasi
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link py-1 {{ request()->routeIs('evaluasi-kalibrasi.*') ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('evaluasi-kalibrasi.index') }}">
+                    <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Evaluasi Kalibrasi
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link py-1 {{ request()->routeIs('inventori.monitoring.*') ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('inventori.monitoring.index') }}">
+                    <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Monitoring Ruangan
+                </a>
+            </li>
+        </ul>
+    </div>
+</li>
+@endif
                 
                 {{-- 2. Personil & Kompetensi --}}
                 @if(Auth::check() && (Auth::user()->hasModulAccess('sdm') || Auth::user()->hasModulAccess('manajemen_pengguna')))
