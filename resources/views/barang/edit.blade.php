@@ -22,13 +22,22 @@
                 </div>
             @endif
 
-            @php
+            {{-- @php
                 $roleName = Auth::user()->role->nama_role ?? '';
                 $isAuthorizedForPricing = in_array($roleName, [
                     \App\Enums\PeranPengguna::HR_GA_OFFICER->value, 
                     \App\Enums\PeranPengguna::ADMIN_APLIKASI->value
                 ]);
-            @endphp            
+            @endphp   --}}
+            @php
+            $roleName = Auth::user()->role->nama_role ?? '';
+            $isAuthorizedForPricing = in_array($roleName, [
+                'GA', 
+                'Admin Aplikasi', 
+                'Koordinator Laboratorium',
+                'Analis Lab'
+            ]);
+        @endphp          
 
             <form action="{{ route('barang.update', $barang->barang_id) }}" method="POST">
                 @csrf

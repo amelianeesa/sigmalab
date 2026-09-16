@@ -134,6 +134,83 @@
             max-width: 1rem !important; max-height: 1rem !important;
             display: inline-block;
         }
+
+        /* ===== Dropdown Notifikasi ===== */
+        #notifDropdown {
+            width: 340px;
+            padding: 0;
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        #notifDropdown .notif-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            background: #f8fafc;
+        }
+        #notifDropdown .notif-list {
+            max-height: 340px;
+            overflow-y: auto;
+        }
+        #notifDropdown .notif-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            white-space: normal;
+            text-decoration: none;
+        }
+        #notifDropdown .notif-item:hover {
+            background: #f8fafc;
+        }
+        #notifDropdown .notif-item.unread {
+            background: rgba(37, 99, 235, 0.06);
+        }
+        #notifDropdown .notif-icon {
+            width: 30px;
+            height: 30px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+        #notifDropdown .notif-msg {
+            font-size: 0.83rem;
+            color: #334155;
+            margin-bottom: 2px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        #notifDropdown .notif-msg.text-danger-emphasis {
+            color: #b91c1c !important;
+        }
+        #notifDropdown .notif-time {
+            font-size: 0.72rem;
+            color: #94a3b8;
+        }
+        #notifDropdown .notif-footer {
+            padding: 10px 16px;
+            text-align: center;
+            border-top: 1px solid #f1f5f9;
+            background: #f8fafc;
+        }
+        #notifDropdown .notif-footer a {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #2563eb;
+            text-decoration: none;
+        }
+        #notifDropdown .notif-empty {
+            padding: 28px 16px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 
@@ -167,25 +244,30 @@
                 </li>
 
 
+
                 {{-- 1. Peralatan & Monitoring --}}
-                {{-- @if(Auth::check() && (Auth::user()->hasModulAccess('alat') || (Auth::user()->role && Auth::user()->role->nama_role == 'HR & GA'))) --}}
-                {{-- @if(Auth::check() && (Auth::user()->hasModulAccess('alat') || (Auth::user()->role && (Auth::user()->role->nama_role == 'HR' || Auth::user()->role->nama_role == 'GA'))))
+                @if(Auth::check() && (Auth::user()->hasModulAccess('alat') || (Auth::user()->role && (Auth::user()->role->nama_role == 'HR' || Auth::user()->role->nama_role == 'GA'))))
                 <li class="nav-item">
-                    <a class="nav-link d-flex justify-content-between align-items-center {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') ? 'active text-primary fw-bold' : 'collapsed' }}" 
+                    <a class="nav-link d-flex justify-content-between align-items-center {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') || request()->routeIs('evaluasi-kalibrasi.*') ? 'active text-primary fw-bold' : 'collapsed' }}" 
                        data-bs-toggle="collapse" 
                        href="#menuManajemenPeralatan" 
                        role="button" 
-                       aria-expanded="{{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') ? 'true' : 'false' }}" 
+                       aria-expanded="{{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') || request()->routeIs('evaluasi-kalibrasi.*') ? 'true' : 'false' }}" 
                        aria-controls="menuManajemenPeralatan">
                         <span><i class="fas fa-tools me-2"></i> Peralatan & Monitoring</span>
                         <i class="fas fa-chevron-down small"></i>
                     </a>
                 
-                    <div class="collapse {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') ? 'show' : '' }}" id="menuManajemenPeralatan">
+                    <div class="collapse {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') || request()->routeIs('evaluasi-kalibrasi.*') ? 'show' : '' }}" id="menuManajemenPeralatan">
                         <ul class="nav flex-column ms-3 ps-2 border-start mt-1" style="font-size: 0.9rem;">
                             <li class="nav-item">
-                                <a class="nav-link py-1 {{ request()->is('alat*') && !request()->routeIs('inventori.monitoring.*') ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('alat.index') }}">
+                                <a class="nav-link py-1 {{ request()->is('alat*') && !request()->routeIs('inventori.monitoring.*') && !request()->routeIs('evaluasi-kalibrasi.*') ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('alat.index') }}">
                                     <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Data Alat & Kalibrasi
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link py-1 {{ request()->routeIs('evaluasi-kalibrasi.*') ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('evaluasi-kalibrasi.index') }}">
+                                    <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Evaluasi Kalibrasi
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -196,42 +278,7 @@
                         </ul>
                     </div>
                 </li>
-                @endif --}}
-
-                {{-- 1. Peralatan & Monitoring --}}
-@if(Auth::check() && (Auth::user()->hasModulAccess('alat') || (Auth::user()->role && (Auth::user()->role->nama_role == 'HR' || Auth::user()->role->nama_role == 'GA'))))
-<li class="nav-item">
-    <a class="nav-link d-flex justify-content-between align-items-center {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') || request()->routeIs('evaluasi-kalibrasi.*') ? 'active text-primary fw-bold' : 'collapsed' }}" 
-       data-bs-toggle="collapse" 
-       href="#menuManajemenPeralatan" 
-       role="button" 
-       aria-expanded="{{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') || request()->routeIs('evaluasi-kalibrasi.*') ? 'true' : 'false' }}" 
-       aria-controls="menuManajemenPeralatan">
-        <span><i class="fas fa-tools me-2"></i> Peralatan & Monitoring</span>
-        <i class="fas fa-chevron-down small"></i>
-    </a>
-
-    <div class="collapse {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') || request()->routeIs('evaluasi-kalibrasi.*') ? 'show' : '' }}" id="menuManajemenPeralatan">
-        <ul class="nav flex-column ms-3 ps-2 border-start mt-1" style="font-size: 0.9rem;">
-            <li class="nav-item">
-                <a class="nav-link py-1 {{ request()->is('alat*') && !request()->routeIs('inventori.monitoring.*') && !request()->routeIs('evaluasi-kalibrasi.*') ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('alat.index') }}">
-                    <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Data Alat & Kalibrasi
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link py-1 {{ request()->routeIs('evaluasi-kalibrasi.*') ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('evaluasi-kalibrasi.index') }}">
-                    <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Evaluasi Kalibrasi
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link py-1 {{ request()->routeIs('inventori.monitoring.*') ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('inventori.monitoring.index') }}">
-                    <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Monitoring Ruangan
-                </a>
-            </li>
-        </ul>
-    </div>
-</li>
-@endif
+                @endif
                 
                 {{-- 2. Personil & Kompetensi --}}
                 @if(Auth::check() && (Auth::user()->hasModulAccess('sdm') || Auth::user()->hasModulAccess('manajemen_pengguna')))
@@ -246,7 +293,6 @@
                     <a href="{{ route('kegiatan.index') }}"><i class="fas fa-flask"></i> Verifikasi Mutu (QC)</a>
                 </li>
                 @endif
-
 
                 {{-- 4. Inventori Bahan/Barang --}}
                 @if(Auth::check() && (Auth::user()->hasModulAccess('barang') || Auth::user()->hasModulAccess('pengadaan')))
@@ -299,38 +345,60 @@
                         </span>
                     @endif
                 </a>
-                <ul class="dropdown-menu dropdown-menu-end shadow" style="width: 300px; max-height: 400px; overflow-y: auto;">
-                    <li><h6 class="dropdown-header">Notifikasi Terbaru</h6></li>
-                    @if(isset($recentNotifs) && $recentNotifs->count() > 0)
-                        @foreach($recentNotifs as $notif)
-                            <li>
-                                <a class="dropdown-item d-flex align-items-start py-2 border-bottom text-wrap" href="#">
-                                    <div class="me-3 mt-1">
-                                        @if($notif->jenis_notifikasi == 'qc')
-                                            <i class="fas fa-flask text-primary"></i>
-                                        @elseif($notif->jenis_notifikasi == 'kalibrasi')
-                                            <i class="fas fa-tools text-warning"></i>
-                                        @elseif($notif->jenis_notifikasi == 'stok')
-                                            <i class="fas fa-box text-success"></i>
-                                        @elseif($notif->jenis_notifikasi == 'sertifikasi')
-                                            <i class="fas fa-certificate text-danger"></i>
-                                        @else
-                                            <i class="fas fa-bell text-secondary"></i>
-                                        @endif
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <p class="mb-0" style="font-size: 0.85rem;">{{ \Illuminate\Support\Str::limit($notif->pesan, 80) }}</p>
-                                        <small class="text-muted" style="font-size: 0.75rem;">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</small>
+
+                <div class="dropdown-menu dropdown-menu-end shadow" id="notifDropdown">
+                    {{-- Header: fixed, tidak ikut scroll --}}
+                    <div class="notif-header d-flex justify-content-between align-items-center">
+                        <span class="fw-bold" style="font-size: 0.85rem;">Notifikasi Terbaru</span>
+                        @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
+                            <span class="badge bg-danger rounded-pill">{{ $unreadNotifCount }} baru</span>
+                        @endif
+                    </div>
+
+                    {{-- List: hanya bagian ini yang scroll --}}
+                    <div class="notif-list">
+                        @if(isset($recentNotifs) && $recentNotifs->count() > 0)
+                            @foreach($recentNotifs as $notif)
+                                @php
+                                    $isDitolak = str_contains(strtolower($notif->pesan), 'ditolak');
+                                    $iconBg = match($notif->jenis_notifikasi) {
+                                        'qc' => 'bg-primary',
+                                        'kalibrasi' => 'bg-warning',
+                                        'stok' => 'bg-success',
+                                        'sertifikasi' => 'bg-danger',
+                                        default => 'bg-secondary',
+                                    };
+                                    $icon = match($notif->jenis_notifikasi) {
+                                        'qc' => 'fa-flask',
+                                        'kalibrasi' => 'fa-tools',
+                                        'stok' => 'fa-box',
+                                        'sertifikasi' => 'fa-certificate',
+                                        default => 'fa-bell',
+                                    };
+                                @endphp
+                                <a href="#" class="notif-item {{ !$notif->is_read ? 'unread' : '' }}">
+                                    <span class="notif-icon {{ $iconBg }}">
+                                        <i class="fas {{ $icon }} text-white"></i>
+                                    </span>
+                                    <div class="flex-grow-1" style="min-width: 0;">
+                                        <p class="notif-msg {{ $isDitolak ? 'text-danger-emphasis' : '' }}">{{ $notif->pesan }}</p>
+                                        <span class="notif-time">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</span>
                                     </div>
                                 </a>
-                            </li>
-                        @endforeach
-                    @else
-                        <li><span class="dropdown-item text-center text-muted py-3">Tidak ada notifikasi baru</span></li>
-                    @endif
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-center text-primary fw-bold" href="{{ route('notifikasi.index') }}">Lihat Semua Notifikasi</a></li>
-                </ul>
+                            @endforeach
+                        @else
+                            <div class="notif-empty">
+                                <i class="fas fa-bell-slash fs-4 mb-2 d-block opacity-50"></i>
+                                Tidak ada notifikasi baru
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Footer: fixed di bawah, selalu kelihatan --}}
+                    <div class="notif-footer">
+                        <a href="{{ route('notifikasi.index') }}">Lihat Semua Notifikasi</a>
+                    </div>
+                </div>
             </div>
 
             <div class="dropdown">

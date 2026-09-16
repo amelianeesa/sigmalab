@@ -17,55 +17,90 @@ Artisan::command('inspire', function () {
 
 // notif kalibrasi
 Artisan::command('kalibrasi:cek-kadaluwarsa', function () {
-    $batasHari = 180; 
+    $batasHari = 180;
     
     $data = RiwayatKalibrasi::with('alat')
         ->whereDate('tgl_akhir', '<=', now()->addDays($batasHari))
         ->whereDate('tgl_akhir', '>=', now())
         ->get();
 
-    $bulanIni = now()->format('Y-m'); 
+    $sekarang = Carbon::now();
+    $bulanIni = $sekarang->format('Y-m'); 
 
     foreach ($data as $item) {
         if (!$item->alat) continue;
         
-        $pesan = "Peringatan Kalibrasi: Alat \"{$item->alat->nama_alat}\" akan habis masa kalibrasinya pada " . Carbon::parse($item->tgl_akhir)->format('d-m-Y') . " (Menjelang H-6 bulan).";
+        $tglKedaluwarsa = Carbon::parse($item->tgl_akhir);
+        $sisaBulan = (int) ceil($sekarang->diffInMonths($tglKedaluwarsa, false));
+        if ($sisaBulan < 1) $sisaBulan = 1;
+
+        $namaAlat = $item->alat->nama_alat;
+        $kodeAlat = $item->alat->kode_alat ?? '-';
+
+        if ($sisaBulan >= 4) {
+            $pesan = "Pengingat Pemeliharaan Alat: Masa kalibrasi {$namaAlat} ({$kodeAlat}) telah memasuki paruh waktu (Sisa {$sisaBulan} bulan). Harap segera menjadwalkan Kalibrasi Ulang dan Pengecekan Antara (khusus Timbangan) untuk memastikan akurasi alat";
+        } else {
+            $pesan = "Peringatan Masa Berlaku Kalibrasi: Masa berlaku kalibrasi alat {$namaAlat} ({$kodeAlat}) akan berakhir dalam {$sisaBulan} bulan lagi. Harap segera menjadwalkan Kalibrasi Ulang";
+        }
+
+        $item->custom_pesan = $pesan;
+        $item->sisa_bulan = $sisaBulan;
         
         $sudahKirimBulanIni = DB::table('notifikasi')
             ->where('jenis_notifikasi', 'kalibrasi')
-            ->where('pesan', 'LIKE', '%' . $item->alat->nama_alat . '%')
+            ->where('pesan', 'LIKE', '%' . $namaAlat . '%')
             ->whereRaw("DATE_FORMAT(created_at, '%Y-%m') = ?", [$bulanIni])
             ->exists();
 
         if (!$sudahKirimBulanIni) {
-            $users = User::whereHas('role', function($q) { 
-                $q->whereIn('nama_role', ['Analis Lab', 'HR']); 
+            $analisList = User::whereHas('role', function($q) { 
+                $q->where('nama_role', 'LIKE', '%Analis%'); 
             })->get();
 
-            foreach ($users as $user) {
-           
-                if ($user->email) {
+            $koordinatorList = User::whereHas('role', function($q) { 
+                $q->where('nama_role', 'LIKE', '%Koordinator%'); 
+            })->get();
+
+            $koordinatorEmails = $koordinatorList->pluck('email')->filter()->toArray();
+
+            foreach ($analisList as $analis) {
+                if ($analis->email) {
                     try {
-                        Mail::to($user->email)->send(new KalibrasiAkanHabis($item));
+                        if (!empty($koordinatorEmails)) {
+                            Mail::to($analis->email)->cc($koordinatorEmails)->send(new KalibrasiAkanHabis($item));
+                        } else {
+                            Mail::to($analis->email)->send(new KalibrasiAkanHabis($item));
+                        }
                     } catch (\Exception $e) {}
                 }
                 
                 DB::table('notifikasi')->insert([
-                    'users_id' => $user->users_id,
+                    'users_id' => $analis->users_id,
                     'jenis_notifikasi' => 'kalibrasi',
-                    'pesan' => $pesan,
+                    'pesan' => "[TO] " . $pesan,
+                    'is_read' => 0,
+                    'created_at' => now(),
+                    
+                ]);
+            }
+
+            foreach ($koordinatorList as $koordinator) {
+                DB::table('notifikasi')->insert([
+                    'users_id' => $koordinator->users_id,
+                    'jenis_notifikasi' => 'kalibrasi',
+                    'pesan' => "[CC] " . $pesan,
                     'is_read' => 0,
                     'created_at' => now(),
                 ]);
             }
-            $this->info("Notifikasi berkala H-6 bulan berhasil dikirim untuk alat: {$item->alat->nama_alat}");
+
+            $this->info("Notifikasi & Email kalibrasi berhasil dikirim untuk alat: {$namaAlat}");
         }
     }
 
     $this->info('Pengecekan kalibrasi berkala H-6 bulan selesai');
-})->description('Mengecek kalibrasi H-6 bulan dan mengirim pengingat berkala tiap bulan via web dan email');
+})->description('Mengecek kalibrasi H-6 bulan dengan format TO/CC khusus kalibrasi');
 
-// Daftar Jadwal Otomatis Harian
 Schedule::command('sertifikasi:cek-kadaluwarsa')->dailyAt('08:00');
 Schedule::command('kalibrasi:cek-kadaluwarsa')->dailyAt('08:00');
 Schedule::command('barang:cek-stok')->dailyAt('08:00');

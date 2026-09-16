@@ -28,9 +28,7 @@ class BarangController extends Controller
             $query->where('kondisi', $filterKondisi);
         }
 
-        // UBAH DARI $query->get(); MENJADI DIURUTKAN DARI YANG TERBARU
         $barang = $query->latest()->get(); 
-        // Atau bisa juga menggunakan: $query->orderBy('barang_id', 'desc')->get();
 
         return view('barang.index', compact('barang', 'search', 'filterKondisi'));
     }
@@ -108,12 +106,14 @@ class BarangController extends Controller
 
         $data = $request->all();
 
-        // Hanya HR dan Admin Aplikasi yang dapat edit harga
         $roleName = Auth::user()->role->nama_role ?? '';
         $isAuthorizedForPricing = in_array($roleName, [
-            \App\Enums\PeranPengguna::HR_GA_OFFICER->value, 
-            \App\Enums\PeranPengguna::ADMIN_APLIKASI->value
+            'HR', 
+            'Admin Aplikasi',
+            'Koordinator Laboratorium',
+            'Analis Lab'
         ]);
+        
         if (!$isAuthorizedForPricing) {
             $data['harga_rata'] = $barang->harga_rata;
         }

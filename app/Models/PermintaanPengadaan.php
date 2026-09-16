@@ -2,25 +2,16 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\LogsStandardActivity;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-use Spatie\Activitylog\Models\Concerns\LogsActivity;
-use Spatie\Activitylog\Support\LogOptions;
-// use Spatie\Activitylog\Traits\LogsActivity;
-// use Spatie\Activitylog\LogOptions;
-
-
-class PermintaanPengadaan extends BaseModel
+class PermintaanPengadaan extends Model
 {
-    use SoftDeletes;
-    use HasFactory, LogsActivity;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'permintaan_pengadaan';
+    protected $primaryKey = 'permintaan_id';
 
     protected $fillable = [
         'barang_id',
@@ -33,15 +24,15 @@ class PermintaanPengadaan extends BaseModel
         'tanggal_pengajuan',
         'tanggal_keputusan',
         'catatan_approval',
-        'foto_diterima', 
-        'nama_penerima', 
+        'nama_penerima',
+        'foto_diterima',
         'waktu_diterima',
     ];
 
     protected $casts = [
-        'tanggal_pengajuan' => 'date',
-        'tanggal_keputusan' => 'date',
-        'waktu_diterima' => 'datetime'
+        'tanggal_pengajuan' => 'datetime',
+        'tanggal_keputusan' => 'datetime',
+        'waktu_diterima' => 'datetime',
     ];
 
     public function barang()
@@ -58,5 +49,4 @@ class PermintaanPengadaan extends BaseModel
     {
         return $this->belongsTo(User::class, 'disetujui_oleh', 'users_id');
     }
-
 }
