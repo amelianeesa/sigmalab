@@ -18,83 +18,97 @@ use App\Http\Controllers\HakAksesController;
 use App\Http\Controllers\MonitoringRuanganController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\EvaluasiKalibrasiController;
+use App\Http\Controllers\PerbaikanAlatController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LibraryController;
+use App\Http\Controllers\KelolaUserController;
+use App\Http\Controllers\VerifikasiMutuController;
+use App\Http\Controllers\QcInhouseController;
+use App\Http\Controllers\QcHarianController;
 
+// Guest/Public
 Route::get('/', [AuthController::class, 'showLogin']);
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'processLogin'])->name('login.process')->middleware('throttle:5,1');
-
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/public/alat/{kode_alat}', [AlatController::class, 'inputKalibrasiByKode'])->where('kode_alat', '.*')->name('alat.public-scan');
 
-Route::get('/alat/{id}/input-kalibrasi', [AlatController::class, 'inputKalibrasi'])->name('alat.input-kalibrasi');
 
-// unduh informasi dan riwayat kalibrasi alat
-Route::get('/alat/{id}/export-pdf', [AlatController::class, 'exportPdf'])->name('alat.export-pdf');
-Route::get('/alat/{id}/export-excel', [AlatController::class, 'exportExcel'])->name('alat.export-excel');
-Route::get('/alat/{id}/export-word', [AlatController::class, 'exportWord'])->name('alat.export-word');
-
-
-
-// ini harus login dulu
+// Wajib Login
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+    // Dashboard & Role
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/switch-role', [RoleSwitcherController::class, 'switchRole'])->name('switch-role');
 
+    // Evaluasi Kalibrasi
     Route::resource('evaluasi-kalibrasi', EvaluasiKalibrasiController::class);
 
-    // SDM & Kompetensi
-    Route::get('/sdm', [SdmController::class, 'index'])->name('sdm.index');
-    Route::get('/sdm/create', [SdmController::class, 'create'])->name('sdm.create');
-    Route::post('/sdm', [SdmController::class, 'store'])->name('sdm.store');
-    Route::post('/sdm/kategori', [SdmController::class, 'storeKategori'])->name('sdm.kategori.store');
-    Route::delete('/sdm/kategori/{kode}', [SdmController::class, 'destroyKategori'])->name('sdm.kategori.destroy');
+    // SDM dan Kompetensi
+    Route::prefix('sdm')->name('sdm.')->group(function () {
+        Route::get('/', [SdmController::class, 'index'])->name('index');
+        Route::get('/create', [SdmController::class, 'create'])->name('create');
+        Route::post('/', [SdmController::class, 'store'])->name('store');
+        Route::post('/kategori', [SdmController::class, 'storeKategori'])->name('kategori.store');
+        Route::delete('/kategori/{kode}', [SdmController::class, 'destroyKategori'])->name('kategori.destroy');
 
-    Route::get('/sdm/competency-matrix', [SdmController::class, 'competencyMatrix'])->name('sdm.competency-matrix');
-    Route::get('/sdm/competency-matrix/pdf', [SdmController::class, 'competencyMatrixPdf'])->name('sdm.competency-matrix.pdf');
+        Route::get('/competency-matrix', [SdmController::class, 'competencyMatrix'])->name('competency-matrix');
+        Route::get('/competency-matrix/pdf', [SdmController::class, 'competencyMatrixPdf'])->name('competency-matrix.pdf');
 
-    Route::get('/sdm/{id}/edit', [SdmController::class, 'edit'])->name('sdm.edit');
-    Route::put('/sdm/{id}', [SdmController::class, 'update'])->name('sdm.update');
-    Route::delete('/sdm/{id}', [SdmController::class, 'destroy'])->name('sdm.destroy');
-    Route::patch('/sdm/{id}/aktifkan', [SdmController::class, 'activate'])->name('sdm.activate');
-    Route::delete('/sdm/{id}/permanen', [SdmController::class, 'forceDestroy'])->name('sdm.force-destroy');
-    Route::post('/sdm/{id}/akun', [App\Http\Controllers\SdmController::class, 'storeAkun'])
-    ->name('sdm.akun.store');
+        Route::get('/{id}/edit', [SdmController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [SdmController::class, 'update'])->name('update');
+        Route::delete('/{id}', [SdmController::class, 'destroy'])->name('destroy');
+        Route::patch('/{id}/aktifkan', [SdmController::class, 'activate'])->name('activate');
+        Route::delete('/{id}/permanen', [SdmController::class, 'forceDestroy'])->name('force-destroy');
+        
+        Route::post('/{id}/akun', [SdmController::class, 'storeAkun'])->name('akun.store');
 
-    Route::get('/sdm/{id}/kompetensi', [SdmController::class, 'kompetensiDetail'])->name('sdm.kompetensi.detail');
-    Route::post('/sdm/{id}/kompetensi', [SdmController::class, 'storeKompetensi'])->name('sdm.kompetensi.store');
-    Route::put('/sdm/{id}/kompetensi/{kompetensiId}', [SdmController::class, 'updateKompetensi'])->name('sdm.kompetensi.update');
-    Route::delete('/sdm/{id}/kompetensi/{kompetensiId}', [SdmController::class, 'destroyKompetensi'])->name('sdm.kompetensi.destroy');
-    Route::get('/sdm/{id}/kompetensi/{kompetensiId}/file', [SdmController::class, 'showKompetensiFile'])->name('sdm.kompetensi.file');
-    Route::post('/sdm/{id}/kompetensi/{kompetensiId}/file', [SdmController::class, 'uploadKompetensiFile'])->name('sdm.kompetensi.file.upload');
-    Route::get('/sdm/{id}/cv', [SdmController::class, 'showCv'])->name('sdm.cv');
+        Route::get('/{id}/kompetensi', [SdmController::class, 'kompetensiDetail'])->name('kompetensi.detail');
+        Route::post('/{id}/kompetensi', [SdmController::class, 'storeKompetensi'])->name('kompetensi.store');
+        Route::put('/{id}/kompetensi/{kompetensiId}', [SdmController::class, 'updateKompetensi'])->name('kompetensi.update');
+        Route::delete('/{id}/kompetensi/{kompetensiId}', [SdmController::class, 'destroyKompetensi'])->name('kompetensi.destroy');
+        Route::get('/{id}/kompetensi/{kompetensiId}/file', [SdmController::class, 'showKompetensiFile'])->name('kompetensi.file');
+        Route::post('/{id}/kompetensi/{kompetensiId}/file', [SdmController::class, 'uploadKompetensiFile'])->name('kompetensi.file.upload');
+        Route::get('/{id}/cv', [SdmController::class, 'showCv'])->name('cv');
+    });
 
-    // Resources
+    // Manajemen Alat dan Peerbaikan
     Route::post('/alat/parse-sertifikat', [AlatController::class, 'parseSertifikat'])->name('alat.parse-sertifikat');
     Route::resource('alat', AlatController::class);
-    
-    // alat
-    Route::post('/alat/{id}/input-kalibrasi', [AlatController::class, 'storeInputKalibrasi'])->name('alat.store-input-kalibrasi');
 
-    Route::get('/alat/{id}/pemeliharaan', [AlatController::class, 'pemeliharaanBulanan'])->name('alat.pemeliharaan');
-    Route::post('/alat/{id}/pemeliharaan/update', [AlatController::class, 'updatePemeliharaanHarian'])->name('alat.pemeliharaan.update');
-    Route::get('/alat/{id}/item-pemeliharaan', [AlatController::class, 'editItemPemeliharaan'])->name('alat.item-pemeliharaan.edit');
-    Route::post('/alat/{id}/item-pemeliharaan', [AlatController::class, 'updateItemPemeliharaan'])->name('alat.item-pemeliharaan.update');
-    Route::post('/alat/{id}/perbaikan', [AlatController::class, 'storePerbaikan'])->name('alat.perbaikan.store');
-    Route::put('/alat/{id}/perbaikan/{perbaikan_id}', [AlatController::class, 'updatePerbaikan'])->name('alat.perbaikan.update');
-    Route::get('/alat/{id}/pemeliharaan/pdf', [AlatController::class, 'exportPemeliharaanPdf'])->name('alat.pemeliharaan.pdf');
-    Route::get('/alat/{id}/pemeliharaan/excel', [AlatController::class, 'exportPemeliharaanExcel'])->name('alat.pemeliharaan.excel');
-    // barang dan pengadaan
+    Route::prefix('alat/{id}')->name('alat.')->group(function () {
+        Route::get('input-kalibrasi', [AlatController::class, 'inputKalibrasi'])->name('input-kalibrasi');
+        Route::post('input-kalibrasi', [AlatController::class, 'storeInputKalibrasi'])->name('store-input-kalibrasi');
+        
+        Route::get('pemeliharaan', [AlatController::class, 'pemeliharaanBulanan'])->name('pemeliharaan');
+        Route::post('pemeliharaan/update', [AlatController::class, 'updatePemeliharaanHarian'])->name('pemeliharaan.update');
+        Route::get('item-pemeliharaan', [AlatController::class, 'editItemPemeliharaan'])->name('item-pemeliharaan.edit');
+        Route::post('item-pemeliharaan', [AlatController::class, 'updateItemPemeliharaan'])->name('item-pemeliharaan.update');
+        
+        Route::get('pemeliharaan/pdf', [AlatController::class, 'exportPemeliharaanPdf'])->name('pemeliharaan.pdf');
+        Route::get('pemeliharaan/excel', [AlatController::class, 'exportPemeliharaanExcel'])->name('pemeliharaan.excel');
+        
+        Route::get('export-pdf', [AlatController::class, 'exportPdf'])->name('export-pdf');
+        Route::get('export-excel', [AlatController::class, 'exportExcel'])->name('export-excel');
+        Route::get('export-word', [AlatController::class, 'exportWord'])->name('export-word');
+
+        // Perbaikan Alat
+        Route::post('perbaikan', [PerbaikanAlatController::class, 'store'])->name('perbaikan.store');
+        Route::put('perbaikan/{riwayat_perbaikan_id}', [PerbaikanAlatController::class, 'update'])->name('perbaikan.update');
+    });
+
+    // Barang dan Pengadaan
     Route::get('barang/cetak-periode', [BarangController::class, 'printPeriode'])->name('barang.cetak-periode');
     Route::resource('barang', BarangController::class);
+    Route::post('/barang/{id}/pengeluaran', [BarangController::class, 'storePengeluaran'])->name('barang.pengeluaran');
+
     Route::get('/pengadaan/export-pdf', [PengadaanController::class, 'exportPdf'])->name('pengadaan.exportPdf');
     Route::resource('pengadaan', PengadaanController::class);
     Route::post('/pengadaan/{id}/approve', [PengadaanController::class, 'approve'])->name('pengadaan.approve');
     Route::post('/pengadaan/{id}/terima', [PengadaanController::class, 'konfirmasiTerima'])->name('pengadaan.konfirmasiTerima');
-    Route::post('/barang/{id}/pengeluaran', [BarangController::class, 'storePengeluaran'])->name('barang.pengeluaran');
 
-    //monitoring ruangan
+    // Monitoring Ruangan
     Route::prefix('inventori')->name('inventori.')->group(function () {
         Route::get('/monitoring-ruangan', [MonitoringRuanganController::class, 'index'])->name('monitoring.index');
         Route::post('/monitoring-ruangan/update', [MonitoringRuanganController::class, 'updateBaris'])->name('monitoring.updateBaris');
@@ -105,71 +119,51 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/monitoring-ruangan/upload-referensi', [MonitoringRuanganController::class, 'uploadReferensi'])->name('monitoring.uploadReferensi');
         Route::put('/monitoring-ruangan/referensi/{id}', [MonitoringRuanganController::class, 'updateReferensi'])->name('monitoring.updateReferensi');
         Route::delete('/monitoring-ruangan/referensi/{id}', [MonitoringRuanganController::class, 'destroyReferensi'])->name('monitoring.destroyReferensi');
-        // Route::post('/inventori/monitoring-ruangan/sync-kalibrasi/{alatId}', [MonitoringRuanganController::class, 'syncKalibrasi'])->name('inventori.monitoring.syncKalibrasi');
     });
 
+    // Parameter Uji CRM
     Route::resource('parameter-uji', ParameterUjiController::class);
-
-    Route::middleware('modul:library_manage,tambah_ubah')->group(function () {
-        Route::get('/library/create', [\App\Http\Controllers\LibraryController::class, 'create'])->name('library.create');
-        Route::get('/library/arsip', [\App\Http\Controllers\LibraryController::class, 'archive'])->name('library.archive');
-    });
-
-    Route::middleware('modul:library_manage,lihat')->group(function () {
-        Route::get('/library', [\App\Http\Controllers\LibraryController::class, 'index'])->name('library.index');
-        Route::get('/library/export/pdf', [\App\Http\Controllers\LibraryController::class, 'exportPdf'])->name('library.export.pdf');
-        Route::get('/library/{id}/versions/{versionId}/download', [\App\Http\Controllers\LibraryController::class, 'downloadVersion'])->name('library.version.download');
-        Route::get('/library/{id}', [\App\Http\Controllers\LibraryController::class, 'show'])->name('library.show');
-        Route::get('/library/{id}/download', [\App\Http\Controllers\LibraryController::class, 'download'])->name('library.download');
-        Route::get('/library/{id}/preview', [\App\Http\Controllers\LibraryController::class, 'preview'])->name('library.preview');
-
-    });
-
-    Route::middleware('modul:library_manage,tambah_ubah')->group(function () {
-        Route::post('/library', [\App\Http\Controllers\LibraryController::class, 'store'])->name('library.store');
-        Route::get('/library/{id}/edit', [\App\Http\Controllers\LibraryController::class, 'edit'])->name('library.edit');
-        Route::put('/library/{id}', [\App\Http\Controllers\LibraryController::class, 'update'])->name('library.update');
-        Route::delete('/library/{id}', [\App\Http\Controllers\LibraryController::class, 'destroy'])->name('library.destroy');
-        Route::patch('/library/{id}/aktifkan', [\App\Http\Controllers\LibraryController::class, 'activate'])->name('library.activate');
-        Route::get('/library/{id}/revisi', [\App\Http\Controllers\LibraryController::class, 'createRevision'])->name('library.revision.create');
-        Route::post('/library/{id}/revisi', [\App\Http\Controllers\LibraryController::class, 'storeRevision'])->name('library.revision.store');
-    });
-
     Route::get('/parameter-uji/{parameter_uji}/calculate-stats', [ParameterUjiController::class, 'calculateHistoricalStats'])->name('parameter-uji.calculate-stats');
     Route::get('/parameter-uji/{parameter_uji}/control-chart', [ParameterUjiController::class, 'controlChart'])->name('parameter-uji.control-chart');
     Route::match(['get', 'post'], 'parameter-uji/{parameter_uji}/cetak', [ParameterUjiController::class, 'cetakControlChart'])->name('parameter-uji.cetak-control-chart');
-    Route::resource('parameter-uji', ParameterUjiController::class);
     Route::post('/parameter-uji/crm-katalog', [ParameterUjiController::class, 'storeCrmKatalog'])->name('parameter-uji.store-crm');
     Route::delete('/parameter-uji/crm-katalog/{id}', [ParameterUjiController::class, 'destroyCrmKatalog'])->name('parameter-uji.destroy-crm');
+
+    // Library Digital
+    Route::middleware('modul:library_manage,lihat')->group(function () {
+        Route::get('/library', [LibraryController::class, 'index'])->name('library.index');
+        Route::get('/library/export/pdf', [LibraryController::class, 'exportPdf'])->name('library.export.pdf');
+        Route::get('/library/{id}/versions/{versionId}/download', [LibraryController::class, 'downloadVersion'])->name('library.version.download');
+        Route::get('/library/{id}', [LibraryController::class, 'show'])->name('library.show');
+        Route::get('/library/{id}/download', [LibraryController::class, 'download'])->name('library.download');
+        Route::get('/library/{id}/preview', [LibraryController::class, 'preview'])->name('library.preview');
+    });
+
+    Route::middleware('modul:library_manage,tambah_ubah')->group(function () {
+        Route::get('/library/create', [LibraryController::class, 'create'])->name('library.create');
+        Route::get('/library/arsip', [LibraryController::class, 'archive'])->name('library.archive');
+        Route::post('/library', [LibraryController::class, 'store'])->name('library.store');
+        Route::get('/library/{id}/edit', [LibraryController::class, 'edit'])->name('library.edit');
+        Route::put('/library/{id}', [LibraryController::class, 'update'])->name('library.update');
+        Route::delete('/library/{id}', [LibraryController::class, 'destroy'])->name('library.destroy');
+        Route::patch('/library/{id}/aktifkan', [LibraryController::class, 'activate'])->name('library.activate');
+        Route::get('/library/{id}/revisi', [LibraryController::class, 'createRevision'])->name('library.revision.create');
+        Route::post('/library/{id}/revisi', [LibraryController::class, 'storeRevision'])->name('library.revision.store');
+    });
+
+    // Kegiatan, Uji Hasil, Tindak Lanjut
     Route::resource('kegiatan', KegiatanController::class);
     Route::post('/kegiatan/{id}/unlock', [KegiatanController::class, 'unlock'])->name('kegiatan.unlock');
+
     Route::resource('hasil-uji', HasilUjiController::class);
     Route::post('/hasil-uji/{id}/retest', [HasilUjiController::class, 'retest'])->name('hasil-uji.retest');
     Route::post('/hasil-uji/{id}/override', [HasilUjiController::class, 'overrideWestgard'])->name('hasil-uji.override');
+    Route::post('/hasil-uji/{id}/override-evaluasi', [HasilUjiController::class, 'overrideEvaluasi'])->name('hasil-uji.override-evaluasi');
+
     Route::resource('tindak-lanjut', RiwayatTindakLanjutController::class)->except(['destroy']);
     Route::post('/tindak-lanjut/{id}/komentar', [RiwayatTindakLanjutController::class, 'storeKomentar'])->name('tindak-lanjut.komentar.store');
-    
-    Route::get('/alat/{id}/input-kalibrasi', [AlatController::class, 'inputKalibrasi'])->name('alat.input-kalibrasi');
-    Route::post('/alat/{id}/input-kalibrasi', [AlatController::class, 'storeInputKalibrasi'])->name('alat.store-input-kalibrasi');
 
-    Route::get('/alat/{id}/pemeliharaan', [AlatController::class, 'pemeliharaanBulanan'])->name('alat.pemeliharaan');
-    Route::post('/alat/{id}/pemeliharaan/update', [AlatController::class, 'updatePemeliharaanHarian'])->name('alat.pemeliharaan.update');
-    Route::get('/alat/{id}/item-pemeliharaan', [AlatController::class, 'editItemPemeliharaan'])->name('alat.item-pemeliharaan.edit');
-    Route::post('/alat/{id}/item-pemeliharaan', [AlatController::class, 'updateItemPemeliharaan'])->name('alat.item-pemeliharaan.update');
-    Route::post('/alat/{id}/perbaikan', [AlatController::class, 'storePerbaikan'])->name('alat.perbaikan.store');
-    Route::put('/alat/{id}/perbaikan/{perbaikan_id}', [AlatController::class, 'updatePerbaikan'])->name('alat.perbaikan.update');
-  
-    Route::prefix('alat/{id}')->controller(AlatController::class)->name('alat.')->group(function () {
-        Route::get('input-kalibrasi', 'inputKalibrasi')->name('input-kalibrasi');
-        Route::post('input-kalibrasi', 'storeInputKalibrasi')->name('store-input-kalibrasi');
-        Route::get('pemeliharaan', 'pemeliharaanBulanan')->name('pemeliharaan');
-        Route::post('pemeliharaan/update', 'updatePemeliharaanHarian')->name('pemeliharaan.update');
-        Route::get('item-pemeliharaan', 'editItemPemeliharaan')->name('item-pemeliharaan.edit');
-        Route::post('item-pemeliharaan', 'updateItemPemeliharaan')->name('item-pemeliharaan.update');
-        Route::post('perbaikan', 'storePerbaikan')->name('perbaikan.store');
-        Route::put('perbaikan/{perbaikan_id}', 'updatePerbaikan')->name('perbaikan.update');
-    });
-    // Reporting
+    // Reporting dan Audit Log
     Route::get('reporting', [ReportingController::class, 'index'])->name('reporting.index');
     Route::get('reporting/pdf', [ReportingController::class, 'exportPdf'])->name('reporting.pdf');
 
@@ -178,67 +172,65 @@ Route::middleware(['auth'])->group(function () {
         Route::get('audit-log/{id}', [AuditLogController::class, 'show'])->name('audit-log.show');
     });
 
+    // Hak Akses dan Manajemen Pengguna
     Route::middleware('modul:manajemen_pengguna,lihat')->group(function () {
         Route::get('hak-akses', [HakAksesController::class, 'index'])->name('hak-akses.index');
         Route::post('hak-akses', [HakAksesController::class, 'update'])->name('hak-akses.update');
-        Route::get('kelola-user', [\App\Http\Controllers\KelolaUserController::class, 'index'])->name('kelola-user.index');
+        Route::get('kelola-user', [KelolaUserController::class, 'index'])->name('kelola-user.index');
     });
 
     Route::middleware('modul:manajemen_pengguna,tambah_ubah')->group(function () {
-
-        Route::post('kelola-user', [\App\Http\Controllers\KelolaUserController::class, 'store'])->name('kelola-user.store');
-        Route::put('kelola-user/{id}', [\App\Http\Controllers\KelolaUserController::class, 'update'])->name('kelola-user.update');
-        Route::delete('kelola-user/{id}', [\App\Http\Controllers\KelolaUserController::class, 'destroy'])->name('kelola-user.destroy');
+        Route::post('kelola-user', [KelolaUserController::class, 'store'])->name('kelola-user.store');
+        Route::put('kelola-user/{id}', [KelolaUserController::class, 'update'])->name('kelola-user.update');
+        Route::delete('kelola-user/{id}', [KelolaUserController::class, 'destroy'])->name('kelola-user.destroy');
     });
-});
 
     // Notifikasi
-    Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
-    Route::post('/notifikasi/{id}/read', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.read');
-    Route::post('/notifikasi/read-all', [NotifikasiController::class, 'markAllAsRead'])->name('notifikasi.read-all');
-    Route::get('/notifikasi/unread-count', [NotifikasiController::class, 'getUnreadCount'])->name('notifikasi.unread-count');
+    Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
+        Route::get('/', [NotifikasiController::class, 'index'])->name('index');
+        Route::post('/{id}/read', [NotifikasiController::class, 'markAsRead'])->name('read');
+        Route::post('/read-all', [NotifikasiController::class, 'markAllAsRead'])->name('read-all');
+        Route::get('/unread-count', [NotifikasiController::class, 'getUnreadCount'])->name('unread-count');
+    });
 
-    // Inhouse Control
-    Route::post('/hasil-uji/{id}/override-evaluasi', [HasilUjiController::class, 'overrideEvaluasi'])->name('hasil-uji.override-evaluasi');
-
-    Route::get('verifikasi-mutu', [\App\Http\Controllers\VerifikasiMutuController::class, 'index'])->name('verifikasi-mutu.index');
+    //QC
+    Route::get('verifikasi-mutu', [VerifikasiMutuController::class, 'index'])->name('verifikasi-mutu.index');
 
     Route::prefix('qc-inhouse')->name('qc-inhouse.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\QcInhouseController::class, 'index'])->name('index');
-        Route::get('/create', [\App\Http\Controllers\QcInhouseController::class, 'create'])->name('create');
-        Route::post('/', [\App\Http\Controllers\QcInhouseController::class, 'store'])->name('store');
-        Route::get('/{id}', [\App\Http\Controllers\QcInhouseController::class, 'show'])->name('show');
+        Route::get('/', [QcInhouseController::class, 'index'])->name('index');
+        Route::get('/create', [QcInhouseController::class, 'create'])->name('create');
+        Route::post('/', [QcInhouseController::class, 'store'])->name('store');
+        Route::get('/{id}', [QcInhouseController::class, 'show'])->name('show');
         
-        // Tahap 2: Preparasi
-        Route::get('/{id}/preparasi', [\App\Http\Controllers\QcInhouseController::class, 'showPreparasi'])->name('preparasi');
-        Route::post('/{id}/preparasi', [\App\Http\Controllers\QcInhouseController::class, 'storePreparasi'])->name('preparasi.store');
-        Route::get('/{id}/cetak-label', [\App\Http\Controllers\QcInhouseController::class, 'cetakLabel'])->name('cetak-label');
+        // Preparasi
+        Route::get('/{id}/preparasi', [QcInhouseController::class, 'showPreparasi'])->name('preparasi');
+        Route::post('/{id}/preparasi', [QcInhouseController::class, 'storePreparasi'])->name('preparasi.store');
+        Route::get('/{id}/cetak-label', [QcInhouseController::class, 'cetakLabel'])->name('cetak-label');
         
-        // Tahap 3: Uji Homogenitas
-        Route::get('/{id}/instruksi-homogenitas', [\App\Http\Controllers\QcInhouseController::class, 'showInstruksiHomogenitas'])->name('instruksi-homogenitas');
-        Route::get('/{id}/homogenitas', [\App\Http\Controllers\QcInhouseController::class, 'showHomogenitas'])->name('homogenitas');
-        Route::post('/{id}/homogenitas', [\App\Http\Controllers\QcInhouseController::class, 'storeHomogenitas'])->name('homogenitas.store');
+        // Uji Homogenitas
+        Route::get('/{id}/instruksi-homogenitas', [QcInhouseController::class, 'showInstruksiHomogenitas'])->name('instruksi-homogenitas');
+        Route::get('/{id}/homogenitas', [QcInhouseController::class, 'showHomogenitas'])->name('homogenitas');
+        Route::post('/{id}/homogenitas', [QcInhouseController::class, 'storeHomogenitas'])->name('homogenitas.store');
         
-        // Tahap 4: Penetapan Nilai Target
-        Route::get('/{id}/penetapan-target', [\App\Http\Controllers\QcInhouseController::class, 'showPenetapanTarget'])->name('penetapan-target');
-        Route::post('/{id}/penetapan-target', [\App\Http\Controllers\QcInhouseController::class, 'storePenetapanTarget'])->name('penetapan-target.store');
+        // Penetapan Nilai Target
+        Route::get('/{id}/penetapan-target', [QcInhouseController::class, 'showPenetapanTarget'])->name('penetapan-target');
+        Route::post('/{id}/penetapan-target', [QcInhouseController::class, 'storePenetapanTarget'])->name('penetapan-target.store');
         
-        // Tahap 5: Uji Stabilitas
-        Route::get('/{id}/stabilitas', [\App\Http\Controllers\QcInhouseController::class, 'showStabilitas'])->name('stabilitas');
-        Route::post('/{id}/stabilitas', [\App\Http\Controllers\QcInhouseController::class, 'storeStabilitas'])->name('stabilitas.store');
+        // Uji Stabilitas
+        Route::get('/{id}/stabilitas', [QcInhouseController::class, 'showStabilitas'])->name('stabilitas');
+        Route::post('/{id}/stabilitas', [QcInhouseController::class, 'storeStabilitas'])->name('stabilitas.store');
 
-        // Tahap 6: Aktivasi
-        Route::post('/{id}/aktifkan', [\App\Http\Controllers\QcInhouseController::class, 'aktifkan'])->name('aktifkan');
+        // Aktivasi
+        Route::post('/{id}/aktifkan', [QcInhouseController::class, 'aktifkan'])->name('aktifkan');
     });
 
-    // =============================================
-    // Verifikasi Mutu - Pengujian Harian QC
-    // =============================================
     Route::prefix('qc-harian')->name('qc-harian.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\QcHarianController::class, 'index'])->name('index');
-        Route::get('/create', [\App\Http\Controllers\QcHarianController::class, 'create'])->name('create');
-        Route::post('/', [\App\Http\Controllers\QcHarianController::class, 'store'])->name('store');
-        Route::get('/{parameter_uji_id}/chart', [\App\Http\Controllers\QcHarianController::class, 'chart'])->name('chart');
-        Route::get('/{id}/investigasi', [\App\Http\Controllers\QcHarianController::class, 'investigasi'])->name('investigasi');
-        Route::post('/{id}/investigasi', [\App\Http\Controllers\QcHarianController::class, 'storeInvestigasi'])->name('investigasi.store');
+        Route::get('/', [QcHarianController::class, 'index'])->name('index');
+        Route::get('/create', [QcHarianController::class, 'create'])->name('create');
+        Route::post('/', [QcHarianController::class, 'store'])->name('store');
+        Route::get('/{parameter_uji_id}/chart', [QcHarianController::class, 'chart'])->name('chart');
+        Route::get('/{id}/investigasi', [QcHarianController::class, 'investigasi'])->name('investigasi');
+        Route::post('/{id}/investigasi', [QcHarianController::class, 'storeInvestigasi'])->name('investigasi.store');
     });
+
+});

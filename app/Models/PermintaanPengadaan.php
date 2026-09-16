@@ -16,6 +16,7 @@ class PermintaanPengadaan extends Model
     protected $fillable = [
         'barang_id',
         'jumlah_diminta',
+        'target_hari',
         'alasan',
         'foto',
         'status',

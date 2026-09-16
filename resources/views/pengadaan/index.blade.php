@@ -10,7 +10,7 @@
                 <li class="breadcrumb-item active">Pengadaan Bahan</li>
             </ol>
             <h4 class="fw-bold text-dark mb-1">Pengadaan Bahan / Barang</h4>
-            <p class="text-muted mb-0 small">Manajemen permintaan pengadaan barang dengan alur approval berjenjang.</p>
+            <p class="text-muted mb-0 small">Manajemen permintaan pengadaan barang dengan alur approval berjenjang</p>
         </div>
         <div class="d-flex gap-2">
             @if(in_array(Auth::user()->role->nama_role ?? '', [\App\Enums\PeranPengguna::GA_OFFICER->value, \App\Enums\PeranPengguna::ADMIN_APLIKASI->value, 'GA', 'GA_OFFICER']))
@@ -35,6 +35,7 @@
                             <th width="4%">No</th>
                             <th>Nama Barang</th>
                             <th>Tanggal</th>
+                            <th>Target Waktu</th>
                             <th>Diajukan Oleh</th>
                             <th>Jumlah</th>
                             <th>Status</th>
@@ -48,7 +49,7 @@
                                 $isKoor = in_array($roleUser, ['Koordinator Lab', 'Koordinator Laboratorium']);
                                 $isGa = in_array($roleUser, [\App\Enums\PeranPengguna::GA_OFFICER->value, \App\Enums\PeranPengguna::ADMIN_APLIKASI->value, 'GA', 'GA_OFFICER']);
                                 $isAdminAplikasi = $roleUser === \App\Enums\PeranPengguna::ADMIN_APLIKASI->value;
-
+                
                                 $catatan = $p->catatan_approval ?? '';
                                 $labelPenolak = null;
                                 $alasanText = $catatan;
@@ -58,26 +59,41 @@
                                 }
                             @endphp
                             <tr>
+                                <!-- 1. No -->
                                 <td class="text-center">{{ $loop->iteration }}</td>
-
+                
+                                <!-- 2. Nama Barang & Foto -->
                                 <td>
                                     <span class="fw-semibold">{{ $p->barang ? $p->barang->nama_barang : 'Barang Dihapus' }}</span><br>
                                     <span class="text-muted" style="font-size:0.75rem;">{{ $p->alasan ?? 'Tidak ada catatan khusus' }}</span>
                                     @if($p->foto)
-                                        <div class="mt-1">
-                                            <a href="{{ asset($p->foto) }}" target="_blank" class="badge bg-light text-primary border text-decoration-none" style="font-size:0.68rem;">
-                                                <i class="fas fa-image me-1"></i>Foto
-                                            </a>
-                                        </div>
-                                    @endif
+                                    <div class="mt-1">
+                                        <a href="{{ asset($p->foto) }}" target="_blank" class="badge bg-light text-primary border text-decoration-none" style="font-size:0.68rem;">
+                                            <i class="fas fa-image me-1"></i>Foto
+                                        </a>
+                                    </div>
+                                @endif
                                 </td>
-
-                                <td class="text-nowrap">{{ \Carbon\Carbon::parse($p->tanggal_pengajuan)->format('d M Y') }}</td>
-                                <td>{{ $p->pemohon ? $p->pemohon->username : '-' }}</td>
+                
+                                <!-- 3. Tanggal Pengajuan -->
+                                <td class="text-nowrap text-center">{{ \Carbon\Carbon::parse($p->tanggal_pengajuan)->format('d M Y') }}</td>
+                
+                                <!-- 4. Target Waktu -->
+                                <td class="text-center">
+                                    <span class="badge bg-light text-dark border" style="font-size:0.7rem;">
+                                        <i class="fas fa-clock me-1 text-primary"></i> {{ $p->target_hari }} hari
+                                    </span>
+                                </td>
+                
+                                <!-- 5. Diajukan Oleh -->
+                                <td class="text-center">{{ $p->pemohon ? $p->pemohon->username : '-' }}</td>
+                
+                                <!-- 6. Jumlah -->
                                 <td class="text-center fw-bold text-primary">
                                     {{ (float) $p->jumlah_diminta }} <span class="text-muted fw-normal" style="font-size:0.72rem;">{{ $p->barang ? $p->barang->satuan : '' }}</span>
                                 </td>
-
+                
+                                <!-- 7. Status -->
                                 <td class="text-center" style="min-width:170px;">
                                     @if($p->status == 'menunggu_koordinator' || $p->status == 'diajukan')
                                         <span class="badge bg-secondary" style="font-size:0.7rem;">Menunggu Koordinator</span>
@@ -101,10 +117,10 @@
                                         <span class="badge bg-success" style="font-size:0.7rem;">Selesai (Stok Masuk)</span>
                                     @endif
                                 </td>
-
+                
+                                <!-- 8. Aksi -->
                                 <td>
                                     <div class="d-flex flex-column gap-1">
-
                                         @if($isKoor && ($p->status == 'menunggu_koordinator' || $p->status == 'diajukan'))
                                             <div class="d-flex gap-1">
                                                 <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST" class="w-50">
@@ -117,7 +133,7 @@
                                                 </button>
                                             </div>
                                         @endif
-
+                
                                         @if($isGa && $p->status == 'menunggu_ga')
                                             <div class="d-flex gap-1">
                                                 <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST" class="w-50">
@@ -130,7 +146,7 @@
                                                 </button>
                                             </div>
                                         @endif
-
+                
                                         @if($isGa && $p->status == 'disetujui')
                                             <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST">
                                                 @csrf
@@ -138,7 +154,8 @@
                                                 <button class="btn btn-sm btn-primary w-100 py-1" style="font-size:0.72rem;"><i class="fas fa-spinner"></i> Proses (PO)</button>
                                             </form>
                                         @endif
-
+                
+                                        <!-- Modal Penolakan -->
                                         <div class="modal fade" id="modalTolak{{ $p->permintaan_id }}" tabindex="-1">
                                             <div class="modal-dialog modal-sm">
                                                 <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST" class="modal-content text-start">
@@ -159,7 +176,7 @@
                                                 </form>
                                             </div>
                                         </div>
-
+                
                                         @if($p->status == 'selesai' || $p->foto_diterima)
                                             <div class="p-1 border rounded bg-light text-start" style="font-size:0.72rem;">
                                                 <span class="fw-bold text-dark">Penerima: {{ $p->nama_penerima ?? '-' }}</span><br>
@@ -173,7 +190,8 @@
                                             <button type="button" class="btn btn-sm btn-warning fw-bold w-100 py-1" data-bs-toggle="modal" data-bs-target="#modalTerima{{ $p->permintaan_id }}" style="font-size:0.72rem;">
                                                 <i class="fas fa-camera"></i> Konfirmasi Terima
                                             </button>
-
+                
+                                            <!-- Modal Konfirmasi Terima -->
                                             <div class="modal fade" id="modalTerima{{ $p->permintaan_id }}" tabindex="-1">
                                                 <div class="modal-dialog modal-sm">
                                                     <form action="{{ route('pengadaan.konfirmasiTerima', $p->permintaan_id) }}" method="POST" enctype="multipart/form-data" class="modal-content text-start">
@@ -204,7 +222,7 @@
                                                 </div>
                                             </div>
                                         @endif
-
+                
                                         @if(Auth::id() == $p->diajukan_oleh && in_array($p->status, ['diajukan', 'menunggu_koordinator']))
                                             <form action="{{ route('pengadaan.destroy', $p->permintaan_id) }}" method="POST">
                                                 @csrf
@@ -212,7 +230,7 @@
                                                 <button class="btn btn-sm btn-outline-danger w-100 py-1" style="font-size:0.72rem;" onclick="return confirm('Batalkan pengajuan?')"><i class="fas fa-trash"></i> Batalkan</button>
                                             </form>
                                         @endif
-
+                
                                         @if($isAdminAplikasi)
                                             <form action="{{ route('pengadaan.destroy', $p->permintaan_id) }}" method="POST">
                                                 @csrf
@@ -220,13 +238,13 @@
                                                 <button class="btn btn-sm btn-danger w-100 py-1" style="font-size:0.72rem;" onclick="return confirm('Yakin hapus permanen data pengadaan ini? Tindakan ini tidak bisa dibatalkan.')"><i class="fas fa-trash-alt"></i> Hapus</button>
                                             </form>
                                         @endif
-
+                
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-4 text-muted">Belum ada riwayat pengajuan pengadaan barang.</td>
+                                <td colspan="8" class="text-center py-4 text-muted">Belum ada riwayat pengajuan pengadaan barang.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -262,6 +280,31 @@
                 <div class="mb-3">
                     <label class="form-label fw-bold small">Jumlah Diminta <span class="text-danger">*</span></label>
                     <input type="number" step="0.01" min="0.1" name="jumlah_diminta" class="form-control form-control-sm" required placeholder="Contoh: 100">
+                </div>
+                <!-- INPUT TARGET WAKTU (TAHUN, BULAN, HARI) - BERSIH TANPA DEFAULT 0 -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Target Batas Waktu Pengadaan <span class="text-danger">*</span></label>
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <div class="input-group input-group-sm">
+                                <input type="number" name="target_tahun" class="form-control" min="0" placeholder="0">
+                                <span class="input-group-text">Thn</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="input-group input-group-sm">
+                                <input type="number" name="target_bulan" class="form-control" min="0" max="12" placeholder="0">
+                                <span class="input-group-text">Bln</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="input-group input-group-sm">
+                                <input type="number" name="target_hari" class="form-control" min="0" max="31" placeholder="0">
+                                <span class="input-group-text">Hari</span>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted" style="font-size:0.7rem;">Isi bagian yang diperlukan saja (kosongkan jika tidak ada, misal hanya isi 1 bulan).</small>
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold small">Catatan Kebutuhan / Spesifikasi Barang</label>

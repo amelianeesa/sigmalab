@@ -23,7 +23,7 @@ class ApprovePengadaanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => 'required|in:disetujui,ditolak,diproses,selesai',
+            'status' => 'required|in:menunggu_ga,disetujui,ditolak,diproses,selesai',
             'catatan_approval' => 'nullable|string'
         ];
     }

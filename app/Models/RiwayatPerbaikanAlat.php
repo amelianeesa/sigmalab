@@ -18,6 +18,9 @@ class RiwayatPerbaikanAlat extends BaseModel
 
     protected $table = 'riwayat_perbaikan_alat';
 
+    protected $primaryKey = 'riwayat_perbaikan_id';
+    public $incrementing = true;
+    protected $keyType = 'int';
     protected $fillable = [
         'alat_id',
         'tanggal_rusak',

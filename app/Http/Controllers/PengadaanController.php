@@ -63,6 +63,18 @@ class PengadaanController extends Controller
 
         $validated = $request->validated();
 
+        // 1. Konversi Tahun, Bulan, dan Hari dari input form menjadi Total Hari
+        $tahun = (int) $request->input('target_tahun', 0);
+        $bulan = (int) $request->input('target_bulan', 0);
+        $hari  = (int) $request->input('target_hari', 0);
+
+        $totalHari = ($tahun * 365) + ($bulan * 30) + $hari;
+
+        // Validasi pengaman agar minimal total hari adalah 1
+        if ($totalHari <= 0) {
+            return back()->withErrors(['target_hari' => 'Target batas waktu pengadaan harus diisi minimal 1 hari.'])->withInput();
+        }
+
         $pathFoto = null;
         if ($request->hasFile('foto')) {
             $file = $request->file('foto');
@@ -72,7 +84,6 @@ class PengadaanController extends Controller
         }
 
         // Analis wajib lewat persetujuan Koordinator dulu.
-        // Koordinator (dan GA/Admin) yang mengajukan langsung diteruskan ke GA.
         if (str_contains($roleName, 'analis')) {
             $statusAwal = 'menunggu_koordinator';
             $pesanSukses = 'Pengajuan berhasil dibuat dan menunggu persetujuan Koordinator Lab.';
@@ -84,6 +95,7 @@ class PengadaanController extends Controller
         $pengadaan = PermintaanPengadaan::create([
             'barang_id' => $validated['barang_id'],
             'jumlah_diminta' => $validated['jumlah_diminta'],
+            'target_hari' => $totalHari, // Menyimpan total konversi hari ke database
             'alasan' => $validated['alasan'] ?? null,
             'foto' => $pathFoto,
             'status' => $statusAwal,
@@ -92,10 +104,8 @@ class PengadaanController extends Controller
         ]);
 
         if ($statusAwal === 'menunggu_koordinator') {
-            // Analis mengajukan -> Koordinator Lab diberi tahu untuk menyetujui.
             $this->notifikasiKeKoordinator($pengadaan, 'Pengajuan baru memerlukan persetujuan Anda.');
         } else {
-            // Koordinator/GA mengajukan langsung -> notifikasi pengajuan diteruskan ke GA (to) & Kabid (cc).
             $this->kirimEmailNotifikasiKeGAAndCC($pengadaan);
             $this->notifikasiInAppGAAndKabid($pengadaan, 'Pengajuan pengadaan baru membutuhkan persetujuan GA.');
         }
@@ -145,7 +155,6 @@ class PengadaanController extends Controller
                 $pengadaan->status = 'menunggu_ga';
                 $pengadaan->save();
 
-                // Koordinator menyetujui -> pengajuan diteruskan ke GA (to) & Kabid (cc).
                 $this->kirimEmailNotifikasiKeGAAndCC($pengadaan);
                 $this->notifikasiInAppGAAndKabid($pengadaan, 'Pengajuan telah disetujui Koordinator dan menunggu persetujuan GA.');
             } elseif ($isGaOrAdmin) {
@@ -282,12 +291,6 @@ class PengadaanController extends Controller
         return redirect()->route('pengadaan.index')->with('success', $pesan);
     }
 
-    /**
-     * Aturan #1: notifikasi pengajuan pengadaan ke GA -> to: GA, cc: Kabid Inspeksi & Kabid Dukungan Bisnis.
-     * Sebelumnya nama role di-hardcode ('Kabid Inspeksi') dan tidak cocok dengan nama role asli di
-     * tabel roles ('Kabid Inspeksi dan Solusi Perdagangan'), jadi CC-nya tidak pernah terkirim.
-     * Sekarang pakai Enum PeranPengguna supaya selalu sinkron dengan tabel roles.
-     */
     private function kirimEmailNotifikasiKeGAAndCC($pengadaan)
     {
         $emailGA = User::whereHas('role', function ($q) {
@@ -313,10 +316,6 @@ class PengadaanController extends Controller
         }
     }
 
-    /**
-     * Notifikasi in-app (lonceng) untuk GA + Kabid Inspeksi + Kabid Dukungan Bisnis,
-     * dikirim setiap kali ada pengajuan pengadaan yang siap diproses GA.
-     */
     private function notifikasiInAppGAAndKabid($pengadaan, $pesan)
     {
         $users = User::whereHas('role', function ($q) {
@@ -338,11 +337,6 @@ class PengadaanController extends Controller
         }
     }
 
-    /**
-     * Aturan #2: saat Analis mengajukan pengadaan, Koordinator Lab diberi notifikasi untuk menyetujui.
-     * Nama role sebelumnya campur ('Koordinator Lab', 'Koordinator Laboratorium', 'koordinator_tester')
-     * — hanya salah satu yang benar-benar cocok dengan tabel roles. Disederhanakan pakai Enum.
-     */
     private function notifikasiKeKoordinator($pengadaan, $pesan)
     {
         $koordinators = User::whereHas('role', function ($q) {
