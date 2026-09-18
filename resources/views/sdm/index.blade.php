@@ -785,18 +785,10 @@
                                 name="email"
                                 class="form-control form-control-sm"
                                 required>
-                        </div>
 
-                        <div class="mb-3">
-                            <label class="form-label small fw-semibold">
-                                Password
-                            </label>
-
-                            <input type="password"
-                                name="password"
-                                class="form-control form-control-sm"
-                                required
-                                minlength="6">
+                            <div class="form-text" style="font-size: 0.75rem;">
+                                Password sementara akan otomatis dibuat sistem dan dikirim ke email ini.
+                            </div>
                         </div>
 
                         <div class="mb-2">
