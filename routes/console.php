@@ -7,7 +7,7 @@ use App\Models\RiwayatKalibrasi;
 use App\Models\RiwayatPerbaikanAlat;
 use App\Models\User;
 use App\Mail\KalibrasiAkanHabis;
-use App\Mail\LaporanKerusakanMail; // Pastikan Mailable ini di-import
+use App\Mail\LaporanKerusakanMail; 
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -102,7 +102,6 @@ Artisan::command('kalibrasi:cek-kadaluwarsa', function () {
     $this->info('Pengecekan kalibrasi berkala H-6 bulan selesai');
 })->description('Mengecek kalibrasi H-6 bulan dengan format TO/CC khusus kalibrasi');
 
-// perbaikan alat
 Artisan::command('perbaikan:cek-status', function () {
     $dataPerbaikan = RiwayatPerbaikanAlat::with('alat')
         ->whereIn('status_perbaikan', ['Belum Diperbaiki', 'Dalam Perbaikan'])
@@ -153,7 +152,6 @@ Artisan::command('perbaikan:cek-status', function () {
                             $primaryGaEmail = $ga->email;
                             $allCcEmails = $koordinatorEmails;
                             
-                            // Menggunakan Mailable View HTML yang sama
                             Mail::to($primaryGaEmail)->cc($allCcEmails)->send(new LaporanKerusakanMail($item));
                         } else {
                             Mail::to($ga->email)->send(new LaporanKerusakanMail($item));
@@ -192,3 +190,4 @@ Schedule::command('sertifikasi:cek-kadaluwarsa')->dailyAt('08:00');
 Schedule::command('kalibrasi:cek-kadaluwarsa')->dailyAt('08:00');
 Schedule::command('perbaikan:cek-status')->dailyAt('08:05');
 Schedule::command('barang:cek-stok')->dailyAt('08:00');
+Schedule::command('pengadaan:cek-status')->dailyAt('08:00');

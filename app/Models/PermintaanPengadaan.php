@@ -28,6 +28,7 @@ class PermintaanPengadaan extends Model
         'nama_penerima',
         'foto_diterima',
         'waktu_diterima',
+        'catatan_po'
     ];
 
     protected $casts = [
@@ -49,5 +50,24 @@ class PermintaanPengadaan extends Model
     public function penyetuju()
     {
         return $this->belongsTo(User::class, 'disetujui_oleh', 'users_id');
+    }
+    public function getFormatTargetWaktuAttribute()
+    {
+        $totalHari = $this->target_hari;
+        if (!$totalHari || $totalHari <= 0) {
+            return '-';
+        }
+    
+        $tahun = floor($totalHari / 365);
+        $sisa = $totalHari % 365;
+        $bulan = floor($sisa / 30);
+        $hari = $sisa % 30;
+    
+        $str = [];
+        if ($tahun > 0) $str[] = "{$tahun} thn";
+        if ($bulan > 0) $str[] = "{$bulan} bln";
+        if ($hari > 0 || empty($str)) $str[] = "{$hari} hari";
+    
+        return implode(' ', $str);
     }
 }

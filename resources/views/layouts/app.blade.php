@@ -16,7 +16,7 @@
 
     <style>
         :root {
-            --sidebar-width: {{ auth()->check() ? '260px' : '0' }};
+            --sidebar-width: {{ auth()->check() ? '220px' : '0' }};
             --sdm-50: #eef0f1;
             --sdm-500: #1d4c7a;
             --sdm-600: #1d4c7a;
@@ -28,7 +28,7 @@
         @endphp
         
         #sidebar { 
-            min-width: 260px; max-width: 260px; 
+            min-width: 240px; max-width: 240px; 
             height: 100vh; position: fixed; top: 0; left: 0; 
             background-color: #ffffff; color: #334155; z-index: 1040;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -38,25 +38,25 @@
 
         #content { 
             transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-left: {{ $useSidebar ? '260px' : '0' }}; 
-            padding: 24px; 
+            margin-left: {{ $useSidebar ? '240px' : '' }}; 
+            padding: 16px 18px; 
             padding-top: 20px; 
             min-height: 100vh; 
         }
 
         .top-navbar {
             background: var(--sdm-600);
-            padding: 12px 28px;
+            padding: 9px 26px;
             border-bottom: 1px solid var(--sdm-700);
             transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-left: {{ $useSidebar ? '260px' : '0' }};
+            margin-left: {{ $useSidebar ? '220px' : '0' }};
             display: flex;
             justify-content: space-between;
             align-items: center;
             position: sticky;
             top: 0;
             z-index: 1020;
-            min-height: 64px;
+            min-height: 60px;
             color: #fff;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
@@ -78,18 +78,18 @@
         #sidebar-overlay { display: none; position: fixed; width: 100vw; height: 100vh; background: rgba(15,23,42,0.4); z-index: 1030; top: 0; left: 0; cursor: pointer; transition: opacity .2s ease; backdrop-filter: blur(2px); }
         
         #sidebar .sidebar-header { 
-            padding: 22px 20px; 
+            padding: 16px 16px; 
             border-bottom: 1px solid #f1f5f9; 
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
         #sidebar .sidebar-header:hover { background-color: #f8fafc; }
 
-        #sidebar ul.components { padding: 20px 0; }
+        #sidebar ul.components { padding: 16px 0; }
         
         #sidebar ul li a { 
-            padding: 12px 20px 12px 24px; 
-            font-size: 0.92rem; 
+            padding: 10px 14px 10px 16px; 
+            font-size: 0.85rem; 
             font-weight: 500;
             display: flex; align-items: center; gap: 12px;
             color: #64748b; 
@@ -114,7 +114,12 @@
             font-weight: 600; 
         }
         
-        #sidebar ul li a i { font-size: 1.1rem; opacity: 0.75; margin-right: 10px; }
+        #sidebar ul li a i { 
+            font-size: 0.82rem; 
+            opacity: 0.75; 
+            width: 20px;
+            margin-right: 0px; 
+        }
         #sidebar ul li a:hover i, #sidebar ul li.active > a i { opacity: 1; color: #2563eb; }
 
         @media (min-width: 992px) {
@@ -137,10 +142,11 @@
 
         /* ===== Dropdown Notifikasi ===== */
         #notifDropdown {
-            width: 340px;
+            width: 320px;
             padding: 0;
             border: none;
-            border-radius: 12px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
             overflow: hidden;
         }
         #notifDropdown .notif-header {
@@ -235,14 +241,13 @@
                         <small class="text-muted fw-bold" style="font-size: 0.7rem;">PT Sucofindo - Cilacap</small>
                     </div>
                 </div>
-                <i class="fas fa-chevron-left text-muted opacity-50"></i>
+                {{-- <i class="fas fa-chevron-left text-muted opacity-50"></i> --}}
             </div>
 
             <ul class="list-unstyled components" id="sidebar-accordion" style="overflow-y: auto; max-height: calc(100vh - 80px);">
                 <li class="{{ request()->is('/') || request()->is('dashboard') ? 'active' : '' }}">
                     <a href="{{ route('dashboard') ?? url('/') }}"><i class="fas fa-home"></i> Dashboard</a>
                 </li>
-
 
 
                 {{-- 1. Peralatan & Monitoring --}}
@@ -255,7 +260,7 @@
                        aria-expanded="{{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') || request()->routeIs('evaluasi-kalibrasi.*') ? 'true' : 'false' }}" 
                        aria-controls="menuManajemenPeralatan">
                         <span><i class="fas fa-tools me-2"></i> Peralatan & Monitoring</span>
-                        <i class="fas fa-chevron-down small"></i>
+                        <i class="fas fa-chevron-down small" style="font-size: 0.7rem;"></i>
                     </a>
                 
                     <div class="collapse {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') || request()->routeIs('evaluasi-kalibrasi.*') ? 'show' : '' }}" id="menuManajemenPeralatan">
@@ -319,27 +324,28 @@
     @endauth
 
     {{-- TOP NAVBAR UTAMA --}}
-    <div class="top-navbar shadow-sm">
-        <div class="d-flex align-items-center">
+    <div class="top-navbar shadow-sm" style="padding-left: 25px; padding-right: 20px; min-height: 74px; display: flex; align-items: center; justify-content: space-between;">
+        <div class="d-flex align-items-center gap-2">
             @auth
-                <button class="btn text-white me-3 d-flex align-items-center justify-content-center p-1" onclick="toggleSidebar()" style="border:1px solid rgba(255,255,255,0.3); border-radius:6px; background:rgba(0,0,0,0.1); width:36px; height:36px;">
+                <button class="btn text-white d-flex align-items-center justify-content-center p-1" onclick="toggleSidebar()" style="border:1px solid rgba(255,255,255,0.3); border-radius:6px; background:rgba(0,0,0,0.1); width:34px; height:34px;">
                     <i class="fas fa-bars"></i>
                 </button>
             @endauth
-            <div>
-                <span class="text-uppercase text-secondary fs-7 fw-bold d-block mb-1" style="font-size: 18px; letter-spacing: 1px;">SIGMA-LAB</span>
-                <div class="mb-0 fw-bold d-none d-sm-block">Sistem Integrated General Management Analytics of Lab</div>
+            <div class="d-flex flex-column justify-content-center" style="gap: 0px;">
+                <span class="fw-bold text-white text-uppercase" style="font-size: 1.10rem; letter-spacing: 0.5px; line-height: 1.1;">SIGMA-LAB</span>
+                <span class="text-white-50 d-none d-sm-block" style="font-size: 0.80rem; line-height: 1;">Sistem Integrated General Management Analytics of Lab</span>
             </div>
         </div>
 
-        <div class="d-flex align-items-center">
+        <!-- Sisi Kanan: Notifikasi & Profil User -->
+        <div class="d-flex align-items-center gap-3">
             @auth
             {{-- Dropdown Notifikasi --}}
-            <div class="dropdown me-3">
-                <a href="#" class="btn btn-warning position-relative rounded-circle p-2 d-flex align-items-center justify-content-center dropdown-toggle" style="width: 38px; height: 38px;" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-bell text-white"></i>
+            <div class="dropdown">
+                <a href="#" class="btn btn-warning position-relative rounded-circle p-2 d-flex align-items-center justify-content-center dropdown-toggle" style="width: 36px; height: 36px;" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-bell text-white" style="font-size: 0.85rem;"></i>
                     @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light">
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.6rem;">
                             {{ $unreadNotifCount > 99 ? '99+' : $unreadNotifCount }}
                             <span class="visually-hidden">unread messages</span>
                         </span>
@@ -361,14 +367,14 @@
                             @foreach($recentNotifs as $notif)
                                 @php
                                     $isDitolak = str_contains(strtolower($notif->pesan), 'ditolak');
-                                    $iconBg = match($notif->jenis_notifikasi) {
+                                    $iconBg = match($notif->jenis_notifikasi ?? '') {
                                         'qc' => 'bg-primary',
                                         'kalibrasi' => 'bg-warning',
                                         'stok' => 'bg-success',
                                         'sertifikasi' => 'bg-danger',
                                         default => 'bg-secondary',
                                     };
-                                    $icon = match($notif->jenis_notifikasi) {
+                                    $icon = match($notif->jenis_notifikasi ?? '') {
                                         'qc' => 'fa-flask',
                                         'kalibrasi' => 'fa-tools',
                                         'stok' => 'fa-box',
@@ -401,12 +407,13 @@
                 </div>
             </div>
 
+            {{-- Dropdown Profil --}}
             <div class="dropdown">
-                <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown" title="Profil" style="border-color: rgba(255,255,255,0.2);">
-                    <i class="bi bi-person-circle me-1 text-white"></i> 
-                    <div class="d-none d-sm-flex flex-column text-start ms-1 me-1 text-white" style="line-height: 1.2;">
-                        <span class="fw-bold" style="font-size: 0.9rem;">{{ Auth::user()->personil->nama_personil ?? Auth::user()->username ?? 'Pengguna' }}</span>
-                        <small style="font-size: 0.75rem; color: rgba(255,255,255,0.85);">{{ Auth::user()->role->nama_role ?? '-' }}</small>
+                <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center py-1 px-2" type="button" data-bs-toggle="dropdown" title="Profil" style="border-color: rgba(255,255,255,0.2);">
+                    <i class="bi bi-person-circle me-1 text-white" style="font-size: 1rem;"></i> 
+                    <div class="d-none d-sm-flex flex-column text-start ms-1 me-1 text-white" style="line-height: 1.1;">
+                        <span class="fw-bold" style="font-size: 0.85rem;">{{ Auth::user()->personil->nama_personil ?? Auth::user()->username ?? 'Pengguna' }}</span>
+                        <small style="font-size: 0.68rem; color: rgba(255,255,255,0.85);">{{ Auth::user()->role->nama_role ?? '-' }}</small>
                     </div>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
@@ -480,14 +487,12 @@
     </script>
 
     <script>
-        $(document).ready(function() {
-            $('.select2-alat, #selectAlat').select2({
-                theme: 'bootstrap-5',
-                width: '100%',
-                placeholder: '-- Pilih Alat --',
-                allowClear: true
-            });
-        });
+$('.select2-alat, #selectAlat, #selectTracking').select2({
+    theme: 'bootstrap-5',
+    width: 'auto', // Mengikuti ukuran w-auto pada tracking
+    placeholder: '-- Pilih Barang / Alat --',
+    allowClear: true
+});;
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     @stack('scripts')

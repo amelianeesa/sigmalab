@@ -47,4 +47,17 @@ class NotifikasiController extends Controller
             
         return response()->json(['count' => $count]);
     }
+    public function klikNotifikasi($id)
+    {
+        $notif = Notifikasi::query()
+            ->where('notifikasi_id', $id)
+            ->where('users_id', Auth::id())
+            ->firstOrFail();
+        
+        if (!$notif->is_read) {
+            $notif->update(['is_read' => true]);
+        }
+
+        return redirect($notif->url ?? route('notifikasi.index'));
+    }
 }

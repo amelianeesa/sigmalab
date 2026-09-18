@@ -11,7 +11,7 @@ class Notifikasi extends BaseModel
         'users_id',
         'judul',
         'pesan',
-        'link',
+        'url',
         'is_read',
         'tipe'
     ];

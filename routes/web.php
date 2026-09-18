@@ -107,6 +107,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('pengadaan', PengadaanController::class);
     Route::post('/pengadaan/{id}/approve', [PengadaanController::class, 'approve'])->name('pengadaan.approve');
     Route::post('/pengadaan/{id}/terima', [PengadaanController::class, 'konfirmasiTerima'])->name('pengadaan.konfirmasiTerima');
+    Route::put('/pengadaan/{id}/update-progres', [PengadaanController::class, 'updateProgres'])->name('pengadaan.update-progres');
+    Route::put('/pengadaan/{id}/batal-progres', [PengadaanController::class, 'batalProgres'])->name('pengadaan.batal-progres');
 
     // Monitoring Ruangan
     Route::prefix('inventori')->name('inventori.')->group(function () {
@@ -188,6 +190,7 @@ Route::middleware(['auth'])->group(function () {
     // Notifikasi
     Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
         Route::get('/', [NotifikasiController::class, 'index'])->name('index');
+        Route::get('/{id}/klik', [NotifikasiController::class, 'klikNotifikasi'])->name('klik');
         Route::post('/{id}/read', [NotifikasiController::class, 'markAsRead'])->name('read');
         Route::post('/read-all', [NotifikasiController::class, 'markAllAsRead'])->name('read-all');
         Route::get('/unread-count', [NotifikasiController::class, 'getUnreadCount'])->name('unread-count');

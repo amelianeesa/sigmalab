@@ -63,14 +63,12 @@ class PengadaanController extends Controller
 
         $validated = $request->validated();
 
-        // 1. Konversi Tahun, Bulan, dan Hari dari input form menjadi Total Hari
         $tahun = (int) $request->input('target_tahun', 0);
         $bulan = (int) $request->input('target_bulan', 0);
         $hari  = (int) $request->input('target_hari', 0);
 
         $totalHari = ($tahun * 365) + ($bulan * 30) + $hari;
 
-        // Validasi pengaman agar minimal total hari adalah 1
         if ($totalHari <= 0) {
             return back()->withErrors(['target_hari' => 'Target batas waktu pengadaan harus diisi minimal 1 hari.'])->withInput();
         }
@@ -83,7 +81,6 @@ class PengadaanController extends Controller
             $pathFoto = 'uploads/pengadaan/' . $filename;
         }
 
-        // Analis wajib lewat persetujuan Koordinator dulu.
         if (str_contains($roleName, 'analis')) {
             $statusAwal = 'menunggu_koordinator';
             $pesanSukses = 'Pengajuan berhasil dibuat dan menunggu persetujuan Koordinator Lab.';
@@ -95,7 +92,7 @@ class PengadaanController extends Controller
         $pengadaan = PermintaanPengadaan::create([
             'barang_id' => $validated['barang_id'],
             'jumlah_diminta' => $validated['jumlah_diminta'],
-            'target_hari' => $totalHari, // Menyimpan total konversi hari ke database
+            'target_hari' => $totalHari,
             'alasan' => $validated['alasan'] ?? null,
             'foto' => $pathFoto,
             'status' => $statusAwal,
@@ -123,20 +120,21 @@ class PengadaanController extends Controller
         $isKoor = str_contains($roleName, 'koor');
         $isGaOrAdmin = str_contains($roleName, 'ga') || str_contains($roleName, 'admin');
 
-        DB::transaction(function () use ($validated, $pengadaan, $roleName, $statusBaru, $isKoor, $isGaOrAdmin) {
+        if ($isKoor && !in_array($pengadaan->status, ['diajukan', 'menunggu_koordinator'])) {
+            return redirect()->back()->with('error', 'Pengadaan ini sudah melewati tahap verifikasi Koordinator.');
+        }
+
+        if ($isGaOrAdmin && !in_array($pengadaan->status, ['menunggu_ga', 'disetujui', 'diproses_po', 'pembelian'])) {
+            return redirect()->back()->with('error', 'Pengadaan ini belum sampai di tahap GA.');
+        }
+
+        DB::transaction(function () use ($request, $validated, $pengadaan, $roleName, $statusBaru, $isKoor, $isGaOrAdmin) {
 
             $labelPeranPenolak = $isKoor ? 'Ditolak oleh: Koordinator Lab' : 'Ditolak oleh: GA Officer';
             $catatanAsli = $validated['catatan_approval'] ?? 'Tidak ada alasan spesifik.';
             $catatanLengkapPenolakan = "{$labelPeranPenolak}. Alasan: {$catatanAsli}";
 
             if ($statusBaru === 'ditolak') {
-                if ($isKoor && $pengadaan->status !== 'menunggu_koordinator') {
-                    throw new \Exception('Koordinator hanya bisa menolak pengajuan yang berstatus menunggu koordinator.');
-                }
-                if ($isGaOrAdmin && $pengadaan->status !== 'menunggu_ga') {
-                    throw new \Exception('GA hanya bisa menolak pengajuan yang berstatus menunggu GA.');
-                }
-
                 $pengadaan->status = 'ditolak';
                 $pengadaan->disetujui_oleh = Auth::id();
                 $pengadaan->tanggal_keputusan = Carbon::now()->toDateString();
@@ -148,35 +146,38 @@ class PengadaanController extends Controller
             }
 
             if ($isKoor) {
-                if ($pengadaan->status !== 'menunggu_koordinator') {
-                    throw new \Exception('Pengadaan ini tidak dalam posisi menunggu persetujuan Koordinator.');
-                }
-
                 $pengadaan->status = 'menunggu_ga';
                 $pengadaan->save();
 
                 $this->kirimEmailNotifikasiKeGAAndCC($pengadaan);
                 $this->notifikasiInAppGAAndKabid($pengadaan, 'Pengajuan telah disetujui Koordinator dan menunggu persetujuan GA.');
-            } elseif ($isGaOrAdmin) {
 
-                $transisiValid = [
-                    'menunggu_ga' => ['disetujui'],
-                    'disetujui'   => ['diproses'],
-                ];
-
-                if (
-                    !isset($transisiValid[$pengadaan->status]) ||
-                    !in_array($statusBaru, $transisiValid[$pengadaan->status])
-                ) {
-                    throw new \Exception("Transisi status dari '{$pengadaan->status}' ke '{$statusBaru}' tidak diizinkan.");
-                }
-
-                $pengadaan->status = $statusBaru;
+            } 
+            elseif ($isGaOrAdmin) {
                 $pengadaan->disetujui_oleh = Auth::id();
                 $pengadaan->tanggal_keputusan = Carbon::now()->toDateString();
-                $pengadaan->catatan_approval = $validated['catatan_approval'] ?? $pengadaan->catatan_approval;
+                
+                if ($statusBaru === 'diproses') {
+                    $metode = $request->input('metode_proses', 'PO'); 
+                    
+                    if ($metode === 'Pembelian') {
+                        $pengadaan->status = 'pembelian';
+                    } else {
+                        $pengadaan->status = 'diproses_po';
+                    }
+                    
+                    $pengadaan->catatan_po = $request->input('catatan_po');
+                } else {
+                    $pengadaan->status = $statusBaru;
+                }
+            
+                if (isset($validated['catatan_approval'])) {
+                    $pengadaan->catatan_approval = $validated['catatan_approval'];
+                }
+            
                 $pengadaan->save();
-            } else {
+            }
+             else {
                 throw new \Exception('Anda tidak memiliki izin untuk memproses persetujuan ini.');
             }
         });
@@ -375,5 +376,72 @@ class PengadaanController extends Controller
                 Mail::to($koor->email)->send(new \App\Mail\PenolakanPengadaanMail($pengadaan, $pesanPenolakan));
             }
         }
+    }
+    private function formatTargetWaktu($totalHari)
+    {
+        if (!$totalHari || $totalHari <= 0) {
+            return '-';
+        }
+
+        $tahun = floor($totalHari / 365);
+        $sisaHariSetelahTahun = $totalHari % 365;
+
+        $bulan = floor($sisaHariSetelahTahun / 30);
+        $hari  = $sisaHariSetelahTahun % 30;
+
+        $hasil = [];
+        if ($tahun > 0) {
+            $hasil[] = "{$tahun} thn";
+        }
+        if ($bulan > 0) {
+            $hasil[] = "{$bulan} bln";
+        }
+        if ($hari > 0 || empty($hasil)) {
+            $hasil[] = "{$hari} hari";
+        }
+
+        return implode(' ', $hasil);
+    }
+
+    public function prosesPo(Request $request, $id)
+    {
+        $request->validate([
+            'catatan_po' => 'nullable|string|max:255'
+        ]);
+
+        $pengadaan = PermintaanPengadaan::findOrFail($id);
+        $pengadaan->status = 'diproses';
+        $pengadaan->catatan_po = $request->catatan_po;
+        $pengadaan->save();
+
+        return redirect()->back()->with('success', 'Pengadaan berhasil diproses ke tahap PO');
+    }
+
+    public function updateProgres(Request $request, $id)
+    {
+        $request->validate([
+            'catatan_po' => 'required|string',
+        ]);
+    
+        $pengadaan = PermintaanPengadaan::findOrFail($id);
+        
+        $pengadaan->catatan_po = $request->catatan_po;
+        $pengadaan->save();
+    
+        return redirect()->back()->with('success', 'Catatan progres berhasil diperbarui!');
+    }
+    public function batalProgres(Request $request, $id)
+    {
+        $request->validate([
+            'alasan_batal' => 'required|string|max:255',
+        ]);
+    
+        $pengadaan = PermintaanPengadaan::findOrFail($id);
+        
+        $pengadaan->status = 'ditolak';
+        $pengadaan->catatan_approval = 'Dibatalkan oleh: GA. Alasan: ' . $request->alasan_batal;
+        $pengadaan->save();
+    
+        return redirect()->back()->with('success', 'Proses pengadaan berhasil dibatalkan.');
     }
 }
