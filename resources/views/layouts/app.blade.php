@@ -489,7 +489,7 @@
     <script>
 $('.select2-alat, #selectAlat, #selectTracking').select2({
     theme: 'bootstrap-5',
-    width: 'auto', // Mengikuti ukuran w-auto pada tracking
+    width: 'auto',
     placeholder: '-- Pilih Barang / Alat --',
     allowClear: true
 });;

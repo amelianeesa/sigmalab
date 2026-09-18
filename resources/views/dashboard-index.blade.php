@@ -207,201 +207,387 @@
         </div>
     </div>
 
-    <!-- TRACKING STATUS PENGADAAN -->
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card shadow-sm border-0 tracking-card">
-                <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <h5 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem;">
-                        <i class="fas fa-route text-primary me-2"></i>Tracking Status Pengadaan Barang
-                    </h5>
-                    
-                    <select id="selectTracking" class="form-select form-select-sm w-auto">
-                        <option value="">-- Pilih Barang / Alat --</option>
-                        @foreach($pengadaanAktif as $p)
-                            <option value="track-{{ $p->permintaan_id }}" {{ $loop->first ? 'selected' : '' }}>
-                                {{ $p->barang->nama_barang ?? 'Barang' }} ({{ $p->barang->kode_barang ?? 'Tanpa Kode' }})
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+<!-- TRACKING STATUS PENGADAAN -->
+{{-- <div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 tracking-card">
+            <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h5 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem;">
+                    <i class="fas fa-route text-primary me-2"></i>Tracking Status Pengadaan Barang
+                </h5>
                 
-                <div class="card-body p-2.5">
-                    @forelse($pengadaanAktif as $p)
-                        <div id="track-{{ $p->permintaan_id }}" class="tracking-item" style="display: none;">
-                            <!-- Info Singkat Barang (Dirapatkan ke Samping) -->
-                            <div class="row mb-2">
-                                <div class="col-md-12 border-bottom pb-2 d-flex justify-content-between align-items-center flex-wrap gap-3">
-                                    <div>
-                                        <h6 class="fw-bold mb-1 text-primary" style="font-size: 0.9rem;">
-                                            {{ $p->barang->nama_barang ?? '-' }} 
-                                            <span class="text-muted fw-normal ms-1" style="font-size: 0.75rem;"><b>[{{ $p->barang->kode_barang ?? '-' }}]</b></span>
-                                        </h6>
-                                        
-                                        <div class="d-flex flex-wrap gap-3 text-muted" style="font-size: 0.78rem;">
-                                            <span>Jumlah: <b class="text-dark">{{ (float) $p->jumlah_diminta }} {{ $p->barang->satuan ?? '' }}</b></span>
-                                            
-                                            @php
-                                                $isTerlambat = false;
-                                                if ($p->status != 'selesai') {
-                                                    $batasWaktu = \Carbon\Carbon::parse($p->created_at)->addDays(30); 
-                                                    if (\Carbon\Carbon::now()->isAfter($batasWaktu)) {
-                                                        $isTerlambat = true;
-                                                    }
-                                                }
-                                            @endphp
-
-                                            <span>Target Waktu: <b class="{{ $isTerlambat ? 'text-danger' : 'text-dark' }}">{{ $p->format_target_waktu }}</b></span>
-                                            
-                                            @if($isTerlambat)
-                                                <span class="badge bg-danger animate-pulse" style="font-size: 0.65rem;">
-                                                    <i class="fas fa-exclamation-triangle me-1"></i> Terlambat / Overdue
-                                                </span>
-                                            @endif
-                                        </div>
-                                    </div>
+                <select id="selectTracking" class="form-select form-select-sm w-auto select2-alat">
+                    <option value="">-- Pilih Barang/Bahan --</option>
+                    @foreach($pengadaanAktif as $p)
+                        <option value="track-{{ $p->permintaan_id }}" {{ $loop->first ? 'selected' : '' }}>
+                            {{ $p->barang->nama_barang ?? 'Barang' }} ({{ $p->barang->kode_barang ?? 'Tanpa Kode' }})
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <div class="card-body p-3">
+                @forelse($pengadaanAktif as $p)
+                    <div id="track-{{ $p->permintaan_id }}" class="tracking-item" style="display: none;">
+                        @php
+                           $isTerlambat = false;
+                           if ($p->status != 'selesai') {
+                               $batasWaktu = \Carbon\Carbon::parse($p->created_at)->addDays(30); 
+                               if (\Carbon\Carbon::now()->isAfter($batasWaktu)) {
+                                   $isTerlambat = true;
+                               }
+                           }
+                       @endphp
+                       <div id="track-{{ $p->permintaan_id }}" class="tracking-item" style="display: none;">
+                        <!-- Info Singkat Barang -->
+                        <div class="row mb-3">
+                            <div class="col-md-12 border-bottom pb-2">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h6 class="fw-bold mb-0 text-primary" style="font-size: 0.95rem;">
+                                        {{ $p->barang->nama_barang ?? '-' }} ({{ $p->barang->kode_barang ?? 'Tanpa Kode' }})
+                                    </h6>
+                                    @if($isTerlambat)
+                                        <span class="badge bg-danger animate-pulse" style="font-size: 0.68rem;">
+                                            <i class="fas fa-exclamation-triangle me-1"></i> Terlambat
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="text-muted" style="font-size: 0.81rem;">
+                                    <span>Jumlah: <b class="text-dark">{{ (float) $p->jumlah_diminta }} {{ $p->barang->satuan ?? '' }}</b></span><br>
+                                    <span>Target Waktu Pengadaan: <b class="text-dark">{{ $p->format_target_waktu ?? '-' }}</b></span><br>
                                 </div>
                             </div>
-                            
-                            <!-- Progress Bar & Steps yang Lebih Ramping -->
-                            <div class="row align-items-center px-2">
-                                <div class="col-12">
-                                    <div class="d-flex justify-content-between text-center position-relative px-3 py-1">
-                                        <!-- Garis Background Progress -->
-                                        <div class="progress position-absolute w-100" style="height: 3px; top: 14px; z-index: 1; left: 0;">
-                                            <div class="progress-bar bg-success" role="progressbar" style="width: 
-                                                @if($p->status == 'menunggu_koordinator' || $p->status == 'diajukan') 12% 
-                                                @elseif($p->status == 'menunggu_ga') 37% 
-                                                @elseif($p->status == 'disetujui') 62% 
-                                                @elseif(in_array($p->status, ['diproses', 'diproses_po', 'pembelian'])) 87% 
-                                                @elseif($p->status == 'selesai') 100% 
-                                                @else 0% @endif">
-                                            </div>
+                        </div>
+                        
+                        <!-- Progress Bar & Steps -->
+                        <div class="row align-items-center px-2">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between text-center position-relative px-3 py-1">
+                                    <!-- Garis Background Progress -->
+                                    <div class="progress position-absolute w-100" style="height: 3px; top: 14px; z-index: 1; left: 0;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: 
+                                            @if($p->status == 'menunggu_koordinator' || $p->status == 'diajukan') 12% 
+                                            @elseif($p->status == 'menunggu_ga') 37% 
+                                            @elseif($p->status == 'disetujui') 62% 
+                                            @elseif(in_array($p->status, ['diproses', 'diproses_po', 'pembelian'])) 87% 
+                                            @elseif($p->status == 'selesai') 100% 
+                                            @else 0% @endif">
                                         </div>
+                                    </div>
     
-                                        <!-- STEP 1 -->
-                                        <div class="position-relative text-center" style="z-index: 2; flex: 1;">
-                                            <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm bg-success text-white" style="width: 30px; height: 30px; font-size: 0.7rem;">
-                                                <i class="fas fa-file-alt"></i>
-                                            </div>
-                                            <div class="mt-1">
-                                                <span class="fw-bold d-block text-success" style="font-size:0.68rem;">1. Diajukan</span>
-                                                <small class="text-muted d-block" style="font-size:0.6rem;">
-                                                    Oleh: {{ $p->pemohon ? $p->pemohon->username : '-' }}<br>
-                                                    {{ \Carbon\Carbon::parse($p->created_at)->format('d M Y') }}
-                                                </small>
-                                            </div>
+                                    <!-- STEP 1 -->
+                                    <div class="position-relative text-center" style="z-index: 2; flex: 1;">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm bg-success text-white" style="width: 30px; height: 30px; font-size: 0.7rem;">
+                                            <i class="fas fa-file-alt"></i>
                                         </div>
-    
-                                        <!-- STEP 2 -->
-                                        <div class="position-relative text-center" style="z-index: 2; flex: 1;">
-                                            <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ in_array($p->status, ['menunggu_ga', 'disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'bg-success text-white' : 'bg-secondary text-white' }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
-                                                <i class="fas fa-user-check"></i>
-                                            </div>
-                                            <div class="mt-1">
-                                                <span class="fw-bold d-block" style="font-size:0.68rem;">2. Koordinator</span>
-                                                <small class="text-muted d-block" style="font-size:0.6rem;">
-                                                    @if(in_array($p->status, ['menunggu_ga', 'disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']))
-                                                        <span class="text-success fw-semibold">Disetujui</span>
-                                                    @else
-                                                        <span class="text-warning fw-semibold">Menunggu</span>
-                                                    @endif
-                                                </small>
-                                            </div>
+                                        <div class="mt-1">
+                                            <span class="fw-bold d-block text-success" style="font-size:0.68rem;">1. Diajukan</span>
+                                            <small class="text-muted d-block" style="font-size:0.6rem;">
+                                                Oleh: {{ $p->pemohon ? $p->pemohon->username : '-' }}<br>
+                                                {{ \Carbon\Carbon::parse($p->created_at)->format('d M Y, H:i') }}
+                                            </small>
                                         </div>
+                                    </div>
     
-                                        <!-- STEP 3 -->
-                                        <div class="position-relative text-center" style="z-index: 2; flex: 1;">
-                                            <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ in_array($p->status, ['disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'bg-success text-white' : 'bg-secondary text-white' }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
-                                                <i class="fas fa-building"></i>
-                                            </div>
-                                            <div class="mt-1">
-                                                <span class="fw-bold d-block" style="font-size:0.68rem;">3. GA Approval</span>
-                                                <small class="text-muted d-block" style="font-size:0.6rem;">
-                                                    @if(in_array($p->status, ['disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']))
-                                                        <span class="text-success fw-semibold">Disetujui</span>
-                                                    @else
-                                                        Menunggu
-                                                    @endif
-                                                </small>
-                                            </div>
+                                    <!-- STEP 2 -->
+                                    <div class="position-relative text-center" style="z-index: 2; flex: 1;">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ in_array($p->status, ['menunggu_ga', 'disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'bg-success text-white' : 'bg-secondary text-white' }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
+                                            <i class="fas fa-user-check"></i>
                                         </div>
-    
-                                        <!-- STEP 4 -->
-                                        <div class="position-relative text-center" style="z-index: 2; flex: 1;">
-                                            <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ in_array($p->status, ['diproses', 'diproses_po', 'pembelian', 'selesai']) ? ($isTerlambat && $p->status != 'selesai' ? 'bg-danger text-white' : 'bg-success text-white') : 'bg-secondary text-white' }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
-                                                <i class="fas fa-box-open"></i>
-                                            </div>
-                                            <div class="mt-1">
-                                                <span class="fw-bold d-block" style="font-size:0.68rem;">4. Diproses</span>
-                                                <small class="text-muted d-block" style="font-size:0.6rem;">
-                                                    @if(in_array($p->status, ['diproses', 'diproses_po', 'pembelian', 'selesai']))
-                                                        <span class="fw-semibold">Sedang Diproses</span>
-                                                    @else
-                                                        Belum
-                                                    @endif
-                                                </small>
-                                            </div>
+                                        <div class="mt-1">
+                                            <span class="fw-bold d-block {{ in_array($p->status, ['menunggu_ga', 'disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'text-success' : '' }}" style="font-size:0.68rem;">2. Koordinator</span>
+                                            <small class="text-muted d-block" style="font-size:0.6rem;">
+                                                @if(in_array($p->status, ['menunggu_ga', 'disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']))
+                                                    <span class="text-success fw-semibold">Disetujui</span>
+                                                @else
+                                                    <span class="text-warning fw-semibold">Menunggu</span>
+                                                @endif
+                                                <br>{{ \Carbon\Carbon::parse($p->updated_at)->format('d M Y, H:i') }}
+                                            </small>
                                         </div>
+                                    </div>
     
-                                        <!-- STEP 5 -->
-                                        <div class="position-relative text-center" style="z-index: 2; flex: 1;">
-                                            <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ $p->status == 'selesai' ? 'bg-success text-white' : 'bg-secondary text-white' }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
-                                                <i class="fas fa-check-circle"></i>
-                                            </div>
-                                            <div class="mt-1">
-                                                <span class="fw-bold d-block" style="font-size:0.68rem;">5. Diterima</span>
-                                                <small class="text-muted d-block" style="font-size:0.6rem;">
-                                                    @if($p->status == 'selesai')
-                                                        Selesai
-                                                    @else
-                                                        Menunggu Tiba
-                                                    @endif
-                                                </small>
-                                            </div>
+                                    <!-- STEP 3 -->
+                                    <div class="position-relative text-center" style="z-index: 2; flex: 1;">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ in_array($p->status, ['disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'bg-success text-white' : 'bg-secondary text-white' }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
+                                            <i class="fas fa-building"></i>
+                                        </div>
+                                        <div class="mt-1">
+                                            <span class="fw-bold d-block {{ in_array($p->status, ['disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'text-success' : '' }}" style="font-size:0.68rem;">3. GA Approval</span>
+                                            <small class="text-muted d-block" style="font-size:0.6rem;">
+                                                @if(in_array($p->status, ['disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']))
+                                                    <span class="text-success fw-semibold">Disetujui</span>
+                                                @else
+                                                    Menunggu
+                                                @endif
+                                                <br>{{ \Carbon\Carbon::parse($p->updated_at)->format('d M Y, H:i') }}
+                                            </small>
+                                        </div>
+                                    </div>
+    
+                                    <!-- STEP 4 -->
+                                    <div class="position-relative text-center" style="z-index: 2; flex: 1;">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ in_array($p->status, ['diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'bg-success text-white' : 'bg-secondary text-white' }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
+                                            <i class="fas fa-box-open"></i>
+                                        </div>
+                                        <div class="mt-1">
+                                            <span class="fw-bold d-block {{ in_array($p->status, ['diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'text-success' : '' }}" style="font-size:0.68rem;">4. Diproses (PO)</span>
+                                            <small class="text-muted d-block" style="font-size:0.6rem;">
+                                                @if(in_array($p->status, ['diproses', 'diproses_po', 'pembelian', 'selesai']))
+                                                    <span class="fw-semibold">Sedang Diproses</span>
+                                                @else
+                                                    Belum
+                                                @endif
+                                                <br>{{ \Carbon\Carbon::parse($p->updated_at)->format('d M Y, H:i') }}
+                                            </small>
+                                        </div>
+                                    </div>
+    
+                                    <!-- STEP 5 -->
+                                    <div class="position-relative text-center" style="z-index: 2; flex: 1;">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ $p->status == 'selesai' ? 'bg-success text-white' : 'bg-secondary text-white' }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="mt-1">
+                                            <span class="fw-bold d-block {{ $p->status == 'selesai' ? 'text-success' : '' }}" style="font-size:0.68rem;">5. Diterima</span>
+                                            <small class="text-muted d-block" style="font-size:0.6rem;">
+                                                @if($p->status == 'selesai')
+                                                    Selesai
+                                                @else
+                                                    Menunggu Tiba
+                                                @endif
+                                            </small>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    @empty
-                        <div class="text-center py-2 text-muted">
-                            <i class="fas fa-check-circle fa-2x mb-1 text-success"></i>
-                            <p class="mb-0 small">Tidak ada pengadaan barang yang berjalan saat ini.</p>
-                        </div>
-                    @endforelse
-    
-                    <div id="trackingPlaceholder" class="text-center py-2 text-muted" style="display: none;">
-                        <i class="fas fa-hand-pointer fa-lg mb-1 text-primary"></i>
-                        <p class="mb-0 small">Silakan pilih salah satu barang di menu dropdown atas untuk melihat rincian alur tracking prosesnya.</p>
                     </div>
+                @empty
+                    <div class="text-center py-2 text-muted">
+                        <i class="fas fa-check-circle fa-2x mb-1 text-success"></i>
+                        <p class="mb-0 small">Tidak ada pengadaan barang yang berjalan saat ini.</p>
+                    </div>
+                @endforelse
+
+                <div id="trackingPlaceholder" class="text-center py-2 text-muted" style="display: none;">
+                    <i class="fas fa-hand-pointer fa-lg mb-1 text-primary"></i>
+                    <p class="mb-0 small">Silakan pilih salah satu barang di menu dropdown atas untuk melihat rincian alur tracking prosesnya.</p>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Script Dropdown -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const select = document.getElementById('selectTracking');
-            const placeholder = document.getElementById('trackingPlaceholder');
+</div> --}}
 
-            function updateTracking() {
-                document.querySelectorAll('.tracking-item').forEach(el => el.style.display = 'none');
+<!-- TRACKING STATUS PENGADAAN -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 tracking-card">
+            <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h5 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem;">
+                    <i class="fas fa-route text-primary me-2"></i>Tracking Status Pengadaan Barang
+                </h5>
                 
-                const selectedId = select.value;
-                if (selectedId) {
-                    if (placeholder) placeholder.style.display = 'none';
-                    const targetEl = document.getElementById(selectedId);
-                    if (targetEl) targetEl.style.display = 'block';
-                } else {
-                    if (placeholder) placeholder.style.display = 'block';
-                }
+                <select id="selectTracking" class="form-select form-select-sm w-auto">
+                    <option value="">-- Pilih Barang/Bahan --</option>
+                    @foreach($pengadaanAktif as $p)
+                        <option value="track-{{ $p->permintaan_id }}" {{ $loop->first ? 'selected' : '' }}>
+                            {{ $p->barang->nama_barang ?? 'Barang' }} ({{ $p->barang->kode_barang ?? 'Tanpa Kode' }})
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <div class="card-body p-3">
+                @forelse($pengadaanAktif as $p)
+                    @php
+                        // Logika Pengecekan Terlambat / Overdue
+                        $isTerlambat = false;
+                        if ($p->status != 'selesai') {
+                            $batasWaktu = \Carbon\Carbon::parse($p->created_at)->addDays(30); 
+                            if (\Carbon\Carbon::now()->isAfter($batasWaktu)) {
+                                $isTerlambat = true;
+                            }
+                        }
+                    @endphp
+
+                    <div id="track-{{ $p->permintaan_id }}" class="tracking-item" style="display: none;">
+                        <!-- Info Singkat Barang -->
+                        <div class="row mb-3">
+                            <div class="col-md-12 border-bottom pb-2">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+                                    <h6 class="fw-bold mb-0 text-primary" style="font-size: 0.95rem;">
+                                        {{ $p->barang->nama_barang ?? '-' }} ({{ $p->barang->kode_barang ?? 'Tanpa Kode' }})
+                                    </h6>
+                                    
+                                    <!-- BADGE WARNING TERLAMBAT -->
+                                    @if($isTerlambat)
+                                        <span class="badge bg-danger animate-pulse" style="font-size: 0.68rem;">
+                                            <i class="fas fa-exclamation-triangle me-1"></i> Terlambat / Overdue
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="text-muted" style="font-size: 0.81rem;">
+                                    <span>Jumlah: <b class="text-dark">{{ (float) $p->jumlah_diminta }} {{ $p->barang->satuan ?? '' }}</b></span><br>
+                                    <span>Target Waktu Pengadaan: <b class="{{ $isTerlambat ? 'text-danger' : 'text-dark' }}">{{ $p->format_target_waktu ?? '-' }}</b></span><br>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress Bar & Steps -->
+                        <div class="row align-items-center px-2">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between text-center position-relative px-3 py-1">
+                                    <!-- Garis Background Progress -->
+                                    <div class="progress position-absolute w-100" style="height: 3px; top: 14px; z-index: 1; left: 0;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: 
+                                            @if($p->status == 'menunggu_koordinator' || $p->status == 'diajukan') 12% 
+                                            @elseif($p->status == 'menunggu_ga') 37% 
+                                            @elseif($p->status == 'disetujui') 62% 
+                                            @elseif(in_array($p->status, ['diproses', 'diproses_po', 'pembelian'])) 87% 
+                                            @elseif($p->status == 'selesai') 100% 
+                                            @else 0% @endif">
+                                        </div>
+                                    </div>
+    
+                                    <!-- STEP 1 -->
+                                    <div class="position-relative text-center" style="z-index: 2; flex: 1;">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm bg-success text-white" style="width: 30px; height: 30px; font-size: 0.7rem;">
+                                            <i class="fas fa-file-alt"></i>
+                                        </div>
+                                        <div class="mt-1">
+                                            <span class="fw-bold d-block text-success" style="font-size:0.68rem;">1. Diajukan</span>
+                                            <small class="text-muted d-block" style="font-size:0.6rem;">
+                                                Oleh: {{ $p->pemohon ? $p->pemohon->username : '-' }}<br>
+                                                {{ \Carbon\Carbon::parse($p->created_at)->format('d M Y, H:i') }}
+                                            </small>
+                                        </div>
+                                    </div>
+    
+                                    <!-- STEP 2 -->
+                                    <div class="position-relative text-center" style="z-index: 2; flex: 1;">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ in_array($p->status, ['menunggu_ga', 'disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'bg-success text-white' : 'bg-secondary text-white' }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
+                                            <i class="fas fa-user-check"></i>
+                                        </div>
+                                        <div class="mt-1">
+                                            <span class="fw-bold d-block {{ in_array($p->status, ['menunggu_ga', 'disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'text-success' : '' }}" style="font-size:0.68rem;">2. Koordinator</span>
+                                            <small class="text-muted d-block" style="font-size:0.6rem;">
+                                                @if(in_array($p->status, ['menunggu_ga', 'disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']))
+                                                    <span class="text-success fw-semibold">Disetujui</span>
+                                                @else
+                                                    <span class="text-warning fw-semibold">Menunggu</span>
+                                                @endif
+                                                <br>{{ \Carbon\Carbon::parse($p->updated_at)->format('d M Y, H:i') }}
+                                            </small>
+                                        </div>
+                                    </div>
+    
+                                    <!-- STEP 3 -->
+                                    <div class="position-relative text-center" style="z-index: 2; flex: 1;">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ in_array($p->status, ['disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'bg-success text-white' : 'bg-secondary text-white' }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
+                                            <i class="fas fa-building"></i>
+                                        </div>
+                                        <div class="mt-1">
+                                            <span class="fw-bold d-block {{ in_array($p->status, ['disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'text-success' : '' }}" style="font-size:0.68rem;">3. GA Approval</span>
+                                            <small class="text-muted d-block" style="font-size:0.6rem;">
+                                                @if(in_array($p->status, ['disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']))
+                                                    <span class="text-success fw-semibold">Disetujui</span>
+                                                @else
+                                                    Menunggu
+                                                @endif
+                                                <br>{{ \Carbon\Carbon::parse($p->updated_at)->format('d M Y, H:i') }}
+                                            </small>
+                                        </div>
+                                    </div>
+    
+                                    <!-- STEP 4 (MERAH JIKA TERLAMBAT) -->
+                                    <div class="position-relative text-center" style="z-index: 2; flex: 1;">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ in_array($p->status, ['diproses', 'diproses_po', 'pembelian', 'selesai']) ? ($isTerlambat && $p->status != 'selesai' ? 'bg-danger text-white' : 'bg-success text-white') : 'bg-secondary text-white' }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
+                                            <i class="fas fa-box-open"></i>
+                                        </div>
+                                        <div class="mt-1">
+                                            <span class="fw-bold d-block" style="font-size:0.68rem;">4. Diproses (PO)</span>
+                                            <small class="text-muted d-block" style="font-size:0.6rem;">
+                                                @if(in_array($p->status, ['diproses', 'diproses_po', 'pembelian', 'selesai']))
+                                                    <span class="{{ $isTerlambat && $p->status != 'selesai' ? 'text-danger fw-semibold' : 'fw-semibold' }}">
+                                                        {{ $isTerlambat && $p->status != 'selesai' ? 'Terlambat' : 'Sedang Diproses' }}
+                                                    </span>
+                                                @else
+                                                    Belum
+                                                @endif
+                                                <br>{{ \Carbon\Carbon::parse($p->updated_at)->format('d M Y, H:i') }}
+                                            </small>
+                                        </div>
+                                    </div>
+    
+                                    <!-- STEP 5 -->
+                                    <div class="position-relative text-center" style="z-index: 2; flex: 1;">
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ $p->status == 'selesai' ? 'bg-success text-white' : 'bg-secondary text-white' }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="mt-1">
+                                            <span class="fw-bold d-block {{ $p->status == 'selesai' ? 'text-success' : '' }}" style="font-size:0.68rem;">5. Diterima</span>
+                                            <small class="text-muted d-block" style="font-size:0.6rem;">
+                                                @if($p->status == 'selesai')
+                                                    Selesai
+                                                @else
+                                                    Menunggu Tiba
+                                                @endif
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="text-center py-2 text-muted">
+                        <i class="fas fa-check-circle fa-2x mb-1 text-success"></i>
+                        <p class="mb-0 small">Tidak ada pengadaan barang yang berjalan saat ini.</p>
+                    </div>
+                @endforelse
+
+                <div id="trackingPlaceholder" class="text-center py-2 text-muted" style="display: none;">
+                    <i class="fas fa-hand-pointer fa-lg mb-1 text-primary"></i>
+                    <p class="mb-0 small">Silakan pilih salah satu barang di menu dropdown atas untuk melihat rincian alur tracking prosesnya.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@push('scripts')
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const select = $('#selectTracking');
+        const placeholder = document.getElementById('trackingPlaceholder');
+
+        function updateTracking() {
+            document.querySelectorAll('.tracking-item').forEach(el => el.style.display = 'none');
+            
+            const selectedId = select.val();
+            if (selectedId) {
+                if (placeholder) placeholder.style.display = 'none';
+                const targetEl = document.getElementById(selectedId);
+                if (targetEl) targetEl.style.display = 'block';
+            } else {
+                if (placeholder) placeholder.style.display = 'block';
             }
+        }
+
+        if (select.length) {
+            select.select2({
+                theme: 'bootstrap-5',
+                width: 'resolve',
+                dropdownParent: select.parent(),
+                minimumResultsForSearch: Infinity,
+                allowClear: false
+            });
 
             updateTracking();
-            select?.addEventListener('change', updateTracking);
-        });
-    </script>
+            select.on('change', updateTracking);
+        }
+    });
+</script>
+@endpush
 </div>
 @endsection
