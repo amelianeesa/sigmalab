@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Daftar - Reporting')
 
 @section('content')
 <div class="container-fluid px-4">

@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Edit Data - SDM')
 
 @section('content')
 <div class="container py-4">

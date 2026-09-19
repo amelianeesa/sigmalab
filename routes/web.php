@@ -132,8 +132,32 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/parameter-uji/{parameter_uji}/control-chart', [ParameterUjiController::class, 'controlChart'])->name('parameter-uji.control-chart');
     Route::match(['get', 'post'], 'parameter-uji/{parameter_uji}/cetak', [ParameterUjiController::class, 'cetakControlChart'])->name('parameter-uji.cetak-control-chart');
     Route::resource('parameter-uji', ParameterUjiController::class);
-    Route::post('/parameter-uji/crm-katalog', [ParameterUjiController::class, 'storeCrmKatalog'])->name('parameter-uji.store-crm');
-    Route::delete('/parameter-uji/crm-katalog/{id}', [ParameterUjiController::class, 'destroyCrmKatalog'])->name('parameter-uji.destroy-crm');
+    Route::post('/parameter-uji/store-crm', [ParameterUjiController::class, 'storeCrmKatalog'])->name('parameter-uji.store-crm');
+    // CRM Katalog CRUD
+    Route::resource('crm-katalog', \App\Http\Controllers\CrmKatalogController::class);
+    Route::post('crm-katalog/{id}/sertifikat', [\App\Http\Controllers\CrmKatalogController::class, 'storeSertifikat'])->name('crm-katalog.store-sertifikat');
+    Route::delete('crm-katalog/{id}/sertifikat/{sertifikat_id}', [\App\Http\Controllers\CrmKatalogController::class, 'destroySertifikat'])->name('crm-katalog.destroy-sertifikat');
+
+    // Pengujian Harian QC CRM
+    Route::resource('qc-crm', \App\Http\Controllers\QcCrmController::class);
+    Route::get('api/crm-katalog/{id}/parameters', [\App\Http\Controllers\QcCrmController::class, 'apiGetParameters'])->name('api.crm-katalog.parameters');
+    
+    // QC Uji Banding
+    Route::post('qc-uji-banding/draft', [\App\Http\Controllers\QcUjiBandingController::class, 'storeDraft'])->name('qc-uji-banding.draft.store');
+    Route::resource('qc-uji-banding', \App\Http\Controllers\QcUjiBandingController::class);
+    Route::get('qc-uji-banding/{id}/print-pdf', [\App\Http\Controllers\QcUjiBandingController::class, 'printPdf'])->name('qc-uji-banding.printPdf');
+    Route::get('qc-uji-banding/{id}/evaluasi/{param_id}', [\App\Http\Controllers\QcUjiBandingController::class, 'editEvaluasi'])->name('qc-uji-banding.evaluasi');
+    Route::put('qc-uji-banding/{id}/evaluasi/{param_id}', [\App\Http\Controllers\QcUjiBandingController::class, 'updateEvaluasi'])->name('qc-uji-banding.update-evaluasi');
+    Route::get('qc-uji-banding/{id}/investigasi/{param_id}', [\App\Http\Controllers\QcUjiBandingController::class, 'investigasi'])->name('qc-uji-banding.investigasi');
+    Route::put('qc-uji-banding/{id}/investigasi/{param_id}', [\App\Http\Controllers\QcUjiBandingController::class, 'storeInvestigasi'])->name('qc-uji-banding.store-investigasi');
+    Route::get('qc-uji-banding/{id}/cetak/pdf/{param_id}', [\App\Http\Controllers\QcUjiBandingController::class, 'cetakLksPdf'])->name('qc-uji-banding.cetak.pdf');
+    Route::get('qc-uji-banding/{id}/cetak/word/{param_id}', [\App\Http\Controllers\QcUjiBandingController::class, 'cetakLksWord'])->name('qc-uji-banding.cetak.word');
+
+    // AFT Kalibrasi Endpoints
+    Route::post('aft-kalibrasi', [\App\Http\Controllers\QcUjiBandingController::class, 'aftKalibrasiStore'])->name('aft.kalibrasi.store');
+    Route::get('aft-kalibrasi', [\App\Http\Controllers\QcUjiBandingController::class, 'aftKalibrasiList'])->name('aft.kalibrasi.list');
+    Route::get('aft-kalibrasi/{id}', [\App\Http\Controllers\QcUjiBandingController::class, 'aftKalibrasiShow'])->name('aft.kalibrasi.show');
+
     Route::resource('kegiatan', KegiatanController::class);
     Route::post('/kegiatan/{id}/unlock', [KegiatanController::class, 'unlock'])->name('kegiatan.unlock');
     Route::resource('hasil-uji', HasilUjiController::class);
@@ -141,27 +165,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/hasil-uji/{id}/override', [HasilUjiController::class, 'overrideWestgard'])->name('hasil-uji.override');
     Route::resource('tindak-lanjut', RiwayatTindakLanjutController::class)->except(['destroy']);
     Route::post('/tindak-lanjut/{id}/komentar', [RiwayatTindakLanjutController::class, 'storeKomentar'])->name('tindak-lanjut.komentar.store');
-    
-    Route::get('/alat/{id}/input-kalibrasi', [AlatController::class, 'inputKalibrasi'])->name('alat.input-kalibrasi');
-    Route::post('/alat/{id}/input-kalibrasi', [AlatController::class, 'storeInputKalibrasi'])->name('alat.store-input-kalibrasi');
 
-    Route::get('/alat/{id}/pemeliharaan', [AlatController::class, 'pemeliharaanBulanan'])->name('alat.pemeliharaan');
-    Route::post('/alat/{id}/pemeliharaan/update', [AlatController::class, 'updatePemeliharaanHarian'])->name('alat.pemeliharaan.update');
-    Route::get('/alat/{id}/item-pemeliharaan', [AlatController::class, 'editItemPemeliharaan'])->name('alat.item-pemeliharaan.edit');
-    Route::post('/alat/{id}/item-pemeliharaan', [AlatController::class, 'updateItemPemeliharaan'])->name('alat.item-pemeliharaan.update');
-    Route::post('/alat/{id}/perbaikan', [AlatController::class, 'storePerbaikan'])->name('alat.perbaikan.store');
-    Route::put('/alat/{id}/perbaikan/{perbaikan_id}', [AlatController::class, 'updatePerbaikan'])->name('alat.perbaikan.update');
-  
-    Route::prefix('alat/{id}')->controller(AlatController::class)->name('alat.')->group(function () {
-        Route::get('input-kalibrasi', 'inputKalibrasi')->name('input-kalibrasi');
-        Route::post('input-kalibrasi', 'storeInputKalibrasi')->name('store-input-kalibrasi');
-        Route::get('pemeliharaan', 'pemeliharaanBulanan')->name('pemeliharaan');
-        Route::post('pemeliharaan/update', 'updatePemeliharaanHarian')->name('pemeliharaan.update');
-        Route::get('item-pemeliharaan', 'editItemPemeliharaan')->name('item-pemeliharaan.edit');
-        Route::post('item-pemeliharaan', 'updateItemPemeliharaan')->name('item-pemeliharaan.update');
-        Route::post('perbaikan', 'storePerbaikan')->name('perbaikan.store');
-        Route::put('perbaikan/{perbaikan_id}', 'updatePerbaikan')->name('perbaikan.update');
-    });
     // Reporting
     Route::get('reporting', [ReportingController::class, 'index'])->name('reporting.index');
     Route::get('reporting/pdf', [ReportingController::class, 'exportPdf'])->name('reporting.pdf');
@@ -177,12 +181,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('kelola-user', [\App\Http\Controllers\KelolaUserController::class, 'index'])->name('kelola-user.index');
     });
 
+
+
     Route::middleware('modul:manajemen_pengguna,tambah_ubah')->group(function () {
     Route::post('kelola-user', [\App\Http\Controllers\KelolaUserController::class, 'store'])->name('kelola-user.store');
     Route::put('kelola-user/{id}', [\App\Http\Controllers\KelolaUserController::class, 'update'])->name('kelola-user.update');
     Route::delete('kelola-user/{id}', [\App\Http\Controllers\KelolaUserController::class, 'destroy'])->name('kelola-user.destroy');
-});
-});
+    });
+
     // Notifikasi
     Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index');
     Route::post('/notifikasi/{id}/read', [NotifikasiController::class, 'markAsRead'])->name('notifikasi.read');
@@ -190,7 +196,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/notifikasi/unread-count', [NotifikasiController::class, 'getUnreadCount'])->name('notifikasi.unread-count');
 
     // Inhouse Control
-        Route::post('/hasil-uji/{id}/override-evaluasi', [HasilUjiController::class, 'overrideEvaluasi'])->name('hasil-uji.override-evaluasi');
+    Route::post('/hasil-uji/{id}/override-evaluasi', [HasilUjiController::class, 'overrideEvaluasi'])->name('hasil-uji.override-evaluasi');
 
     // =============================================
     // Verifikasi Mutu — Portal & QC In-House

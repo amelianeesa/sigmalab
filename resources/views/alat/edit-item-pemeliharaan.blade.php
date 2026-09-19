@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Edit Item Pemeliharaan - Alat')
 
 @section('content')
 <div class="container py-4">

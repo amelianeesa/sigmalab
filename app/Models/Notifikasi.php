@@ -8,11 +8,9 @@ class Notifikasi extends BaseModel
 
     protected $fillable = [
         'users_id',
-        'judul',
+        'jenis_notifikasi',
         'pesan',
-        'link',
         'is_read',
-        'tipe'
     ];
 
     protected $casts = [

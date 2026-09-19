@@ -51,6 +51,8 @@ class AlatController extends Controller
             $query->where('kondisi_barang', $filterKondisi);
         }
 
+        $alatList = $query->latest()->get();
+
         if ($filterStatus) {
             $alatList = $alatList->filter(function($item) use ($filterStatus) {
                 $kalibrasiTerakhir = $item->riwayatKalibrasi->sortByDesc('tgl_kalibrasi')->first();
@@ -72,8 +74,6 @@ class AlatController extends Controller
                 return true;
             });
         }
-
-        $alatList = $query->latest()->get();
 
         $alat = $alatList;
 
@@ -964,5 +964,14 @@ class AlatController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Status perbaikan berhasil diperbarui');
+    }
+
+    /**
+     * Export data alat ke format Word.
+     * TODO: Implementasi export Word (belum tersedia).
+     */
+    public function exportWord($id)
+    {
+        return back()->with('error', 'Fitur export Word belum tersedia.');
     }
 }

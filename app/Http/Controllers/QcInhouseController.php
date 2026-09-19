@@ -122,17 +122,15 @@ class QcInhouseController extends Controller
             $batch = SampelInhouse::create([
                 'nama_sampel' => $request->nama_sampel,
                 'jenis_batubara' => $jenis,
-                'data_screening' => $dataScreening, // Simpan profil kasar
+                'data_screening' => $dataScreening,
                 'tanggal_pemilihan' => now(),
-                'status' => 'preparasi', // Auto lanjut ke preparasi
+                'status' => 'preparasi',
                 'dibuat_oleh' => Auth::id(),
             ]);
 
-            // Ambil ID Parameter untuk 5 General Analysis
             $namaParamGa = ['IM', 'ASH', 'VM', 'TS', 'CV'];
             $params = ParameterUji::whereIn('nama_parameter', $namaParamGa)->get();
 
-            // Auto-bundling 5 Parameter (Eliminasi TM)
             foreach ($params as $p) {
                 SampelInhouseParameter::create([
                     'sampel_inhouse_id' => $batch->sampel_inhouse_id,
@@ -176,7 +174,7 @@ class QcInhouseController extends Controller
             'jumlah_botol' => 'required|integer|min:10',
             'nomor_awal_botol' => 'required|integer|min:1',
             'kode_batch' => 'required|string|max:50',
-            'data_equilibrium' => 'required|string', // JSON dari frontend
+            'data_equilibrium' => 'required|string',
             'catatan_preparasi' => 'nullable|string'
         ]);
 
@@ -187,7 +185,6 @@ class QcInhouseController extends Controller
             return redirect()->back()->withInput()->with('error', 'Bobot konstan (selisih <= 0.001) belum tercapai.');
         }
 
-        // Generate urutan acak instrumen untuk 20 porsi (10 botol x 2)
         $urutanInstrumen = $this->preparasiService->generateUrutanInstrumen(10, 2);
 
         $batch->update([
@@ -238,7 +235,6 @@ class QcInhouseController extends Controller
         // Populate tolerance limits for UI
         $tolerances = [];
         foreach ($batch->parameters as $param) {
-            // Kita pakai batas sementara dengan asumsi rata-rata = 0, akan diupdate oleh JS live
             $tolerances[$param->id] = $this->repeatabilityService->getLimit(
                 $batch->metode_acuan, 
                 $param->parameterUji->nama_parameter, 
@@ -249,7 +245,12 @@ class QcInhouseController extends Controller
 
         $tabelAcak = TabelAngkaAcak::orderBy('urutan')->get()->keyBy('urutan');
 
-        return view('qc-inhouse.homogenitas', compact('batch', 'tolerances', 'tabelAcak'));
+        // Tabel F kritis (alpha=0.05) untuk lookup ANOVA di frontend, satu sumber
+        // yang sama persis dengan HomogenitasService (server-side), supaya preview
+        // live di JS tidak pernah berbeda dengan hasil kalkulasi backend.
+        $fTabelLookup = $this->homogenitasService->getTabelF();
+
+        return view('qc-inhouse.homogenitas', compact('batch', 'tolerances', 'tabelAcak', 'fTabelLookup'));
     }
 
     public function storeHomogenitas(Request $request, $id)
@@ -265,7 +266,7 @@ class QcInhouseController extends Controller
                 $paramId = $param->id;
                 $inputData = $request->input("data_{$paramId}");
                 
-                if (empty($inputData) || count($inputData) < 10) continue;
+                if (empty($inputData) || count($inputData) < 3) continue;
                 $adaData = true;
 
                 // Kosongkan data lama
@@ -275,9 +276,8 @@ class QcInhouseController extends Controller
                 $isiLengkap = 0;
 
                 foreach ($inputData as $index => $row) {
-                    $nomorSampel = $index + 1; // 1-10
+                    $nomorSampel = $index + 1;
                     
-                    // Cek apakah d1 dan d2 terisi angka (bukan string kosong)
                     $d1_ada = isset($row['nilai_d1']) && $row['nilai_d1'] !== '';
                     $d2_ada = isset($row['nilai_d2']) && $row['nilai_d2'] !== '';
                     
@@ -301,9 +301,12 @@ class QcInhouseController extends Controller
                         $val1 = $row['nilai_d1'];
                         $val2 = $row['nilai_d2'];
                         
-                        if (isset($row['nilai_db_1']) && $row['nilai_db_1'] !== '') {
-                            $val1 = $row['nilai_db_1'];
-                            $val2 = $row['nilai_db_2'];
+                        $dbVal1 = $row['nilai_db_1'] ?? null;
+                        $dbVal2 = $row['nilai_db_2'] ?? null;
+
+                        if ($dbVal1 !== null && $dbVal2 !== '') {
+                            $val1 = $dbVal1;
+                            $val2 = $dbVal2;
                         }
 
                         $samplesForAnova[] = [
@@ -313,17 +316,19 @@ class QcInhouseController extends Controller
                     }
                 }
 
-                // Jika simpan draft, lewati kalkulasi ANOVA
                 if ($request->input('is_draft')) {
-                    continue; // Pindah ke parameter berikutnya, tidak ubah status_parameter
+                    continue;
                 }
 
-                // Pastikan 10 data lengkap untuk ANOVA
-                if ($isiLengkap < 10) {
-                    throw new \Exception("Parameter {$param->parameterUji->nama_parameter} belum lengkap 10 sampel.");
-                }
+               $totalBaris = count($inputData);
+               if ($isiLengkap < $totalBaris) {
+                    throw new \Exception("Parameter {$param->parameterUji->nama_parameter} belum lengkap: {$isiLengkap} dari {$totalBaris} baris terisi.");
+               }
 
-                // Kalkulasi ANOVA
+               if ($totalBaris < 3) {
+                    throw new \Exception("Parameter {$param->parameterUji->nama_parameter} harus memiliki minimal 3 baris data untuk uji homogenitas.");
+               }
+
                 $anova = $this->homogenitasService->calculateAnova($samplesForAnova);
                 
                 if (isset($anova['error'])) {
@@ -347,11 +352,9 @@ class QcInhouseController extends Controller
                 throw new \Exception("Data penimbangan tidak lengkap.");
             }
 
-            // Cek apakah semua parameter sudah diuji
             $semuaParameterLengkap = true;
             $semuaParameterHomogen = true;
             
-            // Re-fetch parameters to get updated status
             $batch->refresh();
             foreach ($batch->parameters as $p) {
                 if ($p->status_parameter !== 'homogen') {
@@ -362,7 +365,6 @@ class QcInhouseController extends Controller
                 }
             }
 
-            // Update Batch Status hanya jika semua lengkap (atau jika form disubmit penuh non-ajax)
             if ($semuaParameterLengkap || (!$request->ajax() && $semuaHomogen)) {
                 $batch->update([
                     'status' => $semuaParameterHomogen ? 'penetapan_target' : 'gagal_homogenitas',
@@ -411,7 +413,6 @@ class QcInhouseController extends Controller
         DB::beginTransaction();
         try {
             foreach ($batch->parameters as $param) {
-                // Sesuai prosedur baru: Nilai Target & SD diambil langsung dari Mean Global & SD Global uji Homogenitas
                 $param->update([
                     'mean_target' => $param->mean_global,
                     'sd_target' => $param->sd_global,
@@ -503,7 +504,6 @@ class QcInhouseController extends Controller
                         'mean_pengujian' => $meanPengujian,
                     ]);
 
-                    // Gunakan nilai DB jika tersedia untuk T-Test
                     if (isset($row['nilai_db_1']) && $row['nilai_db_1'] !== '') {
                         $val1 = $row['nilai_db_1'];
                         $val2 = $row['nilai_db_2'];
@@ -512,8 +512,6 @@ class QcInhouseController extends Controller
                     $stabilityDataY[] = (float)$val2;
                 }
 
-                // Karena Target ditetapkan dari Homogenitas (N=20), kita bisa reverse-engineer sum_sq dari sd_target
-                // Rumus: SD = sqrt(sum_sq / (N - 1)) -> sum_sq = (SD^2) * (N - 1)
                 $nx = 20;
                 $targetDataset = [
                     'n' => $nx,
@@ -539,10 +537,9 @@ class QcInhouseController extends Controller
                     'tanggal_stabilitas' => now(),
                 ]);
 
-                // Jika lolos semua, update Master Parameter Uji Limit
                 if ($isStabil) {
                     $param->parameterUji->update([
-                        'sampel_inhouse_id' => $batch->sampel_inhouse_id, // Link to active batch
+                        'sampel_inhouse_id' => $batch->sampel_inhouse_id,
                         'mean' => $param->mean_target,
                         'sd' => $param->sd_target,
                         'ucl' => $param->mean_target + (3 * $param->sd_target),
@@ -557,7 +554,6 @@ class QcInhouseController extends Controller
                 throw new \Exception("Data pengujian stabilitas kosong.");
             }
 
-            // Check if ALL parameters are stabil before updating batch status
             $allStabil = true;
             $adaGagal = false;
             foreach ($batch->parameters as $p) {
@@ -573,10 +569,8 @@ class QcInhouseController extends Controller
             if ($adaGagal) {
                 $batch->update(['status' => 'gagal_stabilitas']);
             } elseif ($allStabil) {
-                // Batch stabil tapi belum aktif secara harian (menunggu aktivasi manual)
                 $batch->update(['status' => 'siap_digunakan']);
             } else {
-                // Return to uji_stabilitas if someone partially saved and the batch prematurely became 'aktif'
                 $batch->update(['status' => 'uji_stabilitas']);
             }
 
@@ -623,16 +617,12 @@ class QcInhouseController extends Controller
 
         \Illuminate\Support\Facades\DB::beginTransaction();
         try {
-            // Nonaktifkan batch lain agar HANYA ADA 1 BATCH AKTIF pada satu waktu
             SampelInhouse::where('status', 'aktif')
                 ->where('sampel_inhouse_id', '!=', $batch->sampel_inhouse_id)
                 ->update(['status' => 'kadaluarsa']);
                 
             $batch->update(['status' => 'aktif']);
 
-            // SINKRONISASI KE MASTER DATA PARAMETER UJI
-            // Analis meminta agar setelah diaktifkan, nilai acuan & SD di Master Parameter 
-            // otomatis terganti dengan hasil dari Batch yang baru ini.
             foreach ($batch->parameters as $param) {
                 if ($param->status_parameter === 'stabil' && $param->parameterUji) {
                     $mean = (float) $param->mean_target;

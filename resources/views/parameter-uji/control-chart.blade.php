@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Control Chart - Parameter Uji')
 
 @section('content')
 <div class="container-fluid px-4">

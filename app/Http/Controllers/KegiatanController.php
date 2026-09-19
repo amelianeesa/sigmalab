@@ -64,7 +64,7 @@ class KegiatanController extends Controller
                 ->where('status_aktif', false)->get();
             
             if ($personelTidakAktif->isNotEmpty()) {
-                $namaPersonel = $personelTidakAktif->pluck('nama_lengkap')->join(', ');
+                $namaPersonel = $personelTidakAktif->pluck('nama')->join(', ');
                 return back()->withInput()->with('error', "Validasi Gagal (Gate 2): Personel berikut berstatus tidak aktif atau kompetensinya dicabut: {$namaPersonel}");
             }
         }
@@ -350,7 +350,8 @@ class KegiatanController extends Controller
         $kegiatan = Kegiatan::findOrFail($id);
         
         // Authorization: only specific roles can unlock
-        if (!auth()->user()->hasRole(['koordinator_lab', 'manajer_teknis', 'admin'])) {
+        $allowedRoles = ['koordinator_lab', 'manajer_teknis', 'admin'];
+        if (!in_array(auth()->user()->role->nama_role ?? '', $allowedRoles)) {
             abort(403, 'Anda tidak memiliki hak akses untuk membuka kunci kegiatan.');
         }
 

@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Tambah Baru - QC Harian')
 
 @section('content')
 <div class="container-fluid px-4 pb-5">
@@ -6,9 +7,14 @@
         <li class="breadcrumb-item"><a href="{{ route('qc-harian.index') }}" class="text-decoration-none">Pengujian Harian QC</a></li>
         <li class="breadcrumb-item active">Input Data</li>
     </x-qc-breadcrumb>
-    <h2 class="mb-4 fw-bold text-dark">
-        <i class="fas fa-plus-circle text-danger me-2"></i>Input Data Harian QC
-    </h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark mb-0">
+            <i class="fas fa-plus-circle text-danger me-2"></i>Input Data Harian QC
+        </h2>
+        <a href="{{ route('parameter-uji.index') }}" class="btn btn-outline-secondary btn-sm shadow-sm" target="_blank">
+            <i class="fas fa-cogs me-1"></i> Master Parameter Uji
+        </a>
+    </div>
 
     @if(session('error'))
     <div class="alert alert-danger shadow-sm border-0">
@@ -204,7 +210,10 @@
                                                     <th>A</th>
                                                     <th>B</th>
                                                     <th class="bg-warning bg-opacity-25">M%</th>
-                                                    <th colspan="2">ABSOLUTE DIFFERENCE</th>
+                                                    <th colspan="2">
+                                                        ABSOLUTE DIFFERENCE 
+                                                        <i class="fas fa-info-circle ms-1 text-primary" data-bs-toggle="tooltip" title="0.09 + (0.1 * AVG)"></i>
+                                                    </th>
                                                     <th>AVERAGE %</th>
                                                 </tr>
                                             @elseif($code === 'ASH')
@@ -216,7 +225,10 @@
                                                     <th>M3</th>
                                                     <th>M3-M1</th>
                                                     <th class="bg-warning bg-opacity-25">ASH%</th>
-                                                    <th colspan="2">ABSOLUTE DIFFERENCE</th>
+                                                    <th colspan="2">
+                                                        ABSOLUTE DIFFERENCE 
+                                                        <i class="fas fa-info-circle ms-1 text-primary" data-bs-toggle="tooltip" title="0.09 + (0.1 * AVG)"></i>
+                                                    </th>
                                                     <th>AVERAGE %adb</th>
                                                     <th>%db</th>
                                                     <th>db</th>
@@ -232,7 +244,10 @@
                                                     <th>LOSS%</th>
                                                     <th>IM</th>
                                                     <th class="bg-warning bg-opacity-25">VM%</th>
-                                                    <th colspan="2">ABSOLUTE DIFFERENCE</th>
+                                                    <th colspan="2">
+                                                        ABSOLUTE DIFFERENCE 
+                                                        <i class="fas fa-info-circle ms-1 text-primary" data-bs-toggle="tooltip" title="0.09 + (0.1 * AVG)"></i>
+                                                    </th>
                                                     <th>AVERAGE %adb</th>
                                                     <th>AVERAGE %db</th>
                                                     <th>%db</th>
@@ -257,7 +272,10 @@
                                                     <th>Volume of Titrant (ml)</th>
                                                     <th>Length of Fuse (cm)</th>
                                                     <th>Total TS</th>
-                                                    <th class="bg-warning bg-opacity-25">Final Result (cal/g) adb</th>
+                                                    <th class="bg-warning bg-opacity-25" style="width: 16%">
+                                                        Final Result (cal/g) adb 
+                                                        <i class="fas fa-info-circle ms-1 text-primary" data-bs-toggle="tooltip" title="(PR - (14.3 * 0.0699 * VT) - (2.3 * LF) - (13.2 * TS * SM)) / SM"></i>
+                                                    </th>
                                                     <th>Average Result (cal/g), adb</th>
                                                     <th>Average Result (cal/g), db</th>
                                                     <th>%db</th>
@@ -424,323 +442,151 @@
     </form>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // ============================================
-    // LocalStorage Draft Logic
-    // ============================================
-    const formQc = document.getElementById('formQc');
-    const DRAFT_KEY = 'qc_harian_draft';
+    // Inject ParameterUji config
+    const paramConfigs = {
+        @if(isset($allParameters))
+            @foreach($allParameters as $param)
+                "{{ $param->parameter_uji_id }}": {
+                    rumus: {!! json_encode($param->rumus_kalkulasi ?? '') !!},
+                    langkah: {!! json_encode($param->langkah_kalkulasi ?? []) !!},
+                    toleransi: {!! json_encode($param->toleransi_duplo ?? '') !!}
+                },
+            @endforeach
+        @elseif(isset($parameters))
+            @foreach($parameters as $param)
+                "{{ $param->parameter_uji_id }}": {
+                    rumus: {!! json_encode($param->parameterUji->rumus_kalkulasi ?? '') !!},
+                    langkah: {!! json_encode($param->parameterUji->langkah_kalkulasi ?? []) !!},
+                    toleransi: {!! json_encode($param->parameterUji->toleransi_duplo ?? '') !!}
+                },
+            @endforeach
+        @endif
+    };
 
-    function saveDraft() {
-        const formData = new FormData(formQc);
-        const data = Object.fromEntries(formData.entries());
-        // hapus _token csrf
-        delete data['_token'];
-        
-        // Simpan checkbox yang dicentang secara spesifik
-        const checkboxes = [];
-        document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-            if(cb.checked) checkboxes.push({ name: cb.name, value: cb.value });
-        });
-        
-        localStorage.setItem(DRAFT_KEY, JSON.stringify({
-            inputs: data,
-            checkboxes: checkboxes,
-            timestamp: new Date().getTime()
-        }));
-
-        Swal.fire({
-            icon: 'success',
-            title: 'Draft Tersimpan',
-            text: 'Data tersimpan sementara di browser ini. Anda bisa melanjutkan pengisian nanti.',
-            timer: 2000,
-            showConfirmButton: false
-        });
+    function parseNum(val) {
+        const n = parseFloat(val);
+        return isNaN(n) ? 0 : n;
     }
 
-    function loadDraft() {
-        const draftStr = localStorage.getItem(DRAFT_KEY);
-        if(!draftStr) return;
-        
-        try {
-            const draft = JSON.parse(draftStr);
-            const draftAge = (new Date().getTime() - draft.timestamp) / (1000 * 60 * 60); // in hours
-            if(draftAge > 24) {
-                localStorage.removeItem(DRAFT_KEY); // hapus jika lebih dari 24 jam
+        const selectCrm = document.getElementById('crm_katalog_id');
+    if(selectCrm) {
+        selectCrm.addEventListener('change', function() {
+            const val = this.value;
+            window.crmCertificates = {};
+            if(!val) {
+                document.querySelectorAll('.btn-evaluasi').forEach(b => b.classList.add('d-none'));
                 return;
             }
-
-            // Restore inputs
-            for(const [key, value] of Object.entries(draft.inputs)) {
-                const el = formQc.querySelector(`[name="${key}"]`);
-                if(el && el.type !== 'checkbox' && el.type !== 'radio' && el.type !== 'hidden') {
-                    el.value = value;
-                }
-            }
-
-            // Restore checkboxes
-            draft.checkboxes.forEach(cb => {
-                const el = formQc.querySelector(`input[type="checkbox"][name="${cb.name}"][value="${cb.value}"]`);
-                if(el) {
-                    el.checked = true;
-                    // trigger change untuk expand accordion
-                    el.dispatchEvent(new Event('change'));
-                }
-            });
-
-            // Trigger calculation for all restored inputs
-            document.querySelectorAll('.param-table input:not([type="hidden"])').forEach(inp => {
-                if(inp.value) inp.dispatchEvent(new Event('input'));
-            });
-
-            const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000
-            });
-            Toast.fire({
-                icon: 'info',
-                title: 'Draft sebelumnya berhasil dimuat.'
-            });
-        } catch(e) {
-            console.error("Error loading draft", e);
-        }
-    }
-
-    document.getElementById('btnDraft').addEventListener('click', saveDraft);
-
-    // Auto-save draft every 30 seconds if form has changes
-    setInterval(() => {
-        // Silent save without alert
-        const formData = new FormData(formQc);
-        const data = Object.fromEntries(formData.entries());
-        delete data['_token'];
-        const checkboxes = [];
-        document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-            if(cb.checked) checkboxes.push({ name: cb.name, value: cb.value });
-        });
-        localStorage.setItem(DRAFT_KEY, JSON.stringify({
-            inputs: data,
-            checkboxes: checkboxes,
-            timestamp: new Date().getTime()
-        }));
-    }, 30000);
-
-    // ============================================
-    // Accordion Toggle & Disable Inputs
-    // ============================================
-    const paramEnables = document.querySelectorAll('.param-enable-check');
-    paramEnables.forEach(check => {
-        check.addEventListener('change', function() {
-            const pid = this.dataset.pid;
-            const collapseEl = document.getElementById('collapse-' + pid);
-            const accordionButton = document.querySelector(`[aria-controls="collapse-${pid}"]`);
-            const inputs = collapseEl.querySelectorAll('input:not([type="hidden"]):not([readonly])');
-
-            if (this.checked) {
-                new bootstrap.Collapse(collapseEl, { toggle: false }).show();
-                accordionButton.classList.remove('collapsed');
-                inputs.forEach(inp => { inp.disabled = false; inp.required = true; });
-            } else {
-                new bootstrap.Collapse(collapseEl, { toggle: false }).hide();
-                accordionButton.classList.add('collapsed');
-                inputs.forEach(inp => { 
-                    inp.disabled = true; 
-                    inp.required = false; 
-                    if(inp.classList.contains('in-im-1') || inp.classList.contains('in-im-2')) {
-                        // don't clear IM if auto-filled, maybe? Actually just clear it.
-                    } else {
-                        inp.value = ''; 
-                    }
+            fetch('/api/crm-katalog/' + val + '/parameters')
+                .then(r => r.json())
+                .then(data => {
+                    data.forEach(item => {
+                        window.crmCertificates[item.parameter_uji_id] = { val: item.cert_value, u: item.cert_u };
+                    });
+                    document.querySelectorAll('.in-hasil-1').forEach(inp => inp.dispatchEvent(new Event('input')));
                 });
-                // Trigger calculation to clear results
-                calculateRow(document.querySelector(`#table-${pid} .row-entry`), document.getElementById(`table-${pid}`).dataset.code);
-            }
-        });
-    });
-
-    // ============================================
-    // Math Logic from Homogenitas
-    // ============================================
-    function parseNum(val) {
-        if(!val) return 0;
-        let v = val.toString().replace(',', '.');
-        return isNaN(parseFloat(v)) ? 0 : parseFloat(v);
-    }
-
-    // Auto sync IM from IM table to VM table if IM is checked, and trigger DB calc for others
-    function syncIM() {
-        const imTables = document.querySelectorAll('table[data-code="IM"]');
-        if(imTables.length === 0) return;
-
-        const imTable = imTables[0];
-        const imCheck = document.querySelector(`.param-enable-check[data-pid="${imTable.dataset.pid}"]`);
-        
-        let imSimplo = 0, imDuplo = 0;
-        if(imCheck && imCheck.checked) {
-            imSimplo = parseNum(imTable.querySelector('.row-entry:nth-child(1) .in-hasil-1')?.value);
-            imDuplo = parseNum(imTable.querySelector('.row-entry:nth-child(2) .in-hasil-2')?.value);
-        }
-
-        // Loop ke tabel lain yang butuh DB
-        document.querySelectorAll('.param-table').forEach(table => {
-            const code = table.dataset.code;
-            if (code === 'VM') {
-                const vmIm1 = table.querySelector('.row-entry:nth-child(1) .in-im-1');
-                const vmIm2 = table.querySelector('.row-entry:nth-child(2) .in-im-2');
-                if(vmIm1 && vmIm2) {
-                    vmIm1.value = imSimplo > 0 ? imSimplo.toFixed(2) : '';
-                    vmIm2.value = imDuplo > 0 ? imDuplo.toFixed(2) : '';
-                }
-            }
-            
-            // Re-calculate the row so the absolute difference and DB update
-            if (code === 'ASH' || code === 'VM' || code === 'TS' || code === 'CV') {
-                calculateRow(table.querySelector('.row-entry:nth-child(1)'), code, true);
-                calculateRow(table.querySelector('.row-entry:nth-child(2)'), code, true);
-            }
         });
     }
-
-    // Auto sync TS to CV if TS is checked
-    function syncTS() {
-        const tsTables = document.querySelectorAll('table[data-code="TS"]');
-        if(tsTables.length === 0) return;
-
-        const tsTable = tsTables[0];
-        const tsCheck = document.querySelector(`.param-enable-check[data-pid="${tsTable.dataset.pid}"]`);
-        
-        let tsSimplo = 0, tsDuplo = 0;
-        if(tsCheck && tsCheck.checked) {
-            tsSimplo = parseNum(tsTable.querySelector('.row-entry:nth-child(1) .in-hasil-1')?.value);
-            tsDuplo = parseNum(tsTable.querySelector('.row-entry:nth-child(2) .in-hasil-2')?.value);
-        }
-
-        document.querySelectorAll('.param-table').forEach(table => {
-            const code = table.dataset.code;
-            if (code === 'CV') {
-                const cvTs1 = table.querySelector('.row-entry:nth-child(1) .in-ts-1');
-                const cvTs2 = table.querySelector('.row-entry:nth-child(2) .in-ts-2');
-                if(cvTs1 && cvTs2) {
-                    cvTs1.value = tsSimplo > 0 ? tsSimplo.toFixed(2) : '';
-                    cvTs2.value = tsDuplo > 0 ? tsDuplo.toFixed(2) : '';
-                }
-                
-                // Trigger recalc on CV to update its Final Result
-                calculateRow(table.querySelector('.row-entry:nth-child(1)'), 'CV', true);
-                calculateRow(table.querySelector('.row-entry:nth-child(2)'), 'CV', true);
-            }
-        });
-    }
-
-    function calculateRow(row, code, isSyncing = false) {
+    // Kalkulasi per baris
+    function calculateRow(row, pid, isSyncing = false) {
         if(!row) return;
         
-        let hasil = 0;
-        let i = row.querySelector('.in-hasil-1') ? 1 : 2; // Simplo or Duplo
+        let config = paramConfigs[pid];
+        if(!config) return;
 
-        if(code === 'IM') {
-            const m1 = parseNum(row.querySelector(`.in-m1-${i}`)?.value);
-            const m3 = parseNum(row.querySelector(`.in-m3-${i}`)?.value);
-            const a = parseNum(row.querySelector(`.in-a-${i}`)?.value);
-            
-            if(m1 && a) {
-                const m2 = m1 + a;
-                row.querySelector(`.in-m2-${i}`).value = m2.toFixed(4);
-                if(m3) {
-                    const b = m2 - m3;
-                    row.querySelector(`.in-b-${i}`).value = b.toFixed(4);
-                    hasil = (b / a) * 100;
-                }
+        let i = row.querySelector('.in-hasil-1') ? 1 : 2;
+        let scope = {};
+
+        // Extract all inputs matching .in-*
+        const inputs = row.querySelectorAll('input[class*="in-"]');
+        inputs.forEach(inp => {
+            const match = inp.className.match(/in-([a-zA-Z0-9_]+)-\d/);
+            if(match) {
+                const varName = match[1].toLowerCase();
+                scope[varName] = parseNum(inp.value);
             }
-        } 
-        else if(code === 'ASH') {
-            const m1 = parseNum(row.querySelector(`.in-m1-${i}`)?.value);
-            const m2m1 = parseNum(row.querySelector(`.in-m2m1-${i}`)?.value);
-            const m3 = parseNum(row.querySelector(`.in-m3-${i}`)?.value);
+        });
 
-            if(m1 && m2m1) {
-                const m2 = m1 + m2m1;
-                row.querySelector(`.in-m2-${i}`).value = m2.toFixed(4);
-                if(m3) {
-                    const m3m1 = m3 - m1;
-                    row.querySelector(`.in-m3m1-${i}`).value = m3m1.toFixed(4);
-                    hasil = (m3m1 / m2m1) * 100;
+        if(row.closest('table').dataset.code === 'CV') {
+            const tsTable = document.querySelector('table[data-code="TS"]');
+            if(tsTable) {
+                const tsInp = tsTable.querySelector(`.in-hasil-${i}`);
+                if(tsInp && tsInp.value) {
+                    scope['ts'] = parseNum(tsInp.value);
+                    const tsRow = row.querySelector(`.in-ts-${i}`);
+                    if(tsRow) tsRow.value = tsInp.value;
                 }
             }
         }
-        else if(code === 'VM') {
-            const m1 = parseNum(row.querySelector(`.in-m1-${i}`)?.value);
-            const m2m1 = parseNum(row.querySelector(`.in-m2m1-${i}`)?.value);
-            const m3 = parseNum(row.querySelector(`.in-m3-${i}`)?.value);
-            const im = parseNum(row.querySelector(`.in-im-${i}`)?.value);
 
-            if(m1 && m2m1) {
-                const m2 = m1 + m2m1;
-                row.querySelector(`.in-m2-${i}`).value = m2.toFixed(4);
-                if(m3) {
-                    const m2m3 = m2 - m3;
-                    row.querySelector(`.in-m2m3-${i}`).value = m2m3.toFixed(4);
-                    const loss = (m2m3 / m2m1) * 100;
-                    row.querySelector(`.in-loss-${i}`).value = loss.toFixed(4);
-                    if(im > 0) {
-                        hasil = loss - im;
-                    }
+        // Inject IM value for VM calculations
+        if(row.closest('table').dataset.code === 'VM') {
+            const imTable = document.querySelector('table[data-code="IM"]');
+            if(imTable) {
+                const imInp = imTable.querySelector(`.in-hasil-${i}`);
+                if(imInp && imInp.value) {
+                    scope['im'] = parseNum(imInp.value);
+                    // Also auto-fill the VM table's IM input field so db calculation can read it
+                    const vmImInp = row.querySelector(`.in-im-${i}`);
+                    if(vmImInp && !vmImInp.value) vmImInp.value = imInp.value;
                 }
             }
         }
-        else if(code === 'CV') {
-            const sm = parseNum(row.querySelector(`.in-sm-${i}`)?.value);
-            const pr = parseNum(row.querySelector(`.in-pr-${i}`)?.value);
-            const ee = parseNum(row.querySelector(`.in-ee-${i}`)?.value);
-            const t = parseNum(row.querySelector(`.in-t-${i}`)?.value);
-            const vt = parseNum(row.querySelector(`.in-vt-${i}`)?.value);
-            const lf = parseNum(row.querySelector(`.in-lf-${i}`)?.value);
-            const ts = parseNum(row.querySelector(`.in-ts-${i}`)?.value);
 
-            if(sm > 0 && pr > 0 && ee > 0) {
-                const outT = row.querySelector(`.in-t-${i}`);
-                if (outT) outT.value = ((pr / ee) * sm).toFixed(4);
+        if(config.langkah && config.langkah.length > 0) {
+            config.langkah.forEach(step => {
+                if(step.var && step.rumus) {
+                    try {
+                        let res = math.evaluate(step.rumus.toLowerCase().replace(/\|/g, ''), scope);
+                        scope[step.var.toLowerCase()] = res;
+                        // Also store under sanitized key (strip special chars) so formulas can find it
+                        let cleanKey = step.var.toLowerCase().replace(/[^a-z0-9_]/g, '');
+                        if(cleanKey !== step.var.toLowerCase()) scope[cleanKey] = res;
+                        
+                        // Try original key first, then sanitized key for the input element
+                        let targetInp = null;
+                        try { targetInp = row.querySelector(`.in-${step.var.toLowerCase()}-${i}`); } catch(ex) {}
+                        if(!targetInp) targetInp = row.querySelector(`.in-${cleanKey}-${i}`);
+                        if(targetInp) targetInp.value = res.toFixed(4);
+                    } catch(e) { }
+                }
+            });
+        }
+
+        let result = 0;
+        if(config.rumus) {
+            try {
+                result = math.evaluate(config.rumus.toLowerCase(), scope);
+            } catch(e) {
+                if(row.closest('table').dataset.code === 'TS') result = scope['mass'] || 0;
             }
-
-            const tsInput = row.querySelector(`.in-ts-${i}`)?.value;
-            if(sm > 0 && pr > 0 && ee > 0 && vt > 0 && lf > 0 && tsInput !== '') {
-                hasil = Math.round(((pr) - (14.3 * 0.0699 * vt) - (2.3 * lf) - (13.2 * ts * sm)) / sm);
+        } else {
+            const code = row.closest('table').dataset.code;
+            if(code === 'IM') {
+                if(scope.m2 > 0) result = ((scope.m2 - scope.m3) / scope.m2) * 100;
+            } else if(code === 'ASH') {
+                if(scope.m2m1 > 0) result = (scope.m3m1 / scope.m2m1) * 100;
+            } else if(code === 'VM') {
+                result = (scope.loss || 0) - (scope.im || 0);
+            } else if(code === 'TS') {
+                result = scope.mass || 0;
             }
         }
-        else if(code === 'TS' || true) {
-            // TS atau param fallback yg diisi manual
-            hasil = parseNum(row.querySelector(`.in-hasil-${i}`)?.value);
-        }
 
-        // Output Result
-        const outHasil = row.querySelector(`.in-hasil-${i}`);
-        if(outHasil && (code === 'IM' || code === 'ASH' || code === 'VM' || code === 'CV')) {
-            outHasil.value = hasil > 0 ? hasil.toFixed(2) : '';
+        const inHasil = row.querySelector(`.in-hasil-${i}`);
+        const inD = row.querySelector(`.in-d${i}`); 
+        if(inHasil && !inHasil.hasAttribute('disabled')) {
+            const dec = (row.closest('table').dataset.code === 'CV') ? 0 : 2;
+            inHasil.value = result.toFixed(dec);
         }
+        if(inD) inD.value = result.toFixed(4);
 
-        // Set Hidden Input for Controller
-        const hiddenInp = row.querySelector(`.in-d${i}`);
-        if(hiddenInp) {
-            hiddenInp.value = hasil > 0 ? hasil : '';
-        }
-
-        if(code === 'IM' && !isSyncing) {
-            syncIM();
-        }
-
-        if(code === 'TS' && !isSyncing) {
-            syncTS();
-        }
-
-        // ==========================================
-        // Hitung Absolute Difference & Average (Jika D1 dan D2 terisi)
-        // ==========================================
         const tbody = row.closest('tbody');
-        const d1 = parseNum(tbody.querySelector('.in-hasil-1')?.value);
-        const d2 = parseNum(tbody.querySelector('.in-hasil-2')?.value);
+        const d1 = parseNum(tbody.querySelector('.in-d1')?.value || tbody.querySelector('.in-hasil-1')?.value);
+        const d2 = parseNum(tbody.querySelector('.in-d2')?.value || tbody.querySelector('.in-hasil-2')?.value);
 
         if(d1 > 0 && d2 > 0) {
             const diff = Math.abs(d1 - d2);
@@ -753,24 +599,24 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if(outDiff) outDiff.textContent = diffStr;
 
-            if(outTol) {
-                if (code === 'IM' || code === 'ASH' || code === 'VM') {
-                    // Semua yang punya out-tol kita kasih logic toleransi, 
-                    // namun user minta IM rumusnya spesifik. Jika parameter lain butuh, bisa disesuaikan.
-                    if (code === 'IM') {
-                        const limit = 0.09 + (0.1 * avg);
-                        const isYes = diff < limit;
-                        outTol.innerHTML = isYes ? `<span class="badge bg-success">YES</span>` : `<span class="badge bg-danger">NO</span>`;
-                    } else {
-                        outTol.textContent = '-'; // Bisa diisi logic ASH/VM nanti
-                    }
+            if(outTol && config.toleransi) {
+                let limit = 0;
+                try {
+                    limit = math.evaluate(config.toleransi, { AVG: avg, avg: avg });
+                } catch(e) {
+                    limit = parseFloat(config.toleransi) || 0;
                 }
+                const isYes = diff < limit;
+                outTol.innerHTML = isYes ? `<span class="badge bg-success">YES</span>` : `<span class="badge bg-danger">NO</span>`;
+            } else if(outTol) {
+                const isYes = diff < (0.09 + (0.1 * avg));
+                outTol.innerHTML = isYes ? `<span class="badge bg-success">YES</span>` : `<span class="badge bg-danger">NO</span>`;
             }
             
             const outAvg = tbody.querySelector('.out-avg-adb');
             if(outAvg) outAvg.textContent = avgStr;
 
-            // Hitung DB conversion jika parameter butuh DB
+            const code = tbody.closest('table').dataset.code;
             if (code === 'ASH' || code === 'VM' || code === 'TS' || code === 'CV') {
                 const outDb1 = tbody.querySelector('.out-db-1');
                 const outDb2 = tbody.querySelector('.out-db-2');
@@ -778,14 +624,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 const inDb2 = tbody.querySelector('.in-db-2');
                 const outAvgDb = tbody.querySelector('.out-avg-db');
                 
-                // Ambil nilai IM dari table IM yang dicentang
                 let im1 = 0, im2 = 0;
                 if (code === 'VM') {
-                    // VM punya input IM manual/otomatis di barisnya sendiri
                     im1 = parseNum(tbody.querySelector('.in-im-1')?.value);
                     im2 = parseNum(tbody.querySelector('.in-im-2')?.value);
+                    // Fallback to IM table values if VM's own IM inputs are empty
+                    if(im1 === 0 || im2 === 0) {
+                        const imTable = document.querySelector('table[data-code="IM"]');
+                        if(imTable) {
+                            const imCheck = document.querySelector(`.param-enable-check[data-pid="${imTable.dataset.pid}"]`);
+                            if(imCheck && imCheck.checked) {
+                                if(im1 === 0) im1 = parseNum(imTable.querySelector('.in-hasil-1')?.value);
+                                if(im2 === 0) im2 = parseNum(imTable.querySelector('.in-hasil-2')?.value);
+                            }
+                        }
+                    }
                 } else {
-                    // Ambil dari table IM jika ada
                     const imTable = document.querySelector('table[data-code="IM"]');
                     if(imTable) {
                         const imCheck = document.querySelector(`.param-enable-check[data-pid="${imTable.dataset.pid}"]`);
@@ -801,114 +655,341 @@ document.addEventListener('DOMContentLoaded', function() {
                     db1 = d1 * (100 / (100 - im1));
                     if(outDb1) outDb1.textContent = db1.toFixed(2);
                     if(inDb1) inDb1.value = db1.toFixed(4);
-                } else {
-                    if(outDb1) outDb1.textContent = '-';
-                    if(inDb1) inDb1.value = '';
                 }
-
                 if(im2 > 0) {
                     db2 = d2 * (100 / (100 - im2));
                     if(outDb2) outDb2.textContent = db2.toFixed(2);
                     if(inDb2) inDb2.value = db2.toFixed(4);
-                } else {
-                    if(outDb2) outDb2.textContent = '-';
-                    if(inDb2) inDb2.value = '';
                 }
 
                 if(im1 > 0 && im2 > 0) {
-                    const avgDb = ((db1 + db2) / 2).toFixed(2);
-                    if(outAvgDb) outAvgDb.textContent = avgDb;
-                } else {
-                    if(outAvgDb) outAvgDb.textContent = '-';
+                    const avgDb = (db1 + db2) / 2;
+                    if(outAvgDb) outAvgDb.textContent = avgDb.toFixed(2);
                 }
             }
-        } else {
-            const outDiff = tbody.querySelector('.out-diff');
-            if(outDiff) outDiff.textContent = '-';
-            const outTol = tbody.querySelector('.out-tol');
-            if(outTol) outTol.textContent = '-';
-            const outAvg = tbody.querySelector('.out-avg-adb');
-            if(outAvg) outAvg.textContent = '-';
-            const outAvgDb = tbody.querySelector('.out-avg-db');
-            if(outAvgDb) outAvgDb.textContent = '-';
             
-            const outDb1 = tbody.querySelector('.out-db-1');
-            if(outDb1) outDb1.textContent = '-';
-            const outDb2 = tbody.querySelector('.out-db-2');
-            if(outDb2) outDb2.textContent = '-';
+            let evalVal = parseFloat(avgStr);
+            const codeEval = tbody.closest('table').dataset.code;
+            if (codeEval === 'ASH' || codeEval === 'VM' || codeEval === 'TS' || codeEval === 'CV') {
+                const outAvgDb = tbody.querySelector('.out-avg-db');
+                if (outAvgDb && outAvgDb.textContent && !isNaN(parseFloat(outAvgDb.textContent))) {
+                    evalVal = parseFloat(outAvgDb.textContent);
+                }
+            }
+
+            if(window.location.href.includes('qc-harian')) {
+                const trAvg = tbody.querySelector('.tr-avg');
+                if(trAvg) {
+                    const mean = parseFloat(trAvg.dataset.mean);
+                    const sd = parseFloat(trAvg.dataset.sd);
+                    const btnEval = trAvg.querySelector('.btn-evaluasi');
+                    const formEval = document.getElementById('eval_' + pid);
+                    
+                    if(mean && sd && btnEval && formEval) {
+                        btnEval.classList.remove('d-none');
+                        const statusEval = formEval.querySelector('.status-eval');
+                        if(statusEval) {
+                            if(evalVal >= (mean - 2*sd) && evalVal <= (mean + 2*sd)) {
+                                statusEval.value = 'inlier';
+                                btnEval.className = 'btn btn-sm fw-bold btn-success btn-evaluasi mt-1';
+                                btnEval.innerHTML = '<i class="fas fa-check-circle"></i> STATUS: INLIER';
+                            } else if((evalVal >= (mean - 3*sd) && evalVal < (mean - 2*sd)) || (evalVal > (mean + 2*sd) && evalVal <= (mean + 3*sd))) {
+                                statusEval.value = 'warning';
+                                btnEval.className = 'btn btn-sm fw-bold btn-warning btn-evaluasi mt-1';
+                                btnEval.innerHTML = '<i class="fas fa-exclamation-triangle"></i> STATUS: WARNING';
+                            } else {
+                                statusEval.value = 'outlier';
+                                btnEval.className = 'btn btn-sm fw-bold btn-danger btn-evaluasi mt-1';
+                                btnEval.innerHTML = '<i class="fas fa-times-circle"></i> STATUS: OUTLIER';
+                            }
+                        }
+                        const avgInp = formEval.querySelector('.nilai-akhir-input');
+                        if(avgInp) avgInp.value = evalVal.toFixed(2);
+                    }
+                }
+            }
+            
+            if(window.location.href.includes('qc-crm')) {
+                const trAvg = tbody.querySelector('.tr-avg');
+                if(trAvg) {
+                    const certData = window.crmCertificates[pid];
+                    const btnEval = trAvg.querySelector('.btn-evaluasi');
+                    const formEval = document.getElementById('eval_' + pid);
+
+                    if (certData && btnEval && formEval) {
+                        btnEval.classList.remove('d-none');
+                        const statusEval = formEval.querySelector('.status-eval');
+                        const v = certData.val;
+                        const u = certData.u;
+                        
+                        if(statusEval) {
+                            if(evalVal >= (v - u) && evalVal <= (v + u)) {
+                                statusEval.value = 'inlier';
+                                btnEval.className = 'btn btn-sm fw-bold btn-success btn-evaluasi mt-1';
+                                btnEval.innerHTML = '<i class="fas fa-check-circle"></i> STATUS: INLIER';
+                            } else {
+                                statusEval.value = 'outlier';
+                                btnEval.className = 'btn btn-sm fw-bold btn-danger btn-evaluasi mt-1';
+                                btnEval.innerHTML = '<i class="fas fa-times-circle"></i> STATUS: OUTLIER';
+                            }
+                        }
+                        const avgInp = formEval.querySelector('.nilai-akhir-input');
+                        if(avgInp) avgInp.value = evalVal.toFixed(2);
+                    }
+                }
+            }
         }
     }
 
-    // Attach Event Listeners to Inputs
     document.querySelectorAll('.param-table input').forEach(input => {
         input.addEventListener('input', function() {
             const row = this.closest('.row-entry');
-            const code = this.closest('table').dataset.code;
+            const pid = this.closest('table').dataset.pid;
             
             if(this.classList.contains('in-hasil-1') || this.classList.contains('in-hasil-2')) {
-                // Update hidden input if it's entered manually (like TS)
                 const i = this.classList.contains('in-hasil-1') ? 1 : 2;
                 const hiddenInp = row.querySelector(`.in-d${i}`);
                 if(hiddenInp) hiddenInp.value = this.value;
             }
             
-            // Selalu trigger kalkulasi agar Average, Absolute Diff, DB, dan Sync (IM/TS) bisa jalan
-            calculateRow(row, code);
+            calculateRow(row, pid, true);
         });
     });
 
-    // ============================================
-    // Form submit validation & loading
-    // ============================================
-    document.getElementById('formQc').addEventListener('submit', function(e) {
-        const checked = document.querySelectorAll('.param-enable-check:checked');
-        if (checked.length === 0) {
-            e.preventDefault();
-            Swal.fire({
-                icon: 'warning',
-                title: 'Belum Ada Parameter',
-                text: 'Silakan centang minimal 1 parameter yang ingin diuji.',
-                confirmButtonColor: '#d33'
-            });
-            return;
-        }
-        
-        // Ensure inputs are filled
-        let valid = true;
-        checked.forEach(check => {
-            const pid = check.dataset.pid;
-            const collapseEl = document.getElementById('collapse-' + pid);
-            const inputs = collapseEl.querySelectorAll('input:not([type="hidden"]):not([readonly]):not(:disabled)');
-            inputs.forEach(inp => {
-                if(!inp.value && inp.required) {
-                    valid = false;
-                    inp.classList.add('is-invalid');
+    const formQc = document.getElementById('formQc');
+    document.querySelectorAll('.param-enable-check').forEach(check => {
+        check.addEventListener('change', function() {
+            const pid = this.dataset.pid;
+            const table = document.getElementById('table-' + pid);
+            if(table) {
+                const inputs = table.querySelectorAll('input:not([type="hidden"])');
+                if(this.checked) {
+                    inputs.forEach(inp => { if(!inp.classList.contains('bg-light')) inp.disabled = false; });
                 } else {
-                    inp.classList.remove('is-invalid');
+                    inputs.forEach(inp => {
+                        inp.disabled = true;
+                        inp.value = '';
+                    });
+                }
+            }
+        });
+    });
+
+    if(formQc) {
+        formQc.addEventListener('submit', function(e) {
+            const checked = document.querySelectorAll('.param-enable-check:checked');
+            if (checked.length === 0) {
+                e.preventDefault();
+                Swal.fire('Belum Ada Parameter', 'Silakan centang minimal 1 parameter yang ingin diuji.', 'warning');
+                return;
+            }
+            // Clear draft on successful submit
+            const batchKey = 'qc_harian_draft_{{ $activeBatch->id ?? "default" }}';
+            localStorage.removeItem(batchKey);
+        });
+    }
+
+    // ============================================================
+    // DRAFT SAVE / LOAD FUNCTIONALITY
+    // ============================================================
+    const DRAFT_KEY = 'qc_harian_draft_{{ $activeBatch->id ?? "default" }}';
+
+    // SAVE DRAFT
+    const btnDraft = document.getElementById('btnDraft');
+    if(btnDraft) {
+        btnDraft.addEventListener('click', function() {
+            const draft = {};
+
+            // Save tanggal uji & nama sampel
+            const tanggal = document.querySelector('input[name="tanggal_uji"]');
+            const namaSampel = document.querySelector('input[name="nama_sampel_uji"]');
+            if(tanggal) draft.tanggal_uji = tanggal.value;
+            if(namaSampel) draft.nama_sampel = namaSampel.value;
+
+            // Save checked alat
+            draft.alat_ids = [];
+            document.querySelectorAll('.alat-checkbox:checked').forEach(cb => {
+                draft.alat_ids.push(cb.value);
+            });
+
+            // Save checked personil + peran
+            draft.personil_ids = [];
+            draft.personil_peran = {};
+            document.querySelectorAll('input[name="personil_ids[]"]:checked').forEach(cb => {
+                draft.personil_ids.push(cb.value);
+            });
+            document.querySelectorAll('input[name^="personil_peran["]').forEach(inp => {
+                const match = inp.name.match(/personil_peran\[(\d+)\]/);
+                if(match) draft.personil_peran[match[1]] = inp.value;
+            });
+
+            // Save checked barang + jumlah
+            draft.barang_ids = [];
+            draft.barang_jumlah = {};
+            document.querySelectorAll('input[name="barang_ids[]"]:checked').forEach(cb => {
+                draft.barang_ids.push(cb.value);
+            });
+            document.querySelectorAll('.barang-input').forEach(inp => {
+                const match = inp.name.match(/barang_jumlah\[(\d+)\]/);
+                if(match && inp.value) draft.barang_jumlah[match[1]] = inp.value;
+            });
+
+            // Save parameter data (checkboxes + all input values)
+            draft.params = {};
+            document.querySelectorAll('.param-enable-check').forEach(check => {
+                const pid = check.dataset.pid;
+                const table = document.getElementById('table-' + pid);
+                if(!table) return;
+                
+                draft.params[pid] = {
+                    selected: check.checked,
+                    inputs: {}
+                };
+
+                // Save all input values in the table
+                table.querySelectorAll('input').forEach(inp => {
+                    // Use a combination of class and row to identify inputs
+                    const classes = Array.from(inp.classList).filter(c => c.startsWith('in-'));
+                    if(classes.length > 0) {
+                        const key = classes[0];
+                        draft.params[pid].inputs[key] = inp.value;
+                    }
+                });
+            });
+
+            draft.saved_at = new Date().toLocaleString('id-ID');
+
+            try {
+                localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Draft Tersimpan!',
+                    html: `<p>Data berhasil disimpan ke penyimpanan lokal browser.</p><small class="text-muted">Tersimpan: ${draft.saved_at}</small>`,
+                    timer: 2500,
+                    showConfirmButton: false,
+                    toast: false
+                });
+            } catch(err) {
+                Swal.fire('Gagal Menyimpan', 'Terjadi kesalahan: ' + err.message, 'error');
+            }
+        });
+    }
+
+    // LOAD DRAFT on page load
+    (function loadDraft() {
+        const raw = localStorage.getItem(DRAFT_KEY);
+        if(!raw) return;
+
+        let draft;
+        try { draft = JSON.parse(raw); } catch(e) { return; }
+        if(!draft || !draft.params) return;
+
+        Swal.fire({
+            icon: 'question',
+            title: 'Draft Ditemukan',
+            html: `<p>Ada draft lokal tersimpan.</p><small class="text-muted">Tersimpan: ${draft.saved_at || '-'}</small>`,
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-undo me-1"></i> Muat Draft',
+            cancelButtonText: 'Abaikan',
+            confirmButtonColor: '#f0ad4e',
+        }).then(result => {
+            if(!result.isConfirmed) return;
+
+            // Restore tanggal & nama sampel
+            if(draft.tanggal_uji) {
+                const tanggal = document.querySelector('input[name="tanggal_uji"]');
+                if(tanggal) tanggal.value = draft.tanggal_uji;
+            }
+            if(draft.nama_sampel) {
+                const namaSampel = document.querySelector('input[name="nama_sampel_uji"]');
+                if(namaSampel) namaSampel.value = draft.nama_sampel;
+            }
+
+            // Restore alat checkboxes
+            if(draft.alat_ids) {
+                draft.alat_ids.forEach(id => {
+                    const cb = document.querySelector(`.alat-checkbox[value="${id}"]`);
+                    if(cb) cb.checked = true;
+                });
+            }
+
+            // Restore personil checkboxes + peran
+            if(draft.personil_ids) {
+                draft.personil_ids.forEach(id => {
+                    const cb = document.getElementById('personil_' + id);
+                    if(cb) cb.checked = true;
+                });
+            }
+            if(draft.personil_peran) {
+                Object.keys(draft.personil_peran).forEach(id => {
+                    const inp = document.querySelector(`input[name="personil_peran[${id}]"]`);
+                    if(inp) inp.value = draft.personil_peran[id];
+                });
+            }
+
+            // Restore barang checkboxes + jumlah
+            if(draft.barang_ids) {
+                draft.barang_ids.forEach(id => {
+                    const cb = document.getElementById('barang_' + id);
+                    if(cb && !cb.disabled) cb.checked = true;
+                });
+            }
+            if(draft.barang_jumlah) {
+                Object.keys(draft.barang_jumlah).forEach(id => {
+                    const inp = document.querySelector(`input[name="barang_jumlah[${id}]"]`);
+                    if(inp && !inp.disabled) inp.value = draft.barang_jumlah[id];
+                });
+            }
+
+            // Restore parameter data
+            Object.keys(draft.params).forEach(pid => {
+                const paramDraft = draft.params[pid];
+                const check = document.querySelector(`.param-enable-check[data-pid="${pid}"]`);
+                const table = document.getElementById('table-' + pid);
+                if(!check || !table) return;
+
+                if(paramDraft.selected) {
+                    // Enable checkbox and enable inputs
+                    check.checked = true;
+                    check.dispatchEvent(new Event('change'));
+
+                    // Restore input values after a short delay to ensure inputs are enabled
+                    setTimeout(() => {
+                        if(paramDraft.inputs) {
+                            Object.keys(paramDraft.inputs).forEach(className => {
+                                const inp = table.querySelector('.' + className);
+                                if(inp && paramDraft.inputs[className]) {
+                                    inp.value = paramDraft.inputs[className];
+                                }
+                            });
+
+                            // Trigger recalculation for both rows
+                            const rows = table.querySelectorAll('.row-entry');
+                            rows.forEach(row => {
+                                calculateRow(row, pid);
+                            });
+                        }
+                    }, 100);
                 }
             });
-        });
 
-        if(!valid) {
-            e.preventDefault();
             Swal.fire({
-                icon: 'error',
-                title: 'Data Belum Lengkap',
-                text: 'Mohon lengkapi semua isian pada parameter yang Anda pilih.',
+                icon: 'success',
+                title: 'Draft Dimuat!',
+                text: 'Data draft berhasil dipulihkan.',
+                timer: 2000,
+                showConfirmButton: false
             });
-            return;
-        }
-
-        const btn = document.getElementById('btnSubmit');
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Mengevaluasi...';
-        btn.disabled = true;
-
-        // Bersihkan draft setelah klik simpan
-        localStorage.removeItem(DRAFT_KEY);
-    });
-
-    // Panggil loadDraft saat halaman pertama kali dibuka
-    loadDraft();
+        });
+    })();
 });
 </script>
+
+
+
 @endsection
+
+
+
+
+

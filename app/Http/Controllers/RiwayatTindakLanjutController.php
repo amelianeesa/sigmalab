@@ -124,7 +124,7 @@ class RiwayatTindakLanjutController extends Controller
 
         // Send notifications via Service
         $currentUser = Auth::user();
-        $senderName = $currentUser->personil->nama_personil ?? $currentUser->username;
+        $senderName = $currentUser->personil->nama ?? $currentUser->username;
         $pesanNotif = "💬 Komentar baru dari {$senderName} pada Tindak Lanjut Outlier #" . $tindakLanjut->riwayat_tindak_lanjut_id;
 
         $this->notificationService->notifyRoles($pesanNotif, 'qc', [

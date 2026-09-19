@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Edit Data - Alat')
 
 @section('content')
 <div class="container-fluid px-4">

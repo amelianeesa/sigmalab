@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Detail Data - Alat')
 
 @section('content')
 <div class="container-fluid px-4 py-4">

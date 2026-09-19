@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('qc_harians', function (Blueprint $table) {
-            //
+            if (!Schema::hasColumn('qc_harians', 'data_mentah')) {
+                $table->json('data_mentah')->nullable()->after('status_evaluasi');
+            }
         });
     }
 
@@ -22,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('qc_harians', function (Blueprint $table) {
-            //
+            $table->dropColumn('data_mentah');
         });
     }
 };

@@ -405,6 +405,10 @@ current() }}" method="GET" class="row g-3 align-items-end">
 
                     const pointRadius = chartData.statuses.map(status => status === 'outlier' ? 6 : 4);
 
+                    if (typeof ChartDataLabels !== 'undefined') {
+                        Chart.register(ChartDataLabels);
+                    }
+
                     new Chart(ctx, {
                         type: 'line',
                         data: {

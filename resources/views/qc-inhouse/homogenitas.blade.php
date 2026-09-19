@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Homogenitas - QC In-House')
 
 @section('content')
 <div class="container-fluid px-4 pb-5">
@@ -44,6 +45,14 @@
                             <i class="fas fa-info-circle me-2"></i> Ketergantungan Data: Tab <strong>IM</strong> wajib diisi lebih dulu karena parameter lain membutuhkan nilai IM untuk konversi ke basis Dry Basis (db). Tab <strong>CV</strong> juga membutuhkan nilai dari tab <strong>TS</strong>.
                         </div>
 
+                        @php
+                            // Dihitung SEKALI untuk seluruh batch (bukan per parameter), karena
+                            // semua parameter menguji set kemasan fisik yang sama -- index ke-i
+                            // harus merujuk ke kemasan yang sama persis di semua tabel parameter.
+                            $rowCount = max(3, $batch->parameters->max(function ($p) {
+                                return $p->dataHomogenitas->count();
+                            }) ?? 0);
+                        @endphp
                         <div class="tab-content" id="parameterTabsContent">
                             @foreach($batch->parameters as $index => $param)
                                 @php 
@@ -140,7 +149,7 @@
                                                 @endif
                                             </thead>
                                             <tbody>
-                                                @for($i = 1; $i <= 10; $i++)
+                                                @for($i = 1; $i <= $rowCount; $i++)
                                                     @php 
                                                         $botolNomor = $tabelAcak[$i]->nomor_botol ?? $i; 
                                                         $dh = $param->dataHomogenitas->where('nomor_sampel', $i)->first();
@@ -148,10 +157,12 @@
                                                     @endphp
                                                     <!-- SIMPLO ROW -->
                                                     <tr class="row-simplo">
-                                                        <td rowspan="2" class="fw-bold align-middle bg-light border-end">Botol {{ $botolNomor }}
+                                                        <td rowspan="2" class="fw-bold align-middle bg-light border-end">
+                                                            {{ $i }}
+                                                            <div class="small text-muted fw-normal">Botol {{ $botolNomor }}</div>
                                                             <input type="hidden" name="data_{{ $pid }}[{{ $i-1 }}][nomor_botol_fisik]" value="{{ $botolNomor }}">
-                                                            <input type="hidden" class="in-db-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][nilai_db_1]" value="{{ $mentah['nilai_db_1'] ?? '' }}">
-                                                            <input type="hidden" class="in-db-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][nilai_db_2]" value="{{ $mentah['nilai_db_2'] ?? '' }}">
+                                                            <input type="hidden" class="in-db-1" name="data_{{ $pid }}[{{ $i-1 }}][nilai_db_1]" value="{{ $mentah['nilai_db_1'] ?? '' }}">
+                                                            <input type="hidden" class="in-db-2" name="data_{{ $pid }}[{{ $i-1 }}][nilai_db_2]" value="{{ $mentah['nilai_db_2'] ?? '' }}">
                                                         </td>
                                                         <td class="bg-light fw-bold">1</td>
                                                         
@@ -271,7 +282,15 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    <div class="px-3 pb-3 d-flex justify-content-end">
+                                    <div class="px-3 pb-3 d-flex justify-content-between">
+                                        <div>
+                                            <button type="button" class="btn btn-outline-primary btn-tambah-kemasan fw-bold me-2" data-pid="{{ $pid }}" data-code="{{ $code }}">
+                                                <i class="fas fa-plus me-1"></i> Tambah Kemasan
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-hapus-kemasan fw-bold" data-pid="{{ $pid }}" data-code="{{ $code }}">
+                                                <i class="fas fa-trash me-1"></i> Hapus Kemasan
+                                            </button>
+                                        </div>
                                         <button type="button" class="btn btn-outline-success btn-save-sheet fw-bold" data-pid="{{ $pid }}" data-code="{{ $code }}">
                                             <i class="fas fa-save me-1"></i> Simpan Tabel {{ $code }} Saja
                                         </button>
@@ -440,7 +459,7 @@
                                             <span>=</span>
                                             <div class="d-flex flex-column text-center">
                                                 <span class="border-bottom border-dark px-2" id="modalValMsbFormulaAtas">-</span>
-                                                <span>18</span>
+                                                <span id="modalValMsbDivisor">18</span>
                                             </div>
                                             <span>=</span>
                                             <span class="fw-bold" id="modalValMsbLengkap">-</span>
@@ -464,7 +483,7 @@
                                             <span>=</span>
                                             <div class="d-flex flex-column text-center">
                                                 <span class="border-bottom border-dark px-2" id="modalValMswFormulaAtas">-</span>
-                                                <span>20</span>
+                                                <span id="modalValMswDivisor">20</span>
                                             </div>
                                             <span>=</span>
                                             <span class="fw-bold" id="modalValMswLengkap">-</span>
@@ -520,8 +539,8 @@
                                         <h4 class="fw-bold mb-0 text-secondary" id="modalValKesimpulanOp">?</h4>
                                     </div>
                                     <div class="text-center">
-                                        <div class="small text-muted">F Tabel (v1=9, v2=10)</div>
-                                        <h4 class="fw-bold text-dark mb-0">3.020</h4>
+                                        <div class="small text-muted" id="modalValFtabelLabel">F Tabel</div>
+                                        <h4 class="fw-bold text-dark mb-0" id="modalValFtabel">-</h4>
                                     </div>
                                 </div>
                                 <hr>
@@ -543,18 +562,52 @@
 
 <!-- Tambahkan script SweetAlert2 untuk notif elegan -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <!-- Tambahkan script SheetJS dan html2pdf untuk Export -->
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
+// Tabel F kritis (alpha=0.05) dari backend HomogenitasService, satu sumber
+// kebenaran yang sama dengan kalkulasi server -> preview live tidak pernah beda.
+const fTabelLookup = @json($fTabelLookup ?? []);
+
+// kode program ini ditambahkan pada tanggal 11 september 2026
+const botolAcakLookup = {
+    @if(isset($tabelAcak))
+        @foreach($tabelAcak as $key => $item)
+            "{{ $key }}": "{{ $item->nomor_botol ?? $key }}",
+        @endforeach
+    @endif
+};
+
+function getFTabelForN(n) {
+    if (fTabelLookup[n] !== undefined) return fTabelLookup[n];
+    const keys = Object.keys(fTabelLookup).map(Number).sort((a,b) => a-b);
+    if (keys.length === 0) return null;
+    const minN = keys[0], maxN = keys[keys.length-1];
+    if (n < minN) return fTabelLookup[minN];
+    if (n > maxN) return fTabelLookup[maxN];
+    // interpolasi linear antar n terdekat
+    let lower = null, upper = null;
+    for (const k of keys) {
+        if (k <= n) lower = k;
+        if (k >= n && upper === null) upper = k;
+    }
+    if (lower !== null && upper !== null && lower !== upper) {
+        const ratio = (n - lower) / (upper - lower);
+        return fTabelLookup[lower] + (fTabelLookup[upper] - fTabelLookup[lower]) * ratio;
+    }
+    return fTabelLookup[maxN];
+}
+
 // STATE STORE
 const State = {};
 @foreach($batch->parameters as $param)
     State["{{ strtoupper($param->parameterUji->nama_parameter) }}"] = {
         id: {{ $param->id }},
         ready: false,
-        data: Array.from({length: 10}, () => ({ 
+        data: Array.from({length: {{ $rowCount }} }, () => ({ 
             simplo_adb: null, duplo_adb: null, avg_adb: null 
         })),
         limit: {{ $tolerances[$param->id] ?? 0.09 }} // Default fixed limit unless IM dynamic
@@ -586,6 +639,132 @@ document.addEventListener('DOMContentLoaded', function() {
                 if(e.target.value && !e.target.readOnly) e.target.value = rnd(e.target.value, 2);
             }
         }, true); // capture phase since blur doesn't bubble
+    });
+
+    // Tambah satu baris kemasan ke SATU tabel tertentu (dipakai internal oleh
+    // fungsi tambahKemasanSemuaParameter di bawah, agar semua tabel tetap sinkron)
+    function tambahKemasanKeTabel(code) {
+        const table = tablesByCode[code];
+        if(!table) return;
+
+        const tbody = table.querySelector('tbody');
+        const simploRows = tbody.querySelectorAll('.row-simplo');
+        const duploRows = tbody.querySelectorAll('.row-duplo');
+
+        const newIndex = simploRows.length; // 0-indexed, dipakai untuk nama field
+        const newUrutan = newIndex + 1; // nomor tampilan, 1-indexed
+
+        const newBotolFisik = botolAcakLookup[newUrutan] !== undefined ? botolAcakLookup[newUrutan] : newUrutan; // fallback ke urutan jika tidak ada di lookup
+        const cloneSimplo = simploRows[0].cloneNode(true);
+        const cloneDuplo = duploRows[0].cloneNode(true);
+
+        // Reindex nama field: hanya bracket numerik (index baris) yang diganti,
+        // bracket non-numerik seperti [mentah] atau [nilai_d1] tidak tersentuh.
+        cloneSimplo.querySelectorAll('[name]').forEach(el => {
+            el.name = el.name.replace(/\[\d+\]/, `[${newIndex}]`);
+        });
+        cloneDuplo.querySelectorAll('[name]').forEach(el => {
+            el.name = el.name.replace(/\[\d+\]/, `[${newIndex}]`);
+        });
+
+        // Kosongkan input yang bisa diisi manual
+        cloneSimplo.querySelectorAll('input').forEach(el => { if(el.type !== 'hidden') el.value = ''; });
+        cloneDuplo.querySelectorAll('input').forEach(el => { if(el.type !== 'hidden') el.value = ''; });
+
+        // Reset field db tersembunyi
+        const inDb1 = cloneSimplo.querySelector('.in-db-1');
+        const inDb2 = cloneSimplo.querySelector('.in-db-2');
+        if(inDb1) inDb1.value = '';
+        if(inDb2) inDb2.value = '';
+
+        // Update nomor botol (tidak ada acuan tabel acak untuk kemasan tambahan ini,
+        // jadi diberi nomor urut berikutnya secara manual sebagai nomor botol fisik juga)
+        const hiddenBotol = cloneSimplo.querySelector('input[name*="[nomor_botol_fisik]"]');
+        if (hiddenBotol) hiddenBotol.value = newBotolFisik;
+
+        const labelCell = cloneSimplo.querySelector('td[rowspan="2"]');
+        if (labelCell) {
+            // Node pertama = teks nomor urut sequential (Kode Sampel)
+            if (labelCell.firstChild && labelCell.firstChild.nodeType === Node.TEXT_NODE) {
+                labelCell.firstChild.textContent = ' ' + newUrutan + ' ';
+            }
+            // Sub-label kecil menampilkan nomor botol fisik
+            const subLabel = labelCell.querySelector('div.text-muted');
+            if (subLabel) subLabel.textContent = 'Botol ' + newBotolFisik;
+        }
+
+        // Reset kolom hasil kalkulasi ke '-'
+        cloneSimplo.querySelectorAll('td.out-diff, td.out-tol, td.out-avg-adb, td.out-avg-db, td.out-db-1').forEach(td => td.textContent = '-');
+        cloneDuplo.querySelectorAll('td.out-db-2').forEach(td => td.textContent = '-');
+
+        tbody.appendChild(cloneSimplo);
+        tbody.appendChild(cloneDuplo);
+
+        State[code].data.push({ simplo_adb: null, duplo_adb: null, avg_adb: null });
+    }
+
+    function hapusKemasanDariTabel(code) {
+        const table = tablesByCode[code];
+        if(!table) return false;
+
+        const tbody = table.querySelector('tbody');
+        const simploRows = tbody.querySelectorAll('.row-simplo');
+        const duploRows = tbody.querySelectorAll('.row-duplo');
+
+        if (simploRows.length <= 3) return false;
+
+        const lastIndex = simploRows.length - 1;
+        tbody.removeChild(simploRows[lastIndex]);
+        tbody.removeChild(duploRows[lastIndex]);
+
+        State[code].data.pop();
+        return true;
+    }
+
+    // Event listener untuk tombol "Tambah Kemasan"
+    // PENTING: diterapkan ke SEMUA parameter sekaligus (bukan cuma tab aktif),
+    // karena kemasan ke-i harus merujuk ke botol fisik yang sama untuk semua
+    // parameter (IM, ASH, VM, TS, CV diuji dari kemasan yang identik).
+    document.querySelectorAll('.btn-tambah-kemasan').forEach(btn => {
+        btn.addEventListener('click', function() {
+            Object.keys(tablesByCode).forEach(code => {
+                tambahKemasanKeTabel(code);
+            });
+            executionOrder.forEach(c => {
+                if(tablesByCode[c]) processTable(c, tablesByCode[c]);
+            });
+            Object.keys(tablesByCode).forEach(code => {
+                if(!executionOrder.includes(code)) processTable(code, tablesByCode[code]);
+            });
+        });
+    });
+
+    // Event listener untuk tombol "Hapus Kemasan" -- juga diterapkan ke semua parameter
+    document.querySelectorAll('.btn-hapus-kemasan').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const anyTableCode = Object.keys(tablesByCode)[0];
+            const anyTable = tablesByCode[anyTableCode];
+            const currentCount = anyTable ? anyTable.querySelectorAll('.row-simplo').length : 0;
+
+            if (currentCount <= 3) {
+                Swal.fire({
+                    toast: true, position: 'top-end', icon: 'error',
+                    title: 'Minimal harus ada 3 kemasan untuk uji homogenitas.',
+                    showConfirmButton: false, timer: 2200
+                });
+                return;
+            }
+
+            Object.keys(tablesByCode).forEach(code => {
+                hapusKemasanDariTabel(code);
+            });
+            executionOrder.forEach(c => {
+                if(tablesByCode[c]) processTable(c, tablesByCode[c]);
+            });
+            Object.keys(tablesByCode).forEach(code => {
+                if(!executionOrder.includes(code)) processTable(code, tablesByCode[code]);
+            });
+        });
     });
 
     // Initial process to calculate pre-filled data in DEPENDENCY ORDER
@@ -627,10 +806,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function processTable(code, table) {
         let isComplete = true;
-        
-        for(let i=0; i<10; i++) {
-            const tr1 = table.querySelectorAll('.row-simplo')[i];
-            const tr2 = table.querySelectorAll('.row-duplo')[i];
+        const simploRowsAll = table.querySelectorAll('.row-simplo');
+        const duploRowsAll = table.querySelectorAll('.row-duplo');
+        const rowCount = simploRowsAll.length;
+
+        for(let i=0; i<rowCount; i++) {
+            const tr1 = simploRowsAll[i];
+            const tr2 = duploRowsAll[i];
             
             let val1 = null;
             let val2 = null;
@@ -957,7 +1139,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function calculateAnovaPreview(code) {
         // Pure JS ANOVA Calculation
         let sumA = 0, sumB = 0;
-        const n = 10;
+        const n = State[code].data.length;
         let ai = [], bi = [];
 
         for(let i=0; i<n; i++) {
@@ -995,10 +1177,10 @@ document.addEventListener('DOMContentLoaded', function() {
         let MSW = mswSum / (2 * n);
         
         let F = MSB / MSW;
-        let FTabel = 3.020;
-        let isHomogen = F < FTabel;
+        let FTabel = getFTabelForN(n);
+        let isHomogen = FTabel !== null ? (F < FTabel) : false;
 
-        State[code].anova = { ai, bi, msbSum, mswSum, MSB, MSW, F, isHomogen };
+        State[code].anova = { n, ai, bi, msbSum, mswSum, MSB, MSW, F, FTabel, isHomogen };
         renderPreview();
     }
 
@@ -1011,22 +1193,27 @@ document.addEventListener('DOMContentLoaded', function() {
         if (elParamName) elParamName.textContent = code;
 
         const previewDiv = document.getElementById('anovaPreviewBoxes');
+        const nKemasan = State[code].data.length;
         if(State[code].ready && State[code].anova) {
             const a = State[code].anova;
             previewDiv.innerHTML = `
-                <div class="col-3">
+                <div class="col-2">
                     <div class="small text-muted">MSB</div>
                     <h4 class="fw-bold text-dark">${rnd(a.MSB)}</h4>
                 </div>
-                <div class="col-3">
+                <div class="col-2">
                     <div class="small text-muted">MSW</div>
                     <h4 class="fw-bold text-dark">${rnd(a.MSW)}</h4>
                 </div>
-                <div class="col-3">
+                <div class="col-2">
                     <div class="small text-muted">F-Hitung</div>
                     <h4 class="fw-bold text-primary">${rnd(a.F)}</h4>
                 </div>
-                <div class="col-3">
+                <div class="col-2">
+                    <div class="small text-muted">F-Tabel (v1=${nKemasan-1}, v2=${nKemasan})</div>
+                    <h4 class="fw-bold text-dark">${a.FTabel !== null ? rnd(a.FTabel) : '-'}</h4>
+                </div>
+                <div class="col-4">
                     <div class="small text-muted">Keputusan</div>
                     <h4 class="fw-bold ${a.isHomogen ? 'text-success' : 'text-danger'}">
                         ${a.isHomogen ? '<i class="fas fa-check-circle me-1"></i> HOMOGEN' : '<i class="fas fa-times-circle me-1"></i> TIDAK'}
@@ -1034,7 +1221,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `;
         } else {
-            previewDiv.innerHTML = `<div class="col-12"><p class="text-muted fst-italic">Lengkapi 10 botol (simplo & duplo) untuk melihat Live ANOVA.</p></div>`;
+            previewDiv.innerHTML = `<div class="col-12"><p class="text-muted fst-italic">Lengkapi ${nKemasan} kemasan (simplo & duplo) untuk melihat Live ANOVA.</p></div>`;
         }
     }
 
@@ -1054,8 +1241,10 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('modalTableCombined').innerHTML = `<tr><td colspan="9" class="text-danger fw-bold py-3 text-center">Data parameter ${code} belum lengkap atau gagal dihitung karena ada data dependensi (IM/TS) yang belum lengkap.</td></tr>`;
             document.getElementById('modalTableCombinedFoot').innerHTML = '';
             document.getElementById('modalValMsbFormulaAtas').textContent = '-';
+            document.getElementById('modalValMsbDivisor').textContent = '-';
             document.getElementById('modalValMsbLengkap').textContent = '-';
             document.getElementById('modalValMswFormulaAtas').textContent = '-';
+            document.getElementById('modalValMswDivisor').textContent = '-';
             document.getElementById('modalValMswLengkap').textContent = '-';
             document.getElementById('modalValMsb2').textContent = '-';
             document.getElementById('modalValMsw2').textContent = '-';
@@ -1063,6 +1252,8 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('modalValMsb').textContent = '-';
             document.getElementById('modalValMsw').textContent = '-';
             document.getElementById('modalValFhitung').textContent = '-';
+            document.getElementById('modalValFtabel').textContent = '-';
+            document.getElementById('modalValFtabelLabel').textContent = 'F Tabel';
             document.getElementById('modalValKesimpulanOp').textContent = '-';
             document.getElementById('modalValKesimpulanTextA').textContent = '-';
             document.getElementById('modalValKesimpulanTextB').innerHTML = '-';
@@ -1070,7 +1261,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const a = State[code].anova;
-        const n = 10;
+        const n = a.n;
         let sumA = 0, sumB = 0;
         let ai = a.ai, bi = a.bi;
         
@@ -1141,9 +1332,11 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('modalValParamName').textContent = paramNames[code] || code;
 
         document.getElementById('modalValMsbFormulaAtas').textContent = rnd(a.msbSum);
+        document.getElementById('modalValMsbDivisor').textContent = 2 * (n - 1);
         document.getElementById('modalValMsbLengkap').textContent = rnd(a.MSB, 6);
         
         document.getElementById('modalValMswFormulaAtas').textContent = rnd(a.mswSum);
+        document.getElementById('modalValMswDivisor').textContent = 2 * n;
         document.getElementById('modalValMswLengkap').textContent = rnd(a.MSW, 6);
         
         let sdVal = Math.sqrt(Math.max(0, (a.MSB - a.MSW) / 2));
@@ -1154,8 +1347,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('modalValMsw').textContent = rnd(a.MSW);
         
         const fHitungVal = rnd(a.F);
-        const fTabelVal = '3.020';
+        const fTabelVal = a.FTabel !== null ? rnd(a.FTabel) : '-';
         document.getElementById('modalValFhitung').textContent = fHitungVal;
+        document.getElementById('modalValFtabel').textContent = fTabelVal;
+        document.getElementById('modalValFtabelLabel').textContent = `F Tabel (v1=${n-1}, v2=${n})`;
         
         const opText = a.isHomogen ? '<' : '>';
         document.getElementById('modalValKesimpulanOp').textContent = opText;
@@ -1353,7 +1548,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     combinedWsData.push(['MSB = ', document.getElementById('modalValMsbLengkap').textContent]);
                     combinedWsData.push(['MSW = ', document.getElementById('modalValMswLengkap').textContent]);
                     combinedWsData.push(['F Hitung = ', document.getElementById('modalValFhitung').textContent]);
-                    combinedWsData.push(['F Tabel = ', '3.020']);
+                    combinedWsData.push(['F Tabel = ', document.getElementById('modalValFtabel').textContent]);
                     combinedWsData.push(['Status = ', document.getElementById('modalValKesimpulanTextB').innerText]);
                 }
             }
@@ -1370,16 +1565,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function buildExportHtml(params, part) {
+        // Gunakan URL gambar langsung
+        const logoUrl = window.location.origin + '/images/Logo_Suco_Nobg.png';
+
         let html = `<html><head><meta charset="utf-8"><style>
             body { font-family: 'Arial', sans-serif; font-size: 11px; color: black; }
-            .official-table { border-collapse: collapse; width: 100%; margin-bottom: 20px; font-size: 10px; }
+            .official-table { border-collapse: collapse; width: 100%; font-size: 10px; border: 2px solid black; }
             .official-table th, .official-table td { border: 1px solid black; padding: 4px; text-align: center; }
-            .official-table th { background-color: #f8f9fa; font-weight: bold; }
-            .no-border { border: none !important; }
-            .no-border td { border: none !important; }
-            .header-title { font-size: 18px; font-weight: bold; }
-            .title-box { background-color: #e9ecef; font-weight: bold; padding: 3px 5px; }
-            .bg-grey { background-color: #f0f0f0; }
+            .official-table th { background-color: #e9ecef; font-weight: bold; border-bottom: 2px solid black; }
+            .official-table thead { border: 2px solid black; }
             .page-break { page-break-after: always; }
         </style></head><body>`;
         
@@ -1424,6 +1618,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const msb = document.getElementById('modalValMsbLengkap').textContent;
                 const msw = document.getElementById('modalValMswLengkap').textContent;
                 const fHitung = document.getElementById('modalValFhitung').textContent;
+                const fTabel = a.FTabel !== null ? a.FTabel.toFixed(4) : '-';
                 const isHomogen = a.isHomogen;
                 const opText = isHomogen ? '<' : '>';
                 
@@ -1436,142 +1631,146 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 html += `
                 <div style="width: 100%; margin: 0 auto;">
-                    <!-- Header -->
-                    <table style="width:100%; border-bottom: 3px solid black; margin-bottom: 15px;" class="no-border">
+                    
+                    <br> <!-- Spasi atas pendorong kertas -->
+
+                    <!-- KOP SURAT (Format Klasik) -->
+                    <table width="100%" border="0" cellpadding="0" cellspacing="0">
                         <tr>
-                            <td style="font-size: 16px; font-weight: bold; padding-bottom: 10px; text-align:left;">Perhitungan Uji Homogenitas Sampel <span style="font-style: italic;">Inhouse Standard</span></td>
-                            <td style="text-align: right; padding-bottom: 10px; color: #004b87; font-weight: 900; font-size: 18px; font-style: italic;">
-                                SUCOFINDO
+                            <td align="left" valign="bottom" style="font-size: 16px; font-weight: bold; padding-bottom: 5px;">
+                                Perhitungan Uji Homogenitas Sampel <i>Inhouse Standard</i>
+                            </td>
+                            <td align="right" valign="bottom" width="150" style="padding-bottom: 5px;">
+                                <!-- MENGUNCI GAMBAR AGAR TIDAK GEPENG -->
+                                <img src="${logoUrl}" width="140" height="40" alt="SUCOFINDO">
                             </td>
                         </tr>
                     </table>
+                    <hr size="4" color="black" style="background-color: black; border: none; margin: 0; padding: 0;">
                     
-                    <!-- Param Info -->
-                    <table style="width:80%; font-size: 11px; margin-bottom: 15px;" class="no-border">
+                    <br> <!-- Jarak lega setelah garis -->
+
+                    <!-- IDENTITAS PARAMETER -->
+                    <table width="80%" border="0" cellpadding="4" cellspacing="0" style="font-size: 11px;">
                         <tr>
-                            <td style="width: 30%; text-align:left;">Parameter Uji</td>
-                            <td style="width: 5%;">:</td>
-                            <td style="width: 45%;" class="title-box">${paramFull}</td>
-                            <td style="width: 20%; text-align:left; padding-left:10px;">(db)</td>
+                            <td width="35%" align="left">Parameter Uji</td>
+                            <td width="5%" align="center">:</td>
+                            <td width="45%" bgcolor="#e9ecef" align="center" style="border: 1px solid #ccc;"><b>${paramFull}</b></td>
+                            <td width="15%" align="left">&nbsp;&nbsp;(db)</td>
                         </tr>
-                        <tr><td colspan="4" style="height:3px;"></td></tr>
+                        <tr><td colspan="4" height="6"></td></tr> <!-- Jarak antar baris -->
                         <tr>
-                            <td style="text-align:left;">Kode Sampel Inhouse Standard</td>
-                            <td>:</td>
-                            <td class="title-box"></td>
+                            <td align="left">Kode Sampel Inhouse Standard</td>
+                            <td align="center">:</td>
+                            <td bgcolor="#e9ecef" style="border: 1px solid #ccc;"></td>
                             <td></td>
                         </tr>
                     </table>
                     
-                    <!-- Data & Perhitungan Title -->
-                    <table style="width:100%; font-size:11px; font-weight:bold; margin-bottom:5px;" class="no-border">
+                    <br><br> 
+
+                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size:11px; font-weight:bold; margin-bottom:5px;">
                         <tr>
-                            <td style="width:25%; text-align:left;">I. DATA:</td>
-                            <td style="width:75%; text-align:left;">II. PERHITUNGAN:</td>
+                            <td width="28%" align="left">I. DATA:</td>
+                            <td width="73%" align="left">II. PERHITUNGAN:</td>
                         </tr>
                     </table>
                     
-                    <!-- Main Table -->
+                    <!-- TABEL UTAMA ANOVA -->
                     ${tableHtml}
                     
-                    <!-- MSB Formula -->
-                    <table style="width: 70%; font-size: 11px; margin-bottom: 15px; background-color: #f0f0f0; padding: 5px;" class="no-border">
+                    <br> <!-- Jarak lega setelah tabel utama -->
+
+                    <!-- RUMUS MSB & MSW -->
+                    <table width="70%" border="0" cellpadding="5" cellspacing="0" bgcolor="#f0f0f0" style="font-size: 11px; margin-bottom: 15px;">
                         <tr>
-                            <td style="font-weight: bold; width: 10%; text-align: right; vertical-align: middle;">MSB = </td>
-                            <td style="width: 30%; text-align: center; vertical-align: middle;">
-                                <div style="border-bottom: 1px solid black; margin: 0 auto; width: 80%;">E [ (Ai + Bi) - Xab ]&sup2;</div>
-                                <div>2 . (n-1)</div>
+                            <td align="right" width="10%"><b>MSB =</b></td>
+                            <td align="center" width="30%">
+                                <span style="border-bottom: 1px solid black;">E [ (Ai + Bi) - Xab ]&sup2;</span><br>2 . (n-1)
                             </td>
-                            <td style="width: 5%; text-align: center; vertical-align: middle;">=</td>
-                            <td style="width: 20%; text-align: center; vertical-align: middle;">
-                                <div style="border-bottom: 1px solid black; margin: 0 auto; width: 80%;">${msbFormulaAtas}</div>
-                                <div>18</div>
+                            <td align="center" width="5%">=</td>
+                            <td align="center" width="20%">
+                                <span style="border-bottom: 1px solid black;">${msbFormulaAtas}</span><br>${2 * (a.n - 1)}
                             </td>
-                            <td style="width: 5%; text-align: center; vertical-align: middle;">=</td>
-                            <td style="width: 30%; text-align: left; vertical-align: middle;">${msb}</td>
+                            <td align="center" width="5%">=</td>
+                            <td align="left" width="30%"><b>${msb}</b></td>
                         </tr>
                     </table>
+                    <br> 
+                    <table width="70%" border="0" cellpadding="5" cellspacing="0" bgcolor="#f0f0f0" style="font-size: 11px; margin-bottom: 25px;">
+                        <tr>
+                            <td align="right" width="10%"><b>MSW =</b></td>
+                            <td align="center" width="30%">
+                                <span style="border-bottom: 1px solid black;">E [ (Ai - Bi) - Xab ]&sup2;</span><br>2 . (n)
+                            </td>
+                            <td align="center" width="5%">=</td>
+                            <td align="center" width="20%">
+                                <span style="border-bottom: 1px solid black;">${mswFormulaAtas}</span><br>${2 * a.n}
+                            </td>
+                            <td align="center" width="5%">=</td>
+                            <td align="left" width="30%"><b>${msw}</b></td>
+                        </tr>
+                    </table>
+                    <br>
+                    <!-- KESIMPULAN F-TEST -->
+                    <table width="100%" border="0" cellpadding="10" cellspacing="0" bgcolor="#e9ecef" style="font-size: 11px; margin-bottom: 25px;">
+                        <tr>
+                            <td align="right" width="15%"><b>F hitung =</b></td>
+                            <td align="center" width="15%">
+                                <span style="border-bottom: 1px solid black;">MSB</span><br>MSW
+                            </td>
+                            <td align="center" width="5%">=</td>
+                            <td align="center" width="15%">
+                                <span style="background-color: #fff; padding: 4px 15px; border: 1px solid #ccc;"><b>${fHitung}</b></span>
+                            </td>
+                            <td align="center" width="5%"><b>${opText}</b></td>
+                            <td align="left" width="45%">
+                                <b>F tabel (p=0.05 ; v1= ${a.n - 1}; v2= ${a.n} ) =</b> &nbsp;&nbsp;&nbsp; 
+                                <span style="background-color: #fff; padding: 4px 15px; border: 1px solid #ccc;"><b>${fTabel}</b></span>
+                            </td>
+                        </tr>
+                    </table>
+                    <br>
                     
-                    <!-- MSW Formula -->
-                    <table style="width: 70%; font-size: 11px; margin-bottom: 25px; background-color: #f0f0f0; padding: 5px;" class="no-border">
+                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 11px; margin-bottom: 40px;">
                         <tr>
-                            <td style="font-weight: bold; width: 10%; text-align: right; vertical-align: middle;">MSW = </td>
-                            <td style="width: 30%; text-align: center; vertical-align: middle;">
-                                <div style="border-bottom: 1px solid black; margin: 0 auto; width: 80%;">E [ (Ai - Bi) - Xab ]&sup2;</div>
-                                <div>2 . (n)</div>
-                            </td>
-                            <td style="width: 5%; text-align: center; vertical-align: middle;">=</td>
-                            <td style="width: 20%; text-align: center; vertical-align: middle;">
-                                <div style="border-bottom: 1px solid black; margin: 0 auto; width: 80%;">${mswFormulaAtas}</div>
-                                <div>20</div>
-                            </td>
-                            <td style="width: 5%; text-align: center; vertical-align: middle;">=</td>
-                            <td style="width: 30%; text-align: left; vertical-align: middle;">${msw}</td>
-                        </tr>
-                    </table>
-                    
-                    <!-- Section III -->
-                    <table style="width: 100%; font-size: 11px; margin-bottom: 5px;" class="no-border">
-                        <tr>
-                            <td style="font-weight: bold; width: 50%; text-align:left;">III. PERHITUNGAN Nilai "F hitung" dan "F tabel":</td>
-                            <td style="font-weight: bold; font-style: italic; width: 50%; text-align:left;">( Asumsinya, Ho='contoh homogen' )</td>
-                        </tr>
-                    </table>
-                    <table style="width: 100%; font-size: 11px; margin-bottom: 25px; background-color: #e9ecef; padding: 10px;" class="no-border">
-                        <tr>
-                            <td style="font-weight: bold; width: 15%; text-align: right; vertical-align: middle;">F hitung = </td>
-                            <td style="font-weight: bold; width: 15%; text-align: center; vertical-align: middle;">
-                                <div style="border-bottom: 1px solid black; margin: 0 auto; width: 60%;">MSB</div>
-                                <div>MSW</div>
-                            </td>
-                            <td style="font-weight: bold; width: 5%; text-align: center; vertical-align: middle;">=</td>
-                            <td style="font-weight: bold; width: 15%; text-align: center; vertical-align: middle;"><span style="background-color: #d3d3d3; padding: 2px 15px;">${fHitung}</span></td>
-                            <td style="font-weight: bold; width: 50%; text-align: right; vertical-align: middle;">F tabel (p=0.05 ; v1= 9; v2= 10 ) = &nbsp;&nbsp;&nbsp; <span style="background-color: #d3d3d3; padding: 2px 15px;">3.020</span></td>
-                        </tr>
-                    </table>
-                    
-                    <!-- Section IV -->
-                    <table style="width: 100%; font-size: 11px; margin-bottom: 40px;" class="no-border">
-                        <tr>
-                            <td style="font-weight: bold; width: 20%; text-decoration: underline; vertical-align: top; text-align:left;">IV. KESIMPULAN:</td>
-                            <td style="width: 80%; text-align:left;">
-                                <div>a). F hitung &nbsp;&nbsp; ${opText} &nbsp;&nbsp; F tabel &nbsp;&nbsp; <span style="color: red; font-style: italic; font-size: 9px;">[isilah dengan tanda "<" atau ">"]</span></div>
-                                <div style="margin-top:4px;">b). Hal ini artinya, bahwa contoh tersebut <span style="font-weight:bold;">${isHomogen ? 'HOMOGEN / <span style="text-decoration: line-through; font-weight:normal;">TIDAK Homogen</span>' : '<span style="text-decoration: line-through; font-weight:normal;">HOMOGEN</span> / TIDAK Homogen'}</span> * &nbsp;&nbsp; <span style="color: red; font-style: italic; font-size: 9px;">[ *coret yg tdk perlu ]</span></div>
-                                <div style="color: red; font-style: italic; font-size: 9px; margin-top: 5px;">( apabila <span style="font-weight: bold;">F hitung &lt; F tabel</span> maka Homogen, dan jika sebaliknya maka Tidak Homogen )</div>
+                            <td align="left" valign="top" width="15%"><b>Kesimpulan</b></td>
+                            <td align="left" width="85%">
+                                <span style="font-weight:bold; font-size: 12px; margin-left: 20px;">${isHomogen ? 'Homogen' : 'Tidak Homogen'}</span>
                             </td>
                         </tr>
                     </table>
                     
-                    <!-- Signatures -->
-                    <table style="width: 100%; font-size: 11px; margin-bottom: 20px;" class="no-border">
+                    <!-- TANDA TANGAN -->
+                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 11px;">
                         <tr>
-                            <td style="width: 15%; text-align:left;">Disusun oleh</td>
-                            <td style="width: 5%;">:</td>
-                            <td style="width: 30%;" class="title-box"></td>
-                            <td style="width: 10%; text-align:right;">Tanggal</td>
-                            <td style="width: 5%;">:</td>
-                            <td style="width: 20%;" class="title-box"></td>
-                            <td style="width: 15%;"></td>
+                            <td align="left" width="15%">Disusun oleh</td>
+                            <td align="center" width="30%" bgcolor="#e9ecef" style="border: 1px solid #ccc; height: 18px;"></td>
+                            <td width="10%"></td>
+                            <td align="right" width="10%">Tanggal :&nbsp;</td>
+                            <td align="center" width="20%" bgcolor="#e9ecef" style="border: 1px solid #ccc;"></td>
+                            <td width="15%"></td>
                         </tr>
-                        <tr><td colspan="7" style="height: 10px;"></td></tr>
+                        <tr><td colspan="6" height="20"></td></tr>
                         <tr>
-                            <td style="text-align:left;">Diperiksa oleh</td>
-                            <td>:</td>
-                            <td class="title-box"></td>
-                            <td style="text-align:right;">Tanggal</td>
-                            <td>:</td>
-                            <td class="title-box"></td>
+                            <td align="left">Diperiksa oleh</td>
+                            <td align="center" bgcolor="#e9ecef" style="border: 1px solid #ccc; height: 18px;"></td>
+                            <td></td>
+                            <td align="right">Tanggal :&nbsp;</td>
+                            <td align="center" bgcolor="#e9ecef" style="border: 1px solid #ccc;"></td>
                             <td></td>
                         </tr>
                     </table>
                     
-                    <!-- Document Footer -->
-                    <table style="width: 100%; font-size: 9px; margin-top: 50px;" class="no-border">
+                    <br><br><br><br> <!-- JARAK JAUH KE BAWAH -->
+                    
+                    <!-- FOOTER KODE DOKUMEN -->
+                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 9px;">
                         <tr>
-                            <td style="width: 30%; text-align:left;">FOR/COAL-OPS/214</td>
-                            <td style="width: 20%; text-align: center;">Rev. 01</td>
-                            <td style="width: 30%; text-align: center;">Tgl. berlaku: 12/08/2023</td>
-                            <td style="width: 20%; text-align: right;">Hal 1 dari 1 hal</td>
+                            <td align="left" width="30%">FOR/COAL-OPS/214</td>
+                            <td align="center" width="20%">Rev. 01</td>
+                            <td align="center" width="30%">Tgl. berlaku: 12/08/2023</td>
+                            <td align="right" width="20%">Hal 1 dari 1 hal</td>
                         </tr>
                     </table>
                 </div>

@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard - SIGMALAB Sucofindo</title>
+    <title>@yield('title', 'Dashboard')</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo-sucofindo.png') }}?v=1">
    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -280,25 +280,28 @@
                 </li>
                 @endif
                 
-                 @if(Auth::check() && (Auth::user()->hasModulAccess('sdm') || Auth::user()->hasModulAccess('manajemen_pengguna')))
-                 <li class="{{ request()->is('sdm*') || request()->is('hak-akses*') ? 'active' : '' }}">
-                     <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personil & Kompetensi</a>
-                 </li>
-                 @endif
-
-
-                @if(Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
-                <li class="{{ request()->is('parameter-uji*') || request()->is('kegiatan*') || request()->is('tindak-lanjut*') || request()->is('reporting*') ? 'active' : '' }}">
-                    <a href="{{ route('kegiatan.index') }}"><i class="fas fa-flask"></i> Verifikasi Mutu (QC)</a>
+                {{-- 2. Personil & Kompetensi --}}
+                @if(Auth::check() && Auth::user()->hasModulAccess('sdm'))
+                <li class="{{ request()->is('sdm*') ? 'active' : '' }}">
+                    <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personel & Kompetensi</a>
                 </li>
                 @endif
 
+                {{-- 3. Verifikasi Mutu (QC) --}}
+                @if(Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
+                <li class="{{ request()->is('verifikasi-mutu*') || request()->is('qc-inhouse*') || request()->is('parameter-uji*') || request()->is('kegiatan*') || request()->is('inhouse-control*') || request()->is('tindak-lanjut*') || request()->is('reporting*') ? 'active' : '' }}">
+                    <a href="{{ route('verifikasi-mutu.index') }}"><i class="fas fa-flask"></i> Verifikasi Mutu (QC)</a>
+                </li>
+                @endif
+
+                {{-- 4. Inventori & Fasilitas --}}
                 @if(Auth::check() && (Auth::user()->hasModulAccess('barang') || Auth::user()->hasModulAccess('pengadaan')))
                 <li class="{{ request()->is('barang*') || request()->is('pengadaan*') ? 'active' : '' }}">
-                    <a href="{{ route('barang.index') }}"><i class="fas fa-boxes"></i> Inventori Bahan/Barang</a>
+                    <a href="{{ Auth::user()->hasModulAccess('barang') ? route('barang.index') : route('pengadaan.index') }}"><i class="fas fa-boxes"></i> Inventori & Fasilitas</a>
                 </li>
                 @endif
 
+                {{-- 5. Library Digital --}}
                 @if(Auth::check() && Auth::user()->hasModulAccess('library_manage'))
                 <li class="{{ request()->is('library*') ? 'active' : '' }}">
                     <a href="{{ route('library.index') }}"><i class="fas fa-book-open"></i> Library Digital</a>
@@ -306,10 +309,18 @@
                 @endif
 
 
+
                 {{-- 6. Audit Log --}}
                 @if(Auth::check() && Auth::user()->hasModulAccess('audit_log'))
                 <li class="{{ request()->is('audit-log*') ? 'active' : '' }}">
                     <a href="{{ route('audit-log.index') }}"><i class="fas fa-history"></i> Audit Trail</a>
+                </li>
+                @endif
+
+                {{-- 7. Pengaturan Sistem --}}
+                @if(Auth::check() && Auth::user()->hasModulAccess('manajemen_pengguna'))
+                <li class="{{ request()->is('hak-akses*') || request()->is('kelola-user*') ? 'active' : '' }}">
+                    <a href="{{ route('hak-akses.index') }}"><i class="fas fa-user-shield"></i> Pengaturan Akses</a>
                 </li>
                 @endif
             </ul>
@@ -323,49 +334,6 @@
                     <i class="fas fa-bars"></i>
                 </button>
             @endauth
-            {{-- 2. Personel dan Kompetensi --}}
-            @if(Auth::check() && Auth::user()->hasModulAccess('sdm'))
-            <li class="{{ request()->is('sdm*') ? 'active' : '' }}">
-                <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personel & Kompetensi</a>
-            </li>
-            @endif
-
-            {{-- 3. Proses dan Hasil Pengujian (QC) --}}
-            @if(Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
-            <li class="{{ request()->is('verifikasi-mutu*') || request()->is('qc-inhouse*') || request()->is('parameter-uji*') || request()->is('kegiatan*') || request()->is('inhouse-control*') || request()->is('tindak-lanjut*') || request()->is('reporting*') ? 'active' : '' }}">
-                <a href="{{ route('verifikasi-mutu.index') }}"><i class="fas fa-flask"></i> Verifikasi Mutu (QC)</a>
-            </li>
-            @endif
-
-            {{-- 4. Inventori & Fasilitas --}}
-            @if(Auth::check() && (Auth::user()->hasModulAccess('barang') || Auth::user()->hasModulAccess('pengadaan')))
-            <li class="{{ request()->is('barang*') || request()->is('pengadaan*') ? 'active' : '' }}">
-                <a href="{{ Auth::user()->hasModulAccess('barang') ? route('barang.index') : route('pengadaan.index') }}"><i class="fas fa-boxes"></i> Inventori & Fasilitas</a>
-            </li>
-            @endif
-
-            {{-- 5. Audit Log --}}
-            @if(Auth::check() && Auth::user()->hasModulAccess('audit_log'))
-            <li class="{{ request()->is('audit-log*') ? 'active' : '' }}">
-                <a href="{{ route('audit-log.index') }}"><i class="fas fa-history"></i> Audit Trail</a>
-            </li>
-            @endif
-
-            {{-- 6. Pengaturan Sistem --}}
-            @if(Auth::check() && Auth::user()->hasModulAccess('manajemen_pengguna'))
-            <li class="{{ request()->is('hak-akses*') ? 'active' : '' }}">
-                <a href="{{ route('hak-akses.index') }}"><i class="fas fa-user-shield"></i> Pengaturan Akses</a>
-            </li>
-            @endif
-        </ul>
-    </nav>
-
-    <div class="top-navbar shadow-sm">
-        <div class="d-flex align-items-center">
-            <!-- Toggle ini hanya muncul di HP/Mobile (d-lg-none) -->
-            <button class="btn text-white me-3 d-flex d-lg-none align-items-center justify-content-center p-1" onclick="toggleSidebar()" style="border:1px solid rgba(255,255,255,0.3); border-radius:6px; background:rgba(0,0,0,0.1); width:36px; height:36px;">
-                <i class="fas fa-bars"></i>
-            </button>
             <div>
                 <span class="text-uppercase text-secondary fs-7 fw-bold d-block mb-1" style="font-size: 18px; letter-spacing: 1px;">SIGMA-LAB</span>
                 <div class="mb-0 fw-bold d-none d-sm-block">Sistem Integrated General Management Analytics of Lab</div>

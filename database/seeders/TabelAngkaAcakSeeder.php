@@ -7,7 +7,7 @@ use App\Models\TabelAngkaAcak;
 
 class TabelAngkaAcakSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         $data = [
             ['urutan' => 1, 'nomor_botol' => 23],
@@ -22,13 +22,13 @@ class TabelAngkaAcakSeeder extends Seeder
             ['urutan' => 10, 'nomor_botol' => 7],
         ];
 
-        foreach ($data as $item) {
+        foreach ($data as $row) {
+            // updateOrCreate supaya aman dijalankan berkali-kali:
+            // kalau urutan sudah ada, nomor_botol-nya diperbaiki;
+            // kalau belum ada, baris baru dibuat.
             TabelAngkaAcak::updateOrCreate(
-                ['urutan' => $item['urutan']],
-                [
-                    'nomor_botol' => $item['nomor_botol'], 
-                    'keterangan' => 'Tabel Baku Sucofindo'
-                ]
+                ['urutan' => $row['urutan']],
+                ['nomor_botol' => $row['nomor_botol']]
             );
         }
     }

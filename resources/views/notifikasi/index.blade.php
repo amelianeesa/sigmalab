@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Daftar - Notifikasi')
 
 @section('content')
 <nav aria-label="breadcrumb">

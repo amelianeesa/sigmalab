@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Chart - QC Harian')
 
 @section('content')
 <div class="container-fluid px-4 pb-5">
@@ -46,6 +47,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('controlChart').getContext('2d');
@@ -73,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
             pointColors.push('rgba(255, 193, 7, 1)'); // Yellow
             pointRadii.push(6);
         } else {
-            pointColors.push('rgba(13, 110, 253, 1)'); // Blue
+            pointColors.push('rgba(0, 0, 0, 1)'); // Black
             pointRadii.push(4);
         }
     });
@@ -93,6 +95,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const arr1SD = Array(len).fill(mean + 1*sd);
     const arrM1SD = Array(len).fill(mean - 1*sd);
 
+    if (typeof ChartDataLabels !== 'undefined') {
+        Chart.register(ChartDataLabels);
+    }
     new Chart(ctx, {
         type: 'line',
         data: {
@@ -101,15 +106,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 {
                     label: 'Nilai QC',
                     data: dataPoints,
-                    borderColor: 'rgba(13, 110, 253, 0.5)',
+                    borderColor: 'rgba(0, 0, 0, 0.7)',
                     backgroundColor: 'transparent',
                     pointBackgroundColor: pointColors,
                     pointBorderColor: pointColors,
                     pointRadius: pointRadii,
                     pointHoverRadius: 8,
                     borderWidth: 2,
-                    tension: 0.1,
-                    order: 0
+                    tension: 0.4,
+                    order: 0,
+                    datalabels: {
+                        align: 'top',
+                        anchor: 'end',
+                        color: '#333',
+                        font: { weight: 'bold' },
+                        formatter: function(value, context) {
+                            return parseFloat(value).toFixed(2);
+                        }
+                    }
                 },
                 {
                     label: 'Mean',
@@ -117,7 +131,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     borderColor: 'rgba(25, 135, 84, 0.8)',
                     borderWidth: 2,
                     pointRadius: 0,
-                    order: 1
+                    order: 1,
+                    datalabels: { display: false }
                 },
                 {
                     label: 'UCL (+3SD)',
@@ -125,7 +140,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     borderColor: 'rgba(220, 53, 69, 0.8)',
                     borderWidth: 2,
                     pointRadius: 0,
-                    order: 2
+                    order: 2,
+                    datalabels: { display: false }
                 },
                 {
                     label: 'LCL (-3SD)',
@@ -133,7 +149,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     borderColor: 'rgba(220, 53, 69, 0.8)',
                     borderWidth: 2,
                     pointRadius: 0,
-                    order: 3
+                    order: 3,
+                    datalabels: { display: false }
                 },
                 {
                     label: 'UWL (+2SD)',
@@ -142,7 +159,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     borderWidth: 2,
                     borderDash: [5, 5],
                     pointRadius: 0,
-                    order: 4
+                    order: 4,
+                    datalabels: { display: false }
                 },
                 {
                     label: 'LWL (-2SD)',
@@ -151,7 +169,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     borderWidth: 2,
                     borderDash: [5, 5],
                     pointRadius: 0,
-                    order: 5
+                    order: 5,
+                    datalabels: { display: false }
                 },
                 {
                     label: '+1SD',
@@ -160,7 +179,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     borderWidth: 1,
                     borderDash: [2, 2],
                     pointRadius: 0,
-                    order: 6
+                    order: 6,
+                    datalabels: { display: false }
                 },
                 {
                     label: '-1SD',
@@ -169,7 +189,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     borderWidth: 1,
                     borderDash: [2, 2],
                     pointRadius: 0,
-                    order: 7
+                    order: 7,
+                    datalabels: { display: false }
                 }
             ]
         },
@@ -213,3 +234,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
+

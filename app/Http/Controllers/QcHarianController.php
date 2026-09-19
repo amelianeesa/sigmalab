@@ -45,9 +45,11 @@ class QcHarianController extends Controller
         }
 
         $parameters = $activeBatch->parameters()->where('status_parameter', 'stabil')->with('parameterUji')->get();
-        $alatList = \App\Models\Alat::where('status_barang', 'Baik')->orderBy('nama_alat')->get();
+        $alatList = \App\Models\Alat::where('kondisi_barang', 'baik')->orderBy('nama_alat')->get();
         $personilList = \App\Models\Personil::orderBy('nama')->get();
         $barangList = \App\Models\Barang::orderBy('nama_barang')->get();
+        
+        
 
         return view('qc-harian.create', compact('activeBatch', 'parameters', 'alatList', 'personilList', 'barangList'));
     }
@@ -93,8 +95,8 @@ class QcHarianController extends Controller
             $needsDb = in_array($pName, ['ASH', 'VM', 'CV', 'TS', 'FC']);
 
             if ($needsDb) {
-                $im1 = (float)($data['im_d1'] ?? 0);
-                $im2 = (float)($data['im_d2'] ?? 0);
+                $im1 = (float)($data['mentah']['im_d1'] ?? 0);
+                $im2 = (float)($data['mentah']['im_d2'] ?? 0);
                 
                 if ($im1 >= 100 || $im2 >= 100) continue;
 
@@ -212,3 +214,5 @@ class QcHarianController extends Controller
         return redirect()->route('qc-harian.index')->with('success', 'Investigasi berhasil disimpan. Kunci parameter telah dibuka kembali.');
     }
 }
+
+

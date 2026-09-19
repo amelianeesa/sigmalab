@@ -1,11 +1,12 @@
 @extends('layouts.app')
+@section('title', 'Daftar - QC In-House')
 
 @section('content')
 <div class="container-fluid px-4 pb-5">
     <x-qc-breadcrumb active="In-House" />
 
     <div class="d-flex justify-content-between align-items-center mt-3 mb-4">
-        <h2 class="fw-bold text-dark mb-0"><i class="fas fa-flask text-primary me-2"></i>QC In-House Standard (CRM)</h2>
+        <h2 class="fw-bold text-dark mb-0"><i class="fas fa-flask text-primary me-2"></i>QC In-House</h2>
         <a href="{{ route('qc-inhouse.create') }}" class="btn btn-primary shadow-sm"><i class="fas fa-plus me-1"></i> Buat Sampel Baru</a>
     </div>
 
@@ -65,3 +66,4 @@
     </div>
 </div>
 @endsection
+

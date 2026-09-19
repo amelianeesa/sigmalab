@@ -69,12 +69,15 @@ class ParameterUji extends BaseModel
 
     public function hasInhouseLimits(): bool
     {
+        return !is_null($this->mean) && !is_null($this->sd);
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
         return LogOptions::defaults()
             ->logFillable()
             ->logOnlyDirty()
-            // ->dontSubmitEmptyLogs()
             ->setDescriptionForEvent(fn(string $eventName) => "Data parameter uji telah di-{$eventName}");
-        return !is_null($this->mean) && !is_null($this->sd);
     }
 
     public function sertifikatCrm()

@@ -17,7 +17,7 @@ use Spatie\Activitylog\Support\LogOptions;
 class HasilUji extends BaseModel
 {
     use SoftDeletes;
-    use HasFactory, HasActivity;
+    use HasFactory, LogsActivity;
 
     protected $table = 'hasil_uji';
     const UPDATED_AT = null;
@@ -71,14 +71,17 @@ class HasilUji extends BaseModel
             // ->dontSubmitEmptyLogs()
             ->setDescriptionForEvent(fn(string $eventName) => "Hasil uji lab telah di-{$eventName}");
     }
-}
 
-    public function scopePending($query) { return $query->where('status_berketerimaan',
-        'crm_katalog_id', 'pending'); }
-    public function scopeInlier($query) { return $query->where('status_berketerimaan',
-        'crm_katalog_id', 'inlier'); }
-    public function scopeOutlier($query) { return $query->where('status_berketerimaan',
-        'crm_katalog_id', 'outlier'); }
-    public function scopeGagalDuplo($query) { return $query->where('status_berketerimaan',
-        'crm_katalog_id', 'gagal_duplo'); }
+    public function scopePending($query) { 
+        return $query->where('status_berketerimaan', 'pending'); 
+    }
+    public function scopeInlier($query) { 
+        return $query->where('status_berketerimaan', 'inlier'); 
+    }
+    public function scopeOutlier($query) { 
+        return $query->where('status_berketerimaan', 'outlier'); 
+    }
+    public function scopeGagalDuplo($query) { 
+        return $query->where('status_berketerimaan', 'gagal_duplo'); 
+    }
 }

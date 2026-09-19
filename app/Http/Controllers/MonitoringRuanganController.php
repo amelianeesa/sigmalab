@@ -148,6 +148,37 @@ class MonitoringRuanganController extends Controller
         return redirect()->back()->with('success', 'Titik acuan kalibrasi berhasil dihapus!');
     }
 
+    /**
+     * Update persyaratan suhu dan kelembaban ruangan.
+     */
+    public function updatePersyaratan(Request $request)
+    {
+        $request->validate([
+            'alat_id' => 'required|integer',
+            'bulan' => 'required',
+            'tahun' => 'required',
+            'nama_ruangan' => 'required',
+            'persyaratan_suhu' => 'nullable|string',
+            'persyaratan_kelembaban' => 'nullable|string',
+        ]);
+
+        // Simpan persyaratan ke semua baris monitoring bulan ini
+        $rows = MonitoringRuangan::where('alat_id', $request->alat_id)
+            ->where('bulan', $request->bulan)
+            ->where('tahun', $request->tahun)
+            ->where('nama_ruangan', $request->nama_ruangan)
+            ->get();
+
+        foreach ($rows as $row) {
+            $row->update([
+                'persyaratan_suhu' => $request->persyaratan_suhu,
+                'persyaratan_kelembaban' => $request->persyaratan_kelembaban,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Persyaratan suhu dan kelembaban berhasil diperbarui.');
+    }
+
     public function updateBaris(Request $request)
     {
         $request->validate([
@@ -250,7 +281,7 @@ class MonitoringRuanganController extends Controller
             return redirect()->back()->with('error', $pesanWarning);
         }
 
-        return redirect()->back()->with('success', $pessan ?? $pesan);
+        return redirect()->back()->with('success', $pesan);
     }
 
     public function exportPdf(Request $request)

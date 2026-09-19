@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Competency Matrix - SDM')
 
 @section('content')
 <div class="container-fluid px-4 py-4">

@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Pengujian Harian QC')
 
 @section('content')
 <div class="container-fluid px-4 pb-5">
@@ -8,9 +9,9 @@
         @endif
         <li class="breadcrumb-item active">Pengujian Harian QC</li>
     </x-qc-breadcrumb>
-    <h1 class="mb-4 fw-bold text-dark">
+    <div class="d-flex justify-content-between align-items-center mb-4"><h1 class="fw-bold text-dark mb-0">
         <i class="fas fa-chart-line text-danger me-2"></i>Pengujian Harian QC
-    </h1>
+    </h1><a href="{{ route('parameter-uji.index') }}" class="btn btn-outline-secondary btn-sm shadow-sm"><i class="fas fa-cogs me-1"></i> Master Parameter Uji</a></div>
 
     @if(!$activeBatch)
     <div class="alert alert-warning border-0 shadow-sm">
@@ -172,3 +173,4 @@
     }
 </style>
 @endsection
+

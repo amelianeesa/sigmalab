@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Penetapan Target - QC In-House')
 
 @section('content')
 <div class="container-fluid px-4 pb-5">

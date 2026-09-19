@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TindakLanjutKomentar extends BaseModel
@@ -11,6 +10,7 @@ class TindakLanjutKomentar extends BaseModel
     use HasFactory, SoftDeletes;
 
     protected $table = 'tindak_lanjut_komentar';
+    protected $primaryKey = 'komentar_id';
 
     protected $fillable = [
         'riwayat_tindak_lanjut_id',
@@ -28,4 +28,3 @@ class TindakLanjutKomentar extends BaseModel
         return $this->belongsTo(User::class, 'users_id', 'users_id');
     }
 }
-
