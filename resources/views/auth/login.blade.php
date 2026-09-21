@@ -88,8 +88,8 @@
         }
 
         .auth-logo-box {
-            width: 70px;
-            height: 70px;
+            width: 100px;
+            height: 100px;
             background: rgba(255, 255, 255, 0.14);
             border-radius: 18px;
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -108,8 +108,8 @@
         }
 
         .auth-logo-box img {
-            width: 56px;
-            height: 56px;
+            width: 100px;
+            height: 100px;
             object-fit: contain;
         }
 
@@ -203,7 +203,7 @@
                 </div>
                 <div class="auth-form-panel">
                     <div class="auth-logo-box auth-logo-center">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo Perusahaan">
+                        <img src="{{ asset('images/Logo_Suco_Nobg.png') }}" alt="Logo Perusahaan">
                     </div>
                     <h4 class="text-center">Masuk ke SIGMA-LAB</h4>
                     <p>Gunakan username atau email yang telah terdaftar dan password Anda.</p>

@@ -72,7 +72,7 @@
         .auth-side p { font-size: 0.82rem; line-height: 1.5; max-width: 240px; opacity: 0.92; margin: 0; }
 
         .auth-logo-box {
-            width: 70px; height: 70px;
+            width: 100px; height: 100px;
             background: rgba(255,255,255,0.14);
             border-radius: 18px;
             border: 1px solid rgba(255,255,255,0.2);
@@ -82,7 +82,7 @@
         }
 
         .auth-logo-box.auth-logo-center { margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; }
-        .auth-logo-box img { width: 56px; height: 56px; object-fit: contain; }
+        .auth-logo-box img { width: 100px; height: 100px; object-fit: contain; }
 
         .auth-form-panel {
             padding: 1rem 0.95rem;
@@ -141,7 +141,7 @@
                 </div>
                 <div class="auth-form-panel">
                     <div class="auth-logo-box auth-logo-center">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo Perusahaan">
+                        <img src="{{ asset('images/Logo_Suco_Nobg.png') }}" alt="Logo Perusahaan">
                     </div>
                     <h4 class="text-center">Reset Password</h4>
                     <p>Isi password baru Anda di bawah ini.</p>
