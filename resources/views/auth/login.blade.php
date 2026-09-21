@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <title>Login - SIGMALAB Sucofindo</title>
@@ -57,7 +58,7 @@
             transform: translateY(-50%);
             width: 100px;
             height: 200px;
-            background: rgba(255,255,255,0.08);
+            background: rgba(255, 255, 255, 0.08);
             border-radius: 50%;
         }
 
@@ -68,7 +69,7 @@
             bottom: 18px;
             width: 55px;
             height: 55px;
-            background: rgba(255,255,255,0.12);
+            background: rgba(255, 255, 255, 0.12);
             border-radius: 50%;
         }
 
@@ -89,9 +90,9 @@
         .auth-logo-box {
             width: 70px;
             height: 70px;
-            background: rgba(255,255,255,0.14);
+            background: rgba(255, 255, 255, 0.14);
             border-radius: 18px;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             overflow: hidden;
             display: flex;
             align-items: center;
@@ -191,6 +192,7 @@
         }
     </style>
 </head>
+
 <body class="d-flex align-items-center justify-content-center">
     <div class="container py-4">
         <div class="card auth-card shadow-sm">
@@ -200,7 +202,7 @@
                     <p>Masuk untuk mengakses Sistem Integrasi Manajemen Laboratorium PT Sucofindo Cilacap.</p>
                 </div>
                 <div class="auth-form-panel">
-                        <div class="auth-logo-box auth-logo-center">
+                    <div class="auth-logo-box auth-logo-center">
                         <img src="{{ asset('images/logo.png') }}" alt="Logo Perusahaan">
                     </div>
                     <h4 class="text-center">Masuk ke SIGMA-LAB</h4>
@@ -217,13 +219,20 @@
                         @csrf
                         <div class="mb-3">
                             <label class="form-label">Username atau Email</label>
-                            <input type="text" name="username" class="form-control" value="{{ old('username') }}" required autofocus>
+                            <input type="text" name="username" class="form-control" value="{{ old('username') }}"
+                                required autofocus>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Password</label>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label class="form-label mb-0">Password</label>
+                                <a href="{{ route('password.request') }}" class="auth-link"
+                                    style="font-size: 0.78rem;">Lupa Password?</a>
+                            </div>
                             <div class="input-group">
-                                <input type="password" name="password" id="password" class="form-control" required style="border-right: none;">
-                                <button type="button" class="input-group-text bg-white" id="togglePassword" style="border-left: none; cursor: pointer; border-color: #d7e1ea;">
+                                <input type="password" name="password" id="password" class="form-control" required
+                                    style="border-right: none;">
+                                <button type="button" class="input-group-text bg-white" id="togglePassword"
+                                    style="border-left: none; cursor: pointer; border-color: #d7e1ea;">
                                     <i class="bi bi-eye-slash" id="toggleIcon"></i>
                                 </button>
                             </div>
@@ -257,4 +266,5 @@
         });
     </script>
 </body>
+
 </html>
