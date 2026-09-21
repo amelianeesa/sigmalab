@@ -158,7 +158,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('modul:audit_log,lihat')->group(function () {
         Route::get('audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
         Route::get('audit-log/{id}', [AuditLogController::class, 'show'])->name('audit-log.show');
-    });
+    }); 
 
     Route::middleware('modul:manajemen_pengguna,lihat')->group(function () {
         Route::get('hak-akses', [HakAksesController::class, 'index'])->name('hak-akses.index');
