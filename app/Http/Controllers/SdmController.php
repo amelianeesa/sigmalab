@@ -14,6 +14,8 @@ use Illuminate\Support\Str;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AkunLoginMail;
 
 class SdmController extends Controller
 {
@@ -301,20 +303,29 @@ class SdmController extends Controller
         $data = $request->validate([
             'username' => 'required|string|max:50|unique:users,username',
             'email' => 'required|email|max:100|unique:users,email',
-            'password' => 'required|string|min:6',
             'role_id' => 'required|exists:roles,roles_id',
         ]);
 
-        User::create([
+        $passwordSementara = Str::password(10, symbols: false);
+
+        $user = User::create([
             'personil_id' => $personil->personil_id,
             'username' => $data['username'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'password' => Hash::make($passwordSementara),
             'role_id' => $data['role_id'],
             'status_aktif' => true,
+            'must_change_password' => true,
         ]);
 
-        return redirect()->route('sdm.index')->with('success', 'Akun login untuk ' . $personil->nama . ' berhasil dibuat.');
+        Mail::to($user->email)->send(new AkunLoginMail(
+            $personil->nama,
+            $user->username,
+            $user->email,
+            $passwordSementara
+        ));
+
+        return redirect()->route('sdm.index')->with('success', 'Akun login untuk ' . $personil->nama . ' berhasil dibuat. Password sementara telah dikirim ke email pengguna.');
     }
 
     public function forceDestroy($id)
