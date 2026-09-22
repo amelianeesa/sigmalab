@@ -512,10 +512,18 @@ class AlatController extends Controller
     public function exportPdf($id)
     {
         $alat = Alat::with('riwayatKalibrasi')->findOrFail($id);
-        $pdf = Pdf::loadView('alat.laporan-template', compact('alat'))->setPaper('a4', 'portrait');
         
-        return $pdf->download('Laporan_' . $alat->nama_alat . '_' . $alat->kode_alat . '.pdf');
+        $user = Auth::user();
+        $namaUser = 'Petugas Lab';
+
+        if ($user) {
+            $namaUser = $user->name ?? $user->username ?? $user->nama ?? 'Analis Laboratorium';
+        }
+
+        $pdf = Pdf::loadView('alat.laporan-template', compact('alat', 'namaUser'))
+                  ->setPaper('a4', 'portrait');
         
+        return $pdf->stream('Laporan_' . $alat->nama_alat . '_' . $alat->kode_alat . '.pdf');
     }
            
     public function exportExcel($id)
@@ -889,76 +897,4 @@ class AlatController extends Controller
             }
         }, $fileName);
     }
-
-    // public function storePerbaikan(Request $request, $id)
-    // {
-    //     $request->validate([
-    //         'tanggal_rusak' => 'required|date',
-    //         'deskripsi_kerusakan' => 'required|string',
-    //     ]);
-
-    //     $alat = Alat::findOrFail($id);
-
-    //     RiwayatPerbaikanAlat::create([
-    //         'alat_id' => $alat-> alat_id,
-    //         'tanggal_rusak' => $request->tanggal_rusak,
-    //         'deskripsi_kerusakan' => $request->deskripsi_kerusakan,
-    //         'dilaporkan_oleh' => Auth::id(),
-    //         'status_perbaikan' => 'Belum Diperbaiki'
-    //     ]);
-
-    //     $alat->update([
-    //         'kondisi_barang' => 'perbaikan',
-    //         'status_barang' => 'idle'
-    //     ]);
-
-    //     return redirect()->back()->with('success', 'Laporan kerusakan alat berhasil dicatat');
-    // }
-
-    // public function updatePerbaikan(Request $request, $id, $perbaikan_id)
-    // {
-    //     $perbaikan = RiwayatPerbaikanAlat::findOrFail($perbaikan_id);
-    //     $alat = Alat::findOrFail($id);
-        
-    //     $request->validate([
-    //         'status_perbaikan' => 'required|string|in:Dalam Perbaikan,Selesai,Tidak Bisa Diperbaiki',
-    //         'tindakan_perbaikan' => 'nullable|string',
-    //         'tanggal_selesai' => 'nullable|date',
-    //     ]);
-
-    //     if ($request->status_perbaikan === 'Selesai' || $request->status_perbaikan === 'Tidak Bisa Diperbaiki') {
-    //         if (Auth::user()->role->nama_role !== \App\Enums\PeranPengguna::KOORDINATOR_LAB->value) {
-    //             return redirect()->back()->withErrors(['message' => 'Hanya Koordinator Lab yang dapat memverifikasi penyelesaian perbaikan.']);
-    //         }
-    //         $perbaikan->diverifikasi_oleh = Auth::id();
-    //         if (!$request->tanggal_selesai) {
-    //             $perbaikan->tanggal_selesai = now();
-    //         }
-            
-    //         if ($request->status_perbaikan === 'Selesai') {
-    //             $alat->update([
-    //                 'kondisi_barang' => 'baik',
-    //                 'status_barang' => 'idle' 
-    //         ]);
-    //         }elseif ($request->status_perbaikan === 'Tidak Bisa Diperbaiki') {
-    //             $alat->update([
-    //                 'kondisi_barang' => 'rusak',
-    //                 'status_barang' => 'idle'
-    //         ]);
-    //         }
-    //     }elseif ($request->status_perbaikan === 'Dalam Perbaikan') {
-    //         $alat->update([
-    //             'kondisi_barang' => 'perbaikan',
-    //             'status_barang' => 'idle'
-    //     ]);
-    //     }
-
-    //     $perbaikan->update([
-    //         'status_perbaikan' => $request->status_perbaikan,
-    //         'tindakan_perbaikan' => $request->tindakan_perbaikan,
-    //         'tanggal_selesai' => $request->tanggal_selesai ?? $perbaikan->tanggal_selesai,
-    //     ]);
-
-    //     return redirect()->back()->with('success', 'Status perbaikan berhasil diperbarui');
-    // }
 }

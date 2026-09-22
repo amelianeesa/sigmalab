@@ -300,11 +300,26 @@ class MonitoringRuanganController extends Controller
         $firstRecord = collect($monitoringData)->first(fn($item) => $item !== null);
         $persyaratanSuhu = $firstRecord?->persyaratan_suhu ?? '-';
         $persyaratanKelembaban = $firstRecord?->persyaratan_kelembaban ?? '-';
-        $dokumenReferensi = $firstRecord?->dokumen_referensi ?? null;
 
         $alat = Alat::where('alat_id', $alatId)->first();
 
-        return view('monitoring_ruangan.pdf', compact('monitoringData', 'alat', 'bulan', 'tahun', 'ruangan', 'persyaratanSuhu', 'persyaratanKelembaban'));
+        $userCetak = \Illuminate\Support\Facades\Auth::user();
+        $namaUserCetak = $userCetak?->personil?->nama ?? ($userCetak?->name ?? ($userCetak?->username ?? 'System'));
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('monitoring_ruangan.pdf', compact(
+            'monitoringData', 
+            'alat', 
+            'bulan', 
+            'tahun', 
+            'ruangan', 
+            'persyaratanSuhu', 
+            'persyaratanKelembaban', 
+            'namaUserCetak'
+        ));
+
+        $pdf->setPaper('A4', 'landscape');
+        
+        return $pdf->stream("Rekap_Monitoring_{$ruangan}_{$bulan}_{$tahun}.pdf");
     }
     public function uploadReferensi(Request $request)
     {

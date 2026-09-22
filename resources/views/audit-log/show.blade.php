@@ -1,100 +1,141 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4 py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold text-dark mb-1">Detail Rekam Jejak (Audit Log)</h2>
-            <p class="text-muted mb-0">Inspeksi data yang ditambahkan, diubah, atau dihapus.</p>
-        </div>
-        <a href="{{ route('audit-log.index') }}" class="btn btn-secondary">
+
+<style>
+    .container-fluid {
+        padding-top: 2px !important;
+        max-width: 1250px;
+    }
+    .card-header-custom {
+        background-color: #1b3152 !important;
+        color: white !important;
+        font-weight: bold;
+        font-size: 0.85rem !important;
+        padding: 0.4rem 0.75rem !important;
+    }
+    .table-header-custom, 
+    .table-header-custom th, 
+    .table-header-custom tr {
+        background-color: #1b3152 !important;
+        color: #ffffff !important;
+        border-color: #2c4975 !important;
+        font-size: 0.7rem !important;
+        vertical-align: middle !important;
+        text-align: center !important;
+    }
+    .table-responsive-custom {
+        font-size: 0.72rem !important;
+    }
+    .table th, .table td {
+        padding: 0.25rem 0.35rem !important;
+        font-size: 0.72rem !important;
+        vertical-align: middle !important;
+    }
+    .form-control-sm, .form-select-sm {
+        font-size: 0.72rem !important;
+        padding: 0.15rem 0.3rem !important;
+        height: auto !important;
+    }
+    .card-shadow-custom {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    .badge-custom-size {
+        font-size: 0.6rem !important;
+        padding: 0.2rem 0.4rem !important;
+    }
+</style>
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-2 mt-2">
+        <h5 class="fw-bold text-dark mb-0" style="font-size: 1rem;"> Detail Rekam Jejak (Audit Log)</h5>
+        <a href="{{ route('audit-log.index') }}" class="btn btn-secondary btn-sm py-1 px-2 shadow-sm" style="font-size: 0.72rem;">
             <i class="fas fa-arrow-left me-1"></i> Kembali
         </a>
     </div>
 
-    <div class="row">
-        <div class="col-md-5 mb-4">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Informasi Meta</h6>
-                </div>
-                <div class="card-body">
-                    <table class="table table-borderless">
+    @php
+        $batchLogs = isset($batchLogs) ? $batchLogs : collect([$log]);
+    @endphp
+
+    <div class="row g-3">
+        <!-- Informasi Meta -->
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border-0 card-shadow-custom">
+                <div class="card-header card-header-custom"> Informasi</div>
+                <div class="card-body p-2.5">
+                    <table class="table table-bordered table-striped align-middle mb-0" style="font-size: 0.72rem;">
                         <tr>
-                            <th width="40%" class="text-muted">Aktor / User</th>
-                            <td>: <span class="fw-bold">{{ $log->causer ? ($log->causer->personil->nama_personil ?? $log->causer->username) : 'Sistem' }}</span>
+                            <td class="fw-bold text-muted bg-light" style="width: 35%;">Aktor / User</td>
+                            <td>
+                                <span class="fw-bold">{{ $log->causer ? ($log->causer->personil->nama_personil ?? $log->causer->username) : 'Sistem' }}</span>
                                 @if($log->causer && $log->causer->role)
-                                    <span class="badge bg-secondary ms-2">{{ $log->causer->role->nama_role }}</span>
+                                    <br><span class="badge bg-secondary badge-custom-size mt-1">{{ $log->causer->role->nama_role }}</span>
                                 @endif
                             </td>
                         </tr>
                         <tr>
-                            <th class="text-muted">Event</th>
-                            <td>: 
+                            <td class="fw-bold text-muted bg-light">Event</td>
+                            <td>
                                 @if($log->event === 'created')
-                                    <span class="badge bg-success">Created</span>
+                                    <span class="badge bg-success badge-custom-size">Created</span>
                                 @elseif($log->event === 'updated')
-                                    <span class="badge bg-warning text-dark">Updated</span>
+                                    <span class="badge bg-warning text-dark badge-custom-size">Updated</span>
                                 @elseif($log->event === 'deleted')
-                                    <span class="badge bg-danger">Deleted</span>
+                                    <span class="badge bg-danger badge-custom-size">Deleted</span>
                                 @else
-                                    <span class="badge bg-secondary">{{ $log->event }}</span>
+                                    <span class="badge bg-secondary badge-custom-size">{{ ucfirst($log->event) }}</span>
                                 @endif
                             </td>
                         </tr>
                         <tr>
-                            <th class="text-muted">Deskripsi</th>
-                            <td>: {{ $log->description }}</td>
+                            <td class="fw-bold text-muted bg-light">Deskripsi</td>
+                            <td>{{ $log->description }}</td>
                         </tr>
                         <tr>
-                            <th class="text-muted">Model Entitas</th>
-                            <td>: {{ $log->subject_type }}</td>
+                            <td class="fw-bold text-muted bg-light">Model Entitas</td>
+                            <td><code style="font-size: 0.65rem;">{{ $log->subject_type }}</code></td>
                         </tr>
                         <tr>
-                            <th class="text-muted">ID Entitas (PK)</th>
-                            <td>: {{ $log->subject_id }}</td>
+                            <td class="fw-bold text-muted bg-light">ID Entitas (PK)</td>
+                            <td>{{ $log->subject_id }}</td>
                         </tr>
                         <tr>
-                            <th class="text-muted">Waktu Eksekusi</th>
-                            <td>: {{ \Carbon\Carbon::parse($log->created_at)->format('d F Y H:i:s') }}</td>
+                            <td class="fw-bold text-muted bg-light">Waktu Eksekusi</td>
+                            <td>{{ \Carbon\Carbon::parse($log->created_at)->format('d M Y H:i:s') }}</td>
                         </tr>
                     </table>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-7 mb-4">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">Visualisasi Data Berubah (Sesi Ini)</h6>
-                    <span class="badge bg-secondary">{{ $batchLogs->count() }} Aktivitas</span>
+        <div class="col-md-8 mb-3">
+            <div class="card shadow-sm border-0 card-shadow-custom">
+                <div class="card-header card-header-custom d-flex justify-content-between align-items-center">
+                    <span>Visualisasi Data Berubah</span>
+                    <span class="badge bg-light text-dark badge-custom-size">{{ $batchLogs->count() }} Aktivitas</span>
                 </div>
-                <div class="card-body p-0" style="max-height: 500px; overflow-y: auto;">
+                <div class="card-body p-2.5">
                     @foreach($batchLogs as $index => $bLog)
-                    <div class="bg-light p-2 border-bottom fw-bold d-flex justify-content-between">
-                        <span>
-                            #{{ $index + 1 }} - {{ $bLog->description }}
-                        </span>
-                        <span class="text-muted small">
-                            {{ $bLog->subject_type }} (ID: {{ $bLog->subject_id }})
-                        </span>
+                    <div class="bg-light p-2 border rounded mb-2 fw-bold d-flex justify-content-between align-items-center" style="font-size: 0.72rem;">
+                        <span>#{{ $index + 1 }} - {{ $bLog->description }}</span>
+                        <span class="text-muted" style="font-size: 0.65rem;">{{ $bLog->subject_type }} (ID: {{ $bLog->subject_id }})</span>
                     </div>
-                    <div class="table-responsive mb-3">
-                        <table class="table table-bordered mb-0">
-                            <thead class="table-light">
+                    <div class="table-responsive table-responsive-custom mb-3">
+                        <table class="table table-bordered table-striped align-middle mb-0">
+                            <thead class="table-header-custom">
                                 <tr>
-                                    <th width="30%">Field Data (Atribut)</th>
-                                    <th width="35%" class="text-danger">Data Lama (Before)</th>
-                                    <th width="35%" class="text-success">Data Baru (After)</th>
+                                    <th style="width: 30%;">Field Data (Atribut)</th>
+                                    <th style="width: 35%;" class="text-danger">Data Lama (Before)</th>
+                                    <th style="width: 35%;" class="text-success">Data Baru (After)</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @php
-                                    $properties = $bLog->attribute_changes;
+                                    $properties = $bLog->attribute_changes ?? [];
                                     $oldData = $properties['old'] ?? [];
                                     $newData = $properties['attributes'] ?? [];
                                     
-                                    // Combine all unique keys from old and new
                                     $allKeys = array_unique(array_merge(array_keys($oldData), array_keys($newData)));
                                 @endphp
                                 
@@ -102,8 +143,6 @@
                                     @php
                                         $oldVal = array_key_exists($key, $oldData) ? $oldData[$key] : '-';
                                         $newVal = array_key_exists($key, $newData) ? $newData[$key] : '-';
-                                        
-                                        // Highlight differences
                                         $isChanged = ($bLog->event === 'updated' && $oldVal != $newVal);
                                     @endphp
                                     <tr class="{{ $isChanged ? 'table-warning' : '' }}">
@@ -117,7 +156,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="text-center py-3 text-muted">Tidak ada detail data yang direkam.</td>
+                                        <td colspan="3" class="text-center py-2 text-muted">Tidak ada detail data yang direkam.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

@@ -1,7 +1,55 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4">
+<style>
+    .dashboard-container {
+        padding: 2px 20px !important;
+    }
+
+    .dashboard-card {
+        padding: 10px !important;
+    }
+
+    .card-body {
+        padding: 8px !important;
+    }
+
+    .table th, .table td {
+        padding: 6px 8px !important;
+        vertical-align: middle !important;
+        font-size: 0.68rem !important;
+    }
+    
+    .table thead th {
+        font-size: 0.7rem !important;
+        background-color: #1b3152 !important;
+        color: #ffffff !important;
+        border-color: #ffffff !important;
+    }
+
+    .table-bordered > :not(caption) > * > * {
+        border-color: #dee2e6;
+    }
+    .table thead.table-dark th, 
+    .table thead th {
+        border-color: #ffffff !important;
+    }
+
+    .btn-corporate-blue {
+        background-color: #1b3152 !important;
+        border-color: #1b3152 !important;
+        color: #ffffff !important;
+    }
+    .btn-corporate-blue:hover, 
+    .btn-corporate-blue:focus, 
+    .btn-corporate-blue:active {
+        background-color: #14253e !important;
+        border-color: #14253e !important;
+        color: #ffffff !important;
+    }
+</style>
+
+<div class="container-fluid dashboard-container">
     @php
         $alatWarningCount = 0;
         foreach($alat as $item) {
@@ -17,37 +65,38 @@
     @endphp
 
     @if($alatWarningCount > 0)
-        <div class="alert alert-warning alert-dismissible fade show shadow-sm" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i> <strong>Perhatian!</strong> Terdapat <strong>{{ $alatWarningCount }} alat</strong> yang masa kalibrasinya sudah kadaluwarsa atau akan segera berakhir (dalam 180 hari ke depan). Mohon segera jadwalkan kalibrasi ulang
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="alert alert-warning alert-dismissible fade show shadow-sm py-1 px-2 mb-2 d-flex align-items-center justify-content-between" role="alert" style="font-size: 0.75rem;">
+            <div class="pe-2">
+                <i class="fas fa-exclamation-triangle me-1"></i> <strong>Perhatian!</strong> Terdapat <strong>{{ $alatWarningCount }} alat</strong> yang masa kalibrasinya sudah kadaluwarsa atau akan segera berakhir (dalam 180 hari ke depan). Mohon segera jadwalkan kalibrasi ulang.
+            </div>
+            <button type="button" class="btn-close position-static btn-sm" data-bs-dismiss="alert" aria-label="Close" style="transform: scale(0.75);"></button>
         </div>
     @endif
 
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div><i class="fas fa-tools me-1"></i> Data Master Alat & Informasi Kalibrasi</div>
-            
-            <div class="d-flex align-items-center gap-2">
-                <a href="{{ route('inventori.monitoring.index') }}" class="btn btn-success btn-sm fw-bold">
-                    <i class="fas fa-thermometer-half me-1"></i> Monitoring Ruangan
-                </a>
-
-                @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
-                <a href="{{ route('alat.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Tambah Alat</a>
-                @endif
-            </div>
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h5 class="fw-bold mb-0 text">
+             Data Alat & Informasi Kalibrasi
+        </h5>
+        
+        <div class="d-flex align-items-center gap-2">
+            @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
+            <a href="{{ route('alat.create') }}" class="btn btn-corporate-blue btn-sm py-1 shadow-sm" style="font-size: 0.75rem;"><i class="fas fa-plus me-1"></i> Tambah Alat</a>
+            @endif
         </div>
+    </div>
+
+    <div class="card mb-4 border-0 shadow-sm">
         <div class="card-body">
 
             <form action="{{ route('alat.index') }}" method="GET" id="filterForm" class="row g-2 mb-3 align-items-center">
                 <div class="col-md-5">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" name="search" id="searchInput" class="form-control" placeholder="Cari Nama Alat, Kode, atau Merk..." value="{{ $search ?? '' }}" autocomplete="off">
+                        <input type="text" name="search" id="searchInput" class="form-control form-control-sm" placeholder="Cari Nama Alat, Kode, atau Merk..." value="{{ $search ?? '' }}" autocomplete="off" style="font-size: 0.78rem;">
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <select name="filter_status" id="filterStatus" class="form-select form-select-sm">
+                    <select name="filter_status" id="filterStatus" class="form-select form-select-sm" style="font-size: 0.78rem;">
                         <option value="">-- Filter Status Kalibrasi --</option>
                         <option value="aktif" {{ (isset($filterStatus) && $filterStatus == 'aktif') ? 'selected' : '' }}>Aktif (> 180 Hari)</option>
                         <option value="segera" {{ (isset($filterStatus) && $filterStatus == 'segera') ? 'selected' : '' }}>Segera Berakhir (&le; 180 Hari)</option>
@@ -55,7 +104,7 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select name="filter_kondisi" id="filterKondisi" class="form-select form-select-sm">
+                    <select name="filter_kondisi" id="filterKondisi" class="form-select form-select-sm" style="font-size: 0.78rem;">
                         <option value="">-- Filter Kondisi Alat --</option>
                         <option value="baik" {{ (isset($filterKondisi) && $filterKondisi == 'baik') ? 'selected' : '' }}>Baik</option>
                         <option value="perbaikan" {{ (isset($filterKondisi) && $filterKondisi == 'perbaikan') ? 'selected' : '' }}>Perbaikan</option>
@@ -63,27 +112,27 @@
                     </select>
                 </div>
                 <div class="col-md-1 d-flex gap-1">
-                    <a href="{{ route('alat.index') }}" class="btn btn-outline-secondary btn-sm w-100" title="Reset"><i class="fas fa-sync-alt"></i></a>
+                    <a href="{{ route('alat.index') }}" class="btn btn-outline-secondary btn-sm w-100 py-1" title="Reset"><i class="fas fa-sync-alt"></i></a>
                 </div>
             </form>
 
             <div class="table-responsive" id="table-container">
                 <table class="table table-bordered table-striped align-middle text-center" style="font-size: 0.73rem;">
-                    <thead class="table-dark align-middle">
+                    <thead class="align-middle">
                         <tr>
                             <th rowspan="2" style="width: 40px;">No.</th>
-                            <th rowspan="2" style="width: 80px;">QR Code</th>
+                            <th rowspan="2" style="width: 60px;">QR Code</th>
                             <th rowspan="2">Nama Alat</th>
                             <th rowspan="2">CODE</th>
-                            <th rowspan="2" style="min-width: 105px;">No. Inventaris</th>
+                            <th rowspan="2" style="min-width: 90px;">No. Inventaris</th>
                             <th colspan="5">Spesifikasi</th>
                             <th rowspan="2">Kondisi Alat</th>
                             <th rowspan="2">Status Alat</th>
-                            <th rowspan="2" style="min-width: 105px;">No. Sertifikat/<br>Perijinan</th>
+                            <th rowspan="2" style="min-width: 90px;">No. Sertifikat/<br>Perijinan</th>
                             <th rowspan="2">Interval Kalibrasi</th>
                             <th colspan="2">Periode Kalibrasi/<br>Perijinan</th>
-                            <th rowspan="2" style="min-width: 105px;">Unit Kerja Pemilik</th>
-                            <th rowspan="2" style="min-width: 105px;">Lembaga Kalibrasi</th>
+                            <th rowspan="2" style="min-width: 90px;">Unit Kerja Pemilik</th>
+                            <th rowspan="2" style="min-width: 90px;">Lembaga Kalibrasi</th>
                             <th colspan="4">Kalibrasi</th>
                             <th rowspan="2">Aksi</th>
                         </tr>
@@ -93,12 +142,12 @@
                             <th>Warna</th>
                             <th>Ukuran</th>
                             <th>Unit Pemilik</th>
-                            <th style="min-width: 100px;">Tgl Kalibrasi</th>
-                            <th style="min-width: 110px;">Masa Berakhir<br>Kalibrasi</th>
-                            <th style="min-width: 100px;">Jenis Kalibrasi</th>
-                            <th style="min-width: 80px;">Range / Kapasitas</th>
-                            <th style="min-width: 95px;">Faktor Koreksi</th>
-                            <th style="min-width: 80px;">Signifikan (Ya/Tidak)</th>
+                            <th style="min-width: 90px;">Tgl Kalibrasi</th>
+                            <th style="min-width: 100px;">Masa Berakhir<br>Kalibrasi</th>
+                            <th style="min-width: 90px;">Jenis Kalibrasi</th>
+                            <th style="min-width: 70px;">Range / Kapasitas</th>
+                            <th style="min-width: 85px;">Faktor Koreksi</th>
+                            <th style="min-width: 70px;">Signifikan (Ya/Tidak)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -115,16 +164,16 @@
                                 $sisaHari = $sekarang->diffInDays($tglAkhir, false);
 
                                 if ($sisaHari < 0) {
-                                    $statusKalibrasiBadge = '<span class="badge bg-danger mt-1 d-block px-2 py-1" style="font-size: 0.62rem;"><i class="fas fa-times-circle"></i> Kedaluarsa</span>';
+                                    $statusKalibrasiBadge = '<span class="badge bg-danger mt-1 d-block px-2 py-1" style="font-size: 0.60rem;"><i class="fas fa-times-circle"></i> Kedaluarsa</span>';
                                 } elseif ($sisaHari <= 180) {
-                                    $statusKalibrasiBadge = '<span class="badge bg-warning text-dark mt-1 d-block px-2 py-1" style="font-size: 0.62rem;" title="Sisa ' . $sisaHari . ' hari lagi"><i class="fas fa-clock"></i> Segera Berakhir (' . $sisaHari . 'h)</span>';
+                                    $statusKalibrasiBadge = '<span class="badge bg-warning text-dark mt-1 d-block px-2 py-1" style="font-size: 0.60rem;" title="Sisa ' . $sisaHari . ' hari lagi"><i class="fas fa-clock"></i> Segera Berakhir (' . $sisaHari . 'h)</span>';
                                 }
                             }
 
                             $qrData = route('alat.public-scan', $item->kode_alat);
 
-                            $qrSvgCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(40)->generate($qrData);
-                            $qrSvgLarge = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(250)->generate($qrData);
+                            $qrSvgCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(35)->generate($qrData);
+                            $qrSvgLarge = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(160)->generate($qrData);
                         @endphp
                         <tr>
                             <td>{{ $index + 1 }}</td>
@@ -141,35 +190,33 @@
                                 </div>
                             </td>
                             <td class="fw-bold text-start">
-                                <a href="{{ route('alat.input-kalibrasi', $item->alat_id) }}" class="text-decoration-none text-primary" title="Buka Detail & Kalibrasi Alat">
-                                    {{ $item->nama_alat }} <i class="fas fa-external-link-alt ms-1" style="font-size: 0.6rem;"></i>
+                                <a href="{{ route('alat.show', $item->alat_id) }}" class="text-decoration-none text-primary" title="Buka Detail Alat">
+                                    {{ $item->nama_alat }} <i class="fas fa-external-link-alt ms-1" style="font-size: 0.55rem;"></i>
                                 </a>
                             </td>
-                            <td><code class="fw-bold">{{ $item->kode_alat }}</code></td>
+                            <td><code class="fw-bold text-dark">{{ $item->kode_alat }}</code></td>
                             <td>{{ $item->no_inventaris ?? '-' }}</td>
-                            {{-- <td>{{ $kalibrasiTerakhir->interval_kalibrasi ?? '-' }}</td> --}}
                             <td class="text-center">{{ $item->merk_tipe ?? '-' }}</td>
                             <td>{{ $item->no_seri ?? '-' }}</td>
                             <td>{{ $item->warna ?? '-' }}</td>
                             <td>{{ $item->ukuran ?? '-' }}</td>
                             <td>{{ $item->unit_kerja_pemilik ?? '-' }}</td>
                             <td>
-                                <span class="badge bg-{{ $item->kondisi_barang == 'baik' ? 'success' : 'danger' }}">
+                                <span class="badge bg-{{ $item->kondisi_barang == 'baik' ? 'success' : 'danger' }}" style="font-size: 0.65rem;">
                                     {{ ucfirst($item->kondisi_barang) }}
                                 </span>
                             </td>
                             <td>
-                                <span class="badge bg-{{ $item->status_barang == 'terpakai' ? 'primary' : 'secondary' }}">
+                                <span class="badge bg-{{ $item->status_barang == 'terpakai' ? 'primary' : 'secondary' }}" style="font-size: 0.65rem;">
                                     {{ ucfirst($item->status_barang) }}
                                 </span>
                             </td>
                             <td>
                                 {{ $kalibrasiTerakhir->no_sertifikat ?? '-' }}
-
                                 @if(!empty($kalibrasiTerakhir->file_sertifikat))
                                     <div class="mt-1">
-                                        <a href="{{ asset('storage/' . $kalibrasiTerakhir->file_sertifikat) }}" target="_blank" class="btn btn-outline-primary btn-sm py-0 px-1" style="font-size: 0.65rem;" title="Lihat Sertifikat">
-                                            <i class="fas fa-file-alt"></i> Lihat Sertifikat
+                                        <a href="{{ asset('storage/' . $kalibrasiTerakhir->file_sertifikat) }}" target="_blank" class="btn btn-outline-primary btn-sm py-0 px-1" style="font-size: 0.60rem;" title="Lihat Sertifikat">
+                                            <i class="fas fa-file-alt"></i> Lihat
                                         </a>
                                     </div>
                                 @endif
@@ -184,27 +231,17 @@
                             <td>{{ $kalibrasiTerakhir->lembaga_kalibrasi ?? '-' }}</td>
                             <td>{{ $jenisKalibrasi ? ucfirst($jenisKalibrasi) : '-' }}</td>
                             <td>{{ $kalibrasiTerakhir->range_kapasitas ?? '-' }}</td>
-                            <td>{{ $kalibrasiTerakhir->faktor_koreksi ?? '-' }}
-                                {{-- @if(!empty($kalibrasiTerakhir->file_faktor_koreksi))
-                                    <div class="mt-1">
-                                        <a href="{{ asset('storage/' . $kalibrasiTerakhir->file_faktor_koreksi) }}" target="_blank" class="btn btn-outline-primary btn-sm py-0 px-1" style="font-size: 0.65rem;" title="Lihat Dokumen Faktor Koreksi">
-                                            <i class="fas fa-file-alt"></i> Lihat Koreksi
-                                        </a>
-                                    </div>
-                                @endif --}}
-                            </td>
-
+                            <td>{{ $kalibrasiTerakhir->faktor_koreksi ?? '-' }}</td>
                             <td>{{ ucfirst($signifikan ?? '-') }}</td>
-
                             <td class="text-nowrap">
-                                <a href="{{ route('alat.show', $item->alat_id) }}" class="btn btn-info btn-sm text-white" title="Detail"><i class="fas fa-eye"></i></a>
+                                <a href="{{ route('alat.show', $item->alat_id) }}" class="btn btn-corporate-blue btn-sm py-1 px-2 shadow-sm" style="font-size: 0.7rem;" title="Detail Kerusakan & Perbaikan"><i class="fas fa-tools"></i></a>
                                 @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
-                                    <a href="{{ route('alat.edit', $item->alat_id) }}" class="btn btn-warning btn-sm" title="Edit"><i class="fas fa-edit"></i></a>
+                                    <a href="{{ route('alat.edit', $item->alat_id) }}" class="btn btn-warning btn-sm py-1 px-2 text-dark shadow-sm" style="font-size: 0.7rem;" title="Edit"><i class="fas fa-edit"></i></a>
 
                                     <form action="{{ route('alat.destroy', $item->alat_id) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="button" class="btn btn-danger btn-sm" title="Hapus" data-confirm-delete="Data alat beserta riwayat kalibrasinya akan dihapus permanen!">
+                                        <button type="button" class="btn btn-danger btn-sm py-1 px-2 shadow-sm" style="font-size: 0.7rem;" title="Hapus" data-confirm-delete="Data alat beserta riwayat kalibrasinya akan dihapus permanen!">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
@@ -215,7 +252,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="22" class="text-center text-muted">Tidak ada data alat yang ditemukan</td>
+                            <td colspan="22" class="text-center text-muted py-3">Tidak ada data alat yang ditemukan</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -226,23 +263,23 @@
 </div>
 
 <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 320px;">
         <div class="modal-content text-center">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title fs-6" id="qrModalLabel">QR Code Alat</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header text-white py-1.5 px-3" style="background-color: #1b3152;">
+                <h5 class="modal-title" id="qrModalLabel" style="font-size: 0.82rem;">QR Code Alat</h5>
+                <button type="button" class="btn-close btn-close-white btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body py-4">
-                <div id="qrCardContainer" class="p-3 bg-white d-inline-block rounded shadow-sm">
-                    <h6 id="modalNamaAlat" class="fw-bold text-primary mb-1"></h6>
-                    <p id="modalKodeAlat" class="text-muted small mb-3"></p>
+            <div class="modal-body py-3 px-2">
+                <div id="qrCardContainer" class="p-2 bg-white d-inline-block rounded shadow-sm">
+                    <h6 id="modalNamaAlat" class="fw-bold text-primary mb-1" style="font-size: 0.85rem;"></h6>
+                    <p id="modalKodeAlat" class="text-muted small mb-2" style="font-size: 0.72rem;"></p>
 
-                    <div id="modalQrContainer" class="p-3 bg-light d-inline-block shadow-sm rounded"></div>
+                    <div id="modalQrContainer" class="p-2 bg-light d-inline-block shadow-sm rounded"></div>
                 </div>   
             </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
-                <button type="button" id="btnDownloadQr" class="btn btn-success btn-sm"><i class="fas fa-download me-1"></i> Unduh QR Code</button>
+            <div class="modal-footer justify-content-center py-2 px-2">
+                <button type="button" class="btn btn-secondary btn-sm py-1 px-3" data-bs-dismiss="modal" style="font-size: 0.72rem;">Tutup</button>
+                <button type="button" id="btnDownloadQr" class="btn btn-success btn-sm py-1 px-3" style="font-size: 0.72rem;"><i class="fas fa-download me-1"></i> Unduh</button>
             </div>
         </div>
     </div>

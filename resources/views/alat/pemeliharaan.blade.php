@@ -3,17 +3,40 @@
 @push('styles')
 <style>
     .card-header-custom {
-        background-color: #0d6efd;
+        background-color: #1b3152 !important;
         color: white;
     }
     .table-header-custom {
         background-color: #e9ecef;
     }
     .input-table-size {
-        font-size: 0.75rem;
+        font-size: 0.72rem;
     }
     .card-shadow-custom {
         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    .container-fluid {
+        padding-top: 2px !important;
+    }
+    .card-body {
+        padding: 0.75rem 1rem !important;
+    }
+    .table-info-alat td {
+        padding: 3px 6px !important;
+        font-size: 0.78rem !important;
+    }
+    .form-label {
+        font-size: 0.72rem !important;
+        margin-bottom: 0.2rem !important;
+    }
+    .form-control-sm, .form-select-sm, .btn-sm {
+        padding: 0.2rem 0.4rem !important;
+        font-size: 0.75rem !important;
+    }
+    .table th, .table td {
+        padding: 0.35rem 0.4rem !important;
+        font-size: 0.72rem !important;
     }
 </style>
 @endpush
@@ -92,10 +115,8 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <!-- Input tahun tetap mempertahankan fungsi onchange submit form -->
                     <input type="number" name="tahun" class="form-control" value="{{ $tahun }}" onchange="this.form.submit()">
                 </div>
-                <!-- Tombol Dropdown Unduh Laporan (PDF & Excel) -->
                 <div class="col-md-6 text-end">
                     <div class="dropdown">
                         <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="dropdownDownload" data-bs-toggle="dropdown" aria-expanded="false">
@@ -118,7 +139,6 @@
             </form>
 
             @php
-                // Kolom tabel menyesuaikan jumlah item yang diinput (minimal 1 agar layout tidak rusak)
                 $jumlahKolom = max(1, $totalItems);
             @endphp
 

@@ -2,14 +2,18 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <title>Laporan Kalibrasi - {{ $alat->kode_alat }}</title>
     <style>
-        body { font-family: 'Helvetica', sans-serif; font-size: 10pt; color: #333; margin: 15px 20px; }
+        @page { 
+            size: A4 portrait; 
+            margin: 25px 25px 45px 25px; /* Margin bawah disisakan untuk area footer */
+        }
+        body { font-family: 'Helvetica', sans-serif; font-size: 10pt; color: #333; margin: 0; }
         
         /* Header & Logo Fix */
         .header-table { width: 100%; border-collapse: collapse; margin-bottom: 5px; }
         .header-table td { vertical-align: middle; border: none; padding: 0; }
         
-        /* Menggunakan lebar fix agar DomPDF merender logo dengan sempurna tanpa terpotong */
         .logo { width: 140px; display: block; margin-left: auto; }
         
         h2 { color: #004a99; margin: 0 0 2px 0; font-size: 15pt; }
@@ -20,7 +24,7 @@
         .info-table td { padding: 4px 0; border: none; font-size: 10pt; }
         .label { font-weight: bold; width: 150px; }
 
-        /* Tabel Data Riwayat dengan Kolom Diperluas Maksimal */
+        /* Tabel Data Riwayat */
         table.data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         table.data-table th, table.data-table td { 
             border: 1px solid #777; 
@@ -31,6 +35,21 @@
         }
         table.data-table th { background-color: #f2f2f2; font-weight: bold; }
         .text-left { text-align: left !important; padding-left: 8px !important; }
+
+        /* Styling Posisi Footer DomPDF */
+        .footer {
+            position: fixed;
+            bottom: -30px;
+            left: 0;
+            right: 0;
+            font-size: 8.5pt;
+            color: #555;
+            border-top: 1px solid #ccc;
+            padding-top: 6px;
+            width: 100%;
+        }
+        .footer table { width: 100%; border-collapse: collapse; }
+        .footer td { border: none; padding: 0; }
     </style>
 </head>
 <body>
@@ -85,7 +104,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($alat->riwayatKalibrasi as $index => $r)
+            @forelse($alat->riwayatKalibrasi as $index => $r)
             <tr>
                 <td style="font-weight: bold; color: #004a99;">Kalibrasi ke-{{ $index + 1 }}</td>
                 <td>{{ ucfirst($r->jenis_kalibrasi) }}</td>
@@ -101,9 +120,26 @@
                 <td>{{ strtoupper($r->signifikan) }}</td>
                 <td>{{ $r->catatan_evaluasi ?? '-' }}</td>
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="7" style="text-align: center; color: #777; padding: 15px;">Belum ada riwayat kalibrasi untuk alat ini.</td>
+            </tr>
+            @endforelse
         </tbody>
     </table>
+
+    <div class="footer">
+        <table>
+            <tr>
+                <td style="text-align: left;">
+                    Dicetak oleh: <strong>{{ $namaUser }}</strong> (SIGMA-LAB PT Sucofindo)
+                </td>
+                <td style="text-align: right;">
+                    Waktu Cetak: {{ \Carbon\Carbon::now()->format('d-m-Y H:i:s') }} WIB
+                </td>
+            </tr>
+        </table>
+    </div>
 
 </body>
 </html>

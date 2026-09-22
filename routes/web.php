@@ -38,7 +38,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/switch-role', [RoleSwitcherController::class, 'switchRole'])->name('switch-role');
 
-    Route::resource('evaluasi-kalibrasi', EvaluasiKalibrasiController::class);
+    Route::resource('evaluasi-kalibrasi', EvaluasiKalibrasiController::class)->parameters([
+        'evaluasi-kalibrasi' => 'evaluasi'
+    ]);
 
     Route::prefix('sdm')->name('sdm.')->group(function () {
         Route::get('/', [SdmController::class, 'index'])->name('index');
@@ -158,7 +160,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('modul:audit_log,lihat')->group(function () {
         Route::get('audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
         Route::get('audit-log/{id}', [AuditLogController::class, 'show'])->name('audit-log.show');
-    });
+    }); 
 
     Route::middleware('modul:manajemen_pengguna,lihat')->group(function () {
         Route::get('hak-akses', [HakAksesController::class, 'index'])->name('hak-akses.index');

@@ -380,7 +380,6 @@
 @endif
 @endforeach
 
-<!-- Modal Pembatalan Proses oleh GA -->
 @foreach($pengadaans as $p)
 @if(in_array($p->status, ['diproses', 'diproses_po', 'pembelian']))
 <div class="modal fade" id="modalBatalGa{{ $p->permintaan_id }}" tabindex="-1" aria-hidden="true">

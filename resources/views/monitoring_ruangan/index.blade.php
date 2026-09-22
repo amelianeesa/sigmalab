@@ -2,6 +2,9 @@
 
 @push('styles')
 <style>
+    .dashboard-container {
+        padding: 10px 20px !important;
+    }
     .bg-sesi-pagi {
         background-color: #e3f2fd !important; 
     }
@@ -15,42 +18,73 @@
     .table td input.form-control, .table td input.form-control-sm {
         min-width: 55px;
     }
+    .card-body {
+        padding: 10px !important;
+    }
+
+    .table-responsive[style*="max-height"] {
+        max-height: 110px !important; 
+    }
+    .select2-container--bootstrap-5 .select2-dropdown {
+        top: 100% !important;
+        bottom: auto !important;
+        margin-top: 2px !important;
+    }
+
+    .select2-container--bootstrap-5 .select2-dropdown .select2-search {
+        display: none !important;
+    }
+    .select2-container--bootstrap-5 .select2-search--dropdown {
+        padding: 0 !important;
+        display: none !important;
+    }
+
+    input[type="date"].form-control-sm {
+        padding: 2px 6px !important;
+        font-size: 0.72rem !important;
+    }
+    #tabelTemperature th, #tabelTemperature td,
+    #tabelHumidity th, #tabelHumidity td {
+        padding: 2px 4px !important;
+        font-size: 0.68rem !important;
+    }
 </style>
 @endpush
 
 @section('content')
-<div class="container-fluid px-4 py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container-fluid dashboard-container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h2 class="fw-bold text-dark fs-4 mb-1">Pencatatan Monitoring Suhu dan Kelembaban Udara</h2>
+            <h4 class="fw-bold text-dark mb-1">
+                 Pencatatan Monitoring Suhu dan Kelembaban Udara
+            </h4>
             <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0" style="font-size: 0.85rem;">
+                <ol class="breadcrumb mb-0" style="font-size: 0.75rem;">
                     <li class="breadcrumb-item"><a href="{{ url('alat') }}" class="text-decoration-none">Peralatan</a></li>
                     <li class="breadcrumb-item active text-muted" aria-current="page">Monitoring Ruangan</li>
                 </ol>
             </nav>
         </div>    
         <div>
-            <a href="{{ route('inventori.monitoring.index') }}" class="btn btn-outline-primary btn-sm me-2"><i class="fas fa-sync-alt me-1"></i> Refresh Data</a>
+            <a href="{{ route('inventori.monitoring.index') }}" class="btn text-white btn-sm py-1 px-2 me-2 shadow-sm" style="font-size: 0.72rem; background-color: #1b3152;"><i class="fas fa-sync-alt me-1"></i> Refresh Data</a>
             @if(isset($alatId) && $alatId && isset($ruangan) && $ruangan)
-                <a href="{{ route('inventori.monitoring.exportPdf', ['alat_id' => $alatId, 'nama_ruangan' => $ruangan, 'bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="btn btn-danger btn-sm"><i class="fas fa-file-pdf me-1"></i> Unduh Rekapan PDF</a>
+                <a href="{{ route('inventori.monitoring.exportPdf', ['alat_id' => $alatId, 'nama_ruangan' => $ruangan, 'bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="btn btn-danger btn-sm py-1 px-2" style="font-size: 0.72rem;"><i class="fas fa-file-pdf me-1"></i> Unduh Rekapan PDF</a>
             @endif
         </div>
     </div>
 
-    <!-- Card Gabungan: Manajemen Titik Acuan & Dokumen Referensi -->
-    <div class="card border-0 shadow-sm mb-2 bg-light">
-        <div class="card-body p-3">
+    <div class="card border-0 shadow-sm mb-3 bg-light">
+        <div class="card-body p-2">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h5 class="fw-bold text-dark fs-6 mb-1"><i class="fas fa-sliders-h text-primary me-2"></i>Manajemen Titik Acuan Kalibrasi & Dokumen Referensi</h5>
-                    <p class="text-muted small mb-0">Klik tombol di sebelah kanan untuk membuka atau menyembunyikan detail titik acuan dan dokumen.</p>
-                </div>     
-                <button class="btn btn-outline-secondary btn-sm fw-bold px-3 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTitikAcuan" aria-expanded="false" aria-controls="collapseTitikAcuan">
+                    <h6 class="fw-bold text-dark mb-0" style="font-size: 0.85rem;"><i class="fas fa-sliders-h text-primary me-2"></i>Manajemen Titik Acuan Kalibrasi & Dokumen Referensi</h6>
+                    <p class="text-muted small mb-0" style="font-size: 0.7rem;">Klik tombol di sebelah kanan untuk membuka atau menyembunyikan detail titik acuan dan dokumen.</p>
+                </div>    
+                <button class="btn btn-outline-secondary btn-sm fw-bold px-2 py-1 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTitikAcuan" aria-expanded="false" aria-controls="collapseTitikAcuan" style="font-size: 0.7rem;">
                     <i class="fas fa-chevron-down me-1"></i> Sembunyikan / Tampilkan
                 </button>
             </div>
-            <div class="collapse show mt-3" id="collapseTitikAcuan">
+            <div class="collapse show mt-2" id="collapseTitikAcuan">
                 @if(isset($alatAktif) && $alatAktif)
                     @php 
                         $idAlat = $alatAktif->alat_id ?? $alatAktif->id; 
@@ -63,21 +97,21 @@
                     @endphp
                     <form action="{{ route('inventori.monitoring.storeKalibrasi', $idAlat) }}" method="POST">
                         @csrf
-                        <div class="bg-white p-3 rounded border shadow-sm mb-3">
-                            <div class="row align-items-center g-3">
+                        <div class="bg-white p-2 rounded border shadow-sm mb-2">
+                            <div class="row align-items-center g-2">
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold text-secondary mb-1" style="font-size: 11px;"><i class="fas fa-calendar-alt text-primary me-1"></i> TANGGAL KALIBRASI ALAT</label>
-                                    <input type="date" name="tanggal_kalibrasi" value="{{ $tglKalibVal }}" class="form-control form-control-sm bg-light fw-bold text-dark" readonly>
+                                    <label class="form-label fw-bold text-secondary mb-1" style="font-size: 10px;"><i class="fas fa-calendar-alt text-primary me-1"></i> TANGGAL KALIBRASI ALAT</label>
+                                    <input type="date" name="tanggal_kalibrasi" value="{{ $tglKalibVal }}" class="form-control form-control-sm bg-light fw-bold text-dark py-1" style="font-size: 0.75rem;" readonly>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold text-secondary mb-1" style="font-size: 11px;"><i class="fas fa-hourglass-end text-danger me-1"></i> MASA BERLAKU (EXPIRED DATE)</label>
+                                    <label class="form-label fw-bold text-secondary mb-1" style="font-size: 10px;"><i class="fas fa-hourglass-end text-danger me-1"></i> MASA BERLAKU (EXPIRED DATE)</label>
                                     <div class="input-group input-group-sm">
-                                        <input type="date" name="tanggal_expired" value="{{ $tglExpVal }}" class="form-control bg-light fw-bold text-dark" readonly>
+                                        <input type="date" name="tanggal_expired" value="{{ $tglExpVal }}" class="form-control form-control-sm bg-light fw-bold text-dark py-1" style="font-size: 0.75rem;" readonly>
                                         @if($alatAktif->tanggal_expired)
                                             @if($isExpired)
-                                                <span class="badge bg-danger d-flex align-items-center px-3" style="font-size: 10px;"><i class="fas fa-exclamation-triangle me-1"></i> EXPIRED</span>
+                                                <span class="badge bg-danger d-flex align-items-center px-2" style="font-size: 9px;"><i class="fas fa-exclamation-triangle me-1"></i> EXPIRED</span>
                                             @else
-                                                <span class="badge bg-success d-flex align-items-center px-3" style="font-size: 10px;"><i class="fas fa-check-circle me-1"></i> AKTIF</span>
+                                                <span class="badge bg-success d-flex align-items-center px-2" style="font-size: 9px;"><i class="fas fa-check-circle me-1"></i> AKTIF</span>
                                             @endif
                                         @endif
                                     </div>
@@ -85,21 +119,20 @@
                             </div>
                         </div>
 
-                        <div class="row g-3">
-                            <!-- Kolom Kiri: SUHU -->
+                        <div class="row g-2">
                             <div class="col-md-6">
                                 <div class="card border shadow-sm">
-                                    <div class="card-header bg-warning bg-opacity-10 py-2 fw-bold text-dark small text-center">
+                                    <div class="card-header bg-warning bg-opacity-10 py-1 fw-bold text-dark small text-center" style="font-size: 0.75rem;">
                                         TEMPERATURE (Suhu)
                                     </div>
                                     <div class="card-body p-2">
-                                        <div class="table-responsive bg-white rounded mb-2" style="max-height: 180px; overflow-y: auto;">
-                                            <table class="table table-sm table-bordered text-center align-middle mb-0" id="tabelTemperature" style="font-size: 11px;">
+                                        <div class="table-responsive bg-white rounded mb-2" style="max-height: 150px; overflow-y: auto;">
+                                            <table class="table table-sm table-bordered text-center align-middle mb-0" id="tabelTemperature" style="font-size: 0.7rem;">
                                                 <thead class="table-light">
                                                     <tr>
                                                         <th>Equipment Reading</th>
                                                         <th>Standard Reading</th>
-                                                        <th style="width: 40px;">Aksi</th>
+                                                        <th style="width: 35px;">Aksi</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody class="align-middle">
@@ -112,7 +145,7 @@
                                                                     <td>{{ $titik->equipment_reading }}</td>
                                                                     <td>{{ $titik->standard_reading }}</td>
                                                                     <td>
-                                                                        <button type="button" class="btn btn-sm text-danger p-0 border-0 bg-transparent" onclick="if(confirm('Hapus titik acuan temperature ini?')) { document.getElementById('delete-form-{{ $titik->titik_kalibrasi_id }}').submit(); }" title="Hapus"><i class="fas fa-trash"></i></button>
+                                                                        <button type="button" class="btn btn-sm text-danger p-0 border-0 bg-transparent btn-hapus-titik" data-id="{{ $titik->titik_kalibrasi_id }}" title="Hapus"><i class="fas fa-trash"></i></button>
                                                                     </td>
                                                                 </tr>
                                                             @endif
@@ -121,33 +154,32 @@
 
                                                     @if(!$hasTemp)
                                                     <tr>
-                                                        <td><input type="number" step="0.01" name="temperature_equipment[]" class="form-control form-control-sm text-center" placeholder="0.00"></td>
-                                                        <td><input type="number" step="0.01" name="temperature_standard[]" class="form-control form-control-sm text-center" placeholder="0.00"></td>
+                                                        <td><input type="number" step="0.01" name="temperature_equipment[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
+                                                        <td><input type="number" step="0.01" name="temperature_standard[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
                                                         <td><button type="button" class="btn btn-sm text-danger p-0 border-0 bg-transparent hapus-baris"><i class="fas fa-times"></i></button></td>
                                                     </tr>
                                                     @endif
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <button type="button" id="tambahTemperature" class="btn btn-outline-warning btn-sm w-100 text-dark fw-bold" style="font-size: 11px;"><i class="fas fa-plus me-1"></i> Tambah Baris Temperature</button>
+                                        <button type="button" id="tambahTemperature" class="btn btn-outline-warning btn-sm w-100 text-dark fw-bold py-1" style="font-size: 0.7rem;"><i class="fas fa-plus me-1"></i> Tambah Baris Temperature</button>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Kolom Kanan: HUMIDITY -->
                             <div class="col-md-6">
                                 <div class="card border shadow-sm">
-                                    <div class="card-header bg-success bg-opacity-10 py-2 fw-bold text-dark small text-center">
+                                    <div class="card-header bg-success bg-opacity-10 py-1 fw-bold text-dark small text-center" style="font-size: 0.75rem;">
                                         HUMIDITY (Kelembaban)
                                     </div>
                                     <div class="card-body p-2">
-                                        <div class="table-responsive bg-white rounded mb-2" style="max-height: 180px; overflow-y: auto;">
-                                            <table class="table table-sm table-bordered text-center align-middle mb-0" id="tabelHumidity" style="font-size: 11px;">
+                                        <div class="table-responsive bg-white rounded mb-2" style="max-height: 150px; overflow-y: auto;">
+                                            <table class="table table-sm table-bordered text-center align-middle mb-0" id="tabelHumidity" style="font-size: 0.7rem;">
                                                 <thead class="table-light">
                                                     <tr>
                                                         <th>Equipment Reading</th>
                                                         <th>Standard Reading</th>
-                                                        <th style="width: 40px;">Aksi</th>
+                                                        <th style="width: 35px;">Aksi</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody class="align-middle">
@@ -160,7 +192,7 @@
                                                                     <td>{{ $titik->equipment_reading }}</td>
                                                                     <td>{{ $titik->standard_reading }}</td>
                                                                     <td>
-                                                                        <button type="button" class="btn btn-sm text-danger p-0 border-0 bg-transparent" onclick="if(confirm('Hapus titik acuan humidity ini?')) { document.getElementById('delete-form-{{ $titik->titik_kalibrasi_id }}').submit(); }" title="Hapus"><i class="fas fa-trash"></i></button>
+                                                                        <button type="button" class="btn btn-sm text-danger p-0 border-0 bg-transparent btn-hapus-titik" data-id="{{ $titik->titik_kalibrasi_id }}" title="Hapus"><i class="fas fa-trash"></i></button>
                                                                     </td>
                                                                 </tr>
                                                             @endif
@@ -168,36 +200,44 @@
                                                     @endif
 
                                                     @if(!$hasHumidity)
-                                                        <tr>
-                                                            <td><input type="number" step="0.01" name="humidity_equipment[]" class="form-control form-control-sm text-center" placeholder="0.00"></td>
-                                                            <td><input type="number" step="0.01" name="humidity_standard[]" class="form-control form-control-sm text-center" placeholder="0.00"></td>
-                                                            <td><button type="button" class="btn btn-sm text-danger p-0 border-0 bg-transparent hapus-baris"><i class="fas fa-times"></i></button></td>
-                                                        </tr>
+                                                    <tr>
+                                                        <td><input type="number" step="0.01" name="humidity_equipment[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
+                                                        <td><input type="number" step="0.01" name="humidity_standard[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
+                                                        <td><button type="button" class="btn btn-sm text-danger p-0 border-0 bg-transparent hapus-baris"><i class="fas fa-times"></i></button></td>
+                                                    </tr>
                                                     @endif
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <button type="button" id="tambahHumidity" class="btn btn-outline-success btn-sm w-100 fw-bold" style="font-size: 11px;"><i class="fas fa-plus me-1"></i> Tambah Baris Humidity</button>
+                                        <button type="button" id="tambahHumidity" class="btn btn-outline-success btn-sm w-100 fw-bold py-1" style="font-size: 0.7rem;"><i class="fas fa-plus me-1"></i> Tambah Baris Humidity</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                    
-                        <div class="mt-3 text-end">
-                            <button type="submit" class="btn btn-success px-4 py-2"><i class="fas fa-save me-1"></i> Simpan Semua Titik Acuan</button>
+                        <div class="mt-2 text-end">
+                            <button type="submit" class="btn btn-success btn-sm px-3 py-1 fw-bold" style="font-size: 0.72rem;"><i class="fas fa-save me-1"></i> Simpan Semua Titik Acuan</button>
                         </div>
                     </form>
 
-                    <!-- DOKUMEN REFERENSI RUANGAN (LAYOUT COMPACT / BERDAMPINGAN) -->
+                    @if(isset($titikKalibrasiList) && count($titikKalibrasiList) > 0)
+                        @foreach($titikKalibrasiList as $titik)
+                            <form id="delete-form-{{ $titik->titik_kalibrasi_id }}" action="{{ route('inventori.monitoring.destroyKalibrasi', $titik->titik_kalibrasi_id) }}" method="POST" style="display: none;">
+                                @csrf
+                                @method('DELETE')
+                            </form>
+                        @endforeach
+                    @endif
+
+                    <!-- DOKUMEN REFERENSI RUANGAN -->
                     <div class="card border bg-white shadow-sm mt-3">
-                        <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
-                            <span class="fw-bold text-dark small"><i class="fas fa-file-pdf text-danger me-1"></i> DOKUMEN REFERENSI RUANGAN</span>
+                        <div class="card-header bg-light py-2 px-3 d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-dark small" style="font-size: 0.75rem;"><i class="fas fa-file-alt text-primary me-1"></i> DOKUMEN REFERENSI RUANGAN</span>
                             <span class="badge bg-primary" style="font-size: 10px;">{{ isset($dokumenList) ? count($dokumenList) : 0 }} File</span>
                         </div>
                         <div class="card-body p-3">
-                            <div class="row g-3">
-                                <!-- Kolom Kiri: Form Upload Ringkas -->
-                                <div class="col-md-5 border-end">
+                            <div class="row g-3 align-items-center">
+                                <div class="col-md-5 border-end pe-md-3">
                                     <form action="{{ route('inventori.monitoring.uploadReferensi') }}" method="POST" enctype="multipart/form-data">
                                         @csrf
                                         <input type="hidden" name="nama_ruangan" value="{{ $ruangan }}">
@@ -205,29 +245,27 @@
                                         <input type="hidden" name="tahun" value="{{ $tahun }}">
                                         <input type="hidden" name="alat_id" value="{{ $alatId }}">
 
-
                                         <label class="form-label fw-bold text-secondary mb-1" style="font-size: 11px;">UNGGAH DOKUMEN BARU</label>
-                                        <div class="input-group input-group-sm mb-2">
-                                            <input type="file" class="form-control" name="dokumen_referensi" required accept=".pdf,.doc,.docx,.jpg,.png" {{ empty($ruangan) ? 'disabled' : '' }}>
-                                            <button type="submit" class="btn btn-primary fw-bold" {{ empty($ruangan) ? 'disabled' : '' }}>
-                                                <i class="fas fa-upload"></i> Unggah
+                                        <div class="input-group input-group-sm mb-1">
+                                            <input type="file" class="form-control form-control-sm" name="dokumen_referensi" required accept=".pdf,.doc,.docx,.jpg,.png" {{ empty($ruangan) ? 'disabled' : '' }} style="font-size: 0.72rem;">
+                                            <button type="submit" class="btn text-white btn-sm fw-bold px-3 shadow-sm" {{ empty($ruangan) ? 'disabled' : '' }} style="font-size: 0.72rem; background-color: #1b3152;">
+                                                <i class="fas fa-upload me-1"></i> Unggah
                                             </button>
                                         </div>
                                         @if(empty($ruangan))
-                                            <small class="text-danger" style="font-size: 10px;">Pilih nama ruangan terlebih dahulu pada filter di atas.</small>
+                                            <small class="text-danger" style="font-size: 10px;">Pilih nama ruangan terlebih dahulu pada filter di bawah.</small>
                                         @endif
                                     </form>
                                 </div>
 
-                                <!-- Kolom Kanan: Daftar Dokumen (Compact Scrollable List) -->
-                                <div class="col-md-7">
+                                <div class="col-md-7 ps-md-3">
                                     <label class="form-label fw-bold text-secondary mb-1" style="font-size: 11px;">DAFTAR DOKUMEN TERSEDIA</label>
                                     <div class="table-responsive rounded border" style="max-height: 120px; overflow-y: auto;">
-                                        <table class="table table-sm table-hover align-middle mb-0" style="font-size: 11px;">
+                                        <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.72rem;">
                                             <thead class="table-light sticky-top">
                                                 <tr>
                                                     <th class="ps-2">Nama File</th>
-                                                    <th class="text-center" style="width: 130px;">Aksi</th>
+                                                    <th class="text-center" style="width: 120px;">Aksi</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -235,19 +273,16 @@
                                                     @foreach($dokumenList as $doc)
                                                         <tr>
                                                             <td class="ps-2 text-truncate" style="max-width: 200px;" title="{{ $doc->nama_file_asli ?? basename($doc->file_path) }}">
-                                                                <i class="fas fa-file-pdf text-danger me-1"></i> {{ $doc->nama_file_asli ?? basename($doc->file_path) }}
+                                                                <i class="fas fa-file-alt text-secondary me-1"></i> {{ $doc->nama_file_asli ?? basename($doc->file_path) }}
                                                             </td>
                                                             <td class="text-center">
-                                                                <!-- Tombol Lihat -->
-                                                                <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="btn btn-info btn-sm text-white px-2 py-0" style="font-size: 10px;" title="Lihat">
+                                                                <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="btn btn-sm text-white px-1.5 py-0" style="font-size: 10px; background-color: #1b3152;" title="Lihat">
                                                                     <i class="fas fa-eye"></i>
                                                                 </a>
-                                                                <!-- Tombol Edit / Ganti -->
-                                                                <button type="button" class="btn btn-warning btn-sm text-dark px-2 py-0" style="font-size: 10px;" data-bs-toggle="modal" data-bs-target="#editDocModal-{{ $doc->dokumen_id }}" title="Ganti/Edit">
+                                                                <button type="button" class="btn btn-warning btn-sm text-dark px-1.5 py-0" style="font-size: 10px;" data-bs-toggle="modal" data-bs-target="#editDocModal-{{ $doc->dokumen_id }}" title="Ganti/Edit">
                                                                     <i class="fas fa-edit"></i>
                                                                 </button>
-                                                                <!-- Tombol Hapus -->
-                                                                <button type="button" class="btn btn-danger btn-sm px-2 py-0" style="font-size: 10px;" onclick="if(confirm('Yakin ingin menghapus dokumen ini?')) { document.getElementById('delete-doc-{{ $doc->dokumen_id }}').submit(); }" title="Hapus">
+                                                                <button type="button" class="btn btn-danger btn-sm px-1.5 py-0 btn-hapus-doc" data-id="{{ $doc->dokumen_id }}" style="font-size: 10px;" title="Hapus">
                                                                     <i class="fas fa-trash"></i>
                                                                 </button>
                                                             </td>
@@ -279,11 +314,11 @@
                                     <form action="{{ route('inventori.monitoring.updateReferensi', $doc->dokumen_id) }}" method="POST" enctype="multipart/form-data">
                                         @csrf
                                         @method('PUT')
-                                        <div class="modal-header py-2">
-                                            <h6 class="modal-title fw-bold">Edit / Ganti Dokumen Referensi</h6>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        <div class="modal-header py-1 px-3 text-white" style="background-color: #1b3152;">
+                                            <h6 class="modal-title fw-bold" style="font-size: 0.85rem;">Edit / Ganti Dokumen Referensi</h6>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
-                                        <div class="modal-body text-start">
+                                        <div class="modal-body text-start p-3">
                                             <div class="mb-2">
                                                 <label class="form-label small fw-bold">Nama / Keterangan File</label>
                                                 <input type="text" class="form-control form-control-sm" name="nama_file_asli" value="{{ $doc->nama_file_asli ?? basename($doc->file_path) }}" required>
@@ -294,18 +329,18 @@
                                                 <small class="text-muted" style="font-size: 10px;">Biarkan kosong jika tidak ingin mengganti file fisiknya.</small>
                                             </div>
                                         </div>
-                                        <div class="modal-footer py-1">
+                                        <div class="modal-footer py-1 px-3">
                                             <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
-                                            <button type="submit" class="btn btn-success btn-sm">Simpan Perubahan</button>
+                                            <button type="submit" class="btn text-white btn-sm shadow-sm" style="background-color: #1b3152;">Simpan Perubahan</button>
                                         </div>
                                     </form>
                                 </div>
                             </div>
                         </div>
-                        @endforeach
+                    @endforeach
                     @endif
                 @else
-                    <div class="alert alert-warning py-2 mb-0 small">
+                    <div class="alert alert-warning py-1 px-2 mb-0 small" style="font-size: 0.75rem;">
                         <i class="fas fa-exclamation-circle me-1"></i> Silakan pilih <strong>Pilih Alat</strong> terlebih dahulu pada filter di bawah untuk mengatur titik kalibrasi alat tersebut
                     </div>
                 @endif
@@ -313,13 +348,12 @@
         </div>
     </div>
 
-    <!-- Header Filter & Informasi Alat -->
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <form method="GET" action="{{ route('inventori.monitoring.index') }}" id="filterForm" class="row g-3 align-items-end">
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body p-2">
+            <form method="GET" action="{{ route('inventori.monitoring.index') }}" id="filterForm" class="row g-2 align-items-end">
                 <div class="col-md-3">
-                    <label class="fw-bold text-muted small">PILIH ALAT</label>
-                    <select name="alat_id" id="selectAlat" class="form-select">
+                    <label class="fw-bold text-muted small" style="font-size: 0.7rem;">PILIH ALAT</label>
+                    <select name="alat_id" id="selectAlat" class="form-select form-select-sm">
                         <option value="">-- Pilih Alat --</option>
                         @foreach($daftarAlat as $alat)
                             <option value="{{ $alat->alat_id ?? $alat->id }}" {{ $alatId == ($alat->alat_id ?? $alat->id) ? 'selected' : '' }}>
@@ -330,13 +364,13 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label class="fw-bold text-muted small">NAMA RUANGAN</label>
-                    <input type="text" name="nama_ruangan" value="{{ $ruangan }}" placeholder="Input Ruangan" class="form-control">
+                    <label class="fw-bold text-muted small" style="font-size: 0.7rem;">NAMA RUANGAN</label>
+                    <input type="text" name="nama_ruangan" value="{{ $ruangan }}" placeholder="Input Ruangan" class="form-control form-control-sm py-1" style="font-size: 0.75rem;">
                 </div>
 
                 <div class="col-md-2">
-                    <label class="fw-bold text-muted small">BULAN</label>
-                    <select name="bulan" class="form-select">
+                    <label class="fw-bold text-muted small" style="font-size: 0.7rem;">BULAN</label>
+                    <select name="bulan" class="form-select form-select-sm py-1" style="font-size: 0.75rem;">
                         @foreach(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $b)
                             <option value="{{ $b }}" {{ $bulan == $b ? 'selected' : '' }}>{{ $b }}</option>
                         @endforeach
@@ -344,68 +378,67 @@
                 </div>
 
                 <div class="col-md-2">
-                    <label class="fw-bold text-muted small">TAHUN</label>
-                    <input type="number" name="tahun" value="{{ $tahun }}" class="form-control">
+                    <label class="fw-bold text-muted small" style="font-size: 0.7rem;">TAHUN</label>
+                    <input type="number" name="tahun" value="{{ $tahun }}" class="form-control form-control-sm py-1" style="font-size: 0.75rem;">
                 </div>
 
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search me-1"></i> Tampilkan</button>
+                    <button type="submit" class="btn text-white btn-sm w-100 py-1 shadow-sm" style="font-size: 0.72rem; background-color: #1b3152;"><i class="fas fa-search me-1"></i> Tampilkan</button>
                 </div>
 
                 <input type="hidden" name="persyaratan_suhu" id="hiddenPersyaratanSuhu" value="{{ $persyaratanSuhu }}">
                 <input type="hidden" name="persyaratan_kelembaban" id="hiddenPersyaratanKelembaban" value="{{ $persyaratanKelembaban }}">
             </form>
             
-            <hr class="my-3">
-            <div class="row text-secondary small align-items-center">
+            <hr class="my-2">
+            <div class="row text-secondary small align-items-center" style="font-size: 0.72rem;">
                 <div class="col-md-12">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <strong style="width: 180px;">Persyaratan Suhu:</strong>
-                        <input type="text" id="inputPersyaratanSuhu" value="{{ $persyaratanSuhu }}" class="form-control form-control-sm w-50" placeholder="Otomatis dari acuan suhu">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <strong style="width: 160px;">Persyaratan Suhu:</strong>
+                        <input type="text" id="inputPersyaratanSuhu" value="{{ $persyaratanSuhu }}" class="form-control form-control-sm w-50 py-0.5" placeholder="Otomatis dari acuan suhu" style="font-size: 0.72rem;">
                     </div>
                     <div class="d-flex align-items-center gap-2 mb-0">
-                        <strong style="width: 180px;">Persyaratan Kelembaban:</strong>
-                        <input type="text" id="inputPersyaratanKelembaban" value="{{ $persyaratanKelembaban }}" class="form-control form-control-sm w-50" placeholder="Otomatis dari acuan humidity">
+                        <strong style="width: 160px;">Persyaratan Kelembaban:</strong>
+                        <input type="text" id="inputPersyaratanKelembaban" value="{{ $persyaratanKelembaban }}" class="form-control form-control-sm w-50 py-0.5" placeholder="Otomatis dari acuan humidity" style="font-size: 0.72rem;">
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Tabel Monitoring Harian (1 - 31) -->
     <div class="card border-0 shadow-sm">
         <div class="card-body px-0 pt-0">
             <div class="table-responsive">
-                <table class="table table-bordered text-center align-middle small mb-0">
+                <table class="table table-bordered text-center align-middle small mb-0" style="font-size: 0.68rem;">
                     <thead class="table-light align-middle">
                         <tr>
-                            <th rowspan="2" style="width: 55px;" class="bg-light">Tanggal</th>
+                            <th rowspan="2" style="width: 45px;" class="bg-light">Tanggal</th>
                             <th colspan="2" class="py-1 bg-light">Waktu Pencatatan</th>
                             <th colspan="4" class="py-1 bg-sesi-pagi">Suhu (°C)</th>
                             <th colspan="4" class="py-1 bg-sesi-pagi">Kelembaban (%)</th>
                             <th colspan="2" class="py-1 bg-white">Status</th>
                             <th colspan="2" class="py-1 bg-light">Paraf</th>
-                            <th rowspan="2" style="width: 65px;" class="bg-light">Aksi</th>
+                            <th rowspan="2" style="width: 55px;" class="bg-light">Aksi</th>
                         </tr>
                         <tr>
-                            <th class="py-2 bg-sesi-pagi" style="width: 85px;">Pagi</th>
-                            <th class="py-2 bg-sesi-sore" style="width: 85px;">Sore</th>
+                            <th class="py-1 bg-sesi-pagi" style="width: 70px;">Pagi</th>
+                            <th class="py-1 bg-sesi-sore" style="width: 70px;">Sore</th>
                             
-                            <th class="py-2 bg-sesi-pagi">Pembacaan 1</th>
-                            <th class="py-2 bg-sesi-pagi">Koreksi 1</th>
-                            <th class="py-2 bg-sesi-sore">Pembacaan 2</th>
-                            <th class="py-2 bg-sesi-sore">Koreksi 2</th>
+                            <th class="py-1 bg-sesi-pagi">Pembacaan 1</th>
+                            <th class="py-1 bg-sesi-pagi">Koreksi 1</th>
+                            <th class="py-1 bg-sesi-sore">Pembacaan 2</th>
+                            <th class="py-1 bg-sesi-sore">Koreksi 2</th>
                             
-                            <th class="py-2 bg-sesi-pagi">Pembacaan 1</th>
-                            <th class="py-2 bg-sesi-pagi">Koreksi 1</th>
-                            <th class="py-2 bg-sesi-sore">Pembacaan 2</th>
-                            <th class="py-2 bg-sesi-sore">Koreksi 2</th>
+                            <th class="py-1 bg-sesi-pagi">Pembacaan 1</th>
+                            <th class="py-1 bg-sesi-pagi">Koreksi 1</th>
+                            <th class="py-1 bg-sesi-sore">Pembacaan 2</th>
+                            <th class="py-1 bg-sesi-sore">Koreksi 2</th>
                             
-                            <th class="py-2 bg-white" style="width: 70px;">Diterima</th>
-                            <th class="py-2 bg-white" style="width: 70px;">Ditolak</th>
+                            <th class="py-1 bg-white" style="width: 60px;">Diterima</th>
+                            <th class="py-1 bg-white" style="width: 60px;">Ditolak</th>
                 
-                            <th class="py-2 bg-sesi-pagi" style="width: 80px;">1</th>
-                            <th class="py-2 bg-sesi-sore" style="width: 80px;">2</th>
+                            <th class="py-1 bg-sesi-pagi" style="width: 65px;">1</th>
+                            <th class="py-1 bg-sesi-sore" style="width: 65px;">2</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -415,12 +448,12 @@
                             $minHum  = isset($titikKalibrasiList) ? collect($titikKalibrasiList)->filter(fn($t) => strtolower($t->kategori) == 'humidity')->min('equipment_reading') : null;
                             $maxHum  = isset($titikKalibrasiList) ? collect($titikKalibrasiList)->filter(fn($t) => strtolower($t->kategori) == 'humidity')->max('equipment_reading') : null;
                         @endphp
-                 
+               
                         @for($tgl = 1; $tgl <= 31; $tgl++)
                         @php 
                             $row = $monitoringData[$tgl] ?? null; 
                             $sudahAdaData = $row ? true : false;
-                 
+               
                             $isS1Out = ($minTemp !== null && $row?->suhu_pembacaan_1 !== null && ($row->suhu_pembacaan_1 < $minTemp || $row->suhu_pembacaan_1 > $maxTemp));
                             $isS2Out = ($minTemp !== null && $row?->suhu_pembacaan_2 !== null && ($row->suhu_pembacaan_2 < $minTemp || $row->suhu_pembacaan_2 > $maxTemp));
                             $isH1Out = ($minHum !== null && $row?->kelembaban_pembacaan_1 !== null && ($row->kelembaban_pembacaan_1 < $minHum || $row->kelembaban_pembacaan_1 > $maxHum));
@@ -437,71 +470,66 @@
                                 
                                 <input type="hidden" name="persyaratan_suhu" class="row-persyaratan-suhu" value="{{ $persyaratanSuhu ?: $otomatisSuhu }}">
                                 <input type="hidden" name="persyaratan_kelembaban" class="row-persyaratan-kelembaban" value="{{ $persyaratanKelembaban ?: $otomatisKelembaban }}">
-                
+                    
                                 <td class="fw-bold bg-light">{{ $tgl }}</td>
                                 
                                 <td class="bg-sesi-pagi">
-                                    <input type="text" name="waktu_1" value="{{ $row?->waktu_1 }}" class="form-control form-control-sm text-center px-1 bg-white" placeholder="08:00">
+                                    <input type="text" name="waktu_1" value="{{ $row?->waktu_1 }}" class="form-control form-control-sm text-center px-1 bg-white py-0" placeholder="08:00" style="font-size: 0.68rem;">
                                 </td>
                                 <td class="bg-sesi-sore">
-                                    <input type="text" name="waktu_2" value="{{ $row?->waktu_2 }}" class="form-control form-control-sm text-center px-1 bg-white" placeholder="13:00">
+                                    <input type="text" name="waktu_2" value="{{ $row?->waktu_2 }}" class="form-control form-control-sm text-center px-1 bg-white py-0" placeholder="13:00" style="font-size: 0.68rem;">
                                 </td>
-                
+                    
                                 <td class="bg-sesi-pagi">
-                                    <input type="number" step="0.01" name="suhu_pembacaan_1" value="{{ $row?->suhu_pembacaan_1 }}" class="form-control form-control-sm text-center px-1 input-suhu-1 bg-white {{ $isS1Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00">
+                                    <input type="number" step="0.01" name="suhu_pembacaan_1" value="{{ $row?->suhu_pembacaan_1 }}" class="form-control form-control-sm text-center px-1 input-suhu-1 bg-white py-0 {{ $isS1Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;">
                                 </td>
                                 <td class="fw-bold text-primary bg-sesi-pagi">
                                     <span id="suhu-terkoreksi-1-text-{{ $tgl }}">{{ $row?->suhu_terkoreksi_1 ?? '-' }}</span>
                                     <input type="hidden" name="suhu_terkoreksi_1" id="suhu-terkoreksi-1-input-{{ $tgl }}" value="{{ $row?->suhu_terkoreksi_1 }}">
                                 </td>
-                
+                    
                                 <td class="bg-sesi-sore">
-                                    <input type="number" step="0.01" name="suhu_pembacaan_2" value="{{ $row?->suhu_pembacaan_2 }}" class="form-control form-control-sm text-center px-1 input-suhu-2 bg-white {{ $isS2Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00">
+                                    <input type="number" step="0.01" name="suhu_pembacaan_2" value="{{ $row?->suhu_pembacaan_2 }}" class="form-control form-control-sm text-center px-1 input-suhu-2 bg-white py-0 {{ $isS2Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;">
                                 </td>
                                 <td class="fw-bold text-success bg-sesi-sore">
                                     <span id="suhu-terkoreksi-2-text-{{ $tgl }}">{{ $row?->suhu_terkoreksi_2 ?? '-' }}</span>
                                     <input type="hidden" name="suhu_terkoreksi_2" id="suhu-terkoreksi-2-input-{{ $tgl }}" value="{{ $row?->suhu_terkoreksi_2 }}">
                                 </td>
-                
+                    
                                 <td class="bg-sesi-pagi">
-                                    <input type="number" step="0.01" name="kelembaban_pembacaan_1" value="{{ $row?->kelembaban_pembacaan_1 }}" class="form-control form-control-sm text-center px-1 input-lembap-1 bg-white {{ $isH1Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00">
+                                    <input type="number" step="0.01" name="kelembaban_pembacaan_1" value="{{ $row?->kelembaban_pembacaan_1 }}" class="form-control form-control-sm text-center px-1 input-lembap-1 bg-white py-0 {{ $isH1Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;">
                                 </td>
                                 <td class="fw-bold text-primary bg-sesi-pagi">
                                     <span id="lembap-terkoreksi-1-text-{{ $tgl }}">{{ $row?->kelembaban_terkoreksi_1 ?? '-' }}</span>
                                     <input type="hidden" name="kelembaban_terkoreksi_1" id="lembap-terkoreksi-1-input-{{ $tgl }}" value="{{ $row?->kelembaban_terkoreksi_1 }}">
                                 </td>
-                
+                    
                                 <td class="bg-sesi-sore">
-                                    <input type="number" step="0.01" name="kelembaban_pembacaan_2" value="{{ $row?->kelembaban_pembacaan_2 }}" class="form-control form-control-sm text-center px-1 input-lembap-2 bg-white {{ $isH2Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00">
+                                    <input type="number" step="0.01" name="kelembaban_pembacaan_2" value="{{ $row?->kelembaban_pembacaan_2 }}" class="form-control form-control-sm text-center px-1 input-lembap-2 bg-white py-0 {{ $isH2Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;">
                                 </td>
                                 <td class="fw-bold text-success bg-sesi-sore">
                                     <span id="lembap-terkoreksi-2-text-{{ $tgl }}">{{ $row?->kelembaban_terkoreksi_2 ?? '-' }}</span>
                                     <input type="hidden" name="kelembaban_terkoreksi_2" id="lembap-terkoreksi-2-input-{{ $tgl }}" value="{{ $row?->kelembaban_terkoreksi_2 }}">
                                 </td>
-                
-                                <!-- Status Diterima -->
+                    
                                 <td class="bg-white text-center align-middle">
                                     <input class="form-check-input" type="radio" name="status" value="Diterima" {{ ($row?->status == 'Diterima') ? 'checked' : '' }}>
                                 </td>
-                
-                                <!-- Status Ditolak -->
+                    
                                 <td class="bg-white text-center align-middle">
                                     <input class="form-check-input" type="radio" name="status" value="Ditolak" {{ ($row?->status == 'Ditolak') ? 'checked' : '' }}>
                                 </td>
-                
-                                <!-- Kolom Paraf 1 -->
-                                <td class="bg-sesi-pagi text-center small fw-bold text-dark text-truncate" style="max-width: 80px;" title="{{ $row?->paraf_1 }}">
+                    
+                                <td class="bg-sesi-pagi text-center small fw-bold text-dark text-truncate" style="max-width: 65px;" title="{{ $row?->paraf_1 }}">
                                     {{ $row?->paraf_1 ?? '-' }}
                                 </td>
 
-                                <!-- Kolom Paraf 2 -->
-                                <td class="bg-sesi-sore text-center small fw-bold text-dark text-truncate" style="max-width: 80px;" title="{{ $row?->paraf_2 }}">
+                                <td class="bg-sesi-sore text-center small fw-bold text-dark text-truncate" style="max-width: 65px;" title="{{ $row?->paraf_2 }}">
                                     {{ $row?->paraf_2 ?? '-' }}
                                 </td>
-                
-                                <!-- Tombol Aksi (Simpan) -->
+                    
                                 <td class="bg-light text-center">
-                                    <button type="submit" class="btn btn-sm btn-success px-2 py-1" title="Simpan Baris"><i class="fas fa-save"></i></button>
+                                    <button type="submit" class="btn btn-sm btn-success px-1.5 py-0.5" style="font-size: 0.65rem;" title="Simpan Baris"><i class="fas fa-save"></i></button>
                                 </td>
                             </form>
                         </tr>
@@ -516,15 +544,63 @@
 
 @push('scripts')
 <script>
-    $(document).ready(function() {
-        if ($.fn.select2) {
-            $('#selectAlat').select2({
-                theme: 'bootstrap-5',
-                placeholder: '-- Pilih Alat --',
-                allowClear: false
+    document.addEventListener("DOMContentLoaded", function() {
+        if (typeof jQuery !== 'undefined') {
+            $(document).ready(function() {
+                if ($.fn.select2) {
+                    $('#selectAlat').select2({
+                        theme: 'bootstrap-5',
+                        placeholder: '-- Pilih Alat --',
+                        allowClear: false
+                    });
+                }
             });
         }
 
+        document.querySelectorAll('.btn-hapus-titik').forEach(button => {
+            button.addEventListener('click', function() {
+                let id = this.getAttribute('data-id');
+                Swal.fire({
+                    title: 'Konfirmasi Hapus',
+                    text: "Hapus titik acuan temperature ini?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        let form = document.getElementById('delete-form-' + id);
+                        if (form) form.submit();
+                    }
+                });
+            });
+        });
+
+        document.querySelectorAll('.btn-hapus-doc').forEach(button => {
+            button.addEventListener('click', function() {
+                let id = this.getAttribute('data-id');
+                Swal.fire({
+                    title: 'Konfirmasi Hapus',
+                    text: "Yakin ingin menghapus dokumen ini?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        let form = document.getElementById('delete-doc-' + id);
+                        if (form) form.submit();
+                    }
+                });
+            });
+        });
+    });
+
+    $(document).ready(function() {
         function updateRentangOtomatis() {
             let suhuVals = [];
             $('#tabelTemperature tbody tr').each(function() {
@@ -747,8 +823,8 @@
         $(document).off('click', '#tambahHumidity').on('click', '#tambahHumidity', function(e) {
             e.preventDefault();
             let row = `<tr>
-                <td><input type="number" step="0.01" name="humidity_equipment[]" class="form-control form-control-sm text-center" placeholder="0.00"></td>
-                <td><input type="number" step="0.01" name="humidity_standard[]" class="form-control form-control-sm text-center" placeholder="0.00"></td>
+                <td><input type="number" step="0.01" name="humidity_equipment[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
+                <td><input type="number" step="0.01" name="humidity_standard[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
                 <td><button type="button" class="btn btn-sm text-danger p-0 border-0 bg-transparent hapus-baris"><i class="fas fa-times"></i></button></td>
             </tr>`;
             $('#tabelHumidity tbody').append(row);
@@ -757,26 +833,23 @@
         $(document).off('click', '#tambahTemperature').on('click', '#tambahTemperature', function(e) {
             e.preventDefault();
             let row = `<tr>
-                <td><input type="number" step="0.01" name="temperature_equipment[]" class="form-control form-control-sm text-center" placeholder="0.00"></td>
-                <td><input type="number" step="0.01" name="temperature_standard[]" class="form-control form-control-sm text-center" placeholder="0.00"></td>
+                <td><input type="number" step="0.01" name="temperature_equipment[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
+                <td><input type="number" step="0.01" name="temperature_standard[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
                 <td><button type="button" class="btn btn-sm text-danger p-0 border-0 bg-transparent hapus-baris"><i class="fas fa-times"></i></button></td>
             </tr>`;
             $('#tabelTemperature tbody').append(row);
         });
 
-        $(document).on('click', '.hapus-baris', function() {
-            $(this).closest('tr').remove();
+        $(document).on('click', '.hapus-baris', function() {$(this).closest('tr').remove();
         });
 
         $('#inputPersyaratanSuhu').on('input', function() {
-            let val = $(this).val();
-            $('#hiddenPersyaratanSuhu').val(val);
+            let val = $(this).val();$('#hiddenPersyaratanSuhu').val(val);
             $('.row-persyaratan-suhu').val(val);
         });
 
         $('#inputPersyaratanKelembaban').on('input', function() {
-            let val = $(this).val();
-            $('#hiddenPersyaratanKelembaban').val(val);
+            let val = $(this).val();$('#hiddenPersyaratanKelembaban').val(val);
             $('.row-persyaratan-kelembaban').val(val);
         });
 
