@@ -195,6 +195,29 @@
                                                     </div>
                                                     
                                                     <div class="param-form-wrapper" style="opacity: 0.5; pointer-events: none;">
+                                                        <!-- ANALIS & ALAT (CHN) -->
+                                                        <div class="row g-3 bg-light p-3 rounded mb-3 border border-info align-items-center">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label small fw-bold mb-1">Analis / Personil</label>
+                                                                <select name="params[{{ $pid }}][analis_id]" class="form-select form-select-sm param-input-ext" disabled>
+                                                                    <option value="">-- Pilih Analis --</option>
+                                                                    @foreach($personilList as $personil)
+                                                                        <option value="{{ $personil->personil_id }}">{{ $personil->nama }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label small fw-bold mb-1">Instrumen/Alat</label>
+                                                                <select name="params[{{ $pid }}][alat_id]" class="form-select form-select-sm param-input-ext" disabled>
+                                                                    <option value="">-- Pilih Alat --</option>
+                                                                    <option value="1">CLC1204-10001 - Sulfur Analyzer</option>
+                                                                    <option value="2">CLC1206-10001 - Calorimeter</option>
+                                                                    <option value="3">CLC1156-10002 - MFS/1 ASTM Oven</option>
+                                                                    <option value="4">CLC3208-10001 - MFS/1 ASTM Oven</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+
                                                         @include('qc-uji-banding.partials.chn_table')
 
                                                         @php
@@ -235,29 +258,7 @@
                                                                 </div>
                                                             </div>
                                                         @endif
-
-                                                        <!-- TANGGAL UJI (CHN) -->
-                                                        <div class="row g-3 bg-light p-3 rounded mt-3 border border-info align-items-center">
-                                                            <div class="col-md-6">
-                                                                <label class="form-label small fw-bold mb-1">Analis / Personil</label>
-                                                                <select name="params[{{ $pid }}][analis_id]" class="form-select form-select-sm param-input-ext" disabled>
-                                                                    <option value="">-- Pilih Analis --</option>
-                                                                    @foreach($personilList as $personil)
-                                                                        <option value="{{ $personil->personil_id }}">{{ $personil->nama }}</option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label small fw-bold mb-1">Instrumen/Alat</label>
-                                                                <select name="params[{{ $pid }}][alat_id]" class="form-select form-select-sm param-input-ext" disabled>
-                                                                    <option value="">-- Pilih Alat --</option>
-                                                                    <option value="1">CLC1204-10001 - Sulfur Analyzer</option>
-                                                                    <option value="2">CLC1206-10001 - Calorimeter</option>
-                                                                    <option value="3">CLC1156-10002 - MFS/1 ASTM Oven</option>
-                                                                    <option value="4">CLC3208-10001 - MFS/1 ASTM Oven</option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
+                                                        
                                                     </div>
                                                 </div>
 
@@ -289,6 +290,29 @@
                                                                     <h5 class="fw-bold text-dark mb-0 ms-2 text-primary">Aktifkan Pengujian {{ $code }} <span class="badge bg-secondary ms-2">{{ $param->satuan }}</span></h5>
                                                                 </div>
                                                                 <div class="param-form-wrapper" style="opacity: 0.5; pointer-events: none;">
+                                                                    <!-- ANALIS & ALAT (UMUM) -->
+                                                                    <div class="row g-3 bg-light p-3 rounded mb-3 border border-info align-items-center">
+                                                                        <div class="col-md-6">
+                                                                            <label class="form-label small fw-bold mb-1">Analis / Personil</label>
+                                                                            <select name="params[{{ $pid }}][analis_id]" class="form-select form-select-sm param-input-ext" disabled>
+                                                                                <option value="">-- Pilih Analis --</option>
+                                                                                @foreach($personilList as $personil)
+                                                                                    <option value="{{ $personil->personil_id }}">{{ $personil->nama }}</option>
+                                                                                @endforeach
+                                                                            </select>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <label class="form-label small fw-bold mb-1">Instrumen/Alat</label>
+                                                                            <select name="params[{{ $pid }}][alat_id]" class="form-select form-select-sm param-input-ext" disabled>
+                                                                                <option value="">-- Pilih Alat --</option>
+                                                                                <option value="1">CLC1204-10001 - Sulfur Analyzer</option>
+                                                                                <option value="2">CLC1206-10001 - Calorimeter</option>
+                                                                                <option value="3">CLC1156-10002 - MFS/1 ASTM Oven</option>
+                                                                                <option value="4">CLC3208-10001 - MFS/1 ASTM Oven</option>
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
+
                                                                     @if(in_array($code, ['IM', 'ASH', 'VM', 'FC', 'RM']))
                                                                         @include('qc-uji-banding.partials.proximate_table')
                                                                     @elseif($kategori === 'Determination of Sulfur by IR Spectrometry')
@@ -365,30 +389,6 @@
                                                                         </div>
                                                                     @endif
 
-                                                                    <!-- TANGGAL UJI (UMUM) - INI DIV ROW YANG SEBELUMNYA HILANG -->
-                                                                    <div class="row g-3 bg-light p-3 rounded mt-3 border border-info align-items-center">
-                                                                        <div class="col-md-6">
-                                                                            <label class="form-label small fw-bold mb-1">Analis / Personil</label>
-                                                                            <select name="params[{{ $pid }}][analis_id]" class="form-select form-select-sm param-input-ext" disabled>
-                                                                                <option value="">-- Pilih Analis --</option>
-                                                                                @foreach($personilList as $personil)
-                                                                                    <option value="{{ $personil->personil_id }}">{{ $personil->nama }}</option>
-                                                                                @endforeach
-                                                                            </select>
-                                                                        </div>
-                                                                        <div class="col-md-6">
-                                                                            <label class="form-label small fw-bold mb-1">Instrumen/Alat</label>
-                                                                            <select name="params[{{ $pid }}][alat_id]" class="form-select form-select-sm param-input-ext" disabled>
-                                                                                <option value="">-- Pilih Alat --</option>
-                                                                                <option value="1">CLC1204-10001 - Sulfur Analyzer</option>
-                                                                                <option value="2">CLC1206-10001 - Calorimeter</option>
-                                                                                <option value="3">CLC1156-10002 - MFS/1 ASTM Oven</option>
-                                                                                <option value="4">CLC3208-10001 - MFS/1 ASTM Oven</option>
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-                                                                    <!-- Penutup Row Tanggal Uji -->
-                                                                    
                                                                 </div>
                                                             </div>
                                                         </div>
