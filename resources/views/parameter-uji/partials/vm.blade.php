@@ -23,9 +23,8 @@
             <h6 class="m-0 font-weight-bold text-primary">Filter Data</h6>
         </div>
         <div class="card-body">
-            <form action="{{ url()->
-            <input type="hidden" name="tab" value="{{ $jenisGrafik }}">
-current() }}" method="GET" class="row g-3 align-items-end">
+            <form action="{{ url()->current() }}" method="GET" class="row g-3 align-items-end">
+                <input type="hidden" name="tab" value="{{ $jenisGrafik }}">
                 <div class="col-md-3">
                     <label for="parameter_uji_id" class="form-label">Parameter Uji</label>
                     <select class="form-select" id="parameter_uji_id" name="parameter_uji_id" required>

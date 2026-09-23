@@ -2,6 +2,11 @@
 @section('title', 'Tambah Baru - QC CRM')
 
 @section('content')
+<style>
+    .param-table { min-width: max-content; }
+    .param-table th, .param-table td { white-space: nowrap; padding-left: 10px !important; padding-right: 10px !important; }
+    .param-table td input.form-control { min-width: 90px; }
+</style>
 <div class="container-fluid px-4 pb-5">
     <x-qc-breadcrumb active="CRM">
         <li class="breadcrumb-item active" aria-current="page">Input Data</li>
@@ -187,6 +192,7 @@
                                 <div class="d-flex justify-content-between align-items-end border-bottom pb-2 mb-3">
                                     <h5 class="fw-bold text-dark mb-0"><i class="fas fa-flask text-primary me-2"></i>Pengujian {{ $code }}</h5>
                                 </div>
+                                <div class="table-responsive pb-2">
                                 <table class="table table-bordered table-sm align-middle text-center param-table" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
                                         <thead class="table-light">
                                             @if($code === 'IM')
@@ -240,7 +246,7 @@
                                                     <th>AVERAGE %db</th>
                                                     <th>%db</th>
                                                 </tr>
-                                            @elseif($code === 'TS')
+                                            @elseif(in_array($code, ['TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']))
                                                 <tr>
                                                     <th>PENGULANGAN</th>
                                                     <th style="width: 16%">Massa sample</th>
@@ -280,7 +286,7 @@
                                         <tbody>
                                             <!-- SIMPLO -->
                                             <tr class="row-entry">
-                                                <td class="fw-bold bg-light">
+                                                <td class="align-middle fw-bold bg-light border-bottom-0">
                                                     Simplo (D1)
                                                     <input type="hidden" class="in-d1" name="params[{{ $pid }}][d1]">
                                                     <input type="hidden" class="in-db-1" name="params[{{ $pid }}][db1]">
@@ -293,9 +299,6 @@
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-a-1" name="params[{{ $pid }}][mentah][a_1]" disabled></td>
                                                     <td><input type="text" class="form-control form-control-sm in-b-1 bg-light border-0" readonly tabindex="-1"></td>
                                                     <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" readonly tabindex="-1"></td>
-                                                    <td rowspan="2" class="align-middle out-diff">-</td>
-                                                    <td rowspan="2" class="align-middle out-tol fw-bold">-</td>
-                                                    <td rowspan="2" class="align-middle out-avg-adb">-</td>
                                                 @elseif($code === 'ASH')
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-1" name="params[{{ $pid }}][mentah][m1_1]" disabled></td>
                                                     <td><input type="text" class="form-control form-control-sm in-m2-1 bg-light border-0" readonly tabindex="-1"></td>
@@ -303,10 +306,6 @@
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m3-1" name="params[{{ $pid }}][mentah][m3_1]" disabled></td>
                                                     <td><input type="text" class="form-control form-control-sm in-m3m1-1 bg-light border-0" readonly tabindex="-1"></td>
                                                     <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" readonly tabindex="-1"></td>
-                                                    <td rowspan="2" class="align-middle out-diff">-</td>
-                                                    <td rowspan="2" class="align-middle out-tol fw-bold">-</td>
-                                                    <td rowspan="2" class="align-middle out-avg-adb">-</td>
-                                                    <td rowspan="2" class="align-middle out-avg-db">-</td>
                                                     <td class="align-middle out-db-1 fw-bold text-success">-</td>
                                                 @elseif($code === 'VM')
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-1" name="params[{{ $pid }}][mentah][m1_1]" disabled></td>
@@ -319,16 +318,10 @@
                                                         <input type="text" inputmode="decimal" class="form-control form-control-sm in-im-1 fw-bold bg-transparent border-0 text-center text-warning" name="params[{{ $pid }}][mentah][im_d1]" placeholder="IM D1" disabled>
                                                     </td>
                                                     <td class="bg-warning bg-opacity-25"><input type="text" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" readonly tabindex="-1"></td>
-                                                    <td rowspan="2" class="align-middle out-diff">-</td>
-                                                    <td rowspan="2" class="align-middle out-tol fw-bold">-</td>
-                                                    <td rowspan="2" class="align-middle out-avg-adb">-</td>
-                                                    <td rowspan="2" class="align-middle out-avg-db">-</td>
                                                     <td class="align-middle out-db-1 fw-bold text-success">-</td>
-                                                @elseif($code === 'TS')
+                                                @elseif(in_array($code, ['TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']))
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-mass-1" name="params[{{ $pid }}][mentah][mass_1]" disabled></td>
                                                     <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" disabled></td>
-                                                    <td rowspan="2" class="align-middle out-avg-adb fw-bold">-</td>
-                                                    <td rowspan="2" class="align-middle out-avg-db fw-bold">-</td>
                                                     <td class="align-middle out-db-1 fw-bold text-success">-</td>
                                                 @elseif($code === 'CV')
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-w-1" name="params[{{ $pid }}][mentah][w_1]" disabled></td>
@@ -340,19 +333,15 @@
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-lf-1" name="params[{{ $pid }}][mentah][lf_1]" disabled></td>
                                                     <td><input type="text" class="form-control form-control-sm in-ts-1 bg-light border-0" name="params[{{ $pid }}][mentah][ts_1]" readonly tabindex="-1" placeholder="Auto dari TS"></td>
                                                     <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" readonly tabindex="-1"></td>
-                                                    <td rowspan="2" class="align-middle out-avg-adb fw-bold">-</td>
-                                                    <td rowspan="2" class="align-middle out-avg-db fw-bold">-</td>
                                                     <td class="align-middle out-db-1 fw-bold text-success">-</td>
                                                 @else
                                                     <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" disabled></td>
-                                                    <td rowspan="2" class="align-middle out-diff">-</td>
-                                                    <td rowspan="2" class="align-middle out-avg-adb">-</td>
                                                 @endif
                                             </tr>
 
                                             <!-- DUPLO -->
                                             <tr class="row-entry">
-                                                <td class="fw-bold bg-light">
+                                                <td class="fw-bold text-start border-start-0">
                                                     Duplo (D2)
                                                     <input type="hidden" class="in-d2" name="params[{{ $pid }}][d2]">
                                                     <input type="hidden" class="in-db-2" name="params[{{ $pid }}][db2]">
@@ -385,7 +374,7 @@
                                                     </td>
                                                     <td class="bg-warning bg-opacity-25"><input type="text" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" readonly tabindex="-1"></td>
                                                     <td class="align-middle out-db-2 fw-bold text-success">-</td>
-                                                @elseif($code === 'TS')
+                                                @elseif(in_array($code, ['TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']))
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-mass-2" name="params[{{ $pid }}][mentah][mass_2]" disabled></td>
                                                     <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" disabled></td>
                                                     <td class="align-middle out-db-2 fw-bold text-success">-</td>
@@ -402,6 +391,40 @@
                                                     <td class="align-middle out-db-2 fw-bold text-success">-</td>
                                                 @else
                                                     <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" disabled></td>
+                                                @endif
+                                            </tr>
+
+                                            <tr class="tr-avg bg-light">
+                                                @php
+                                                    $colSpan = 2;
+                                                    if (in_array($code, ['IM', 'ASH'])) $colSpan = 7;
+                                                    elseif ($code === 'VM') $colSpan = 9;
+                                                    elseif (in_array($code, ['TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)'])) $colSpan = 3;
+                                                    elseif (in_array($code, ['CV', 'GCV'])) $colSpan = 10;
+                                                @endphp
+                                                <td colspan="{{ $colSpan }}" class="text-end fw-bold pe-3">EVALUASI HASIL & RATA-RATA:</td>
+                                                
+                                                @if($code === 'IM')
+                                                    <td class="align-middle out-diff fw-bold">-</td>
+                                                    <td class="align-middle out-tol fw-bold">-</td>
+                                                    <td class="align-middle out-avg-adb fw-bold text-primary fs-6">-</td>
+                                                @elseif($code === 'ASH' || $code === 'VM')
+                                                    <td class="align-middle out-diff fw-bold">-</td>
+                                                    <td class="align-middle out-tol fw-bold">-</td>
+                                                    <td class="align-middle out-avg-adb fw-bold text-primary fs-6">-</td>
+                                                    <td class="align-middle out-avg-db fw-bold text-success fs-6">-</td>
+                                                    <td class="bg-transparent border-0"></td>
+                                                @elseif(in_array($code, ['TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']))
+                                                    <td class="align-middle out-avg-adb fw-bold text-primary fs-6">-</td>
+                                                    <td class="align-middle out-avg-db fw-bold text-success fs-6">-</td>
+                                                    <td class="bg-transparent border-0"></td>
+                                                @elseif(in_array($code, ['CV', 'GCV']))
+                                                    <td class="align-middle out-avg-adb fw-bold text-primary fs-6">-</td>
+                                                    <td class="align-middle out-avg-db fw-bold text-success fs-6">-</td>
+                                                    <td class="bg-transparent border-0"></td>
+                                                @else
+                                                    <td class="align-middle out-diff fw-bold">-</td>
+                                                    <td class="align-middle out-avg-adb fw-bold text-primary fs-6">-</td>
                                                 @endif
                                             </tr>
                                         </tbody>

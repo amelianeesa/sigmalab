@@ -6,7 +6,16 @@
     <x-qc-breadcrumb active="Uji Banding"></x-qc-breadcrumb>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold text-dark mb-0"><i class="fas fa-balance-scale text-primary me-2"></i>QC Uji Banding</h2>
-        <a href="{{ route('qc-uji-banding.create') }}" class="btn btn-primary shadow-sm"><i class="fas fa-plus me-1"></i> Input Uji Banding Baru</a>
+        
+        <!-- Bungkus tombol agar posisinya sejajar di kanan -->
+        <div>
+            <a href="{{ route('master.toleransi.index') }}" class="btn btn-outline-secondary shadow-sm me-2">
+                <i class="fas fa-cog me-1"></i> Master Batas Toleransi
+            </a>
+            <a href="{{ route('qc-uji-banding.create') }}" class="btn btn-primary shadow-sm">
+                <i class="fas fa-plus me-1"></i> Input Uji Banding Baru
+            </a>
+        </div>
     </div>
 
     @if(session('success'))

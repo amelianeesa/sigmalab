@@ -23,7 +23,7 @@
         </div>
     @endif
 
-    <form action="{{ route('crm-katalog.store') }}" method="POST">
+    <form action="{{ route('crm-katalog.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <div class="row">
             <div class="col-md-5 mb-4">
@@ -47,6 +47,11 @@
                         <div class="mb-3">
                             <label class="form-label">Produsen / Penerbit</label>
                             <input type="text" class="form-control" name="produsen" value="{{ old('produsen') }}" placeholder="Contoh: NCS / NIST">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Sertifikat CoA (Certificate of Analysis)</label>
+                            <input type="file" class="form-control" name="coa_file" accept=".pdf,.jpg,.jpeg,.png">
+                            <div class="form-text">Format PDF/JPG/PNG, maksimal 5MB.</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Tanggal Expired</label>

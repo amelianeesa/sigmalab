@@ -50,7 +50,12 @@ current() }}" method="GET" class="row g-3 align-items-end">
                         <i class="fas fa-filter"></i> Filter
                     </button>
                     @if($selectedParameter)
-                        <a href="{{ route('parameter-uji.cetak-control-chart', ['parameter_uji' => request()->route('parameter_uji') ?? $selectedParameter->parameter_uji_id, 'tanggal_mulai' => request('tanggal_mulai'), 'tanggal_akhir' => request('tanggal_akhir'), 'tab' => request('tab')]), 'tanggal_mulai' => request('tanggal_mulai'), 'tanggal_akhir' => request('tanggal_akhir')]) }}" class="btn btn-danger flex-grow-1" target="_blank">
+                        <a href="{{ route('parameter-uji.cetak-control-chart', [
+                            'parameter_uji' => request()->route('parameter_uji') ?? $selectedParameter->parameter_uji_id, 
+                            'tanggal_mulai' => request('tanggal_mulai'), 
+                            'tanggal_akhir' => request('tanggal_akhir'), 
+                            'tab' => request('tab')
+                        ]) }}" class="btn btn-danger flex-grow-1" target="_blank">
                             <i class="fas fa-file-pdf"></i> Cetak
                         </a>
                     @endif

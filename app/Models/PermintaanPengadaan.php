@@ -2,29 +2,21 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\LogsStandardActivity;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-use Spatie\Activitylog\Models\Concerns\LogsActivity;
-use Spatie\Activitylog\Support\LogOptions;
-// use Spatie\Activitylog\Traits\LogsActivity;
-// use Spatie\Activitylog\LogOptions;
-
-
-class PermintaanPengadaan extends BaseModel
+class PermintaanPengadaan extends Model
 {
-    use SoftDeletes;
-    use HasFactory, LogsActivity;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'permintaan_pengadaan';
+    protected $primaryKey = 'permintaan_id';
 
     protected $fillable = [
         'barang_id',
         'jumlah_diminta',
+        'target_hari',
         'alasan',
         'foto',
         'status',
@@ -33,15 +25,16 @@ class PermintaanPengadaan extends BaseModel
         'tanggal_pengajuan',
         'tanggal_keputusan',
         'catatan_approval',
-        'foto_diterima', 
-        'nama_penerima', 
+        'nama_penerima',
+        'foto_diterima',
         'waktu_diterima',
+        'catatan_po'
     ];
 
     protected $casts = [
-        'tanggal_pengajuan' => 'date',
-        'tanggal_keputusan' => 'date',
-        'waktu_diterima' => 'datetime'
+        'tanggal_pengajuan' => 'datetime',
+        'tanggal_keputusan' => 'datetime',
+        'waktu_diterima' => 'datetime',
     ];
 
     public function barang()
@@ -58,5 +51,23 @@ class PermintaanPengadaan extends BaseModel
     {
         return $this->belongsTo(User::class, 'disetujui_oleh', 'users_id');
     }
-
+    public function getFormatTargetWaktuAttribute()
+    {
+        $totalHari = $this->target_hari;
+        if (!$totalHari || $totalHari <= 0) {
+            return '-';
+        }
+    
+        $tahun = floor($totalHari / 365);
+        $sisa = $totalHari % 365;
+        $bulan = floor($sisa / 30);
+        $hari = $sisa % 30;
+    
+        $str = [];
+        if ($tahun > 0) $str[] = "{$tahun} thn";
+        if ($bulan > 0) $str[] = "{$bulan} bln";
+        if ($hari > 0 || empty($str)) $str[] = "{$hari} hari";
+    
+        return implode(' ', $str);
+    }
 }

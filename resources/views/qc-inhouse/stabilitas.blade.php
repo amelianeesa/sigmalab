@@ -26,7 +26,10 @@
                     <div class="card-header bg-white pt-3 border-bottom-0">
                         <ul class="nav nav-tabs card-header-tabs" id="parameterTabs" role="tablist">
                             @foreach($batch->parameters as $index => $param)
-                                @php $code = strtoupper($param->parameterUji->nama_parameter); @endphp
+                                @php 
+                                    $rawCode = trim(strtoupper($param->parameterUji->nama_parameter)); 
+                            $code = in_array($rawCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)', 'TS']) ? 'TS' : $rawCode;
+                                @endphp
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link fw-bold {{ $index === 0 ? 'active' : '' }}" 
                                             id="tab-{{ $param->id }}" 
@@ -34,7 +37,7 @@
                                             data-bs-target="#pane-{{ $param->id }}" 
                                             type="button" role="tab"
                                             data-code="{{ $code }}">
-                                        {{ $code }}
+                                        {{ $rawCode }}
                                     </button>
                                 </li>
                             @endforeach
@@ -65,7 +68,8 @@
                         <div class="tab-content" id="parameterTabsContent">
                             @foreach($batch->parameters as $index => $param)
                                 @php 
-                                    $code = strtoupper($param->parameterUji->nama_parameter); 
+                                    $rawCode = trim(strtoupper($param->parameterUji->nama_parameter)); 
+                            $code = in_array($rawCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)', 'TS']) ? 'TS' : $rawCode;
                                     $pid = $param->id;
                                 @endphp
                                 <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}" id="pane-{{ $pid }}" role="tabpanel">
@@ -119,15 +123,14 @@
                                                         <th>%db</th>
                                                     </tr>
                                                 @elseif($code === 'TS')
-                                                    <tr>
-                                                        <th style="width: 15%">KODE SAMPEL</th>
-                                                        <th style="width: 5%">DISH NO.</th>
-                                                        <th style="width: 16%">Massa sample</th>
-                                                        <th class="bg-warning bg-opacity-25" style="width: 16%">TS (Adb)</th>
-                                                        <th style="width: 16%">Average %(adb)</th>
-                                                        <th style="width: 16%">Average % (Db)</th>
-                                                        <th style="width: 16%">%db</th>
-                                                    </tr>
+                                                <tr>
+                                                    <th width="10%">KODE SAMPEL</th>
+                                                    <th>DISH NO.</th>
+                                                    <th>Massa sample</th>
+                                                    <th class="bg-warning bg-opacity-25">TS (Adb)</th>
+                                                    <th>Average % (adb)</th>
+                                                    <th class="bg-warning bg-opacity-25">Average % (db)</th>
+                                                </tr>
                                                 @elseif($code === 'CV')
                                                     <tr>
                                                         <th width="8%">KODE SAMPEL</th>
@@ -216,11 +219,10 @@
                                                             <td rowspan="2" class="align-middle out-avg-db">-</td>
                                                             <td class="align-middle out-db-1 fw-bold text-success">-</td>
                                                         @elseif($code === 'TS')
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_1]" value="{{ $mentah['massa_1'] ?? '' }}"></td>
-                                                            <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" value="{{ $dh->nilai_d1 ?? '' }}"></td>
-                                                            <td rowspan="2" class="align-middle out-avg-adb fw-bold">-</td>
-                                                            <td rowspan="2" class="align-middle out-avg-db fw-bold">-</td>
-                                                            <td class="align-middle out-db-1 fw-bold text-success">-</td>
+                                                        <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_1]" value="{{ $mentah['massa_1'] ?? '' }}"></td>
+                                                        <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" value="{{ $dh->nilai_d1 ?? '' }}"></td>
+                                                        <td rowspan="2" class="align-middle out-avg-adb fw-bold">-</td>
+                                                        <td rowspan="2" class="align-middle out-avg-db fw-bold text-success">-</td>
                                                         @elseif($code === 'CV')
                                                             <td><input type="text" class="form-control form-control-sm in-callid-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][callid_1]" value="{{ $mentah['callid_1'] ?? '' }}"></td>
                                                             <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-weight-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][weight_1]" value="{{ $mentah['weight_1'] ?? '' }}"></td>
@@ -272,9 +274,8 @@
                                                             <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" readonly tabindex="-1"></td>
                                                             <td class="align-middle out-db-2 fw-bold text-success">-</td>
                                                         @elseif($code === 'TS')
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_2]" value="{{ $mentah['massa_2'] ?? '' }}"></td>
-                                                            <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" value="{{ $dh->nilai_d2 ?? '' }}"></td>
-                                                            <td class="align-middle out-db-2 fw-bold text-success">-</td>
+                                                        <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_2]" value="{{ $mentah['massa_2'] ?? '' }}"></td>
+                                                        <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" value="{{ $dh->nilai_d2 ?? '' }}"></td>
                                                         @elseif($code === 'CV')
                                                             <td><input type="text" class="form-control form-control-sm in-callid-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][callid_2]" value="{{ $mentah['callid_2'] ?? '' }}"></td>
                                                             <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-weight-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][weight_2]" value="{{ $mentah['weight_2'] ?? '' }}"></td>
@@ -392,7 +393,10 @@
                     </div>
                     <div id="exportParamCheckboxes">
                         @foreach($batch->parameters as $param)
-                            @php $code = strtoupper($param->parameterUji->nama_parameter); @endphp
+                            @php 
+                                $rawCode = trim(strtoupper($param->parameterUji->nama_parameter)); 
+                            $code = in_array($rawCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)', 'TS']) ? 'TS' : $rawCode;
+                            @endphp
                             <div class="form-check">
                                 <input class="form-check-input chk-export-param" type="checkbox" value="{{ $code }}" id="chkExport{{ $code }}" checked>
                                 <label class="form-check-label" for="chkExport{{ $code }}">{{ $code }}</label>
@@ -447,7 +451,11 @@
 // STATE STORE
 const State = {};
 @foreach($batch->parameters as $param)
-    State["{{ strtoupper($param->parameterUji->nama_parameter) }}"] = {
+    @php 
+        $rawCode = trim(strtoupper($param->parameterUji->nama_parameter)); 
+                            $code = in_array($rawCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)', 'TS']) ? 'TS' : $rawCode;
+    @endphp
+    State["{{ $code }}"] = {
         id: {{ $param->id }},
         ready: false,
         data: Array.from({length: {{ max(3, $param->dataStabilitas->count()) }} }, () => ({ 
@@ -478,7 +486,8 @@ document.addEventListener('DOMContentLoaded', function() {
         @endphp
         @foreach($batch->parameters as $p)
         @php 
-            $pCode = strtoupper($p->parameterUji->nama_parameter);
+            $rawPCode = strtoupper($p->parameterUji->nama_parameter);
+            $pCode = in_array($rawPCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']) ? 'TS' : $rawPCode;
             $dbArr = [];
             foreach($p->dataHomogenitas as $dh) {
                 $m = $dh->data_mentah;
@@ -1241,12 +1250,16 @@ document.addEventListener('DOMContentLoaded', function() {
             tglFormatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
         }
 
+        const logoUrl = window.location.origin + '/images/Logo_Suco_Nobg.png';
+
         let html = `
         <div style="font-size: 12px; line-height: 1.2; padding: 10px;">
-            <table style="width:100%; border-bottom: 2px solid black; margin-bottom: 10px;">
+            <table style="width:100%; border-bottom: 2px solid black; margin-bottom: 10px; page-break-inside: avoid;">
                 <tr>
-                    <td style="font-size: 16px; font-weight: bold; padding-bottom: 5px;">Perhitungan Uji Stabilitas Sampel <i>Inhouse Standard</i></td>
-                    <td style="text-align: right; color: #004b87; font-weight: 900; font-size: 16px; font-style: italic;">SUCOFINDO</td>
+                    <td style="font-size: 16px; font-weight: bold; padding-bottom: 5px; vertical-align: bottom;">Perhitungan Uji Stabilitas Sampel <i>Inhouse Standard</i></td>
+                    <td style="text-align: right; vertical-align: bottom; width: 150px; padding-bottom: 5px;">
+                        <img src="${logoUrl}" style="width: 140px; height: auto; display: block; margin-left: auto;" alt="SUCOFINDO">
+                    </td>
                 </tr>
             </table>
 

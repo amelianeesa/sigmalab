@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 @section('title', 'Tambah Baru - QC Uji Banding')
 
 @section('content')
@@ -20,9 +20,7 @@
         @csrf
         <input type="hidden" name="draft_id" id="draft_id_input" value="{{ $draftId ?? '' }}">
 
-        {{-- ============================================================ --}}
-        {{-- SECTION 1: DATA DASAR PENGUJIAN --}}
-        {{-- ============================================================ --}}
+        
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-primary text-white py-3">
                 <h5 class="mb-0 fw-bold"><i class="fas fa-clipboard-list me-2"></i>Section 1: Data Dasar Pengujian</h5>
@@ -159,11 +157,11 @@
                                 @endif
                                 @php
                                     if ($kategori === 'Proximate Analysis') {
-                                    $order = ['IM' => 1, 'ASH' => 2, 'VM' => 3, 'FC' => 4];
-                                    $params = $params->sortBy(function($p) use ($order) {
-                                    $code = strtoupper(str_replace(' - %', '', $p->nama_parameter));
-                                    return $order[$code] ?? 99;
-                                    })->values();
+                                        $order = ['IM' => 1, 'ASH' => 2, 'VM' => 3, 'FC' => 4];
+                                        $params = $params->sortBy(function($p) use ($order) {
+                                            $code = strtoupper(str_replace(' - %', '', $p->nama_parameter));
+                                            return $order[$code] ?? 99;
+                                        })->values();
                                     }
                                     $catId = Str::slug($kategori);
                                 @endphp
@@ -195,15 +193,52 @@
                                                         <input class="form-check-input param-enable-check me-2" type="checkbox" name="params[{{ $pid }}][selected]" value="1" data-pid="{{ $pid }}" data-cat="{{ $catId }}" style="transform: scale(1.3);">
                                                         <h5 class="fw-bold text-dark mb-0 ms-2 text-primary">Aktifkan Pengujian CHN</h5>
                                                     </div>
+                                                    
                                                     <div class="param-form-wrapper" style="opacity: 0.5; pointer-events: none;">
                                                         @include('qc-uji-banding.partials.chn_table')
 
-                                                        <div class="row g-3 bg-light p-3 rounded mt-2 border border-info">
-                                                            <div class="col-md-4">
-                                                                <label class="form-label small fw-bold mb-1">Tanggal Uji</label>
-                                                                <input type="date" name="params[{{ $pid }}][tanggal_uji]" class="form-control form-control-sm param-input-ext" value="{{ date('Y-m-d') }}" disabled>
+                                                        @php
+                                                            $chnToleransis = \App\Models\ParameterToleransi::whereIn('parameter_uji_id', [$pid_c, $pid_h, $pid_n])->get();
+                                                        @endphp
+
+                                                        @if($chnToleransis->count() > 0)
+                                                            <input type="hidden" id="tol-data-{{ $pid_c }}" value='{{ $chnToleransis->toJson() }}'>
+                                                            <input type="hidden" id="tol-data-{{ $pid_h }}" value='{{ $chnToleransis->toJson() }}'>
+                                                            <input type="hidden" id="tol-data-{{ $pid_n }}" value='{{ $chnToleransis->toJson() }}'>
+                                                            <div class="mt-3 p-3 bg-light border rounded">
+                                                                <h6 class="fw-bold text-secondary mb-2" style="font-size: 0.85rem;">
+                                                                    <i class="fas fa-info-circle me-1"></i> Referensi Batas Toleransi Master CHN
+                                                                </h6>
+                                                                <div class="table-responsive">
+                                                                    <table class="table table-bordered table-sm text-center align-middle mb-0 bg-white" style="font-size: 0.8rem;">
+                                                                        <thead class="table-secondary">
+                                                                            <tr>
+                                                                                <th>Std Method</th>
+                                                                                <th>Element</th>
+                                                                                <th>Range</th>
+                                                                                <th class="text-danger">Repeatability (r)</th>
+                                                                                <th class="text-success">Reproducibility (R)</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            @foreach($chnToleransis as $tol)
+                                                                                <tr>
+                                                                                    <td>{{ $tol->metode ?? '-' }}</td>
+                                                                                    <td class="fw-bold text-primary">{{ $tol->sub_parameter ?? '-' }}</td>
+                                                                                    <td>{{ $tol->range_label ?? '-' }}</td>
+                                                                                    <td class="text-danger fw-bold">{{ $tol->formula_r }}</td>
+                                                                                    <td class="text-success fw-bold">{{ $tol->formula_R_besar }}</td>
+                                                                                </tr>
+                                                                            @endforeach
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
                                                             </div>
-                                                            <div class="col-md-4">
+                                                        @endif
+
+                                                        <!-- TANGGAL UJI (CHN) -->
+                                                        <div class="row g-3 bg-light p-3 rounded mt-3 border border-info align-items-center">
+                                                            <div class="col-md-6">
                                                                 <label class="form-label small fw-bold mb-1">Analis / Personil</label>
                                                                 <select name="params[{{ $pid }}][analis_id]" class="form-select form-select-sm param-input-ext" disabled>
                                                                     <option value="">-- Pilih Analis --</option>
@@ -212,7 +247,7 @@
                                                                     @endforeach
                                                                 </select>
                                                             </div>
-                                                            <div class="col-md-4">
+                                                            <div class="col-md-6">
                                                                 <label class="form-label small fw-bold mb-1">Instrumen/Alat</label>
                                                                 <select name="params[{{ $pid }}][alat_id]" class="form-select form-select-sm param-input-ext" disabled>
                                                                     <option value="">-- Pilih Alat --</option>
@@ -268,12 +303,71 @@
                                                                         @include('qc-uji-banding.partials.generic_table')
                                                                     @endif
 
-                                                                    <div class="row g-3 bg-light p-3 rounded mt-2 border border-info">
-                                                                        <div class="col-md-4">
-                                                                            <label class="form-label small fw-bold mb-1">Tanggal Uji</label>
-                                                                            <input type="date" name="params[{{ $pid }}][tanggal_uji]" class="form-control form-control-sm param-input-ext" value="{{ date('Y-m-d') }}" disabled>
+                                                                    @php
+                                                                        $toleransiList = \App\Models\ParameterToleransi::where('parameter_uji_id', $pid)->get();
+                                                                    @endphp
+
+                                                                    @if($toleransiList->count() > 0)
+                                                                        <input type="hidden" id="tol-data-{{ $pid }}" value='{{ $toleransiList->toJson() }}'>
+                                                                        <div class="mt-3 p-3 bg-light border rounded">
+                                                                            <h6 class="fw-bold text-secondary mb-2" style="font-size: 0.85rem;">
+                                                                                <i class="fas fa-info-circle me-1"></i> Referensi Batas Toleransi Master (ASTM / ISO)
+                                                                            </h6>
+                                                                            <div class="table-responsive">
+                                                                                <table class="table table-bordered table-sm text-center align-middle mb-0 bg-white" style="font-size: 0.8rem;">
+                                                                                    <thead class="table-secondary">
+                                                                                        <tr>
+                                                                                            @if(in_array($code, ['IM', 'TM', 'RM']))
+                                                                                                <th>Material / Kategori</th>
+                                                                                            @elseif(in_array($code, ['ASH', 'TS', 'TOTAL SULFUR (%AD/DB)']))
+                                                                                                <th>Std Method</th>
+                                                                                            @elseif($code == 'VM')
+                                                                                                <th>Std Method</th>
+                                                                                                <th>Type Sample</th>
+                                                                                            @else
+                                                                                                <th>Std Method</th>
+                                                                                                <th>Material / Kategori</th>
+                                                                                            @endif
+
+                                                                                            @if($code !== 'VM')
+                                                                                                <th>Range</th>
+                                                                                            @endif
+                                                                                            <th class="text-danger">Repeatability (r)</th>
+                                                                                            <th class="text-success">Reproducibility (R)</th>
+                                                                                        </tr>
+                                                                                    </thead>
+                                                                                    <tbody>
+                                                                                        @foreach($toleransiList as $tol)
+                                                                                            <tr>
+                                                                                                @if(in_array($code, ['IM', 'TM', 'RM']))
+                                                                                                    <td class="fw-bold">{{ $tol->kategori_label ?? '-' }}</td>
+                                                                                                @elseif(in_array($code, ['ASH', 'TS', 'TOTAL SULFUR (%AD/DB)']))
+                                                                                                    <td class="fw-bold">{{ $tol->metode ?? '-' }}</td>
+                                                                                                @elseif($code == 'VM')
+                                                                                                    <td>{{ $tol->metode ?? '-' }}</td>
+                                                                                                    <td class="fw-bold text-primary">{{ $tol->kategori_label ?? '-' }}</td>
+                                                                                                @else
+                                                                                                    <td>{{ $tol->metode ?? '-' }}</td>
+                                                                                                    <td class="fw-bold">{{ $tol->kategori_label ?? '-' }}</td>
+                                                                                                @endif
+
+                                                                                                @if($code !== 'VM')
+                                                                                                    <td>{{ $tol->range_label ?? '-' }}</td>
+                                                                                                @endif
+
+                                                                                                <td class="text-danger fw-bold">{{ $tol->formula_r }}</td>
+                                                                                                <td class="text-success fw-bold">{{ $tol->formula_R_besar }}</td>
+                                                                                            </tr>
+                                                                                        @endforeach
+                                                                                    </tbody>
+                                                                                </table>
+                                                                            </div>
                                                                         </div>
-                                                                        <div class="col-md-4">
+                                                                    @endif
+
+                                                                    <!-- TANGGAL UJI (UMUM) - INI DIV ROW YANG SEBELUMNYA HILANG -->
+                                                                    <div class="row g-3 bg-light p-3 rounded mt-3 border border-info align-items-center">
+                                                                        <div class="col-md-6">
                                                                             <label class="form-label small fw-bold mb-1">Analis / Personil</label>
                                                                             <select name="params[{{ $pid }}][analis_id]" class="form-select form-select-sm param-input-ext" disabled>
                                                                                 <option value="">-- Pilih Analis --</option>
@@ -282,7 +376,7 @@
                                                                                 @endforeach
                                                                             </select>
                                                                         </div>
-                                                                        <div class="col-md-4">
+                                                                        <div class="col-md-6">
                                                                             <label class="form-label small fw-bold mb-1">Instrumen/Alat</label>
                                                                             <select name="params[{{ $pid }}][alat_id]" class="form-select form-select-sm param-input-ext" disabled>
                                                                                 <option value="">-- Pilih Alat --</option>
@@ -293,6 +387,8 @@
                                                                             </select>
                                                                         </div>
                                                                     </div>
+                                                                    <!-- Penutup Row Tanggal Uji -->
+                                                                    
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -345,6 +441,95 @@ document.addEventListener('DOMContentLoaded', function() {
     function parseNum(val) {
         const n = parseFloat(val);
         return isNaN(n) ? 0 : n;
+
+    };
+    
+    window.updateYesNoColor = function(selectEl) {
+        if (selectEl.value === 'YES') {
+            selectEl.className = 'form-select form-select-sm fw-bold bg-success text-white border-success';
+        } else if (selectEl.value === 'NO') {
+            selectEl.className = 'form-select form-select-sm fw-bold bg-danger text-white border-danger';
+        } else {
+            selectEl.className = 'form-select form-select-sm fw-bold'; // Kembali normal
+        }
+    }
+
+    function runToleranceValidation(container, pid, code) {
+        // 1. Deteksi kelas out-diff atau out-abs (untuk Total Moisture)
+        let diffNode = container.querySelector('.out-diff') || container.querySelector('.out-abs');
+        let diffText = diffNode?.textContent;
+        
+        let avgText = '-';
+        if (code === 'TM' || code === 'TOTAL MOISTURE') {
+            avgText = container.querySelector('.out-avg-ar')?.textContent;
+        } else if (code === 'CHN') {
+            avgText = container.querySelector('.out-avg-txt')?.textContent;
+        } else {
+            avgText = container.querySelector('.out-avg-adb')?.textContent;
+        }
+
+        let selectYesNo = container.querySelector('select[name$="[yesno]"]');
+        if(!selectYesNo) return; 
+
+        if(!diffText || diffText === '-' || !avgText || avgText === '-') {
+            selectYesNo.value = '';
+            updateYesNoColor(selectYesNo);
+            return;
+        }
+
+        let diff = parseFloat(diffText);
+        let avg = parseFloat(avgText);
+
+        let tolInput = document.getElementById('tol-data-' + pid);
+        if(!tolInput) return;
+
+        let tolData = [];
+        try { tolData = JSON.parse(tolInput.value); } catch(e) { return; }
+
+        let matchedRule = null;
+        let rowType = container.dataset.type; // Untuk CHN ('carbon', 'hydrogen', 'nitrogen')
+
+        for(let rule of tolData) {
+            if (code === 'CHN') {
+                let targetSub = '';
+                if (rowType === 'carbon') targetSub = 'C';
+                else if (rowType === 'hydrogen') targetSub = 'H';
+                else if (rowType === 'nitrogen') targetSub = 'N';
+
+                let sub = (rule.sub_parameter || '').toUpperCase();
+                // Dibuat fleksibel agar bisa membaca 'C', 'CARBON', 'H', 'HYDROGEN', dst.
+                if (sub === targetSub || sub.startsWith(targetSub) || sub.includes(targetSub)) {
+                    let min = (rule.range_min !== null && rule.range_min !== '') ? parseFloat(rule.range_min) : -Infinity;
+                    let max = (rule.range_max !== null && rule.range_max !== '') ? parseFloat(rule.range_max) : Infinity;
+                    if (avg >= min && avg <= max) { matchedRule = rule; break; }
+                }
+            } else {
+                if (code !== 'VM') {
+                    let min = (rule.range_min !== null && rule.range_min !== '') ? parseFloat(rule.range_min) : -Infinity;
+                    let max = (rule.range_max !== null && rule.range_max !== '') ? parseFloat(rule.range_max) : Infinity;
+                    if (avg >= min && avg <= max) { matchedRule = rule; break; }
+                } else {
+                    matchedRule = rule; break;
+                }
+            }
+        }
+
+        if(!matchedRule || !matchedRule.formula_r) {
+             selectYesNo.value = '';
+             updateYesNoColor(selectYesNo);
+             return;
+        }
+
+        let formula = matchedRule.formula_r;
+        formula = formula.replace(/(\d)\s*[Xu]/gi, '$1 * X'); 
+        let evalFormula = formula.replace(/X/gi, avg).replace(/u/gi, avg);
+        let limitR = 0;
+        
+        try { limitR = math.evaluate(evalFormula); } 
+        catch(e) { limitR = parseFloat(formula); }
+
+        selectYesNo.value = (diff <= limitR) ? 'YES' : 'NO';
+        updateYesNoColor(selectYesNo);
     }
 
     // Kalkulasi per baris khusus Uji Banding
@@ -576,7 +761,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (proxTmCell) proxTmCell.textContent = '-';
                 }
             }
-            return; // Hentikan fungsi di sini agar tidak error dengan kode generik di bawah
+
+            runToleranceValidation(tbody, pid, code); 
+            return; 
         }
         else if (code === 'CHN') {
             const tbody = row.closest('tbody');
@@ -615,14 +802,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (elHasil1) elHasil1.value = '';
                     if (elHasil2) elHasil2.value = '';
                 }
+
+                // PANGGIL VALIDASI UNTUK CARBON, HYDROGEN, NITROGEN
+                if (r.type !== 'weight') {
+                    let rowPid = pid;
+                    let anyInput = tr.querySelector('[name^="params["]');
+                    if (anyInput) {
+                        let match = anyInput.name.match(/params\[(\d+)\]/);
+                        if (match) rowPid = match[1];
+                    }
+                    runToleranceValidation(tr, rowPid, code);
+                }
             });
 
-            // Trigger sync ke tab Proximate
             if (typeof syncTab1ToTab2 === 'function') {
                 setTimeout(syncTab1ToTab2, 100);
             }
-            return; // Harus ada return agar tidak menabrak logika di bawahnya
+            return;
         }
+
         else if (code === 'GCV') {
             // Weight of Crucible + Sample = weight of crucible + sample mass
             const wcs = scope.wc + scope.mass;
@@ -734,6 +932,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const avgAdb = (d1 + d2) / 2;
             outAvgAdb.textContent = avgAdb.toFixed(2);
         }
+
+        runToleranceValidation(tbody, pid, code);
     }
 
     function syncAndCalculateNcv() {
@@ -1742,6 +1942,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // Initial load
         loadAftHistory();
     }
+
+    
+    setTimeout(function() {
+        document.querySelectorAll('.param-table, .input-table').forEach(table => {
+            const pid = table.dataset.pid;
+            const check = document.querySelector(`.param-enable-check[data-pid="${pid}"]`);
+            
+            if (check && check.checked) {
+                const firstInput = table.querySelector('.row-entry input[type="text"]');
+                if (firstInput) {
+                    firstInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
+        });
+    }, 1500);
 });
 </script>
 @endsection

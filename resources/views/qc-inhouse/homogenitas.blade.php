@@ -26,7 +26,10 @@
                     <div class="card-header bg-white pt-3 border-bottom-0">
                         <ul class="nav nav-tabs card-header-tabs" id="parameterTabs" role="tablist">
                             @foreach($batch->parameters as $index => $param)
-                                @php $code = strtoupper($param->parameterUji->nama_parameter); @endphp
+                                @php 
+                                    $rawCode = trim(strtoupper($param->parameterUji->nama_parameter)); 
+                                    $code = in_array($rawCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']) ? 'TS' : $rawCode;
+                                @endphp
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link fw-bold {{ $index === 0 ? 'active' : '' }}" 
                                             id="tab-{{ $param->id }}" 
@@ -34,7 +37,7 @@
                                             data-bs-target="#pane-{{ $param->id }}" 
                                             type="button" role="tab"
                                             data-code="{{ $code }}">
-                                        {{ $code }}
+                                        {{ $rawCode }}
                                     </button>
                                 </li>
                             @endforeach
@@ -56,7 +59,8 @@
                         <div class="tab-content" id="parameterTabsContent">
                             @foreach($batch->parameters as $index => $param)
                                 @php 
-                                    $code = strtoupper($param->parameterUji->nama_parameter); 
+                                    $rawCode = trim(strtoupper($param->parameterUji->nama_parameter)); 
+                                    $code = in_array($rawCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']) ? 'TS' : $rawCode;
                                     $pid = $param->id;
                                 @endphp
                                 <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}" id="pane-{{ $pid }}" role="tabpanel">
@@ -111,13 +115,12 @@
                                                     </tr>
                                                 @elseif($code === 'TS')
                                                     <tr>
-                                                        <th style="width: 15%">KODE SAMPEL</th>
-                                                        <th style="width: 5%">DISH NO.</th>
-                                                        <th style="width: 16%">Massa sample</th>
-                                                        <th class="bg-warning bg-opacity-25" style="width: 16%">TS (Adb)</th>
-                                                        <th style="width: 16%">Average %(adb)</th>
-                                                        <th style="width: 16%">Average % (Db)</th>
-                                                        <th style="width: 16%">%db</th>
+                                                        <th width="10%">KODE SAMPEL</th>
+                                                        <th>DISH NO.</th>
+                                                        <th>Massa sample</th>
+                                                        <th class="bg-warning bg-opacity-25">TS (Adb)</th>
+                                                        <th>Average % (adb)</th>
+                                                        <th class="bg-warning bg-opacity-25">Average % (db)</th>
                                                     </tr>
                                                 @elseif($code === 'CV')
                                                     <tr>
@@ -206,8 +209,7 @@
                                                             <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_1]" value="{{ $mentah['massa_1'] ?? '' }}"></td>
                                                             <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" value="{{ $dh->nilai_d1 ?? '' }}"></td>
                                                             <td rowspan="2" class="align-middle out-avg-adb fw-bold">-</td>
-                                                            <td rowspan="2" class="align-middle out-avg-db fw-bold">-</td>
-                                                            <td class="align-middle out-db-1 fw-bold text-success">-</td>
+                                                            <td rowspan="2" class="align-middle out-avg-db fw-bold text-success">-</td>
                                                         @elseif($code === 'CV')
                                                             <td><input type="text" class="form-control form-control-sm in-callid-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][callid_1]" value="{{ $mentah['callid_1'] ?? '' }}"></td>
                                                             <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-weight-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][weight_1]" value="{{ $mentah['weight_1'] ?? '' }}"></td>
@@ -261,7 +263,6 @@
                                                         @elseif($code === 'TS')
                                                             <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_2]" value="{{ $mentah['massa_2'] ?? '' }}"></td>
                                                             <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" value="{{ $dh->nilai_d2 ?? '' }}"></td>
-                                                            <td class="align-middle out-db-2 fw-bold text-success">-</td>
                                                         @elseif($code === 'CV')
                                                             <td><input type="text" class="form-control form-control-sm in-callid-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][callid_2]" value="{{ $mentah['callid_2'] ?? '' }}"></td>
                                                             <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-weight-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][weight_2]" value="{{ $mentah['weight_2'] ?? '' }}"></td>
@@ -378,10 +379,13 @@
                     </div>
                     <div id="exportParamCheckboxes">
                         @foreach($batch->parameters as $param)
-                            @php $code = strtoupper($param->parameterUji->nama_parameter); @endphp
+                            @php 
+                                $rawCode = trim(strtoupper($param->parameterUji->nama_parameter)); 
+                                $code = in_array($rawCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']) ? 'TS' : $rawCode;
+                            @endphp
                             <div class="form-check">
                                 <input class="form-check-input chk-export-param" type="checkbox" value="{{ $code }}" id="chkExport{{ $code }}" checked>
-                                <label class="form-check-label" for="chkExport{{ $code }}">{{ $code }}</label>
+                                <label class="form-check-label" for="chkExport{{ $code }}">{{ $rawCode }}</label>
                             </div>
                         @endforeach
                     </div>
@@ -410,7 +414,11 @@
                     <label class="fw-bold form-label">Pilih Parameter:</label>
                     <select class="form-select" id="modalParamSelect">
                         @foreach($batch->parameters as $param)
-                            <option value="{{ strtoupper($param->parameterUji->nama_parameter) }}">{{ strtoupper($param->parameterUji->nama_parameter) }}</option>
+                            @php 
+                                $rawCode = trim(strtoupper($param->parameterUji->nama_parameter)); 
+                                $code = in_array($rawCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']) ? 'TS' : $rawCode;
+                            @endphp
+                            <option value="{{ $code }}">{{ $rawCode }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -604,7 +612,11 @@ function getFTabelForN(n) {
 // STATE STORE
 const State = {};
 @foreach($batch->parameters as $param)
-    State["{{ strtoupper($param->parameterUji->nama_parameter) }}"] = {
+    @php 
+        $rawCode = trim(strtoupper($param->parameterUji->nama_parameter)); 
+        $code = in_array($rawCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']) ? 'TS' : $rawCode;
+    @endphp
+    State["{{ $code }}"] = {
         id: {{ $param->id }},
         ready: false,
         data: Array.from({length: {{ $rowCount }} }, () => ({ 
@@ -1631,8 +1643,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 html += `
                 <div style="width: 100%; margin: 0 auto;">
-                    
-                    <br> <!-- Spasi atas pendorong kertas -->
 
                     <!-- KOP SURAT (Format Klasik) -->
                     <table width="100%" border="0" cellpadding="0" cellspacing="0">
@@ -1641,15 +1651,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                 Perhitungan Uji Homogenitas Sampel <i>Inhouse Standard</i>
                             </td>
                             <td align="right" valign="bottom" width="150" style="padding-bottom: 5px;">
-                                <!-- MENGUNCI GAMBAR AGAR TIDAK GEPENG -->
-                                <img src="${logoUrl}" width="140" height="40" alt="SUCOFINDO">
+                                <img src="${logoUrl}" style="width: 140px; height: auto; display: block; margin-left: auto; page-break-inside: avoid;" alt="SUCOFINDO">
                             </td>
                         </tr>
                     </table>
                     <hr size="4" color="black" style="background-color: black; border: none; margin: 0; padding: 0;">
-                    
-                    <br> <!-- Jarak lega setelah garis -->
-
+                    <br>
                     <!-- IDENTITAS PARAMETER -->
                     <table width="80%" border="0" cellpadding="4" cellspacing="0" style="font-size: 11px;">
                         <tr>
@@ -1682,7 +1689,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <br> <!-- Jarak lega setelah tabel utama -->
 
                     <!-- RUMUS MSB & MSW -->
-                    <table width="70%" border="0" cellpadding="5" cellspacing="0" bgcolor="#f0f0f0" style="font-size: 11px; margin-bottom: 15px;">
+                    <table width="70%" border="0" cellpadding="5" cellspacing="0" bgcolor="#f0f0f0" style="font-size: 11px; margin-bottom: 8px;">
                         <tr>
                             <td align="right" width="10%"><b>MSB =</b></td>
                             <td align="center" width="30%">
@@ -1712,8 +1719,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         </tr>
                     </table>
                     <br>
+                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 11px; font-weight: bold; margin-bottom: 8px;">
+                        <tr>
+                            <td>III. PERHITUNGAN Nilai "F hitung" dan "F tabel":</td>
+                        </tr>
+                    </table>
                     <!-- KESIMPULAN F-TEST -->
-                    <table width="100%" border="0" cellpadding="10" cellspacing="0" bgcolor="#e9ecef" style="font-size: 11px; margin-bottom: 25px;">
+                    <table width="100%" border="0" cellpadding="10" cellspacing="0" bgcolor="#e9ecef" style="font-size: 11px; margin-bottom: 10px;">
                         <tr>
                             <td align="right" width="15%"><b>F hitung =</b></td>
                             <td align="center" width="15%">
@@ -1732,11 +1744,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     </table>
                     <br>
                     
-                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 11px; margin-bottom: 40px;">
+                    <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 11px; margin-bottom: 20px;">
                         <tr>
-                            <td align="left" valign="top" width="15%"><b>Kesimpulan</b></td>
+                            <td align="left" valign="top" width="15%"><b>IV. KESIMPULAN:</b></td>
                             <td align="left" width="85%">
-                                <span style="font-weight:bold; font-size: 12px; margin-left: 20px;">${isHomogen ? 'Homogen' : 'Tidak Homogen'}</span>
+                                a). F hitung ${opText} F tabel
+                                <br>
+                                b). Hal ini artinya, bahwa contoh tersebut
+                                <span style="font-weight:bold;">${isHomogen ? 'HOMOGEN' : 'TIDAK HOMOGEN'}</span>
+                                <span style="font-size: 9px; color: #555;">( apabila F hitung &lt; F tabel maka Homogen, dan jika sebaliknya maka Tidak Homogen )</span>
                             </td>
                         </tr>
                     </table>
@@ -1762,7 +1778,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </tr>
                     </table>
                     
-                    <br><br><br><br> <!-- JARAK JAUH KE BAWAH -->
+                    <br><br>
                     
                     <!-- FOOTER KODE DOKUMEN -->
                     <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 9px;">

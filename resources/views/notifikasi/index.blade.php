@@ -9,58 +9,119 @@
     </ol>
 </nav>
 
+<style>
+    .notif-page-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 16px 20px;
+    }
+    .notif-page-item.unread {
+        background: rgba(37, 99, 235, 0.05);
+    }
+    .notif-page-icon {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+    .notif-page-msg {
+        font-size: 0.92rem;
+        color: #334155;
+        margin-bottom: 4px;
+        line-height: 1.4;
+    }
+    .notif-page-msg.text-danger-emphasis {
+        color: #b91c1c !important;
+    }
+    .notif-page-time {
+        font-size: 0.78rem;
+        color: #94a3b8;
+    }
+    .notif-page-actions {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 8px;
+        margin-left: auto;
+    }
+    @media (max-width: 575.98px) {
+        .notif-page-item {
+            flex-wrap: wrap;
+        }
+        .notif-page-actions {
+            flex-direction: row;
+            align-items: center;
+            margin-left: 54px;
+        }
+    }
+</style>
+
 <div class="card shadow-sm">
-    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
         <h5 class="mb-0">Daftar Notifikasi</h5>
         <form action="{{ route('notifikasi.read-all') }}" method="POST">
             @csrf
-            <button type="submit" class="btn btn-sm btn-primary">Tandai Semua Dibaca</button>
+            <button type="submit" class="btn btn-sm btn-primary">
+                <i class="fas fa-check-double me-1"></i> Tandai Semua Dibaca
+            </button>
         </form>
     </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <tbody>
-                    @forelse($notifikasis as $notif)
-                        <tr class="{{ !$notif->is_read ? 'bg-warning bg-opacity-10' : '' }}">
-                            <td class="text-center align-middle" style="width: 50px;">
-                                @if($notif->jenis_notifikasi == 'qc')
-                                    <i class="fas fa-flask text-primary"></i>
-                                @elseif($notif->jenis_notifikasi == 'kalibrasi')
-                                    <i class="fas fa-tools text-warning"></i>
-                                @elseif($notif->jenis_notifikasi == 'stok')
-                                    <i class="fas fa-box text-success"></i>
-                                @elseif($notif->jenis_notifikasi == 'sertifikasi')
-                                    <i class="fas fa-certificate text-danger"></i>
-                                @else
-                                    <i class="fas fa-bell text-secondary"></i>
-                                @endif
-                            </td>
-                            <td>
-                                <div>{{ $notif->pesan }}</div>
-                                <small class="text-muted">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</small>
-                            </td>
-                            <td class="text-end align-middle">
-                                @if(!$notif->is_read)
-                                    <span class="badge bg-danger me-2">Belum Dibaca</span>
-                                    <form action="{{ route('notifikasi.read', $notif->notifikasi_id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm btn-outline-success">Tandai Dibaca</button>
-                                    </form>
-                                @else
-                                    <span class="badge bg-secondary">Sudah Dibaca</span>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="3" class="text-center py-4">Tidak ada notifikasi.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+
+    <div class="list-group list-group-flush">
+        @forelse($notifikasis as $notif)
+            @php
+                $isDitolak = str_contains(strtolower($notif->pesan), 'ditolak');
+                $iconBg = match($notif->jenis_notifikasi) {
+                    'qc' => 'bg-primary',
+                    'kalibrasi' => 'bg-warning',
+                    'stok' => 'bg-success',
+                    'sertifikasi' => 'bg-danger',
+                    default => 'bg-secondary',
+                };
+                $icon = match($notif->jenis_notifikasi) {
+                    'qc' => 'fa-flask',
+                    'kalibrasi' => 'fa-tools',
+                    'stok' => 'fa-box',
+                    'sertifikasi' => 'fa-certificate',
+                    default => 'fa-bell',
+                };
+            @endphp
+            <div class="list-group-item notif-page-item {{ !$notif->is_read ? 'unread' : '' }}">
+                <span class="notif-page-icon {{ $iconBg }}">
+                    <i class="fas {{ $icon }} text-white"></i>
+                </span>
+
+                <div class="flex-grow-1" style="min-width: 200px;">
+                    <p class="notif-page-msg {{ $isDitolak ? 'text-danger-emphasis' : '' }} mb-1">{{ $notif->pesan }}</p>
+                    <span class="notif-page-time">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</span>
+                </div>
+
+                <div class="notif-page-actions">
+                    @if(!$notif->is_read)
+                        <span class="badge bg-danger">Belum Dibaca</span>
+                        <form action="{{ route('notifikasi.read', $notif->notifikasi_id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-outline-success">Tandai Dibaca</button>
+                        </form>
+                    @else
+                        <span class="badge bg-secondary">Sudah Dibaca</span>
+                    @endif
+                </div>
+            </div>
+        @empty
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-bell-slash fs-1 mb-2 d-block opacity-50"></i>
+                Tidak ada notifikasi.
+            </div>
+        @endforelse
     </div>
+
     @if($notifikasis->hasPages())
     <div class="card-footer bg-white">
         {{ $notifikasis->links() }}

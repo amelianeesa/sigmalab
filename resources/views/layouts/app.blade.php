@@ -12,13 +12,11 @@
     
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
 
     <style>
         :root {
-            --sidebar-width: {{ auth()->check() ? '260px' : '0' }};
-        }
-
-        :root{
+            --sidebar-width: {{ auth()->check() ? '220px' : '0' }};
             --sdm-50: #eef0f1;
             --sdm-500: #1d4c7a;
             --sdm-600: #1d4c7a;
@@ -30,7 +28,7 @@
         @endphp
         
         #sidebar { 
-            min-width: 260px; max-width: 260px; 
+            min-width: 240px; max-width: 240px; 
             height: 100vh; position: fixed; top: 0; left: 0; 
             background-color: #ffffff; color: #334155; z-index: 1040;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -40,25 +38,25 @@
 
         #content { 
             transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-left: {{ $useSidebar ? '260px' : '0' }}; 
-            padding: 24px; 
+            margin-left: {{ $useSidebar ? '240px' : '' }}; 
+            padding: 16px 18px; 
             padding-top: 20px; 
             min-height: 100vh; 
         }
 
         .top-navbar {
             background: var(--sdm-600);
-            padding: 12px 28px;
+            padding: 9px 26px;
             border-bottom: 1px solid var(--sdm-700);
             transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-left: {{ $useSidebar ? '260px' : '0' }};
+            margin-left: {{ $useSidebar ? '220px' : '0' }};
             display: flex;
             justify-content: space-between;
             align-items: center;
             position: sticky;
             top: 0;
             z-index: 1020;
-            min-height: 64px;
+            min-height: 60px;
             color: #fff;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
@@ -80,20 +78,18 @@
         #sidebar-overlay { display: none; position: fixed; width: 100vw; height: 100vh; background: rgba(15,23,42,0.4); z-index: 1030; top: 0; left: 0; cursor: pointer; transition: opacity .2s ease; backdrop-filter: blur(2px); }
         
         #sidebar .sidebar-header { 
-            padding: 22px 20px; 
+            padding: 16px 16px; 
             border-bottom: 1px solid #f1f5f9; 
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
-        #sidebar .sidebar-header:hover {
-            background-color: #f8fafc;
-        }
+        #sidebar .sidebar-header:hover { background-color: #f8fafc; }
 
-        #sidebar ul.components { padding: 20px 0; }
+        #sidebar ul.components { padding: 16px 0; }
         
         #sidebar ul li a { 
-            padding: 12px 20px 12px 24px; 
-            font-size: 0.92rem; 
+            padding: 10px 14px 10px 16px; 
+            font-size: 0.85rem; 
             font-weight: 500;
             display: flex; align-items: center; gap: 12px;
             color: #64748b; 
@@ -118,45 +114,14 @@
             font-weight: 600; 
         }
         
-        #sidebar ul li a i { font-size: 1.1rem; opacity: 0.75; margin-right: 10px; }
+        #sidebar ul li a i { 
+            font-size: 0.82rem; 
+            opacity: 0.75; 
+            width: 20px;
+            margin-right: 0px; 
+        }
         #sidebar ul li a:hover i, #sidebar ul li.active > a i { opacity: 1; color: #2563eb; }
-        
-        #sidebar .sidebar-divider { 
-            font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; 
-            color: #94a3b8; padding: 18px 24px 8px; margin-top: 5px; 
-        }
 
-        #sidebar ul li > a.dropdown-toggle::after {
-            display: inline-block;
-            margin-left: 0.255em;
-            vertical-align: 0.255em;
-            content: "\f107";
-            font-family: "Font Awesome 5 Free";
-            font-weight: 900;
-            border: none;
-            transition: transform 0.2s ease;
-        }
-        #sidebar ul li > a.dropdown-toggle[aria-expanded="true"]::after {
-            transform: rotate(-180deg);
-        }
-        #sidebar ul.collapse li a {
-            padding-left: 3rem !important;
-            font-size: 0.92rem;
-            background: #f8fafc;
-            border-left: 4px solid transparent;
-        }
-        #sidebar ul.collapse li.active > a {
-            background: #eff6ff;
-            border-left-color: #2563eb;
-            color: #1d4ed8;
-            font-weight: 600;
-        }
-        #sidebar ul.collapse li a:hover {
-            transform: none;
-            padding-left: 3.25rem !important;
-            transition: padding-left 0.2s ease, background 0.2s ease, color 0.2s ease;
-        }
-        
         @media (min-width: 992px) {
             body.sidebar-toggled #sidebar-overlay { display: none; }
         }
@@ -168,51 +133,91 @@
             color: #fff;
             border-color: rgba(255,255,255,.18);
         }
-        .top-navbar .dropdown button {
-            max-width: 220px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
         
-        .btn-logout {
-            border-color: rgba(255,255,255,.45);
-            color: #fff;
-            transition: background .15s ease, color .15s ease, border-color .15s ease;
-        }
-        .btn-logout:hover,
-        .btn-logout:focus {
-            background: rgba(255,255,255,.95);
-            color: #1d4c7a;
-            border-color: rgba(255,255,255,.85);
-        }
-        .pagination svg, 
-        .card-body svg {
-            width: 1rem !important;
-            height: 1rem !important;
-            max-width: 1rem !important;
-            max-height: 1rem !important;
+        .pagination svg, .card-body svg {
+            width: 1rem !important; height: 1rem !important;
+            max-width: 1rem !important; max-height: 1rem !important;
             display: inline-block;
         }
 
-        .card-body > div > div.d-flex.justify-content-between.flex-fill.align-items-center.d-sm-none,
-        .card-body > div > nav > div.d-flex.justify-content-between.flex-fill.d-sm-none {
-            display: none !important;
+        /* ===== Dropdown Notifikasi ===== */
+        #notifDropdown {
+            width: 320px;
+            padding: 0;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+            overflow: hidden;
         }
-
-        .card.h-100 .card-body { min-height: 120px; }
-        .card .card-body p { word-break: break-word; }
-        .module-card { transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease; }
-        .module-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(15,35,59,.08); }
-        .sdm-highlight { border-color: var(--sdm-600) !important; }
-        .sdm-text { color: var(--sdm-600) !important; }
-        .sdm-btn { background: var(--sdm-600); border-color: var(--sdm-600); color: #fff; }
-        .sdm-border { border-color: rgba(76,29,149,0.12); }
+        #notifDropdown .notif-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            background: #f8fafc;
+        }
+        #notifDropdown .notif-list {
+            max-height: 340px;
+            overflow-y: auto;
+        }
+        #notifDropdown .notif-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            white-space: normal;
+            text-decoration: none;
+        }
+        #notifDropdown .notif-item:hover {
+            background: #f8fafc;
+        }
+        #notifDropdown .notif-item.unread {
+            background: rgba(37, 99, 235, 0.06);
+        }
+        #notifDropdown .notif-icon {
+            width: 30px;
+            height: 30px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+        #notifDropdown .notif-msg {
+            font-size: 0.83rem;
+            color: #334155;
+            margin-bottom: 2px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        #notifDropdown .notif-msg.text-danger-emphasis {
+            color: #b91c1c !important;
+        }
+        #notifDropdown .notif-time {
+            font-size: 0.72rem;
+            color: #94a3b8;
+        }
+        #notifDropdown .notif-footer {
+            padding: 10px 16px;
+            text-align: center;
+            border-top: 1px solid #f1f5f9;
+            background: #f8fafc;
+        }
+        #notifDropdown .notif-footer a {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #2563eb;
+            text-decoration: none;
+        }
+        #notifDropdown .notif-empty {
+            padding: 28px 16px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
     </style>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
-    </style>
-    <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
 </head>
 
 <body>
@@ -224,6 +229,7 @@
             }
         }
     </script>
+
     @auth
         <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
         <nav id="sidebar">
@@ -235,7 +241,7 @@
                         <small class="text-muted fw-bold" style="font-size: 0.7rem;">PT Sucofindo - Cilacap</small>
                     </div>
                 </div>
-                <i class="fas fa-chevron-left text-muted opacity-50"></i>
+                {{-- <i class="fas fa-chevron-left text-muted opacity-50"></i> --}}
             </div>
 
             <ul class="list-unstyled components" id="sidebar-accordion" style="overflow-y: auto; max-height: calc(100vh - 80px);">
@@ -244,30 +250,29 @@
                 </li>
 
 
-                {{-- 1. Manajemen Peralatan (Aset) --}}
-                @if(Auth::check() && (Auth::user()->hasModulAccess('alat') || (Auth::user()->role && Auth::user()->role->nama_role == 'HR & GA')))
-                <li class="{{ request()->is('alat*') ? 'active' : '' }}">
-                    <a href="{{ route('alat.index') }}"><i class="fas fa-tools"></i>Peralatan & Monitoring</a>
-                </li>
-                @endif 
-                @if(Auth::check() && Auth::user()->hasModulAccess('alat'))
+                {{-- 1. Peralatan & Monitoring --}}
+                @if(Auth::check() && (Auth::user()->hasModulAccess('alat') || (Auth::user()->role && (Auth::user()->role->nama_role == 'HR' || Auth::user()->role->nama_role == 'GA'))))
                 <li class="nav-item">
-                    <a class="nav-link d-flex justify-content-between align-items-center {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') ? 'active' : 'collapsed' }}" 
+                    <a class="nav-link d-flex justify-content-between align-items-center {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') || request()->routeIs('evaluasi-kalibrasi.*') ? 'active text-primary fw-bold' : 'collapsed' }}" 
                        data-bs-toggle="collapse" 
                        href="#menuManajemenPeralatan" 
                        role="button" 
-                       aria-expanded="{{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') ? 'true' : 'false' }}" 
+                       aria-expanded="{{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') || request()->routeIs('evaluasi-kalibrasi.*') ? 'true' : 'false' }}" 
                        aria-controls="menuManajemenPeralatan">
-                       
                         <span><i class="fas fa-tools me-2"></i> Peralatan & Monitoring</span>
-                        <i class="fas fa-chevron-down small"></i>
+                        <i class="fas fa-chevron-down small" style="font-size: 0.7rem;"></i>
                     </a>
                 
-                    <div class="collapse {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') ? 'show' : '' }}" id="menuManajemenPeralatan">
+                    <div class="collapse {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') || request()->routeIs('evaluasi-kalibrasi.*') ? 'show' : '' }}" id="menuManajemenPeralatan">
                         <ul class="nav flex-column ms-3 ps-2 border-start mt-1" style="font-size: 0.9rem;">
                             <li class="nav-item">
-                                <a class="nav-link py-1 {{ request()->is('alat*') && !request()->routeIs('inventori.monitoring.*') ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('alat.index') }}">
+                                <a class="nav-link py-1 {{ request()->is('alat*') && !request()->routeIs('inventori.monitoring.*') && !request()->routeIs('evaluasi-kalibrasi.*') ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('alat.index') }}">
                                     <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Data Alat & Kalibrasi
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link py-1 {{ request()->routeIs('evaluasi-kalibrasi.*') ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('evaluasi-kalibrasi.index') }}">
+                                    <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Evaluasi Kalibrasi
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -308,9 +313,7 @@
                 </li>
                 @endif
 
-
-
-                {{-- 6. Audit Log --}}
+                {{-- 6. Audit Trail --}}
                 @if(Auth::check() && Auth::user()->hasModulAccess('audit_log'))
                 <li class="{{ request()->is('audit-log*') ? 'active' : '' }}">
                     <a href="{{ route('audit-log.index') }}"><i class="fas fa-history"></i> Audit Trail</a>
@@ -327,80 +330,109 @@
         </nav>
     @endauth
 
-    <div class="top-navbar shadow-sm">
-        <div class="d-flex align-items-center">
+    {{-- TOP NAVBAR UTAMA --}}
+    <div class="top-navbar shadow-sm" style="padding-left: 25px; padding-right: 20px; min-height: 74px; display: flex; align-items: center; justify-content: space-between;">
+        <div class="d-flex align-items-center gap-2">
             @auth
-                <button class="btn text-white me-3 d-flex align-items-center justify-content-center p-1" onclick="toggleSidebar()" style="border:1px solid rgba(255,255,255,0.3); border-radius:6px; background:rgba(0,0,0,0.1); width:36px; height:36px;">
+                <button class="btn text-white d-flex align-items-center justify-content-center p-1" onclick="toggleSidebar()" style="border:1px solid rgba(255,255,255,0.3); border-radius:6px; background:rgba(0,0,0,0.1); width:34px; height:34px;">
                     <i class="fas fa-bars"></i>
                 </button>
             @endauth
-            <div>
-                <span class="text-uppercase text-secondary fs-7 fw-bold d-block mb-1" style="font-size: 18px; letter-spacing: 1px;">SIGMA-LAB</span>
-                <div class="mb-0 fw-bold d-none d-sm-block">Sistem Integrated General Management Analytics of Lab</div>
+            <div class="d-flex flex-column justify-content-center" style="gap: 0px;">
+                <span class="fw-bold text-white text-uppercase" style="font-size: 1.10rem; letter-spacing: 0.5px; line-height: 1.1;">SIGMA-LAB</span>
+                <span class="text-white-50 d-none d-sm-block" style="font-size: 0.80rem; line-height: 1;">Sistem Integrated General Management Analytics of Lab</span>
             </div>
         </div>
-        <div class="d-flex align-items-center">
-            <div class="dropdown me-3">
-                <a href="#" class="btn btn-warning position-relative rounded-circle p-2 d-flex align-items-center justify-content-center dropdown-toggle" style="width: 38px; height: 38px;" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-bell text-dark"></i>
+
+        <!-- Sisi Kanan: Notifikasi & Profil User -->
+        <div class="d-flex align-items-center gap-3">
+            @auth
+            {{-- Dropdown Notifikasi --}}
+            <div class="dropdown">
+                <a href="#" class="btn btn-warning position-relative rounded-circle p-2 d-flex align-items-center justify-content-center dropdown-toggle" style="width: 36px; height: 36px;" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-bell text-white" style="font-size: 0.85rem;"></i>
                     @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light">
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style="font-size: 0.6rem;">
                             {{ $unreadNotifCount > 99 ? '99+' : $unreadNotifCount }}
                             <span class="visually-hidden">unread messages</span>
                         </span>
                     @endif
                 </a>
-                <ul class="dropdown-menu dropdown-menu-end shadow" style="width: 300px; max-height: 400px; overflow-y: auto;">
-                    <li><h6 class="dropdown-header">Notifikasi Terbaru</h6></li>
-                    @if(isset($recentNotifs) && $recentNotifs->count() > 0)
-                        @foreach($recentNotifs as $notif)
-                            <li>
-                                <a class="dropdown-item d-flex align-items-start py-2 border-bottom text-wrap" href="#">
-                                    <div class="me-3 mt-1">
-                                        @if($notif->jenis_notifikasi == 'qc')
-                                            <i class="fas fa-flask text-primary"></i>
-                                        @elseif($notif->jenis_notifikasi == 'kalibrasi')
-                                            <i class="fas fa-tools text-warning"></i>
-                                        @elseif($notif->jenis_notifikasi == 'stok')
-                                            <i class="fas fa-box text-success"></i>
-                                        @elseif($notif->jenis_notifikasi == 'sertifikasi')
-                                            <i class="fas fa-certificate text-danger"></i>
-                                        @else
-                                            <i class="fas fa-bell text-secondary"></i>
-                                        @endif
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <p class="mb-0" style="font-size: 0.85rem;">{{ \Illuminate\Support\Str::limit($notif->pesan, 80) }}</p>
-                                        <small class="text-muted" style="font-size: 0.75rem;">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</small>
+
+                <div class="dropdown-menu dropdown-menu-end shadow" id="notifDropdown">
+                    {{-- Header: fixed, tidak ikut scroll --}}
+                    <div class="notif-header d-flex justify-content-between align-items-center">
+                        <span class="fw-bold" style="font-size: 0.85rem;">Notifikasi Terbaru</span>
+                        @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
+                            <span class="badge bg-danger rounded-pill">{{ $unreadNotifCount }} baru</span>
+                        @endif
+                    </div>
+
+                    {{-- List: hanya bagian ini yang scroll --}}
+                    <div class="notif-list">
+                        @if(isset($recentNotifs) && $recentNotifs->count() > 0)
+                            @foreach($recentNotifs as $notif)
+                                @php
+                                    $isDitolak = str_contains(strtolower($notif->pesan), 'ditolak');
+                                    $iconBg = match($notif->jenis_notifikasi ?? '') {
+                                        'qc' => 'bg-primary',
+                                        'kalibrasi' => 'bg-warning',
+                                        'stok' => 'bg-success',
+                                        'sertifikasi' => 'bg-danger',
+                                        default => 'bg-secondary',
+                                    };
+                                    $icon = match($notif->jenis_notifikasi ?? '') {
+                                        'qc' => 'fa-flask',
+                                        'kalibrasi' => 'fa-tools',
+                                        'stok' => 'fa-box',
+                                        'sertifikasi' => 'fa-certificate',
+                                        default => 'fa-bell',
+                                    };
+                                @endphp
+                                <a href="#" class="notif-item {{ !$notif->is_read ? 'unread' : '' }}">
+                                    <span class="notif-icon {{ $iconBg }}">
+                                        <i class="fas {{ $icon }} text-white"></i>
+                                    </span>
+                                    <div class="flex-grow-1" style="min-width: 0;">
+                                        <p class="notif-msg {{ $isDitolak ? 'text-danger-emphasis' : '' }}">{{ $notif->pesan }}</p>
+                                        <span class="notif-time">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</span>
                                     </div>
                                 </a>
-                            </li>
-                        @endforeach
-                    @else
-                        <li><span class="dropdown-item text-center text-muted py-3">Tidak ada notifikasi baru</span></li>
-                    @endif
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-center text-primary fw-bold" href="{{ route('notifikasi.index') }}">Lihat Semua Notifikasi</a></li>
+                            @endforeach
+                        @else
+                            <div class="notif-empty">
+                                <i class="fas fa-bell-slash fs-4 mb-2 d-block opacity-50"></i>
+                                Tidak ada notifikasi baru
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Footer: fixed di bawah, selalu kelihatan --}}
+                    <div class="notif-footer">
+                        <a href="{{ route('notifikasi.index') }}">Lihat Semua Notifikasi</a>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Dropdown Profil --}}
+            <div class="dropdown">
+                <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center py-1 px-2" type="button" data-bs-toggle="dropdown" title="Profil" style="border-color: rgba(255,255,255,0.2);">
+                    <i class="bi bi-person-circle me-1 text-white" style="font-size: 1rem;"></i> 
+                    <div class="d-none d-sm-flex flex-column text-start ms-1 me-1 text-white" style="line-height: 1.1;">
+                        <span class="fw-bold" style="font-size: 0.85rem;">{{ Auth::user()->personil->nama_personil ?? Auth::user()->username ?? 'Pengguna' }}</span>
+                        <small style="font-size: 0.68rem; color: rgba(255,255,255,0.85);">{{ Auth::user()->role->nama_role ?? '-' }}</small>
+                    </div>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i> Logout</button>
+                        </form>
+                    </li>
                 </ul>
             </div>
-            <div class="dropdown">
-            <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown" title="Profil" style="border-color: rgba(255,255,255,0.2);">
-                <i class="bi bi-person-circle me-1 text-white"></i> 
-                <div class="d-none d-sm-flex flex-column text-start ms-1 me-1 text-white" style="line-height: 1.2;">
-                    <span class="fw-bold" style="font-size: 0.9rem;">{{ Auth::user()->personil->nama_personil ?? Auth::user()->username ?? 'Pengguna' }}</span>
-                    <small style="font-size: 0.75rem; color: rgba(255,255,255,0.85);">{{ Auth::user()->role->nama_role ?? '-' }}</small>
-                </div>
-                <span class="d-inline d-sm-none text-white">{{ substr(Auth::user()->personil->nama_personil ?? Auth::user()->username ?? 'U', 0, 5) }}</span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li>
-                    <form action="{{ route('logout') }}" method="POST">
-                        @csrf
-                        <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i> Logout</button>
-                    </form>
-                </li>
-            </ul>
-            </div>
+            @endauth
         </div>
     </div>
 
@@ -424,8 +456,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
@@ -438,7 +468,6 @@
         }
     </script>
 
-    <!-- Global Delete Confirmation (SweetAlert2) -->
     <script>
     function confirmDelete(button, customText) {
         Swal.fire({
@@ -456,7 +485,6 @@
             }
         });
     }
-    // Delegated listener for buttons with data-confirm-delete attribute
     document.addEventListener('click', function(e) {
         const btn = e.target.closest('[data-confirm-delete]');
         if (!btn) return;
@@ -465,86 +493,15 @@
     });
     </script>
 
-    <!-- Live Search Script -->
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const forms = document.querySelectorAll('.live-search-form');
-        
-        forms.forEach(form => {
-            const inputs = form.querySelectorAll('input, select');
-            const targetSelector = form.dataset.target || '#table-container';
-            const targetContainer = document.querySelector(targetSelector);
-            
-            if (!targetContainer) return;
-            
-            let timeout = null;
-            
-            inputs.forEach(input => {
-                input.addEventListener('input', function() {
-                    clearTimeout(timeout);
-                    timeout = setTimeout(() => {
-                        executeSearch(form, targetContainer);
-                    }, 400);
-                });
-            });
-            
-            targetContainer.addEventListener('click', function(e) {
-                const link = e.target.closest('.pagination a');
-                if (link) {
-                    e.preventDefault();
-                    executeSearch(form, targetContainer, link.href);
-                }
-            });
-        });
-        
-        function executeSearch(form, targetContainer, url = null) {
-            targetContainer.style.opacity = '0.5';
-            
-            const formData = new FormData(form);
-            const searchParams = new URLSearchParams(formData);
-            const fetchUrl = url || `${form.action || window.location.pathname}?${searchParams.toString()}`;
-            
-            window.history.pushState({}, '', fetchUrl);
-            
-            fetch(fetchUrl, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.text())
-            .then(html => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const targetSelector = form.dataset.target || '#table-container';
-                const newContent = doc.querySelector(targetSelector);
-                
-                if (newContent) {
-                    targetContainer.innerHTML = newContent.innerHTML;
-                }
-                targetContainer.style.opacity = '1';
-            })
-            .catch(error => {
-                console.error('Live search error:', error);
-                targetContainer.style.opacity = '1';
-            });
-        }
-    });
+$('.select2-alat, #selectAlat, #selectTracking').select2({
+    theme: 'bootstrap-5',
+    width: 'auto',
+    placeholder: '-- Pilih Barang / Alat --',
+    allowClear: true
+});;
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     @stack('scripts')
-    <script>
-        $(document).ready(function() {
-            // Mengubah semua elemen select dengan class tertentu atau secara umum 
-            // menjadi Select2 dengan tema Bootstrap 5 yang rapi
-            $('.select2-alat, #selectAlat').select2({
-                theme: 'bootstrap-5',
-                width: '100%',
-                placeholder: '-- Pilih Alat --',
-                allowClear: true
-            });
-        });
-    </script>
-
-    @stack('scripts')
-
 </body>
 </html>

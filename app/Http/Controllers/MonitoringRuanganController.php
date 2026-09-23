@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use App\Models\MonitoringRuangan;
 use App\Models\Alat;
 use App\Models\TitikKalibrasi;
 use App\Services\KalibrasiService;
+use App\Models\DokumenReferensiRuangan;
 
 class MonitoringRuanganController extends Controller
 {
@@ -35,7 +37,6 @@ class MonitoringRuanganController extends Controller
         $tahun = $request->input('tahun', date('Y'));
         $ruangan = $request->input('nama_ruangan', '');
 
-        // Ambil data titik kalibrasi manual untuk alat aktif
         $titikKalibrasiList = [];
 
         $otomatisSuhu = '';
@@ -63,7 +64,6 @@ class MonitoringRuanganController extends Controller
             }
         }
         
-        // Ambil data monitoring untuk 31 hari
         $monitoringData = [];
         for ($i = 1; $i <= 31; $i++) {
             $monitoringData[$i] = MonitoringRuangan::where('bulan', $bulan)
@@ -79,6 +79,12 @@ class MonitoringRuanganController extends Controller
         $persyaratanSuhu = $request->input('persyaratan_suhu', $otomatisSuhu ?? ($firstRecord?->persyaratan_suhu ?? ''));
         $persyaratanKelembaban = $request->input('persyaratan_kelembaban', $otomatisKelembaban ?? ($firstRecord?->persyaratan_kelembaban ?? ''));
 
+        $dokumenList = DokumenReferensiRuangan::where('alat_id', $alatId)
+        ->where('nama_ruangan', $ruangan)
+        ->where('bulan', $bulan)
+        ->where('tahun', $tahun)
+        ->get();
+
         return view('monitoring_ruangan.index', compact(
             'daftarAlat', 
             'alatAktif', 
@@ -89,6 +95,7 @@ class MonitoringRuanganController extends Controller
             'alatId', 
             'persyaratanSuhu', 
             'persyaratanKelembaban',
+            'dokumenList',
             'titikKalibrasiList',
             'otomatisSuhu', 
             'otomatisKelembaban'
@@ -105,7 +112,6 @@ class MonitoringRuanganController extends Controller
         $tglKalibrasi = $request->tanggal_kalibrasi;
         $tglExpired = $request->tanggal_expired;
 
-        // Simpan data Humidity jika ada yang diisi
         if ($request->has('humidity_equipment')) {
             foreach ($request->humidity_equipment as $index => $eq) {
                 if (!is_null($eq) && !is_null($request->humidity_standard[$index])) {
@@ -121,7 +127,6 @@ class MonitoringRuanganController extends Controller
             }
         }
 
-        // Simpan data Temperature jika ada yang diisi
         if ($request->has('temperature_equipment')) {
             foreach ($request->temperature_equipment as $index => $eq) {
                 if (!is_null($eq) && !is_null($request->temperature_standard[$index])) {
@@ -139,7 +144,7 @@ class MonitoringRuanganController extends Controller
 
         return redirect()->back()->with('success', 'Titik acuan kalibrasi Humidity & Temperature berhasil disimpan!');
     }
-
+    
     public function destroyTitikKalibrasi($id)
     {
         $titik = TitikKalibrasi::findOrFail($id);
@@ -190,6 +195,9 @@ class MonitoringRuanganController extends Controller
         ]);
 
         $alatId = $request->alat_id;
+
+        $userLogin = \Illuminate\Support\Facades\Auth::user();
+        $namaAnalisLogin = $userLogin->name ?? ($userLogin->username ?? 'Analis');
 
         $titikList = \App\Models\TitikKalibrasi::where('alat_id', $alatId)->get();
         $minTemp = $titikList->where('kategori', 'temperature')->min('equipment_reading');
@@ -242,7 +250,26 @@ class MonitoringRuanganController extends Controller
             }
         }
 
-        // Simpan ke database
+        $existingRecord = MonitoringRuangan::where([
+            'bulan' => $request->bulan,
+            'tahun' => $request->tahun,
+            'nama_ruangan' => $request->nama_ruangan,
+            'alat_id' => $alatId,
+            'tanggal' => $request->tanggal,
+        ])->first();
+
+        if (!empty($existingRecord?->paraf_1)) {
+            $paraf1 = $existingRecord->paraf_1;
+        } else {
+            $paraf1 = ($request->filled('suhu_pembacaan_1') || $request->filled('kelembaban_pembacaan_1') || $request->filled('waktu_1')) ? $namaAnalisLogin : null;
+        }
+
+        if (!empty($existingRecord?->paraf_2)) {
+            $paraf2 = $existingRecord->paraf_2;
+        } else {
+            $paraf2 = ($request->filled('suhu_pembacaan_2') || $request->filled('kelembaban_pembacaan_2') || $request->filled('waktu_2')) ? $namaAnalisLogin : null;
+        }
+
         MonitoringRuangan::updateOrCreate(
             [
                 'bulan' => $request->bulan,
@@ -260,16 +287,16 @@ class MonitoringRuanganController extends Controller
                 'suhu_terkoreksi_1' => $suhuTerkoreksi1,
                 'kelembaban_pembacaan_1' => $request->kelembaban_pembacaan_1,
                 'kelembaban_terkoreksi_1' => $lembapTerkoreksi1,
-                'paraf_1' => $request->has('paraf_1') ? 1 : 0,
+                'paraf_1' => $paraf1,
 
                 'waktu_2' => $request->waktu_2,
                 'suhu_pembacaan_2' => $request->suhu_pembacaan_2,
                 'suhu_terkoreksi_2' => $suhuTerkoreksi2,
                 'kelembaban_pembacaan_2' => $request->kelembaban_pembacaan_2,
                 'kelembaban_terkoreksi_2' => $lembapTerkoreksi2,
-                'paraf_2' => $request->has('paraf_2') ? 1 : 0,
+                'paraf_2' => $paraf2,
 
-                'keterangan' => $request->keterangan,
+                'status' => $request->status,
             ]
         );
 
@@ -304,10 +331,87 @@ class MonitoringRuanganController extends Controller
         $firstRecord = collect($monitoringData)->first(fn($item) => $item !== null);
         $persyaratanSuhu = $firstRecord?->persyaratan_suhu ?? '-';
         $persyaratanKelembaban = $firstRecord?->persyaratan_kelembaban ?? '-';
+        $dokumenReferensi = $firstRecord?->dokumen_referensi ?? null;
 
         $alat = Alat::where('alat_id', $alatId)->first();
 
         return view('monitoring_ruangan.pdf', compact('monitoringData', 'alat', 'bulan', 'tahun', 'ruangan', 'persyaratanSuhu', 'persyaratanKelembaban'));
     }
-}
+    public function uploadReferensi(Request $request)
+    {
+        $request->validate([
+            'dokumen_referensi' => 'required|file|mimes:pdf,doc,docx,jpg,png|max:2048',
+            'nama_ruangan'      => 'required',
+            'bulan'             => 'required',
+            'tahun'             => 'required',
+            'alat_id'           => 'required',
+        ]);
+    
+        if ($request->hasFile('dokumen_referensi')) {
+            $file = $request->file('dokumen_referensi');
+            $namaAsli = $file->getClientOriginalName();
+            $filename = time() . '_' . $namaAsli;
+            $path = $file->storeAs('dokumen_referensi', $filename, 'public');
+        
+            DokumenReferensiRuangan::create([
+                'alat_id'        => $request->alat_id,
+                'nama_ruangan'   => $request->nama_ruangan,
+                'bulan'          => $request->bulan,
+                'tahun'          => $request->tahun,
+                'file_path'      => $path,
+                'nama_file_asli' => $namaAsli,
+            ]);
+        }
+    
+        return redirect()->route('inventori.monitoring.index', [
+            'alat_id'      => $request->alat_id,
+            'nama_ruangan' => $request->nama_ruangan,
+            'bulan'        => $request->bulan,
+            'tahun'        => $request->tahun,
+        ])->with('success', 'Dokumen referensi berhasil ditambahkan.');
+    }
+    public function updateReferensi(Request $request, $id)
+    {
+        $request->validate([
+            'dokumen_referensi' => 'nullable|file|mimes:pdf,doc,docx,jpg,png|max:2048',
+            'nama_file_asli'    => 'nullable|string|max:255',
+        ]);
 
+        $dokumen = DokumenReferensiRuangan::findOrFail($id);
+
+        if ($request->hasFile('dokumen_referensi')) {
+            if (Storage::disk('public')->exists($dokumen->file_path)) {
+                Storage::disk('public')->delete($dokumen->file_path);
+            }
+
+            $file = $request->file('dokumen_referensi');
+            $namaAsli = $file->getClientOriginalName();
+            $filename = time() . '_' . $namaAsli;
+            $path = $file->storeAs('dokumen_referensi', $filename, 'public');
+
+            $dokumen->file_path = $path;
+            $dokumen->nama_file_asli = $namaAsli;
+        }
+
+        if ($request->filled('nama_file_asli')) {
+            $dokumen->nama_file_asli = $request->nama_file_asli;
+        }
+
+        $dokumen->save();
+
+        return redirect()->back()->with('success', 'Dokumen referensi berhasil diperbarui.');
+    }
+
+    public function destroyReferensi($id)
+    {
+        $dokumen = DokumenReferensiRuangan::findOrFail($id);
+        
+        if (Storage::disk('public')->exists($dokumen->file_path)) {
+            Storage::disk('public')->delete($dokumen->file_path);
+        }
+        
+        $dokumen->delete();
+
+        return redirect()->back()->with('success', 'Dokumen referensi berhasil dihapus.');
+    }
+}

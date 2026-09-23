@@ -52,7 +52,6 @@ class AlatController extends Controller
         }
 
         $alatList = $query->latest()->get();
-
         if ($filterStatus) {
             $alatList = $alatList->filter(function($item) use ($filterStatus) {
                 $kalibrasiTerakhir = $item->riwayatKalibrasi->sortByDesc('tgl_kalibrasi')->first();
@@ -85,6 +84,8 @@ class AlatController extends Controller
         return view('alat.create');
     }
 
+    // public function store(Request $request)
+
     public function store(\App\Http\Requests\AlatRequest $request)
     {
         $request->validate([
@@ -98,6 +99,8 @@ class AlatController extends Controller
             'kondisi_barang' => 'required|in:baik,rusak,perbaikan',
             'status_barang' => 'required|in:terpakai,idle',
             'unit_kerja_pemilik' => 'nullable|string|max:100',
+            
+            // Ubah semua baris validasi kalibrasi di bawah ini menjadi nullable
             'no_sertifikat' => 'nullable|string|max:100',
             'file_sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'interval_kalibrasi' => 'nullable|string|max:50',
@@ -107,7 +110,6 @@ class AlatController extends Controller
             'jenis_kalibrasi' => 'nullable|in:internal,eksternal',
             'range_kapasitas' => 'nullable|string|max:100',
             'faktor_koreksi' => 'nullable|string|max:100',
-            // 'file_faktor_koreksi' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:2048',
             'signifikan' => 'nullable|in:ya,tidak',
             'catatan_evaluasi' => 'nullable|string',
         ]);
@@ -144,10 +146,6 @@ class AlatController extends Controller
                     $path = $request->file('file_sertifikat')->store('sertifikat_kalibrasi', 'public');
                     $dataKalibrasi['file_sertifikat'] = $path;
                 }
-                // if ($request->hasFile('file_faktor_koreksi')) {
-                //     $pathFaktor = $request->file('file_faktor_koreksi')->store('faktor_koreksi', 'public');
-                //     $dataKalibrasi['file_faktor_koreksi'] = $pathFaktor;
-                // }
 
                 RiwayatKalibrasi::create($dataKalibrasi);
             }
@@ -155,7 +153,7 @@ class AlatController extends Controller
 
         return redirect()->route('alat.index')->with('success', 'Data alat beserta informasi kalibrasinya berhasil ditambahkan');
     }
-
+    
     public function edit($id)
     {
         $alat = Alat::with(['riwayatKalibrasi' => function($query) {
@@ -237,7 +235,7 @@ class AlatController extends Controller
             //     $pathFaktor = $request->file('file_faktor_koreksi')->store('faktor_koreksi', 'public');
             //     $dataKalibrasi['file_faktor_koreksi'] = $pathFaktor;
             // }
-        
+            $kalibrasiTerakhir = \App\Models\RiwayatKalibrasi::where('alat_id', $alat->alat_id)->latest('tgl_kalibrasi')->first();
 
             if ($request->filled('tgl_kalibrasi')) {
                 if ($kalibrasiTerakhir) {
@@ -700,13 +698,11 @@ class AlatController extends Controller
                 $lastColIndex = 1 + $totalItems + 2; 
                 $lastColChar = Coordinate::stringFromColumnIndex($lastColIndex);
 
-                //Bersihkan background area atas
                 $sheet->getStyle('A1:' . $lastColChar . '9')->applyFromArray([
                     'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFFFFFFF']],
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_NONE]],
                 ]);
 
-                //Garis pembatas utama
                 $sheet->getStyle('A3:' . $lastColChar . '3')->applyFromArray([
                     'borders' => [
                         'bottom' => [
@@ -716,7 +712,6 @@ class AlatController extends Controller
                     ]
                 ]);
 
-                // 3. Styling Header Tabel
                 $headerStartRow = 11;
                 $endRow = $headerStartRow + 1 + 31; 
 
@@ -726,7 +721,6 @@ class AlatController extends Controller
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                 ]);
 
-                //Border untuk seluruh sel data harian
                 $sheet->getStyle('A' . ($headerStartRow + 2) . ':' . $lastColChar . $endRow)->applyFromArray([
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                     'alignment' => ['vertical' => 'center', 'horizontal' => 'center'],
@@ -894,84 +888,75 @@ class AlatController extends Controller
         }, $fileName);
     }
 
-    public function storePerbaikan(Request $request, $id)
-    {
-        $request->validate([
-            'tanggal_rusak' => 'required|date',
-            'deskripsi_kerusakan' => 'required|string',
-        ]);
+    // public function storePerbaikan(Request $request, $id)
+    // {
+    //     $request->validate([
+    //         'tanggal_rusak' => 'required|date',
+    //         'deskripsi_kerusakan' => 'required|string',
+    //     ]);
 
-        $alat = Alat::findOrFail($id);
+    //     $alat = Alat::findOrFail($id);
 
-        RiwayatPerbaikanAlat::create([
-            'alat_id' => $alat-> alat_id,
-            'tanggal_rusak' => $request->tanggal_rusak,
-            'deskripsi_kerusakan' => $request->deskripsi_kerusakan,
-            'dilaporkan_oleh' => Auth::id(),
-            'status_perbaikan' => 'Belum Diperbaiki'
-        ]);
+    //     RiwayatPerbaikanAlat::create([
+    //         'alat_id' => $alat-> alat_id,
+    //         'tanggal_rusak' => $request->tanggal_rusak,
+    //         'deskripsi_kerusakan' => $request->deskripsi_kerusakan,
+    //         'dilaporkan_oleh' => Auth::id(),
+    //         'status_perbaikan' => 'Belum Diperbaiki'
+    //     ]);
 
-        $alat->update([
-            'kondisi_barang' => 'perbaikan',
-            'status_barang' => 'idle'
-        ]);
+    //     $alat->update([
+    //         'kondisi_barang' => 'perbaikan',
+    //         'status_barang' => 'idle'
+    //     ]);
 
-        return redirect()->back()->with('success', 'Laporan kerusakan alat berhasil dicatat');
-    }
+    //     return redirect()->back()->with('success', 'Laporan kerusakan alat berhasil dicatat');
+    // }
 
-    public function updatePerbaikan(Request $request, $id, $perbaikan_id)
-    {
-        $perbaikan = RiwayatPerbaikanAlat::findOrFail($perbaikan_id);
-        $alat = Alat::findOrFail($id);
+    // public function updatePerbaikan(Request $request, $id, $perbaikan_id)
+    // {
+    //     $perbaikan = RiwayatPerbaikanAlat::findOrFail($perbaikan_id);
+    //     $alat = Alat::findOrFail($id);
         
-        $request->validate([
-            'status_perbaikan' => 'required|string|in:Dalam Perbaikan,Selesai,Tidak Bisa Diperbaiki',
-            'tindakan_perbaikan' => 'nullable|string',
-            'tanggal_selesai' => 'nullable|date',
-        ]);
+    //     $request->validate([
+    //         'status_perbaikan' => 'required|string|in:Dalam Perbaikan,Selesai,Tidak Bisa Diperbaiki',
+    //         'tindakan_perbaikan' => 'nullable|string',
+    //         'tanggal_selesai' => 'nullable|date',
+    //     ]);
 
-        if ($request->status_perbaikan === 'Selesai' || $request->status_perbaikan === 'Tidak Bisa Diperbaiki') {
-            if (Auth::user()->role->nama_role !== \App\Enums\PeranPengguna::KOORDINATOR_LAB->value) {
-                return redirect()->back()->withErrors(['message' => 'Hanya Koordinator Lab yang dapat memverifikasi penyelesaian perbaikan.']);
-            }
-            $perbaikan->diverifikasi_oleh = Auth::id();
-            if (!$request->tanggal_selesai) {
-                $perbaikan->tanggal_selesai = now();
-            }
+    //     if ($request->status_perbaikan === 'Selesai' || $request->status_perbaikan === 'Tidak Bisa Diperbaiki') {
+    //         if (Auth::user()->role->nama_role !== \App\Enums\PeranPengguna::KOORDINATOR_LAB->value) {
+    //             return redirect()->back()->withErrors(['message' => 'Hanya Koordinator Lab yang dapat memverifikasi penyelesaian perbaikan.']);
+    //         }
+    //         $perbaikan->diverifikasi_oleh = Auth::id();
+    //         if (!$request->tanggal_selesai) {
+    //             $perbaikan->tanggal_selesai = now();
+    //         }
             
-            if ($request->status_perbaikan === 'Selesai') {
-                $alat->update([
-                    'kondisi_barang' => 'baik',
-                    'status_barang' => 'idle' 
-            ]);
-            }elseif ($request->status_perbaikan === 'Tidak Bisa Diperbaiki') {
-                $alat->update([
-                    'kondisi_barang' => 'rusak',
-                    'status_barang' => 'idle'
-            ]);
-            }
-        }elseif ($request->status_perbaikan === 'Dalam Perbaikan') {
-            $alat->update([
-                'kondisi_barang' => 'perbaikan',
-                'status_barang' => 'idle'
-        ]);
-        }
+    //         if ($request->status_perbaikan === 'Selesai') {
+    //             $alat->update([
+    //                 'kondisi_barang' => 'baik',
+    //                 'status_barang' => 'idle' 
+    //         ]);
+    //         }elseif ($request->status_perbaikan === 'Tidak Bisa Diperbaiki') {
+    //             $alat->update([
+    //                 'kondisi_barang' => 'rusak',
+    //                 'status_barang' => 'idle'
+    //         ]);
+    //         }
+    //     }elseif ($request->status_perbaikan === 'Dalam Perbaikan') {
+    //         $alat->update([
+    //             'kondisi_barang' => 'perbaikan',
+    //             'status_barang' => 'idle'
+    //     ]);
+    //     }
 
-        $perbaikan->update([
-            'status_perbaikan' => $request->status_perbaikan,
-            'tindakan_perbaikan' => $request->tindakan_perbaikan,
-            'tanggal_selesai' => $request->tanggal_selesai ?? $perbaikan->tanggal_selesai,
-        ]);
+    //     $perbaikan->update([
+    //         'status_perbaikan' => $request->status_perbaikan,
+    //         'tindakan_perbaikan' => $request->tindakan_perbaikan,
+    //         'tanggal_selesai' => $request->tanggal_selesai ?? $perbaikan->tanggal_selesai,
+    //     ]);
 
-        return redirect()->back()->with('success', 'Status perbaikan berhasil diperbarui');
-    }
-
-    /**
-     * Export data alat ke format Word.
-     * TODO: Implementasi export Word (belum tersedia).
-     */
-    public function exportWord($id)
-    {
-        return back()->with('error', 'Fitur export Word belum tersedia.');
-    }
+    //     return redirect()->back()->with('success', 'Status perbaikan berhasil diperbarui');
+    // }
 }

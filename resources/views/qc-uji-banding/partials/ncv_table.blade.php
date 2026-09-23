@@ -1,15 +1,16 @@
 <div class="row g-2 mb-3 bg-light p-2 border">
-    <div class="col-md-2"><label class="small fw-bold">Reference No</label><input type="text" name="params[{{ $pid }}][ref_no]" class="form-control form-control-sm param-input-ext" disabled></div>
-    <div class="col-md-2"><label class="small fw-bold">Date</label><input type="date" name="params[{{ $pid }}][ncv_date]" class="form-control form-control-sm param-input-ext" disabled></div>
-    <div class="col-md-2"><label class="small fw-bold">Balance ID</label><input type="text" name="params[{{ $pid }}][blnc_id]" class="form-control form-control-sm param-input-ext" disabled></div>
+    <div class="col-md-3"><label class="small fw-bold">Reference No</label><input type="text" name="params[{{ $pid }}][ref_no]" class="form-control form-control-sm param-input-ext" disabled></div>
+    <div class="col-md-3"><label class="small fw-bold">Balance ID</label><input type="text" name="params[{{ $pid }}][blnc_id]" class="form-control form-control-sm param-input-ext" disabled></div>
     <div class="col-md-3"><label class="small fw-bold">Calorimeter ID</label><input type="text" name="params[{{ $pid }}][calorimeter_id]" class="form-control form-control-sm param-input-ext" disabled></div>
     <div class="col-md-3"><label class="small fw-bold">Reference Method</label><input type="text" name="params[{{ $pid }}][std_method]" class="form-control form-control-sm param-input-ext" disabled></div>
 </div>
 
-<div class="table-responsive">
+<div class="table-responsive" style="overflow-x: auto; white-space: nowrap;">
     <table class="table table-bordered table-sm align-middle text-center param-table" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="NCV">
         <thead class="table-light">
             <tr>
+                <th style="min-width: 80px;">Pengujian Ke-</th>
+                <th style="min-width: 130px;">Date</th>
                 <th style="min-width: 80px;">BOMB NO</th>
                 <th style="min-width: 100px;">Call ID</th>
                 <th style="min-width: 130px;">Qv (ad) gross</th>
@@ -24,14 +25,19 @@
                 <th style="min-width: 170px;">Hvap (constant pressure at 25&deg;C)</th>
                 <th style="min-width: 100px;">Qv&rarr;p</th>
                 <th style="min-width: 100px;">Qh</th>
-                <th style="min-width: 100px;">Qmar</th>
-                <th style="min-width: 140px;">Qvad (Gross) (J/g)</th>
-                <th style="min-width: 140px;">Qpar (net) (J/g)</th>
+                <th style="min-width: 100px;">Qm (ar)</th>
+                <th style="min-width: 130px;">Qv (ad) gross (J/g)</th>
                 <th style="min-width: 130px;" class="bg-warning bg-opacity-25">Qpar (net)</th>
             </tr>
         </thead>
         <tbody class="generic-tbody">
             <tr class="row-entry simplo-row">
+                <td rowspan="2" class="align-middle">
+                    <input type="number" class="form-control form-control-sm text-center mx-auto" name="params[{{ $pid }}][data][0][pengujian_ke]" style="width: 70px; min-width: 70px;" value="1">
+                </td>
+                <td rowspan="2" class="align-middle">
+                    <input type="date" class="form-control form-control-sm" name="params[{{ $pid }}][data][0][tanggal_uji]" style="width: 130px; min-width: 130px;" value="{{ date('Y-m-d') }}">
+                </td>
                 <td>
                     <input type="text" class="form-control form-control-sm in-bomb-1 bg-light border-0" readonly tabindex="-1" name="params[{{ $pid }}][data][0][dish_1]">
                     <input type="hidden" class="in-d1" name="params[{{ $pid }}][data][0][d1]">

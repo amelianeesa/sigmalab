@@ -57,17 +57,24 @@
                                 @endif
                             </td>
                             <td><span class="badge bg-secondary">{{ $r->sertifikats_count }} Parameter</span></td>
+                            
                             <td>
-                                @if($r->is_active)
-                                    <span class="badge bg-success">Aktif</span>
-                                @else
-                                    <span class="badge bg-danger">Inaktif</span>
-                                @endif
+                                <span class="badge {{ $r->statusBadgeClass() }}">{{ $r->statusLabel() }}</span>
                             </td>
+                            
                             <td>
                                 <a href="{{ route('crm-katalog.show', $r->id) }}" class="btn btn-sm btn-info text-white">
                                     <i class="fas fa-eye"></i> Detail & Sertifikat
                                 </a>
+                                @if($r->status === 'menunggu_verifikasi')
+                                    <a href="{{ route('crm-katalog.verifikasi-administratif.form', $r->id) }}" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-clipboard-check"></i> Verifikasi
+                                    </a>
+                                @elseif($r->status === 'menunggu_verifikasi_teknis')
+                                    <a href="{{ route('crm-katalog.verifikasi-teknis.form', $r->id) }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-flask"></i> Verifikasi Teknis
+                                    </a>
+                                @endif
                                 <button class="btn btn-sm btn-outline-secondary ms-1" data-bs-toggle="modal" data-bs-target="#editModal{{ $r->id }}">
                                     <i class="fas fa-edit"></i>
                                 </button>
@@ -77,7 +84,7 @@
                         <!-- Modal Edit -->
                         <div class="modal fade" id="editModal{{ $r->id }}" tabindex="-1" aria-labelledby="editModalLabel{{ $r->id }}" aria-hidden="true">
                             <div class="modal-dialog">
-                                <form action="{{ route('crm-katalog.update', $r->id) }}" method="POST">
+                                <form action="{{ route('crm-katalog.update', $r->id) }}" method="POST" enctype="multipart/form-data">
                                     @csrf
                                     @method('PUT')
                                     <div class="modal-content">
@@ -102,6 +109,21 @@
                                                 <label class="form-label">Produsen</label>
                                                 <input type="text" class="form-control" name="produsen" value="{{ $r->produsen }}">
                                             </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Sertifikat CoA (Certificate of Analysis)</label>
+                                                @if($r->coa_file)
+                                                    <div class="mb-2">
+                                                        <a href="{{ asset('storage/' . $r->coa_file) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                                            <i class="fas fa-file-pdf me-1"></i> Lihat CoA Saat Ini
+                                                        </a>
+                                                    </div>
+                                                @endif
+                                                <input type="file" class="form-control" name="coa_file" accept=".pdf,.jpg,.jpeg,.png">
+                                                <div class="form-text">Kosongkan jika tidak ingin mengganti file yang sudah ada. Format PDF/JPG/PNG, maksimal 5MB.</div>
+                                            </div>
+
+
                                             <div class="mb-3">
                                                 <label class="form-label">Tanggal Expired</label>
                                                 <input type="date" class="form-control" name="tanggal_expired" value="{{ $r->tanggal_expired ? $r->tanggal_expired->format('Y-m-d') : '' }}">

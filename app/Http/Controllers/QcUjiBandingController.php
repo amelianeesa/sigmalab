@@ -318,4 +318,63 @@ class QcUjiBandingController extends Controller
         $kalibrasi = AftKalibrasi::findOrFail($id);
         return response()->json($kalibrasi);
     }
+
+    public function evaluasiForm($id)
+    {
+        $program = QcUjiBanding::with(['parameters.parameterUji'])->findOrFail($id);
+        return view('qc-uji-banding.evaluasi-vendor', compact('program'));
+    }
+
+    public function evaluasiStore(Request $request, $id)
+    {
+        $program = QcUjiBanding::findOrFail($id);
+
+        $request->validate([
+            'params' => 'required|array',
+            'params.*.target_vendor' => 'nullable|numeric',
+            'params.*.sdpa' => 'nullable|numeric',
+        ]);
+
+        foreach ($request->params as $paramId => $data) {
+            $assignedValue = $data['target_vendor'] ?? null;
+            $sdpa = $data['sdpa'] ?? null;
+
+            if ($assignedValue === null || $assignedValue === '' || $sdpa === null || $sdpa === '' || floatval($sdpa) == 0) {
+                continue; // belum lengkap, lewati — jangan hapus data yang sudah ada
+            }
+
+            $parameter = QcUjiBandingParameter::where('qc_uji_banding_id', $id)->find($paramId);
+            if (!$parameter) continue;
+
+            $assignedValue = floatval($assignedValue);
+            $sdpa = floatval($sdpa);
+            $zScore = ($parameter->nilai_akhir - $assignedValue) / $sdpa;
+            $absZ = abs($zScore);
+
+            $status = $absZ <= 2 ? 'inlier' : ($absZ < 3 ? 'warning' : 'outlier');
+
+            $statusInvestigasi = $parameter->status_investigasi;
+            if ($status === 'outlier' && $statusInvestigasi === 'aman') {
+                $statusInvestigasi = 'menunggu_investigasi';
+            } elseif ($status !== 'outlier') {
+                $statusInvestigasi = 'aman';
+            }
+
+            $parameter->update([
+                'target_vendor' => $assignedValue,
+                'sdpa' => $sdpa,
+                'z_score' => round($zScore, 2),
+                'status_evaluasi' => $status,
+                'status_investigasi' => $statusInvestigasi,
+            ]);
+        }
+
+        return redirect()->route('qc-uji-banding.ringkasan', $id)->with('success', 'Hasil evaluasi vendor berhasil disimpan.');
+    }
+
+    public function ringkasanUnjukKerja($id)
+    {
+        $program = QcUjiBanding::with(['parameters.parameterUji'])->findOrFail($id);
+        return view('qc-uji-banding.ringkasan-unjuk-kerja', compact('program'));
+    }
 }

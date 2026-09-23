@@ -84,4 +84,9 @@ class ParameterUji extends BaseModel
     {
         return $this->hasMany(CrmSertifikat::class, 'parameter_uji_id', 'parameter_uji_id');
     }
+
+    public function toleransis()
+    {
+        return $this->hasMany(ParameterToleransi::class, 'parameter_uji_id', 'parameter_uji_id');
+    }
 }

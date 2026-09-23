@@ -42,16 +42,16 @@ class AppServiceProvider extends ServiceProvider
             $unreadNotifCount = 0;
             $recentNotifs = collect();
 
-            if (auth()->check()) {
-                if (in_array(auth()->user()->role->nama_role ?? '', [\App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value, \App\Enums\PeranPengguna::ADMIN_APLIKASI->value])) {
+            if (Auth::check()) {
+                if (in_array(Auth::user()->role->nama_role ?? '', [\App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value, \App\Enums\PeranPengguna::ADMIN_APLIKASI->value])) {
                     $pendingPengadaan = \App\Models\PermintaanPengadaan::where('status', 'diajukan')->count();
                 }
 
-                $unreadNotifCount = \App\Models\Notifikasi::where('users_id', auth()->id())
+                $unreadNotifCount = \App\Models\Notifikasi::where('users_id', Auth::id())
                     ->where('is_read', false)
                     ->count();
 
-                $recentNotifs = \App\Models\Notifikasi::where('users_id', auth()->id())
+                $recentNotifs = \App\Models\Notifikasi::where('users_id', Auth::id())
                     ->where('is_read', false)
                     ->orderBy('created_at', 'desc')
                     ->limit(5)

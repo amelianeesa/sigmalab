@@ -6,12 +6,13 @@
     <div class="col-md-2"><label class="small fw-bold">Std Method</label><input type="text" name="params[{{ $pid }}][std_method]" class="form-control form-control-sm param-input-ext" disabled></div>
     <div class="col-md-2"><label class="small fw-bold">Indicate T</label><input type="text" name="params[{{ $pid }}][indicate_t]" class="form-control form-control-sm param-input-ext" disabled></div>
 </div>
-<div class="table-responsive mb-3">
+<div class="table-responsive mb-3" style="overflow-x: auto; white-space: nowrap;">
     <table class="table table-bordered table-sm align-middle text-center param-table" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
         <thead class="table-light">
             @if($code === 'IM' || $code === 'RM')
                 <tr>
-                    
+                    <th>Pengujian Ke-</th>
+                    <th>Date</th>
                     <th>DISH NO</th>
                     <th>M1</th>
                     <th>M2</th>
@@ -19,13 +20,13 @@
                     <th>A</th>
                     <th>B</th>
                     <th class="bg-warning bg-opacity-25">M%</th>
-                    <th>ABS DIFF</th>
-                    <th>YES/NO</th>
+                    <th colspan="2">ABSOLUTE DIFFERENCE</th>
                     <th>AVERAGE %</th>
                     </tr>
             @elseif($code === 'ASH')
                 <tr>
-                    
+                    <th>Pengujian Ke-</th>
+                    <th>Date</th>
                     <th>DISH NO</th>
                     <th>M1</th>
                     <th>M2</th>
@@ -33,13 +34,14 @@
                     <th>M3</th>
                     <th>M3-M1</th>
                     <th class="bg-warning bg-opacity-25">ASH%</th>
-                    <th>ABS DIFF</th>
-                    <th>YES/NO</th>
+                    <th colspan="2">ABSOLUTE DIFFERENCE</th>
+                    
                     <th>AVERAGE %adb</th>
                     </tr>
             @elseif($code === 'VM')
                 <tr>
-                    
+                    <th>Pengujian Ke-</th>
+                    <th>Date</th>
                     <th>DISH NO</th>
                     <th>M1</th>
                     <th>M2</th>
@@ -49,8 +51,8 @@
                     <th>%LOSS</th>
                     <th>%M adb</th>
                     <th class="bg-warning bg-opacity-25">%VM</th>
-                    <th>ABS DIFF</th>
-                    <th>YES/NO</th>
+                    <th colspan="2">ABSOLUTE DIFFERENCE</th>
+                    
                     <th>AVERAGE %adb</th>
                     </tr>
             @endif
@@ -58,6 +60,12 @@
         <tbody class="proximate-tbody" data-index="0">
             <!-- SIMPLO -->
             <tr class="row-entry simplo-row">
+                <td rowspan="2" class="align-middle">
+                    <input type="number" class="form-control form-control-sm text-center mx-auto" name="params[{{ $pid }}][data][0][pengujian_ke]" style="width: 70px; min-width: 70px;" value="1">
+                </td>
+                <td rowspan="2" class="align-middle">
+                    <input type="date" class="form-control form-control-sm" name="params[{{ $pid }}][data][0][tanggal_uji]" style="width: 130px; min-width: 130px;" value="{{ date('Y-m-d') }}">
+                </td>
                 <!-- Kolom Date Dihapus, hidden input pindah ke sini -->
                 <td>
                     <input type="text" class="form-control form-control-sm in-dish-1" name="params[{{ $pid }}][data][0][dish_1]" placeholder="S" disabled>
@@ -87,14 +95,17 @@
                 @endif
 
                 @if($code === 'VM' || $code === 'TOTAL SULFUR (%AD/DB)')
-<td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold text-center text-primary" name="params[{{ $pid }}][data][0][mentah][vm_manual_1]"></td>
-@else
-<td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" readonly tabindex="-1"></td>
-@endif
+                <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold text-center text-primary" name="params[{{ $pid }}][data][0][mentah][vm_manual_1]"></td>
+                @else
+                <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" readonly tabindex="-1"></td>
+                @endif
+
                 <td rowspan="2" class="align-middle out-diff">-</td>
                 <td rowspan="2" class="align-middle">
-                    <select class="form-select form-select-sm" name="params[{{ $pid }}][data][0][yesno]" disabled>
-                        <option value=""></option><option value="YES">YES</option><option value="NO">NO</option>
+                    <select class="form-select form-select-sm fw-bold" name="params[{{ $pid }}][data][0][yesno]" onchange="updateYesNoColor(this)">
+                        <option value=""></option>
+                        <option value="YES">YES</option>
+                        <option value="NO">NO</option>
                     </select>
                 </td>
                 <td rowspan="2" class="align-middle out-avg-adb">-</td>

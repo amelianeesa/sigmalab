@@ -12,6 +12,7 @@ class RiwayatKalibrasi extends BaseModel
     use HasFactory;
 
     protected $table = 'riwayat_kalibrasi';
+    protected $primaryKey = 'riwayat_kalibrasi_id';
     public $timestamps = false;
     protected $casts = [
         'tgl_akhir' => 'date',
