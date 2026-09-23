@@ -3,7 +3,6 @@
         <h4 class="fw-bold m-0 text-uppercase" style="letter-spacing: 1px;">{{ $title ?? 'FORM PENGUJIAN' }}</h4>
     </div>
     <div class="print-logo-area text-end">
-        {{-- Menggunakan base64 logo atau dummy jika belum ada --}}
-        <img src="{{ asset('assets/img/logo-sucofindo.png') }}" alt="SUCOFINDO" style="height: 50px;">
+        <img src="{{ asset('images/Logo_Suco_Nobg.png') }}" alt="SUCOFINDO" style="height: 80px;">
     </div>
 </div>

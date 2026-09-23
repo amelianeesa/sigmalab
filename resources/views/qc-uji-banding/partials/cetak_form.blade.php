@@ -6,6 +6,7 @@
             <select id="cetak-modul-selector" class="form-select border-primary shadow-sm">
                 <option value="">-- Pilih Modul --</option>
                 <option value="proximate">Proximate Analysis</option>
+                <option value="im">Determination of Moisture in Analysis Sample (IM)</option>
                 <!-- Modul lain akan ditambahkan di sini -->
             </select>
         </div>
@@ -28,6 +29,7 @@
 
         <!-- Modul-modul cetak akan di-include di sini (awalnya di-hide semua) -->
         @include('qc-uji-banding.print.modules.proximate')
+        @include('qc-uji-banding.print.modules.im')
         
     </div>
 </div>
@@ -100,6 +102,8 @@
                 // Jalankan sinkronisasi data khusus untuk modul yang dipilih
                 if(selected === 'proximate') {
                     syncProximateData();
+                } else if (selected === 'im') {
+                    syncImData();
                 }
             }
         });
@@ -137,6 +141,114 @@
         const fcDb = document.querySelector('tr[data-param="FC"] .prox-db');
         if(fcAdb) document.getElementById('print-prox-fc-adb').innerText = fcAdb.innerText !== '—' ? fcAdb.innerText : '';
         if(fcDb) document.getElementById('print-prox-fc-db').innerText = fcDb.innerText !== '—' ? fcDb.innerText : '';
+    }
+
+    function syncImData() {
+        const imTable = document.querySelector('table.param-table[data-code="IM"]');
+        if(!imTable) {
+            console.warn("Tabel IM tidak ditemukan di Tab 1.");
+            return;
+        }
+        
+        const pid = imTable.getAttribute('data-pid');
+        
+        // Header Meta
+        const getVal = (selector) => {
+            let el = document.querySelector(selector);
+            return el ? el.value : '';
+        };
+
+        document.getElementById('print-im-ref-no').innerText = getVal(`input[name="params[${pid}][ref_no]"]`);
+        document.getElementById('print-im-balance-id').innerText = getVal(`input[name="params[${pid}][blnc_id]"]`);
+        document.getElementById('print-im-oven-id').innerText = getVal(`input[name="params[${pid}][furnace_id]"]`);
+        document.getElementById('print-im-std-method').innerText = getVal(`input[name="params[${pid}][std_method]"]`);
+        document.getElementById('print-im-time').innerText = getVal(`input[name="params[${pid}][time]"]`);
+        document.getElementById('print-im-temp').innerText = getVal(`input[name="params[${pid}][indicate_t]"]`);
+        
+        const sampleId = getVal('input[name="kode_sampel"]');
+
+        // Dynamic Table
+        const simplos = imTable.querySelectorAll('.simplo-row');
+        const duplos = imTable.querySelectorAll('.duplo-row');
+        
+        let colsHtml = '';
+        
+        let rowDate = `<tr><td class="text-uppercase text-start ps-2" colspan="2" style="width: 20%;">DATE OF ANALYSIS</td>`;
+        let rowSample = `<tr><td class="text-uppercase text-start ps-2" colspan="2">SAMPLE ID</td>`;
+        let rowDish = `<tr><td class="text-uppercase text-start ps-2" colspan="2">DISH NO.</td>`;
+        let rowM1 = `<tr><td class="text-uppercase text-start ps-2">M1</td><td>gram</td>`;
+        let rowM2 = `<tr><td class="text-uppercase text-start ps-2">M2</td><td>gram</td>`;
+        let rowM3 = `<tr><td class="text-uppercase text-start ps-2">M3</td><td>gram</td>`;
+        let rowA = `<tr><td class="text-uppercase text-start ps-2">A</td><td>gram</td>`;
+        let rowB = `<tr><td class="text-uppercase text-start ps-2">B</td><td>gram</td>`;
+        let rowM = `<tr><td class="text-uppercase text-start ps-2">M</td><td>%</td>`;
+        let rowDiff = `<tr><td class="text-uppercase text-start ps-2" colspan="2">Absolute Diference</td>`;
+        let rowAvg = `<tr><td class="text-uppercase text-start ps-2" colspan="2">AVERAGE % (reported)</td>`;
+
+        for (let i = 0; i < simplos.length; i++) {
+            const getTVal = (row, selector) => {
+                let el = row.querySelector(selector);
+                if(el && el.tagName === 'SELECT') return el.options[el.selectedIndex].text;
+                return el ? el.value || el.innerText : '';
+            };
+
+            let dateVal = getTVal(simplos[i], 'input[type="date"]');
+            let diffVal = getTVal(simplos[i], '.out-diff');
+            let yesnoVal = getTVal(simplos[i], 'select[name*="[yesno]"]');
+            if(yesnoVal) yesnoVal += ')*';
+            let avgVal = getTVal(simplos[i], '.out-avg-adb');
+
+            rowDate += `<td colspan="2"><div contenteditable="true" class="print-editable w-100">${dateVal}</div></td>`;
+            rowSample += `<td colspan="2"><div contenteditable="true" class="print-editable w-100 fw-bold">${sampleId}</div></td>`;
+            
+            rowDish += `<td><div contenteditable="true" class="print-editable w-100">${getTVal(simplos[i], '.in-dish-1')}</div></td>`;
+            rowDish += `<td><div contenteditable="true" class="print-editable w-100">${getTVal(duplos[i], '.in-dish-2')}</div></td>`;
+            
+            rowM1 += `<td><div contenteditable="true" class="print-editable w-100">${getTVal(simplos[i], '.in-m1-1')}</div></td>`;
+            rowM1 += `<td><div contenteditable="true" class="print-editable w-100">${getTVal(duplos[i], '.in-m1-2')}</div></td>`;
+            
+            rowM2 += `<td><div contenteditable="true" class="print-editable w-100">${getTVal(simplos[i], '.in-m2-1')}</div></td>`;
+            rowM2 += `<td><div contenteditable="true" class="print-editable w-100">${getTVal(duplos[i], '.in-m2-2')}</div></td>`;
+            
+            rowM3 += `<td><div contenteditable="true" class="print-editable w-100">${getTVal(simplos[i], '.in-m3-1')}</div></td>`;
+            rowM3 += `<td><div contenteditable="true" class="print-editable w-100">${getTVal(duplos[i], '.in-m3-2')}</div></td>`;
+            
+            rowA += `<td><div contenteditable="true" class="print-editable w-100">${getTVal(simplos[i], '.in-a-1')}</div></td>`;
+            rowA += `<td><div contenteditable="true" class="print-editable w-100">${getTVal(duplos[i], '.in-a-2')}</div></td>`;
+            
+            rowB += `<td><div contenteditable="true" class="print-editable w-100">${getTVal(simplos[i], '.in-b-1')}</div></td>`;
+            rowB += `<td><div contenteditable="true" class="print-editable w-100">${getTVal(duplos[i], '.in-b-2')}</div></td>`;
+            
+            let hasilSimplo = simplos[i].querySelector('.in-hasil-1');
+            let mSimplo = hasilSimplo ? (hasilSimplo.value || hasilSimplo.innerText) : '';
+            // Wait, for IM, .in-hasil-1 is an input or what? In L100 of proximate_table: <td class="bg-warning..."><input type="text" class="form-control ... in-hasil-1" readonly ...></td>
+            // It uses .value.
+            let hasilDuplo = duplos[i] ? duplos[i].querySelector('.in-hasil-2') : null;
+            let mDuplo = hasilDuplo ? (hasilDuplo.value || hasilDuplo.innerText) : '';
+
+            rowM += `<td><div contenteditable="true" class="print-editable w-100">${mSimplo}</div></td>`;
+            rowM += `<td><div contenteditable="true" class="print-editable w-100">${mDuplo}</div></td>`;
+            
+            // Format for absolute diff in the excel mockup: Left col is diff value, right col is Yes/No)*
+            rowDiff += `<td><div contenteditable="true" class="print-editable w-100 text-center">${diffVal !== '-' ? diffVal : ''}</div></td>`;
+            rowDiff += `<td><div contenteditable="true" class="print-editable w-100 text-center">${yesnoVal || 'Yes/No)*'}</div></td>`;
+
+            rowAvg += `<td colspan="2"><div contenteditable="true" class="print-editable w-100 fw-bold">${avgVal !== '-' ? avgVal : ''}</div></td>`;
+        }
+
+        rowDate += `</tr>`;
+        rowSample += `</tr>`;
+        rowDish += `</tr>`;
+        rowM1 += `</tr>`;
+        rowM2 += `</tr>`;
+        rowM3 += `</tr>`;
+        rowA += `</tr>`;
+        rowB += `</tr>`;
+        rowM += `</tr>`;
+        rowDiff += `</tr>`;
+        rowAvg += `</tr>`;
+
+        document.getElementById('print-im-dynamic-tbody').innerHTML = rowDate + rowSample + rowDish + rowM1 + rowM2 + rowM3 + rowA + rowB + rowM + rowDiff + rowAvg;
     }
 
     function savePrintData() {
