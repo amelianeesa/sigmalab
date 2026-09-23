@@ -162,40 +162,6 @@ class QcUjiBandingController extends Controller
         return $pdf->stream('Laporan_Uji_Banding_' . $program->kode_sampel . '.pdf');
     }
 
-    public function editEvaluasi($id, $param_id)
-    {
-        $program = QcUjiBanding::findOrFail($id);
-        $parameter = QcUjiBandingParameter::with('parameterUji')->where('qc_uji_banding_id', $id)->findOrFail($param_id);
-        return view('qc-uji-banding.evaluasi', compact('program', 'parameter'));
-    }
-
-    public function updateEvaluasi(Request $request, $id, $param_id)
-    {
-        $request->validate([
-            'target_vendor' => 'nullable|numeric',
-            'z_score' => 'nullable|numeric',
-            'status_evaluasi' => 'required|in:inlier,warning,outlier',
-        ]);
-
-        $parameter = QcUjiBandingParameter::where('qc_uji_banding_id', $id)->findOrFail($param_id);
-        
-        $statusInvestigasi = $parameter->status_investigasi;
-        if ($request->status_evaluasi === 'outlier' && $statusInvestigasi === 'aman') {
-            $statusInvestigasi = 'menunggu_investigasi';
-        } elseif ($request->status_evaluasi !== 'outlier') {
-            $statusInvestigasi = 'aman';
-        }
-
-        $parameter->update([
-            'target_vendor' => $request->target_vendor,
-            'z_score' => $request->z_score,
-            'status_evaluasi' => $request->status_evaluasi,
-            'status_investigasi' => $statusInvestigasi,
-        ]);
-
-        return redirect()->route('qc-uji-banding.show', $id)->with('success', 'Evaluasi berhasil disimpan.');
-    }
-
     public function investigasi($id, $param_id)
     {
         $program = QcUjiBanding::findOrFail($id);

@@ -50,7 +50,7 @@
                                     @elseif($p->status_evaluasi === 'outlier')
                                         <span class="badge bg-danger">Outlier</span>
                                     @else
-                                        <span class="text-muted">Belum dievaluasi</span>
+                                        <span class="badge bg-warning text-dark">Menunggu Vendor</span>
                                     @endif
                                 </td>
                                 <td>{{ $p->metode_uji ?? '-' }}</td>

@@ -12,6 +12,8 @@
         </div>
         <div>
             <a href="{{ route('qc-uji-banding.edit', $program->id) }}" class="btn btn-outline-secondary me-2"><i class="fas fa-edit"></i> Edit Data</a>
+            <a href="{{ route('qc-uji-banding.evaluasi.form', $program->id) }}" class="btn btn-outline-primary me-2"><i class="fas fa-chart-bar"></i> Input Hasil Evaluasi Vendor</a>
+            <a href="{{ route('qc-uji-banding.ringkasan', $program->id) }}" class="btn btn-outline-success me-2"><i class="fas fa-table"></i> Ringkasan Unjuk Kerja</a>
             <a href="{{ route('qc-uji-banding.printPdf', $program->id) }}" class="btn btn-danger" target="_blank"><i class="fas fa-file-pdf"></i> Cetak Laporan (PDF)</a>
         </div>
     </div>
@@ -106,7 +108,6 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('qc-uji-banding.evaluasi', [$program->id, $param->id]) }}" class="btn btn-sm btn-primary" title="Input Evaluasi Vendor"><i class="fas fa-edit"></i> Evaluasi</a>
                                         
                                         @if($param->status_evaluasi === 'outlier')
                                             @if($param->status_investigasi === 'menunggu_investigasi')

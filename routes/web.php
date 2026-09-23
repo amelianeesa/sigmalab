@@ -154,8 +154,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('qc-uji-banding/draft', [\App\Http\Controllers\QcUjiBandingController::class, 'storeDraft'])->name('qc-uji-banding.draft.store');
     Route::resource('qc-uji-banding', \App\Http\Controllers\QcUjiBandingController::class);
     Route::get('qc-uji-banding/{id}/print-pdf', [\App\Http\Controllers\QcUjiBandingController::class, 'printPdf'])->name('qc-uji-banding.printPdf');
-    Route::get('qc-uji-banding/{id}/evaluasi/{param_id}', [\App\Http\Controllers\QcUjiBandingController::class, 'editEvaluasi'])->name('qc-uji-banding.evaluasi');
-    Route::put('qc-uji-banding/{id}/evaluasi/{param_id}', [\App\Http\Controllers\QcUjiBandingController::class, 'updateEvaluasi'])->name('qc-uji-banding.update-evaluasi');
     Route::get('qc-uji-banding/{id}/investigasi/{param_id}', [\App\Http\Controllers\QcUjiBandingController::class, 'investigasi'])->name('qc-uji-banding.investigasi');
     Route::put('qc-uji-banding/{id}/investigasi/{param_id}', [\App\Http\Controllers\QcUjiBandingController::class, 'storeInvestigasi'])->name('qc-uji-banding.store-investigasi');
     Route::get('qc-uji-banding/{id}/cetak/pdf/{param_id}', [\App\Http\Controllers\QcUjiBandingController::class, 'cetakLksPdf'])->name('qc-uji-banding.cetak.pdf');
@@ -218,8 +216,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('hak-akses', [HakAksesController::class, 'update'])->name('hak-akses.update');
         Route::get('kelola-user', [KelolaUserController::class, 'index'])->name('kelola-user.index');
     });
-
-
 
     Route::middleware('modul:manajemen_pengguna,tambah_ubah')->group(function () {
         Route::post('kelola-user', [KelolaUserController::class, 'store'])->name('kelola-user.store');
