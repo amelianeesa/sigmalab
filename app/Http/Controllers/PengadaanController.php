@@ -292,6 +292,11 @@ class PengadaanController extends Controller
         return redirect()->route('pengadaan.index')->with('success', $pesan);
     }
 
+    private function urlPengadaan($pengadaan)
+    {
+        return route('pengadaan.index', [], false) . '#pengadaan-' . $pengadaan->permintaan_id;
+    }
+
     private function kirimEmailNotifikasiKeGAAndCC($pengadaan)
     {
         $emailGA = User::whereHas('role', function ($q) {
@@ -327,11 +332,14 @@ class PengadaanController extends Controller
             ]);
         })->get();
 
+        $url = $this->urlPengadaan($pengadaan);
+
         foreach ($users as $user) {
             DB::table('notifikasi')->insert([
                 'users_id' => $user->users_id,
                 'jenis_notifikasi' => 'stok',
                 'pesan' => "{$pesan} (Barang: {$pengadaan->barang->nama_barang})",
+                'url' => $url,
                 'is_read' => 0,
                 'created_at' => now(),
             ]);
@@ -344,11 +352,14 @@ class PengadaanController extends Controller
             $q->where('nama_role', PeranPengguna::KOORDINATOR_LAB->value);
         })->get();
 
+        $url = $this->urlPengadaan($pengadaan);
+
         foreach ($koordinators as $koor) {
             DB::table('notifikasi')->insert([
                 'users_id' => $koor->users_id,
                 'jenis_notifikasi' => 'stok',
                 'pesan' => "{$pesan} (Barang: {$pengadaan->barang->nama_barang})",
+                'url' => $url,
                 'is_read' => 0,
                 'created_at' => now(),
             ]);
@@ -362,12 +373,14 @@ class PengadaanController extends Controller
         })->get();
 
         $pesanPenolakan = "Pengajuan pengadaan barang \"{$pengadaan->barang->nama_barang}\" DITOLAK. Detail: {$pengadaan->catatan_approval}";
+        $url = $this->urlPengadaan($pengadaan);
 
         foreach ($koordinators as $koor) {
             DB::table('notifikasi')->insert([
                 'users_id' => $koor->users_id,
                 'jenis_notifikasi' => 'stok',
                 'pesan' => $pesanPenolakan,
+                'url' => $url,
                 'is_read' => 0,
                 'created_at' => now(),
             ]);
@@ -377,6 +390,7 @@ class PengadaanController extends Controller
             }
         }
     }
+
     private function formatTargetWaktu($totalHari)
     {
         if (!$totalHari || $totalHari <= 0) {
@@ -430,6 +444,7 @@ class PengadaanController extends Controller
     
         return redirect()->back()->with('success', 'Catatan progres berhasil diperbarui!');
     }
+
     public function batalProgres(Request $request, $id)
     {
         $request->validate([

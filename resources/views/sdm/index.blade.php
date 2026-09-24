@@ -57,6 +57,10 @@
             transform: translateY(-50%);
             right: 0.75rem;
         }
+        .pagination .page-link {
+            font-size: 0.72rem;
+            padding: 0.2rem 0.55rem;
+        }
 
         /* Styling Dropdown agar lengkung & hover persis seperti gambar 1 */
         .dropdown-menu {
@@ -514,16 +518,9 @@
                     </table>
                 </div>
 
-                @if($personil->hasPages())
-                    <div class="d-flex flex-column align-items-center gap-0.5 mt-2">
-                        <small class="text-muted" style="font-size: 0.7rem;">
-                            Menampilkan {{ $personil->firstItem() }}–{{ $personil->lastItem() }}
-                            dari {{ $personil->total() }} personil
-                        </small>
-
-                        {{ $personil->onEachSide(1)->links('pagination::bootstrap-5') }}
-                    </div>
-                @endif
+                <div class="mt-2">
+                    {{ $personil->withQueryString()->links('vendor.pagination.custom', ['size' => 'sm']) }}
+                </div>
             </div>
         </div>
     </div>

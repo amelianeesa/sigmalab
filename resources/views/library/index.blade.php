@@ -108,6 +108,10 @@
         background-color: #fdf2f2 !important;
         color: #dc3545 !important;
     }
+    .pagination .page-link {
+        font-size: 0.72rem;
+        padding: 0.2rem 0.55rem;
+    }
 </style>
 
 <div class="container-fluid dashboard-container">
@@ -247,7 +251,7 @@
             </div>
 
             <div class="mt-2 px-3 pb-2">
-                {{ $documents->links('pagination::bootstrap-5') }}
+                {{ $documents->links('vendor.pagination.custom', ['size' => 'sm']) }}
             </div>
         </div>
     </div>

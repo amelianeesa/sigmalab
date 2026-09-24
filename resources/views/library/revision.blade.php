@@ -1,13 +1,44 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4 py-3">
-    <div class="d-flex align-items-center justify-content-between mb-3">
+<style>
+    .dashboard-container {
+        padding: 4px 20px !important;
+    }
+    .form-label {
+        font-size: 0.7rem !important;
+        font-weight: 600;
+        color: #64748b;
+        margin-bottom: 0.2rem !important;
+    }
+    .form-control-sm, .form-select-sm {
+        font-size: 0.72rem !important;
+        padding: 4px 8px !important;
+    }
+    .card-body {
+        padding: 12px !important;
+    }
+    .btn-corporate-blue {
+        background-color: #1b3152 !important;
+        border-color: #1b3152 !important;
+        color: #ffffff !important;
+    }
+    .btn-corporate-blue:hover, 
+    .btn-corporate-blue:focus, 
+    .btn-corporate-blue:active {
+        background-color: #14253e !important;
+        border-color: #14253e !important;
+        color: #ffffff !important;
+    }
+</style>
+
+<div class="container-fluid dashboard-container">
+    <div class="d-flex justify-content-between align-items-center mb-2 mt-1 flex-wrap gap-2">
         <div>
-            <h4 class="fw-bold text-dark mb-1">Revisi Dokumen</h4>
-            <p class="text-muted mb-0">Upload versi terbaru untuk {{ $document->judul }}.</p>
+            <h4 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">Revisi Dokumen</h4>
+            <p class="text-muted small mb-0" style="font-size: 0.72rem;">Upload versi terbaru untuk {{ $document->judul }}.</p>
         </div>
-        <a href="{{ route('library.show', $document->id) }}" class="btn btn-outline-secondary btn-sm">
+        <a href="{{ route('library.show', $document->id) }}" class="btn btn-outline-secondary btn-sm py-1" style="font-size: 0.72rem;">
             <i class="fas fa-arrow-left me-1"></i> Kembali
         </a>
     </div>
@@ -17,26 +48,28 @@
             <form action="{{ route('library.revision.store', $document->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
-                <div class="row g-3">
+                <div class="row g-2">
                     <div class="col-12">
                         <label class="form-label">Catatan Revisi</label>
-                        <textarea name="catatan_revisi" rows="4" class="form-control" placeholder="Contoh: Perubahan prosedur untuk menyesuaikan persyaratan akreditasi..."></textarea>
+                        <textarea name="catatan_revisi" rows="3" class="form-control form-control-sm" style="font-size: 0.72rem !important;" placeholder="Contoh: Perubahan prosedur untuk menyesuaikan persyaratan akreditasi..."></textarea>
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label">Tanggal Berlaku</label>
-                        <input type="date" name="tanggal_berlaku" value="{{ old('tanggal_berlaku', now()->toDateString()) }}" class="form-control">
+                        <input type="date" name="tanggal_berlaku" value="{{ old('tanggal_berlaku', now()->toDateString()) }}" class="form-control form-control-sm">
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label">File Versi Baru</label>
-                        <input type="file" name="file" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png" required>
+                        <input type="file" name="file" class="form-control form-control-sm" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png" required>
                     </div>
                 </div>
 
-                <div class="mt-4 d-flex justify-content-end gap-2">
-                    <a href="{{ route('library.show', $document->id) }}" class="btn btn-outline-secondary">Batal</a>
-                    <button type="submit" class="btn btn-primary">Simpan Revisi</button>
+                <div class="mt-3 d-flex justify-content-end gap-2">
+                    <a href="{{ route('library.show', $document->id) }}" class="btn btn-outline-secondary btn-sm py-1 px-3" style="font-size: 0.72rem;">Batal</a>
+                    <button type="submit" class="btn btn-corporate-blue btn-sm py-1 px-3 shadow-sm" style="font-size: 0.72rem;">
+                        <i class="fas fa-save me-1"></i> Simpan Revisi
+                    </button>
                 </div>
             </form>
         </div>

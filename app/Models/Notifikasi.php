@@ -9,6 +9,7 @@ class Notifikasi extends BaseModel
 
     protected $fillable = [
         'users_id',
+        'jenis_notifikasi',
         'judul',
         'pesan',
         'url',

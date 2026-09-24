@@ -35,7 +35,7 @@
 <div class="container-fluid dashboard-container">
     <div class="d-flex justify-content-between align-items-center mb-2 mt-1 flex-wrap gap-2">
         <div>
-            <h4 class="fw-bold mb-0">Edit Dokumen</h4>
+            <h4 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">Edit Dokumen</h4>
             <p class="text-muted small mb-0" style="font-size: 0.72rem;">Perbarui metadata dokumen library digital.</p>
         </div>
         <a href="{{ route('library.index') }}" class="btn btn-outline-secondary btn-sm py-1" style="font-size: 0.72rem;">

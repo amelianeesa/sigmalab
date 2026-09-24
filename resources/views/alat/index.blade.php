@@ -47,23 +47,14 @@
         border-color: #14253e !important;
         color: #ffffff !important;
     }
+
+    .pagination .page-link {
+        font-size: 0.72rem;
+        padding: 0.2rem 0.55rem;
+    }
 </style>
 
 <div class="container-fluid dashboard-container" style="font-size: 0.82rem;">
-    @php
-        $alatWarningCount = 0;
-        foreach($alat as $item) {
-            $kalibrasi = $item->riwayatKalibrasi->sortByDesc('tgl_kalibrasi')->first();
-            if ($kalibrasi && $kalibrasi->tgl_akhir) {
-                $tglAkhir = \Carbon\Carbon::parse($kalibrasi->tgl_akhir);
-                $sisaHari = \Carbon\Carbon::now()->startOfDay()->diffInDays($tglAkhir, false);
-                if ($sisaHari <= 180) {
-                    $alatWarningCount++;
-                }
-            }
-        }
-    @endphp
-
     @if($alatWarningCount > 0)
         <div class="alert alert-warning alert-dismissible fade show shadow-sm py-1 px-2.5 mb-2 d-flex align-items-center justify-content-between" role="alert" style="font-size: 0.8rem;">
             <div class="pe-2">
@@ -117,7 +108,7 @@
             </form>
 
             <div class="table-responsive" id="table-container">
-                <table class="table table-bordered table-striped align-middle text-center" style="font-size: 0.78rem;">
+                <table class="table table-bordered table-striped align-middle text-center mb-0" style="font-size: 0.78rem;">
                     <thead class="align-middle">
                         <tr>
                             <th rowspan="2" style="width: 45px;">No.</th>
@@ -176,7 +167,7 @@
                             $qrSvgLarge = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(160)->generate($qrData);
                         @endphp
                         <tr>
-                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $alat->firstItem() + $index }}</td>
                             <td>
                                 <div class="p-1 bg-white d-inline-block shadow-sm rounded qr-thumbnail"
                                      style="cursor: pointer;"
@@ -277,6 +268,10 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            <div class="mt-3">
+                {{ $alat->withQueryString()->links('vendor.pagination.custom', ['size' => 'sm']) }}
             </div>
         </div>
     </div>

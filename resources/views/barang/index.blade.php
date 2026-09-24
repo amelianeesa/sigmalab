@@ -86,6 +86,10 @@
     .form-select-sm {
         font-size: 0.78rem;
     }
+    .pagination .page-link {
+        font-size: 0.72rem;
+        padding: 0.2rem 0.55rem;
+    }
 
     .alert-dismissible {
         position: relative;
@@ -153,22 +157,6 @@
 
 <div class="container-fluid px-4">
 
-    @php
-        $barangHabisCount = 0;
-        $barangMenipisCount = 0;
-        foreach($barang as $item) {
-            $saldoAwal = $item->saldo_awal ?? 0;
-            $penerimaan = $item->penerimaan ?? 0;
-            $pengeluaran = $item->pengeluaran ?? 0;
-            $saldoAkhir = ($saldoAwal + $penerimaan) - $pengeluaran;
-            if ($saldoAkhir <= 0) {
-                $barangHabisCount++;
-            } elseif ($saldoAkhir <= $item->minimal_stok) {
-                $barangMenipisCount++;
-            }
-        }
-    @endphp
-
     @if($barangHabisCount > 0 || $barangMenipisCount > 0)
         <div class="alert alert-warning alert-dismissible fade show shadow-sm py-2 d-flex align-items-center" role="alert" style="font-size: 0.85rem;">
             <div class="flex-grow-1">
@@ -185,19 +173,12 @@
         </div>
     @endif
 
-
-
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
         <h5 class="fw-bold mb-0">Data Inventory Barang/Bahan</h5>
         <div>
-                @if(Auth::user()->hasModulAccess('pengadaan'))
-                <a href="{{ route('pengadaan.index') }}" class="btn btn-brand-standard shadow-sm">
-                    <i class="fas fa-truck-loading me-1"></i> Cek Pengadaan
-                </a>
-                @endif
-                <button type="button" class="btn btn-success-standard shadow-sm" data-bs-toggle="modal" data-bs-target="#cetakPeriodeModal">
-                    <i class="fas fa-print me-1"></i> Cetak Laporan Periode
-                </button>
+            <button type="button" class="btn btn-success-standard shadow-sm" data-bs-toggle="modal" data-bs-target="#cetakPeriodeModal">
+                <i class="fas fa-print me-1"></i> Cetak Laporan Periode
+            </button>
             @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
             <a href="{{ route('barang.create') }}" class="btn btn-brand-standard shadow-sm">
                 <i class="fas fa-plus me-1"></i> Tambah Barang/Bahan
@@ -229,7 +210,7 @@
             </form>
 
             <div class="table-responsive" id="table-container">
-                <table class="table table-bordered table-striped align-middle text-center table-responsive-custom">
+                <table class="table table-bordered table-striped align-middle text-center table-responsive-custom mb-0">
                     <thead class="table-header-custom text-center">
                         <tr>
                             <th rowspan="2" class="text-center align-middle" style="width: 35px;">No.</th>
@@ -266,7 +247,7 @@
                             $isMenipis = !$isHabis && ($saldoAkhir <= $item->minimal_stok);
                         @endphp
                         <tr class="{{ $isHabis ? 'table-danger' : ($isMenipis ? 'table-warning' : '') }}">
-                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $barang->firstItem() + $index }}</td>
                             <td class="fw-bold text-start">{{ $item->nama_barang }}</td>
                             <td>{{ $item->satuan }}</td>
                             <td><code class="fw-bold">{{ $item->kode_barang }}</code></td>
@@ -277,11 +258,11 @@
                             <td class="fw-bold {{ $isHabis ? 'text-danger' : '' }}">
                                 {{ number_format($saldoAkhir, 0, ',', '.') }}
                                 @if($isHabis)
-                                    <a href="{{ route('pengadaan.index', $item->pengadaan_id ?? 1) }}" class="badge bg-danger mt-1 d-block text-decoration-none text-white shadow-sm badge-custom-size" title="Klik untuk atur stok barang">
+                                    <a href="{{ route('pengadaan.index') }}" class="badge bg-danger mt-1 d-block text-decoration-none text-white shadow-sm badge-custom-size" title="Klik untuk cek pengadaan barang">
                                         <i class="fas fa-times-circle"></i> Habis
                                     </a>
                                 @elseif($isMenipis)
-                                    <a href="{{ route('pengadaan.index', $item->pengadaan_id ?? 1) }}" class="badge bg-warning text-dark mt-1 d-block text-decoration-none shadow-sm badge-custom-size" title="Klik untuk atur stok barang">
+                                    <a href="{{ route('pengadaan.index') }}" class="badge bg-warning text-dark mt-1 d-block text-decoration-none shadow-sm badge-custom-size" title="Klik untuk cek pengadaan barang">
                                         <i class="fas fa-exclamation-triangle"></i> Stok Menipis
                                     </a>
                                 @endif
@@ -336,6 +317,10 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            <div class="mt-3">
+                {{ $barang->withQueryString()->links('vendor.pagination.custom', ['size' => 'sm']) }}
             </div>
         </div>
     </div>
@@ -459,7 +444,6 @@
                 </div>
                 <div class="modal-footer py-2 bg-light">
                     <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">Tutup</button>
-                    <!-- Menggunakan background birdong dan ikon cetak (fas fa-print) -->
                     <button type="submit" class="btn btn-sm px-3 text-white" style="background-color: var(--brand-navy); border-color: var(--brand-navy);">
                         <i class="fas fa-print me-1"></i> Cetak PDF
                     </button>
@@ -471,79 +455,66 @@
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.bulan-option').forEach(function(item) {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                let val = this.getAttribute('data-value');
-                let txt = this.getAttribute('data-text');
-                document.getElementById('selected_bulan').value = val;
-                document.getElementById('bulan_label').innerText = txt;
+    function confirmDelete(button, saldoAkhir, namaBarang) {
+        if (saldoAkhir > 0) {
+            Swal.fire({
+                title: 'Tidak Dapat Dihapus!',
+                text: `Stok barang "${namaBarang}" masih tersisa ${saldoAkhir}. Barang hanya bisa dihapus jika stok sudah habis (0)`,
+                icon: 'error',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Mengerti'
             });
-        });
-
-        document.querySelectorAll('.tahun-option').forEach(function(item) {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                let val = this.getAttribute('data-value');
-                let txt = this.getAttribute('data-text');
-                document.getElementById('selected_tahun').value = val;
-                document.getElementById('tahun_label').innerText = txt;
+        } else {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: 'Data barang beserta riwayat transaksi/stoknya akan dihapus permanen!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    button.closest('form').submit();
+                }
             });
-        });
-    });
-</script>
-@endpush
-
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-function confirmDelete(button, saldoAkhir, namaBarang) {
-    if (saldoAkhir > 0) {
-        Swal.fire({
-            title: 'Tidak Dapat Dihapus!',
-            text: `Stok barang "${namaBarang}" masih tersisa ${saldoAkhir}. Barang hanya bisa dihapus jika stok sudah habis (0)`,
-            icon: 'error',
-            confirmButtonColor: '#3085d6',
-            confirmButtonText: 'Mengerti'
-        });
-    } else {
-        // Tampilan SweetAlert disamakan persis dengan gaya desain modal alat
-        Swal.fire({
-            title: 'Apakah Anda yakin?',
-            text: 'Data barang beserta riwayat transaksi/stoknya akan dihapus permanen!',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                button.closest('form').submit();
-            }
-        });
+        }
     }
-}
 
-document.addEventListener("DOMContentLoaded", function() {
-    const searchInput = document.getElementById('searchInput');
-    const filterKondisi = document.getElementById('filterKondisi');
-    const filterForm = document.getElementById('filterForm');
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.bulan-option').forEach(function (item) {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.getElementById('selected_bulan').value = this.getAttribute('data-value');
+                document.getElementById('bulan_label').innerText = this.getAttribute('data-text');
+            });
+        });
 
-    let timeout = null;
+        document.querySelectorAll('.tahun-option').forEach(function (item) {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.getElementById('selected_tahun').value = this.getAttribute('data-value');
+                document.getElementById('tahun_label').innerText = this.getAttribute('data-text');
+            });
+        });
 
-    searchInput.addEventListener('input', function() {
-        clearTimeout(timeout);
-        timeout = setTimeout(function() {
+        const searchInput = document.getElementById('searchInput');
+        const filterKondisi = document.getElementById('filterKondisi');
+        const filterForm = document.getElementById('filterForm');
+        let timeout = null;
+
+        searchInput.addEventListener('input', function () {
+            clearTimeout(timeout);
+            timeout = setTimeout(function () {
+                filterForm.submit();
+            }, 500);
+        });
+
+        filterKondisi.addEventListener('change', function () {
             filterForm.submit();
-        }, 500);
+        });
     });
-
-    filterKondisi.addEventListener('change', function() {
-        filterForm.submit();
-    });
-});
 </script>
 @endpush
 @endsection

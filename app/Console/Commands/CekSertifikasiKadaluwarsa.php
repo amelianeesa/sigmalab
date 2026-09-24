@@ -62,6 +62,7 @@ class CekSertifikasiKadaluwarsa extends Command
                     'users_id'         => $user->users_id,
                     'jenis_notifikasi' => 'sertifikasi',
                     'pesan'            => $pesan,
+                    'url'              => route('sdm.kompetensi.detail', $personil->personil_id, false),
                     'is_read'          => 0,
                     'created_at'       => now(),
                 ]);

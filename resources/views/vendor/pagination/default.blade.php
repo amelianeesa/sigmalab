@@ -1,7 +1,7 @@
 @if ($paginator->hasPages())
     <nav>
         <ul class="pagination">
-            {{-- Previous Page Link --}}
+     
             @if ($paginator->onFirstPage())
                 <li class="disabled" aria-disabled="true" aria-label="@lang('pagination.previous')">
                     <span aria-hidden="true">&lsaquo;</span>
@@ -12,7 +12,6 @@
                 </li>
             @endif
 
-            {{-- Pagination Elements --}}
             @foreach ($elements as $element)
                 {{-- "Three Dots" Separator --}}
                 @if (is_string($element))

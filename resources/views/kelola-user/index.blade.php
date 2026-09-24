@@ -21,6 +21,10 @@
     .btn-corporate-outline:focus * {
         color: #ffffff !important;
     }
+    .pagination .page-link {
+        font-size: 0.72rem;
+        padding: 0.2rem 0.55rem;
+    }
 </style>
 
 <div class="container-fluid px-3 pt-1 pb-2" style="font-size: 0.78rem;">
@@ -211,11 +215,9 @@
             </table>
         </div>
 
-        @if($users->hasPages())
-            <div class="d-flex justify-content-center mt-3">
-                {{ $users->onEachSide(1)->links('pagination::bootstrap-5') }}
-            </div>
-        @endif
+        <div class="mt-3">
+            {{ $users->withQueryString()->links('vendor.pagination.custom', ['size' => 'sm']) }}
+        </div>
     </div>
 </div>
 

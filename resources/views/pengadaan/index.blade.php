@@ -1,6 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+    tr:target > td { animation: sorotBaris 3s ease; }
+    @keyframes sorotBaris {
+        0%, 60% { background-color: #fff3cd; }
+        100% { background-color: transparent; }
+    }
+</style>
+
 <div class="container-fluid px-4 py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
@@ -8,7 +16,7 @@
             <ol class="breadcrumb mb-1 mt-1 small">
                 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
                 <li class="breadcrumb-item"><a href="{{ route('barang.index') }}" class="text-decoration-none">Inventori Barang & Bahan</a></li>
-                <li class="breadcrumb-item active">Pengadaan Bahan & Bahan</li>
+                <li class="breadcrumb-item active">Pengadaan Bahan & Barang</li>
             </ol>
         </div>
         <div class="d-flex gap-2">
@@ -48,7 +56,7 @@
                                 $isKoor = in_array($roleUser, ['Koordinator Lab', 'Koordinator Laboratorium']);
                                 $isGa = in_array($roleUser, [\App\Enums\PeranPengguna::GA_OFFICER->value, \App\Enums\PeranPengguna::ADMIN_APLIKASI->value, 'GA', 'GA_OFFICER']);
                                 $isAdminAplikasi = $roleUser === \App\Enums\PeranPengguna::ADMIN_APLIKASI->value;
-                    
+
                                 $catatan = $p->catatan_approval ?? '';
                                 $labelPenolak = null;
                                 $alasanText = $catatan;
@@ -57,11 +65,9 @@
                                     $alasanText = trim($alasanText);
                                 }
                             @endphp
-                            <tr>
-                                <!-- 1. No -->
+                            <tr id="pengadaan-{{ $p->permintaan_id }}">
                                 <td class="text-center">{{ $loop->iteration }}</td>
-                    
-                                <!-- 2. Nama Barang & Foto -->
+
                                 <td>
                                     <span class="fw-semibold">{{ $p->barang ? $p->barang->nama_barang : 'Barang Dihapus' }}</span><br>
                                     <span class="text-muted" style="font-size:0.75rem;">{{ $p->alasan ?? 'Tidak ada catatan khusus' }}</span>
@@ -73,72 +79,65 @@
                                     </div>
                                     @endif
                                 </td>
-                    
-                                <!-- 3. Tanggal Pengajuan -->
+
                                 <td class="text-nowrap text-center">{{ \Carbon\Carbon::parse($p->tanggal_pengajuan)->format('d M Y') }}</td>
-                    
-                                <!-- 4. Target Waktu -->
+
                                 <td class="text-center">
                                     <span class="text-dark small fw-medium">{{ $p->format_target_waktu }}</span>
                                 </td>
-                    
-                                <!-- 5. Diajukan Oleh -->
+
                                 <td class="text-center">{{ $p->pemohon ? $p->pemohon->username : '-' }}</td>
-                    
-                                <!-- 6. Jumlah -->
+
                                 <td class="text-center fw-bold text-primary">
                                     {{ (float) $p->jumlah_diminta }} <span class="text-muted fw-normal" style="font-size:0.72rem;">{{ $p->barang ? $p->barang->satuan : '' }}</span>
                                 </td>
-                    
-<!-- 7. Status -->
-<td class="text-center" style="min-width:170px;">
-    @if($p->status == 'menunggu_koordinator' || $p->status == 'diajukan')
-        <span class="badge bg-secondary" style="font-size:0.7rem;">Menunggu Koordinator</span>
-    @elseif($p->status == 'menunggu_ga')
-        <span class="badge bg-warning text-dark" style="font-size:0.7rem;">Menunggu GA</span>
-    @elseif($p->status == 'disetujui')
-        <span class="badge bg-info text-dark" style="font-size:0.7rem;">Disetujui GA</span>
-    @elseif($p->status == 'ditolak')
-        <span class="badge bg-danger" style="font-size:0.7rem;">Ditolak</span>
-        <div class="mt-1 p-1 rounded text-start" style="background:#fdeaea; border:1px solid #f5c2c2; font-size:0.72rem;">
-            @if($labelPenolak)
-                <div class="fw-bold text-danger">{{ $labelPenolak }}</div>
-                <div class="text-danger">Alasan: {{ $alasanText }}</div>
-            @else
-                <div class="text-danger">{{ $catatan }}</div>
-            @endif
-        </div>
-    @elseif($p->status == 'batal')
-        <span class="badge bg-dark text-white" style="font-size:0.7rem;">Dibatalkan</span>
-        <div class="mt-1 p-1 rounded text-start" style="background:#f1f1f1; border:1px solid #dcdcdc; color:#333; font-size:0.72rem;">
-            @if($labelPenolak)
-                <div class="fw-bold text-dark">{{ $labelPenolak }}</div>
-                <div class="text-muted">Alasan: {{ $alasanText }}</div>
-            @else
-                <div class="text-dark">{{ $catatan }}</div>
-            @endif
-        </div>
-    @elseif($p->status == 'diproses_po' || $p->status == 'diproses')
-        <span class="badge bg-primary" style="font-size:0.7rem;">Diproses</span>
-        @if($p->catatan_po)
-            <div class="mt-1 p-1 rounded text-start" style="background:#fff3cd; border:1px solid #ffeeba; color:#856404; font-size:0.72rem;">
-                <i class="fas fa-info-circle me-1"></i> <b>Catatan:</b> {{ $p->catatan_po }}
-            </div>
-        @endif
-    
-    @elseif($p->status == 'pembelian')
-        <span class="badge bg-info text-dark" style="font-size:0.7rem;">Pembelian Langsung</span>
-        @if($p->catatan_po)
-            <div class="mt-1 p-1 rounded text-start" style="background:#fff3cd; border:1px solid #ffeeba; color:#856404; font-size:0.72rem;">
-                <i class="fas fa-info-circle me-1"></i> <b>Catatan:</b> {{ $p->catatan_po }}
-            </div>
-        @endif
-    @elseif($p->status == 'selesai')
-        <span class="badge bg-success" style="font-size:0.7rem;">Selesai (Stok Masuk)</span>
-    @endif
-</td>
-                    
-                                <!-- 8. Aksi -->
+
+                                <td class="text-center" style="min-width:170px;">
+                                    @if($p->status == 'menunggu_koordinator' || $p->status == 'diajukan')
+                                        <span class="badge bg-secondary" style="font-size:0.7rem;">Menunggu Koordinator</span>
+                                    @elseif($p->status == 'menunggu_ga')
+                                        <span class="badge bg-warning text-dark" style="font-size:0.7rem;">Menunggu GA</span>
+                                    @elseif($p->status == 'disetujui')
+                                        <span class="badge bg-info text-dark" style="font-size:0.7rem;">Disetujui GA</span>
+                                    @elseif($p->status == 'ditolak')
+                                        <span class="badge bg-danger" style="font-size:0.7rem;">Ditolak</span>
+                                        <div class="mt-1 p-1 rounded text-start" style="background:#fdeaea; border:1px solid #f5c2c2; font-size:0.72rem;">
+                                            @if($labelPenolak)
+                                                <div class="fw-bold text-danger">{{ $labelPenolak }}</div>
+                                                <div class="text-danger">Alasan: {{ $alasanText }}</div>
+                                            @else
+                                                <div class="text-danger">{{ $catatan }}</div>
+                                            @endif
+                                        </div>
+                                    @elseif($p->status == 'batal')
+                                        <span class="badge bg-dark text-white" style="font-size:0.7rem;">Dibatalkan</span>
+                                        <div class="mt-1 p-1 rounded text-start" style="background:#f1f1f1; border:1px solid #dcdcdc; color:#333; font-size:0.72rem;">
+                                            @if($labelPenolak)
+                                                <div class="fw-bold text-dark">{{ $labelPenolak }}</div>
+                                                <div class="text-muted">Alasan: {{ $alasanText }}</div>
+                                            @else
+                                                <div class="text-dark">{{ $catatan }}</div>
+                                            @endif
+                                        </div>
+                                    @elseif($p->status == 'diproses_po' || $p->status == 'diproses')
+                                        <span class="badge bg-primary" style="font-size:0.7rem;">Diproses</span>
+                                        @if($p->catatan_po)
+                                            <div class="mt-1 p-1 rounded text-start" style="background:#fff3cd; border:1px solid #ffeeba; color:#856404; font-size:0.72rem;">
+                                                <i class="fas fa-info-circle me-1"></i> <b>Catatan:</b> {{ $p->catatan_po }}
+                                            </div>
+                                        @endif
+                                    @elseif($p->status == 'pembelian')
+                                        <span class="badge bg-info text-dark" style="font-size:0.7rem;">Pembelian Langsung</span>
+                                        @if($p->catatan_po)
+                                            <div class="mt-1 p-1 rounded text-start" style="background:#fff3cd; border:1px solid #ffeeba; color:#856404; font-size:0.72rem;">
+                                                <i class="fas fa-info-circle me-1"></i> <b>Catatan:</b> {{ $p->catatan_po }}
+                                            </div>
+                                        @endif
+                                    @elseif($p->status == 'selesai')
+                                        <span class="badge bg-success" style="font-size:0.7rem;">Selesai (Stok Masuk)</span>
+                                    @endif
+                                </td>
+
                                 <td>
                                     <div class="d-flex flex-column gap-1">
                                         @if($isKoor && ($p->status == 'menunggu_koordinator' || $p->status == 'diajukan'))
@@ -153,7 +152,7 @@
                                                 </button>
                                             </div>
                                         @endif
-                    
+
                                         @if($isGa && $p->status == 'menunggu_ga')
                                             <div class="d-flex gap-1">
                                                 <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST" class="w-50">
@@ -168,7 +167,6 @@
                                         @endif
 
                                         @if($isGa && in_array($p->status, ['diproses', 'diproses_po', 'pembelian']))
-                                            <!-- Dropdown Tombol Aksi -->
                                             <div class="dropdown">
                                                 <button class="btn btn-sm btn-outline-primary dropdown-toggle w-100 py-1" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size:0.72rem;">
                                                      Aksi
@@ -188,27 +186,24 @@
                                                 </ul>
                                             </div>
                                         @endif
-                                        
+
                                         @if($isGa && $p->status == 'disetujui')
-                                        <!-- Tombol Pemicu Modal Pilih Metode GA -->
                                         <button type="button" class="btn btn-sm btn-primary w-100 py-1" data-bs-toggle="modal" data-bs-target="#modalMetodeGa{{ $p->permintaan_id }}" style="font-size:0.72rem;">
                                             <i class="fas fa-tasks me-1"></i> Proses Pengadaan
                                         </button>
-                                    
-                                        <!-- Modal Pilihan Metode (PO atau Pembelian) & Estimasi Waktu -->
+
                                         <div class="modal fade" id="modalMetodeGa{{ $p->permintaan_id }}" tabindex="-1">
                                             <div class="modal-dialog modal-sm">
                                                 <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST" class="modal-content text-start">
                                                     @csrf
                                                     <input type="hidden" name="status" value="diproses">
-                                                    
+
                                                     <div class="modal-header bg-dark text-white py-2">
                                                         <h6 class="modal-title mb-0"><i class="fas fa-shopping-cart me-1"></i>Pilih Metode Pengadaan</h6>
                                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                                     </div>
-                                                    
+
                                                     <div class="modal-body py-2">
-                                                        <!-- Pilihan Metode -->
                                                         <div class="mb-2">
                                                             <label class="form-label fw-bold small">Metode Penanganan <span class="text-danger">*</span></label>
                                                             <select name="metode_proses" class="form-select form-select-sm" id="selectMetode{{ $p->permintaan_id }}" required onchange="toggleEstimasi(this, '{{ $p->permintaan_id }}')">
@@ -217,14 +212,13 @@
                                                                 <option value="Pembelian">Pembelian Langsung</option>
                                                             </select>
                                                         </div>
-                            
-                                                        <!-- Input Estimasi Hari / Catatan -->
+
                                                         <div class="mb-2" id="divEstimasi{{ $p->permintaan_id }}">
                                                             <label class="form-label fw-bold small" id="labelEstimasi{{ $p->permintaan_id }}">Catatan / Estimasi</label>
                                                             <textarea name="catatan_po" class="form-control form-control-sm" rows="2" placeholder="Contoh: Estimasi tiba 3 hari..."></textarea>
                                                         </div>
                                                     </div>
-                                    
+
                                                     <div class="modal-footer bg-light py-2">
                                                         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
                                                         <button type="submit" class="btn btn-primary btn-sm">Simpan & Proses</button>
@@ -232,23 +226,8 @@
                                                 </form>
                                             </div>
                                         </div>
-                                    
-                                        <!-- Script kecil pengubah label dinamis -->
-                                        <script>
-                                            function toggleEstimasi(selectObj, id) {
-                                                const label = document.getElementById('labelEstimasi' + id);
-                                                if (selectObj.value === 'PO') {
-                                                    label.innerText = 'Estimasi PO (Hari / Keterangan)';
-                                                } else if (selectObj.value === 'Pembelian') {
-                                                    label.innerText = 'Estimasi Pembelian Langsung';
-                                                } else {
-                                                    label.innerText = 'Catatan / Estimasi';
-                                                }
-                                            }
-                                        </script>
-                                        @endif                            
-                            
-                                        <!-- Modal Penolakan -->
+                                        @endif
+
                                         <div class="modal fade" id="modalTolak{{ $p->permintaan_id }}" tabindex="-1">
                                             <div class="modal-dialog modal-sm">
                                                 <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST" class="modal-content text-start">
@@ -288,8 +267,7 @@
                                             <button type="button" class="btn btn-sm btn-warning fw-bold w-100 py-1" data-bs-toggle="modal" data-bs-target="#modalTerima{{ $p->permintaan_id }}" style="font-size:0.72rem;">
                                                 <i class="fas fa-camera"></i> Konfirmasi Terima
                                             </button>
-                                        
-                                            <!-- Modal Konfirmasi Terima -->
+
                                             <div class="modal fade" id="modalTerima{{ $p->permintaan_id }}" tabindex="-1">
                                                 <div class="modal-dialog modal-sm">
                                                     <form action="{{ route('pengadaan.konfirmasiTerima', $p->permintaan_id) }}" method="POST" enctype="multipart/form-data" class="modal-content text-start">
@@ -320,7 +298,7 @@
                                                 </div>
                                             </div>
                                         @endif
-                    
+
                                         @if(Auth::id() == $p->diajukan_oleh && in_array($p->status, ['diajukan', 'menunggu_koordinator']))
                                             <form action="{{ route('pengadaan.destroy', $p->permintaan_id) }}" method="POST">
                                                 @csrf
@@ -328,7 +306,7 @@
                                                 <button class="btn btn-sm btn-outline-danger w-100 py-1" style="font-size:0.72rem;" onclick="return confirm('Batalkan pengajuan?')"><i class="fas fa-trash"></i> Batalkan</button>
                                             </form>
                                         @endif
-                    
+
                                         @if($isAdminAplikasi)
                                             <form action="{{ route('pengadaan.destroy', $p->permintaan_id) }}" method="POST">
                                                 @csrf
@@ -351,8 +329,6 @@
     </div>
 </div>
 
-<!-- Modal Update Progres -->
-<!-- Modal Update Progres untuk GA -->
 @foreach($pengadaans as $p)
 @if(in_array($p->status, ['diproses', 'diproses_po', 'pembelian']))
 <div class="modal fade" id="updateProsesModal{{ $p->permintaan_id }}" tabindex="-1" aria-hidden="true">
@@ -377,11 +353,7 @@
         </form>
     </div>
 </div>
-@endif
-@endforeach
 
-@foreach($pengadaans as $p)
-@if(in_array($p->status, ['diproses', 'diproses_po', 'pembelian']))
 <div class="modal fade" id="modalBatalGa{{ $p->permintaan_id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <form action="{{ route('pengadaan.batal-progres', $p->permintaan_id) }}" method="POST" class="modal-content text-start">
@@ -513,3 +485,18 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    function toggleEstimasi(selectObj, id) {
+        const label = document.getElementById('labelEstimasi' + id);
+        if (selectObj.value === 'PO') {
+            label.innerText = 'Estimasi PO (Hari / Keterangan)';
+        } else if (selectObj.value === 'Pembelian') {
+            label.innerText = 'Estimasi Pembelian Langsung';
+        } else {
+            label.innerText = 'Catatan / Estimasi';
+        }
+    }
+</script>
+@endpush
