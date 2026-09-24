@@ -132,15 +132,10 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
     Route::post('/parameter-uji/crm-katalog', [ParameterUjiController::class, 'storeCrmKatalog'])->name('parameter-uji.store-crm');
     Route::delete('/parameter-uji/crm-katalog/{id}', [ParameterUjiController::class, 'destroyCrmKatalog'])->name('parameter-uji.destroy-crm');
 
-    Route::middleware('modul:library_manage,lihat')->group(function () {
-        Route::get('/library', [LibraryController::class, 'index'])->name('library.index');
-        Route::get('/library/export/pdf', [LibraryController::class, 'exportPdf'])->name('library.export.pdf');
-        Route::get('/library/{id}/versions/{versionId}/download', [LibraryController::class, 'downloadVersion'])->name('library.version.download');
-        Route::get('/library/{id}', [LibraryController::class, 'show'])->name('library.show');
-        Route::get('/library/{id}/download', [LibraryController::class, 'download'])->name('library.download');
-        Route::get('/library/{id}/preview', [LibraryController::class, 'preview'])->name('library.preview');
-    });
-
+    // PENTING: group "tambah_ubah" (berisi route statis seperti /library/create dan /library/arsip)
+    // HARUS didaftarkan SEBELUM group "lihat" (berisi route dinamis /library/{id}).
+    // Kalau tidak, Laravel akan mencocokkan "create" atau "arsip" sebagai {id} duluan
+    // karena route dicocokkan berurutan dari atas ke bawah -> hasilnya 404.
     Route::middleware('modul:library_manage,tambah_ubah')->group(function () {
         Route::get('/library/create', [LibraryController::class, 'create'])->name('library.create');
         Route::get('/library/arsip', [LibraryController::class, 'archive'])->name('library.archive');
@@ -151,6 +146,15 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::patch('/library/{id}/aktifkan', [LibraryController::class, 'activate'])->name('library.activate');
         Route::get('/library/{id}/revisi', [LibraryController::class, 'createRevision'])->name('library.revision.create');
         Route::post('/library/{id}/revisi', [LibraryController::class, 'storeRevision'])->name('library.revision.store');
+    });
+
+    Route::middleware('modul:library_manage,lihat')->group(function () {
+        Route::get('/library', [LibraryController::class, 'index'])->name('library.index');
+        Route::get('/library/export/pdf', [LibraryController::class, 'exportPdf'])->name('library.export.pdf');
+        Route::get('/library/{id}/versions/{versionId}/download', [LibraryController::class, 'downloadVersion'])->name('library.version.download');
+        Route::get('/library/{id}', [LibraryController::class, 'show'])->name('library.show');
+        Route::get('/library/{id}/download', [LibraryController::class, 'download'])->name('library.download');
+        Route::get('/library/{id}/preview', [LibraryController::class, 'preview'])->name('library.preview');
     });
 
     Route::resource('kegiatan', KegiatanController::class);
