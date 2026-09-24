@@ -171,6 +171,7 @@
         .btn-auth:hover {
             background: #0a2a4b;
             border-color: #0a2a4b;
+            color: #ffffff !important;
         }
 
         .auth-link {
