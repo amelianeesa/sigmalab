@@ -25,15 +25,22 @@ use App\Http\Controllers\KelolaUserController;
 use App\Http\Controllers\VerifikasiMutuController;
 use App\Http\Controllers\QcInhouseController;
 use App\Http\Controllers\QcHarianController;
+use App\Http\Controllers\ProfilController;
+use App\Http\Controllers\ForgotPasswordController;
 
 Route::get('/', [AuthController::class, 'showLogin']);
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'processLogin'])->name('login.process')->middleware('throttle:5,1');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showForgotForm'])->name('password.request');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink'])->name('password.email');
+Route::get('/reset-password/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('password.update');
+
 Route::get('/public/alat/{kode_alat}', [AlatController::class, 'inputKalibrasiByKode'])->where('kode_alat', '.*')->name('alat.public-scan');
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'force.password.change'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/switch-role', [RoleSwitcherController::class, 'switchRole'])->name('switch-role');
@@ -41,6 +48,9 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('evaluasi-kalibrasi', EvaluasiKalibrasiController::class)->parameters([
         'evaluasi-kalibrasi' => 'evaluasi'
     ]);
+
+    Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
+    Route::put('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.password.update');
 
     Route::prefix('sdm')->name('sdm.')->group(function () {
         Route::get('/', [SdmController::class, 'index'])->name('index');
@@ -160,7 +170,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('modul:audit_log,lihat')->group(function () {
         Route::get('audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
         Route::get('audit-log/{id}', [AuditLogController::class, 'show'])->name('audit-log.show');
-    }); 
+    });
 
     Route::middleware('modul:manajemen_pengguna,lihat')->group(function () {
         Route::get('hak-akses', [HakAksesController::class, 'index'])->name('hak-akses.index');
@@ -214,11 +224,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{parameter_uji_id}/chart', [QcHarianController::class, 'chart'])->name('chart');
         Route::get('/{id}/investigasi', [QcHarianController::class, 'investigasi'])->name('investigasi');
         Route::post('/{id}/investigasi', [QcHarianController::class, 'storeInvestigasi'])->name('investigasi.store');
-    });
-
-    Route::middleware(['force.password.change'])->group(function () {
-        Route::get('/password/force-change', [AuthController::class, 'showForceChangePassword'])->name('password.force-change');
-        Route::post('/password/force-change', [AuthController::class, 'updateForceChangePassword'])->name('password.force-change.update');
     });
 
 });

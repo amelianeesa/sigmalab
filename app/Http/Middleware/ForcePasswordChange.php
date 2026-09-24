@@ -12,9 +12,9 @@ class ForcePasswordChange
         if (
             Auth::check() &&
             Auth::user()->must_change_password &&
-            !$request->routeIs('password.force-change', 'password.force-change.update', 'logout')
+            !$request->routeIs('profil.index', 'profil.password.update', 'logout')
         ) {
-            return redirect()->route('password.force-change');
+            return redirect()->route('profil.index')->with('force_password', true);
         }
 
         return $next($request);

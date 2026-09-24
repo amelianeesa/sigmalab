@@ -60,7 +60,7 @@
             </h4>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0" style="font-size: 0.75rem;">
-                    <li class="breadcrumb-item"><a href="{{ url('alat') }}" class="text-decoration-none">Peralatan</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url('alat') }}" class="text-decoration-none">Data Alat & Kalibrasi</a></li>
                     <li class="breadcrumb-item active text-muted" aria-current="page">Monitoring Ruangan</li>
                 </ol>
             </nav>

@@ -30,7 +30,6 @@
         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
         border: 1px solid #e3e6f0;
     }
-    /* Memastikan tombol bernuansa biru tua solid korporat #1b3152 */
     .btn-corporate-blue {
         background-color: #1b3152 !important;
         border-color: #1b3152 !important;
@@ -81,19 +80,16 @@
                         </select>
                     </div>
 
-                    <!-- Tanggal Evaluasi -->
                     <div class="col-md-6">
                         <label class="form-label">Tanggal Evaluasi <span class="text-danger">*</span></label>
                         <input type="date" name="tanggal_evaluasi" class="form-control form-control-sm" value="{{ old('tanggal_evaluasi', $evaluasi->tanggal_evaluasi ? $evaluasi->tanggal_evaluasi->format('Y-m-d') : '') }}" required>
                     </div>
 
-                    <!-- File Laporan -->
                     <div class="col-md-6">
                         <label class="form-label">Upload Laporan Evaluasi (Opsional)</label>
                         <input type="file" name="file_laporan" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png">
                         <div class="form-text text-muted">Format: PDF, JPG, PNG (Maks. 5MB).</div>
 
-                        <!-- Laporan Saat Ini -->
                         @if($evaluasi->file_laporan)
                             <div class="mt-2 p-2 border rounded bg-light d-flex align-items-center justify-content-between shadow-sm">
                                 <div class="d-flex align-items-center text-truncate me-2">
@@ -103,7 +99,6 @@
                                         <span class="text-dark fw-semibold text-truncate d-inline-block" style="font-size: 11px; max-width: 220px;">{{ basename($evaluasi->file_laporan) }}</span>
                                     </div>
                                 </div>
-                                <!-- Tombol Lihat dengan Inline CSS Biru Dongker -->
                                 <a href="{{ asset('storage/' . $evaluasi->file_laporan) }}" target="_blank" class="btn btn-sm text-nowrap py-1 px-2 shadow-sm d-flex align-items-center text-white" style="background-color: #1b3152 !important; border-color: #1b3152 !important; font-size: 11px; gap: 5px;">
                                     <i class="fas fa-eye text-white"></i> <span class="text-white">Lihat</span>
                                 </a>
@@ -111,7 +106,6 @@
                         @endif
                     </div>
 
-                    <!-- Keputusan -->
                     <div class="col-md-6">
                         <label class="form-label">Keputusan <span class="text-danger">*</span></label>
                         <select name="keputusan" class="form-select form-select-sm" required>
@@ -122,17 +116,14 @@
                         </select>
                     </div>
 
-                    <!-- Komentar -->
                     <div class="col-md-12">
                         <label class="form-label">Komentar</label>
                         <textarea name="catatan_spesifikasi" class="form-control" rows="3" placeholder="Tuliskan catatan spesifikasi...">{{ old('catatan_spesifikasi', $evaluasi->catatan_spesifikasi) }}</textarea>
                     </div>
                 </div>
 
-                <!-- Tombol Aksi Bawah -->
                 <div class="mt-3 text-end pt-2 border-top">
                     <a href="{{ route('evaluasi-kalibrasi.index') }}" class="btn btn-secondary btn-sm me-1 px-3 shadow-sm" style="font-size: 0.75rem;">Batal</a>
-                    <!-- Tombol Perbarui dengan Inline CSS Biru Dongker -->
                     <button type="submit" class="btn btn-sm px-3 fw-bold shadow-sm text-white" style="background-color: #1b3152 !important; border-color: #1b3152 !important; font-size: 0.75rem;">
                         <i class="fas fa-save me-1"></i> Perbarui
                     </button>

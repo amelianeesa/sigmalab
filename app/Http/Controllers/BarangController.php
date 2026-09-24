@@ -283,6 +283,23 @@ class BarangController extends Controller
         return redirect()->route('barang.index')->with('success', 'Data barang berhasil dihapus');
     }
 
+    // public function printPeriode(Request $request)
+    // {
+    //     $bulan = $request->input('bulan');
+    //     $tahun = $request->input('tahun');
+    //     $query = Barang::query();
+
+    //     if ($bulan && $tahun) {
+    //         $query->whereYear('created_at', $tahun)->whereMonth('created_at', $bulan);
+    //     }
+        
+    //     $barang = $query->latest()->get();
+
+    //     $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('barang.cetak-periode', compact('barang', 'bulan', 'tahun'));
+    //     $pdf->setPaper('A4', 'landscape');
+        
+    //     return $pdf->download('Laporan_Inventori_Bahan_' . $bulan . '_' . $tahun . '.pdf');
+    // }
     public function printPeriode(Request $request)
     {
         $bulan = $request->input('bulan');
@@ -298,6 +315,7 @@ class BarangController extends Controller
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('barang.cetak-periode', compact('barang', 'bulan', 'tahun'));
         $pdf->setPaper('A4', 'landscape');
         
-        return $pdf->download('Laporan_Inventori_Bahan_' . $bulan . '_' . $tahun . '.pdf');
+        // GUNAKAN stream() AGAR MUNCUL PREVIEW DI TAB BARU (BUKAN download())
+        return $pdf->stream('Laporan_Inventori_Bahan_' . $bulan . '_' . $tahun . '.pdf');
     }
 }

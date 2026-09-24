@@ -140,7 +140,6 @@
             display: inline-block;
         }
 
-        /* ===== Dropdown Notifikasi ===== */
         #notifDropdown {
             width: 320px;
             padding: 0;
@@ -235,13 +234,12 @@
         <nav id="sidebar">
             <div class="sidebar-header d-flex justify-content-between align-items-center" onclick="toggleSidebar()" title="Klik untuk Buka/Tutup Sidebar" style="cursor:pointer;">
                 <div class="d-flex align-items-center gap-2">
-                    <img src="{{ asset('images/logo-sucofindo.png') }}" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=SL&background=0D8ABC&color=fff';" alt="Logo" style="height: 40px; width: auto; object-fit: contain;">
+                    <img src="{{ asset('images/Logo_Suco_Nobg.png') }}" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=SL&background=0D8ABC&color=fff';" alt="Logo" style="height: 40px; width: auto; object-fit: contain;">
                     <div style="line-height: 1.2;">
                         <span class="text-dark" style="font-size: 1.2rem; font-weight: 800; letter-spacing: -0.5px;">SIGMA LAB</span><br>
                         <small class="text-muted fw-bold" style="font-size: 0.7rem;">PT Sucofindo - Cilacap</small>
                     </div>
                 </div>
-                {{-- <i class="fas fa-chevron-left text-muted opacity-50"></i> --}}
             </div>
 
             <ul class="list-unstyled components" id="sidebar-accordion" style="overflow-y: auto; max-height: calc(100vh - 80px);">
@@ -249,8 +247,6 @@
                     <a href="{{ route('dashboard') ?? url('/') }}"><i class="fas fa-home"></i> Dashboard</a>
                 </li>
 
-
-                {{-- 1. Peralatan & Monitoring --}}
                 @if(Auth::check() && (Auth::user()->hasModulAccess('alat') || (Auth::user()->role && (Auth::user()->role->nama_role == 'HR' || Auth::user()->role->nama_role == 'GA'))))
                 <li class="nav-item">
                     <a class="nav-link d-flex justify-content-between align-items-center {{ request()->is('alat*') || request()->routeIs('inventori.monitoring.*') || request()->routeIs('evaluasi-kalibrasi.*') ? 'active text-primary fw-bold' : 'collapsed' }}" 
@@ -285,35 +281,30 @@
                 </li>
                 @endif
                 
-                {{-- 2. Personil & Kompetensi --}}
                 @if(Auth::check() && (Auth::user()->hasModulAccess('sdm') || Auth::user()->hasModulAccess('manajemen_pengguna')))
                 <li class="{{ request()->is('sdm*') || request()->is('hak-akses*') ? 'active' : '' }}">
                     <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personil & Kompetensi</a>
                 </li>
                 @endif
 
-                {{-- 3. Verifikasi Mutu (QC) --}}
                 @if(Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
                 <li class="{{ request()->is('parameter-uji*') || request()->is('kegiatan*') || request()->is('tindak-lanjut*') || request()->is('reporting*') ? 'active' : '' }}">
                     <a href="{{ route('kegiatan.index') }}"><i class="fas fa-flask"></i> Verifikasi Mutu (QC)</a>
                 </li>
                 @endif
 
-                {{-- 4. Inventori Bahan/Barang --}}
                 @if(Auth::check() && (Auth::user()->hasModulAccess('barang') || Auth::user()->hasModulAccess('pengadaan')))
                 <li class="{{ request()->is('barang*') || request()->is('pengadaan*') ? 'active' : '' }}">
                     <a href="{{ route('barang.index') }}"><i class="fas fa-boxes"></i> Inventori Bahan/Barang</a>
                 </li>
                 @endif
 
-                {{-- 5. Library Digital --}}
                 @if(Auth::check() && Auth::user()->hasModulAccess('library_manage'))
                 <li class="{{ request()->is('library*') ? 'active' : '' }}">
                     <a href="{{ route('library.index') }}"><i class="fas fa-book-open"></i> Library Digital</a>
                 </li>
                 @endif
 
-                {{-- 6. Audit Trail --}}
                 @if(Auth::check() && Auth::user()->hasModulAccess('audit_log'))
                 <li class="{{ request()->is('audit-log*') ? 'active' : '' }}">
                     <a href="{{ route('audit-log.index') }}"><i class="fas fa-history"></i> Audit Trail</a>
@@ -323,7 +314,6 @@
         </nav>
     @endauth
 
-    {{-- TOP NAVBAR UTAMA --}}
     <div class="top-navbar shadow-sm" style="padding-left: 25px; padding-right: 20px; min-height: 74px; display: flex; align-items: center; justify-content: space-between;">
         <div class="d-flex align-items-center gap-2">
             @auth
@@ -337,10 +327,8 @@
             </div>
         </div>
 
-        <!-- Sisi Kanan: Notifikasi & Profil User -->
         <div class="d-flex align-items-center gap-3">
             @auth
-            {{-- Dropdown Notifikasi --}}
             <div class="dropdown">
                 <a href="#" class="btn btn-warning position-relative rounded-circle p-2 d-flex align-items-center justify-content-center dropdown-toggle" style="width: 36px; height: 36px;" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="fas fa-bell text-white" style="font-size: 0.85rem;"></i>
@@ -353,7 +341,6 @@
                 </a>
 
                 <div class="dropdown-menu dropdown-menu-end shadow" id="notifDropdown">
-                    {{-- Header: fixed, tidak ikut scroll --}}
                     <div class="notif-header d-flex justify-content-between align-items-center">
                         <span class="fw-bold" style="font-size: 0.85rem;">Notifikasi Terbaru</span>
                         @if(isset($unreadNotifCount) && $unreadNotifCount > 0)
@@ -361,7 +348,6 @@
                         @endif
                     </div>
 
-                    {{-- List: hanya bagian ini yang scroll --}}
                     <div class="notif-list">
                         @if(isset($recentNotifs) && $recentNotifs->count() > 0)
                             @foreach($recentNotifs as $notif)
@@ -400,14 +386,12 @@
                         @endif
                     </div>
 
-                    {{-- Footer: fixed di bawah, selalu kelihatan --}}
                     <div class="notif-footer">
                         <a href="{{ route('notifikasi.index') }}">Lihat Semua Notifikasi</a>
                     </div>
                 </div>
             </div>
 
-            {{-- Dropdown Profil --}}
             <div class="dropdown">
                 <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center py-1 px-2" type="button" data-bs-toggle="dropdown" title="Profil" style="border-color: rgba(255,255,255,0.2);">
                     <i class="bi bi-person-circle me-1 text-white" style="font-size: 1rem;"></i> 
@@ -417,6 +401,12 @@
                     </div>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="{{ route('profil.index') }}">
+                            <i class="bi bi-person me-2"></i> Profil Saya
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
                     <li>
                         <form action="{{ route('logout') }}" method="POST">
                             @csrf

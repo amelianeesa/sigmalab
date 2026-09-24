@@ -1,72 +1,88 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-4 py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<style>
+    .table thead th {
+        background-color: #1b3152 !important;
+        color: #ffffff !important;
+        padding: 8px 6px;
+        font-size: 0.7rem;
+        text-align: center;
+        vertical-align: middle;
+    }
+    .table tbody td {
+        padding: 8px 6px;
+        font-size: 0.73rem;
+        vertical-align: middle;
+    }
+</style>
+
+<div class="container-fluid px-3 pt-1 pb-2" style="font-size: 0.78rem;">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 px-1">
         <div>
-            <ol class="breadcrumb mb-1 mt-2">
-                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('sdm.index') }}" class="text-decoration-none">Personel & Kompetensi</a></li>
-                <li class="breadcrumb-item active">Hak Akses</li>
-            </ol>
-    <h2 class="fw-bold text-dark mb-1">Manajemen Hak Akses</h2>
-            <p class="text-muted mb-0 mt-2">Atur kewenangan setiap Role terhadap masing-masing Modul sistem secara dinamis.</p>
+            <nav aria-label="breadcrumb">
+
+            </nav>
+            <h4 class="fw-bold mb-0">Manajemen Hak Akses</h4>
+            <p class="text-muted mb-0" style="font-size: 0.72rem;">Atur kewenangan setiap Role terhadap masing-masing Modul sistem secara dinamis.</p>
         </div>
     </div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-body">
-            <div class="alert alert-info py-2" style="font-size: 0.9rem;">
-                <i class="fas fa-info-circle me-1"></i> Perubahan matriks ini akan langsung memengaruhi menu apa saja yang tampil di sidebar dan hak akses operasi (Create, Read, Update, Delete) masing-masing jabatan.
-            </div>
+    <div class="alert alert-info py-2 px-3 mb-2 shadow-sm d-flex align-items-center" role="alert" style="font-size: 0.73rem;">
+        <i class="fas fa-info-circle me-2 fs-6"></i>
+        <div>Perubahan matriks ini akan langsung memengaruhi menu apa saja yang tampil di sidebar dan hak akses operasi (Create, Read, Update, Delete) masing-masing jabatan.</div>
+    </div>
 
-            <form action="{{ route('hak-akses.update') }}" method="POST">
-                @csrf
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover align-middle">
-                        <thead class="table-light text-center">
+    <div class="mb-2 px-1">
+        <form action="{{ route('hak-akses.update') }}" method="POST">
+            @csrf
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle mb-0 bg-white shadow-sm rounded-3">
+                    <thead>
+                        <tr>
+                            <th class="text-start" style="min-width: 180px; position: sticky; left: 0; z-index: 2;">Role \ Modul</th>
+                            @foreach($modules as $modul)
+                                <th style="min-width: 140px;">
+                                    {{ $modul->nama_modul }}<br>
+                                    <span class="fw-normal" style="font-size: 0.62rem; opacity: 0.85;">({{ $modul->modul_id }})</span>
+                                </th>
+                            @endforeach
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($roles as $role)
                             <tr>
-                                <th class="text-start" style="min-width: 200px; position: sticky; left: 0; background: #f8f9fa; z-index: 2;">Role \ Modul</th>
+                                <td class="fw-bold text-dark bg-white" style="position: sticky; left: 0; z-index: 1; font-size: 0.73rem; padding: 8px 6px;">
+                                    {{ $role->nama_role }}
+                                </td>
                                 @foreach($modules as $modul)
-                                    <th style="min-width: 150px;">
-                                        {{ $modul->nama_modul }}<br>
-                                        <small class="text-muted fw-normal">({{ $modul->modul_id }})</small>
-                                    </th>
+                                    @php
+                                        $currentLevel = $matrix[$role->roles_id][$modul->modul_id] ?? 'none';
+                                    @endphp
+                                    <td class="text-center" style="padding: 8px 6px;">
+                                        <select name="matrix[{{ $role->roles_id }}][{{ $modul->modul_id }}]" class="form-select form-select-sm py-1 {{ $currentLevel != 'none' ? 'border-primary' : '' }}" style="font-size: 0.73rem;">
+                                            <option value="none" {{ $currentLevel == 'none' ? 'selected' : '' }} class="text-muted">Tidak Ada Akses</option>
+                                            <option value="lihat" {{ $currentLevel == 'lihat' ? 'selected' : '' }}>Lihat Saja</option>
+                                            <option value="tambah_ubah" {{ $currentLevel == 'tambah_ubah' ? 'selected' : '' }}>Tambah/Ubah</option>
+                                            <option value="full" {{ $currentLevel == 'full' ? 'selected' : '' }} class="text-danger fw-bold">Akses Penuh</option>
+                                        </select>
+                                    </td>
                                 @endforeach
                             </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($roles as $role)
-                                <tr>
-                                    <td class="fw-bold bg-light" style="position: sticky; left: 0; z-index: 1;">
-                                        {{ $role->nama_role }}
-                                    </td>
-                                    @foreach($modules as $modul)
-                                        @php
-                                            $currentLevel = $matrix[$role->roles_id][$modul->modul_id] ?? 'none';
-                                        @endphp
-                                        <td class="text-center p-2">
-                                            <select name="matrix[{{ $role->roles_id }}][{{ $modul->modul_id }}]" class="form-select form-select-sm {{ $currentLevel != 'none' ? 'border-primary' : '' }}">
-                                                <option value="none" {{ $currentLevel == 'none' ? 'selected' : '' }} class="text-muted">Tidak Ada Akses</option>
-                                                <option value="lihat" {{ $currentLevel == 'lihat' ? 'selected' : '' }}>Lihat Saja</option>
-                                                <option value="tambah_ubah" {{ $currentLevel == 'tambah_ubah' ? 'selected' : '' }}>Tambah/Ubah</option>
-                                                <option value="full" {{ $currentLevel == 'full' ? 'selected' : '' }} class="text-danger fw-bold">Akses Penuh</option>
-                                            </select>
-                                        </td>
-                                    @endforeach
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
 
-                <div class="mt-4 text-end">
-                    <button type="submit" class="btn btn-primary px-4">
-                        <i class="fas fa-save me-2"></i> Simpan Konfigurasi
-                    </button>
-                </div>
-            </form>
-        </div>
+            <div class="mt-3 text-end px-1 d-flex justify-content-end gap-2">
+                <a href="{{ route('sdm.index') }}" class="btn btn-secondary btn-sm px-3 py-1 fw-semibold rounded-2" style="font-size: 0.73rem;">
+                    <i class="fas fa-arrow-left me-1"></i> Kembali
+                </a>
+                <button type="submit" class="btn btn-sm text-white px-3 py-1 fw-semibold rounded-2" style="background-color: #1b3152; font-size: 0.73rem;">
+                    <i class="fas fa-save me-1"></i> Simpan
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 @endsection

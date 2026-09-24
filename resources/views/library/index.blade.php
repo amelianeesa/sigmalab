@@ -264,6 +264,46 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalKonfirmasiHapus" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 360px;">
+        <div class="modal-content border-0 shadow text-center p-3" style="font-size: 0.78rem; border-radius: 8px;">
+            <div class="pt-2 pb-1">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background-color: #fff8e6; color: #f0ad4e; font-size: 22px; border: 2px solid #ffeeba;">
+                    <i class="fas fa-exclamation"></i>
+                </div>
+            </div>
+            <div class="modal-body px-2 py-2">
+                <h5 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Apakah Anda yakin?</h5>
+                <p class="text-muted mb-0" style="font-size: 0.72rem;">Hapus dokumen ini dari daftar aktif? Riwayat dokumen tetap tersimpan.</p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center gap-2 pt-1 pb-2">
+                <button type="button" id="btnConfirmDelete" class="btn btn-danger btn-sm py-1 px-3 fw-semibold rounded-2" style="font-size: 0.73rem;">Ya, Hapus!</button>
+                <button type="button" class="btn btn-secondary btn-sm py-1 px-3 fw-semibold rounded-2" data-bs-dismiss="modal" style="font-size: 0.73rem;">Batal</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalKonfirmasiPulihkan" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 360px;">
+        <div class="modal-content border-0 shadow text-center p-3" style="font-size: 0.78rem; border-radius: 8px;">
+            <div class="pt-2 pb-1">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background-color: #e8f4fd; color: #0d6efd; font-size: 22px; border: 2px solid #cfe2ff;">
+                    <i class="fas fa-question"></i>
+                </div>
+            </div>
+            <div class="modal-body px-2 py-2">
+                <h5 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Apakah Anda yakin?</h5>
+                <p class="text-muted mb-0" style="font-size: 0.72rem;">Tampilkan kembali dokumen ini pada daftar aktif?</p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center gap-2 pt-1 pb-2">
+                <button type="button" id="btnConfirmActivate" class="btn btn-success btn-sm py-1 px-3 fw-semibold rounded-2" style="font-size: 0.73rem;">Ya, Tampilkan!</button>
+                <button type="button" class="btn btn-secondary btn-sm py-1 px-3 fw-semibold rounded-2" data-bs-dismiss="modal" style="font-size: 0.73rem;">Batal</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -281,47 +321,48 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        // SweetAlert untuk konfirmasi Hapus Dokumen
+        let activeDeleteId = null;
+        let activeActivateId = null;
+
+        const modalHapusEl = document.getElementById('modalKonfirmasiHapus');
+        const modalHapus = modalHapusEl ? new bootstrap.Modal(modalHapusEl) : null;
+
+        const modalPulihkanEl = document.getElementById('modalKonfirmasiPulihkan');
+        const modalPulihkan = modalPulihkanEl ? new bootstrap.Modal(modalPulihkanEl) : null;
+
+        // Trigger Modal Hapus Bootstrap
         document.querySelectorAll('.btn-delete').forEach(button => {
             button.addEventListener('click', function () {
-                let id = this.getAttribute('data-id');
-                Swal.fire({
-                    title: 'Konfirmasi Hapus',
-                    text: "Hapus dokumen ini dari daftar aktif? Riwayat dokumen tetap tersimpan.",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#dc3545',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Ya, Hapus!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById('form-delete-' + id).submit();
-                    }
-                });
+                activeDeleteId = this.getAttribute('data-id');
+                if (modalHapus) modalHapus.show();
             });
         });
 
-        // SweetAlert untuk konfirmasi Tampilkan Kembali (Aktifkan Arsip)
+        const btnConfirmDelete = document.getElementById('btnConfirmDelete');
+        if (btnConfirmDelete) {
+            btnConfirmDelete.addEventListener('click', function () {
+                if (activeDeleteId) {
+                    document.getElementById('form-delete-' + activeDeleteId).submit();
+                }
+            });
+        }
+
+        // Trigger Modal Pulihkan/Tampilkan Bootstrap
         document.querySelectorAll('.btn-activate').forEach(button => {
             button.addEventListener('click', function () {
-                let id = this.getAttribute('data-id');
-                Swal.fire({
-                    title: 'Konfirmasi Pemulihan',
-                    text: "Tampilkan kembali dokumen ini pada daftar aktif?",
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#198754',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Ya, Tampilkan!',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById('form-activate-' + id).submit();
-                    }
-                });
+                activeActivateId = this.getAttribute('data-id');
+                if (modalPulihkan) modalPulihkan.show();
             });
         });
+
+        const btnConfirmActivate = document.getElementById('btnConfirmActivate');
+        if (btnConfirmActivate) {
+            btnConfirmActivate.addEventListener('click', function () {
+                if (activeActivateId) {
+                    document.getElementById('form-activate-' + activeActivateId).submit();
+                }
+            });
+        }
 
         const modalPreview = document.getElementById('modalPreviewDokumen');
         if (!modalPreview) return;
