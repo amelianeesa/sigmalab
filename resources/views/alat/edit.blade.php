@@ -5,10 +5,6 @@
     <!-- Judul & Breadcrumb Lebih Compact dan Dekat ke Topbar -->
     <div class="pt-2 mb-2">
         <h5 class="fw-bold mb-1" style="font-size: 1.2rem; color: #333;">Edit Data Alat & Kalibrasi</h5>
-        <ol class="breadcrumb mb-0" style="font-size: 12px;">
-            <li class="breadcrumb-item"><a href="{{ route('alat.index') }}" class="text-primary text-decoration-none">Data Alat & Kalibrasi</a></li>
-            <li class="breadcrumb-item text-muted active">Edit</li>
-        </ol>
     </div>
 
     <div class="card shadow-sm border-0 mb-4">
@@ -69,18 +65,27 @@
                 <div class="row g-2 mb-2">
                     <div class="col-md-6">
                         <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Kondisi Barang</label>
+                        @if($alat->kondisi_barang == 'perbaikan')
+                            <input type="hidden" name="kondisi_barang" value="perbaikan">
+                            <input type="text" class="form-control form-control-sm bg-light text-danger" value="Sedang Dalam Perbaikan" readonly>
+                        @else
                         <select name="kondisi_barang" class="form-select form-select-sm">
                             <option value="baik" {{ old('kondisi_barang', $alat->kondisi_barang) == 'baik' ? 'selected' : '' }}>Baik</option>
-                            <option value="perbaikan" {{ old('kondisi_barang', $alat->kondisi_barang) == 'perbaikan' ? 'selected' : '' }}>Perbaikan</option>
                             <option value="rusak" {{ old('kondisi_barang', $alat->kondisi_barang) == 'rusak' ? 'selected' : '' }}>Rusak</option>
                         </select>
+                        @endif
                     </div>
                     <div class="col-md-6">
                         <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Status Barang</label>
+                        @if($alat->kondisi_barang == 'perbaikan')
+                            <input type="hidden" name="status_barang" value="idle">
+                            <input type="text" class="form-control form-control-sm bg-light" value="Idle" readonly>
+                        @else
                         <select name="status_barang" class="form-select form-select-sm">
                             <option value="idle" {{ old('status_barang', $alat->status_barang) == 'idle' ? 'selected' : '' }}>Idle</option>
                             <option value="terpakai" {{ old('status_barang', $alat->status_barang) == 'terpakai' ? 'selected' : '' }}>Terpakai</option>
                         </select>
+                        @endif
                     </div>
                 </div>
 

@@ -154,6 +154,11 @@
 <div class="container-fluid px-4">
 
     @php
+        // Daftar role yang diizinkan crud
+        $allowedManageRoles = ['Koordinator Laboratorium', 'GA', 'Analis Lab', 'Admin Aplikasi'];
+        $userRoleName = Auth::user()->role->nama_role ?? '';
+        $canManageBarang = in_array($userRoleName, $allowedManageRoles);
+
         $barangHabisCount = 0;
         $barangMenipisCount = 0;
         foreach($barang as $item) {
@@ -198,7 +203,7 @@
                 <button type="button" class="btn btn-success-standard shadow-sm" data-bs-toggle="modal" data-bs-target="#cetakPeriodeModal">
                     <i class="fas fa-print me-1"></i> Cetak Laporan Periode
                 </button>
-            @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
+            @if($canManageBarang && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
             <a href="{{ route('barang.create') }}" class="btn btn-brand-standard shadow-sm">
                 <i class="fas fa-plus me-1"></i> Tambah Barang/Bahan
             </a>
@@ -244,7 +249,9 @@
                             <th rowspan="2" class="text-center align-middle">Nilai</th>
                             <th rowspan="2" class="text-center align-middle">Kondisi</th>
                             <th rowspan="2" class="text-center align-middle">Tanggal Expired Date</th>
+                            @if($canManageBarang && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
                             <th rowspan="2" class="text-center align-middle" style="width: 80px;">Aksi</th>
+                            @endif
                         </tr>
                         <tr>
                             <th>Penerimaan</th>
@@ -314,20 +321,18 @@
                                     {{ $item->tgl_exp ? \Carbon\Carbon::parse($item->tgl_exp)->format('d M Y') : '-' }}
                                 @endif
                             </td>
+                            @if($canManageBarang && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
                             <td class="text-nowrap">
-                                @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
-                                    <a href="{{ route('barang.edit', $item->barang_id) }}" class="btn btn-warning btn-sm py-0 px-1" title="Edit"><i class="fas fa-edit"></i></a>
-                                    <form action="{{ route('barang.destroy', $item->barang_id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" class="btn btn-danger btn-sm py-0 px-1" title="Hapus" onclick="confirmDelete(this, {{ $saldoAkhir }}, '{{ addslashes($item->nama_barang) }}')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                @else
-                                    -
-                                @endif
+                                <a href="{{ route('barang.edit', $item->barang_id) }}" class="btn btn-warning btn-sm py-0 px-1" title="Edit"><i class="fas fa-edit"></i></a>
+                                <form action="{{ route('barang.destroy', $item->barang_id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" class="btn btn-danger btn-sm py-0 px-1" title="Hapus" onclick="confirmDelete(this, {{ $saldoAkhir }}, '{{ addslashes($item->nama_barang) }}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
                             </td>
+                            @endif
                         </tr>
                         @empty
                         <tr>

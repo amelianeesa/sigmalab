@@ -53,16 +53,23 @@
 
 @section('content')
 <div class="container-fluid dashboard-container">
+    @php
+        // Daftar role yang diizinkan menginput dan mengelola data
+        $allowedRoles = ['Koordinator Laboratorium', 'Koordinator Lab', 'Analis Lab', 'Analis', 'Admin Aplikasi'];
+        $userRoleName = Auth::user()->role->nama_role ?? '';
+        $canManage = in_array($userRoleName, $allowedRoles);
+    @endphp
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
             <h4 class="fw-bold text-dark mb-1">
                  Pencatatan Monitoring Suhu dan Kelembaban Udara
             </h4>
             <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0" style="font-size: 0.75rem;">
+                {{-- <ol class="breadcrumb mb-0" style="font-size: 0.75rem;">
                     <li class="breadcrumb-item"><a href="{{ url('alat') }}" class="text-decoration-none">Data Alat & Kalibrasi</a></li>
                     <li class="breadcrumb-item active text-muted" aria-current="page">Monitoring Ruangan</li>
-                </ol>
+                </ol> --}}
             </nav>
         </div>    
         <div>
@@ -132,7 +139,9 @@
                                                     <tr>
                                                         <th>Equipment Reading</th>
                                                         <th>Standard Reading</th>
+                                                        @if($canManage)
                                                         <th style="width: 35px;">Aksi</th>
+                                                        @endif
                                                     </tr>
                                                 </thead>
                                                 <tbody class="align-middle">
@@ -144,15 +153,17 @@
                                                                 <tr>
                                                                     <td>{{ $titik->equipment_reading }}</td>
                                                                     <td>{{ $titik->standard_reading }}</td>
+                                                                    @if($canManage)
                                                                     <td>
                                                                         <button type="button" class="btn btn-sm text-danger p-0 border-0 bg-transparent btn-hapus-titik" data-id="{{ $titik->titik_kalibrasi_id }}" title="Hapus"><i class="fas fa-trash"></i></button>
                                                                     </td>
+                                                                    @endif
                                                                 </tr>
                                                             @endif
                                                         @endforeach
                                                     @endif
 
-                                                    @if(!$hasTemp)
+                                                    @if(!$hasTemp && $canManage)
                                                     <tr>
                                                         <td><input type="number" step="0.01" name="temperature_equipment[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
                                                         <td><input type="number" step="0.01" name="temperature_standard[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
@@ -162,7 +173,9 @@
                                                 </tbody>
                                             </table>
                                         </div>
+                                        @if($canManage)
                                         <button type="button" id="tambahTemperature" class="btn btn-outline-warning btn-sm w-100 text-dark fw-bold py-1" style="font-size: 0.7rem;"><i class="fas fa-plus me-1"></i> Tambah Baris Temperature</button>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -179,7 +192,9 @@
                                                     <tr>
                                                         <th>Equipment Reading</th>
                                                         <th>Standard Reading</th>
+                                                        @if($canManage)
                                                         <th style="width: 35px;">Aksi</th>
+                                                        @endif
                                                     </tr>
                                                 </thead>
                                                 <tbody class="align-middle">
@@ -191,15 +206,17 @@
                                                                 <tr>
                                                                     <td>{{ $titik->equipment_reading }}</td>
                                                                     <td>{{ $titik->standard_reading }}</td>
+                                                                    @if($canManage)
                                                                     <td>
                                                                         <button type="button" class="btn btn-sm text-danger p-0 border-0 bg-transparent btn-hapus-titik" data-id="{{ $titik->titik_kalibrasi_id }}" title="Hapus"><i class="fas fa-trash"></i></button>
                                                                     </td>
+                                                                    @endif
                                                                 </tr>
                                                             @endif
                                                         @endforeach
                                                     @endif
 
-                                                    @if(!$hasHumidity)
+                                                    @if(!$hasHumidity && $canManage)
                                                     <tr>
                                                         <td><input type="number" step="0.01" name="humidity_equipment[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
                                                         <td><input type="number" step="0.01" name="humidity_standard[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
@@ -209,18 +226,22 @@
                                                 </tbody>
                                             </table>
                                         </div>
+                                        @if($canManage)
                                         <button type="button" id="tambahHumidity" class="btn btn-outline-success btn-sm w-100 fw-bold py-1" style="font-size: 0.7rem;"><i class="fas fa-plus me-1"></i> Tambah Baris Humidity</button>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
                         </div>
                    
+                        @if($canManage)
                         <div class="mt-2 text-end">
                             <button type="submit" class="btn btn-success btn-sm px-3 py-1 fw-bold" style="font-size: 0.72rem;"><i class="fas fa-save me-1"></i> Simpan Semua Titik Acuan</button>
                         </div>
+                        @endif
                     </form>
 
-                    @if(isset($titikKalibrasiList) && count($titikKalibrasiList) > 0)
+                    @if($canManage && isset($titikKalibrasiList) && count($titikKalibrasiList) > 0)
                         @foreach($titikKalibrasiList as $titik)
                             <form id="delete-form-{{ $titik->titik_kalibrasi_id }}" action="{{ route('inventori.monitoring.destroyKalibrasi', $titik->titik_kalibrasi_id) }}" method="POST" style="display: none;">
                                 @csrf
@@ -237,6 +258,7 @@
                         </div>
                         <div class="card-body p-3">
                             <div class="row g-3 align-items-center">
+                                @if($canManage)
                                 <div class="col-md-5 border-end pe-md-3">
                                     <form action="{{ route('inventori.monitoring.uploadReferensi') }}" method="POST" enctype="multipart/form-data">
                                         @csrf
@@ -257,8 +279,9 @@
                                         @endif
                                     </form>
                                 </div>
+                                @endif
 
-                                <div class="col-md-7 ps-md-3">
+                                <div class="{{ $canManage ? 'col-md-7 ps-md-3' : 'col-md-12' }}">
                                     <label class="form-label fw-bold text-secondary mb-1" style="font-size: 11px;">DAFTAR DOKUMEN TERSEDIA</label>
                                     <div class="table-responsive rounded border" style="max-height: 120px; overflow-y: auto;">
                                         <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.72rem;">
@@ -279,12 +302,14 @@
                                                                 <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="btn btn-sm text-white px-1.5 py-0" style="font-size: 10px; background-color: #1b3152;" title="Lihat">
                                                                     <i class="fas fa-eye"></i>
                                                                 </a>
+                                                                @if($canManage)
                                                                 <button type="button" class="btn btn-warning btn-sm text-dark px-1.5 py-0" style="font-size: 10px;" data-bs-toggle="modal" data-bs-target="#editDocModal-{{ $doc->dokumen_id }}" title="Ganti/Edit">
                                                                     <i class="fas fa-edit"></i>
                                                                 </button>
                                                                 <button type="button" class="btn btn-danger btn-sm px-1.5 py-0 btn-hapus-doc" data-id="{{ $doc->dokumen_id }}" style="font-size: 10px;" title="Hapus">
                                                                     <i class="fas fa-trash"></i>
                                                                 </button>
+                                                                @endif
                                                             </td>
                                                         </tr>
                                                     @endforeach
@@ -301,7 +326,7 @@
                         </div>
                     </div>
 
-                    @if(isset($dokumenList))
+                    @if($canManage && isset($dokumenList))
                     @foreach($dokumenList as $doc)
                         <form id="delete-doc-{{ $doc->dokumen_id }}" action="{{ route('inventori.monitoring.destroyReferensi', $doc->dokumen_id) }}" method="POST" style="display: none;">
                             @csrf
@@ -395,11 +420,11 @@
                 <div class="col-md-12">
                     <div class="d-flex align-items-center gap-2 mb-1">
                         <strong style="width: 160px;">Persyaratan Suhu:</strong>
-                        <input type="text" id="inputPersyaratanSuhu" value="{{ $persyaratanSuhu }}" class="form-control form-control-sm w-50 py-0.5" placeholder="Otomatis dari acuan suhu" style="font-size: 0.72rem;">
+                        <input type="text" id="inputPersyaratanSuhu" value="{{ $persyaratanSuhu }}" class="form-control form-control-sm w-50 py-0.5" placeholder="Otomatis dari acuan suhu" style="font-size: 0.72rem;" {{ !$canManage ? 'readonly' : '' }}>
                     </div>
                     <div class="d-flex align-items-center gap-2 mb-0">
                         <strong style="width: 160px;">Persyaratan Kelembaban:</strong>
-                        <input type="text" id="inputPersyaratanKelembaban" value="{{ $persyaratanKelembaban }}" class="form-control form-control-sm w-50 py-0.5" placeholder="Otomatis dari acuan humidity" style="font-size: 0.72rem;">
+                        <input type="text" id="inputPersyaratanKelembaban" value="{{ $persyaratanKelembaban }}" class="form-control form-control-sm w-50 py-0.5" placeholder="Otomatis dari acuan humidity" style="font-size: 0.72rem;" {{ !$canManage ? 'readonly' : '' }}>
                     </div>
                 </div>
             </div>
@@ -418,11 +443,13 @@
                             <th colspan="4" class="py-1 bg-sesi-pagi">Kelembaban (%)</th>
                             <th colspan="2" class="py-1 bg-white">Status</th>
                             <th colspan="2" class="py-1 bg-light">Paraf</th>
+                            @if($canManage)
                             <th rowspan="2" style="width: 55px;" class="bg-light">Aksi</th>
+                            @endif
                         </tr>
                         <tr>
-                            <th class="py-1 bg-sesi-pagi" style="width: 70px;">Pagi</th>
-                            <th class="py-1 bg-sesi-sore" style="width: 70px;">Sore</th>
+                            <th class="py-1 bg-sesi-pagi" style="width: 90px;">Pagi</th>
+                            <th class="py-1 bg-sesi-sore" style="width: 90px;">Sore</th>
                             
                             <th class="py-1 bg-sesi-pagi">Pembacaan 1</th>
                             <th class="py-1 bg-sesi-pagi">Koreksi 1</th>
@@ -437,8 +464,8 @@
                             <th class="py-1 bg-white" style="width: 60px;">Diterima</th>
                             <th class="py-1 bg-white" style="width: 60px;">Ditolak</th>
                 
-                            <th class="py-1 bg-sesi-pagi" style="width: 65px;">1</th>
-                            <th class="py-1 bg-sesi-sore" style="width: 65px;">2</th>
+                            <th class="py-1 bg-sesi-pagi" style="width: 110px;">1</th>
+                            <th class="py-1 bg-sesi-sore" style="width: 110px;">2</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -474,14 +501,14 @@
                                 <td class="fw-bold bg-light">{{ $tgl }}</td>
                                 
                                 <td class="bg-sesi-pagi">
-                                    <input type="text" name="waktu_1" value="{{ $row?->waktu_1 }}" class="form-control form-control-sm text-center px-1 bg-white py-0" placeholder="08:00" style="font-size: 0.68rem;">
+                                    <input type="text" name="waktu_1" value="{{ $row?->waktu_1 }}" class="form-control form-control-sm text-center px-1 bg-white py-0" placeholder="08:00" style="font-size: 0.68rem;" {{ !$canManage ? 'readonly' : '' }}>
                                 </td>
                                 <td class="bg-sesi-sore">
-                                    <input type="text" name="waktu_2" value="{{ $row?->waktu_2 }}" class="form-control form-control-sm text-center px-1 bg-white py-0" placeholder="13:00" style="font-size: 0.68rem;">
+                                    <input type="text" name="waktu_2" value="{{ $row?->waktu_2 }}" class="form-control form-control-sm text-center px-1 bg-white py-0" placeholder="13:00" style="font-size: 0.68rem;" {{ !$canManage ? 'readonly' : '' }}>
                                 </td>
                     
                                 <td class="bg-sesi-pagi">
-                                    <input type="number" step="0.01" name="suhu_pembacaan_1" value="{{ $row?->suhu_pembacaan_1 }}" class="form-control form-control-sm text-center px-1 input-suhu-1 bg-white py-0 {{ $isS1Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;">
+                                    <input type="number" step="0.01" name="suhu_pembacaan_1" value="{{ $row?->suhu_pembacaan_1 }}" class="form-control form-control-sm text-center px-1 input-suhu-1 bg-white py-0 {{ $isS1Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;" {{ !$canManage ? 'readonly' : '' }}>
                                 </td>
                                 <td class="fw-bold text-primary bg-sesi-pagi">
                                     <span id="suhu-terkoreksi-1-text-{{ $tgl }}">{{ $row?->suhu_terkoreksi_1 ?? '-' }}</span>
@@ -489,7 +516,7 @@
                                 </td>
                     
                                 <td class="bg-sesi-sore">
-                                    <input type="number" step="0.01" name="suhu_pembacaan_2" value="{{ $row?->suhu_pembacaan_2 }}" class="form-control form-control-sm text-center px-1 input-suhu-2 bg-white py-0 {{ $isS2Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;">
+                                    <input type="number" step="0.01" name="suhu_pembacaan_2" value="{{ $row?->suhu_pembacaan_2 }}" class="form-control form-control-sm text-center px-1 input-suhu-2 bg-white py-0 {{ $isS2Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;" {{ !$canManage ? 'readonly' : '' }}>
                                 </td>
                                 <td class="fw-bold text-success bg-sesi-sore">
                                     <span id="suhu-terkoreksi-2-text-{{ $tgl }}">{{ $row?->suhu_terkoreksi_2 ?? '-' }}</span>
@@ -497,7 +524,7 @@
                                 </td>
                     
                                 <td class="bg-sesi-pagi">
-                                    <input type="number" step="0.01" name="kelembaban_pembacaan_1" value="{{ $row?->kelembaban_pembacaan_1 }}" class="form-control form-control-sm text-center px-1 input-lembap-1 bg-white py-0 {{ $isH1Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;">
+                                    <input type="number" step="0.01" name="kelembaban_pembacaan_1" value="{{ $row?->kelembaban_pembacaan_1 }}" class="form-control form-control-sm text-center px-1 input-lembap-1 bg-white py-0 {{ $isH1Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;" {{ !$canManage ? 'readonly' : '' }}>
                                 </td>
                                 <td class="fw-bold text-primary bg-sesi-pagi">
                                     <span id="lembap-terkoreksi-1-text-{{ $tgl }}">{{ $row?->kelembaban_terkoreksi_1 ?? '-' }}</span>
@@ -505,7 +532,7 @@
                                 </td>
                     
                                 <td class="bg-sesi-sore">
-                                    <input type="number" step="0.01" name="kelembaban_pembacaan_2" value="{{ $row?->kelembaban_pembacaan_2 }}" class="form-control form-control-sm text-center px-1 input-lembap-2 bg-white py-0 {{ $isH2Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;">
+                                    <input type="number" step="0.01" name="kelembaban_pembacaan_2" value="{{ $row?->kelembaban_pembacaan_2 }}" class="form-control form-control-sm text-center px-1 input-lembap-2 bg-white py-0 {{ $isH2Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;" {{ !$canManage ? 'readonly' : '' }}>
                                 </td>
                                 <td class="fw-bold text-success bg-sesi-sore">
                                     <span id="lembap-terkoreksi-2-text-{{ $tgl }}">{{ $row?->kelembaban_terkoreksi_2 ?? '-' }}</span>
@@ -513,11 +540,11 @@
                                 </td>
                     
                                 <td class="bg-white text-center align-middle">
-                                    <input class="form-check-input" type="radio" name="status" value="Diterima" {{ ($row?->status == 'Diterima') ? 'checked' : '' }}>
+                                    <input class="form-check-input" type="radio" name="status" value="Diterima" {{ ($row?->status == 'Diterima') ? 'checked' : '' }} {{ !$canManage ? 'disabled' : '' }}>
                                 </td>
                     
                                 <td class="bg-white text-center align-middle">
-                                    <input class="form-check-input" type="radio" name="status" value="Ditolak" {{ ($row?->status == 'Ditolak') ? 'checked' : '' }}>
+                                    <input class="form-check-input" type="radio" name="status" value="Ditolak" {{ ($row?->status == 'Ditolak') ? 'checked' : '' }} {{ !$canManage ? 'disabled' : '' }}>
                                 </td>
                     
                                 <td class="bg-sesi-pagi text-center small fw-bold text-dark text-truncate" style="max-width: 65px;" title="{{ $row?->paraf_1 }}">
@@ -528,9 +555,11 @@
                                     {{ $row?->paraf_2 ?? '-' }}
                                 </td>
                     
+                                @if($canManage)
                                 <td class="bg-light text-center">
                                     <button type="submit" class="btn btn-sm btn-success px-1.5 py-0.5" style="font-size: 0.65rem;" title="Simpan Baris"><i class="fas fa-save"></i></button>
                                 </td>
+                                @endif
                             </form>
                         </tr>
                         @endfor

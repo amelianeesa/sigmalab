@@ -35,20 +35,29 @@
 @section('content')
 <div class="container-fluid pt-0 pb-3 px-4" style="max-width: 950px;">
     
+    @php
+        // Daftar role yang diizinkan untuk mengedit dan menghapus data evaluasi
+        $allowedRoles = ['Admin Aplikasi', 'Analis Lab', 'Koordinator Laboratorium'];
+        $userRoleName = Auth::user()->role->nama_role ?? '';
+        $canModify = in_array($userRoleName, $allowedRoles);
+    @endphp
+
     <div class="d-flex justify-content-between align-items-center mb-2 mt-1">
         <div></div>
         <div class="d-flex align-items-center gap-1">
             <a href="{{ route('evaluasi-kalibrasi.index') }}" class="btn btn-outline-secondary btn-sm fw-bold py-1 px-2 shadow-sm" style="font-size: 11px;">
                 <i class="fas fa-arrow-left me-1"></i> Kembali
             </a>
-            <a href="{{ route('evaluasi-kalibrasi.edit', $evaluasi->evaluasi_id) }}" class="btn btn-sm text-nowrap py-1 px-2 shadow-sm d-flex align-items-center text-white" style="background-color: #1b3152 !important; border-color: #1b3152 !important; font-size: 11px; gap: 5px;">
-                <i class="fas fa-edit text-white"></i> <span class="text-white">Edit</span>
-            </a>
-            
-            <!-- Tombol Trigger Modal Bootstrap -->
-            <button type="button" class="btn btn-danger btn-sm fw-bold py-1 px-2 shadow-sm" style="font-size: 11px;" data-bs-toggle="modal" data-bs-target="#modalHapusEvaluasi">
-                <i class="fas fa-trash me-1"></i> Hapus
-            </button>
+
+            @if($canModify)
+                <a href="{{ route('evaluasi-kalibrasi.edit', $evaluasi->evaluasi_id) }}" class="btn btn-sm text-nowrap py-1 px-2 shadow-sm d-flex align-items-center text-white" style="background-color: #1b3152 !important; border-color: #1b3152 !important; font-size: 11px; gap: 5px;">
+                    <i class="fas fa-edit text-white"></i> <span class="text-white">Edit</span>
+                </a>
+                
+                <button type="button" class="btn btn-danger btn-sm fw-bold py-1 px-2 shadow-sm" style="font-size: 11px;" data-bs-toggle="modal" data-bs-target="#modalHapusEvaluasi">
+                    <i class="fas fa-trash me-1"></i> Hapus
+                </button>
+            @endif
         </div>
     </div>
 
@@ -108,6 +117,7 @@
     </div>
 </div>
 
+@if($canModify)
 <!-- Modal Konfirmasi Hapus Bootstrap -->
 <div class="modal fade" id="modalHapusEvaluasi" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 360px;">
@@ -132,4 +142,5 @@
         </div>
     </div>
 </div>
+@endif
 @endsection
