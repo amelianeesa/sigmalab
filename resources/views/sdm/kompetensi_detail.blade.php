@@ -164,9 +164,12 @@
                                     <form action="{{ route('sdm.kompetensi.destroy', [$personil->personil_id, $komp->kompetensi_personil_id]) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus riwayat sertifikasi &quot;{{ $komp->jenis_sertifikasi }}&quot;? Dokumen terkait juga akan terhapus.')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm table-action-btn" title="Hapus">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        <button type="button" class="btn btn-danger btn-sm table-action-btn" title="Hapus"
+                                        data-bs-toggle="modal" data-bs-target="#modalHapusSertifikasi"
+                                        data-action="{{ route('sdm.kompetensi.destroy', [$personil->personil_id, $komp->kompetensi_personil_id]) }}"
+                                        data-namasertifikat="{{ $komp->jenis_sertifikasi }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                     </form>
                                 </td>
                             </tr>
@@ -274,6 +277,30 @@
         </div>
     </div>
 
+    <!-- DITAMBAHKAN -->
+<div class="modal fade" id="modalHapusSertifikasi" tabindex="-1" aria-labelledby="modalHapusSertifikasiLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
+        <div class="modal-content border-0 shadow text-center p-3" style="font-size: 0.82rem; border-radius: 8px;">
+            <div class="pt-2 pb-1">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 56px; height: 56px; background-color: #fff8e6; color: #f0ad4e; font-size: 24px; border: 2px solid #ffeeba;">
+                    <i class="fas fa-exclamation"></i>
+                </div>
+            </div>
+            <div class="modal-body px-2 py-2">
+                <h5 class="fw-bold text-dark mb-1" style="font-size: 1rem;">Apakah Anda yakin?</h5>
+                <p class="text-muted mb-0" style="font-size: 0.78rem;">Data riwayat sertifikasi <strong id="namaSertifikasiHapus" class="text-dark"></strong> ini akan dihapus secara permanen beserta dokumen terkait!</p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center gap-2 pt-1 pb-2">
+                <button type="button" class="btn btn-secondary btn-sm py-1.5 px-3.5 fw-semibold rounded-2" data-bs-dismiss="modal" style="font-size: 0.78rem;">Batal</button>
+                <form id="formHapusSertifikasi" action="" method="POST" class="d-inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger btn-sm py-1.5 px-3.5 fw-semibold rounded-2" style="font-size: 0.78rem;">Ya, Hapus!</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const modalEdit = document.getElementById('modalEditSertifikasi');
@@ -294,5 +321,16 @@
                     : 'Belum ada dokumen. Unggah di sini bila tersedia.';
             });
         });
+        const modalHapus = document.getElementById('modalHapusSertifikasi');
+        if (modalHapus) {
+            modalHapus.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const actionUrl = button.getAttribute('data-action');
+                const namaSertifikasi = button.getAttribute('data-namasertifikat');
+            
+                document.getElementById('formHapusSertifikasi').action = actionUrl;
+                document.getElementById('namaSertifikasiHapus').textContent = `"${namaSertifikasi}"`;
+            });
+        }
     </script>
 @endsection

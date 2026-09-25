@@ -133,6 +133,88 @@
             color: #fff;
             border-color: rgba(255,255,255,.18);
         }
+
+        .nav-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #ffffff;
+            color: #1d4c7a;
+            font-weight: 700;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        #profileDropdown {
+            min-width: 240px;
+            padding: 0;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+            overflow: hidden;
+        }
+        #profileDropdown .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            background: #f8fafc;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        #profileDropdown .profile-header .nav-avatar {
+            width: 38px;
+            height: 38px;
+            font-size: 1rem;
+            background: #1d4c7a;
+            color: #ffffff;
+        }
+        #profileDropdown .profile-name {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1.2;
+        }
+        #profileDropdown .profile-email {
+            font-size: 0.72rem;
+            color: #64748b;
+            line-height: 1.2;
+            word-break: break-all;
+        }
+        #profileDropdown .profile-role {
+            display: inline-block;
+            margin-top: 3px;
+            padding: 1px 8px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #1d4c7a;
+            background: rgba(29, 76, 122, 0.1);
+            border-radius: 10px;
+        }
+        #profileDropdown .dropdown-item {
+            font-size: 0.8rem;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #profileDropdown .dropdown-item i {
+            width: 16px;
+            font-size: 0.85rem;
+        }
+        #profileDropdown .dropdown-item:hover {
+            background: #eff6ff;
+            color: #1d4c7a;
+        }
+        #profileDropdown .dropdown-item.text-danger:hover {
+            background: #fdf2f2;
+            color: #dc3545;
+        }
+        #profileDropdown .dropdown-divider {
+            margin: 0;
+        }
         
         .pagination svg, .card-body svg {
             width: 1rem !important; height: 1rem !important;
@@ -288,14 +370,52 @@
                 @endif
 
                 @if(Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
-                <li class="{{ request()->is('parameter-uji*') || request()->is('kegiatan*') || request()->is('tindak-lanjut*') || request()->is('reporting*') ? 'active' : '' }}">
+                @php
+                    $qcIndexPath = trim((string) parse_url(route('kegiatan.index'), PHP_URL_PATH), '/');
+                    $qcActive = request()->is('verifikasi-mutu*', 'qc-inhouse*', 'parameter-uji*', 'kegiatan*', 'tindak-lanjut*', 'reporting*')
+                        || request()->routeIs('verifikasi-mutu.*', 'qc-inhouse.*', 'kegiatan.*', 'parameter-uji.*', 'tindak-lanjut.*', 'reporting.*')
+                        || ($qcIndexPath !== '' && request()->is($qcIndexPath . '*'));
+                @endphp
+                <li class="{{ $qcActive ? 'active' : '' }}">
                     <a href="{{ route('kegiatan.index') }}"><i class="fas fa-flask"></i> Verifikasi Mutu (QC)</a>
                 </li>
                 @endif
 
                 @if(Auth::check() && (Auth::user()->hasModulAccess('barang') || Auth::user()->hasModulAccess('pengadaan')))
-                <li class="{{ request()->is('barang*') || request()->is('pengadaan*') ? 'active' : '' }}">
-                    <a href="{{ route('barang.index') }}"><i class="fas fa-boxes"></i> Inventori Bahan/Barang</a>
+                @php
+                    $barangMenuActive = request()->is('barang*');
+                    $pengadaanMenuActive = request()->is('pengadaan*');
+                    $inventoriMenuOpen = $barangMenuActive || $pengadaanMenuActive;
+                @endphp
+                <li class="nav-item">
+                    <a class="nav-link d-flex justify-content-between align-items-center {{ $inventoriMenuOpen ? 'active text-primary fw-bold' : 'collapsed' }}" 
+                       data-bs-toggle="collapse" 
+                       href="#menuInventoriBarang" 
+                       role="button" 
+                       aria-expanded="{{ $inventoriMenuOpen ? 'true' : 'false' }}" 
+                       aria-controls="menuInventoriBarang">
+                        <span><i class="fas fa-boxes me-2"></i> Inventori Bahan/Barang</span>
+                        <i class="fas fa-chevron-down small" style="font-size: 0.7rem;"></i>
+                    </a>
+
+                    <div class="collapse {{ $inventoriMenuOpen ? 'show' : '' }}" id="menuInventoriBarang">
+                        <ul class="nav flex-column ms-3 ps-2 border-start mt-1" style="font-size: 0.9rem;">
+                            @if(Auth::user()->hasModulAccess('barang'))
+                            <li class="nav-item">
+                                <a class="nav-link py-1 {{ $barangMenuActive ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('barang.index') }}">
+                                    <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Data Inventory Barang/Bahan
+                                </a>
+                            </li>
+                            @endif
+                            @if(Auth::user()->hasModulAccess('pengadaan'))
+                            <li class="nav-item">
+                                <a class="nav-link py-1 {{ $pengadaanMenuActive ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('pengadaan.index') }}">
+                                    <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Cek Pengadaan
+                                </a>
+                            </li>
+                            @endif
+                        </ul>
+                    </div>
                 </li>
                 @endif
 
@@ -329,6 +449,11 @@
 
         <div class="d-flex align-items-center gap-3">
             @auth
+            @php
+                $navUser = Auth::user();
+                $navName = $navUser->personil->nama ?? $navUser->username ?? 'Pengguna';
+                $navInitial = strtoupper(mb_substr($navName, 0, 1));
+            @endphp
             <div class="dropdown">
                 <a href="#" class="btn btn-warning position-relative rounded-circle p-2 d-flex align-items-center justify-content-center dropdown-toggle" style="width: 36px; height: 36px;" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="fas fa-bell text-white" style="font-size: 0.85rem;"></i>
@@ -368,7 +493,7 @@
                                         default => 'fa-bell',
                                     };
                                 @endphp
-                                <a href="#" class="notif-item {{ !$notif->is_read ? 'unread' : '' }}">
+                                <a href="{{ route('notifikasi.klik', $notif->notifikasi_id) }}" class="notif-item {{ !$notif->is_read ? 'unread' : '' }}">
                                     <span class="notif-icon {{ $iconBg }}">
                                         <i class="fas {{ $icon }} text-white"></i>
                                     </span>
@@ -393,24 +518,34 @@
             </div>
 
             <div class="dropdown">
-                <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center py-1 px-2" type="button" data-bs-toggle="dropdown" title="Profil" style="border-color: rgba(255,255,255,0.2);">
-                    <i class="bi bi-person-circle me-1 text-white" style="font-size: 1rem;"></i> 
-                    <div class="d-none d-sm-flex flex-column text-start ms-1 me-1 text-white" style="line-height: 1.1;">
-                        <span class="fw-bold" style="font-size: 0.85rem;">{{ Auth::user()->personil->nama_personil ?? Auth::user()->username ?? 'Pengguna' }}</span>
-                        <small style="font-size: 0.68rem; color: rgba(255,255,255,0.85);">{{ Auth::user()->role->nama_role ?? '-' }}</small>
+                <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center py-1 px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Akun Saya" style="border-color: rgba(255,255,255,0.2);">
+                    <span class="nav-avatar">{{ $navInitial }}</span>
+                    <div class="d-none d-sm-flex flex-column text-start ms-2 me-1 text-white" style="line-height: 1.1;">
+                        <span class="fw-bold" style="font-size: 0.85rem;">{{ $navName }}</span>
+                        <small style="font-size: 0.68rem; color: rgba(255,255,255,0.85);">{{ $navUser->role->nama_role ?? '-' }}</small>
                     </div>
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end">
+                <ul class="dropdown-menu dropdown-menu-end" id="profileDropdown">
+                    <li>
+                        <div class="profile-header">
+                            <span class="nav-avatar">{{ $navInitial }}</span>
+                            <div style="min-width: 0;">
+                                <div class="profile-name">{{ $navName }}</div>
+                                <div class="profile-email">{{ $navUser->email }}</div>
+                                <span class="profile-role">{{ $navUser->role->nama_role ?? '-' }}</span>
+                            </div>
+                        </div>
+                    </li>
                     <li>
                         <a class="dropdown-item" href="{{ route('profil.index') }}">
-                            <i class="bi bi-person me-2"></i> Profil Saya
+                            <i class="bi bi-person"></i> Profil Saya
                         </a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
                         <form action="{{ route('logout') }}" method="POST">
                             @csrf
-                            <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i> Logout</button>
+                            <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right"></i> Logout</button>
                         </form>
                     </li>
                 </ul>

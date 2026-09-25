@@ -1,6 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
+<style>
+    tr:target > td { animation: sorotBaris 3s ease; }
+    @keyframes sorotBaris {
+        0%, 60% { background-color: #fff3cd; }
+        100% { background-color: transparent; }
+    }
+</style>
+
 <div class="container-fluid pt-0 pb-4 px-4">
     <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
         <div>
@@ -55,7 +63,7 @@
                                 $alasanText = trim($alasanText);
                             }
                         @endphp
-                        <tr>
+                        <tr id="pengadaan-{{ $p->permintaan_id }}">
                             <!-- 1. No -->
                             <td class="text-center">{{ $loop->iteration }}</td>
                 
@@ -220,21 +228,8 @@
                                                 </form>
                                             </div>
                                         </div>
-                                    
-                                        <script>
-                                            function toggleEstimasi(selectObj, id) {
-                                                const label = document.getElementById('labelEstimasi' + id);
-                                                if (selectObj.value === 'PO') {
-                                                    label.innerText = 'Estimasi PO (Hari / Keterangan)';
-                                                } else if (selectObj.value === 'Pembelian') {
-                                                    label.innerText = 'Estimasi Pembelian Langsung';
-                                                } else {
-                                                    label.innerText = 'Catatan / Estimasi';
-                                                }
-                                            }
-                                        </script>
-                                    @endif            
-                        
+                                    @endif        
+
                                     <div class="modal fade" id="modalTolak{{ $p->permintaan_id }}" tabindex="-1">
                                         <div class="modal-dialog modal-sm">
                                             <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST" class="modal-content text-start">
@@ -257,20 +252,20 @@
                                     </div>
 
                                     @if($p->status == 'selesai' || $p->foto_diterima)
-                                    <div class="p-1 border rounded bg-light text-start" style="font-size:0.7rem;">
-                                        <span class="fw-bold text-dark">Penerima: {{ $p->nama_penerima ?? '-' }}</span><br>
-                                        @if($p->waktu_diterima)
-                                            <span class="text-muted" style="font-size:0.65rem;">
-                                                <i class="fas fa-clock me-1 text-secondary"></i>{{ \Carbon\Carbon::parse($p->waktu_diterima)->format('d M Y, H:i') }}
-                                            </span><br>
-                                        @endif
-                                        @if($p->foto_diterima)
-                                            <a href="{{ asset($p->foto_diterima) }}" target="_blank" class="btn btn-sm btn-info mt-1 text-white py-0 px-2 w-100" style="font-size:0.65rem;">
-                                                <i class="fas fa-image"></i> Lihat Bukti
-                                            </a>
-                                        @endif
-                                    </div>
-                                    @elseif($p->status == 'disetujui' || $p->status == 'diproses')
+                                        <div class="p-1 border rounded bg-light text-start" style="font-size:0.7rem;">
+                                            <span class="fw-bold text-dark">Penerima: {{ $p->nama_penerima ?? '-' }}</span><br>
+                                            @if($p->waktu_diterima)
+                                                <span class="text-muted" style="font-size:0.65rem;">
+                                                    <i class="fas fa-clock me-1 text-secondary"></i>{{ \Carbon\Carbon::parse($p->waktu_diterima)->format('d M Y, H:i') }}
+                                                </span><br>
+                                            @endif
+                                            @if($p->foto_diterima)
+                                                <a href="{{ asset($p->foto_diterima) }}" target="_blank" class="btn btn-sm btn-info mt-1 text-white py-0 px-2 w-100" style="font-size:0.65rem;">
+                                                    <i class="fas fa-image"></i> Lihat Bukti
+                                                </a>
+                                            @endif
+                                        </div>
+                                    @elseif(in_array($p->status, ['disetujui', 'diproses', 'diproses_po', 'pembelian']))
                                         <button type="button" class="btn btn-sm btn-warning fw-bold w-100 py-1" data-bs-toggle="modal" data-bs-target="#modalTerima{{ $p->permintaan_id }}" style="font-size:0.7rem;">
                                             <i class="fas fa-camera"></i> Konfirmasi Terima
                                         </button>
@@ -304,7 +299,7 @@
                                                 </form>
                                             </div>
                                         </div>
-                                    @endif
+                                    @endif 
                         
                                     @if(Auth::id() == $p->diajukan_oleh && in_array($p->status, ['diajukan', 'menunggu_koordinator']))
                                         <form action="{{ route('pengadaan.destroy', $p->permintaan_id) }}" method="POST">
@@ -335,7 +330,6 @@
     </div>
 </div>
 
-<!-- Modal Update Progres -->
 @foreach($pengadaans as $p)
 @if(in_array($p->status, ['diproses', 'diproses_po', 'pembelian']))
 <div class="modal fade" id="updateProsesModal{{ $p->permintaan_id }}" tabindex="-1" aria-hidden="true">
@@ -360,11 +354,7 @@
         </form>
     </div>
 </div>
-@endif
-@endforeach
 
-@foreach($pengadaans as $p)
-@if(in_array($p->status, ['diproses', 'diproses_po', 'pembelian']))
 <div class="modal fade" id="modalBatalGa{{ $p->permintaan_id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <form action="{{ route('pengadaan.batal-progres', $p->permintaan_id) }}" method="POST" class="modal-content text-start">
@@ -492,3 +482,18 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    function toggleEstimasi(selectObj, id) {
+        const label = document.getElementById('labelEstimasi' + id);
+        if (selectObj.value === 'PO') {
+            label.innerText = 'Estimasi PO (Hari / Keterangan)';
+        } else if (selectObj.value === 'Pembelian') {
+            label.innerText = 'Estimasi Pembelian Langsung';
+        } else {
+            label.innerText = 'Catatan / Estimasi';
+        }
+    }
+</script>
+@endpush

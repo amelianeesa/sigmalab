@@ -47,9 +47,52 @@
         border-color: #14253e !important;
         color: #ffffff !important;
     }
+
+    .pagination .page-link {
+        font-size: 0.72rem;
+        padding: 0.2rem 0.55rem;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .sticky-no {
+        position: sticky !important;
+        left: 0 !important;
+        width: 45px !important;
+        min-width: 45px !important;
+        z-index: 3;
+        background-color: #ffffff !important;
+    }
+
+    .sticky-alat {
+        position: sticky !important;
+        left: 45px !important; 
+        width: 200px !important;
+        min-width: 200px !important;
+        z-index: 3;
+        background-color: #ffffff !important;
+    }
+
+    thead th.sticky-no, thead th.sticky-alat {
+        background-color: #1b3152 !important;
+        z-index: 4;
+    }
+
+    .sticky-alat::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 4px;
+        box-shadow: inset -3px 0 3px -2px rgba(0, 0, 0, 0.15);
+    }
 </style>
 
 <div class="container-fluid dashboard-container" style="font-size: 0.82rem;">
+
     @php
         $alatWarningCount = 0;
         foreach($alat as $item) {
@@ -63,7 +106,6 @@
             }
         }
 
-        // Daftar role yang diizinkan
         $allowedRoles = ['Admin Aplikasi', 'Analis Lab', 'Koordinator Laboratorium', 'GA'];
         $userRoleName = Auth::user()->role->nama_role ?? '';
         $canModify = in_array($userRoleName, $allowedRoles);
@@ -122,13 +164,12 @@
             </form>
 
             <div class="table-responsive" id="table-container">
-                <table class="table table-bordered table-striped align-middle text-center" style="font-size: 0.78rem;">
+                <table class="table table-bordered table-striped align-middle text-center mb-0" style="font-size: 0.78rem;">
                     <thead class="align-middle">
                         <tr>
-                            <th rowspan="2" style="width: 45px;">No.</th>
+                            <th rowspan="2" class="sticky-no" style="width: 45px;">No.</th>
+                            <th rowspan="2" class="sticky-alat" style="width: 200px;">Alat</th>
                             <th rowspan="2" style="width: 65px;">QR Code</th>
-                            <th rowspan="2">Nama Alat</th>
-                            <th rowspan="2">CODE</th>
                             <th rowspan="2" style="min-width: 100px;">No. Inventaris</th>
                             <th colspan="5">Spesifikasi</th>
                             <th rowspan="2">Kondisi Alat</th>
@@ -181,7 +222,13 @@
                             $qrSvgLarge = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(160)->generate($qrData);
                         @endphp
                         <tr>
-                            <td>{{ $index + 1 }}</td>
+                            <td class="sticky-no">{{ $alat->firstItem() + $index }}</td>
+                            <td class="sticky-alat text-start fw-bold">
+                                <a href="{{ route('alat.input-kalibrasi', $item->alat_id) }}" class="text-decoration-none text-primary" title="Buka Halaman Kalibrasi">
+                                    {{ $item->nama_alat }} <i class="fas fa-external-link-alt ms-1" style="font-size: 0.6rem;"></i>
+                                </a>
+                                <div class="fw-normal text-muted" style="font-size: 0.7rem;">Code: <code class="text-dark">{{ $item->kode_alat }}</code></div>
+                            </td>
                             <td>
                                 <div class="p-1 bg-white d-inline-block shadow-sm rounded qr-thumbnail"
                                      style="cursor: pointer;"
@@ -194,12 +241,6 @@
                                     {!! $qrSvgCode !!}
                                 </div>
                             </td>
-                            <td class="fw-bold text-start">
-                                <a href="{{ route('alat.input-kalibrasi', $item->alat_id) }}" class="text-decoration-none text-primary" title="Buka Halaman Kalibrasi">
-                                    {{ $item->nama_alat }} <i class="fas fa-external-link-alt ms-1" style="font-size: 0.6rem;"></i>
-                                </a>
-                            </td>
-                            <td><code class="fw-bold text-dark">{{ $item->kode_alat }}</code></td>
                             <td>{{ $item->no_inventaris ?? '-' }}</td>
                             <td class="text-center">{{ $item->merk_tipe ?? '-' }}</td>
                             <td>{{ $item->no_seri ?? '-' }}</td>
@@ -283,6 +324,10 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            <div class="mt-3">
+                {{ $alat->withQueryString()->links('vendor.pagination.custom', ['size' => 'sm']) }}
             </div>
         </div>
     </div>

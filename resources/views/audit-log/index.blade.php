@@ -55,6 +55,10 @@
         color: #ffffff !important;
         border-color: #1b3152 !important;
     }
+    .pagination .page-link {
+        font-size: 0.72rem;
+        padding: 0.2rem 0.55rem;
+    }
 </style>
 
 <div class="container-fluid px-4">
@@ -144,8 +148,8 @@
                 </table>
             </div>
 
-            <div class="mt-3 d-flex justify-content-end" style="font-size: 0.72rem;">
-                {{ $logs->withQueryString()->links() }}
+            <div class="mt-3" style="font-size: 0.72rem;">
+                {{ $logs->withQueryString()->links('vendor.pagination.custom') }}
             </div>
         </div>
     </div>

@@ -105,6 +105,7 @@
             font-size: 0.92rem;
             color: #1f2a37;
             background-color: #ffffff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         .form-control:focus {
@@ -120,13 +121,28 @@
             font-size: 0.92rem;
             font-weight: 700;
             color: #ffffff;
-            transition: all 0.2s ease;
+            transition: all 0.25s ease-in-out;
         }
 
-        .btn-auth:hover { background: #0a2a4b; border-color: #0a2a4b; }
+        .btn-auth:hover {
+            background: #0a2a4b;
+            border-color: #0a2a4b;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(12, 58, 104, 0.25);
+            transform: translateY(-1px);
+        }
 
-        .auth-link { color: #0d4c76; font-weight: 600; text-decoration: none; }
-        .auth-link:hover { color: #0b3d5d; text-decoration: underline; }
+        .auth-link {
+            color: #0d4c76;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        
+        .auth-link:hover {
+            color: #0b3d5d;
+            text-decoration: underline;
+        }
 
         .auth-footer { margin-top: 0.85rem; color: #7b8a9d; font-size: 0.78rem; text-align: center; }
     </style>
