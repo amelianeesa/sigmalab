@@ -1,11 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
     <style>
         .page-container {
             font-size: 0.78rem;
         }
-        
+
         .profile-avatar {
             width: 44px;
             height: 44px;
@@ -30,6 +31,29 @@
             padding: 8px 6px;
             font-size: 0.73rem;
             vertical-align: middle;
+        }
+
+        .col-jenis { width: 170px; }
+        .col-no { width: 95px; }
+        .col-tanggal { width: 90px; }
+        .col-status { width: 85px; }
+        .col-dokumen { width: 230px; }
+        .col-aksi { width: 95px; }
+
+        @media (max-width: 768px) {
+            .table thead th { font-size: 0.62rem; padding: 6px 4px; white-space: nowrap; }
+            .table tbody td { font-size: 0.65rem; padding: 6px 4px; }
+
+            .col-jenis { width: 130px; }
+            .col-no { width: 75px; }
+            .col-tanggal { width: 68px; }
+            .col-status { width: 65px; }
+            .col-dokumen { width: 150px; }
+            .col-aksi { width: 75px; }
+
+            .table-upload-input { width: 90px; font-size: 0.6rem; }
+            .table-upload-btn { font-size: 0.62rem; padding: 0.1rem 0.35rem; }
+            .table-action-btn { font-size: 0.62rem !important; padding: 0.2rem 0.35rem !important; }
         }
 
         .btn-corporate-outline {
@@ -68,6 +92,13 @@
             height: 28px;
             padding: 0.1rem 0.5rem;
         }
+
+        .flatpickr-input {
+            font-size: 0.73rem;
+        }
+        .flatpickr-calendar {
+            font-size: 0.8rem;
+        }
     </style>
 
     <div class="container-fluid px-3 pt-1 pb-2 page-container">
@@ -85,7 +116,7 @@
         @endif
 
         <div class="card border-0 shadow-sm rounded-3 mb-2">
-            <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="card-body p-3 d-flex justify-content-between align-items-start align-items-md-center flex-column flex-md-row gap-2">
                 <div class="d-flex align-items-center gap-3">
                     <div class="rounded-circle bg-dark text-white fw-bold d-flex align-items-center justify-content-center shadow-sm profile-avatar">
                         {{ strtoupper(substr($personil->nama, 0, 2)) }}
@@ -116,13 +147,13 @@
                     <table class="table table-bordered table-striped align-middle mb-0">
                         <thead>
                             <tr>
-                                <th style="width: 170px;">Jenis Sertifikasi / Pelatihan</th>
-                                <th style="width: 95px;">No. Sertifikat</th>
-                                <th style="width: 85px;">Tanggal Terbit</th>
-                                <th style="width: 90px;">Masa Berlaku Berakhir</th>
-                                <th style="width: 85px;">Status</th>
-                                <th style="width: 230px;">Dokumen</th>
-                                <th style="width: 95px;">Aksi</th>
+                                <th class="col-jenis">Jenis Sertifikasi / Pelatihan</th>
+                                <th class="col-no">No. Sertifikat</th>
+                                <th class="col-tanggal">Tanggal Terbit</th>
+                                <th class="col-tanggal">Masa Berlaku Berakhir</th>
+                                <th class="col-status">Status</th>
+                                <th class="col-dokumen">Dokumen</th>
+                                <th class="col-aksi">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -209,11 +240,11 @@
                         <div class="row g-2">
                             <div class="col-md-6 mb-2">
                                 <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Tanggal Terbit</label>
-                                <input type="date" name="tanggal_terbit" class="form-control form-control-sm py-1" value="{{ date('Y-m-d') }}" style="font-size: 0.73rem;">
+                                <input type="text" name="tanggal_terbit" id="addTanggalTerbit" class="form-control form-control-sm py-1 flatpickr-date" value="{{ date('Y-m-d') }}" placeholder="dd/mm/yyyy" autocomplete="off" style="font-size: 0.73rem;">
                             </div>
                             <div class="col-md-6 mb-2">
                                 <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Tanggal Berakhir</label>
-                                <input type="date" name="tanggal_berakhir" class="form-control form-control-sm py-1" style="font-size: 0.73rem;">
+                                <input type="text" name="tanggal_berakhir" id="addTanggalBerakhir" class="form-control form-control-sm py-1 flatpickr-date" placeholder="dd/mm/yyyy" autocomplete="off" style="font-size: 0.73rem;">
                                 <div class="form-text text-muted mt-0.5" style="font-size: 0.62rem;">Kosongkan bila tidak terbatas.</div>
                             </div>
                         </div>
@@ -222,7 +253,7 @@
                             <input type="file" name="file_sertifikat" class="form-control form-control-sm py-1" accept="image/*,application/pdf" style="font-size: 0.73rem;">
                             <div class="form-text text-muted mt-0.5" style="font-size: 0.62rem;">Format: JPG, PNG, PDF (Maks. 2MB).</div>
                         </div>
-                    </div>  
+                    </div>
                     <div class="modal-footer bg-light py-1.5 px-3">
                         <button type="button" class="btn btn-secondary btn-sm py-1 px-3" data-bs-dismiss="modal" style="font-size: 0.73rem;">Batal</button>
                         <button type="submit" class="btn btn-sm py-1 px-3 text-white" style="background-color: #1b3152; font-size: 0.73rem;"><i class="fas fa-save me-1"></i> Simpan</button>
@@ -254,11 +285,11 @@
                         <div class="row g-2">
                             <div class="col-md-6 mb-2">
                                 <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Tanggal Terbit</label>
-                                <input type="date" name="tanggal_terbit" id="editTanggalTerbit" class="form-control form-control-sm py-1" style="font-size: 0.73rem;">
+                                <input type="text" name="tanggal_terbit" id="editTanggalTerbit" class="form-control form-control-sm py-1 flatpickr-date" placeholder="dd/mm/yyyy" autocomplete="off" style="font-size: 0.73rem;">
                             </div>
                             <div class="col-md-6 mb-2">
                                 <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Tanggal Berakhir</label>
-                                <input type="date" name="tanggal_berakhir" id="editTanggalBerakhir" class="form-control form-control-sm py-1" style="font-size: 0.73rem;">
+                                <input type="text" name="tanggal_berakhir" id="editTanggalBerakhir" class="form-control form-control-sm py-1 flatpickr-date" placeholder="dd/mm/yyyy" autocomplete="off" style="font-size: 0.73rem;">
                                 <div class="form-text text-muted mt-0.5" style="font-size: 0.62rem;">Kosongkan bila tidak terbatas.</div>
                             </div>
                         </div>
@@ -301,8 +332,24 @@
         </div>
     </div>
 </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const commonOpts = {
+                dateFormat: 'Y-m-d',
+                altInput: true,
+                altFormat: 'd/m/Y',
+                allowInput: true
+            };
+
+            flatpickr('#addTanggalTerbit', commonOpts);
+            flatpickr('#addTanggalBerakhir', commonOpts);
+
+            const fpEditTerbit = flatpickr('#editTanggalTerbit', commonOpts);
+            const fpEditBerakhir = flatpickr('#editTanggalBerakhir', commonOpts);
+
             const modalEdit = document.getElementById('modalEditSertifikasi');
             if (!modalEdit) return;
 
@@ -312,8 +359,11 @@
                 document.getElementById('formEditSertifikasi').action = button.getAttribute('data-action');
                 document.getElementById('editJenisSertifikasi').value = button.getAttribute('data-jenis') || '';
                 document.getElementById('editNoSertifikasi').value = button.getAttribute('data-no') || '';
-                document.getElementById('editTanggalTerbit').value = button.getAttribute('data-terbit') || '';
-                document.getElementById('editTanggalBerakhir').value = button.getAttribute('data-berakhir') || '';
+
+                const terbit = button.getAttribute('data-terbit') || '';
+                const berakhir = button.getAttribute('data-berakhir') || '';
+                fpEditTerbit.setDate(terbit || null, true);
+                fpEditBerakhir.setDate(berakhir || null, true);
 
                 const hasFile = button.getAttribute('data-has-file') === '1';
                 document.getElementById('editFileInfo').textContent = hasFile

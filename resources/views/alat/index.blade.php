@@ -111,6 +111,7 @@
         $canModify = in_array($userRoleName, $allowedRoles);
     @endphp
 
+
     @if($alatWarningCount > 0)
         <div class="alert alert-warning alert-dismissible fade show shadow-sm py-1 px-2.5 mb-2 d-flex align-items-center justify-content-between" role="alert" style="font-size: 0.8rem;">
             <div class="pe-2">

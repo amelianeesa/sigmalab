@@ -5,128 +5,117 @@
     <title>Laporan Inventori Bahan</title>
     <style>
         @page {
-            size: A4 landscape;
-            margin: 15mm 15mm 25mm 15mm;
+            size: A4 portrait;
+            margin: 10mm;
         }
 
         body { 
             font-family: sans-serif; 
-            font-size: 9.5pt; 
+            font-size: 8pt; 
             color: #333;
             margin: 0;
         }
 
-        .header-table {
-            width: 100%;
+        .header { 
+            width: 100%; 
+            border-bottom: 2px solid #333; 
+            padding-bottom: 4px; 
+            padding-top: 1px;
+            margin-bottom: 8px; 
+        }
+        .header table { 
+            width: 100%; 
             border-collapse: collapse;
-            margin-bottom: 0;
-            border: none;
         }
-        .header-table td {
-            border: none;
-            padding: 0 !important; 
-            vertical-align: middle;
-        }
-        
-        .report-title {
-            font-size: 13pt;
-            font-weight: bold;
-            text-align: left !important;
+        .title { 
+            font-size: 11.5pt; 
+            font-weight: bold; 
+            color: #333; 
+            text-align: left;
             text-transform: uppercase;
-            margin: 0;
-            padding: 0;
         }
-        
-        .logo-container {
-            text-align: right !important;
-            padding: 0 !important;
-        }
-        .logo-img {
-            height: 70px; 
-        }
-        .header-line {
-            border: none;
-            border-top: 2px solid #333;
-            margin-top: 8px;
-            margin-bottom: 10px;
-        }
-
         .header-subtitle { 
-            font-size: 10pt; 
-            text-align: left !important; 
+            font-size: 9pt; 
             font-weight: bold;
-            margin-top: 0;
-            margin-bottom: 15px;
-            padding: 0 !important;
+            margin-top: 2px;
+            padding-bottom: 2px;
+            color: #333;
+        }
+        .logo { 
+            width: 110px; 
+            padding-bottom: 14px;
         }
 
         table.data-table { 
             width: 100%; 
             border-collapse: collapse; 
-            margin-top: 5px; 
+            margin-top: 0; 
         }
         table.data-table th, table.data-table td { 
             border: 1px solid #333; 
-            padding: 6px; 
+            padding: 4px 3px; 
             text-align: center; 
+            word-wrap: break-word;
         }
         table.data-table th { 
             background-color: #f2f2f2; 
+            font-size: 7.5pt;
         }
         .text-start { text-align: left; }
         .fw-bold { font-weight: bold; }
 
         .footer {
             width: 100%;
-            position: fixed;
-            bottom: -15mm;
+            position: absolute;
+            bottom: -1mm;
             left: 0;
             right: 0;
-            font-size: 8pt;
+            font-size: 7.5pt;
             border-top: 1px solid #999;
-            padding-top: 5px;
+            padding-top: 4px;
         }
-        .footer-left {
-            float: left;
-        }
-        .footer-right {
-            float: right;
+        .footer-left { float: left; }
+        .footer-right { float: right; }
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
         }
     </style>
 </head>
 <body>
 
-    <table class="header-table">
-        <tr>
-            <td style="width: 75%;">
-                <div class="report-title">LAPORAN INVENTORI BARANG PERSEDIAAN</div>
-            </td>
-            <td class="logo-container" style="width: 25%;">
-                <img src="{{ public_path('images/Logo_Suco_Nobg.png') }}" alt="SUCOFINDO" class="logo-img">
-            </td>
-        </tr>
-    </table>
-    <hr class="header-line">
-
-    <div class="header-subtitle">
-        Periode: {{ date('F', mktime(0, 0, 0, $bulan, 10)) }} {{ $tahun }}
+    <div class="header">
+        <table>
+            <tr>
+                <td style="text-align: left; vertical-align: middle;">
+                    <div class="title">LAPORAN INVENTORI BARANG PERSEDIAAN</div>
+                    <div class="header-subtitle">
+                        Periode: {{ date('F', mktime(0, 0, 0, $bulan, 10)) }} {{ $tahun }}
+                    </div>
+                </td>
+                <td style="text-align: right; vertical-align: middle;">
+                    <img src="{{ public_path('images/Logo_Suco_Nobg.png') }}" alt="SUCOFINDO" class="logo">
+                </td>
+            </tr>
+        </table>
     </div>
 
     <table class="data-table">
         <thead>
             <tr>
-                <th rowspan="2" style="width: 40px;">No.</th>
-                <th rowspan="2">Nama Barang</th>
-                <th rowspan="2" style="width: 80px;">Satuan</th>
-                <th rowspan="2" style="width: 100px;">Kode Barang</th>
-                <th rowspan="2" style="width: 90px;">Saldo Awal</th>
-                <th colspan="2">Jumlah</th>
-                <th rowspan="2" style="width: 90px;">Saldo Akhir</th>
-                <th rowspan="2" style="width: 90px;">Kondisi</th>
+                <th rowspan="2" style="width: 25px;">No.</th>
+                <th rowspan="2" style="width: 110px;">Nama Barang</th>
+                <th rowspan="2" style="width: 45px;">Satuan</th>
+                <th rowspan="2" style="width: 60px;">Kode</th>
+                <th rowspan="2" style="width: 45px;">Awal</th>
+                <th colspan="2" style="width: 80px;">Jumlah</th>
+                <th rowspan="2" style="width: 45px;">Akhir</th>
+                <th rowspan="2" style="width: 50px;">Kondisi</th>
             </tr>
             <tr>
-                <th style="width: 80px;">Masuk</th>
-                <th style="width: 80px;">Keluar</th>
+                <th style="width: 40px;">Masuk</th>
+                <th style="width: 40px;">Keluar</th>
             </tr>
         </thead>
         <tbody>
@@ -156,9 +145,9 @@
         </tbody>
     </table>
 
-    <div class="footer">
+    <div class="footer clearfix">
         <div class="footer-left">
-            Dicetak oleh: {{ Auth::user()->name ?? 'System' }}
+            Dicetak oleh: {{ $cetakOleh ?? 'System PT Sucofindo' }}
         </div>
         <div class="footer-right">
             Waktu Cetak: {{ date('d-m-Y H:i:s') }} WIB

@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Dashboard - SIGMALAB Sucofindo</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo-sucofindo.png') }}?v=1">
    
@@ -297,6 +298,21 @@
             text-align: center;
             color: #94a3b8;
             font-size: 0.85rem;
+        }
+
+        /* ===== Responsif Mobile: top navbar & konten ===== */
+        @media (max-width: 575.98px) {
+            .top-navbar {
+                padding-left: 14px !important;
+                padding-right: 12px !important;
+                min-height: 58px !important;
+            }
+            .top-navbar .fw-bold.text-uppercase {
+                font-size: 0.95rem !important;
+            }
+            #content {
+                padding: 12px 12px !important;
+            }
         }
     </style>
 </head>

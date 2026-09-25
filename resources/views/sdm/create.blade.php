@@ -1,6 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
+<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+<style>
+    .select2-container--bootstrap-5 .select2-selection {
+        font-size: 0.95rem !important;
+    }
+    .flatpickr-input {
+        background-color: #fff !important;
+    }
+</style>
 <div class="container-fluid px-4 py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -21,7 +30,7 @@
             </div>
 
             <div class="mb-4">
-                <select class="form-select form-select-lg rounded-3 border-secondary-subtle" onchange="if (this.value) window.location.href='?personil_id=' + this.value">
+                <select id="selectPersonilPicker" class="form-select form-select-lg rounded-3 border-secondary-subtle" onchange="if (this.value) window.location.href='?personil_id=' + this.value">
                     <option value="">— Pilih personil —</option>
                     @foreach($personil as $p)
                         <option value="{{ $p->personil_id }}" {{ isset($selectedPersonil) && $selectedPersonil->personil_id == $p->personil_id ? 'selected' : '' }}>
@@ -158,17 +167,17 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold text-dark small">Tgl Terbit</label>
-                            <input type="date" name="tgl_terbit" class="form-control form-control-sm py-2" value="{{ old('tgl_terbit', date('Y-m-d')) }}">
+                            <input type="text" name="tgl_terbit" class="form-control form-control-sm py-2 flatpickr-date" autocomplete="off" value="{{ old('tgl_terbit', date('Y-m-d')) }}">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-semibold text-dark small">Tgl Berakhir</label>
-                            <input type="date" name="tgl_berakhir" class="form-control form-control-sm py-2" value="{{ old('tgl_berakhir', date('Y-m-d', strtotime('+2 years'))) }}">
+                            <input type="text" name="tgl_berakhir" class="form-control form-control-sm py-2 flatpickr-date" autocomplete="off" value="{{ old('tgl_berakhir', date('Y-m-d', strtotime('+2 years'))) }}">
                         </div>
                     </div>
 
                     <div class="mb-2">
                         <label class="form-label fw-semibold text-dark small">Reminder Sebelum Jatuh Tempo</label>
-                        <select name="reminder" class="form-select form-select-sm py-2">
+                        <select name="reminder" class="form-select form-select-sm py-2 select2-in-modal">
                             <option value="H-30" {{ old('reminder') == 'H-30' ? 'selected' : '' }}>H-30</option>
                             <option value="H-60" {{ old('reminder') == 'H-60' ? 'selected' : '' }}>H-60</option>
                             <option value="H-90" {{ old('reminder') == 'H-90' ? 'selected' : '' }}>H-90</option>
@@ -184,4 +193,36 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+<script>
+    $(function () {
+        $('#selectPersonilPicker').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            placeholder: '— Pilih personil —'
+        });
+
+        $('.select2-in-modal').each(function () {
+            const $modal = $(this).closest('.modal');
+            $(this).select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                dropdownParent: $modal.length ? $modal : $(document.body)
+            });
+        });
+
+        flatpickr.localize(flatpickr.l10ns.id);
+        $('.flatpickr-date').flatpickr({
+            dateFormat: 'Y-m-d',
+            altInput: true,
+            altFormat: 'd F Y',
+            allowInput: true,
+            disableMobile: true
+        });
+    });
+</script>
+@endpush
 @endsection

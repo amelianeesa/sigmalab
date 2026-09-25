@@ -640,6 +640,12 @@ class AlatController extends Controller
         $bulan = $request->get('bulan', date('m'));
         $tahun = $request->get('tahun', date('Y'));
 
+        $user = Auth::user();
+        $namaUser = 'Petugas Lab';
+        if ($user) {
+            $namaUser = $user->name ?? $user->username ?? $user->nama ?? 'Analis Laboratorium';
+        }
+
         $rawLogs = LogPemeliharaan::where('alat_id', $id)
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
@@ -657,11 +663,11 @@ class AlatController extends Controller
             ];
         }
 
-        $pdf = Pdf::loadView('alat.pemeliharaan-template', compact('alat', 'logs', 'bulan', 'tahun'));
+        $pdf = Pdf::loadView('alat.pemeliharaan-template', compact('alat', 'logs', 'bulan', 'tahun', 'namaUser'));
         $pdf->setPaper('A4', 'portrait');
 
         $namaAlatSafe = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $alat->nama_alat);
-        return $pdf->download('Kartu_Pemeliharaan_' . $namaAlatSafe . '_' . $alat->kode_alat . '_' . $bulan . '_' . $tahun . '.pdf');
+        return $pdf->stream('Kartu_Pemeliharaan_' . $namaAlatSafe . '_' . $alat->kode_alat . '_' . $bulan . '_' . $tahun . '.pdf');
     }
 
     public function exportPemeliharaanExcel(Request $request, $id)
@@ -673,7 +679,7 @@ class AlatController extends Controller
         $namaAlatSafe = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $alat->nama_alat);
         $fileName = 'Kartu_Pemeliharaan_' . $namaAlatSafe . '_' . $bulan . '_' . $tahun . '_' . time() . '.xlsx';
 
-        return Excel::download(new class($alat, $bulan, $tahun) implements FromArray, WithStyles, WithColumnWidths, WithEvents {
+        return Excel::stream(new class($alat, $bulan, $tahun) implements FromArray, WithStyles, WithColumnWidths, WithEvents {
             protected $alat, $bulan, $tahun;
 
             public function __construct($alat, $bulan, $tahun) {

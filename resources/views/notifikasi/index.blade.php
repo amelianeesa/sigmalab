@@ -87,15 +87,16 @@
 </style>
 
 <div class="container-fluid px-3 pt-1 pb-2" style="font-size: 0.8rem;">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb mb-1 mt-1 small" style="font-size: 0.72rem;">
-            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Notifikasi</li>
-        </ol>
-    </nav>
-
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-        <h4 class="mb-0 fw-bold" style="font-size: 1.1rem;">Daftar Notifikasi</h4>
+        <div>
+            <h4 class="mb-0 fw-bold" style="font-size: 1.1rem;">Daftar Notifikasi</h4>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 mt-1 small" style="font-size: 0.72rem;">
+                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Notifikasi</li>
+                </ol>
+            </nav>
+        </div>
         <form action="{{ route('notifikasi.read-all') }}" method="POST" class="m-0">
             @csrf
             <button type="submit" class="btn btn-corporate-dark btn-sm py-1 px-3" style="font-size: 0.75rem;">
