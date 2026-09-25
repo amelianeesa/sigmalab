@@ -126,14 +126,37 @@
         let paramIndex = 0;
 
         // Function to add a new parameter row
-        function addRow() {
+        function addRow(data = null) {
             const rowHtml = template.replace(/__INDEX__/g, paramIndex);
             paramWrapper.insertAdjacentHTML('beforeend', rowHtml);
+            
+            if (data) {
+                const row = paramWrapper.lastElementChild;
+                if (data.parameter_uji_id) {
+                    row.querySelector(`select[name="parameters[${paramIndex}][parameter_uji_id]"]`).value = data.parameter_uji_id;
+                }
+                if (data.cert_value !== undefined) {
+                    row.querySelector(`input[name="parameters[${paramIndex}][cert_value]"]`).value = data.cert_value;
+                }
+                if (data.cert_u !== undefined) {
+                    row.querySelector(`input[name="parameters[${paramIndex}][cert_u]"]`).value = data.cert_u;
+                }
+            }
+            
             paramIndex++;
         }
 
-        // Add 1 default row on load
-        addRow();
+        // Restore old parameters if validation failed, otherwise 1 blank row
+        const oldParams = @json(old('parameters', []));
+        const oldParamsArray = Object.values(oldParams || {});
+        
+        if (oldParamsArray.length > 0) {
+            oldParamsArray.forEach(function(param) {
+                addRow(param);
+            });
+        } else {
+            addRow();
+        }
 
         // Handle Add Button
         addBtn.addEventListener('click', addRow);

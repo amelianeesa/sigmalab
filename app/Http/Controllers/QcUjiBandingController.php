@@ -78,9 +78,7 @@ class QcUjiBandingController extends Controller
             'nama_program' => 'required|string',
             'penyelenggara' => 'required|string',
             'tanggal_terima' => 'required|date',
-            'tanggal_uji' => 'required|date',
             'kode_sampel' => 'required|string',
-            'analis_id' => 'required|exists:personil,id',
             'params' => 'required|array',
         ]);
 
@@ -91,7 +89,6 @@ class QcUjiBandingController extends Controller
                 'nama_program' => $request->nama_program,
                 'penyelenggara' => $request->penyelenggara,
                 'tanggal_terima' => $request->tanggal_terima,
-                'tanggal_uji' => $request->tanggal_uji,
                 'kode_sampel' => $request->kode_sampel,
                 'keterangan' => $request->keterangan,
                 'status' => 'completed',
@@ -107,10 +104,10 @@ class QcUjiBandingController extends Controller
             foreach ($request->params as $paramId => $data) {
                 if (empty($data['selected'])) continue;
                 
-                $nilai_d1 = isset($data['d1']) ? floatval($data['d1']) : null;
-                $nilai_d2 = isset($data['d2']) ? floatval($data['d2']) : null;
-                $nilai_db_1 = isset($data['db1']) ? floatval($data['db1']) : null;
-                $nilai_db_2 = isset($data['db2']) ? floatval($data['db2']) : null;
+                $nilai_d1 = isset($data['d1']) && $data['d1'] !== '' ? floatval($data['d1']) : null;
+                $nilai_d2 = isset($data['d2']) && $data['d2'] !== '' ? floatval($data['d2']) : null;
+                $nilai_db_1 = isset($data['db1']) && $data['db1'] !== '' ? floatval($data['db1']) : null;
+                $nilai_db_2 = isset($data['db2']) && $data['db2'] !== '' ? floatval($data['db2']) : null;
                 
                 if ($nilai_db_1 !== null && $nilai_db_2 !== null) {
                     $nilai_akhir = ($nilai_db_1 + $nilai_db_2) / 2;
@@ -123,7 +120,7 @@ class QcUjiBandingController extends Controller
                 QcUjiBandingParameter::create([
                     'qc_uji_banding_id' => $program->id,
                     'parameter_uji_id' => $paramId,
-                    'analis_id' => $request->analis_id,
+                    'analis_id' => $data['analis_id'] ?? null,
                     'alat_id' => $data['alat_id'] ?? null,
                     'metode_uji' => $data['metode_uji'] ?? null,
                     'uncertainty_lab' => $data['uncertainty_lab'] ?? null,
@@ -288,6 +285,33 @@ class QcUjiBandingController extends Controller
     public function evaluasiForm($id)
     {
         $program = QcUjiBanding::with(['parameters.parameterUji'])->findOrFail($id);
+        
+        // Auto-fix missing Hydrogen and Nitrogen (Bug from create form)
+        $cParam = $program->parameters->where('parameter_uji_id', 4)->first();
+        if ($cParam) {
+            $hasH = $program->parameters->where('parameter_uji_id', 5)->first();
+            $hasN = $program->parameters->where('parameter_uji_id', 6)->first();
+            if (!$hasH) {
+                QcUjiBandingParameter::create([
+                    'qc_uji_banding_id' => $id,
+                    'parameter_uji_id' => 5,
+                    'nilai_akhir' => 0,
+                    'status_evaluasi' => 'menunggu'
+                ]);
+            }
+            if (!$hasN) {
+                QcUjiBandingParameter::create([
+                    'qc_uji_banding_id' => $id,
+                    'parameter_uji_id' => 6,
+                    'nilai_akhir' => 0,
+                    'status_evaluasi' => 'menunggu'
+                ]);
+            }
+            if (!$hasH || !$hasN) {
+                $program = QcUjiBanding::with(['parameters.parameterUji'])->findOrFail($id);
+            }
+        }
+
         return view('qc-uji-banding.evaluasi-vendor', compact('program'));
     }
 
@@ -297,20 +321,27 @@ class QcUjiBandingController extends Controller
 
         $request->validate([
             'params' => 'required|array',
+            'params.*.lab_value' => 'nullable|numeric',
             'params.*.target_vendor' => 'nullable|numeric',
             'params.*.sdpa' => 'nullable|numeric',
         ]);
 
         foreach ($request->params as $paramId => $data) {
+            $labValue = isset($data['lab_value']) && $data['lab_value'] !== '' ? floatval($data['lab_value']) : null;
             $assignedValue = $data['target_vendor'] ?? null;
             $sdpa = $data['sdpa'] ?? null;
 
-            if ($assignedValue === null || $assignedValue === '' || $sdpa === null || $sdpa === '' || floatval($sdpa) == 0) {
-                continue; // belum lengkap, lewati — jangan hapus data yang sudah ada
-            }
-
             $parameter = QcUjiBandingParameter::where('qc_uji_banding_id', $id)->find($paramId);
             if (!$parameter) continue;
+
+            if ($labValue !== null) {
+                $parameter->nilai_akhir = $labValue;
+            }
+
+            if ($assignedValue === null || $assignedValue === '' || $sdpa === null || $sdpa === '' || floatval($sdpa) == 0) {
+                $parameter->save(); // Simpan lab_value meski belum evaluasi
+                continue; 
+            }
 
             $assignedValue = floatval($assignedValue);
             $sdpa = floatval($sdpa);
@@ -327,6 +358,7 @@ class QcUjiBandingController extends Controller
             }
 
             $parameter->update([
+                'nilai_akhir' => $parameter->nilai_akhir,
                 'target_vendor' => $assignedValue,
                 'sdpa' => $sdpa,
                 'z_score' => round($zScore, 2),

@@ -19,7 +19,7 @@
             </tr>
         </thead>
         <tbody>
-            {{-- ROW 1: WEIGHT --}}
+            <!-- weight -->
             <tr class="row-entry" data-type="weight">
                 <td rowspan="4" class="align-middle">
                     <input type="number" class="form-control form-control-sm text-center mx-auto" name="params[{{ $pid_c }}][data][0][pengujian_ke]" style="width: 70px; min-width: 70px;" value="1">
@@ -40,7 +40,8 @@
                 </td>
                 <td class="align-middle bg-warning bg-opacity-25 fw-bold fs-6"><span class="out-avg-txt">-</span></td>
             </tr>
-            {{-- ROW 2: CARBON --}}
+
+            <!-- carbon -->
             <tr class="row-entry" data-type="carbon">
                 <td class="fw-bold">Carbon %db</td>
                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-c-1" name="params[{{ $pid_c }}][data][0][mentah][c_1]" disabled></td>
@@ -56,9 +57,12 @@
                 <td class="align-middle bg-warning bg-opacity-25 fw-bold fs-6"><span class="out-avg-txt">-</span>
                     <input type="hidden" class="in-hasil-1" name="params[{{ $pid_c }}][data][0][hasil_1]" disabled>
                     <input type="hidden" class="in-hasil-2" name="params[{{ $pid_c }}][data][0][hasil_2]" disabled>
+                    <input type="hidden" class="in-d1" name="params[{{ $pid_c }}][data][0][d1]">
+                    <input type="hidden" class="in-d2" name="params[{{ $pid_c }}][data][0][d2]">
                 </td>
             </tr>
-            {{-- ROW 3: HYDROGEN --}}
+
+            <!-- hydrogen -->
             <tr class="row-entry" data-type="hydrogen">
                 <td class="fw-bold">Hydrogen %db</td>
                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-h-1" name="params[{{ $pid_h }}][data][0][mentah][h_1]" disabled></td>
@@ -74,9 +78,12 @@
                 <td class="align-middle bg-warning bg-opacity-25 fw-bold fs-6"><span class="out-avg-txt">-</span>
                     <input type="hidden" class="in-hasil-1" name="params[{{ $pid_h }}][data][0][hasil_1]" disabled>
                     <input type="hidden" class="in-hasil-2" name="params[{{ $pid_h }}][data][0][hasil_2]" disabled>
+                    <input type="hidden" class="in-d1" name="params[{{ $pid_h }}][data][0][d1]">
+                    <input type="hidden" class="in-d2" name="params[{{ $pid_h }}][data][0][d2]">
                 </td>
             </tr>
-            {{-- ROW 4: NITROGEN --}}
+            
+            <!-- ROW 4: NITROGEN -->
             <tr class="row-entry" data-type="nitrogen">
                 <td class="fw-bold">Nitrogen %db</td>
                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-n-1" name="params[{{ $pid_n }}][data][0][mentah][n_1]" disabled></td>
@@ -92,6 +99,8 @@
                 <td class="align-middle bg-warning bg-opacity-25 fw-bold fs-6"><span class="out-avg-txt">-</span>
                     <input type="hidden" class="in-hasil-1" name="params[{{ $pid_n }}][data][0][hasil_1]" disabled>
                     <input type="hidden" class="in-hasil-2" name="params[{{ $pid_n }}][data][0][hasil_2]" disabled>
+                    <input type="hidden" class="in-d1" name="params[{{ $pid_n }}][data][0][d1]">
+                    <input type="hidden" class="in-d2" name="params[{{ $pid_n }}][data][0][d2]">
                 </td>
             </tr>
         </tbody>

@@ -20,7 +20,10 @@ class QcCrmController extends Controller
             ->orderBy('tanggal_uji', 'desc')
             ->orderBy('created_at', 'desc')
             ->get();
-        return view('qc-crm.index', compact('kegiatanList'));
+            
+        $katalogs = CrmKatalog::with(['sertifikats.parameterUji', 'verifikasiTeknis.parameterUji', 'verifikasiTeknis.analis'])->orderBy('created_at', 'desc')->get();
+        
+        return view('qc-crm.index', compact('kegiatanList', 'katalogs'));
     }
 
     public function create()
@@ -51,7 +54,7 @@ class QcCrmController extends Controller
             'crm_katalog_id' => 'required|exists:crm_katalog,id',
             'tanggal_uji' => 'required|date',
             'analis_id' => 'nullable|exists:personil,id',
-            'parameters' => 'required|array', // The parameters checked and their data
+            'params' => 'required|array', // The parameters checked and their data
         ]);
 
         $katalogId = $request->crm_katalog_id;
@@ -63,7 +66,10 @@ class QcCrmController extends Controller
 
         DB::beginTransaction();
         try {
-            foreach ($request->parameters as $paramId => $data) {
+            foreach ($request->params as $paramId => $data) {
+                // Check if user selected this param
+                if (!isset($data['selected'])) continue;
+                
                 // Check if this param is certified for this bottle
                 if (!isset($sertifikatMap[$paramId])) continue;
                 $sertifikat = $sertifikatMap[$paramId];

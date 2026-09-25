@@ -40,7 +40,7 @@
                                 <td>
                                     <span class="badge bg-info text-dark rounded-pill px-3">{{ $s->parameters->count() }} Parameter</span>
                                 </td>
-                                <td>{{ $s->pembuat->name ?? '-' }}</td>
+                                <td>{{ $s->pembuat->username ?? '-' }}</td>
                                 <td>{{ $s->created_at->format('d M Y') }}</td>
                                 <td>
                                     <span class="badge bg-{{ $s->status_color }} py-1 px-2">{{ $s->status_label }}</span>

@@ -13,13 +13,6 @@
         <p class="text-muted mb-0">Kelola nilai sertifikat parameter uji untuk botol ini.</p>
     </div>
 
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
     <div class="row">
         <!-- Informasi Botol -->
         <div class="col-md-4 mb-4">

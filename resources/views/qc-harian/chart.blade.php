@@ -19,9 +19,6 @@
                     <h5 class="fw-bold mb-1">Batch: {{ $activeBatch->kode_batch }}</h5>
                     <p class="text-muted mb-0 small">Nilai acuan ditarik dari hasil Uji Homogenitas (Target).</p>
                 </div>
-                <div class="col-md-4 text-end">
-                    <a href="{{ route('qc-harian.index') }}" class="btn btn-outline-secondary rounded-pill px-4"><i class="fas fa-arrow-left me-2"></i>Kembali</a>
-                </div>
             </div>
 
             <!-- Legenda Nilai Acuan -->
@@ -42,6 +39,60 @@
             <div style="height: 500px; width: 100%;">
                 <canvas id="controlChart"></canvas>
             </div>
+
+            <!-- TABEL DATA CONTROL CHART -->
+            <hr class="my-5">
+            <h5 class="fw-bold mb-3"><i class="fas fa-table text-primary me-2"></i>Tabel Data Control Chart</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-hover text-center align-middle" style="font-size: 14px;">
+                    <thead class="table-light">
+                        <tr>
+                            <th rowspan="2" class="align-middle">Tanggal</th>
+                            <th rowspan="2" class="align-middle">Pengujian Ke</th>
+                            <th>LCL</th>
+                            <th>LWL</th>
+                            <th>&mu; - 1&sigma;</th>
+                            <th>&mu; (Mean)</th>
+                            <th>&mu; + 1&sigma;</th>
+                            <th>UWL</th>
+                            <th>UCL</th>
+                            <th rowspan="2" class="align-middle">Control</th>
+                        </tr>
+                        <tr>
+                            <th class="text-muted fw-normal">({{ number_format($m - 3*$sd, 2) }})</th>
+                            <th class="text-muted fw-normal">({{ number_format($m - 2*$sd, 2) }})</th>
+                            <th class="text-muted fw-normal">({{ number_format($m - 1*$sd, 2) }})</th>
+                            <th class="text-muted fw-normal">({{ number_format($m, 2) }})</th>
+                            <th class="text-muted fw-normal">({{ number_format($m + 1*$sd, 2) }})</th>
+                            <th class="text-muted fw-normal">({{ number_format($m + 2*$sd, 2) }})</th>
+                            <th class="text-muted fw-normal">({{ number_format($m + 3*$sd, 2) }})</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($logs as $index => $log)
+                            <tr>
+                                <td>{{ \Carbon\Carbon::parse($log->tanggal_uji)->format('d/m/Y') }}</td>
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ number_format($m - 3*$sd, 2) }}</td>
+                                <td>{{ number_format($m - 2*$sd, 2) }}</td>
+                                <td>{{ number_format($m - 1*$sd, 2) }}</td>
+                                <td>{{ number_format($m, 2) }}</td>
+                                <td>{{ number_format($m + 1*$sd, 2) }}</td>
+                                <td>{{ number_format($m + 2*$sd, 2) }}</td>
+                                <td>{{ number_format($m + 3*$sd, 2) }}</td>
+                                <td class="fw-bold {{ $log->status_evaluasi === 'outlier' ? 'text-danger' : ($log->status_evaluasi === 'warning' ? 'text-warning text-dark' : 'text-success') }}">
+                                    {{ number_format($log->nilai_akhir, 2) }}
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="10" class="text-muted py-4">Belum ada data pengujian harian untuk parameter ini.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            
         </div>
     </div>
 </div>

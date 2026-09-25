@@ -267,6 +267,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [QcHarianController::class, 'index'])->name('index');
         Route::get('/create', [QcHarianController::class, 'create'])->name('create');
         Route::post('/', [QcHarianController::class, 'store'])->name('store');
+        Route::get('/print-pdf', [QcHarianController::class, 'printPdf'])->name('print-pdf');
         Route::get('/{parameter_uji_id}/chart', [QcHarianController::class, 'chart'])->name('chart');
         Route::get('/{id}/investigasi', [QcHarianController::class, 'investigasi'])->name('investigasi');
         Route::post('/{id}/investigasi', [QcHarianController::class, 'storeInvestigasi'])->name('investigasi.store');

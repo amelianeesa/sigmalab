@@ -1,4 +1,4 @@
-<div class="row g-2 mb-3 bg-light p-2 border">
+﻿<div class="row g-2 mb-3 bg-light p-2 border">
     <div class="col-md-2"><label class="small fw-bold">Reference No</label><input type="text" name="params[{{ $pid }}][ref_no]" class="form-control form-control-sm param-input-ext" disabled></div>
     <div class="col-md-2"><label class="small fw-bold">BLNC ID</label><input type="text" name="params[{{ $pid }}][blnc_id]" class="form-control form-control-sm param-input-ext" disabled></div>
     <div class="col-md-2"><label class="small fw-bold">Time</label><input type="text" name="params[{{ $pid }}][time]" class="form-control form-control-sm param-input-ext" disabled></div>
@@ -63,7 +63,7 @@
                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-hf-1" name="params[{{ $pid }}][data][0][mentah][hf_1]" disabled></td>
                 <td><input type="text" class="form-control form-control-sm in-e2-1 bg-light border-0" readonly tabindex="-1"></td>
                 
-                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-ts-1" name="params[{{ $pid }}][data][0][mentah][ts_1]" disabled></td>
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-ts-1" name="params[{{ $pid }}][data][0][mentah][ts_1]" disabled></td>
                 <td><input type="text" class="form-control form-control-sm in-e3-1 bg-light border-0" readonly tabindex="-1"></td>
                 <td class="text-center text-muted">-</td>
                 <td class="text-center text-muted">-</td>

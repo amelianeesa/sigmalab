@@ -22,7 +22,18 @@
     </div>
     @endif
 
-    <form action="{{ route('qc-crm.store') }}" method="POST" id="formQc">
+    @if($errors->any())
+    <div class="alert alert-danger shadow-sm border-0">
+        <i class="fas fa-exclamation-triangle me-2"></i> Terdapat kesalahan pada isian form:
+        <ul class="mb-0 mt-1">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+
+    <form action="{{ route('qc-crm.store') }}" method="POST" id="formQc" autocomplete="off">
         @csrf
 
         {{-- ============================================================ --}}
@@ -193,101 +204,59 @@
                                     <h5 class="fw-bold text-dark mb-0"><i class="fas fa-flask text-primary me-2"></i>Pengujian {{ $code }}</h5>
                                 </div>
                                 <div class="table-responsive pb-2">
-                                <table class="table table-bordered table-sm align-middle text-center param-table" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
+                                <table class="table table-bordered table-sm align-middle text-center param-table {{ in_array($code, ['TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']) ? 'w-auto' : '' }}" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
                                         <thead class="table-light">
-                                            @if($code === 'IM')
-                                                <tr>
-                                                    <th>PENGULANGAN</th>
-                                                    <th>M1</th>
-                                                    <th>M2</th>
-                                                    <th>M3</th>
-                                                    <th>A</th>
-                                                    <th>B</th>
-                                                    <th class="bg-warning bg-opacity-25">M%</th>
-                                                    <th colspan="2">
-                                                        ABSOLUTE DIFFERENCE
-                                                        <i class="fas fa-info-circle ms-1 text-primary" data-bs-toggle="tooltip" title="0.09 + (0.1 * AVG)"></i>
-                                                    </th>
-                                                    <th>AVERAGE %</th>
-                                                </tr>
-                                            @elseif($code === 'ASH')
-                                                <tr>
-                                                    <th>PENGULANGAN</th>
-                                                    <th>M1</th>
-                                                    <th>M2</th>
-                                                    <th>M2-M1</th>
-                                                    <th>M3</th>
-                                                    <th>M3-M1</th>
-                                                    <th class="bg-warning bg-opacity-25">ASH%</th>
-                                                    <th colspan="2">
-                                                        ABSOLUTE DIFFERENCE
-                                                        <i class="fas fa-info-circle ms-1 text-primary" data-bs-toggle="tooltip" title="0.09 + (0.1 * AVG)"></i>
-                                                    </th>
-                                                    <th>AVERAGE %adb</th>
-                                                    <th>%db</th>
-                                                    <th>db</th>
-                                                </tr>
-                                            @elseif($code === 'VM')
-                                                <tr>
-                                                    <th>PENGULANGAN</th>
-                                                    <th>M1</th>
-                                                    <th>M2</th>
-                                                    <th>M2-M1</th>
-                                                    <th>M3</th>
-                                                    <th>M2-M3</th>
-                                                    <th>LOSS%</th>
-                                                    <th>IM</th>
-                                                    <th class="bg-warning bg-opacity-25">VM%</th>
-                                                    <th colspan="2">
-                                                        ABSOLUTE DIFFERENCE
-                                                        <i class="fas fa-info-circle ms-1 text-primary" data-bs-toggle="tooltip" title="0.09 + (0.1 * AVG)"></i>
-                                                    </th>
-                                                    <th>AVERAGE %adb</th>
-                                                    <th>AVERAGE %db</th>
-                                                    <th>%db</th>
-                                                </tr>
-                                            @elseif(in_array($code, ['TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']))
-                                                <tr>
-                                                    <th>PENGULANGAN</th>
-                                                    <th style="width: 16%">Massa sample</th>
-                                                    <th class="bg-warning bg-opacity-25" style="width: 16%">TS (Adb)</th>
-                                                    <th style="width: 16%">Average %(adb)</th>
-                                                    <th style="width: 16%">Average % (Db)</th>
-                                                    <th style="width: 16%">%db</th>
-                                                </tr>
-                                            @elseif($code === 'CV')
-                                                <tr>
-                                                    <th>PENGULANGAN</th>
-                                                    <th>Weight of Crucible</th>
-                                                    <th>Sample Mass</th>
-                                                    <th>Primary Result (cal/g)</th>
-                                                    <th>Ee</th>
-                                                    <th>t</th>
-                                                    <th>Volume of Titrant (ml)</th>
-                                                    <th>Length of Fuse (cm)</th>
-                                                    <th>Total TS</th>
-                                                    <th class="bg-warning bg-opacity-25" style="width: 16%">
-                                                        Final Result (cal/g) adb
-                                                        <i class="fas fa-info-circle ms-1 text-primary" data-bs-toggle="tooltip" title="(PR - (14.3 * 0.0699 * VT) - (2.3 * LF) - (13.2 * TS * SM)) / SM"></i>
-                                                    </th>
-                                                    <th>Average Result (cal/g), adb</th>
-                                                    <th>Average Result (cal/g), db</th>
-                                                    <th>%db</th>
-                                                </tr>
-                                            @else
-                                                <tr>
-                                                    <th>PENGULANGAN</th>
-                                                    <th class="bg-warning bg-opacity-25">Hasil Uji (adb)</th>
-                                                    <th>ABSOLUTE DIFFERENCE</th>
-                                                    <th>AVERAGE % (adb)</th>
-                                                </tr>
-                                            @endif
+                                          <tr>
+                                              <th>DISH NO</th>
+                                          @if(in_array($code, ['IM','RM']))
+                                              <th>M1</th><th>M2</th><th>M3</th><th>A</th><th>B</th><th class="bg-warning bg-opacity-25">M%</th>
+                                          @elseif($code === 'ASH')
+                                              <th>M1</th><th>M2</th><th>M2-M1</th><th>M3</th><th>M3-M1</th><th class="bg-warning bg-opacity-25">ASH%</th>
+                                          @elseif($code === 'VM')
+                                              <th>M1</th><th>M2-M1</th><th>M2</th><th>M3</th><th>M2-M3</th><th>LOSS%</th><th>IM</th><th class="bg-warning bg-opacity-25">VM%</th>
+                                          @elseif(in_array($code, ['TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']))
+                                              <th style="width: 16%">Massa sample</th><th class="bg-warning bg-opacity-25" style="width: 16%">TS (adb)</th>
+                                          @elseif(in_array($code, ['CV','GCV']))
+                                              <th>Weight of Crucible</th><th>Sample Mass</th><th>Primary Result (cal/g)</th><th>Ee</th><th>t</th><th>Volume of Titrant (ml)</th><th>Length of Fuse (cm)</th><th>Total TS</th><th class="bg-warning bg-opacity-25">Final Result (cal/g) adb <i class="fas fa-info-circle ms-1 text-primary" data-bs-toggle="tooltip" title="(PR - (14.3 * 0.0699 * VT) - (2.3 * LF) - (13.2 * TS * SM)) / SM"></i></th>
+                                          @elseif($code === 'CHN')
+                                              <th>Weight</th><th>N % db</th><th>C % db</th><th>H % db</th>
+                                          @elseif($code === 'AFT')
+                                              <th>Reducing/Oxidizing</th><th>IDT</th><th>ST</th><th>HT</th><th>FT</th>
+                                          @else
+                                              <th class="bg-warning bg-opacity-25">Hasil Uji (adb)</th>
+                                          @endif
+                                          @if(!in_array($code, ['CHN', 'AFT', 'TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)', 'CV', 'GCV']))
+                                              <th colspan="2">ABSOLUTE DIFFERENCE <i class="fas fa-info-circle ms-1 text-primary" data-bs-toggle="tooltip" title="0.09 + (0.1 * AVG)"></i></th>
+                                          @endif
+                                          @if(!in_array($code, ['CHN', 'AFT']))
+                                              @if(in_array($code, ['CV', 'GCV']))
+                                                  <th class="bg-warning bg-opacity-25">Average Result (cal/g), adb</th>
+                                              @elseif($code === 'VM')
+                                                  <th class="bg-warning bg-opacity-25">average %adb</th>
+                                              @elseif(in_array($code, ['TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']))
+                                                  <th class="bg-warning bg-opacity-25">average % (Adb)</th>
+                                              @else
+                                                  <th class="bg-warning bg-opacity-25">AVERAGE</th>
+                                              @endif
+                                          @endif
+                                          @if(in_array($code, ['ASH','VM','TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)', 'CV','GCV']))
+                                              @if(in_array($code, ['CV', 'GCV']))
+                                                  <th class="bg-info bg-opacity-25">Average Result (cal/g), db</th>
+                                              @elseif($code === 'VM')
+                                                  <th class="bg-info bg-opacity-25">average %db</th>
+                                              @elseif(in_array($code, ['TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']))
+                                                  <th class="bg-info bg-opacity-25">average % (db)</th>
+                                              @else
+                                                  <th class="bg-info bg-opacity-25">%db</th>
+                                              @endif
+                                          @endif
+                                          </tr>
                                         </thead>
                                         <tbody>
                                             <!-- SIMPLO -->
                                             <tr class="row-entry">
-                                                <td class="align-middle fw-bold bg-light border-bottom-0">
-                                                    Simplo (D1)
+                                                <td class="align-middle fw-bold bg-light border-bottom-0" style="width:110px;">
+                                                    <input type="text" class="form-control form-control-sm text-center fw-bold in-dish-1" name="params[{{ $pid }}][mentah][dish_1]" placeholder="D1" value="Simplo">
                                                     <input type="hidden" class="in-d1" name="params[{{ $pid }}][d1]">
                                                     <input type="hidden" class="in-db-1" name="params[{{ $pid }}][db1]">
                                                 </td>
@@ -306,11 +275,11 @@
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m3-1" name="params[{{ $pid }}][mentah][m3_1]" disabled></td>
                                                     <td><input type="text" class="form-control form-control-sm in-m3m1-1 bg-light border-0" readonly tabindex="-1"></td>
                                                     <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" readonly tabindex="-1"></td>
-                                                    <td class="align-middle out-db-1 fw-bold text-success">-</td>
+
                                                 @elseif($code === 'VM')
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-1" name="params[{{ $pid }}][mentah][m1_1]" disabled></td>
-                                                    <td><input type="text" class="form-control form-control-sm in-m2-1 bg-light border-0" readonly tabindex="-1"></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m2m1-1" name="params[{{ $pid }}][mentah][m2m1_1]" disabled></td>
+                                                    <td><input type="text" class="form-control form-control-sm in-m2-1 bg-light border-0" readonly tabindex="-1"></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m3-1" name="params[{{ $pid }}][mentah][m3_1]" disabled></td>
                                                     <td><input type="text" class="form-control form-control-sm in-m2m3-1 bg-light border-0" readonly tabindex="-1"></td>
                                                     <td><input type="text" class="form-control form-control-sm in-loss-1 bg-light border-0" readonly tabindex="-1"></td>
@@ -318,31 +287,41 @@
                                                         <input type="text" inputmode="decimal" class="form-control form-control-sm in-im-1 fw-bold bg-transparent border-0 text-center text-warning" name="params[{{ $pid }}][mentah][im_d1]" placeholder="IM D1" disabled>
                                                     </td>
                                                     <td class="bg-warning bg-opacity-25"><input type="text" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" readonly tabindex="-1"></td>
-                                                    <td class="align-middle out-db-1 fw-bold text-success">-</td>
+
                                                 @elseif(in_array($code, ['TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']))
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-mass-1" name="params[{{ $pid }}][mentah][mass_1]" disabled></td>
-                                                    <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" disabled></td>
-                                                    <td class="align-middle out-db-1 fw-bold text-success">-</td>
+                                                    <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold text-primary text-center" name="params[{{ $pid }}][mentah][ts_1]" disabled></td>
+
                                                 @elseif($code === 'CV')
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-w-1" name="params[{{ $pid }}][mentah][w_1]" disabled></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-sm-1" name="params[{{ $pid }}][mentah][sm_1]" disabled></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-pr-1" name="params[{{ $pid }}][mentah][pr_1]" disabled></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-ee-1" name="params[{{ $pid }}][mentah][ee_1]" disabled></td>
-                                                    <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-t-1" name="params[{{ $pid }}][mentah][t_1]" disabled></td>
+                                                    <td><input type="text" class="form-control form-control-sm in-t-1 bg-light border-0" readonly tabindex="-1"></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-vt-1" name="params[{{ $pid }}][mentah][vt_1]" disabled></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-lf-1" name="params[{{ $pid }}][mentah][lf_1]" disabled></td>
                                                     <td><input type="text" class="form-control form-control-sm in-ts-1 bg-light border-0" name="params[{{ $pid }}][mentah][ts_1]" readonly tabindex="-1" placeholder="Auto dari TS"></td>
                                                     <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" readonly tabindex="-1"></td>
-                                                    <td class="align-middle out-db-1 fw-bold text-success">-</td>
+
                                                 @else
                                                     <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" disabled></td>
+                                                @endif
+                                                @if(!in_array($code, ['CHN', 'AFT', 'TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)', 'CV', 'GCV']))
+                                                    <td rowspan="2" class="align-middle out-diff fw-bold">-</td>
+                                                    <td rowspan="2" class="align-middle out-tol fw-bold">-</td>
+                                                @endif
+                                                @if(!in_array($code, ['CHN', 'AFT']))
+                                                    <td rowspan="2" class="align-middle out-avg-adb fw-bold text-primary fs-6">-</td>
+                                                @endif
+                                                @if(in_array($code, ['ASH','VM','TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)', 'CV','GCV']))
+                                                    <td rowspan="2" class="align-middle out-avg-db fw-bold text-success fs-6">-</td>
                                                 @endif
                                             </tr>
 
                                             <!-- DUPLO -->
                                             <tr class="row-entry">
                                                 <td class="fw-bold text-start border-start-0">
-                                                    Duplo (D2)
+                                                    <input type="text" class="form-control form-control-sm text-center fw-bold in-dish-2" name="params[{{ $pid }}][mentah][dish_2]" placeholder="D2" value="Duplo">
                                                     <input type="hidden" class="in-d2" name="params[{{ $pid }}][d2]">
                                                     <input type="hidden" class="in-db-2" name="params[{{ $pid }}][db2]">
                                                 </td>
@@ -361,11 +340,11 @@
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m3-2" name="params[{{ $pid }}][mentah][m3_2]" disabled></td>
                                                     <td><input type="text" class="form-control form-control-sm in-m3m1-2 bg-light border-0" readonly tabindex="-1"></td>
                                                     <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" readonly tabindex="-1"></td>
-                                                    <td class="align-middle out-db-2 fw-bold text-success">-</td>
+
                                                 @elseif($code === 'VM')
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-2" name="params[{{ $pid }}][mentah][m1_2]" disabled></td>
-                                                    <td><input type="text" class="form-control form-control-sm in-m2-2 bg-light border-0" readonly tabindex="-1"></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m2m1-2" name="params[{{ $pid }}][mentah][m2m1_2]" disabled></td>
+                                                    <td><input type="text" class="form-control form-control-sm in-m2-2 bg-light border-0" readonly tabindex="-1"></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m3-2" name="params[{{ $pid }}][mentah][m3_2]" disabled></td>
                                                     <td><input type="text" class="form-control form-control-sm in-m2m3-2 bg-light border-0" readonly tabindex="-1"></td>
                                                     <td><input type="text" class="form-control form-control-sm in-loss-2 bg-light border-0" readonly tabindex="-1"></td>
@@ -373,60 +352,28 @@
                                                         <input type="text" inputmode="decimal" class="form-control form-control-sm in-im-2 fw-bold bg-transparent border-0 text-center text-warning" name="params[{{ $pid }}][mentah][im_d2]" placeholder="IM D2" disabled>
                                                     </td>
                                                     <td class="bg-warning bg-opacity-25"><input type="text" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" readonly tabindex="-1"></td>
-                                                    <td class="align-middle out-db-2 fw-bold text-success">-</td>
+
                                                 @elseif(in_array($code, ['TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']))
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-mass-2" name="params[{{ $pid }}][mentah][mass_2]" disabled></td>
-                                                    <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" disabled></td>
-                                                    <td class="align-middle out-db-2 fw-bold text-success">-</td>
+                                                    <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold text-primary text-center" name="params[{{ $pid }}][mentah][ts_2]" disabled></td>
+
                                                 @elseif($code === 'CV')
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-w-2" name="params[{{ $pid }}][mentah][w_2]" disabled></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-sm-2" name="params[{{ $pid }}][mentah][sm_2]" disabled></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-pr-2" name="params[{{ $pid }}][mentah][pr_2]" disabled></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-ee-2" name="params[{{ $pid }}][mentah][ee_2]" disabled></td>
-                                                    <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-t-2" name="params[{{ $pid }}][mentah][t_2]" disabled></td>
+                                                    <td><input type="text" class="form-control form-control-sm in-t-2 bg-light border-0" readonly tabindex="-1"></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-vt-2" name="params[{{ $pid }}][mentah][vt_2]" disabled></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-lf-2" name="params[{{ $pid }}][mentah][lf_2]" disabled></td>
                                                     <td><input type="text" class="form-control form-control-sm in-ts-2 bg-light border-0" name="params[{{ $pid }}][mentah][ts_2]" readonly tabindex="-1" placeholder="Auto dari TS"></td>
                                                     <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" readonly tabindex="-1"></td>
-                                                    <td class="align-middle out-db-2 fw-bold text-success">-</td>
+
                                                 @else
                                                     <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" disabled></td>
                                                 @endif
                                             </tr>
 
-                                            <tr class="tr-avg bg-light">
-                                                @php
-                                                    $colSpan = 2;
-                                                    if (in_array($code, ['IM', 'ASH'])) $colSpan = 7;
-                                                    elseif ($code === 'VM') $colSpan = 9;
-                                                    elseif (in_array($code, ['TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)'])) $colSpan = 3;
-                                                    elseif (in_array($code, ['CV', 'GCV'])) $colSpan = 10;
-                                                @endphp
-                                                <td colspan="{{ $colSpan }}" class="text-end fw-bold pe-3">EVALUASI HASIL & RATA-RATA:</td>
-                                                
-                                                @if($code === 'IM')
-                                                    <td class="align-middle out-diff fw-bold">-</td>
-                                                    <td class="align-middle out-tol fw-bold">-</td>
-                                                    <td class="align-middle out-avg-adb fw-bold text-primary fs-6">-</td>
-                                                @elseif($code === 'ASH' || $code === 'VM')
-                                                    <td class="align-middle out-diff fw-bold">-</td>
-                                                    <td class="align-middle out-tol fw-bold">-</td>
-                                                    <td class="align-middle out-avg-adb fw-bold text-primary fs-6">-</td>
-                                                    <td class="align-middle out-avg-db fw-bold text-success fs-6">-</td>
-                                                    <td class="bg-transparent border-0"></td>
-                                                @elseif(in_array($code, ['TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']))
-                                                    <td class="align-middle out-avg-adb fw-bold text-primary fs-6">-</td>
-                                                    <td class="align-middle out-avg-db fw-bold text-success fs-6">-</td>
-                                                    <td class="bg-transparent border-0"></td>
-                                                @elseif(in_array($code, ['CV', 'GCV']))
-                                                    <td class="align-middle out-avg-adb fw-bold text-primary fs-6">-</td>
-                                                    <td class="align-middle out-avg-db fw-bold text-success fs-6">-</td>
-                                                    <td class="bg-transparent border-0"></td>
-                                                @else
-                                                    <td class="align-middle out-diff fw-bold">-</td>
-                                                    <td class="align-middle out-avg-adb fw-bold text-primary fs-6">-</td>
-                                                @endif
-                                            </tr>
+                                            <tr class="tr-avg d-none"></tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -443,7 +390,7 @@
             <a href="{{ route('qc-harian.index') }}" class="btn btn-light border px-4">Batal</a>
             <div>
                 <button type="button" class="btn btn-warning px-4 rounded-pill shadow-sm me-2" id="btnDraft">
-                    <i class="fas fa-save me-2"></i>Simpan Draft Lokal
+                    <i class="fas fa-save me-2"></i>Simpan Draft
                 </button>
                 <button type="submit" class="btn btn-danger px-5 rounded-pill shadow-sm" id="btnSubmit">
                     <i class="fas fa-check-circle me-2"></i>Simpan & Evaluasi Semua
@@ -551,6 +498,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     showParametersForCrm(data);
 
+                    if(window.pendingDraftToLoad) {
+                        window.applyDraft(window.pendingDraftToLoad);
+                        window.pendingDraftToLoad = null;
+                    }
+
                     document.querySelectorAll('.in-hasil-1').forEach(inp => inp.dispatchEvent(new Event('input')));
                 })
                 .catch(() => {
@@ -578,8 +530,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        if(row.closest('table').dataset.code === 'CV') {
-            const tsTable = document.querySelector('table[data-code="TS"]');
+        if(row.closest('table').dataset.code === 'CV' || row.closest('table').dataset.code === 'GCV') {
+            let tsTable = document.querySelector('table[data-code="TS"]') 
+                       || document.querySelector('table[data-code="TOTAL SULFUR"]')
+                       || document.querySelector('table[data-code="TOTAL SULFUR (%AD/DB)"]');
+            
             if(tsTable) {
                 const tsInp = tsTable.querySelector(`.in-hasil-${i}`);
                 if(tsInp && tsInp.value) {
@@ -593,12 +548,70 @@ document.addEventListener('DOMContentLoaded', function() {
         if(row.closest('table').dataset.code === 'VM') {
             const imTable = document.querySelector('table[data-code="IM"]');
             if(imTable) {
-                const imInp = imTable.querySelector(`.in-hasil-${i}`);
-                if(imInp && imInp.value) {
-                    scope['im'] = parseNum(imInp.value);
-                    const vmImInp = row.querySelector(`.in-im-${i}`);
-                    if(vmImInp && !vmImInp.value) vmImInp.value = imInp.value;
+                let imVal = 0;
+                const imAvgOut = imTable.querySelector('.out-avg-adb');
+                if(imAvgOut && imAvgOut.textContent && imAvgOut.textContent !== '-') {
+                    imVal = parseNum(imAvgOut.textContent);
+                } else {
+                    let v1 = parseNum(imTable.querySelector('.in-hasil-1')?.value);
+                    let v2 = parseNum(imTable.querySelector('.in-hasil-2')?.value);
+                    if(v1 > 0 && v2 > 0) imVal = (v1 + v2) / 2;
+                    else if(v1 > 0) imVal = v1;
+                    else if(v2 > 0) imVal = v2;
                 }
+                
+                if(imVal > 0) {
+                    scope['im'] = imVal;
+                    const vmImInp = row.querySelector(`.in-im-${i}`);
+                    if(vmImInp) vmImInp.value = imVal.toFixed(2);
+                }
+            }
+        }
+
+        const rowCode = row.closest('table').dataset.code;
+        if(rowCode === 'IM') {
+            if(scope.m1 !== undefined && scope.a !== undefined) {
+                scope.m2 = scope.m1 + scope.a;
+                let inM2 = row.querySelector(`.in-m2-${i}`);
+                if(inM2) inM2.value = scope.m2.toFixed(4);
+            }
+            if(scope.m3 !== undefined && scope.m1 !== undefined) {
+                scope.b = scope.m3 - scope.m1;
+                let inB = row.querySelector(`.in-b-${i}`);
+                if(inB) inB.value = scope.b.toFixed(4);
+            }
+        } else if(rowCode === 'ASH') {
+            if(scope.m2m1 !== undefined && scope.m1 !== undefined) {
+                scope.m2 = scope.m2m1 + scope.m1;
+                let inM2 = row.querySelector(`.in-m2-${i}`);
+                if(inM2) inM2.value = scope.m2.toFixed(4);
+            }
+            if(scope.m3 !== undefined && scope.m1 !== undefined) {
+                scope.m3m1 = scope.m3 - scope.m1;
+                let inM3M1 = row.querySelector(`.in-m3m1-${i}`);
+                if(inM3M1) inM3M1.value = scope.m3m1.toFixed(4);
+            }
+        } else if(rowCode === 'VM') {
+            if(scope.m1 !== undefined && scope.m2m1 !== undefined) {
+                scope.m2 = scope.m1 + scope.m2m1;
+                let inM2 = row.querySelector(`.in-m2-${i}`);
+                if(inM2) inM2.value = scope.m2.toFixed(4);
+            }
+            if(scope.m2 !== undefined && scope.m3 !== undefined) {
+                scope.m2m3 = scope.m2 - scope.m3;
+                let inM2M3 = row.querySelector(`.in-m2m3-${i}`);
+                if(inM2M3) inM2M3.value = scope.m2m3.toFixed(4);
+            }
+            if(scope.m2m3 !== undefined && scope.m2m1 !== undefined && scope.m2m1 > 0) {
+                scope.loss = (scope.m2m3 / scope.m2m1) * 100;
+                let inLoss = row.querySelector(`.in-loss-${i}`);
+                if(inLoss) inLoss.value = scope.loss.toFixed(4);
+            }
+        } else if(rowCode === 'CV' || rowCode === 'GCV') {
+            if(scope.pr !== undefined && scope.ee !== undefined && scope.ee > 0 && scope.sm !== undefined) {
+                scope.t = (scope.pr / scope.ee) * scope.sm;
+                let inT = row.querySelector(`.in-t-${i}`);
+                if(inT) inT.value = scope.t.toFixed(4);
             }
         }
 
@@ -621,32 +634,43 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         let result = 0;
+        let isTS = ['TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)'].includes(row.closest('table').dataset.code);
+
         if(config.rumus) {
             try {
                 result = math.evaluate(config.rumus.toLowerCase(), scope);
             } catch(e) {
-                if(row.closest('table').dataset.code === 'TS') result = scope['mass'] || 0;
             }
         } else {
             const code = row.closest('table').dataset.code;
             if(code === 'IM') {
-                if(scope.m2 > 0) result = ((scope.m2 - scope.m3) / scope.m2) * 100;
+                if(scope.a > 0) result = ((scope.a - scope.b) / scope.a) * 100;
             } else if(code === 'ASH') {
                 if(scope.m2m1 > 0) result = (scope.m3m1 / scope.m2m1) * 100;
             } else if(code === 'VM') {
                 result = (scope.loss || 0) - (scope.im || 0);
-            } else if(code === 'TS') {
-                result = scope.mass || 0;
+            } else if(code === 'CV' || code === 'GCV') {
+                let e1 = 14.3 * 0.0699 * (scope.vt || 0);
+                let e2 = 2.3 * (scope.lf || 0);
+                let e3 = 13.2 * (scope.ts || 0) * (scope.sm || 0);
+                if(scope.sm > 0) {
+                    result = (scope.pr - e1 - e2 - e3) / scope.sm;
+                }
             }
         }
 
         const inHasil = row.querySelector(`.in-hasil-${i}`);
         const inD = row.querySelector(`.in-d${i}`);
-        if(inHasil && !inHasil.hasAttribute('disabled')) {
-            const dec = (row.closest('table').dataset.code === 'CV') ? 0 : 2;
-            inHasil.value = result.toFixed(dec);
+        
+        if (!isTS) {
+            if(inHasil && !inHasil.hasAttribute('disabled')) {
+                const dec = (row.closest('table').dataset.code === 'CV') ? 0 : 2;
+                inHasil.value = result.toFixed(dec);
+            }
+            if(inD) inD.value = result.toFixed(4);
+        } else {
+            if(inD && inHasil) inD.value = inHasil.value;
         }
-        if(inD) inD.value = result.toFixed(4);
 
         const tbody = row.closest('tbody');
         const d1 = parseNum(tbody.querySelector('.in-d1')?.value || tbody.querySelector('.in-hasil-1')?.value);
@@ -673,7 +697,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 const isYes = diff < limit;
                 outTol.innerHTML = isYes ? `<span class="badge bg-success">YES</span>` : `<span class="badge bg-danger">NO</span>`;
             } else if(outTol) {
-                const isYes = diff < (0.09 + (0.1 * avg));
+                let isYes = false;
+                const codeT = tbody.closest('table').dataset.code;
+                if (codeT === 'ASH') {
+                    isYes = diff < 0.22;
+                } else if (codeT === 'VM') {
+                    isYes = diff < 1.0;
+                } else {
+                    isYes = diff < (0.09 + (0.1 * avg));
+                }
                 outTol.innerHTML = isYes ? `<span class="badge bg-success">YES</span>` : `<span class="badge bg-danger">NO</span>`;
             }
 
@@ -681,7 +713,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if(outAvg) outAvg.textContent = avgStr;
 
             const code = tbody.closest('table').dataset.code;
-            if (code === 'ASH' || code === 'VM' || code === 'TS' || code === 'CV') {
+            if (['ASH', 'VM', 'TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)', 'CV', 'GCV'].includes(code)) {
                 const outDb1 = tbody.querySelector('.out-db-1');
                 const outDb2 = tbody.querySelector('.out-db-2');
                 const inDb1 = tbody.querySelector('.in-db-1');
@@ -713,21 +745,42 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
 
+                let imAvg = 0;
+                if(im1 > 0 && im2 > 0) imAvg = (im1 + im2) / 2;
+                else if(im1 > 0) imAvg = im1;
+                else if(im2 > 0) imAvg = im2;
+
                 let db1 = 0, db2 = 0;
-                if(im1 > 0) {
-                    db1 = d1 * (100 / (100 - im1));
-                    if(outDb1) outDb1.textContent = db1.toFixed(2);
+                if(imAvg > 0) {
+                    if (['ASH', 'VM', 'TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)'].includes(code)) {
+                        db1 = Math.round(d1 * (100 / (100 - imAvg)) * 100) / 100;
+                        db2 = Math.round(d2 * (100 / (100 - imAvg)) * 100) / 100;
+                    } else {
+                        db1 = d1 * (100 / (100 - imAvg));
+                        db2 = d2 * (100 / (100 - imAvg));
+                    }
+                    if(outDb1) outDb1.textContent = (['CV', 'GCV'].includes(code)) ? db1.toFixed(0) : db1.toFixed(2);
                     if(inDb1) inDb1.value = db1.toFixed(4);
-                }
-                if(im2 > 0) {
-                    db2 = d2 * (100 / (100 - im2));
-                    if(outDb2) outDb2.textContent = db2.toFixed(2);
+                    if(outDb2) outDb2.textContent = (['CV', 'GCV'].includes(code)) ? db2.toFixed(0) : db2.toFixed(2);
                     if(inDb2) inDb2.value = db2.toFixed(4);
                 }
 
-                if(im1 > 0 && im2 > 0) {
-                    const avgDb = (db1 + db2) / 2;
-                    if(outAvgDb) outAvgDb.textContent = avgDb.toFixed(2);
+                if(imAvg > 0) {
+                    let avgDb = (db1 + db2) / 2;
+                    let a = (d1 + d2) / 2;
+                    
+                    if (['ASH', 'VM', 'TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)', 'CV', 'GCV'].includes(code)) {
+                        if (['CV', 'GCV'].includes(code)) {
+                            a = Math.round(a); // CV uses rounded adb average
+                            avgDb = Math.round(a * (100 / (100 - imAvg)));
+                        } else if (['ASH', 'VM', 'TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)'].includes(code)) {
+                            avgDb = Math.round(a * (100 / (100 - imAvg)) * 100) / 100;
+                        } else {
+                            avgDb = a * (100 / (100 - imAvg));
+                        }
+                    }
+                    
+                    if(outAvgDb) outAvgDb.textContent = (['CV', 'GCV'].includes(code)) ? avgDb.toFixed(0) : avgDb.toFixed(2);
                 }
             }
 
@@ -846,8 +899,133 @@ document.addEventListener('DOMContentLoaded', function() {
                 Swal.fire('Belum Ada Parameter', 'Silakan centang minimal 1 parameter yang ingin diuji.', 'warning');
                 return;
             }
+            // Clear draft on successful submit
+            localStorage.removeItem('qc_crm_draft');
         });
     }
+
+    // DRAFT LOKAL
+    const DRAFT_KEY = 'qc_crm_draft';
+    const btnDraft = document.getElementById('btnDraft');
+    if(btnDraft) {
+        btnDraft.addEventListener('click', function() {
+            const draft = {};
+
+            const crm = document.querySelector('select[name="crm_katalog_id"]');
+            const tanggal = document.querySelector('input[name="tanggal_uji"]');
+            const analis = document.querySelector('select[name="analis_id"]');
+            
+            if(crm) draft.crm_katalog_id = crm.value;
+            if(tanggal) draft.tanggal_uji = tanggal.value;
+            if(analis) draft.analis_id = analis.value;
+
+            draft.params = {};
+            document.querySelectorAll('.param-enable-check').forEach(check => {
+                const pid = check.dataset.pid;
+                const table = document.getElementById('table-' + pid);
+                if(!table) return;
+                
+                draft.params[pid] = {
+                    selected: check.checked,
+                    inputs: {}
+                };
+
+                table.querySelectorAll('input').forEach(inp => {
+                    const classes = Array.from(inp.classList).filter(c => c.startsWith('in-'));
+                    if(classes.length > 0) {
+                        const key = classes[0];
+                        draft.params[pid].inputs[key] = inp.value;
+                    }
+                });
+            });
+
+            draft.saved_at = new Date().toLocaleString('id-ID');
+
+            try {
+                localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Draft Tersimpan!',
+                    html: `<p>Data berhasil disimpan ke penyimpanan lokal browser.</p><small class="text-muted">Tersimpan: ${draft.saved_at}</small>`,
+                    timer: 2500,
+                    showConfirmButton: false,
+                    toast: false
+                });
+            } catch(err) {
+                Swal.fire('Gagal Menyimpan', 'Terjadi kesalahan: ' + err.message, 'error');
+            }
+        });
+    }
+
+    window.applyDraft = function(draft) {
+        if(draft.tanggal_uji) {
+            const tanggal = document.querySelector('input[name="tanggal_uji"]');
+            if(tanggal) tanggal.value = draft.tanggal_uji;
+        }
+        if(draft.analis_id) {
+            const analis = document.querySelector('select[name="analis_id"]');
+            if(analis) analis.value = draft.analis_id;
+        }
+
+        Object.keys(draft.params).forEach(pid => {
+            const paramDraft = draft.params[pid];
+            const check = document.querySelector(`.param-enable-check[data-pid="${pid}"]`);
+            const table = document.getElementById('table-' + pid);
+            if(!check || !table) return;
+
+            if(paramDraft.selected) {
+                check.checked = true;
+                check.dispatchEvent(new Event('change'));
+
+                if(paramDraft.inputs) {
+                    Object.keys(paramDraft.inputs).forEach(className => {
+                        const inp = table.querySelector('.' + className);
+                        if(inp && paramDraft.inputs[className]) {
+                            inp.value = paramDraft.inputs[className];
+                        }
+                    });
+
+                    const rows = table.querySelectorAll('.row-entry');
+                    rows.forEach(row => {
+                        calculateRow(row, pid);
+                    });
+                }
+            }
+        });
+    };
+
+    // LOAD DRAFT
+    (function loadDraft() {
+        const raw = localStorage.getItem(DRAFT_KEY);
+        if(!raw) return;
+
+        let draft;
+        try { draft = JSON.parse(raw); } catch(e) { return; }
+        if(!draft || !draft.params) return;
+
+        Swal.fire({
+            icon: 'question',
+            title: 'Draft Ditemukan',
+            html: `<p>Ada draft lokal tersimpan.</p><small class="text-muted">Tersimpan: ${draft.saved_at || '-'}</small>`,
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-undo me-1"></i> Muat Draft',
+            cancelButtonText: 'Abaikan',
+            confirmButtonColor: '#f0ad4e',
+        }).then(result => {
+            if(!result.isConfirmed) return;
+
+            if(draft.crm_katalog_id) {
+                const crm = document.querySelector('select[name="crm_katalog_id"]');
+                if(crm) {
+                    window.pendingDraftToLoad = draft;
+                    crm.value = draft.crm_katalog_id;
+                    crm.dispatchEvent(new Event('change'));
+                }
+            } else {
+                window.applyDraft(draft);
+            }
+        });
+    })();
 });
 </script>
 

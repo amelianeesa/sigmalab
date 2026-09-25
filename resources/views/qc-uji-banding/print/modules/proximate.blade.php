@@ -70,4 +70,5 @@
             </tr>
         </tbody>
     </table>
+    @include('qc-uji-banding.print.footer_ttd', ['idPrefix' => 'prox', 'kodeDokumen' => 'FOR/COAL-OPS/119', 'rev' => '02', 'tglBerlaku' => '03/08/2021'])
 </div>

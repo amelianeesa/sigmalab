@@ -1,4 +1,3 @@
-{{-- Tab Proximate: Laporan Hasil Akhir 4 Basis Kelembapan --}}
 <div class="p-4">
     <div class="row g-3 mb-4">
         <div class="col-md-4">

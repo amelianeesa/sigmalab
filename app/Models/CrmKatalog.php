@@ -29,6 +29,11 @@ class CrmKatalog extends Model
         return $this->belongsTo(Personil::class, 'verifikasi_administratif_oleh', 'personil_id');
     }
 
+    public function verifikasiTeknis()
+    {
+        return $this->hasMany(CrmVerifikasiTeknis::class, 'crm_katalog_id');
+    }
+
     public function statusLabel(): string
     {
         return match ($this->status) {

@@ -16,7 +16,19 @@
         </div>
     @endif
 
-    <form action="{{ route('qc-uji-banding.store') }}" method="POST" id="formQc">
+    @if($errors->any())
+        <div class="alert alert-danger shadow-sm border-0">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Terdapat kesalahan:</strong>
+            <ul class="mb-0 mt-1">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form action="{{ route('qc-uji-banding.store') }}" method="POST" id="formQc" autocomplete="off">
         @csrf
         <input type="hidden" name="draft_id" id="draft_id_input" value="{{ $draftId ?? '' }}">
 
@@ -796,11 +808,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (elAvgTxt) { elAvgTxt.textContent = avg.toFixed(2); elAvgTxt.dataset.val = avg; }
                     if (elHasil1) elHasil1.value = v1;
                     if (elHasil2) elHasil2.value = v2;
+                    const elD1 = tr.querySelector('.in-d1');
+                    const elD2 = tr.querySelector('.in-d2');
+                    if (elD1) elD1.value = v1;
+                    if (elD2) elD2.value = v2;
                 } else {
                     if (elDiff) elDiff.textContent = '-';
                     if (elAvgTxt) { elAvgTxt.textContent = '-'; elAvgTxt.dataset.val = ''; }
                     if (elHasil1) elHasil1.value = '';
                     if (elHasil2) elHasil2.value = '';
+                    const elD1 = tr.querySelector('.in-d1');
+                    const elD2 = tr.querySelector('.in-d2');
+                    if (elD1) elD1.value = '';
+                    if (elD2) elD2.value = '';
                 }
 
                 // PANGGIL VALIDASI UNTUK CARBON, HYDROGEN, NITROGEN

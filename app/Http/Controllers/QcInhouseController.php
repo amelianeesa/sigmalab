@@ -156,11 +156,7 @@ class QcInhouseController extends Controller
     public function showPreparasi($id)
     {
         $batch = SampelInhouse::with('parameters.parameterUji')->findOrFail($id);
-        
-        if (!in_array($batch->status, ['preparasi', 'pemilihan_sampel'])) {
-            return redirect()->route('qc-inhouse.show', $id)
-                             ->with('error', 'Sampel ini sudah melewati tahap preparasi.');
-        }
+
 
         return view('qc-inhouse.preparasi', compact('batch'));
     }

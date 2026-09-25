@@ -12,7 +12,6 @@
         <div class="col-xl-10">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h3 class="fw-bold text-dark mb-0"><i class="fas fa-bullseye text-primary me-2"></i>Penetapan Nilai Target (Tahap 4)</h3>
-                <a href="{{ route('qc-inhouse.show', $batch->sampel_inhouse_id) }}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-1"></i> Kembali ke Detail Sampel</a>
             </div>
             <p class="text-muted">Sesuai prosedur operasional standar, Nilai Target (Mean) dan Simpangan Baku (Standar Deviasi) diwarisi otomatis secara presisi dari kalkulasi <strong>Global Mean</strong> dan <strong>Global Standard Deviation</strong> dari 20 titik uji Homogenitas (Tahap 3) yang telah lolos validasi statistik.</p>
 

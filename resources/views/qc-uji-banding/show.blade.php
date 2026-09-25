@@ -53,10 +53,7 @@
                             <td class="text-muted">Tanggal Terima</td>
                             <td class="fw-bold">{{ $program->tanggal_terima->format('d M Y') }}</td>
                         </tr>
-                        <tr>
-                            <td class="text-muted">Tanggal Uji</td>
-                            <td class="fw-bold">{{ $program->tanggal_uji->format('d M Y') }}</td>
-                        </tr>
+
                         @if($program->keterangan)
                         <tr>
                             <td class="text-muted">Keterangan</td>

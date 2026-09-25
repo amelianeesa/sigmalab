@@ -30,7 +30,6 @@ class QcHarianController extends Controller
                 ->with(['parameterUji', 'analis'])
                 ->orderBy('tanggal_uji', 'desc')
                 ->orderBy('created_at', 'desc')
-                ->take(50)
                 ->get();
         }
 
@@ -137,7 +136,7 @@ class QcHarianController extends Controller
                 'sampel_inhouse_id' => $activeBatch->sampel_inhouse_id,
                 'parameter_uji_id' => $paramUji->parameter_uji_id,
                 'tanggal_uji' => $request->tanggal_uji,
-                'analis_id' => auth()->id() ?? 1,
+                'analis_id' => auth()->user()->personil_id ?? 1,
                 'nilai_d1' => $d1,
                 'nilai_d2' => $d2,
                 'nilai_db_1' => $db1,
@@ -212,6 +211,67 @@ class QcHarianController extends Controller
         ]);
 
         return redirect()->route('qc-harian.index')->with('success', 'Investigasi berhasil disimpan. Kunci parameter telah dibuka kembali.');
+    }
+
+    public function printPdf(Request $request)
+    {
+        $bulan = $request->input('bulan', date('n'));
+        $tahun = $request->input('tahun', date('Y'));
+        
+        $cetakRiwayat = $request->input('cetak_riwayat') == 1;
+        $cetakChart = $request->input('cetak_chart') == 1;
+        
+        $paramType = $request->input('param_type', 'all');
+        $paramIds = $request->input('param_ids', []);
+
+        $activeBatch = SampelInhouse::where('status', 'aktif')->latest()->first();
+        if (!$activeBatch) {
+            return redirect()->route('qc-harian.index')->with('error', 'Tidak ada batch QC In-House yang aktif.');
+        }
+
+        // Ambil parameter yang akan dicetak
+        $queryParam = $activeBatch->parameters()->where('status_parameter', 'stabil')->with('parameterUji');
+        if ($paramType === 'specific' && !empty($paramIds)) {
+            $queryParam->whereIn('parameter_uji_id', $paramIds);
+        }
+        $parameters = $queryParam->get();
+
+        if ($parameters->isEmpty()) {
+            return redirect()->route('qc-harian.index')->with('error', 'Tidak ada parameter yang dipilih atau tersedia.');
+        }
+
+        // Kumpulkan data per parameter
+        $reportData = [];
+        foreach ($parameters as $param) {
+            $paramModel = $param->parameterUji;
+            
+            $logs = QcHarian::where('sampel_inhouse_id', $activeBatch->sampel_inhouse_id)
+                ->where('parameter_uji_id', $param->parameter_uji_id)
+                ->whereMonth('tanggal_uji', $bulan)
+                ->whereYear('tanggal_uji', $tahun)
+                ->with('analis')
+                ->orderBy('tanggal_uji', 'asc')
+                ->orderBy('created_at', 'asc')
+                ->get();
+                
+            $reportData[] = [
+                'parameter' => $paramModel,
+                'mean' => (float)$paramModel->mean,
+                'sd' => (float)$paramModel->sd,
+                'logs' => $logs
+            ];
+        }
+
+        $bulanName = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'][$bulan - 1];
+        $periode = "$bulanName $tahun";
+
+        return view('qc-harian.print-pdf', compact(
+            'activeBatch', 
+            'reportData', 
+            'periode', 
+            'cetakRiwayat', 
+            'cetakChart'
+        ));
     }
 }
 

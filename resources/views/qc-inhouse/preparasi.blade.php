@@ -74,7 +74,9 @@
                                     </tbody>
                                 </table>
                             </div>
+                        @if($batch->status === 'preparasi')
                             <button type="button" class="btn btn-sm btn-outline-primary mb-3" id="btnAddRow"><i class="fas fa-plus"></i> Tambah Baris</button>
+                        @endif
                             
                             <div id="eqStatus" class="alert alert-secondary py-2 text-center fw-bold d-none">
                                 Menunggu data...
@@ -109,9 +111,11 @@
                         </div>
 
                         <div class="d-flex justify-content-end mt-4">
+                            @if($batch->status === 'preparasi')
                             <button type="submit" class="btn btn-primary px-5 btn-lg shadow-sm" id="btnSubmit" disabled>
                                 <i class="fas fa-save me-2"></i> Simpan & Lanjut Homogenitas
                             </button>
+                            @endif
                         </div>
                     </form>
                 </div>

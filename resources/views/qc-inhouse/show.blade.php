@@ -77,7 +77,7 @@
                         <dd class="col-sm-7">{{ $batch->jumlah_botol ? $batch->jumlah_botol . ' botol' : '-' }}</dd>
 
                         <dt class="col-sm-5 text-muted">Dibuat Oleh</dt>
-                        <dd class="col-sm-7">{{ $batch->pembuat->name ?? '-' }} ({{ $batch->tanggal_pemilihan ? $batch->tanggal_pemilihan->format('d/m/Y') : '-' }})</dd>
+                        <dd class="col-sm-7">{{ $batch->pembuat->username ?? '-' }} ({{ $batch->tanggal_pemilihan ? $batch->tanggal_pemilihan->format('d/m/Y') : '-' }})</dd>
                     </dl>
                 </div>
             </div>

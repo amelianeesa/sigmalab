@@ -75,7 +75,7 @@
                                 <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}" id="pane-{{ $pid }}" role="tabpanel">
                                     
                                     <div class="table-responsive p-3">
-                                        <table class="table table-bordered table-sm align-middle text-center param-table" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
+                                        <table class="table table-bordered table-sm align-middle text-center param-table text-nowrap" style="min-width: 1500px;" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
                                             <thead class="table-light">
                                                 @if($code === 'IM')
                                                     <tr>
@@ -296,6 +296,7 @@
                                             </tbody>
                                         </table>
                                     </div>
+                                    @if(in_array($batch->status, ['uji_stabilitas', 'gagal_stabilitas']))
                                     <div class="px-3 pb-3 d-flex justify-content-between">
                                         <div>
                                             <button type="button" class="btn btn-outline-primary btn-tambah-kemasan fw-bold me-2" data-pid="{{ $pid }}" data-code="{{ $code }}">
@@ -309,6 +310,7 @@
                                             <i class="fas fa-save me-1"></i> Simpan Tabel {{ $code }} Saja
                                         </button>
                                     </div>
+                                    @endif
                                 </div>
                             @endforeach
                         </div>
@@ -331,9 +333,11 @@
                 </div>
 
                 <div class="d-flex justify-content-end mb-5">
+                    @if(in_array($batch->status, ['uji_stabilitas', 'gagal_stabilitas']))
                     <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm" id="btnSubmit">
                         <i class="fas fa-check-double me-2"></i> Simpan Data Uji Stabilitas
                     </button>
+                    @endif
                 </div>
             </form>
         </div>
@@ -1391,17 +1395,27 @@ document.addEventListener('DOMContentLoaded', function() {
         this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Memproses...';
         this.disabled = true;
 
-        setTimeout(() => {
+        setTimeout(async () => {
             try {
-                if(format === 'excel') exportToExcel(selectedParams, part);
-                else if(format === 'pdf') exportToPdf(selectedParams, part);
-                else if(format === 'word') exportToWord(selectedParams, part);
+                if(format === 'excel') {
+                    exportToExcel(selectedParams, part);
+                    this.innerHTML = originalBtnHtml;
+                    this.disabled = false;
+                } else if(format === 'pdf') {
+                    await exportToPdf(selectedParams, part);
+                    this.innerHTML = originalBtnHtml;
+                    this.disabled = false;
+                } else if(format === 'word') {
+                    exportToWord(selectedParams, part);
+                    this.innerHTML = originalBtnHtml;
+                    this.disabled = false;
+                }
             } catch (e) {
                 console.error(e);
                 Swal.fire('Error', 'Kesalahan: ' + e.message, 'error');
+                this.innerHTML = originalBtnHtml;
+                this.disabled = false;
             }
-            this.innerHTML = originalBtnHtml;
-            this.disabled = false;
         }, 300);
     });
 
@@ -1487,26 +1501,28 @@ document.addEventListener('DOMContentLoaded', function() {
             .header-title { font-size: 18px; font-weight: bold; }
             .title-box { background-color: #e9ecef; font-weight: bold; padding: 3px 5px; }
             .bg-grey { background-color: #f0f0f0; }
-            .page-break { page-break-after: always; }
+            .page-break { page-break-before: always; display: block; height: 1px; width: 100%; clear: both; }
         </style></head><body>`;
         
         const oldCode = modalParamSelect.value;
         
         params.forEach((code, index) => {
-            if (index > 0) html += `<div class="page-break"></div>`;
             
             if(part === 'both' || part === 'main') {
                 const origTable = document.querySelector(`.param-table[data-code="${code}"]`);
                 if(origTable) {
+                    if (index > 0) html += `<div class="page-break"></div>`;
+                    html += `<div>`;
                     html += `<div style="font-size: 16px; font-weight: bold; text-align: center; margin-bottom: 10px;">DATA UTAMA UJI STABILITAS - ${code}</div>`;
                     const tableClone = origTable.cloneNode(true);
+                    tableClone.style.minWidth = 'auto'; // Hapus min-width agar pas di PDF
                     tableClone.querySelectorAll('input').forEach(inp => {
                         const text = document.createTextNode(inp.value);
                         inp.parentNode.replaceChild(text, inp);
                     });
                     tableClone.className = "official-table";
                     html += tableClone.outerHTML;
-                    if(part === 'both') html += `<div class="page-break"></div>`;
+                    html += `</div>`;
                 }
             }
             
@@ -1514,7 +1530,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 modalParamSelect.value = code;
                 renderModalTTest();
                 const prt = document.getElementById('modalPrintArea').innerHTML;
-                html += prt;
+                if (part === 'both' || index > 0) {
+                    html += `<div class="page-break"></div>`;
+                }
+                html += `<div>${prt}</div>`;
             }
         });
         
@@ -1535,10 +1554,11 @@ document.addEventListener('DOMContentLoaded', function() {
             filename:     'Laporan_Stabilitas.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { scale: 2 },
-            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
+            pagebreak:    { mode: 'css', avoid: ['tr', 'h5', 'h4', '.avoid-break'] }
         };
         
-        html2pdf().set(opt).from(container).save();
+        return html2pdf().set(opt).from(html).save();
     }
 
     function exportToWord(params, part) {

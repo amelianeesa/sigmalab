@@ -24,7 +24,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('qc-inhouse.store') }}" method="POST" id="formPemilihan">
+                    <form action="{{ route('qc-inhouse.store') }}" method="POST" id="formPemilihan" autocomplete="off">
                         @csrf
                         
                         <div class="row g-4 mb-4">
