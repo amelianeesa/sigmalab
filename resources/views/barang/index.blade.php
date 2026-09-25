@@ -153,10 +153,138 @@
         background-color: rgba(27, 58, 92, 0.15) !important;
         color: #1b3a5c !important;
     }
+
+    .header-action-btns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .scroll-hint {
+        display: none;
+        font-size: 0.68rem;
+        color: #6c757d;
+        margin-bottom: 0.4rem;
+    }
+
+    .filter-select {
+        position: relative;
+        font-size: 0.78rem;
+    }
+    .filter-select-trigger {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        padding: 0.32rem 0.6rem;
+        font-size: 0.78rem;
+        cursor: pointer;
+        text-align: left;
+        color: #212529;
+    }
+    .filter-select-trigger:after {
+        content: "";
+        width: 0;
+        height: 0;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 5px solid #6c757d;
+        margin-left: 6px;
+        flex-shrink: 0;
+    }
+    .filter-select.open .filter-select-trigger {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15);
+    }
+    .filter-select-options {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1050;
+        margin-top: 2px;
+        max-height: 220px;
+        overflow-y: auto;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+        list-style: none;
+        padding: 4px 0;
+    }
+    .filter-select.open .filter-select-options {
+        display: block;
+    }
+    .filter-select-options li {
+        padding: 6px 10px;
+        font-size: 0.78rem;
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .filter-select-options li:hover {
+        background-color: #f1f3f5;
+    }
+    .filter-select-options li.selected {
+        background-color: #0d6efd;
+        color: #fff;
+    }
+
+    @media (max-width: 768px) {
+        .table-responsive-custom {
+            font-size: 0.62rem;
+        }
+        .table-responsive-custom th,
+        .table-responsive-custom td {
+            padding: 0.2rem 0.25rem;
+        }
+        .badge-custom-size {
+            font-size: 0.5rem;
+        }
+        .scroll-hint {
+            display: block;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .header-action-btns {
+            width: 100%;
+            flex-direction: column;
+        }
+        .header-action-btns a,
+        .header-action-btns button {
+            width: 100%;
+            text-align: center;
+        }
+    }
 </style>
 
 <div class="container-fluid px-4">
 
+    @php
+        $allowedManageRoles = ['Koordinator Laboratorium', 'GA', 'Analis Lab', 'Admin Aplikasi'];
+        $userRoleName = Auth::user()->role->nama_role ?? '';
+        $canManageBarang = in_array($userRoleName, $allowedManageRoles);
+
+        $barangHabisCount = 0;
+        $barangMenipisCount = 0;
+        foreach($barang as $item) {
+            $saldoAwal = $item->saldo_awal ?? 0;
+            $penerimaan = $item->penerimaan ?? 0;
+            $pengeluaran = $item->pengeluaran ?? 0;
+            $saldoAkhir = ($saldoAwal + $penerimaan) - $pengeluaran;
+            if ($saldoAkhir <= 0) {
+                $barangHabisCount++;
+            } elseif ($saldoAkhir <= $item->minimal_stok) {
+                $barangMenipisCount++;
+            }
+        }
+    @endphp
     @if($barangHabisCount > 0 || $barangMenipisCount > 0)
         <div class="alert alert-warning alert-dismissible fade show shadow-sm py-2 d-flex align-items-center" role="alert" style="font-size: 0.85rem;">
             <div class="flex-grow-1">
@@ -175,11 +303,16 @@
 
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
         <h5 class="fw-bold mb-0">Data Inventory Barang/Bahan</h5>
-        <div>
+        <div class="header-action-btns">
+            @if(Auth::user()->hasModulAccess('pengadaan'))
+            <a href="{{ route('pengadaan.index') }}" class="btn btn-brand-standard shadow-sm">
+                <i class="fas fa-truck-loading me-1"></i> Cek Pengadaan
+            </a>
+            @endif
             <button type="button" class="btn btn-success-standard shadow-sm" data-bs-toggle="modal" data-bs-target="#cetakPeriodeModal">
                 <i class="fas fa-print me-1"></i> Cetak Laporan Periode
             </button>
-            @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
+            @if($canManageBarang && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
             <a href="{{ route('barang.create') }}" class="btn btn-brand-standard shadow-sm">
                 <i class="fas fa-plus me-1"></i> Tambah Barang/Bahan
             </a>
@@ -198,16 +331,26 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <select name="filter_kondisi" id="filterKondisi" class="form-select form-select-sm">
-                        <option value="">-- Filter Kondisi Barang --</option>
-                        <option value="baik" {{ (isset($filterKondisi) && $filterKondisi == 'baik') ? 'selected' : '' }}>Baik</option>
-                        <option value="rusak" {{ (isset($filterKondisi) && $filterKondisi == 'rusak') ? 'selected' : '' }}>Rusak</option>
-                    </select>
+                    @php
+                        $kondisiLabels = ['' => '-- Filter Kondisi Barang --', 'baik' => 'Baik', 'rusak' => 'Rusak'];
+                        $selectedKondisi = $filterKondisi ?? '';
+                    @endphp
+                    <div class="filter-select" id="selectFilterKondisi">
+                        <input type="hidden" name="filter_kondisi" id="filterKondisi" value="{{ $selectedKondisi }}">
+                        <button type="button" class="filter-select-trigger">{{ $kondisiLabels[$selectedKondisi] }}</button>
+                        <ul class="filter-select-options">
+                            @foreach($kondisiLabels as $value => $label)
+                                <li data-value="{{ $value }}" class="{{ $selectedKondisi === $value ? 'selected' : '' }}">{{ $label }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
                 <div class="col-md-1 d-flex gap-1">
                     <a href="{{ route('barang.index') }}" class="btn btn-outline-secondary btn-sm w-100" title="Reset"><i class="fas fa-sync-alt"></i></a>
                 </div>
             </form>
+
+            <div class="scroll-hint"><i class="fas fa-arrows-alt-h me-1"></i> Geser tabel ke samping untuk melihat kolom lainnya</div>
 
             <div class="table-responsive" id="table-container">
                 <table class="table table-bordered table-striped align-middle text-center table-responsive-custom mb-0">
@@ -225,7 +368,9 @@
                             <th rowspan="2" class="text-center align-middle">Nilai</th>
                             <th rowspan="2" class="text-center align-middle">Kondisi</th>
                             <th rowspan="2" class="text-center align-middle">Tanggal Expired Date</th>
+                            @if($canManageBarang && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
                             <th rowspan="2" class="text-center align-middle" style="width: 80px;">Aksi</th>
+                            @endif
                         </tr>
                         <tr>
                             <th>Penerimaan</th>
@@ -295,20 +440,18 @@
                                     {{ $item->tgl_exp ? \Carbon\Carbon::parse($item->tgl_exp)->format('d M Y') : '-' }}
                                 @endif
                             </td>
+                            @if($canManageBarang && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
                             <td class="text-nowrap">
-                                @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
-                                    <a href="{{ route('barang.edit', $item->barang_id) }}" class="btn btn-warning btn-sm py-0 px-1" title="Edit"><i class="fas fa-edit"></i></a>
-                                    <form action="{{ route('barang.destroy', $item->barang_id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" class="btn btn-danger btn-sm py-0 px-1" title="Hapus" onclick="confirmDelete(this, {{ $saldoAkhir }}, '{{ addslashes($item->nama_barang) }}')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                @else
-                                    -
-                                @endif
+                                <a href="{{ route('barang.edit', $item->barang_id) }}" class="btn btn-warning btn-sm py-0 px-1" title="Edit"><i class="fas fa-edit"></i></a>
+                                <form action="{{ route('barang.destroy', $item->barang_id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" class="btn btn-danger btn-sm py-0 px-1" title="Hapus" onclick="confirmDelete(this, {{ $saldoAkhir }}, '{{ addslashes($item->nama_barang) }}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
                             </td>
+                            @endif
                         </tr>
                         @empty
                         <tr>
@@ -499,8 +642,39 @@
             });
         });
 
+        document.querySelectorAll('.filter-select').forEach(function (wrapper) {
+            const trigger = wrapper.querySelector('.filter-select-trigger');
+            const hiddenInput = wrapper.querySelector('input[type="hidden"]');
+            const options = wrapper.querySelectorAll('.filter-select-options li');
+            const form = wrapper.closest('form');
+
+            trigger.addEventListener('click', function (e) {
+                e.stopPropagation();
+                document.querySelectorAll('.filter-select.open').forEach(function (other) {
+                    if (other !== wrapper) other.classList.remove('open');
+                });
+                wrapper.classList.toggle('open');
+            });
+
+            options.forEach(function (li) {
+                li.addEventListener('click', function () {
+                    hiddenInput.value = li.getAttribute('data-value');
+                    trigger.textContent = li.textContent;
+                    options.forEach(function (o) { o.classList.remove('selected'); });
+                    li.classList.add('selected');
+                    wrapper.classList.remove('open');
+                    form.submit();
+                });
+            });
+        });
+
+        document.addEventListener('click', function () {
+            document.querySelectorAll('.filter-select.open').forEach(function (wrapper) {
+                wrapper.classList.remove('open');
+            });
+        });
+
         const searchInput = document.getElementById('searchInput');
-        const filterKondisi = document.getElementById('filterKondisi');
         const filterForm = document.getElementById('filterForm');
         let timeout = null;
 
@@ -509,10 +683,6 @@
             timeout = setTimeout(function () {
                 filterForm.submit();
             }, 500);
-        });
-
-        filterKondisi.addEventListener('change', function () {
-            filterForm.submit();
         });
     });
 </script>

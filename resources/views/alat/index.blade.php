@@ -55,12 +55,29 @@
 </style>
 
 <div class="container-fluid dashboard-container" style="font-size: 0.82rem;">
+    @php
+        $alatWarningCount = 0;
+        foreach($alat as $item) {
+            $kalibrasi = $item->riwayatKalibrasi->sortByDesc('tgl_kalibrasi')->first();
+            if ($kalibrasi && $kalibrasi->tgl_akhir) {
+                $tglAkhir = \Carbon\Carbon::parse($kalibrasi->tgl_akhir);
+                $sisaHari = \Carbon\Carbon::now()->startOfDay()->diffInDays($tglAkhir, false);
+                if ($sisaHari <= 180) {
+                    $alatWarningCount++;
+                }
+            }
+        }
+
+        $allowedRoles = ['Admin Aplikasi', 'Analis Lab', 'Koordinator Laboratorium', 'GA'];
+        $userRoleName = Auth::user()->role->nama_role ?? '';
+        $canModify = in_array($userRoleName, $allowedRoles);
+    @endphp
     @if($alatWarningCount > 0)
         <div class="alert alert-warning alert-dismissible fade show shadow-sm py-1 px-2.5 mb-2 d-flex align-items-center justify-content-between" role="alert" style="font-size: 0.8rem;">
             <div class="pe-2">
                 <i class="fas fa-exclamation-triangle me-1"></i> <strong>Perhatian!</strong> Terdapat <strong>{{ $alatWarningCount }} alat</strong> yang masa kalibrasinya sudah kadaluwarsa atau akan segera berakhir (dalam 180 hari ke depan). Mohon segera jadwalkan kalibrasi ulang.
             </div>
-            <button type="button" class="btn-close m-0 p-2" data-bs-dismiss="modal" aria-label="Close" style="transform: scale(0.75); position: absolute; right: 15px; top: 50%; transform: translateY(-50%) scale(0.8);"></button>
+            <button type="button" class="btn-close m-0 p-2" data-bs-dismiss="alert" aria-label="Close" style="transform: scale(0.75); position: absolute; right: 15px; top: 50%; transform: translateY(-50%) scale(0.8);"></button>
         </div>
     @endif
 
@@ -70,7 +87,7 @@
         </h5>
         
         <div class="d-flex align-items-center gap-2">
-            @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
+            @if($canModify)
             <a href="{{ route('alat.create') }}" class="btn btn-corporate-blue btn-sm py-1.5 px-3 shadow-sm fw-semibold" style="font-size: 0.8rem;"><i class="fas fa-plus me-1"></i> Tambah Alat</a>
             @endif
         </div>
@@ -226,7 +243,8 @@
                             <td>{{ ucfirst($signifikan ?? '-') }}</td>
                             <td class="text-nowrap">
                                 <a href="{{ route('alat.show', $item->alat_id) }}" class="btn btn-corporate-blue btn-sm py-1 px-2 shadow-sm" style="font-size: 0.75rem;" title="Detail Kerusakan & Perbaikan"><i class="fas fa-tools"></i></a>
-                                @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
+                                
+                                @if($canModify)
                                     <a href="{{ route('alat.edit', $item->alat_id) }}" class="btn btn-warning btn-sm py-1 px-2 text-dark shadow-sm" style="font-size: 0.75rem;" title="Edit"><i class="fas fa-edit"></i></a>
 
                                     <button type="button" class="btn btn-danger btn-sm py-1 px-2 shadow-sm" style="font-size: 0.75rem;" title="Hapus" data-bs-toggle="modal" data-bs-target="#modalHapusAlat{{ $item->alat_id }}">
@@ -341,7 +359,7 @@ qrModal.addEventListener('show.bs.modal', function (event) {
     const btnDownload = document.getElementById('btnDownloadQr');
     btnDownload.onclick = function() {
         const cardElement = document.getElementById('qrCardContainer');
-        const kodeAlatVal = kodeAlat.replace(/[^a-zA-Z0-9]/g, '_');
+        const kodeAlalatVal = kodeAlat.replace(/[^a-zA-Z0-9]/g, '_');
 
         html2canvas(cardElement, {
             scale: 3, 
@@ -350,7 +368,7 @@ qrModal.addEventListener('show.bs.modal', function (event) {
             const pngUrl = canvas.toDataURL('image/png');
             const downloadLink = document.createElement('a');
             downloadLink.href = pngUrl;
-            downloadLink.download = 'QRCode-' + kodeAlatVal + '.png';
+            downloadLink.download = 'QRCode-' + kodeAlalatVal + '.png';
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);

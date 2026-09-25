@@ -13,13 +13,39 @@
 @endpush
 
 @section('content')
+<style>
+    .dropdown-menu .dropdown-item {
+        border-radius: 4px;
+        margin: 0 4px;
+        width: calc(100% - 8px);
+        transition: all 0.15s ease-in-out;
+    }
+
+    .dropdown-menu .dropdown-item.dropdown-item-pdf:hover,
+    .dropdown-menu .dropdown-item.dropdown-item-pdf:focus,
+    .dropdown-menu .dropdown-item.dropdown-item-pdf:active {
+        background-color: rgba(220, 53, 69, 0.15) !important;
+        color: #dc3545 !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    .dropdown-menu .dropdown-item.dropdown-item-excel:hover,
+    .dropdown-menu .dropdown-item.dropdown-item-excel:focus,
+    .dropdown-menu .dropdown-item.dropdown-item-excel:active {
+        background-color: rgba(40, 167, 69, 0.15) !important;
+        color: #28a745 !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+</style>
+
 <div class="container-fluid pt-0 pb-4 px-4" style="max-width: 1050px;">
     <div class="mb-2">
         <h4 class="fw-bold mb-1">Pemeliharaan</h4>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0" style="font-size: 12px;">
                 @auth
-                    <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
                     <li class="breadcrumb-item"><a href="{{ route('alat.index') }}" class="text-decoration-none">Data Alat & Kalibrasi</a></li>
                 @else
                     <li class="breadcrumb-item text-muted">Informasi resmi identitas dan status kalibrasi alat laboratorium</li>
@@ -50,12 +76,12 @@
                             </button>
                             <ul class="dropdown-menu shadow" aria-labelledby="dropdownMenuButton" style="font-size: 0.75rem;">
                                 <li>
-                                    <a class="dropdown-item text-danger py-1" href="{{ route('alat.export-pdf', $alat->alat_id) }}" target="_blank">
+                                    <a class="dropdown-item dropdown-item-pdf text-danger py-1" href="{{ route('alat.export-pdf', $alat->alat_id) }}" target="_blank">
                                         <i class="fas fa-file-pdf me-2"></i> PDF
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item text-success py-1" href="{{ route('alat.export-excel', $alat->alat_id) }}">
+                                    <a class="dropdown-item dropdown-item-excel text-success py-1" href="{{ route('alat.export-excel', $alat->alat_id) }}">
                                         <i class="fas fa-file-excel me-2"></i> Excel
                                     </a>
                                 </li>
@@ -164,7 +190,12 @@
             </div>
 
             {{-- 3. FORM INPUT KALIBRASI BARU (Header Biru Pekat Sucofindo, Teks Putih) --}}
-            @auth
+            @php
+                $allowedRoles = ['Koordinator Laboratorium', 'Analis Lab', 'Admin Aplikasi'];$userRoleName = Auth::user()->role->nama_role ?? '';
+                $canInputKalibrasi = Auth::check() && in_array($userRoleName,$allowedRoles);
+            @endphp
+
+            @if($canInputKalibrasi)
             <div class="card custom-card mb-3">
                 <div class="card-header text-white py-2 px-3" style="background-color: #1b3152 !important;">
                     <h6 class="mb-0 fw-bold text-white" style="font-size: 13px;"><i class="fas fa-plus-circle me-2"></i> Form Input Pengecekan / Kalibrasi Baru</h6>
@@ -236,8 +267,9 @@
                     </form>
                 </div>
             </div>
-            @else
-            {{-- TAMPILAN UNTUK PUBLIK --}}
+            @elseif(!Auth::check())
+
+            {{-- tampilan publik --}}
             <div class="card custom-card mb-3 border-secondary">
                 <div class="card-header bg-secondary text-white py-2 px-3">
                     <h6 class="mb-0 fw-bold text-white" style="font-size: 13px;"><i class="fas fa-lock me-2"></i> Form Input Pengecekan / Kalibrasi Baru</h6>
@@ -251,8 +283,7 @@
                     </a>
                 </div>
             </div>
-            @endauth
-
+            @endif
         </div>
     </div>
 </div>

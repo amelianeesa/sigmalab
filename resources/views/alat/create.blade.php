@@ -12,7 +12,6 @@
     </div>
 
     <div class="card shadow-sm border-0 mb-4">
-        <!-- Header Card Biru Tua Pekat Seragam dengan Topbar (#1b3152) -->
         <div class="card-header text-white py-1.5 px-3" style="background-color: #1b3152;">
             <h6 class="mb-0 fw-semibold" style="font-size: 13px;"> Form Input Data Master & Kalibrasi</h6>
         </div>
@@ -77,7 +76,6 @@
                         <select name="kondisi_barang" class="form-select form-select-sm" required>
                             <option value="">--Pilih Kondisi--</option>
                             <option value="baik" {{ old('kondisi_barang') == 'baik' ? 'selected' : '' }}>Baik</option>
-                            <option value="perbaikan" {{ old('kondisi_barang') == 'perbaikan' ? 'selected' : '' }}>Perbaikan</option>
                             <option value="rusak" {{ old('kondisi_barang') == 'rusak' ? 'selected' : '' }}>Rusak</option>
                         </select>
                     </div>

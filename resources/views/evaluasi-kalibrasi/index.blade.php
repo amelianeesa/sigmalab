@@ -50,14 +50,23 @@
 </style>
 
 <div class="container-fluid dashboard-container">
+    @php
+        // Daftar role yang diizinkan menginput evaluasi baru
+        $allowedRoles = ['Koordinator Laboratorium', 'Analis Lab', 'Admin Aplikasi'];
+        $userRoleName = Auth::user()->role->nama_role ?? '';
+        $canInputEvaluasi = in_array($userRoleName, $allowedRoles);
+    @endphp
+
     <div class="mb-2">
         <h4 class="fw-bold mb-0">Evaluasi Kalibrasi</h4>
     </div>
 
     <div class="d-flex justify-content-end mb-2">
-        <a href="{{ route('evaluasi-kalibrasi.create') }}" class="btn btn-corporate-blue btn-sm py-1 px-2.5 shadow-sm fw-semibold" style="font-size: 0.73rem;">
-            <i class="fas fa-plus me-1"></i> Input Evaluasi Baru
-        </a>
+        @if($canInputEvaluasi)
+            <a href="{{ route('evaluasi-kalibrasi.create') }}" class="btn btn-corporate-blue btn-sm py-1 px-2.5 shadow-sm fw-semibold" style="font-size: 0.73rem;">
+                <i class="fas fa-plus me-1"></i> Input Evaluasi Baru
+            </a>
+        @endif
     </div>
 
     <div class="table-responsive">

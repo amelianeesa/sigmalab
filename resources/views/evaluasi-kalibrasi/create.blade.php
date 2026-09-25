@@ -5,7 +5,6 @@
     <!-- Judul & Breadcrumb Lebih Dekat ke Topbar -->
     <h3 class="fw-bold mb-1">Evaluasi Kalibrasi</h3>
     <ol class="breadcrumb mb-3" style="font-size: 13.5px;">
-        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
         <li class="breadcrumb-item"><a href="{{ route('evaluasi-kalibrasi.index') }}">Evaluasi Kalibrasi</a></li>
         <li class="breadcrumb-item active">Input Evaluasi</li>
     </ol>
