@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
     <style>
         .table thead, 
         .table thead tr, 
@@ -108,6 +109,21 @@
         .dropdown-menu .dropdown-item.text-danger:focus i {
             color: #dc3545 !important;
         }
+
+        /* ===== Select2 & Flatpickr custom, konsisten dengan tema corporate ===== */
+        .select2-container--bootstrap-5 .select2-selection {
+            font-size: 0.75rem !important;
+            min-height: 31px !important;
+        }
+        .select2-container--bootstrap-5 .select2-selection__rendered {
+            padding-top: 0 !important;
+        }
+        .select2-container--bootstrap-5 .select2-results__option {
+            font-size: 0.8rem !important;
+        }
+        .flatpickr-input {
+            background-color: #fff !important;
+        }
     </style>
 
     <div class="container-fluid px-3 pt-1 pb-2" style="font-size: 0.8rem;">
@@ -190,7 +206,7 @@
                             <input type="hidden" name="cari" value="{{ $cari }}">
                         @endif
 
-                        <select name="kategori" class="form-select form-select-sm w-100 py-1" onchange="this.form.submit()" style="font-size: 0.75rem;">
+                        <select name="kategori" id="filterKategori" class="form-select form-select-sm w-100 py-1 select2-basic" onchange="this.form.submit()" style="font-size: 0.75rem;">
                             <option value="">Semua Kategori</option>
                             @foreach($kategoriOptions as $value => $label)
                                 <option value="{{ $value }}" {{ $kategori === $value ? 'selected' : '' }}>
@@ -629,7 +645,8 @@
                                         </button>
                                     </div>
                                     <select name="kategori_personil"
-                                        class="form-select form-select-sm py-1" style="font-size: 0.75rem;">
+                                        id="kategoriPersonilTambah"
+                                        class="form-select form-select-sm py-1 select2-in-modal" style="font-size: 0.75rem;">
                                         <option value="">— Pilih Kategori —</option>
                                         @foreach($kategoriOptions as $value => $label)
                                             <option value="{{ $value }}"
@@ -714,20 +731,22 @@
                                     <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
                                         Tanggal Terbit
                                     </label>
-                                    <input type="date"
+                                    <input type="text"
                                         name="tanggal_terbit"
-                                        class="form-control form-control-sm py-1"
-                                        value="{{ old('tanggal_terbit', date('Y-m-d')) }}" style="font-size: 0.75rem;">
+                                        class="form-control form-control-sm py-1 flatpickr-date"
+                                        value="{{ old('tanggal_terbit', date('Y-m-d')) }}"
+                                        autocomplete="off" style="font-size: 0.75rem;">
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
                                         Tanggal Berakhir
                                     </label>
-                                    <input type="date"
+                                    <input type="text"
                                         name="tanggal_berakhir"
-                                        class="form-control form-control-sm py-1"
-                                        value="{{ old('tanggal_berakhir') }}" style="font-size: 0.75rem;">
+                                        class="form-control form-control-sm py-1 flatpickr-date"
+                                        value="{{ old('tanggal_berakhir') }}"
+                                        autocomplete="off" style="font-size: 0.75rem;">
                                 </div>
                             </div>
                         </div>
@@ -907,7 +926,7 @@
                                 Hak Akses
                             </label>
                             <select name="role_id"
-                                class="form-select form-select-sm py-1"
+                                class="form-select form-select-sm py-1 select2-in-modal"
                                 required style="font-size: 0.75rem;">
                                 <option value="">— Pilih Role —</option>
                                 @foreach($roles as $role)
@@ -977,4 +996,39 @@
             }
         });
     </script>
+
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+    <script>
+        $(function () {
+            // Dropdown filter kategori di luar modal
+            $('#filterKategori').select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                minimumResultsForSearch: -1
+            });
+
+            // Dropdown di dalam modal butuh dropdownParent supaya tidak tersembunyi di belakang modal
+            $('.select2-in-modal').each(function () {
+                const $modal = $(this).closest('.modal');
+                $(this).select2({
+                    theme: 'bootstrap-5',
+                    width: '100%',
+                    dropdownParent: $modal.length ? $modal : $(document.body)
+                });
+            });
+
+            // Input tanggal jadi kalender custom, ramah disentuh di HP
+            flatpickr.localize(flatpickr.l10ns.id);
+            $('.flatpickr-date').flatpickr({
+                dateFormat: 'Y-m-d',
+                altInput: true,
+                altFormat: 'd F Y',
+                allowInput: true,
+                disableMobile: true
+            });
+        });
+    </script>
+    @endpush
 @endsection

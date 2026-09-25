@@ -60,6 +60,105 @@
             transform: translateY(-50%);
             right: 0.75rem;
         }
+
+        /* ===== Responsif Mobile ===== */
+        @media (max-width: 767.98px) {
+            .container-fluid.px-3 {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+                padding-top: 0.75rem !important;
+            }
+            h4.fw-bold {
+                font-size: 1.35rem !important;
+            }
+            h4.fw-bold i {
+                font-size: 1.2rem;
+            }
+            .container-fluid small.text-muted {
+                font-size: 0.85rem !important;
+            }
+
+            /* Kartu profil */
+            .profil-header {
+                padding-top: 1.5rem !important;
+                padding-bottom: 1.5rem !important;
+            }
+            .profil-avatar {
+                width: 72px;
+                height: 72px;
+                font-size: 1.7rem;
+            }
+            .profil-header .fw-bold.text-white {
+                font-size: 1.1rem !important;
+            }
+            .profil-header .badge {
+                font-size: 0.8rem !important;
+                padding: 0.35rem 0.9rem !important;
+            }
+            .profil-info-label {
+                font-size: 0.78rem !important;
+            }
+            .profil-info-value {
+                font-size: 0.92rem !important;
+            }
+            .profil-info-icon {
+                font-size: 0.95rem !important;
+                width: 22px;
+            }
+            .px-3.py-2 > .d-flex {
+                padding-top: 0.65rem !important;
+                padding-bottom: 0.65rem !important;
+            }
+
+            /* Kartu ganti password */
+            .card-header span.fw-bold {
+                font-size: 1.05rem !important;
+            }
+            .card-body.p-3 {
+                padding: 1rem !important;
+            }
+            .card-body p.text-muted {
+                font-size: 0.85rem !important;
+            }
+            .form-label {
+                font-size: 0.88rem !important;
+            }
+            #formGantiPassword input.form-control {
+                font-size: 0.95rem !important;
+                padding-top: 0.6rem !important;
+                padding-bottom: 0.6rem !important;
+            }
+            #formGantiPassword .input-group-text {
+                padding: 0.6rem 0.75rem !important;
+            }
+            #formGantiPassword .toggle-password {
+                padding: 0.6rem 0.85rem !important;
+            }
+            #formGantiPassword .toggle-password i,
+            #formGantiPassword .input-group-text i {
+                font-size: 0.95rem !important;
+            }
+
+            /* Tombol aksi ditumpuk & full-width supaya mudah dipencet */
+            #formGantiPassword .d-flex.justify-content-end.gap-2 {
+                flex-direction: column-reverse;
+                gap: 0.6rem !important;
+            }
+            #formGantiPassword .d-flex.justify-content-end.gap-2 .btn,
+            #formGantiPassword .d-flex.justify-content-end.gap-2 a {
+                width: 100%;
+                justify-content: center;
+                display: flex;
+                align-items: center;
+                font-size: 0.9rem !important;
+                padding: 0.65rem !important;
+            }
+
+            /* Alert */
+            .alert {
+                font-size: 0.85rem !important;
+            }
+        }
     </style>
 
     <div class="container-fluid px-3 pt-1 pb-2" style="font-size: 0.8rem;">
@@ -244,7 +343,10 @@
                                 </div>
                             </div>
 
-                            <div class="d-flex justify-content-end">
+                            <div class="d-flex justify-content-end gap-2">
+                                <a href="{{ route('dashboard') }}" class="btn btn-corporate-outline btn-sm py-1 px-3" style="font-size: 0.75rem;">
+                                    <i class="fas fa-times me-1"></i> Batal
+                                </a>
                                 <button type="submit" class="btn btn-corporate-dark btn-sm py-1 px-3" style="font-size: 0.75rem;">
                                     <i class="fas fa-save me-1"></i> Simpan Password Baru
                                 </button>

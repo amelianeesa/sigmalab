@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
     <style>
         .btn-corporate-dark {
             background-color: #1b3152 !important;
@@ -31,6 +32,21 @@
             top: 50%;
             transform: translateY(-50%);
             right: 1rem;
+        }
+
+        /* ===== Select2 & Flatpickr custom, konsisten dengan tema corporate ===== */
+        .select2-container--bootstrap-5 .select2-selection {
+            font-size: 0.75rem !important;
+            min-height: 31px !important;
+        }
+        .select2-container--bootstrap-5 .select2-selection__rendered {
+            padding-top: 0 !important;
+        }
+        .select2-container--bootstrap-5 .select2-results__option {
+            font-size: 0.8rem !important;
+        }
+        .flatpickr-input {
+            background-color: #fff !important;
         }
     </style>
 
@@ -95,7 +111,7 @@
                                     <i class="fas fa-plus-circle"></i> Kategori Baru
                                 </button>
                             </div>
-                            <select name="kategori_personil" class="form-select form-select-sm py-1" style="font-size: 0.75rem;">
+                            <select name="kategori_personil" class="form-select form-select-sm py-1 select2-basic" style="font-size: 0.75rem;">
                                 <option value="">— Pilih Kategori —</option>
                                 @foreach($kategoriOptions as $value => $label)
                                     <option value="{{ $value }}" {{ old('kategori_personil', $personil->kategori_personil) == $value ? 'selected' : '' }}>
@@ -169,14 +185,14 @@
                             <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">
                                 Tanggal Terbit
                             </label>
-                            <input type="date" name="tanggal_terbit" class="form-control form-control-sm py-1" value="{{ old('tanggal_terbit', $sertifikasi?->tanggal_terbit?->format('Y-m-d')) }}" style="font-size: 0.75rem;">
+                            <input type="text" name="tanggal_terbit" class="form-control form-control-sm py-1 flatpickr-date" autocomplete="off" value="{{ old('tanggal_terbit', $sertifikasi?->tanggal_terbit?->format('Y-m-d')) }}" style="font-size: 0.75rem;">
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">
                                 Tanggal Berakhir
                             </label>
-                            <input type="date" name="tanggal_berakhir" class="form-control form-control-sm py-1" value="{{ old('tanggal_berakhir', $sertifikasi?->tanggal_berakhir?->format('Y-m-d')) }}" style="font-size: 0.75rem;">
+                            <input type="text" name="tanggal_berakhir" class="form-control form-control-sm py-1 flatpickr-date" autocomplete="off" value="{{ old('tanggal_berakhir', $sertifikasi?->tanggal_berakhir?->format('Y-m-d')) }}" style="font-size: 0.75rem;">
                         </div>
                     </div>
                 </div>
@@ -242,4 +258,26 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+    <script>
+        $(function () {
+            $('.select2-basic').select2({
+                theme: 'bootstrap-5',
+                width: '100%'
+            });
+
+            flatpickr.localize(flatpickr.l10ns.id);
+            $('.flatpickr-date').flatpickr({
+                dateFormat: 'Y-m-d',
+                altInput: true,
+                altFormat: 'd F Y',
+                allowInput: true,
+                disableMobile: true
+            });
+        });
+    </script>
+    @endpush
 @endsection

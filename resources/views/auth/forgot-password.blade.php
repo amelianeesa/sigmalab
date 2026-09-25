@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Lupa Password - SIGMALAB Sucofindo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -129,6 +130,90 @@
         .auth-link:hover { color: #0b3d5d; text-decoration: underline; }
 
         .auth-footer { margin-top: 0.85rem; color: #7b8a9d; font-size: 0.78rem; text-align: center; }
+
+        /* ===== Responsif Mobile ===== */
+        @media (max-width: 767.98px) {
+            html,
+            body {
+                height: auto;
+                min-height: 100%;
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+
+            body {
+                align-items: flex-start !important;
+                padding: 0;
+            }
+
+            .container.py-4 {
+                padding-top: 1.75rem !important;
+                padding-bottom: 1.75rem !important;
+            }
+
+            .auth-card {
+                max-width: 420px;
+            }
+
+            .auth-row {
+                grid-template-columns: 1fr;
+                min-height: 0;
+            }
+
+            .auth-side {
+                padding: 1.5rem 1.25rem;
+                border-radius: 16px 16px 0 0;
+                text-align: center;
+                align-items: center;
+            }
+
+            .auth-side h3 {
+                font-size: 1.2rem;
+            }
+
+            .auth-side p {
+                font-size: 0.85rem;
+                max-width: 100%;
+            }
+
+            .auth-form-panel {
+                padding: 1.5rem 1.25rem;
+                border-radius: 0 0 16px 16px;
+            }
+
+            .auth-form-panel h4 {
+                font-size: 1.05rem;
+            }
+
+            .auth-form-panel p {
+                font-size: 0.85rem;
+            }
+
+            .form-label {
+                font-size: 0.85rem;
+            }
+
+            .form-control {
+                font-size: 1rem;
+                min-height: 42px;
+                padding: 0.5rem 0.85rem;
+            }
+
+            .btn-auth {
+                font-size: 0.95rem;
+                padding: 0.7rem 0.95rem;
+            }
+
+            .auth-logo-box {
+                width: 84px;
+                height: 84px;
+            }
+
+            .auth-logo-box img {
+                width: 84px;
+                height: 84px;
+            }
+        }
     </style>
 </head>
 <body class="d-flex align-items-center justify-content-center">
