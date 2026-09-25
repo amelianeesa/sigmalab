@@ -1,6 +1,22 @@
 @extends('layouts.app')
 
 @section('content')
+<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+<style>
+    .select2-container--bootstrap-5 .select2-selection {
+        font-size: 0.82rem !important;
+        min-height: 31px !important;
+    }
+    .select2-container--bootstrap-5 .select2-selection__rendered {
+        padding-top: 0 !important;
+    }
+    .select2-container--bootstrap-5 .select2-results__option {
+        font-size: 0.85rem !important;
+    }
+    .flatpickr-input {
+        background-color: #fff !important;
+    }
+</style>
 <div class="container-fluid pt-1 pb-3 px-4" style="max-width: 1100px;">
     <!-- Judul & Breadcrumb Lebih Dekat ke Topbar -->
     <h3 class="fw-bold mb-1">Evaluasi Kalibrasi</h3>
@@ -31,7 +47,7 @@
                     <!-- Pilih Alat -->
                     <div class="col-md-6">
                         <label class="form-label small fw-bold">Pilih Alat <span class="text-danger">*</span></label>
-                        <select name="alat_id" class="form-select form-select-sm" required>
+                        <select name="alat_id" class="form-select form-select-sm select2-basic" required>
                             <option value="">-- Pilih Alat --</option>
                             @foreach ($alatList as $alat)
                                 <option value="{{ $alat->alat_id }}" {{ old('alat_id') == $alat->alat_id ? 'selected' : '' }}>
@@ -45,7 +61,7 @@
                     <!-- Tanggal Evaluasi -->
                     <div class="col-md-6">
                         <label class="form-label small fw-bold">Tanggal Evaluasi <span class="text-danger">*</span></label>
-                        <input type="date" name="tanggal_evaluasi" class="form-control form-control-sm" value="{{ old('tanggal_evaluasi', date('Y-m-d')) }}" required>
+                        <input type="text" name="tanggal_evaluasi" class="form-control form-control-sm flatpickr-date" autocomplete="off" value="{{ old('tanggal_evaluasi', date('Y-m-d')) }}" required>
                     </div>
 
                     <!-- Upload Laporan -->
@@ -58,7 +74,7 @@
                     <!-- Dropdown Keputusan -->
                     <div class="col-md-6">
                         <label class="form-label small fw-bold">Keputusan <span class="text-danger">*</span></label>
-                        <select name="keputusan" class="form-select form-select-sm" required>
+                        <select name="keputusan" class="form-select form-select-sm select2-basic" required>
                             <option value="">-- Pilih Keputusan --</option>
                             <option value="Layak" {{ old('keputusan') == 'Layak' ? 'selected' : '' }}>Layak</option>
                             <option value="Tidak Layak" {{ old('keputusan') == 'Tidak Layak' ? 'selected' : '' }}>Tidak Layak</option>
@@ -82,4 +98,26 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+<script>
+$(function () {
+    $('.select2-basic').select2({
+        theme: 'bootstrap-5',
+        width: '100%'
+    });
+
+    flatpickr.localize(flatpickr.l10ns.id);
+    $('.flatpickr-date').flatpickr({
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd F Y',
+        allowInput: true,
+        disableMobile: true
+    });
+});
+</script>
+@endpush
 @endsection

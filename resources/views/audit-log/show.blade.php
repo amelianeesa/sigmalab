@@ -44,10 +44,28 @@
         font-size: 0.6rem !important;
         padding: 0.2rem 0.4rem !important;
     }
+
+    @media (max-width: 576px) {
+        .audit-detail-header {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 0.5rem;
+        }
+        .audit-detail-header a {
+            width: 100%;
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .table th, .table td {
+            font-size: 0.65rem !important;
+        }
+    }
 </style>
 
 <div class="container-fluid px-4">
-    <div class="d-flex justify-content-between align-items-center mb-2 mt-2">
+    <div class="d-flex justify-content-between align-items-center mb-2 mt-2 audit-detail-header">
         <h5 class="fw-bold text-dark mb-0" style="font-size: 1rem;"> Detail Rekam Jejak (Audit Log)</h5>
         <a href="{{ route('audit-log.index') }}" class="btn btn-secondary btn-sm py-1 px-2 shadow-sm" style="font-size: 0.72rem;">
             <i class="fas fa-arrow-left me-1"></i> Kembali
@@ -64,47 +82,49 @@
             <div class="card shadow-sm border-0 card-shadow-custom">
                 <div class="card-header card-header-custom"> Informasi</div>
                 <div class="card-body p-2.5">
-                    <table class="table table-bordered table-striped align-middle mb-0" style="font-size: 0.72rem;">
-                        <tr>
-                            <td class="fw-bold text-muted bg-light" style="width: 35%;">Aktor / User</td>
-                            <td>
-                                <span class="fw-bold">{{ $log->causer ? ($log->causer->personil->nama_personil ?? $log->causer->username) : 'Sistem' }}</span>
-                                @if($log->causer && $log->causer->role)
-                                    <br><span class="badge bg-secondary badge-custom-size mt-1">{{ $log->causer->role->nama_role }}</span>
-                                @endif
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="fw-bold text-muted bg-light">Event</td>
-                            <td>
-                                @if($log->event === 'created')
-                                    <span class="badge bg-success badge-custom-size">Created</span>
-                                @elseif($log->event === 'updated')
-                                    <span class="badge bg-warning text-dark badge-custom-size">Updated</span>
-                                @elseif($log->event === 'deleted')
-                                    <span class="badge bg-danger badge-custom-size">Deleted</span>
-                                @else
-                                    <span class="badge bg-secondary badge-custom-size">{{ ucfirst($log->event) }}</span>
-                                @endif
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="fw-bold text-muted bg-light">Deskripsi</td>
-                            <td>{{ $log->description }}</td>
-                        </tr>
-                        <tr>
-                            <td class="fw-bold text-muted bg-light">Model Entitas</td>
-                            <td><code style="font-size: 0.65rem;">{{ $log->subject_type }}</code></td>
-                        </tr>
-                        <tr>
-                            <td class="fw-bold text-muted bg-light">ID Entitas (PK)</td>
-                            <td>{{ $log->subject_id }}</td>
-                        </tr>
-                        <tr>
-                            <td class="fw-bold text-muted bg-light">Waktu Eksekusi</td>
-                            <td>{{ \Carbon\Carbon::parse($log->created_at)->format('d M Y H:i:s') }}</td>
-                        </tr>
-                    </table>
+                    <div class="table-responsive table-responsive-custom">
+                        <table class="table table-bordered table-striped align-middle mb-0" style="font-size: 0.72rem;">
+                            <tr>
+                                <td class="fw-bold text-muted bg-light" style="width: 35%;">Aktor / User</td>
+                                <td>
+                                    <span class="fw-bold">{{ $log->causer ? ($log->causer->personil->nama_personil ?? $log->causer->username) : 'Sistem' }}</span>
+                                    @if($log->causer && $log->causer->role)
+                                        <br><span class="badge bg-secondary badge-custom-size mt-1">{{ $log->causer->role->nama_role }}</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-muted bg-light">Event</td>
+                                <td>
+                                    @if($log->event === 'created')
+                                        <span class="badge bg-success badge-custom-size">Created</span>
+                                    @elseif($log->event === 'updated')
+                                        <span class="badge bg-warning text-dark badge-custom-size">Updated</span>
+                                    @elseif($log->event === 'deleted')
+                                        <span class="badge bg-danger badge-custom-size">Deleted</span>
+                                    @else
+                                        <span class="badge bg-secondary badge-custom-size">{{ ucfirst($log->event) }}</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-muted bg-light">Deskripsi</td>
+                                <td>{{ $log->description }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-muted bg-light">Model Entitas</td>
+                                <td><code style="font-size: 0.65rem;">{{ $log->subject_type }}</code></td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-muted bg-light">ID Entitas (PK)</td>
+                                <td>{{ $log->subject_id }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-muted bg-light">Waktu Eksekusi</td>
+                                <td>{{ \Carbon\Carbon::parse($log->created_at)->format('d M Y H:i:s') }}</td>
+                            </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -117,7 +137,7 @@
                 </div>
                 <div class="card-body p-2.5">
                     @foreach($batchLogs as $index => $bLog)
-                    <div class="bg-light p-2 border rounded mb-2 fw-bold d-flex justify-content-between align-items-center" style="font-size: 0.72rem;">
+                    <div class="bg-light p-2 border rounded mb-2 fw-bold d-flex justify-content-between align-items-center flex-wrap gap-1" style="font-size: 0.72rem;">
                         <span>#{{ $index + 1 }} - {{ $bLog->description }}</span>
                         <span class="text-muted" style="font-size: 0.65rem;">{{ $bLog->subject_type }} (ID: {{ $bLog->subject_id }})</span>
                     </div>

@@ -59,6 +59,90 @@
         font-size: 0.72rem;
         padding: 0.2rem 0.55rem;
     }
+
+    .filter-select {
+        position: relative;
+        font-size: 0.72rem;
+    }
+    .filter-select-trigger {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        padding: 0.15rem 0.3rem;
+        font-size: 0.72rem;
+        cursor: pointer;
+        text-align: left;
+        color: #212529;
+    }
+    .filter-select-trigger:after {
+        content: "";
+        width: 0;
+        height: 0;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 5px solid #6c757d;
+        margin-left: 6px;
+        flex-shrink: 0;
+    }
+    .filter-select.open .filter-select-trigger {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15);
+    }
+    .filter-select-options {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1050;
+        margin-top: 2px;
+        max-height: 220px;
+        overflow-y: auto;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+        list-style: none;
+        padding: 4px 0;
+    }
+    .filter-select.open .filter-select-options {
+        display: block;
+    }
+    .filter-select-options li {
+        padding: 6px 10px;
+        font-size: 0.72rem;
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .filter-select-options li:hover {
+        background-color: #f1f3f5;
+    }
+    .filter-select-options li.selected {
+        background-color: #0d6efd;
+        color: #fff;
+    }
+
+    .scroll-hint-audit {
+        display: none;
+        font-size: 0.68rem;
+        color: #6c757d;
+        margin-bottom: 0.4rem;
+    }
+
+    @media (max-width: 768px) {
+        .scroll-hint-audit {
+            display: block;
+        }
+        .table th, .table td {
+            font-size: 0.65rem !important;
+        }
+    }
 </style>
 
 <div class="container-fluid px-4">
@@ -70,12 +154,24 @@
         <div class="card-body p-2.5">
             <form action="{{ route('audit-log.index') }}" method="GET" class="row g-2 align-items-center" id="filter-form">
                 <div class="col-md-4">
-                    <select name="event" class="form-select form-select-sm">
-                        <option value="">-- Semua Event --</option>
-                        <option value="created" {{ request('event') == 'created' ? 'selected' : '' }}>Created (Baru)</option>
-                        <option value="updated" {{ request('event') == 'updated' ? 'selected' : '' }}>Updated (Ubah)</option>
-                        <option value="deleted" {{ request('event') == 'deleted' ? 'selected' : '' }}>Deleted (Hapus)</option>
-                    </select>
+                    @php
+                        $eventLabels = [
+                            '' => '-- Semua Event --',
+                            'created' => 'Created (Baru)',
+                            'updated' => 'Updated (Ubah)',
+                            'deleted' => 'Deleted (Hapus)',
+                        ];
+                        $selectedEvent = request('event', '');
+                    @endphp
+                    <div class="filter-select" id="selectEvent">
+                        <input type="hidden" name="event" value="{{ $selectedEvent }}">
+                        <button type="button" class="filter-select-trigger">{{ $eventLabels[$selectedEvent] ?? '-- Semua Event --' }}</button>
+                        <ul class="filter-select-options">
+                            @foreach($eventLabels as $value => $label)
+                                <li data-value="{{ $value }}" class="{{ $selectedEvent === $value ? 'selected' : '' }}">{{ $label }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
                 <div class="col-md-7">
                     <input type="text" name="subject_type" class="form-control form-control-sm" placeholder="Ketik nama entitas (Contoh: Barang, Kegiatan)..." value="{{ request('subject_type') }}" autocomplete="off">
@@ -89,6 +185,7 @@
 
     <div class="card shadow-sm border-0 card-shadow-custom">
         <div class="card-body p-2.5">
+            <div class="scroll-hint-audit"><i class="fas fa-arrows-alt-h me-1"></i> Geser tabel ke samping untuk melihat kolom lainnya</div>
             <div class="table-responsive table-responsive-custom">
                 <table class="table table-bordered table-striped align-middle mb-0">
                     <thead class="table-header-custom">
@@ -160,12 +257,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const form = document.getElementById('filter-form');
-        const selectEvent = form.querySelector('select[name="event"]');
         const inputSubject = form.querySelector('input[name="subject_type"]');
-        
-        selectEvent.addEventListener('change', function() {
-            form.submit();
-        });
 
         let timeout = null;
         inputSubject.addEventListener('input', function() {
@@ -173,6 +265,38 @@
             timeout = setTimeout(function() {
                 form.submit();
             }, 500);
+        });
+
+        document.querySelectorAll('.filter-select').forEach(function (wrapper) {
+            const trigger = wrapper.querySelector('.filter-select-trigger');
+            const hiddenInput = wrapper.querySelector('input[type="hidden"]');
+            const options = wrapper.querySelectorAll('.filter-select-options li');
+            const parentForm = wrapper.closest('form');
+
+            trigger.addEventListener('click', function (e) {
+                e.stopPropagation();
+                document.querySelectorAll('.filter-select.open').forEach(function (other) {
+                    if (other !== wrapper) other.classList.remove('open');
+                });
+                wrapper.classList.toggle('open');
+            });
+
+            options.forEach(function (li) {
+                li.addEventListener('click', function () {
+                    hiddenInput.value = li.getAttribute('data-value');
+                    trigger.textContent = li.textContent;
+                    options.forEach(function (o) { o.classList.remove('selected'); });
+                    li.classList.add('selected');
+                    wrapper.classList.remove('open');
+                    if (parentForm) parentForm.submit();
+                });
+            });
+        });
+
+        document.addEventListener('click', function () {
+            document.querySelectorAll('.filter-select.open').forEach(function (wrapper) {
+                wrapper.classList.remove('open');
+            });
         });
     });
 </script>

@@ -52,6 +52,17 @@
         font-size: 0.72rem;
         padding: 0.2rem 0.55rem;
     }
+
+    .select2-container--bootstrap-5 .select2-selection {
+        font-size: 0.82rem !important;
+        min-height: 31px !important;
+    }
+    .select2-container--bootstrap-5 .select2-selection__rendered {
+        padding-top: 0 !important;
+    }
+    .select2-container--bootstrap-5 .select2-results__option {
+        font-size: 0.85rem !important;
+    }
 </style>
 
 <div class="container-fluid dashboard-container" style="font-size: 0.82rem;">
@@ -104,7 +115,7 @@
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <select name="filter_status" id="filterStatus" class="form-select form-select-sm py-1.5" style="font-size: 0.82rem;">
+                    <select name="filter_status" id="filterStatus" class="form-select form-select-sm py-1.5">
                         <option value="">-- Filter Status Kalibrasi --</option>
                         <option value="aktif" {{ (isset($filterStatus) && $filterStatus == 'aktif') ? 'selected' : '' }}>Aktif (> 180 Hari)</option>
                         <option value="segera" {{ (isset($filterStatus) && $filterStatus == 'segera') ? 'selected' : '' }}>Segera Berakhir (&le; 180 Hari)</option>
@@ -112,7 +123,7 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select name="filter_kondisi" id="filterKondisi" class="form-select form-select-sm py-1.5" style="font-size: 0.82rem;">
+                    <select name="filter_kondisi" id="filterKondisi" class="form-select form-select-sm py-1.5">
                         <option value="">-- Filter Kondisi Alat --</option>
                         <option value="baik" {{ (isset($filterKondisi) && $filterKondisi == 'baik') ? 'selected' : '' }}>Baik</option>
                         <option value="perbaikan" {{ (isset($filterKondisi) && $filterKondisi == 'perbaikan') ? 'selected' : '' }}>Perbaikan</option>
@@ -325,6 +336,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const filterKondisi = document.getElementById('filterKondisi');
     const filterForm = document.getElementById('filterForm');
 
+    $('#filterStatus, #filterKondisi').select2({
+        theme: 'bootstrap-5',
+        width: '100%'
+    });
+
     let timeout = null;
 
     searchInput.addEventListener('input', function() {
@@ -334,11 +350,11 @@ document.addEventListener("DOMContentLoaded", function() {
         }, 500);
     });
 
-    filterStatus.addEventListener('change', function() {
+    $('#filterStatus').on('change', function() {
         filterForm.submit();
     });
 
-    filterKondisi.addEventListener('change', function() {
+    $('#filterKondisi').on('change', function() {
         filterForm.submit();
     });
 });

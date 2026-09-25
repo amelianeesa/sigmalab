@@ -112,10 +112,84 @@
         font-size: 0.72rem;
         padding: 0.2rem 0.55rem;
     }
+
+    .filter-select {
+        position: relative;
+        font-size: 0.72rem;
+    }
+    .filter-select-trigger {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        padding: 4px 8px;
+        font-size: 0.72rem;
+        cursor: pointer;
+        text-align: left;
+        color: #212529;
+    }
+    .filter-select-trigger:after {
+        content: "";
+        width: 0;
+        height: 0;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 5px solid #6c757d;
+        margin-left: 6px;
+        flex-shrink: 0;
+    }
+    .filter-select.open .filter-select-trigger {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15);
+    }
+    .filter-select-options {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1060;
+        margin-top: 2px;
+        max-height: 220px;
+        overflow-y: auto;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+        list-style: none;
+        padding: 4px 0;
+    }
+    .filter-select.open .filter-select-options {
+        display: block;
+    }
+    .filter-select-options li {
+        padding: 6px 10px;
+        font-size: 0.72rem;
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .filter-select-options li:hover {
+        background-color: #f1f3f5;
+    }
+    .filter-select-options li.selected {
+        background-color: #0d6efd;
+        color: #fff;
+    }
+
+    @media (max-width: 576px) {
+        .library-header-row { flex-direction: column; align-items: stretch !important; }
+        .library-header-row .d-flex.gap-2 { width: 100%; }
+        .library-header-row .d-flex.gap-2 a { flex: 1; text-align: center; }
+    }
 </style>
 
 <div class="container-fluid dashboard-container">
-    <div class="d-flex justify-content-between align-items-center mb-2 mt-1 flex-wrap gap-2">
+    <div class="d-flex justify-content-between align-items-center mb-2 mt-1 flex-wrap gap-2 library-header-row">
         <div>
             <h4 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">{{ $showArchived ? 'Arsip Dokumen Library' : 'Library Digital' }}</h4>
             <p class="text-muted small mb-0" style="font-size: 0.72rem;">{{ $showArchived ? 'Dokumen yang disembunyikan dari daftar aktif.' : 'Daftar induk dokumen prosedur, formulir, dan instruksi kerja.' }}</p>
@@ -146,13 +220,22 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <label for="library-category" class="library-filter-label d-block">Kategori</label>
-                    <select id="library-category" name="category_id" class="form-select form-select-sm py-1" onchange="this.form.submit()" style="font-size: 0.72rem;">
-                        <option value="">Semua Kategori</option>
-                        @foreach($categories as $category)
-                            <option value="{{ $category->id }}" @selected((string) request('category_id') === (string) $category->id)>{{ $category->nama_kategori }}</option>
-                        @endforeach
-                    </select>
+                    <label class="library-filter-label d-block">Kategori</label>
+                    @php
+                        $selectedCategoryFilter = (string) request('category_id', '');
+                    @endphp
+                    <div class="filter-select" id="selectCategoryFilter">
+                        <input type="hidden" name="category_id" value="{{ $selectedCategoryFilter }}">
+                        <button type="button" class="filter-select-trigger">
+                            {{ $categories->firstWhere('id', $selectedCategoryFilter)->nama_kategori ?? 'Semua Kategori' }}
+                        </button>
+                        <ul class="filter-select-options">
+                            <li data-value="" class="{{ $selectedCategoryFilter === '' ? 'selected' : '' }}">Semua Kategori</li>
+                            @foreach($categories as $category)
+                                <li data-value="{{ $category->id }}" class="{{ $selectedCategoryFilter === (string) $category->id ? 'selected' : '' }}">{{ $category->nama_kategori }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
                 <div class="col-md-3">
                     <label class="library-filter-label d-block" style="visibility: hidden;">Aksi</label>
@@ -303,7 +386,7 @@
             </div>
             <div class="modal-footer border-0 justify-content-center gap-2 pt-1 pb-2">
                 <button type="button" id="btnConfirmActivate" class="btn btn-success btn-sm py-1 px-3 fw-semibold rounded-2" style="font-size: 0.73rem;">Ya, Tampilkan!</button>
-                <button type="button" class="btn btn-secondary btn-sm py-1 px-3 fw-semibold rounded-2" data-bs-dismiss="modal" style="font-size: 0.73rem;">Batal</button>
+                <button type="button" class="btn btn-secondary btn-sm py-1 px-3 fw-semibold rounded-2" data-bs-dismiss="modal">Batal</button>
             </div>
         </div>
     </div>
@@ -334,7 +417,6 @@
         const modalPulihkanEl = document.getElementById('modalKonfirmasiPulihkan');
         const modalPulihkan = modalPulihkanEl ? new bootstrap.Modal(modalPulihkanEl) : null;
 
-        // Trigger Modal Hapus Bootstrap
         document.querySelectorAll('.btn-delete').forEach(button => {
             button.addEventListener('click', function () {
                 activeDeleteId = this.getAttribute('data-id');
@@ -351,7 +433,6 @@
             });
         }
 
-        // Trigger Modal Pulihkan/Tampilkan Bootstrap
         document.querySelectorAll('.btn-activate').forEach(button => {
             button.addEventListener('click', function () {
                 activeActivateId = this.getAttribute('data-id');
@@ -369,35 +450,67 @@
         }
 
         const modalPreview = document.getElementById('modalPreviewDokumen');
-        if (!modalPreview) return;
+        if (modalPreview) {
+            const body = document.getElementById('modalPreviewBody');
+            const title = document.getElementById('modalPreviewDokumenLabel');
+            const imageExt = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
-        const body = document.getElementById('modalPreviewBody');
-        const title = document.getElementById('modalPreviewDokumenLabel');
-        const imageExt = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            modalPreview.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const url = button.getAttribute('data-preview-url');
+                const nama = button.getAttribute('data-preview-nama');
+                const ext = button.getAttribute('data-preview-ext');
 
-        modalPreview.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            const url = button.getAttribute('data-preview-url');
-            const nama = button.getAttribute('data-preview-nama');
-            const ext = button.getAttribute('data-preview-ext');
+                title.textContent = nama;
 
-            title.textContent = nama;
+                if (ext === 'pdf') {
+                    body.innerHTML = '<iframe src="' + url + '" style="width:100%;height:100%;border:0;"></iframe>';
+                } else if (imageExt.includes(ext)) {
+                    body.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 bg-light p-3"><img src="' + url + '" style="max-width:100%;max-height:100%;object-fit:contain;"></div>';
+                } else {
+                    body.innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center h-100 text-center p-4">' +
+                        '<i class="fas fa-file-alt fs-1 text-muted mb-3"></i>' +
+                        '<p class="text-muted mb-3">Pratinjau langsung belum didukung untuk format file ini (.' + ext + ').<br>Unduh dokumen untuk membukanya.</p>' +
+                        '<a href="' + url.replace('/preview', '/download') + '" class="btn btn-corporate-blue btn-sm"><i class="fas fa-download me-1"></i> Unduh Dokumen</a>' +
+                        '</div>';
+                }
+            });
 
-            if (ext === 'pdf') {
-                body.innerHTML = '<iframe src="' + url + '" style="width:100%;height:100%;border:0;"></iframe>';
-            } else if (imageExt.includes(ext)) {
-                body.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 bg-light p-3"><img src="' + url + '" style="max-width:100%;max-height:100%;object-fit:contain;"></div>';
-            } else {
-                body.innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center h-100 text-center p-4">' +
-                    '<i class="fas fa-file-alt fs-1 text-muted mb-3"></i>' +
-                    '<p class="text-muted mb-3">Pratinjau langsung belum didukung untuk format file ini (.' + ext + ').<br>Unduh dokumen untuk membukanya.</p>' +
-                    '<a href="' + url.replace('/preview', '/download') + '" class="btn btn-corporate-blue btn-sm"><i class="fas fa-download me-1"></i> Unduh Dokumen</a>' +
-                    '</div>';
-            }
+            modalPreview.addEventListener('hidden.bs.modal', function () {
+                body.innerHTML = '';
+            });
+        }
+
+        document.querySelectorAll('.filter-select').forEach(function (wrapper) {
+            const trigger = wrapper.querySelector('.filter-select-trigger');
+            const hiddenInput = wrapper.querySelector('input[type="hidden"]');
+            const options = wrapper.querySelectorAll('.filter-select-options li');
+            const form = wrapper.closest('form');
+
+            trigger.addEventListener('click', function (e) {
+                e.stopPropagation();
+                document.querySelectorAll('.filter-select.open').forEach(function (other) {
+                    if (other !== wrapper) other.classList.remove('open');
+                });
+                wrapper.classList.toggle('open');
+            });
+
+            options.forEach(function (li) {
+                li.addEventListener('click', function () {
+                    hiddenInput.value = li.getAttribute('data-value');
+                    trigger.textContent = li.textContent;
+                    options.forEach(function (o) { o.classList.remove('selected'); });
+                    li.classList.add('selected');
+                    wrapper.classList.remove('open');
+                    if (form) form.submit();
+                });
+            });
         });
 
-        modalPreview.addEventListener('hidden.bs.modal', function () {
-            body.innerHTML = '';
+        document.addEventListener('click', function () {
+            document.querySelectorAll('.filter-select.open').forEach(function (wrapper) {
+                wrapper.classList.remove('open');
+            });
         });
     });
 </script>

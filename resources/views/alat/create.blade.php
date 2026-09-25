@@ -1,8 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
+<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+<style>
+    .select2-container--bootstrap-5 .select2-selection {
+        font-size: 0.8rem !important;
+        min-height: 31px !important;
+    }
+    .select2-container--bootstrap-5 .select2-selection__rendered {
+        padding-top: 0 !important;
+    }
+    .select2-container--bootstrap-5 .select2-results__option {
+        font-size: 0.82rem !important;
+    }
+    .flatpickr-input {
+        background-color: #fff !important;
+    }
+</style>
 <div class="container-fluid pt-0 pb-4 px-4" style="max-width: 1050px;">
-    <!-- Judul & Breadcrumb Lebih Compact -->
     <div class="pt-2 mb-2">
         <h5 class="fw-bold mb-1" style="font-size: 1.2rem; color: #333;">Tambah Alat & Informasi Kalibrasi</h5>
         <ol class="breadcrumb mb-0" style="font-size: 12px;">
@@ -73,7 +88,7 @@
                 <div class="row g-2 mb-2">
                     <div class="col-md-6">
                         <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Kondisi Barang</label>
-                        <select name="kondisi_barang" class="form-select form-select-sm" required>
+                        <select name="kondisi_barang" class="form-select form-select-sm select2-basic" required>
                             <option value="">--Pilih Kondisi--</option>
                             <option value="baik" {{ old('kondisi_barang') == 'baik' ? 'selected' : '' }}>Baik</option>
                             <option value="rusak" {{ old('kondisi_barang') == 'rusak' ? 'selected' : '' }}>Rusak</option>
@@ -81,7 +96,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Status Barang</label>
-                        <select name="status_barang" class="form-select form-select-sm" required>
+                        <select name="status_barang" class="form-select form-select-sm select2-basic" required>
                             <option value="">--Pilih Status--</option>
                             <option value="idle" {{ old('status_barang') == 'idle' ? 'selected' : '' }}>Idle</option>
                             <option value="terpakai" {{ old('status_barang') == 'terpakai' ? 'selected' : '' }}>Terpakai</option>
@@ -114,7 +129,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Jenis Kalibrasi</label>
-                        <select name="jenis_kalibrasi" class="form-select form-select-sm">
+                        <select name="jenis_kalibrasi" class="form-select form-select-sm select2-basic">
                             <option value="">--Pilih Jenis Kalibrasi--</option>
                             <option value="eksternal" {{ old('jenis_kalibrasi') == 'eksternal' ? 'selected' : '' }}>Eksternal</option>
                             <option value="internal" {{ old('jenis_kalibrasi') == 'internal' ? 'selected' : '' }}>Internal</option>
@@ -137,7 +152,7 @@
                 <div class="row g-2 mb-2">
                     <div class="col-md-4">
                         <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Tanggal Kalibrasi</label>
-                        <input type="date" name="tgl_kalibrasi" id="tgl_kalibrasi" class="form-control form-control-sm" value="{{ old('tgl_kalibrasi') }}">
+                        <input type="text" name="tgl_kalibrasi" id="tgl_kalibrasi" class="form-control form-control-sm flatpickr-date" autocomplete="off" value="{{ old('tgl_kalibrasi') }}">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Interval Kalibrasi</label>
@@ -145,7 +160,7 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Tanggal Berakhirnya Masa Kalibrasi</label>
-                        <input type="date" name="tgl_akhir" id="tgl_akhir" class="form-control form-control-sm" value="{{ old('tgl_akhir') }}">
+                        <input type="text" name="tgl_akhir" id="tgl_akhir" class="form-control form-control-sm flatpickr-date" autocomplete="off" value="{{ old('tgl_akhir') }}">
                     </div>
                 </div>
 
@@ -160,7 +175,7 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Signifikan</label>
-                        <select name="signifikan" class="form-select form-select-sm">
+                        <select name="signifikan" class="form-select form-select-sm select2-basic">
                             <option value="">--Pilih Signifikan--</option>
                             <option value="ya" {{ old('signifikan') == 'ya' ? 'selected' : '' }}>Ya</option>
                             <option value="tidak" {{ old('signifikan') == 'tidak' ? 'selected' : '' }}>Tidak</option>
@@ -184,7 +199,6 @@
     </div>
 </div>
 
-<!-- Scanner Modal -->
 <div class="modal fade" id="scannerModal" tabindex="-1" aria-labelledby="scannerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -229,6 +243,43 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function onScanFailure(error) {}
+});
+</script>
+@endpush
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+<script>
+$(function () {
+    $('.select2-basic').select2({
+        theme: 'bootstrap-5',
+        width: '100%'
+    });
+
+    flatpickr.localize(flatpickr.l10ns.id);
+    $('.flatpickr-date').flatpickr({
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd F Y',
+        allowInput: true,
+        disableMobile: true
+    });
+
+    // Helper: set nilai input tanggal dengan aman, baik dia sudah jadi flatpickr atau belum
+    function setDateValue(input, value) {
+        if (input._flatpickr) {
+            input._flatpickr.setDate(value || null, true);
+        } else {
+            input.value = value || '';
+        }
+    }
+
+    function setMinDate(input, value) {
+        if (input._flatpickr) {
+            input._flatpickr.set('minDate', value || null);
+        }
+    }
 
     const tglKalibrasiInput = document.getElementById('tgl_kalibrasi');
     const intervalInput = document.getElementById('interval_kalibrasi');
@@ -237,9 +288,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateMinTanggalAkhir() {
         if (tglKalibrasiInput.value) {
-            tglAkhirInput.min = tglKalibrasiInput.value;
+            setMinDate(tglAkhirInput, tglKalibrasiInput.value);
             if (tglAkhirInput.value && tglAkhirInput.value < tglKalibrasiInput.value) {
-                tglAkhirInput.value = '';
+                setDateValue(tglAkhirInput, '');
             }
         }
     }
@@ -272,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let bulan = String(tanggal.getMonth() + 1).padStart(2, '0');
         let hari = String(tanggal.getDate()).padStart(2, '0');
 
-        tglAkhirInput.value = `${tahun}-${bulan}-${hari}`;
+        setDateValue(tglAkhirInput, `${tahun}-${bulan}-${hari}`);
     }
 
     function hitungInterval() {
@@ -318,20 +369,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     tglAkhirInput.addEventListener('change', function() {
         if (tglKalibrasiInput.value && tglAkhirInput.value < tglKalibrasiInput.value) {
-            alert("Tanggal berakhir tidak boleh lebih awal dari tanggal kalibrasi!");
-            tglAkhirInput.value = '';
+            Swal.fire({
+                icon: 'warning',
+                title: 'Tanggal tidak valid',
+                text: 'Tanggal berakhir tidak boleh lebih awal dari tanggal kalibrasi!'
+            });
+            setDateValue(tglAkhirInput, '');
             return;
         }
         hitungInterval();
     });
 
     updateMinTanggalAkhir();
-});
-</script>
-@endpush
 
-@push('scripts')
-<script>
+    // ===== OCR Auto-Fill =====
     document.getElementById('btn_ocr_scan').addEventListener('click', function() {
         let fileInput = document.getElementById('sertifikat_ocr');
         if (!fileInput.files.length) {
@@ -370,12 +421,14 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.disabled = false;
             
             if (data.success) {
-                if(data.data.tgl_kalibrasi) document.getElementById('tgl_kalibrasi').value = data.data.tgl_kalibrasi;
-                if(data.data.tgl_akhir) document.getElementById('tgl_akhir').value = data.data.tgl_akhir;
-                if(data.data.sertifikat_oleh) {
+                if (data.data.tgl_kalibrasi) setDateValue(tglKalibrasiInput, data.data.tgl_kalibrasi);
+                if (data.data.tgl_akhir) setDateValue(tglAkhirInput, data.data.tgl_akhir);
+                if (data.data.sertifikat_oleh) {
                     let lembaga = document.querySelector('input[name="lembaga_kalibrasi"]');
-                    if(lembaga) lembaga.value = data.data.sertifikat_oleh;
+                    if (lembaga) lembaga.value = data.data.sertifikat_oleh;
                 }
+
+                updateMinTanggalAkhir();
                 
                 successEl.textContent = 'Berhasil membaca dokumen! Form telah diisi.';
                 successEl.classList.remove('d-none');
@@ -398,9 +451,10 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.innerHTML = originalHtml;
             btn.disabled = false;
             errorEl.textContent = 'Terjadi kesalahan sistem saat menghubungi server.';
-            errorEl.classList.add('d-none');
+            errorEl.classList.remove('d-none');
         });
     });
+});
 </script>
 @endpush
 @endsection

@@ -39,6 +39,22 @@
 @endpush
 
 @section('content')
+<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+<style>
+    .select2-container--bootstrap-5 .select2-selection {
+        font-size: 0.78rem !important;
+        min-height: 31px !important;
+    }
+    .select2-container--bootstrap-5 .select2-selection__rendered {
+        padding-top: 0 !important;
+    }
+    .select2-container--bootstrap-5 .select2-results__option {
+        font-size: 0.8rem !important;
+    }
+    .flatpickr-input {
+        background-color: #fff !important;
+    }
+</style>
 <div class="container-fluid pt-0 pb-3 px-4" style="max-width: 1100px;">
     
     <div class="d-flex justify-content-between align-items-center mb-2 mt-1">
@@ -185,7 +201,7 @@
                     <p class="text-muted mb-2">Status alat akan diubah menjadi <strong class="text-danger">Rusak</strong>.</p>
                     <div class="mb-2">
                         <label class="form-label fw-semibold">Tanggal Rusak <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control form-control-sm" name="tanggal_rusak" value="{{ date('Y-m-d') }}" required>
+                        <input type="text" class="form-control form-control-sm flatpickr-date" autocomplete="off" name="tanggal_rusak" value="{{ date('Y-m-d') }}" required>
                     </div>
                     <div class="mb-2">
                         <label class="form-label fw-semibold">Deskripsi Kerusakan / Kendala <span class="text-danger">*</span></label>
@@ -242,7 +258,7 @@
                     <h6 class="fw-bold text-muted text-uppercase small mb-2" style="font-size: 0.72rem;">Update Tindakan</h6>
                     <div class="mb-2">
                         <label class="form-label fw-semibold">Ubah Status <span class="text-danger">*</span></label>
-                        <select name="status_perbaikan" class="form-select form-select-sm" required>
+                        <select name="status_perbaikan" class="form-select form-select-sm select2-in-modal" required>
                             <option value="Belum Diperbaiki" {{ $perbaikan->status_perbaikan == 'Belum Diperbaiki' ? 'selected' : '' }}>Belum Diperbaiki</option>
                             <option value="Dalam Perbaikan" {{ $perbaikan->status_perbaikan == 'Dalam Perbaikan' ? 'selected' : '' }}>Dalam Perbaikan</option>
                             @if(Auth::user()->role->nama_role === \App\Enums\PeranPengguna::KOORDINATOR_LAB->value)
@@ -277,4 +293,30 @@
     </div>
 </div>
 @endforeach
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+<script>
+$(function () {
+    flatpickr.localize(flatpickr.l10ns.id);
+    $('.flatpickr-date').flatpickr({
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd F Y',
+        allowInput: true,
+        disableMobile: true
+    });
+
+    $('.select2-in-modal').each(function () {
+        const $modal = $(this).closest('.modal');
+        $(this).select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            dropdownParent: $modal.length ? $modal : $(document.body)
+        });
+    });
+});
+</script>
+@endpush
 @endsection

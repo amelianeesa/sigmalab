@@ -54,6 +54,7 @@
         color: #334155;
         margin-bottom: 2px;
         line-height: 1.35;
+        word-break: break-word;
     }
     .notif-page-msg.text-danger-emphasis {
         color: #b91c1c !important;
@@ -74,14 +75,35 @@
         font-size: 0.72rem;
         padding: 0.2rem 0.55rem;
     }
+    .notif-header-btn {
+        white-space: nowrap;
+    }
+
     @media (max-width: 575.98px) {
         .notif-page-item {
             flex-wrap: wrap;
         }
         .notif-page-actions {
             flex-direction: row;
+            flex-wrap: wrap;
             align-items: center;
-            padding: 0 14px 8px 54px;
+            justify-content: flex-end;
+            width: 100%;
+            padding: 0 14px 10px 54px;
+        }
+        .notif-header-row {
+            flex-direction: column;
+            align-items: stretch !important;
+        }
+        .notif-header-btn {
+            width: 100%;
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .notif-page-actions {
+            padding-left: 14px;
         }
     }
 </style>
@@ -94,11 +116,11 @@
         </ol>
     </nav>
 
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 notif-header-row">
         <h4 class="mb-0 fw-bold" style="font-size: 1.1rem;">Daftar Notifikasi</h4>
         <form action="{{ route('notifikasi.read-all') }}" method="POST" class="m-0">
             @csrf
-            <button type="submit" class="btn btn-corporate-dark btn-sm py-1 px-3" style="font-size: 0.75rem;">
+            <button type="submit" class="btn btn-corporate-dark btn-sm py-1 px-3 notif-header-btn" style="font-size: 0.75rem;">
                 <i class="fas fa-check-double me-1"></i> Tandai Semua Dibaca
             </button>
         </form>

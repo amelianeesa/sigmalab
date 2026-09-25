@@ -72,6 +72,8 @@
     .tracking-select-wrap {
         position: relative;
         display: inline-block;
+        width: 100%;
+        max-width: 300px;
     }
     .tracking-select-wrap > .select2-container:not(.select2) {
         top: 100% !important;
@@ -79,6 +81,7 @@
         left: 0 !important;
         right: auto !important;
         margin-top: 0.15rem;
+        width: 100% !important;
     }
     .select-tracking-dropdown .select2-search__field:focus {
         border-color: #1b3152 !important;
@@ -104,6 +107,59 @@
         background-color: #1b3152 !important;
         color: #ffffff !important;
     }
+
+    .tracking-steps-scroll {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .tracking-steps-inner {
+        display: flex;
+        min-width: 480px;
+    }
+
+    .summary-card-body {
+        padding: 10px 12px !important;
+    }
+    .summary-card-value {
+        font-size: 1.4rem;
+        line-height: 1.1;
+    }
+    .summary-card-label {
+        font-size: 0.68rem;
+        letter-spacing: 0.5px;
+    }
+    .summary-card-link {
+        font-size: 0.72rem;
+    }
+
+    @media (max-width: 420px) {
+        .summary-card-body {
+            padding: 8px 10px !important;
+        }
+        .summary-card-value {
+            font-size: 1.15rem;
+        }
+        .summary-card-label {
+            font-size: 0.6rem;
+        }
+        .summary-card-link {
+            font-size: 0.66rem;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .tracking-card .card-header {
+            flex-direction: column;
+            align-items: stretch !important;
+        }
+        .tracking-select-wrap {
+            max-width: 100%;
+            width: 100%;
+        }
+        .tracking-select-wrap .select2-container {
+            width: 100% !important;
+        }
+    }
 </style>
 
 <div class="container-fluid dashboard-container">
@@ -114,49 +170,49 @@
         </div>
     </div>
 
-    <div class="row g-3 mb-3">
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="card border-0 shadow-sm border-start border-4 border-suco-biru-tua">
-                <div class="card-body p-2 px-3">
-                    <p class="text-muted mb-0 text-uppercase fw-bold" style="font-size: 0.68rem; letter-spacing: 0.5px;">OUTLIER (OPEN)</p>
-                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.4rem; line-height: 1.1;">{{ $outliers }}</h3>
-                    <a href="{{ route('tindak-lanjut.index') }}" class="text-decoration-none text-suco-biru-tua fw-semibold d-inline-block" style="font-size: 0.72rem;">
+    <div class="row g-2 g-sm-3 mb-3">
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm border-start border-4 border-suco-biru-tua h-100">
+                <div class="card-body summary-card-body">
+                    <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">OUTLIER (OPEN)</p>
+                    <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $outliers }}</h3>
+                    <a href="{{ route('tindak-lanjut.index') }}" class="text-decoration-none text-suco-biru-tua fw-semibold d-inline-block summary-card-link">
                         Lihat Detail <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
             </div>
         </div>
 
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="card border-0 shadow-sm border-start border-4 border-suco-biru">
-                <div class="card-body p-2 px-3">
-                    <p class="text-muted mb-0 text-uppercase fw-bold" style="font-size: 0.68rem; letter-spacing: 0.5px;">PENGUJIAN AKTIF</p>
-                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.4rem; line-height: 1.1;">{{ $kegiatanBerjalan }}</h3>
-                    <a href="{{ route('kegiatan.index') }}" class="text-decoration-none text-suco-biru fw-semibold d-inline-block" style="font-size: 0.72rem;">
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm border-start border-4 border-suco-biru h-100">
+                <div class="card-body summary-card-body">
+                    <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">PENGUJIAN AKTIF</p>
+                    <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $kegiatanBerjalan }}</h3>
+                    <a href="{{ route('kegiatan.index') }}" class="text-decoration-none text-suco-biru fw-semibold d-inline-block summary-card-link">
                         Buka Modul QC <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
             </div>
         </div>
 
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="card border-0 shadow-sm border-start border-4 border-suco-biru-muda">
-                <div class="card-body p-2 px-3">
-                    <p class="text-muted mb-0 text-uppercase fw-bold" style="font-size: 0.68rem; letter-spacing: 0.5px;">PERALATAN & KALIBRASI</p>
-                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.4rem; line-height: 1.1;">{{ $tenggatKalibrasi }}</h3>
-                    <a href="{{ route('alat.index') }}" class="text-decoration-none text-suco-biru-muda fw-semibold d-inline-block" style="font-size: 0.72rem;">
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm border-start border-4 border-suco-biru-muda h-100">
+                <div class="card-body summary-card-body">
+                    <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">PERALATAN & KALIBRASI</p>
+                    <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $tenggatKalibrasi }}</h3>
+                    <a href="{{ route('alat.index') }}" class="text-decoration-none text-suco-biru-muda fw-semibold d-inline-block summary-card-link">
                         Kelola Aset <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
             </div>
         </div>
 
-        <div class="col-12 col-sm-6 col-lg-3">
-            <div class="card border-0 shadow-sm border-start border-4 border-suco-hijau">
-                <div class="card-body p-2 px-3">
-                    <p class="text-muted mb-0 text-uppercase fw-bold" style="font-size: 0.68rem; letter-spacing: 0.5px;">SERTIFIKASI PERSONIL H-6</p>
-                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.4rem; line-height: 1.1;">{{ $sertifikasiHampirHabis }}</h3>
-                    <a href="{{ route('sdm.index') }}" class="text-decoration-none text-suco-hijau fw-semibold d-inline-block" style="font-size: 0.72rem;">
+        <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm border-start border-4 border-suco-hijau h-100">
+                <div class="card-body summary-card-body">
+                    <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">SERTIFIKASI PERSONIL H-6</p>
+                    <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $sertifikasiHampirHabis }}</h3>
+                    <a href="{{ route('sdm.index') }}" class="text-decoration-none text-suco-hijau fw-semibold d-inline-block summary-card-link">
                         Cek Sertifikasi <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
@@ -175,7 +231,7 @@
                             </h6>
                             <span class="badge bg-danger rounded-pill" style="font-size: 0.7rem;">{{ $stokTipis }}</span>
                         </div>
-                        <p class="text-muted small mb-3" style="font-size: 0.78rem;">Terdapat {{ $stokTipis }} item barang/reagen di bawah batas minimum.</p>
+                        <p class="text-muted small mb-3" style="font-size: 0.78rem;">Terdapat {{ $stokTipis }} item barang di bawah batas minimum.</p>
                     </div>
                     <div>
                         <a href="{{ route('barang.index') }}" class="btn btn-outline-danger btn-sm w-100 py-1" style="font-size: 0.78rem;">Cek Inventori</a>
@@ -194,7 +250,7 @@
                             </h6>
                             <span class="badge bg-warning text-dark rounded-pill" style="font-size: 0.7rem;">{{ $barangExp }}</span>
                         </div>
-                        <p class="text-muted small mb-3" style="font-size: 0.78rem;">Terdapat {{ $barangExp }} bahan/reagen kedaluwarsa dalam 30 hari.</p>
+                        <p class="text-muted small mb-3" style="font-size: 0.78rem;">Terdapat {{ $barangExp }} bahan kedaluwarsa dalam 180 hari.</p>
                     </div>
                     <div>
                         <a href="{{ route('barang.index') }}" class="btn btn-outline-warning btn-sm w-100 py-1" style="font-size: 0.78rem;">Cek Expired Date</a>
@@ -232,7 +288,7 @@
                 </h5>
 
                 <div id="trackingSelectWrap" class="tracking-select-wrap">
-                    <select id="selectTracking" class="form-select form-select-sm w-auto">
+                    <select id="selectTracking" class="form-select form-select-sm w-100">
                         <option value="">-- Pilih Barang/Bahan --</option>
                         @foreach($pengadaanAktif as $p)
                             <option value="track-{{ $p->permintaan_id }}" {{ $loop->first ? 'selected' : '' }}>
@@ -278,107 +334,109 @@
 
                         <div class="row align-items-center px-2">
                             <div class="col-12">
-                                <div class="d-flex justify-content-between text-center position-relative px-3 py-1">
-                                    <div class="progress position-absolute w-100" style="height: 3px; top: 14px; z-index: 1; left: 0;">
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: 
-                                            @if($p->status == 'menunggu_koordinator' || $p->status == 'diajukan') 12% 
-                                            @elseif($p->status == 'menunggu_ga') 50% 
-                                            @elseif($p->status == 'disetujui') 62% 
-                                            @elseif(in_array($p->status, ['diproses', 'diproses_po', 'pembelian'])) 68% 
-                                            @elseif($p->status == 'selesai') 100% 
-                                            @else 0% @endif">
+                                <div class="tracking-steps-scroll">
+                                    <div class="tracking-steps-inner d-flex justify-content-between text-center position-relative px-3 py-1">
+                                        <div class="progress position-absolute w-100" style="height: 3px; top: 14px; z-index: 1; left: 0;">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 
+                                                @if($p->status == 'menunggu_koordinator' || $p->status == 'diajukan') 12% 
+                                                @elseif($p->status == 'menunggu_ga') 50% 
+                                                @elseif($p->status == 'disetujui') 62% 
+                                                @elseif(in_array($p->status, ['diproses', 'diproses_po', 'pembelian'])) 68% 
+                                                @elseif($p->status == 'selesai') 100% 
+                                                @else 0% @endif">
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div class="position-relative text-center" style="z-index: 2; flex: 1;">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm bg-success text-white" style="width: 30px; height: 30px; font-size: 0.7rem;">
-                                            <i class="fas fa-file-alt"></i>
+                                        <div class="position-relative text-center" style="z-index: 2; flex: 1;">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm bg-success text-white" style="width: 30px; height: 30px; font-size: 0.7rem;">
+                                                <i class="fas fa-file-alt"></i>
+                                            </div>
+                                            <div class="mt-1">
+                                                <span class="fw-bold d-block text-success" style="font-size:0.68rem;">1. Diajukan</span>
+                                                <small class="text-muted d-block" style="font-size:0.6rem;">
+                                                    Oleh: {{ $p->pemohon ? $p->pemohon->username : '-' }}<br>
+                                                    {{ \Carbon\Carbon::parse($p->created_at)->format('d M Y, H:i') }}
+                                                </small>
+                                            </div>
                                         </div>
-                                        <div class="mt-1">
-                                            <span class="fw-bold d-block text-success" style="font-size:0.68rem;">1. Diajukan</span>
-                                            <small class="text-muted d-block" style="font-size:0.6rem;">
-                                                Oleh: {{ $p->pemohon ? $p->pemohon->username : '-' }}<br>
-                                                {{ \Carbon\Carbon::parse($p->created_at)->format('d M Y, H:i') }}
-                                            </small>
-                                        </div>
-                                    </div>
 
-                                    @php
-                                        $isStuckKoordinator = $isTerlambat && $p->status == 'diajukan';
-                                    @endphp
-                                    <div class="position-relative text-center" style="z-index: 2; flex: 1;">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ in_array($p->status, ['menunggu_ga', 'disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'bg-success text-white' : ($isTerlambat ? 'bg-danger text-white' : 'bg-secondary text-white') }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
-                                            <i class="fas fa-user-check"></i>
-                                        </div>
-                                        <div class="mt-1">
-                                            <span class="fw-bold d-block {{ in_array($p->status, ['menunggu_ga', 'disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'text-success' : ($isTerlambat ? 'text-danger' : '') }}" style="font-size:0.68rem;">2. Koordinator</span>
-                                            <small class="text-muted d-block" style="font-size:0.6rem;">
-                                                @if(in_array($p->status, ['menunggu_ga', 'disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']))
-                                                    <span class="text-success fw-semibold">Disetujui</span>
-                                                @else
-                                                    <span class="{{ $isTerlambat ? 'text-danger fw-semibold' : 'text-warning fw-semibold' }}">
-                                                        {{ $isTerlambat ? 'Terlambat / Menunggu' : 'Menunggu' }}
-                                                    </span>
-                                                @endif
-                                            </small>
-                                        </div>
-                                    </div>
-
-                                    @php
-                                        $isStuckGA = $isTerlambat && in_array($p->status, ['menunggu_ga', 'disetujui']);
-                                    @endphp
-                                    <div class="position-relative text-center" style="z-index: 2; flex: 1;">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ in_array($p->status, ['diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'bg-success text-white' : ($isTerlambat ? 'bg-danger text-white' : 'bg-secondary text-white') }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
-                                            <i class="fas fa-building"></i>
-                                        </div>
-                                        <div class="mt-1">
-                                            <span class="fw-bold d-block {{ in_array($p->status, ['diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'text-success' : ($isTerlambat ? 'text-danger' : '') }}" style="font-size:0.68rem;">3. GA Approval</span>
-                                            <small class="text-muted d-block" style="font-size:0.6rem;">
-                                                @if(in_array($p->status, ['diproses', 'diproses_po', 'pembelian', 'selesai']))
-                                                    <span class="text-success fw-semibold">Disetujui</span>
-                                                @else
-                                                    <span class="{{ $isTerlambat ? 'text-danger fw-semibold' : '' }}">
-                                                        {{ $isTerlambat ? 'Terlambat / Menunggu' : 'Menunggu' }}
-                                                    </span>
-                                                @endif
-                                            </small>
-                                        </div>
-                                    </div>
-
-                                    <div class="position-relative text-center" style="z-index: 2; flex: 1;">
                                         @php
-                                            $isStuckProses = $isTerlambat && in_array($p->status, ['diproses', 'diproses_po', 'pembelian']);
+                                            $isStuckKoordinator = $isTerlambat && $p->status == 'diajukan';
                                         @endphp
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ in_array($p->status, ['diproses', 'diproses_po', 'pembelian', 'selesai']) ? ($isStuckProses ? 'bg-danger text-white' : 'bg-success text-white') : 'bg-secondary text-white' }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
-                                            <i class="fas fa-box-open"></i>
+                                        <div class="position-relative text-center" style="z-index: 2; flex: 1;">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ in_array($p->status, ['menunggu_ga', 'disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'bg-success text-white' : ($isTerlambat ? 'bg-danger text-white' : 'bg-secondary text-white') }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
+                                                <i class="fas fa-user-check"></i>
+                                            </div>
+                                            <div class="mt-1">
+                                                <span class="fw-bold d-block {{ in_array($p->status, ['menunggu_ga', 'disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'text-success' : ($isTerlambat ? 'text-danger' : '') }}" style="font-size:0.68rem;">2. Koordinator</span>
+                                                <small class="text-muted d-block" style="font-size:0.6rem;">
+                                                    @if(in_array($p->status, ['menunggu_ga', 'disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai']))
+                                                        <span class="text-success fw-semibold">Disetujui</span>
+                                                    @else
+                                                        <span class="{{ $isTerlambat ? 'text-danger fw-semibold' : 'text-warning fw-semibold' }}">
+                                                            {{ $isTerlambat ? 'Terlambat / Menunggu' : 'Menunggu' }}
+                                                        </span>
+                                                    @endif
+                                                </small>
+                                            </div>
                                         </div>
-                                        <div class="mt-1">
-                                            <span class="fw-bold d-block {{ $isStuckProses ? 'text-danger' : (in_array($p->status, ['diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'text-success' : '') }}" style="font-size:0.68rem;">4. Diproses</span>
-                                            <small class="text-muted d-block" style="font-size:0.6rem;">
-                                                @if(in_array($p->status, ['diproses', 'diproses_po', 'pembelian', 'selesai']))
-                                                    <span class="{{ $isStuckProses ? 'text-danger fw-semibold' : 'fw-semibold' }}">
-                                                        {{ $isStuckProses ? 'Terlambat / Tertahan' : 'Sedang Diproses' }}
-                                                    </span>
-                                                @else
-                                                    Belum
-                                                @endif
-                                            </small>
-                                        </div>
-                                    </div>
 
-                                    <div class="position-relative text-center" style="z-index: 2; flex: 1;">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ $p->status == 'selesai' ? 'bg-success text-white' : 'bg-secondary text-white' }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
-                                            <i class="fas fa-check-circle"></i>
+                                        @php
+                                            $isStuckGA = $isTerlambat && in_array($p->status, ['menunggu_ga', 'disetujui']);
+                                        @endphp
+                                        <div class="position-relative text-center" style="z-index: 2; flex: 1;">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ in_array($p->status, ['diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'bg-success text-white' : ($isTerlambat ? 'bg-danger text-white' : 'bg-secondary text-white') }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
+                                                <i class="fas fa-building"></i>
+                                            </div>
+                                            <div class="mt-1">
+                                                <span class="fw-bold d-block {{ in_array($p->status, ['diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'text-success' : ($isTerlambat ? 'text-danger' : '') }}" style="font-size:0.68rem;">3. GA Approval</span>
+                                                <small class="text-muted d-block" style="font-size:0.6rem;">
+                                                    @if(in_array($p->status, ['diproses', 'diproses_po', 'pembelian', 'selesai']))
+                                                        <span class="text-success fw-semibold">Disetujui</span>
+                                                    @else
+                                                        <span class="{{ $isTerlambat ? 'text-danger fw-semibold' : '' }}">
+                                                            {{ $isTerlambat ? 'Terlambat / Menunggu' : 'Menunggu' }}
+                                                        </span>
+                                                    @endif
+                                                </small>
+                                            </div>
                                         </div>
-                                        <div class="mt-1">
-                                            <span class="fw-bold d-block {{ $p->status == 'selesai' ? 'text-success' : '' }}" style="font-size:0.68rem;">5. Diterima</span>
-                                            <small class="text-muted d-block" style="font-size:0.6rem;">
-                                                @if($p->status == 'selesai')
-                                                    Selesai
-                                                @else
-                                                    Menunggu Tiba
-                                                @endif
-                                            </small>
+
+                                        <div class="position-relative text-center" style="z-index: 2; flex: 1;">
+                                            @php
+                                                $isStuckProses = $isTerlambat && in_array($p->status, ['diproses', 'diproses_po', 'pembelian']);
+                                            @endphp
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ in_array($p->status, ['diproses', 'diproses_po', 'pembelian', 'selesai']) ? ($isStuckProses ? 'bg-danger text-white' : 'bg-success text-white') : 'bg-secondary text-white' }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
+                                                <i class="fas fa-box-open"></i>
+                                            </div>
+                                            <div class="mt-1">
+                                                <span class="fw-bold d-block {{ $isStuckProses ? 'text-danger' : (in_array($p->status, ['diproses', 'diproses_po', 'pembelian', 'selesai']) ? 'text-success' : '') }}" style="font-size:0.68rem;">4. Diproses</span>
+                                                <small class="text-muted d-block" style="font-size:0.6rem;">
+                                                    @if(in_array($p->status, ['diproses', 'diproses_po', 'pembelian', 'selesai']))
+                                                        <span class="{{ $isStuckProses ? 'text-danger fw-semibold' : 'fw-semibold' }}">
+                                                            {{ $isStuckProses ? 'Terlambat / Tertahan' : 'Sedang Diproses' }}
+                                                        </span>
+                                                    @else
+                                                        Belum
+                                                    @endif
+                                                </small>
+                                            </div>
+                                        </div>
+
+                                        <div class="position-relative text-center" style="z-index: 2; flex: 1;">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm {{ $p->status == 'selesai' ? 'bg-success text-white' : 'bg-secondary text-white' }}" style="width: 30px; height: 30px; font-size: 0.7rem;">
+                                                <i class="fas fa-check-circle"></i>
+                                            </div>
+                                            <div class="mt-1">
+                                                <span class="fw-bold d-block {{ $p->status == 'selesai' ? 'text-success' : '' }}" style="font-size:0.68rem;">5. Diterima</span>
+                                                <small class="text-muted d-block" style="font-size:0.6rem;">
+                                                    @if($p->status == 'selesai')
+                                                        Selesai
+                                                    @else
+                                                        Menunggu Tiba
+                                                    @endif
+                                                </small>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -422,7 +480,7 @@
         if (select.length) {
             select.select2({
                 theme: 'bootstrap-5',
-                width: '300px',
+                width: '100%',
                 dropdownParent: $('#trackingSelectWrap'),
                 minimumResultsForSearch: 0,
                 allowClear: false,

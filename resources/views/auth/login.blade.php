@@ -329,9 +329,9 @@
                     </form>
 
                     <div class="text-center mt-4">
-                        <small class="text-muted">Jika Anda belum memiliki akun, hubungi HR & GA.</small>
+                        <small class="text-muted">Jika Anda belum memiliki akun, hubungi HR Officer.</small>
                     </div>
-                    <div class="auth-footer">© PT Sucofindo Cilacap</div>
+                    <div class="auth-footer">© 2026 PT Sucofindo Cilacap </div>
                 </div>
             </div>
         </div>

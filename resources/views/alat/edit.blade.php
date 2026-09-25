@@ -1,14 +1,28 @@
 @extends('layouts.app')
 
 @section('content')
+<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+<style>
+    .select2-container--bootstrap-5 .select2-selection {
+        font-size: 0.8rem !important;
+        min-height: 31px !important;
+    }
+    .select2-container--bootstrap-5 .select2-selection__rendered {
+        padding-top: 0 !important;
+    }
+    .select2-container--bootstrap-5 .select2-results__option {
+        font-size: 0.82rem !important;
+    }
+    .flatpickr-input {
+        background-color: #fff !important;
+    }
+</style>
 <div class="container-fluid pt-0 pb-4 px-4" style="max-width: 1050px;">
-    <!-- Judul & Breadcrumb Lebih Compact dan Dekat ke Topbar -->
     <div class="pt-2 mb-2">
         <h5 class="fw-bold mb-1" style="font-size: 1.2rem; color: #333;">Edit Data Alat & Kalibrasi</h5>
     </div>
 
     <div class="card shadow-sm border-0 mb-4">
-        <!-- Header Card Biru Tua Pekat Seragam dengan Topbar (#1b3152) -->
         <div class="card-header text-white py-1.5 px-3" style="background-color: #1b3152;">
             <h6 class="mb-0 fw-semibold" style="font-size: 13px;"> Form Ubah Data Alat & Kalibrasi</h6>
         </div>
@@ -69,7 +83,7 @@
                             <input type="hidden" name="kondisi_barang" value="perbaikan">
                             <input type="text" class="form-control form-control-sm bg-light text-danger" value="Sedang Dalam Perbaikan" readonly>
                         @else
-                        <select name="kondisi_barang" class="form-select form-select-sm">
+                        <select name="kondisi_barang" class="form-select form-select-sm select2-basic">
                             <option value="baik" {{ old('kondisi_barang', $alat->kondisi_barang) == 'baik' ? 'selected' : '' }}>Baik</option>
                             <option value="rusak" {{ old('kondisi_barang', $alat->kondisi_barang) == 'rusak' ? 'selected' : '' }}>Rusak</option>
                         </select>
@@ -81,7 +95,7 @@
                             <input type="hidden" name="status_barang" value="idle">
                             <input type="text" class="form-control form-control-sm bg-light" value="Idle" readonly>
                         @else
-                        <select name="status_barang" class="form-select form-select-sm">
+                        <select name="status_barang" class="form-select form-select-sm select2-basic">
                             <option value="idle" {{ old('status_barang', $alat->status_barang) == 'idle' ? 'selected' : '' }}>Idle</option>
                             <option value="terpakai" {{ old('status_barang', $alat->status_barang) == 'terpakai' ? 'selected' : '' }}>Terpakai</option>
                         </select>
@@ -101,7 +115,7 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Jenis Kalibrasi</label>
-                        <select name="jenis_kalibrasi" class="form-select form-select-sm @error('jenis_kalibrasi') is-invalid @enderror">
+                        <select name="jenis_kalibrasi" class="form-select form-select-sm select2-basic @error('jenis_kalibrasi') is-invalid @enderror">
                             <option value="">-- Pilih Jenis Kalibrasi --</option>
                             <option value="eksternal" {{ old('jenis_kalibrasi', optional($kalibrasiTerakhir)->jenis_kalibrasi) == 'eksternal' ? 'selected' : '' }}>Eksternal</option>
                             <option value="internal" {{ old('jenis_kalibrasi', optional($kalibrasiTerakhir)->jenis_kalibrasi) == 'internal' ? 'selected' : '' }}>Internal</option>
@@ -139,7 +153,7 @@
                 <div class="row g-2 mb-2">
                     <div class="col-md-4">
                         <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Tanggal Kalibrasi</label>
-                        <input type="date" name="tgl_kalibrasi" id="tgl_kalibrasi" class="form-control form-control-sm @error('tgl_kalibrasi') is-invalid @enderror" value="{{ old('tgl_kalibrasi', optional($kalibrasiTerakhir)->tgl_kalibrasi ? \Carbon\Carbon::parse($kalibrasiTerakhir->tgl_kalibrasi)->format('Y-m-d') : '') }}">
+                        <input type="text" name="tgl_kalibrasi" id="tgl_kalibrasi" class="form-control form-control-sm flatpickr-date @error('tgl_kalibrasi') is-invalid @enderror" autocomplete="off" value="{{ old('tgl_kalibrasi', optional($kalibrasiTerakhir)->tgl_kalibrasi ? \Carbon\Carbon::parse($kalibrasiTerakhir->tgl_kalibrasi)->format('Y-m-d') : '') }}">
                         @error('tgl_kalibrasi') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                     <div class="col-md-4">
@@ -149,7 +163,7 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Tanggal Berakhirnya Masa Kalibrasi</label>
-                        <input type="date" name="tgl_akhir" id="tgl_akhir" class="form-control form-control-sm @error('tgl_akhir') is-invalid @enderror" value="{{ old('tgl_akhir', optional($kalibrasiTerakhir)->tgl_akhir ? \Carbon\Carbon::parse($kalibrasiTerakhir->tgl_akhir)->format('Y-m-d') : '') }}">
+                        <input type="text" name="tgl_akhir" id="tgl_akhir" class="form-control form-control-sm flatpickr-date @error('tgl_akhir') is-invalid @enderror" autocomplete="off" value="{{ old('tgl_akhir', optional($kalibrasiTerakhir)->tgl_akhir ? \Carbon\Carbon::parse($kalibrasiTerakhir->tgl_akhir)->format('Y-m-d') : '') }}">
                         @error('tgl_akhir') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                 </div>
@@ -167,7 +181,7 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Signifikan</label>
-                        <select name="signifikan" class="form-select form-select-sm @error('signifikan') is-invalid @enderror">
+                        <select name="signifikan" class="form-select form-select-sm select2-basic @error('signifikan') is-invalid @enderror">
                             <option value="">--Pilih Signifikan--</option>
                             <option value="ya" {{ old('signifikan', optional($kalibrasiTerakhir)->signifikan) == 'ya' ? 'selected' : '' }}>Ya</option>
                             <option value="tidak" {{ old('signifikan', optional($kalibrasiTerakhir)->signifikan) == 'tidak' ? 'selected' : '' }}>Tidak</option>
@@ -193,8 +207,38 @@
 </div>
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+$(function () {
+    $('.select2-basic').select2({
+        theme: 'bootstrap-5',
+        width: '100%'
+    });
+
+    flatpickr.localize(flatpickr.l10ns.id);
+    $('.flatpickr-date').flatpickr({
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd F Y',
+        allowInput: true,
+        disableMobile: true
+    });
+
+    function setDateValue(input, value) {
+        if (input._flatpickr) {
+            input._flatpickr.setDate(value || null, true);
+        } else {
+            input.value = value || '';
+        }
+    }
+
+    function setMinDate(input, value) {
+        if (input._flatpickr) {
+            input._flatpickr.set('minDate', value || null);
+        }
+    }
+
     const tglKalibrasiInput = document.getElementById('tgl_kalibrasi');
     const intervalInput = document.getElementById('interval_kalibrasi');
     const tglAkhirInput = document.getElementById('tgl_akhir');
@@ -202,9 +246,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function updateMinTanggalAkhir() {
         if (tglKalibrasiInput.value) {
-            tglAkhirInput.min = tglKalibrasiInput.value;
+            setMinDate(tglAkhirInput, tglKalibrasiInput.value);
             if (tglAkhirInput.value && tglAkhirInput.value < tglKalibrasiInput.value) {
-                tglAkhirInput.value = '';
+                setDateValue(tglAkhirInput, '');
             }
         }
     }
@@ -237,7 +281,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let bulan = String(tanggal.getMonth() + 1).padStart(2, '0');
         let hari = String(tanggal.getDate()).padStart(2, '0');
 
-        tglAkhirInput.value = `${tahun}-${bulan}-${hari}`;
+        setDateValue(tglAkhirInput, `${tahun}-${bulan}-${hari}`);
     }
 
     function hitungInterval() {
@@ -283,8 +327,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     tglAkhirInput.addEventListener('change', function() {
         if (tglKalibrasiInput.value && tglAkhirInput.value < tglKalibrasiInput.value) {
-            alert("Tanggal berakhir tidak boleh lebih awal dari tanggal kalibrasi!");
-            tglAkhirInput.value = '';
+            Swal.fire({
+                icon: 'warning',
+                title: 'Tanggal tidak valid',
+                text: 'Tanggal berakhir tidak boleh lebih awal dari tanggal kalibrasi!'
+            });
+            setDateValue(tglAkhirInput, '');
             return;
         }
         hitungInterval();
