@@ -178,9 +178,9 @@ class CrmKatalogController extends Controller
             'status' => $request->keputusan === 'lolos' ? 'menunggu_verifikasi_teknis' : 'ditolak',
         ]);
 
-            if ($isDraft) {
-                \Illuminate\Support\Facades\DB::commit();
-                return redirect()->route('qc-crm.index')->with('success', 'Draft verifikasi teknis berhasil disimpan.');
+            if ($request->keputusan === 'lolos') {
+                return redirect()->route('crm-katalog.verifikasi-teknis.form', $id)
+                    ->with('success', 'Verifikasi administratif berhasil. Silakan lengkapi Verifikasi Teknis.');
             }
 
             return redirect()->route('crm-katalog.show', $id)
@@ -224,25 +224,23 @@ class CrmKatalogController extends Controller
                     $terakhirD1 = null;
                     $terakhirD2 = null;
 
-                    foreach ($inputRows as $row) {
+                    $totalRows = count($inputRows);
+
+                    foreach ($inputRows as $index => $row) {
                         $val1 = $row['nilai_d1'] ?? null;
                         $val2 = $row['nilai_d2'] ?? null;
                         
-                        // Jika BUKAN draft dan isiannya belum lengkap, baru kita buang/lewati
-                        if (!$isDraft && ($val1 === null || $val1 === '' || $val2 === null || $val2 === '')) {
+                        $isHistorical = $index < ($totalRows - 1);
+
+                        if (!$isDraft && !$isHistorical && ($val1 === null || $val1 === '' || $val2 === null || $val2 === '')) {
                             continue;
                         }
 
-                        // Hanya tambahkan ke kalkulasi rata-rata (mean) jika nilainya sudah lengkap terisi
                         if ($val1 !== null && $val1 !== '' && $val2 !== null && $val2 !== '') {
                             $meanPerPengujian[] = (floatval($val1) + floatval($val2)) / 2;
                         }
 
-                        // PENTING: Simpan seluruh variabel $row secara utuh! 
-                        // Jangan dipotong menjadi $row['mentah'], agar array yang tersimpan tetap 
-                        // memiliki key 'mentah' sehingga serasi dengan pemanggilan di file Blade.
                         $mentahSemua[] = $row;
-                        
                         $terakhirD1 = $val1;
                         $terakhirD2 = $val2;
                     }
@@ -255,7 +253,8 @@ class CrmKatalogController extends Controller
                     $status = null;
 
                     if (!empty($meanPerPengujian)) {
-                        $nilai_akhir = array_sum($meanPerPengujian) / count($meanPerPengujian);
+                        $nilai_akhir = end($meanPerPengujian); 
+                        
                         $status = ($nilai_akhir >= $batas_bawah && $nilai_akhir <= $batas_atas) ? 'inlier' : 'outlier';
                         if ($status === 'outlier') $semuaInlier = false;
                     }
@@ -281,7 +280,7 @@ class CrmKatalogController extends Controller
                             // Mode draft: cukup simpan apa adanya, tanpa cek kelengkapan atau ubah status botol
             if ($isDraft) {
                 \Illuminate\Support\Facades\DB::commit();
-                return redirect()->route('crm-katalog.verifikasi-teknis.form', $id)->with('success', 'Draft berhasil disimpan.');
+                return redirect()->route('qc-crm.index')->with('success', 'Draft berhasil disimpan.');
             }
 
             if (!$adaData) {
@@ -294,12 +293,13 @@ class CrmKatalogController extends Controller
             if ($jumlahTerisi >= $jumlahParam && $semuaInlier) {
                 $katalog->update(['status' => 'aktif', 'is_active' => true]);
                 \Illuminate\Support\Facades\DB::commit();
-                return redirect()->route('crm-katalog.show', $id)->with('success', 'Semua parameter INLIER. Botol CRM kini AKTIF dan bisa digunakan untuk pengujian harian.');
+                return redirect()->route('qc-crm.index')->with('success', 'Semua parameter INLIER. Botol CRM kini AKTIF dan bisa digunakan untuk pengujian harian.');
             }
 
             if ($jumlahTerisi >= $jumlahParam && !$semuaInlier) {
                 \Illuminate\Support\Facades\DB::commit();
-                return redirect()->route('crm-katalog.show', $id)->with('error', 'Verifikasi teknis selesai, namun ada parameter OUTLIER. Botol belum diaktifkan.');
+                return redirect()->route('qc-crm.index')
+                    ->with('error', 'Verifikasi teknis selesai, namun ada parameter OUTLIER. Silakan lakukan uji ulang.');
             }
 
             \Illuminate\Support\Facades\DB::commit();

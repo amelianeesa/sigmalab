@@ -143,6 +143,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Pengujian Harian QC CRM
     Route::resource('qc-crm', \App\Http\Controllers\QcCrmController::class);
+    Route::get('qc-crm/chart/data', [\App\Http\Controllers\QcCrmController::class, 'chartData'])->name('qc-crm.chart.data');
     Route::get('api/crm-katalog/{id}/parameters', [\App\Http\Controllers\QcCrmController::class, 'apiGetParameters'])->name('api.crm-katalog.parameters');
 
     // QC Uji Banding

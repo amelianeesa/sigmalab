@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 @section('title', 'Tambah Baru - QC Uji Banding')
 
 @section('content')
@@ -34,7 +34,7 @@
 
         
         <div class="card shadow-sm border-0 mb-4">
-            <div class="card-header bg-primary text-white py-3">
+            <div class="card-header text-white py-3" style="background-color: #1b3152;">
                 <h5 class="mb-0 fw-bold"><i class="fas fa-clipboard-list me-2"></i>Section 1: Data Dasar Pengujian</h5>
             </div>
             <div class="card-body p-4">
@@ -113,7 +113,7 @@
 
         {{-- SECTION 2: INPUT DATA PENGUJIAN --}}
         <div class="card shadow-sm border-0 mb-4">
-            <div class="card-header bg-danger text-white py-3">
+            <div class="card-header text-white py-3" style="background-color: #1b3152;">
                 <h5 class="mb-0 fw-bold"><i class="fas fa-table me-2"></i>Section 2: Input Data Pengujian</h5>
             </div>
             <div class="card-body p-0">
@@ -432,17 +432,25 @@
             </div>{{-- /card-body --}}
         </div>{{-- /card Section 2 --}}
 
-        {{-- TOMBOL SUBMIT & DRAFT --}}
-        <div class="d-flex justify-content-between align-items-center">
-            <a href="{{ route('qc-uji-banding.index') }}" class="btn btn-light border px-4">Batal</a>
-            <div>
-                <button type="button" class="btn btn-warning px-4 rounded-pill shadow-sm me-2" id="btnDraft">
+        {{-- TOMBOL SUBMIT & DRAFT (RESPONSIVE) --}}
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3 mt-4">
+            
+            <!-- Tombol Batal pindah ke bawah saat di HP (order-last) -->
+            <a href="{{ route('qc-uji-banding.index') }}" class="btn btn-light border px-4 rounded-pill order-last order-md-first">
+                Batal
+            </a>
+            
+            <!-- Tombol Simpan berbaris ke bawah di HP, menyamping di Laptop -->
+            <div class="d-flex flex-column flex-md-row gap-2 order-first order-md-last">
+                <button type="button" class="btn btn-warning px-4 rounded-pill shadow-sm" id="btnDraft">
                     <i class="fas fa-save me-2"></i>Simpan Draft
                 </button>
+                
                 <button type="submit" class="btn btn-danger px-5 rounded-pill shadow-sm" id="btnSubmit">
                     <i class="fas fa-check-circle me-2"></i>Simpan Data Uji Banding
                 </button>
             </div>
+            
         </div>
     </form>
 </div>

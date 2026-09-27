@@ -2,17 +2,51 @@
 @section('title', 'Daftar - QC Uji Banding')
 
 @section('content')
+
+<style>
+    .btn-corporate-blue {
+        background-color: #1b3152 !important;
+        border-color: #1b3152 !important;
+        color: #ffffff !important;
+    }
+    .btn-corporate-blue:hover, .btn-corporate-blue:focus {
+        background-color: #14253e !important;
+        border-color: #14253e !important;
+        color: #ffffff !important;
+    }
+    .btn-outline-corporate {
+        color: #1b3152 !important;
+        border-color: #1b3152 !important;
+    }
+    .btn-outline-corporate:hover {
+        background-color: #1b3152 !important;
+        color: #ffffff !important;
+    }
+
+    .table-corporate thead th {
+        background-color: #1b3152 !important;
+        color: #ffffff !important;
+        border-bottom: 2px solid #14253e !important;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+</style>
+
 <div class="container-fluid px-4 pb-5">
     <x-qc-breadcrumb active="Uji Banding"></x-qc-breadcrumb>
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-dark mb-0"><i class="fas fa-balance-scale text-primary me-2"></i>QC Uji Banding</h2>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <h2 class="fw-bold text-dark mb-0">
+            <i class="fas fa-balance-scale me-2" style="color: #1b3152;"></i>QC Uji Banding
+        </h2>
         
-        <!-- Bungkus tombol agar posisinya sejajar di kanan -->
-        <div>
-            <a href="{{ route('master.toleransi.index') }}" class="btn btn-outline-secondary shadow-sm me-2">
+        <div class="d-flex flex-column flex-md-row gap-2">
+            <a href="{{ route('master.toleransi.index') }}" class="btn btn-outline-corporate rounded-pill px-4 shadow-sm">
                 <i class="fas fa-cog me-1"></i> Master Batas Toleransi
             </a>
-            <a href="{{ route('qc-uji-banding.create') }}" class="btn btn-primary shadow-sm">
+            <a href="{{ route('qc-uji-banding.create') }}" class="btn btn-corporate-blue rounded-pill px-4 shadow-sm">
                 <i class="fas fa-plus me-1"></i> Input Uji Banding Baru
             </a>
         </div>
@@ -27,7 +61,7 @@
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0 table-corporate">
                     <thead class="table-light">
                         <tr>
                             <th class="ps-4">Tgl Terima & Uji</th>
@@ -77,7 +111,7 @@
                                 @if(isset($prog->status) && $prog->status === 'draft')
                                     <a href="{{ route('qc-uji-banding.create', ['draft_id' => $prog->id]) }}" class="btn btn-sm btn-warning"><i class="fas fa-edit me-1"></i>Lanjutkan Draft</a>
                                 @else
-                                    <a href="{{ route('qc-uji-banding.show', $prog->id) }}" class="btn btn-sm btn-outline-primary">Detail</a>
+                                    <a href="{{ route('qc-uji-banding.show', $prog->id) }}" class="btn btn-sm btn-outline-corporate">Detail</a>
                                     @if($menunggu > 0)
                                         <a href="{{ route('qc-uji-banding.evaluasi.form', $prog->id) }}" class="btn btn-sm btn-outline-warning">
                                             <i class="fas fa-chart-bar me-1"></i>Input Hasil Vendor

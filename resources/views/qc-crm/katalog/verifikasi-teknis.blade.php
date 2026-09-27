@@ -39,7 +39,7 @@
                 <select name="analis_id" class="form-select" required>
                     <option value="">-- Pilih Analis --</option>
                     @foreach(\App\Models\Personil::orderBy('nama')->get() as $p)
-                        <option value="{{ $p->id }}" {{ $p->id == $savedAnalisId ? 'selected' : '' }}>
+                        <option value="{{ $p->personil_id }}" {{ $p->personil_id == $savedAnalisId ? 'selected' : '' }}>
                             {{ $p->nama }}
                         </option>
                     @endforeach
@@ -661,6 +661,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    
+
     function attachListeners(tbody) {
         const code = tbody.closest('table').dataset.code;
         if (['CHN','AFT'].includes(code)) {
@@ -734,7 +736,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Minimal harus ada 1 pengujian.');
             }
         }
-    });
+});
+
+    const formVerTeknis = document.getElementById('formVerTeknis');
+    if (formVerTeknis) {
+        formVerTeknis.addEventListener('submit', function(e) {
+            const btn = e.submitter;
+            if (btn) {
+                btn.style.pointerEvents = 'none';
+                btn.classList.add('disabled');
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Menyimpan...';
+            }
+        });
+    }
 });
 </script>
 @endsection

@@ -35,6 +35,6 @@ class QcCrm extends Model
 
     public function analis()
     {
-        return $this->belongsTo(Personil::class, 'analis_id', 'id'); // Adjust PK if necessary
+        return $this->belongsTo(Personil::class, 'analis_id', 'personil_id'); 
     }
 }

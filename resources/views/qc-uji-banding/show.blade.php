@@ -32,7 +32,7 @@
     <div class="row g-4">
         <div class="col-md-4">
             <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header text-white" style="background-color: #1b3152;">
                     <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informasi Program</h5>
                 </div>
                 <div class="card-body">
@@ -67,7 +67,7 @@
 
         <div class="col-md-8">
             <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-dark text-white">
+                    <div class="card-header text-white" style="background-color: #1b3152;">
                     <h5 class="mb-0"><i class="fas fa-list-check me-2"></i>Parameter Uji & Evaluasi Vendor</h5>
                 </div>
                 <div class="card-body p-0">
@@ -128,7 +128,7 @@
     
     <!-- Bagian Data Mentah (Preview Tampilan Cetak) -->
     <div class="card shadow-sm border-0 mt-4">
-        <div class="card-header bg-secondary text-white">
+        <div class="card-header text-white" style="background-color: #1b3152;">
             <h5 class="mb-0"><i class="fas fa-eye me-2"></i>Preview Data Mentah Pengujian</h5>
         </div>
         <div class="card-body">

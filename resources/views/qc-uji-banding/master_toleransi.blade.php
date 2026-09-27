@@ -1,6 +1,43 @@
 @extends('layouts.app')
 
 @section('content')
+
+<style>
+    .btn-corporate-blue {
+        background-color: #1b3152 !important;
+        border-color: #1b3152 !important;
+        color: #ffffff !important;
+    }
+    .btn-corporate-blue:hover, .btn-corporate-blue:focus {
+        background-color: #14253e !important;
+        border-color: #14253e !important;
+        color: #ffffff !important;
+    }
+
+    .table-corporate thead th {
+        background-color: #1b3152 !important;
+        color: #ffffff !important;
+        border-bottom: 2px solid #14253e !important;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        vertical-align: middle;
+    }
+    
+    .nav-pills .nav-link.active {
+        background-color: #1b3152 !important;
+        color: #ffffff !important;
+    }
+    .nav-pills .nav-link:not(.active) {
+        color: #1b3152;
+    }
+    .nav-pills .nav-link:hover:not(.active) {
+        background-color: #e9ecef;
+    }
+</style>
+
 <div class="container-fluid px-4 pb-5">
     
     <x-qc-breadcrumb active="Uji Banding">
@@ -102,15 +139,15 @@
                                  id="content-param-{{ $tabId }}" role="tabpanel">
                                 
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 class="text-primary fw-bold">Aturan Toleransi: {{ $tabTitle }}</h5>
-                                    <button class="btn btn-sm btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambah-{{ $tabId }}">
+                                    <h5 class="fw-bold" style="color: #1b3152;">Aturan Toleransi: {{ $tabTitle }}</h5>
+                                    <button class="btn btn-sm btn-corporate-blue shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambah-{{ $tabId }}">
                                         <i class="fas fa-plus me-1"></i> Tambah Aturan
                                     </button>
                                 </div>
 
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-sm text-center align-middle">
-                                        <thead class="table-light">
+                                    <table class="table table-bordered table-sm text-center align-middle table-corporate">
+                                        <thead>
                                             <tr>
                                                 @if(in_array($param->nama_parameter, ['IM', 'TM', 'RM']))
                                                     <th>Material / Kategori</th>
