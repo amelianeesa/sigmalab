@@ -64,7 +64,6 @@
             <h2 class="fw-bold text-dark mb-0">
                 <i class="fas fa-certificate me-2" style="color: #1b3152;"></i>QC CRM Dashboard
             </h2>
-            <p class="text-muted mb-0 mt-1">Kelola Master Botol, Uji Verifikasi, dan Pengujian Harian CRM.</p>
         </div>
         
         <!-- Bagian Tombol Aksi (Tambahkan d-grid agar otomatis full-width di HP) -->

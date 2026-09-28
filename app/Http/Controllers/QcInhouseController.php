@@ -47,32 +47,30 @@ class QcInhouseController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
-        $filterStatus = $request->input('filter_status');
-        $filterJenis = $request->input('filter_jenis');
+        $jenis = $request->input('jenis_batubara');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
 
-        $query = SampelInhouse::with(['parameters.parameterUji', 'pembuat'])
-            ->orderBy('created_at', 'desc');
+        $query = \App\Models\SampelInhouse::with(['parameters', 'pembuat'])->latest();
 
-        if ($search) {
-            $query->where('nama_sampel', 'like', "%{$search}%")
-                  ->orWhere('kode_batch', 'like', "%{$search}%");
-        }
+        $query->when($search, function($q) use ($search) {
+            $q->where('kode_batch', 'like', "%{$search}%")
+              ->orWhere('nama_sampel', 'like', "%{$search}%");
+        });
 
-        if ($filterStatus) {
-            $query->where('status', $filterStatus);
-        }
+        $query->when($jenis, function($q) use ($jenis) {
+            $q->where('jenis_batubara', $jenis);
+        });
 
-        if ($filterJenis) {
-            $query->where('jenis_batubara', $filterJenis);
-        }
+        $query->when($startDate && $endDate, function($q) use ($startDate, $endDate) {
+            $q->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+        });
 
-        $sampels = $query->paginate(15);
+        $sampels = $query->paginate(10);
+
         return view('qc-inhouse.index', compact('sampels'));
     }
 
-    // ============================================
-    // TAHAP 1: PEMILIHAN SAMPEL
-    // ============================================
     public function create()
     {
         $parameters = ParameterUji::where('status_aktif', true)->get();
@@ -96,8 +94,6 @@ class QcInhouseController extends Controller
         $dataScreening = $request->only(['tm', 'mad', 'ash', 'vm', 'ts', 'gcv']);
         $jenis = $request->jenis_batubara;
 
-        // 1. Hukum Fisika & Proximate Balance
-        // Hitung FC = 100 - (MAD + Ash + VM)
         $fc = 100 - ((float)$request->mad + (float)$request->ash + (float)$request->vm);
         $dataScreening['fc'] = round($fc, 4);
 
@@ -106,11 +102,9 @@ class QcInhouseController extends Controller
             return redirect()->back()->withInput()->withErrors($crossErrors);
         }
 
-        // 2. Konversi ADB -> DB
         $dbData = $this->pemilihanSampelService->convertAdbToDb($dataScreening);
         $dataScreening = array_merge($dataScreening, $dbData);
 
-        // 3. Validasi Rentang Komoditas
         $rangeErrors = $this->pemilihanSampelService->validateRange($jenis, $dataScreening);
         if (!empty($rangeErrors)) {
             return redirect()->back()->withInput()->withErrors($rangeErrors);
@@ -118,7 +112,6 @@ class QcInhouseController extends Controller
 
         DB::beginTransaction();
         try {
-            // Create Batch Header
             $batch = SampelInhouse::create([
                 'nama_sampel' => $request->nama_sampel,
                 'jenis_batubara' => $jenis,
@@ -150,9 +143,6 @@ class QcInhouseController extends Controller
         }
     }
 
-    // ============================================
-    // TAHAP 2: PREPARASI SAMPEL
-    // ============================================
     public function showPreparasi($id)
     {
         $batch = SampelInhouse::with('parameters.parameterUji')->findOrFail($id);
@@ -166,20 +156,13 @@ class QcInhouseController extends Controller
         $batch = SampelInhouse::findOrFail($id);
 
         $request->validate([
-            'metode_acuan' => 'required|in:astm,iso',
+            'metode_acuan' => 'required|string',
             'jumlah_botol' => 'required|integer|min:10',
             'nomor_awal_botol' => 'required|integer|min:1',
             'kode_batch' => 'required|string|max:50',
-            'data_equilibrium' => 'required|string',
+            // 'data_equilibrium' => 'required|string', <-- (HAPUS BARIS INI)
             'catatan_preparasi' => 'nullable|string'
         ]);
-
-        $dataEquilibrium = json_decode($request->data_equilibrium, true) ?? [];
-        $konstan = $this->preparasiService->isEquilibriumReached($dataEquilibrium);
-
-        if (!$konstan) {
-            return redirect()->back()->withInput()->with('error', 'Bobot konstan (selisih <= 0.001) belum tercapai.');
-        }
 
         $urutanInstrumen = $this->preparasiService->generateUrutanInstrumen(10, 2);
 
@@ -188,7 +171,7 @@ class QcInhouseController extends Controller
             'kode_batch' => $request->kode_batch,
             'jumlah_botol' => $request->jumlah_botol,
             'nomor_awal_botol' => $request->nomor_awal_botol,
-            'data_equilibrium' => $dataEquilibrium,
+            'data_equilibrium' => null,
             'bobot_konstan_tercapai' => true,
             'catatan_preparasi' => $request->catatan_preparasi,
             'tanggal_preparasi' => now(),
@@ -213,9 +196,6 @@ class QcInhouseController extends Controller
         return view('qc-inhouse.cetak-label', compact('batch', 'labels'));
     }
 
-    // ============================================
-    // TAHAP 3: UJI HOMOGENITAS
-    // ============================================
     public function showInstruksiHomogenitas($id)
     {
         $batch = SampelInhouse::findOrFail($id);
@@ -228,7 +208,6 @@ class QcInhouseController extends Controller
     {
         $batch = SampelInhouse::with(['parameters.parameterUji', 'parameters.dataHomogenitas'])->findOrFail($id);
         
-        // Populate tolerance limits for UI
         $tolerances = [];
         foreach ($batch->parameters as $param) {
             $tolerances[$param->id] = $this->repeatabilityService->getLimit(
@@ -241,9 +220,6 @@ class QcInhouseController extends Controller
 
         $tabelAcak = TabelAngkaAcak::orderBy('urutan')->get()->keyBy('urutan');
 
-        // Tabel F kritis (alpha=0.05) untuk lookup ANOVA di frontend, satu sumber
-        // yang sama persis dengan HomogenitasService (server-side), supaya preview
-        // live di JS tidak pernah berbeda dengan hasil kalkulasi backend.
         $fTabelLookup = $this->homogenitasService->getTabelF();
 
         return view('qc-inhouse.homogenitas', compact('batch', 'tolerances', 'tabelAcak', 'fTabelLookup'));
@@ -265,7 +241,6 @@ class QcInhouseController extends Controller
                 if (empty($inputData) || count($inputData) < 3) continue;
                 $adaData = true;
 
-                // Kosongkan data lama
                 DataHomogenitas::where('sampel_inhouse_parameter_id', $paramId)->delete();
                 
                 $samplesForAnova = [];

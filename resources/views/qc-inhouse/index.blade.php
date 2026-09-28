@@ -32,21 +32,59 @@
 <div class="container-fluid px-4 pb-5">
     <x-qc-breadcrumb active="In-House" />
 
-    <div class="d-flex justify-content-between align-items-center mt-3 mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mt-3 mb-4 gap-3">
         <h2 class="fw-bold text-dark mb-0">
-            <!-- Ikon menyesuaikan warna corporate -->
             <i class="fas fa-flask me-2" style="color: #1b3152;"></i>QC In-House
         </h2>
-        <!-- Tombol menggunakan btn-corporate-blue -->
-        <a href="{{ route('qc-inhouse.create') }}" class="btn btn-corporate-blue shadow-sm rounded-pill px-4">
-            <i class="fas fa-plus me-1"></i> Buat Sampel Baru
-        </a>
+
+        <div class="d-grid d-md-block w-100 w-md-auto">
+            <a href="{{ route('qc-inhouse.create') }}" class="btn btn-corporate-blue shadow-sm rounded-pill px-4">
+                <i class="fas fa-plus me-1"></i> Buat Sampel Baru
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4 bg-light">
+        <div class="card-body">
+            <form action="{{ route('qc-inhouse.index') }}" method="GET" id="filterForm">
+                <div class="row g-2 align-items-center">
+                    
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                            <input type="text" name="search" id="search" class="form-control border-start-0" placeholder="Cari kode atau nama sampel..." value="{{ request('search') }}">
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <select name="jenis_batubara" id="jenis_batubara" class="form-select">
+                            <option value="">-- Semua Jenis Batubara --</option>
+                            <option value="sub_bituminous" {{ request('jenis_batubara') == 'sub_bituminous' ? 'selected' : '' }}>Sub Bituminous</option>
+                            <option value="bituminous" {{ request('jenis_batubara') == 'bituminous' ? 'selected' : '' }}>Bituminous</option>
+                            <option value="anthracite" {{ request('jenis_batubara') == 'anthracite' ? 'selected' : '' }}>Anthracite</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white">Mulai</span>
+                            <input type="date" name="start_date" id="start_date" class="form-control" value="{{ request('start_date') }}">
+                            <span class="input-group-text bg-white">s/d</span>
+                            <input type="date" name="end_date" id="end_date" class="form-control" value="{{ request('end_date') }}">
+                        </div>
+                    </div>
+
+                    <div class="col-md-1 text-end">
+                        <a href="{{ route('qc-inhouse.index') }}" class="btn btn-outline-danger w-100" title="Reset Filter"><i class="fas fa-sync-alt"></i></a>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <!-- Tambahan class table-corporate di sini -->
                 <table class="table table-hover align-middle mb-0 table-corporate">
                     <thead>
                         <tr>
@@ -93,10 +131,41 @@
             </div>
         </div>
         @if($sampels->hasPages())
-            <div class="card-footer bg-white pt-3 pb-2">
-                {{ $sampels->links() }}
+            <div class="card-footer bg-white pt-3 pb-2 d-flex justify-content-center">
+                {{ $sampels->withQueryString()->links() }}
             </div>
         @endif
     </div>
 </div>
+
+<script>
+    // Fitur Auto-Submit saat filter diubah
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('filterForm');
+        let timeout = null;
+
+        // Auto-submit saat mengetik (diberi jeda 500ms agar tidak lag)
+        document.getElementById('search').addEventListener('input', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => form.submit(), 500);
+        });
+
+        // Auto-submit saat memilih Dropdown
+        document.getElementById('jenis_batubara').addEventListener('change', function() {
+            form.submit();
+        });
+
+        // Auto-submit saat periode lengkap terisi
+        document.getElementById('start_date').addEventListener('change', checkDates);
+        document.getElementById('end_date').addEventListener('change', checkDates);
+
+        function checkDates() {
+            const start = document.getElementById('start_date').value;
+            const end = document.getElementById('end_date').value;
+            if (start && end) {
+                form.submit();
+            }
+        }
+    });
+</script>
 @endsection
