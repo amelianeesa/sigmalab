@@ -160,6 +160,69 @@
             width: 100% !important;
         }
     }
+
+    /* ===== Info Card (Stok Kritis, Expired, Pengadaan) ===== */
+    .info-card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        height: 100%;
+    }
+    .info-card-clickable {
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        cursor: pointer;
+    }
+    .info-card-clickable:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.12) !important;
+    }
+    .info-card-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+    .info-card-icon.bg-danger-soft { background-color: #fdeaea; color: #dc3545; }
+    .info-card-icon.bg-warning-soft { background-color: #fff8e6; color: #f0ad4e; }
+    .info-card-icon.bg-navy-soft { background-color: rgba(27, 49, 82, 0.1); color: #1b3152; }
+
+    .info-card-badge {
+        font-size: 0.85rem !important;
+        padding: 0.35rem 0.65rem !important;
+        min-width: 32px;
+    }
+    .info-card-badge.pulse-danger {
+        animation: pulseDanger 1.6s infinite;
+    }
+    .info-card-badge.pulse-warning {
+        animation: pulseWarning 1.6s infinite;
+    }
+    .info-card-badge.pulse-navy {
+        animation: pulseNavy 1.6s infinite;
+    }
+    @keyframes pulseDanger {
+        0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.5); }
+        70% { box-shadow: 0 0 0 7px rgba(220, 53, 69, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    }
+    @keyframes pulseWarning {
+        0% { box-shadow: 0 0 0 0 rgba(240, 173, 78, 0.5); }
+        70% { box-shadow: 0 0 0 7px rgba(240, 173, 78, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(240, 173, 78, 0); }
+    }
+    @keyframes pulseNavy {
+        0% { box-shadow: 0 0 0 0 rgba(27, 49, 82, 0.5); }
+        70% { box-shadow: 0 0 0 7px rgba(27, 49, 82, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(27, 49, 82, 0); }
+    }
+
+    .info-card-alert-btn {
+        pointer-events: none;
+    }
 </style>
 
 <div class="container-fluid dashboard-container">
@@ -222,60 +285,75 @@
 
     <div class="row g-3 mb-3">
         <div class="col-12 col-md-4">
-            <div class="card h-100 border-0 shadow-sm info-card">
-                <div class="card-body p-3 d-flex flex-column justify-content-between">
-                    <div>
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">
-                                <i class="fas fa-box-open text-danger me-2"></i> Stok Kritis
-                            </h6>
-                            <span class="badge bg-danger rounded-pill" style="font-size: 0.7rem;">{{ $stokTipis }}</span>
+            <a href="{{ route('barang.index') }}" class="info-card-link">
+                <div class="card h-100 border-0 shadow-sm info-card info-card-clickable">
+                    <div class="card-body p-3 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="info-card-icon bg-danger-soft">
+                                    <i class="fas fa-box-open"></i>
+                                </span>
+                                <div class="flex-grow-1 d-flex align-items-center justify-content-between">
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">Stok Kritis</h6>
+                                    <span class="badge bg-danger rounded-pill info-card-badge {{ $stokTipis > 0 ? 'pulse-danger' : '' }}">{{ $stokTipis }}</span>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-3" style="font-size: 0.78rem;">Terdapat {{ $stokTipis }} item barang di bawah batas minimum.</p>
                         </div>
-                        <p class="text-muted small mb-3" style="font-size: 0.78rem;">Terdapat {{ $stokTipis }} item barang di bawah batas minimum.</p>
-                    </div>
-                    <div>
-                        <a href="{{ route('barang.index') }}" class="btn btn-outline-danger btn-sm w-100 py-1" style="font-size: 0.78rem;">Cek Inventori</a>
+                        <div>
+                            <span class="btn btn-outline-danger btn-sm w-100 py-1 info-card-alert-btn" style="font-size: 0.78rem;">Cek Inventori</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-12 col-md-4">
-            <div class="card h-100 border-0 shadow-sm info-card">
-                <div class="card-body p-3 d-flex flex-column justify-content-between">
-                    <div>
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">
-                                <i class="fas fa-calendar-times text-warning me-2"></i> Akan Kedaluwarsa
-                            </h6>
-                            <span class="badge bg-warning text-dark rounded-pill" style="font-size: 0.7rem;">{{ $barangExp }}</span>
+            <a href="{{ route('barang.index') }}" class="info-card-link">
+                <div class="card h-100 border-0 shadow-sm info-card info-card-clickable">
+                    <div class="card-body p-3 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="info-card-icon bg-warning-soft">
+                                    <i class="fas fa-calendar-times"></i>
+                                </span>
+                                <div class="flex-grow-1 d-flex align-items-center justify-content-between">
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">Akan Kedaluwarsa</h6>
+                                    <span class="badge bg-warning text-dark rounded-pill info-card-badge {{ $barangExp > 0 ? 'pulse-warning' : '' }}">{{ $barangExp }}</span>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-3" style="font-size: 0.78rem;">Terdapat {{ $barangExp }} bahan kedaluwarsa dalam 180 hari.</p>
                         </div>
-                        <p class="text-muted small mb-3" style="font-size: 0.78rem;">Terdapat {{ $barangExp }} bahan kedaluwarsa dalam 180 hari.</p>
-                    </div>
-                    <div>
-                        <a href="{{ route('barang.index') }}" class="btn btn-outline-warning btn-sm w-100 py-1" style="font-size: 0.78rem;">Cek Expired Date</a>
+                        <div>
+                            <span class="btn btn-outline-warning btn-sm w-100 py-1 info-card-alert-btn" style="font-size: 0.78rem;">Cek Expired Date</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-12 col-md-4">
-            <div class="card h-100 border-0 shadow-sm info-card">
-                <div class="card-body p-3 d-flex flex-column justify-content-between">
-                    <div>
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">
-                                <i class="fas fa-shopping-cart text-navy me-2"></i> Approval Pengadaan
-                            </h6>
-                            <span class="badge bg-navy rounded-pill" style="font-size: 0.7rem;">{{ $pengadaanPending }}</span>
+            <a href="{{ route('pengadaan.index') ?? '#' }}" class="info-card-link">
+                <div class="card h-100 border-0 shadow-sm info-card info-card-clickable">
+                    <div class="card-body p-3 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="info-card-icon bg-navy-soft">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </span>
+                                <div class="flex-grow-1 d-flex align-items-center justify-content-between">
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">Approval Pengadaan</h6>
+                                    <span class="badge bg-navy rounded-pill info-card-badge {{ $pengadaanPending > 0 ? 'pulse-navy' : '' }}">{{ $pengadaanPending }}</span>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-3" style="font-size: 0.78rem;">Ada {{ $pengadaanPending }} pengajuan yang butuh persetujuan.</p>
                         </div>
-                        <p class="text-muted small mb-3" style="font-size: 0.78rem;">Ada {{ $pengadaanPending }} pengajuan yang butuh persetujuan.</p>
-                    </div>
-                    <div>
-                        <a href="{{ route('pengadaan.index') ?? '#' }}" class="btn btn-outline-navy btn-sm w-100 py-1" style="font-size: 0.78rem;">Proses Pengajuan</a>
+                        <div>
+                            <span class="btn btn-outline-navy btn-sm w-100 py-1 info-card-alert-btn" style="font-size: 0.78rem;">Proses Pengajuan</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
     </div>
 

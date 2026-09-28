@@ -48,9 +48,15 @@
             border-color: #1b3152 !important;
             color: #ffffff !important;
         }
-        .table-action-btn {
-            font-size: 0.7rem !important;
-            padding: 0.2rem 0.4rem !important;
+        .sdm-action-btn {
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            padding: 0 !important;
+            border-radius: 6px;
         }
         .alert-dismissible .btn-close {
             padding: 0;
@@ -63,54 +69,6 @@
             padding: 0.2rem 0.55rem;
         }
 
-        /* Styling Dropdown agar lengkung & hover persis seperti gambar 1 */
-        .dropdown-menu {
-            border-radius: 0.5rem !important;
-            padding: 0.35rem !important;
-            box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1) !important;
-            border: 1px solid rgba(0,0,0,0.08) !important;
-        }
-        .dropdown-menu .dropdown-item {
-            border-radius: 0.35rem !important;
-            padding: 0.35rem 0.65rem !important;
-            font-size: 0.72rem !important;
-            transition: background-color 0.15s ease, color 0.15s ease;
-        }
-        
-        /* Hover untuk item biasa / Buat Akun -> Biru tua transparan */
-        .dropdown-menu .dropdown-item:hover, 
-        .dropdown-menu .dropdown-item:focus {
-            background-color: rgba(27, 49, 82, 0.08) !important;
-            color: #1b3152 !important;
-        }
-        .dropdown-menu .dropdown-item:hover i, 
-        .dropdown-menu .dropdown-item:focus i {
-            color: #1b3152 !important;
-        }
-
-        /* Hover khusus untuk Edit Personil -> Kuning transparan */
-        .dropdown-menu .dropdown-item.text-warning:hover,
-        .dropdown-menu .dropdown-item.text-warning:focus {
-            background-color: rgba(255, 193, 7, 0.12) !important;
-            color: #b38600 !important;
-        }
-        .dropdown-menu .dropdown-item.text-warning:hover i,
-        .dropdown-menu .dropdown-item.text-warning:focus i {
-            color: #ffc107 !important;
-        }
-
-        /* Hover untuk item berbahaya (Hapus / Nonaktifkan) -> Merah transparan lembut */
-        .dropdown-menu .dropdown-item.text-danger:hover,
-        .dropdown-menu .dropdown-item.text-danger:focus {
-            background-color: #fdf2f2 !important;
-            color: #dc3545 !important;
-        }
-        .dropdown-menu .dropdown-item.text-danger:hover i,
-        .dropdown-menu .dropdown-item.text-danger:focus i {
-            color: #dc3545 !important;
-        }
-
-        /* ===== Select2 & Flatpickr custom, konsisten dengan tema corporate ===== */
         .select2-container--bootstrap-5 .select2-selection {
             font-size: 0.75rem !important;
             min-height: 31px !important;
@@ -305,7 +263,7 @@
                                 <th style="width: 85px;">Masa Berlaku</th>
                                 <th style="width: 95px;">Status Kepatuhan</th>
                                 <th style="width: 75px;">CV</th>
-                                <th style="width: 65px;">Aksi</th>
+                                <th style="width: 150px;">Aksi</th>
                             </tr>
                         </thead>
 
@@ -413,105 +371,83 @@
                                     </td>
 
                                     <td class="text-center text-nowrap">
-                                        @if(
-                                            $showInactive &&
-                                            Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value &&
-                                            Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value
-                                        )
-                                            <button type="button" 
-                                                class="btn btn-success btn-sm table-action-btn py-0 px-1" 
-                                                title="Aktifkan Kembali"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#modalKonfirmasiAksi"
-                                                data-action-url="{{ route('sdm.activate', $row->personil_id) }}"
-                                                data-action-method="PATCH"
-                                                data-action-message="Apakah Anda yakin ingin mengaktifkan kembali <strong>{{ $row->nama }}</strong>?"
-                                                data-action-btn-class="btn-success"
-                                                data-action-btn-text="Aktifkan">
-                                                <i class="fas fa-undo"></i>
-                                            </button>
-                                        @else
+                                        @php
+                                            $bisaKelola = Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value &&
+                                                Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value;
+                                        @endphp
+
+                                        <div class="d-inline-flex align-items-center gap-1">
                                             <a href="{{ route('sdm.kompetensi.detail', $row->personil_id) }}"
-                                                class="btn btn-outline-dark btn-sm table-action-btn py-0 px-1"
-                                                title="Riwayat" style="font-size: 0.68rem;">
+                                                class="btn btn-corporate-dark btn-sm sdm-action-btn shadow-sm"
+                                                title="Riwayat" aria-label="Riwayat">
                                                 <i class="fas fa-history"></i>
                                             </a>
-                                        @endif
 
-                                        @if(
-                                            Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value &&
-                                            Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value
-                                        )
-                                            <div class="dropdown d-inline-block">
-                                                <button class="btn btn-outline-secondary btn-sm table-action-btn py-0 px-1"
-                                                    type="button"
-                                                    data-bs-toggle="dropdown"
-                                                    aria-expanded="false"
-                                                    aria-label="Aksi administrasi" style="font-size: 0.68rem;">
-                                                    <i class="fas fa-ellipsis-vertical"></i>
-                                                </button>
+                                            @if($bisaKelola)
+                                                @unless($row->user)
+                                                    <button type="button"
+                                                        class="btn btn-info text-white btn-sm sdm-action-btn shadow-sm"
+                                                        title="Buat Akun Login"
+                                                        aria-label="Buat Akun Login"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalBuatAkun"
+                                                        data-personil-id="{{ $row->personil_id }}"
+                                                        data-personil-nama="{{ $row->nama }}">
+                                                        <i class="fas fa-user-plus"></i>
+                                                    </button>
+                                                @endunless
 
-                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                                                    @unless($row->user)
-                                                        <li>
-                                                            <button type="button"
-                                                                class="dropdown-item py-1"
-                                                                data-bs-toggle="modal"
-                                                                data-bs-target="#modalBuatAkun"
-                                                                data-personil-id="{{ $row->personil_id }}"
-                                                                data-personil-nama="{{ $row->nama }}">
-                                                                <i class="fas fa-user-plus text-primary me-2"></i>
-                                                                Buat Akun Login
-                                                            </button>
-                                                        </li>
-                                                    @endunless
+                                                <a href="{{ route('sdm.edit', $row->personil_id) }}"
+                                                    class="btn btn-warning btn-sm sdm-action-btn shadow-sm"
+                                                    title="Edit Personil" aria-label="Edit Personil">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
 
-                                                    <li>
-                                                        <a class="dropdown-item text-warning py-1"
-                                                            href="{{ route('sdm.edit', $row->personil_id) }}">
-                                                            <i class="fas fa-edit me-2"></i>
-                                                            Edit Personil
-                                                        </a>
-                                                    </li>
+                                                @if($showInactive)
+                                                    <button type="button"
+                                                        class="btn btn-success btn-sm sdm-action-btn shadow-sm"
+                                                        title="Aktifkan Kembali"
+                                                        aria-label="Aktifkan Kembali"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalKonfirmasiAksi"
+                                                        data-action-url="{{ route('sdm.activate', $row->personil_id) }}"
+                                                        data-action-method="PATCH"
+                                                        data-action-message="Apakah Anda yakin ingin mengaktifkan kembali <strong>{{ $row->nama }}</strong>?"
+                                                        data-action-btn-class="btn-success"
+                                                        data-action-btn-text="Aktifkan">
+                                                        <i class="fas fa-undo"></i>
+                                                    </button>
 
-                                                    <li>
-                                                        <hr class="dropdown-divider my-1">
-                                                    </li>
-
-                                                    @if($showInactive)
-                                                        <li>
-                                                            <button type="button" 
-                                                                class="dropdown-item text-danger py-1"
-                                                                data-bs-toggle="modal"
-                                                                data-bs-target="#modalKonfirmasiAksi"
-                                                                data-action-url="{{ route('sdm.force-destroy', $row->personil_id) }}"
-                                                                data-action-method="DELETE"
-                                                                data-action-message="Data personil <strong>{{ $row->nama }}</strong> ini akan dihapus secara permanen!"
-                                                                data-action-btn-class="btn-danger"
-                                                                data-action-btn-text="Ya, Hapus!">
-                                                                <i class="fas fa-trash me-2"></i>
-                                                                Hapus Permanen
-                                                            </button>
-                                                        </li>
-                                                    @else
-                                                        <li>
-                                                            <button type="button" 
-                                                                class="dropdown-item text-danger py-1"
-                                                                data-bs-toggle="modal"
-                                                                data-bs-target="#modalKonfirmasiAksi"
-                                                                data-action-url="{{ route('sdm.destroy', $row->personil_id) }}"
-                                                                data-action-method="DELETE"
-                                                                data-action-message="Data personil <strong>{{ $row->nama }}</strong> ini akan dinonaktifkan!"
-                                                                data-action-btn-class="btn-danger"
-                                                                data-action-btn-text="Ya, Nonaktifkan!">
-                                                                <i class="fas fa-pause-circle me-2"></i>
-                                                                Nonaktifkan
-                                                            </button>
-                                                        </li>
-                                                    @endif
-                                                </ul>
-                                            </div>
-                                        @endif
+                                                    <button type="button"
+                                                        class="btn btn-danger btn-sm sdm-action-btn shadow-sm"
+                                                        title="Hapus Permanen"
+                                                        aria-label="Hapus Permanen"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalKonfirmasiAksi"
+                                                        data-action-url="{{ route('sdm.force-destroy', $row->personil_id) }}"
+                                                        data-action-method="DELETE"
+                                                        data-action-message="Data personil <strong>{{ $row->nama }}</strong> ini akan dihapus secara permanen!"
+                                                        data-action-btn-class="btn-danger"
+                                                        data-action-btn-text="Ya, Hapus!">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                @else
+                                                    <button type="button"
+                                                        class="btn btn-danger btn-sm sdm-action-btn shadow-sm"
+                                                        title="Nonaktifkan"
+                                                        aria-label="Nonaktifkan"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalKonfirmasiAksi"
+                                                        data-action-url="{{ route('sdm.destroy', $row->personil_id) }}"
+                                                        data-action-method="DELETE"
+                                                        data-action-message="Data personil <strong>{{ $row->nama }}</strong> ini akan dinonaktifkan!"
+                                                        data-action-btn-class="btn-danger"
+                                                        data-action-btn-text="Ya, Nonaktifkan!">
+                                                        <i class="fas fa-user-slash"></i>
+                                                    </button>
+                                                @endif
+                                            @endif
+                                        </div>
                                     </td>
                                 </tr>
 
@@ -540,8 +476,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal Konfirmasi Aksi -->
     <div class="modal fade" id="modalKonfirmasiAksi" tabindex="-1" aria-labelledby="modalKonfirmasiAksiLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
             <div class="modal-content border-0 shadow rounded-3 p-2.5" style="font-size: 0.8rem;">
@@ -573,8 +507,6 @@
             </div>
         </div>
     </div>
-
-    <!-- MODAL TAMBAH PERSONIL -->
     <div class="modal fade"
         id="modalTambahPersonil"
         tabindex="-1"
@@ -592,7 +524,7 @@
                     <div class="modal-header text-white py-1.5 px-3" style="background-color: #1b3152 !important; position: relative; z-index: 2;">
                         <h5 class="modal-title fw-bold text-white mb-0" id="modalTambahPersonilLabel" style="font-size: 0.95rem;">
                             <i class="fas fa-user-plus me-1"></i>
-                            Tambah Personil & Akun
+                            Tambah Personil
                         </h5>
 
                         <button type="button"
@@ -634,7 +566,7 @@
                                 <div class="col-md-6">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <label class="form-label small fw-semibold mb-0" style="font-size: 0.75rem;">
-                                            Kategori Personil
+                                            Kategori Personil <span class="text-muted fw-normal">(Opsional)</span>
                                         </label>
                                         <button type="button"
                                             class="btn btn-link btn-sm p-0"
@@ -646,8 +578,8 @@
                                     </div>
                                     <select name="kategori_personil"
                                         id="kategoriPersonilTambah"
-                                        class="form-select form-select-sm py-1 select2-in-modal" style="font-size: 0.75rem;">
-                                        <option value="">— Pilih Kategori —</option>
+                                        class="form-select form-select-sm py-1 select2-kategori" style="font-size: 0.75rem;">
+                                        <option value="">— Tanpa Kategori —</option>
                                         @foreach($kategoriOptions as $value => $label)
                                             <option value="{{ $value }}"
                                                 {{ old('kategori_personil') == $value ? 'selected' : '' }}>
@@ -655,6 +587,9 @@
                                             </option>
                                         @endforeach
                                     </select>
+                                    <div class="form-text text-muted mt-0.5" style="font-size: 0.65rem;">
+                                        Diisi khusus untuk personil lab. Kosongkan untuk pegawai non-lab.
+                                    </div>
                                 </div>
 
                                 <div class="col-md-6">
@@ -1002,14 +937,12 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
     <script>
         $(function () {
-            // Dropdown filter kategori di luar modal
             $('#filterKategori').select2({
                 theme: 'bootstrap-5',
                 width: '100%',
                 minimumResultsForSearch: -1
             });
 
-            // Dropdown di dalam modal butuh dropdownParent supaya tidak tersembunyi di belakang modal
             $('.select2-in-modal').each(function () {
                 const $modal = $(this).closest('.modal');
                 $(this).select2({
@@ -1019,7 +952,17 @@
                 });
             });
 
-            // Input tanggal jadi kalender custom, ramah disentuh di HP
+            $('.select2-kategori').each(function () {
+                const $modal = $(this).closest('.modal');
+                $(this).select2({
+                    theme: 'bootstrap-5',
+                    width: '100%',
+                    placeholder: '— Tanpa Kategori —',
+                    allowClear: true,
+                    dropdownParent: $modal.length ? $modal : $(document.body)
+                });
+            });
+
             flatpickr.localize(flatpickr.l10ns.id);
             $('.flatpickr-date').flatpickr({
                 dateFormat: 'Y-m-d',

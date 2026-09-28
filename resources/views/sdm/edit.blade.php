@@ -34,7 +34,6 @@
             right: 1rem;
         }
 
-        /* ===== Select2 & Flatpickr custom, konsisten dengan tema corporate ===== */
         .select2-container--bootstrap-5 .select2-selection {
             font-size: 0.75rem !important;
             min-height: 31px !important;
@@ -105,20 +104,23 @@
                         <div class="col-md-6">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <label class="form-label small fw-semibold mb-0" style="font-size: 0.73rem;">
-                                    Kategori Personil
+                                    Kategori Personil <span class="text-muted fw-normal">(Opsional)</span>
                                 </label>
                                 <button type="button" class="btn btn-link btn-sm p-0" data-bs-toggle="modal" data-bs-target="#modalTambahKategori" style="font-size: 0.68rem;">
                                     <i class="fas fa-plus-circle"></i> Kategori Baru
                                 </button>
                             </div>
-                            <select name="kategori_personil" class="form-select form-select-sm py-1 select2-basic" style="font-size: 0.75rem;">
-                                <option value="">— Pilih Kategori —</option>
+                            <select name="kategori_personil" class="form-select form-select-sm py-1 select2-kategori" style="font-size: 0.75rem;">
+                                <option value="">— Tanpa Kategori —</option>
                                 @foreach($kategoriOptions as $value => $label)
                                     <option value="{{ $value }}" {{ old('kategori_personil', $personil->kategori_personil) == $value ? 'selected' : '' }}>
                                         {{ $label }}
                                     </option>
                                 @endforeach
                             </select>
+                            <div class="form-text text-muted mt-1" style="font-size: 0.65rem;">
+                                Diisi khusus untuk personil lab. Kosongkan untuk pegawai non-lab.
+                            </div>
                         </div>
 
                         <div class="col-md-6">
@@ -264,9 +266,11 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
     <script>
         $(function () {
-            $('.select2-basic').select2({
+            $('.select2-kategori').select2({
                 theme: 'bootstrap-5',
-                width: '100%'
+                width: '100%',
+                placeholder: '— Tanpa Kategori —',
+                allowClear: true
             });
 
             flatpickr.localize(flatpickr.l10ns.id);

@@ -254,7 +254,7 @@
                     <div class="text-center mt-4">
                         <a href="{{ route('login') }}" class="auth-link">Kembali ke Login</a>
                     </div>
-                    <div class="auth-footer">© PT Sucofindo Cilacap</div>
+                    <div class="auth-footer">© 2026 PT Sucofindo Cilacap</div>
                 </div>
             </div>
         </div>

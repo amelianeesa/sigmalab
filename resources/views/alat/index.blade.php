@@ -48,6 +48,17 @@
         color: #ffffff !important;
     }
 
+    .alat-action-btn {
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        padding: 0 !important;
+        border-radius: 6px;
+    }
+
     .pagination .page-link {
         font-size: 0.72rem;
         padding: 0.2rem 0.55rem;
@@ -153,7 +164,7 @@
                             <th rowspan="2" style="min-width: 100px;">Unit Kerja Pemilik</th>
                             <th rowspan="2" style="min-width: 100px;">Lembaga Kalibrasi</th>
                             <th colspan="4">Kalibrasi</th>
-                            <th rowspan="2">Aksi</th>
+                            <th rowspan="2" style="min-width: 130px;">Aksi</th>
                         </tr>
                         <tr>
                             <th>Merk / Type</th>
@@ -253,15 +264,19 @@
                             <td>{{ $kalibrasiTerakhir->faktor_koreksi ?? '-' }}</td>
                             <td>{{ ucfirst($signifikan ?? '-') }}</td>
                             <td class="text-nowrap">
-                                <a href="{{ route('alat.show', $item->alat_id) }}" class="btn btn-corporate-blue btn-sm py-1 px-2 shadow-sm" style="font-size: 0.75rem;" title="Detail Kerusakan & Perbaikan"><i class="fas fa-tools"></i></a>
-                                
+                                <div class="d-inline-flex align-items-center gap-1">
+                                    <a href="{{ route('alat.show', $item->alat_id) }}" class="btn btn-corporate-blue btn-sm alat-action-btn shadow-sm" title="Detail Kerusakan & Perbaikan" aria-label="Detail Kerusakan & Perbaikan"><i class="fas fa-tools"></i></a>
+
+                                    @if($canModify)
+                                        <a href="{{ route('alat.edit', $item->alat_id) }}" class="btn btn-warning btn-sm alat-action-btn shadow-sm" title="Edit" aria-label="Edit"><i class="fas fa-edit"></i></a>
+
+                                        <button type="button" class="btn btn-danger btn-sm alat-action-btn shadow-sm" title="Hapus" aria-label="Hapus" data-bs-toggle="modal" data-bs-target="#modalHapusAlat{{ $item->alat_id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    @endif
+                                </div>
+
                                 @if($canModify)
-                                    <a href="{{ route('alat.edit', $item->alat_id) }}" class="btn btn-warning btn-sm py-1 px-2 text-dark shadow-sm" style="font-size: 0.75rem;" title="Edit"><i class="fas fa-edit"></i></a>
-
-                                    <button type="button" class="btn btn-danger btn-sm py-1 px-2 shadow-sm" style="font-size: 0.75rem;" title="Hapus" data-bs-toggle="modal" data-bs-target="#modalHapusAlat{{ $item->alat_id }}">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-
                                     <div class="modal fade" id="modalHapusAlat{{ $item->alat_id }}" tabindex="-1" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
                                             <div class="modal-content border-0 shadow text-center p-3" style="font-size: 0.82rem; border-radius: 8px;">
@@ -285,8 +300,6 @@
                                             </div>
                                         </div>
                                     </div>
-                                @else
-                                    -
                                 @endif
                             </td>
                         </tr>
