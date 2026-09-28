@@ -52,43 +52,6 @@
         font-size: 0.72rem;
         padding: 0.2rem 0.55rem;
     }
-
-    .table-responsive {
-        overflow-x: auto;
-    }
-
-    .sticky-no {
-        position: sticky !important;
-        left: 0 !important;
-        width: 45px !important;
-        min-width: 45px !important;
-        z-index: 3;
-        background-color: #ffffff !important;
-    }
-
-    .sticky-alat {
-        position: sticky !important;
-        left: 45px !important; 
-        width: 200px !important;
-        min-width: 200px !important;
-        z-index: 3;
-        background-color: #ffffff !important;
-    }
-
-    thead th.sticky-no, thead th.sticky-alat {
-        background-color: #1b3152 !important;
-        z-index: 4;
-    }
-
-    .sticky-alat::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        width: 4px;
-        box-shadow: inset -3px 0 3px -2px rgba(0, 0, 0, 0.15);
-    }
 </style>
 
 <div class="container-fluid dashboard-container" style="font-size: 0.82rem;">
@@ -144,7 +107,7 @@
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <select name="filter_status" id="filterStatus" class="form-select form-select-sm py-1.5" style="font-size: 0.82rem;">
+                    <select name="filter_status" id="filterStatus" class="form-select form-select-sm py-1.5">
                         <option value="">-- Filter Status Kalibrasi --</option>
                         <option value="aktif" {{ (isset($filterStatus) && $filterStatus == 'aktif') ? 'selected' : '' }}>Aktif (> 180 Hari)</option>
                         <option value="segera" {{ (isset($filterStatus) && $filterStatus == 'segera') ? 'selected' : '' }}>Segera Berakhir (&le; 180 Hari)</option>
@@ -152,7 +115,7 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select name="filter_kondisi" id="filterKondisi" class="form-select form-select-sm py-1.5" style="font-size: 0.82rem;">
+                    <select name="filter_kondisi" id="filterKondisi" class="form-select form-select-sm py-1.5">
                         <option value="">-- Filter Kondisi Alat --</option>
                         <option value="baik" {{ (isset($filterKondisi) && $filterKondisi == 'baik') ? 'selected' : '' }}>Baik</option>
                         <option value="perbaikan" {{ (isset($filterKondisi) && $filterKondisi == 'perbaikan') ? 'selected' : '' }}>Perbaikan</option>
@@ -175,6 +138,7 @@
                             <th colspan="5">Spesifikasi</th>
                             <th rowspan="2">Kondisi Alat</th>
                             <th rowspan="2">Status Alat</th>
+                            <th rowspan="2" style="width: 110px; max-width: 110px; background-color: #1b3152;">Keputusan Evaluasi</th>
                             <th rowspan="2" style="min-width: 100px;">No. Sertifikat/<br>Perijinan</th>
                             <th rowspan="2">Interval Kalibrasi</th>
                             <th colspan="2">Periode Kalibrasi/<br>Perijinan</th>
@@ -203,6 +167,8 @@
                             $kalibrasiTerakhir = $item->riwayatKalibrasi->sortByDesc('tgl_kalibrasi')->first();
                             $jenisKalibrasi = optional($kalibrasiTerakhir)->jenis_kalibrasi;
                             $signifikan = optional($kalibrasiTerakhir)->signifikan;
+
+                            $evaluasiTerakhir = $item->evaluasiKalibrasi->sortByDesc('tanggal_evaluasi')->first();
 
                             $statusKalibrasiBadge = '';
                             if ($kalibrasiTerakhir && $kalibrasiTerakhir->tgl_akhir) {
@@ -257,6 +223,32 @@
                                 <span class="badge bg-{{ $item->status_barang == 'terpakai' ? 'primary' : 'secondary' }}" style="font-size: 0.7rem;">
                                     {{ ucfirst($item->status_barang) }}
                                 </span>
+                            </td>
+                            <td>
+                                @if($evaluasiTerakhir)
+                                    @php
+                                        $keputusanLower = strtolower($evaluasiTerakhir->keputusan);
+                                        $badgeBg = 'secondary';
+                                        
+                                        if (str_contains($keputusanLower, 'layak') && !str_contains($keputusanLower, 'tidak') && !str_contains($keputusanLower, 'faktor') && !str_contains($keputusanLower, 'penambahan')) {
+                                            $badgeBg = 'success';
+                                        } elseif (str_contains($keputusanLower, 'faktor') || str_contains($keputusanLower, 'penambahan')) {
+                                            $badgeBg = 'warning text-dark'; 
+                                        } elseif (str_contains($keputusanLower, 'tidak')) {
+                                            $badgeBg = 'danger';
+                                        }
+                                    @endphp
+                                    <a href="{{ route('evaluasi-kalibrasi.show', $evaluasiTerakhir->evaluasi_id) }}" class="text-decoration-none" title="Klik untuk melihat detail evaluasi">
+                                        <span class="badge bg-{{ $badgeBg }}" style="font-size: 0.55rem; padding: 0.3em 0.4em; white-space: normal; display: inline-block; max-width: 95px; word-break: break-word; line-height: 1.2;">
+                                            {{ strtoupper($evaluasiTerakhir->keputusan) }}
+                                        </span>
+                                    </a>
+                                    <div class="text-muted mt-1" style="font-size: 0.62rem;">
+                                        {{ \Carbon\Carbon::parse($evaluasiTerakhir->tanggal_evaluasi)->format('d/m/Y') }}
+                                    </div>
+                                @else
+                                    <span class="badge bg-light text-muted border" style="font-size: 0.62rem;">Belum Evaluasi</span>
+                                @endif
                             </td>
                             <td>
                                 {{ $kalibrasiTerakhir->no_sertifikat ?? '-' }}
@@ -320,7 +312,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="22" class="text-center text-muted py-3">Tidak ada data alat yang ditemukan</td>
+                            <td colspan="23" class="text-center text-muted py-3">Tidak ada data alat yang ditemukan</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -364,6 +356,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const filterKondisi = document.getElementById('filterKondisi');
     const filterForm = document.getElementById('filterForm');
 
+    $('#filterStatus, #filterKondisi').select2({
+        theme: 'bootstrap-5',
+        width: '100%'
+    });
+
     let timeout = null;
 
     searchInput.addEventListener('input', function() {
@@ -373,11 +370,11 @@ document.addEventListener("DOMContentLoaded", function() {
         }, 500);
     });
 
-    filterStatus.addEventListener('change', function() {
+    $('#filterStatus').on('change', function() {
         filterForm.submit();
     });
 
-    filterKondisi.addEventListener('change', function() {
+    $('#filterKondisi').on('change', function() {
         filterForm.submit();
     });
 });

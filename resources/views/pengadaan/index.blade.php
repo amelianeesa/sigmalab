@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+{{-- <<<<<<< HEAD
 <style>
     tr:target > td { animation: sorotBaris 3s ease; }
     @keyframes sorotBaris {
@@ -11,6 +12,152 @@
 
 <div class="container-fluid pt-0 pb-4 px-4">
     <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+======= --}}
+
+<style>
+    .pengadaan-header-row {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+    .pengadaan-header-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .modal {
+        overflow: visible !important;
+    }
+    .modal-body {
+        overflow: visible !important;
+    }
+
+    .filter-select {
+        position: relative;
+        font-size: 0.78rem;
+    }
+    .filter-select-trigger {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.78rem;
+        cursor: pointer;
+        text-align: left;
+        color: #212529;
+    }
+    .filter-select-trigger:after {
+        content: "";
+        width: 0;
+        height: 0;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 5px solid #6c757d;
+        margin-left: 6px;
+        flex-shrink: 0;
+    }
+    .filter-select.open .filter-select-trigger {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15);
+    }
+    .filter-select-options {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1060;
+        margin-top: 2px;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+        padding: 4px 0;
+    }
+    .filter-select.open .filter-select-options {
+        display: block;
+    }
+    .filter-select-search-wrap {
+        padding: 4px 8px 6px;
+        border-bottom: 1px solid #eee;
+    }
+    .filter-select-search-input {
+        width: 100%;
+        font-size: 0.75rem;
+        padding: 4px 6px;
+        border: 1px solid #ced4da;
+        border-radius: 0.3rem;
+    }
+    .filter-select-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        max-height: 220px;
+        overflow-y: auto;
+    }
+    .filter-select-list li {
+        padding: 6px 10px;
+        font-size: 0.78rem;
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .filter-select-list li:hover {
+        background-color: #f1f3f5;
+    }
+    .filter-select-list li.selected {
+        background-color: #0d6efd;
+        color: #fff;
+    }
+    .filter-select-list li.d-none {
+        display: none;
+    }
+
+    .flatpickr-input {
+        font-size: 0.78rem;
+    }
+    .flatpickr-calendar {
+        font-size: 0.8rem;
+    }
+
+    .scroll-hint-pengadaan {
+        display: none;
+        font-size: 0.68rem;
+        color: #6c757d;
+        margin-bottom: 0.4rem;
+    }
+
+    @media (max-width: 768px) {
+        .table.small {
+            font-size: 0.62rem;
+        }
+        .scroll-hint-pengadaan {
+            display: block;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .pengadaan-header-row {
+            flex-direction: column;
+            align-items: stretch !important;
+        }
+        .pengadaan-header-actions {
+            width: 100%;
+        }
+        .pengadaan-header-actions button {
+            flex: 1;
+        }
+    }
+</style>
+
+<div class="container-fluid px-4 py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3 pengadaan-header-row">
+
         <div>
             <h5 class="fw-bold text-dark mb-1" style="font-size: 1.2rem;">Pengadaan Bahan / Barang</h5>
             <ol class="breadcrumb mb-0" style="font-size: 12px;">
@@ -18,7 +165,7 @@
                 <li class="breadcrumb-item text-muted active">Pengadaan Barang & Bahan</li>
             </ol>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 pengadaan-header-actions">
             @if(in_array(Auth::user()->role->nama_role ?? '', [\App\Enums\PeranPengguna::GA_OFFICER->value, \App\Enums\PeranPengguna::ADMIN_APLIKASI->value, 'GA', 'GA_OFFICER']))
                 <button class="btn btn-sm btn-outline-success py-1 px-2 fw-bold" data-bs-toggle="modal" data-bs-target="#exportPdfModal" style="font-size: 0.72rem;">
                     <i class="fas fa-file-pdf me-1"></i> Export PDF
@@ -34,6 +181,7 @@
 
     <div class="card shadow-sm border-0">
         <div class="card-body p-2">
+            <div class="scroll-hint-pengadaan"><i class="fas fa-arrows-alt-h me-1"></i> Geser tabel ke samping untuk melihat kolom lainnya</div>
             <div class="table-responsive">
                 <table class="table table-hover table-bordered align-middle mb-0" style="font-size: 0.75rem; border-color: #dee2e6;">
                     <thead class="text-white">
@@ -195,6 +343,7 @@
                                         @endif
                                         
                                         @if($isGa && $p->status == 'disetujui')
+{{-- <<<<<<< HEAD
                                             <button type="button" class="btn btn-sm btn-primary w-100 py-1 text-white" data-bs-toggle="modal" data-bs-target="#modalMetodeGa{{ $p->permintaan_id }}" style="font-size:0.7rem; background-color: #1b3152;">
                                                 <i class="fas fa-tasks me-1"></i> Proses Pengadaan
                                             </button>
@@ -207,6 +356,39 @@
                                                         <div class="modal-header text-white py-2" style="background-color: #1b3152;">
                                                             <h6 class="modal-title mb-0 fs-6"><i class="fas fa-shopping-cart me-1"></i>Pilih Metode Pengadaan</h6>
                                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+======= --}}
+                                        <!-- Tombol Pemicu Modal Pilih Metode GA -->
+                                        <button type="button" class="btn btn-sm btn-primary w-100 py-1" data-bs-toggle="modal" data-bs-target="#modalMetodeGa{{ $p->permintaan_id }}" style="font-size:0.72rem;">
+                                            <i class="fas fa-tasks me-1"></i> Proses Pengadaan
+                                        </button>
+                                    
+                                        <!-- Modal Pilihan Metode (PO atau Pembelian) & Estimasi Waktu -->
+                                        <div class="modal fade" id="modalMetodeGa{{ $p->permintaan_id }}" tabindex="-1">
+                                            <div class="modal-dialog modal-sm">
+                                                <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST" class="modal-content text-start">
+                                                    @csrf
+                                                    <input type="hidden" name="status" value="diproses">
+                                                    
+                                                    <div class="modal-header bg-dark text-white py-2">
+                                                        <h6 class="modal-title mb-0"><i class="fas fa-shopping-cart me-1"></i>Pilih Metode Pengadaan</h6>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    
+                                                    <div class="modal-body py-2">
+                                                        <div class="mb-2">
+                                                            <label class="form-label fw-bold small">Metode Penanganan <span class="text-danger">*</span></label>
+                                                            <div class="filter-select" data-estimasi-id="{{ $p->permintaan_id }}">
+                                                                <input type="hidden" name="metode_proses" required>
+                                                                <button type="button" class="filter-select-trigger">-- Pilih Metode --</button>
+                                                                <div class="filter-select-options">
+                                                                    <ul class="filter-select-list">
+                                                                        <li data-value="">-- Pilih Metode --</li>
+                                                                        <li data-value="PO">Purchase Order (PO)</li>
+                                                                        <li data-value="Pembelian">Pembelian Langsung</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+
                                                         </div>
                                                         <div class="modal-body py-2">
                                                             <div class="mb-2">
@@ -230,6 +412,7 @@
                                                 </div>
                                             </div>
                                         @endif    
+
 
                                         <div class="modal fade" id="modalTolak{{ $p->permintaan_id }}" tabindex="-1">
                                             <div class="modal-dialog modal-sm">
@@ -290,7 +473,7 @@
                                                             </div>
                                                             <div class="mb-1">
                                                                 <label class="form-label fw-bold small">Tgl Expired (Opsional)</label>
-                                                                <input type="date" name="tgl_exp" class="form-control form-control-sm">
+                                                                <input type="text" name="tgl_exp" class="form-control form-control-sm flatpickr-date" placeholder="dd/mm/yyyy" autocomplete="off">
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer bg-light py-2">
@@ -393,17 +576,26 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label fw-bold small">Pilih Barang/Bahan <span class="text-danger">*</span></label>
-                    <select name="barang_id" class="form-select form-select-sm" required>
-                        <option value="">-- Pilih Barang --</option>
-                        @foreach($barangList as $b)
-                            @php
-                                $saldoAkhir = ($b->saldo_awal + $b->penerimaan) - $b->pengeluaran;
-                            @endphp
-                            <option value="{{ $b->barang_id }}">
-                                {{ $b->nama_barang }} (Stok saat ini: {{ $saldoAkhir }} {{ $b->satuan }})
-                            </option>
-                        @endforeach
-                    </select>
+                    <div class="filter-select" id="selectBarangId">
+                        <input type="hidden" name="barang_id" required>
+                        <button type="button" class="filter-select-trigger">-- Pilih Barang --</button>
+                        <div class="filter-select-options">
+                            <div class="filter-select-search-wrap">
+                                <input type="text" class="filter-select-search-input" placeholder="Cari barang...">
+                            </div>
+                            <ul class="filter-select-list">
+                                <li data-value="">-- Pilih Barang --</li>
+                                @foreach($barangList as $b)
+                                    @php
+                                        $saldoAkhir = ($b->saldo_awal + $b->penerimaan) - $b->pengeluaran;
+                                    @endphp
+                                    <li data-value="{{ $b->barang_id }}">
+                                        {{ $b->nama_barang }} (Stok saat ini: {{ $saldoAkhir }} {{ $b->satuan }})
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold small">Jumlah Diminta <span class="text-danger">*</span></label>
@@ -457,23 +649,39 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                @php
+                    $currentMonthNumPengadaan = (int) date('m');
+                    $tahunSekarangPengadaan = (int) date('Y');
+                @endphp
                 <div class="mb-3">
                     <label class="form-label fw-bold small">Bulan</label>
-                    <select name="bulan" class="form-select form-select-sm" required>
-                        @for($i=1; $i<=12; $i++)
-                            <option value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}" {{ date('m') == $i ? 'selected' : '' }}>
-                                {{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}
-                            </option>
-                        @endfor
-                    </select>
+                    <div class="filter-select">
+                        <input type="hidden" name="bulan" value="{{ str_pad($currentMonthNumPengadaan, 2, '0', STR_PAD_LEFT) }}" required>
+                        <button type="button" class="filter-select-trigger">{{ \Carbon\Carbon::create()->month($currentMonthNumPengadaan)->translatedFormat('F') }}</button>
+                        <div class="filter-select-options">
+                            <ul class="filter-select-list">
+                                @for($i=1; $i<=12; $i++)
+                                    <li data-value="{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}" class="{{ $currentMonthNumPengadaan == $i ? 'selected' : '' }}">
+                                        {{ \Carbon\Carbon::create()->month($i)->translatedFormat('F') }}
+                                    </li>
+                                @endfor
+                            </ul>
+                        </div>
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-bold small">Tahun</label>
-                    <select name="tahun" class="form-select form-select-sm" required>
-                        @for($i=date('Y'); $i>=2020; $i--)
-                            <option value="{{ $i }}">{{ $i }}</option>
-                        @endfor
-                    </select>
+                    <div class="filter-select">
+                        <input type="hidden" name="tahun" value="{{ $tahunSekarangPengadaan }}" required>
+                        <button type="button" class="filter-select-trigger">{{ $tahunSekarangPengadaan }}</button>
+                        <div class="filter-select-options">
+                            <ul class="filter-select-list">
+                                @for($i=$tahunSekarangPengadaan; $i>=2020; $i--)
+                                    <li data-value="{{ $i }}" class="{{ $i == $tahunSekarangPengadaan ? 'selected' : '' }}">{{ $i }}</li>
+                                @endfor
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer bg-light py-2">
@@ -486,17 +694,83 @@
 @endsection
 
 @push('scripts')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
 <script>
-    function toggleEstimasi(selectObj, id) {
+    function toggleEstimasi(value, id) {
         const label = document.getElementById('labelEstimasi' + id);
         if (!label) return;
+
         if (selectObj.value === 'PO') {
+
+        // if (value === 'PO') {
+
             label.innerText = 'Estimasi PO (Hari / Keterangan)';
-        } else if (selectObj.value === 'Pembelian') {
+        } else if (value === 'Pembelian') {
             label.innerText = 'Estimasi Pembelian Langsung';
         } else {
             label.innerText = 'Catatan / Estimasi';
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        flatpickr('.flatpickr-date', {
+            dateFormat: 'Y-m-d',
+            altInput: true,
+            altFormat: 'd/m/Y',
+            allowInput: true
+        });
+
+        document.querySelectorAll('.filter-select').forEach(function (wrapper) {
+            const trigger = wrapper.querySelector('.filter-select-trigger');
+            const hiddenInput = wrapper.querySelector('input[type="hidden"]');
+            const options = wrapper.querySelectorAll('.filter-select-list li');
+            const searchInput = wrapper.querySelector('.filter-select-search-input');
+            const estimasiId = wrapper.getAttribute('data-estimasi-id');
+
+            trigger.addEventListener('click', function (e) {
+                e.stopPropagation();
+                document.querySelectorAll('.filter-select.open').forEach(function (other) {
+                    if (other !== wrapper) other.classList.remove('open');
+                });
+                wrapper.classList.toggle('open');
+                if (wrapper.classList.contains('open') && searchInput) {
+                    searchInput.value = '';
+                    options.forEach(function (o) { o.classList.remove('d-none'); });
+                    setTimeout(function () { searchInput.focus(); }, 50);
+                }
+            });
+
+            options.forEach(function (li) {
+                li.addEventListener('click', function () {
+                    hiddenInput.value = li.getAttribute('data-value');
+                    trigger.textContent = li.textContent;
+                    options.forEach(function (o) { o.classList.remove('selected'); });
+                    li.classList.add('selected');
+                    wrapper.classList.remove('open');
+                    if (estimasiId) {
+                        toggleEstimasi(li.getAttribute('data-value'), estimasiId);
+                    }
+                });
+            });
+
+            if (searchInput) {
+                searchInput.addEventListener('click', function (e) { e.stopPropagation(); });
+                searchInput.addEventListener('input', function () {
+                    const q = searchInput.value.toLowerCase();
+                    options.forEach(function (li) {
+                        const match = li.textContent.toLowerCase().includes(q);
+                        li.classList.toggle('d-none', !match);
+                    });
+                });
+            }
+        });
+
+        document.addEventListener('click', function () {
+            document.querySelectorAll('.filter-select.open').forEach(function (wrapper) {
+                wrapper.classList.remove('open');
+            });
+        });
+    });
 </script>
 @endpush

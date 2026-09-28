@@ -13,6 +13,7 @@
 @endpush
 
 @section('content')
+<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
 <style>
     .dropdown-menu .dropdown-item {
         border-radius: 4px;
@@ -37,6 +38,20 @@
         color: #28a745 !important;
         outline: none !important;
         box-shadow: none !important;
+    }
+
+    .select2-container--bootstrap-5 .select2-selection {
+        font-size: 0.75rem !important;
+        min-height: 31px !important;
+    }
+    .select2-container--bootstrap-5 .select2-selection__rendered {
+        padding-top: 0 !important;
+    }
+    .select2-container--bootstrap-5 .select2-results__option {
+        font-size: 0.8rem !important;
+    }
+    .flatpickr-input {
+        background-color: #fff !important;
     }
 </style>
 
@@ -174,9 +189,29 @@
                                             {{ strtoupper($riwayat->signifikan) }}
                                         </span>
                                     </td>
-                                    <td class="text-start py-1">
-                                        {{ $riwayat->catatan_evaluasi ?? '-' }}
+                                    <td class="text-start py-1" style="font-size: 0.65rem;">
+                                        @php
+                                            $query = $alat->evaluasiKalibrasi()->whereDate('tanggal_evaluasi', '>=', $riwayat->tgl_kalibrasi);
+                                            
+                                            if (!empty($riwayat->tgl_akhir)) {
+                                                $query->whereDate('tanggal_evaluasi', '<=', $riwayat->tgl_akhir);
+                                            }
+                                            
+                                            $evaluasiItem = $query->latest('tanggal_evaluasi')->first();
+                                        @endphp
+
+                                        @if($evaluasiItem)
+                                            <div style="line-height: 1.3;">
+                                                <span class="fw-bold text-dark">Keputusan:</span> {{ ucfirst(strtolower($evaluasiItem->keputusan)) }}
+                                            </div>
+                                            <div style="line-height: 1.2;" class="text-muted">
+                                                <span class="fw-bold text-dark">Komentar:</span> {{ $evaluasiItem->catatan ?? $evaluasiItem->komentar ?? '-' }}
+                                            </div>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
                                     </td>
+
                                 </tr>
                                 @empty
                                 <tr>
@@ -189,7 +224,6 @@
                 </div>
             </div>
 
-            {{-- 3. FORM INPUT KALIBRASI BARU (Header Biru Pekat Sucofindo, Teks Putih) --}}
             @php
                 $allowedRoles = ['Koordinator Laboratorium', 'Analis Lab', 'Admin Aplikasi'];$userRoleName = Auth::user()->role->nama_role ?? '';
                 $canInputKalibrasi = Auth::check() && in_array($userRoleName,$allowedRoles);
@@ -207,8 +241,8 @@
                         <div class="row g-2">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small mb-1" style="font-size: 11px;">Jenis Kalibrasi</label>
-                                <select name="jenis_kalibrasi" class="form-select form-select-sm" required style="font-size: 0.75rem;">
-                                    <option>--Pilih Jenis--</option>
+                                <select name="jenis_kalibrasi" class="form-select form-select-sm select2-basic" required>
+                                    <option value="">--Pilih Jenis--</option>
                                     <option value="internal">Internal</option>
                                     <option value="eksternal">Eksternal</option>
                                 </select>
@@ -224,7 +258,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small mb-1" style="font-size: 11px;">Tanggal Kalibrasi</label>
-                                <input type="date" name="tgl_kalibrasi" id="tgl_kalibrasi" class="form-control form-control-sm" required style="font-size: 0.75rem;">
+                                <input type="text" name="tgl_kalibrasi" id="tgl_kalibrasi" class="form-control form-control-sm flatpickr-date" autocomplete="off" required style="font-size: 0.75rem;">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small mb-1" style="font-size: 11px;">Interval Kalibrasi</label>
@@ -232,7 +266,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small mb-1" style="font-size: 11px;">Tanggal Berakhir Kalibrasi</label>
-                                <input type="date" name="tgl_akhir" id="tgl_akhir" class="form-control form-control-sm" required style="font-size: 0.75rem;">
+                                <input type="text" name="tgl_akhir" id="tgl_akhir" class="form-control form-control-sm flatpickr-date" autocomplete="off" required style="font-size: 0.75rem;">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small mb-1" style="font-size: 11px;">Lembaga Kalibrasi</label>
@@ -248,15 +282,22 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small mb-1" style="font-size: 11px;">Signifikan</label>
-                                <select name="signifikan" class="form-select form-select-sm" required style="font-size: 0.75rem;">
-                                    <option>--Pilih Signifikan--</option>
+                                <select name="signifikan" class="form-select form-select-sm select2-basic" required>
+                                    <option value="">--Pilih Signifikan--</option>
                                     <option value="ya">Ya</option>
                                     <option value="tidak">Tidak</option>
                                 </select>
                             </div>
-                            <div class="col-md-12">
-                                <label for="catatan_evaluasi" class="form-label fw-bold small mb-1" style="font-size: 11px;">Catatan / Evaluasi Kalibrasi</label>
-                                <textarea name="catatan_evaluasi" id="catatan_evaluasi" class="form-control form-control-sm" rows="2" placeholder="Tuliskan catatan evaluasi atau hasil analisis alat di sini..." autocomplete="off" style="font-size: 0.75rem;"></textarea>
+                            <div class="row g-2 mb-2">
+                                <div class="col-md-12">
+                                    <div class="p-2 bg-light border rounded text-muted" style="font-size: 11.5px;">
+                                        <i class="fas fa-info-circle me-1" style="color: #1b3152;"></i> 
+                                        Evaluasi dan catatan keputusan dikelola sub menu terpusat.
+                                        <a href="{{ route('evaluasi-kalibrasi.index') }}" class="text-decoration-none fw-semibold text-primary ms-1">
+                                            Evaluasi Kalibrasi <i class="fas fa-external-link-alt" style="font-size: 10px;"></i>
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="mt-3 text-end">
@@ -288,21 +329,58 @@
     </div>
 </div>
 
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    if (window.jQuery) {
+        $('.select2-basic').select2({
+            theme: 'bootstrap-5',
+            width: '100%'
+        });
+    }
+
     const tglKalibrasiInput = document.getElementById('tgl_kalibrasi');
     const intervalInput = document.getElementById('interval_kalibrasi');
     const tglAkhirInput = document.getElementById('tgl_akhir');
 
     if (!tglKalibrasiInput) return;
 
+    if (window.flatpickr) {
+        flatpickr.localize(flatpickr.l10ns.id);
+        [tglKalibrasiInput, tglAkhirInput].forEach(function (el) {
+            flatpickr(el, {
+                dateFormat: 'Y-m-d',
+                altInput: true,
+                altFormat: 'd F Y',
+                allowInput: true,
+                disableMobile: true
+            });
+        });
+    }
+
+    function setDateValue(input, value) {
+        if (input._flatpickr) {
+            input._flatpickr.setDate(value || null, true);
+        } else {
+            input.value = value || '';
+        }
+    }
+
+    function setMinDate(input, value) {
+        if (input._flatpickr) {
+            input._flatpickr.set('minDate', value || null);
+        }
+    }
+
     let isManualEdit = false;
 
     function updateMinTanggalAkhir() {
         if (tglKalibrasiInput.value) {
-            tglAkhirInput.min = tglKalibrasiInput.value;
+            setMinDate(tglAkhirInput, tglKalibrasiInput.value);
             if (tglAkhirInput.value && tglAkhirInput.value < tglKalibrasiInput.value) {
-                tglAkhirInput.value = '';
+                setDateValue(tglAkhirInput, '');
             }
         }
     }
@@ -335,7 +413,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let bulan = String(tanggal.getMonth() + 1).padStart(2, '0');
         let hari = String(tanggal.getDate()).padStart(2, '0');
 
-        tglAkhirInput.value = `${tahun}-${bulan}-${hari}`;
+        setDateValue(tglAkhirInput, `${tahun}-${bulan}-${hari}`);
     }
 
     function hitungInterval() {
@@ -367,35 +445,39 @@ document.addEventListener("DOMContentLoaded", function () {
         isManualEdit = false;
     }
 
-    if (tglKalibrasiInput) {
-        tglKalibrasiInput.addEventListener('change', function() {
-            updateMinTanggalAkhir();
-            if (tglAkhirInput.value) {
-                hitungInterval();
-            } else {
-                hitungTanggalAkhir();
-            }
-        });
-    }
-
-    if (intervalInput) {
-        intervalInput.addEventListener('input', function() {
-            isManualEdit = false;
-            hitungTanggalAkhir();
-        });
-    }
-
-    if (tglAkhirInput) {
-        tglAkhirInput.addEventListener('change', function() {
-            if (tglKalibrasiInput.value && tglAkhirInput.value < tglKalibrasiInput.value) {
-                alert("Tanggal berakhir tidak boleh lebih awal dari tanggal kalibrasi!");
-                tglAkhirInput.value = '';
-                return;
-            }
-            hitungInterval();
-        });
+    tglKalibrasiInput.addEventListener('change', function() {
         updateMinTanggalAkhir();
-    }
+        if (tglAkhirInput.value) {
+            hitungInterval();
+        } else {
+            hitungTanggalAkhir();
+        }
+    });
+
+    intervalInput.addEventListener('input', function() {
+        isManualEdit = false;
+        hitungTanggalAkhir();
+    });
+
+    tglAkhirInput.addEventListener('change', function() {
+        if (tglKalibrasiInput.value && tglAkhirInput.value < tglKalibrasiInput.value) {
+            if (window.Swal) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Tanggal tidak valid',
+                    text: 'Tanggal berakhir tidak boleh lebih awal dari tanggal kalibrasi!'
+                });
+            } else {
+                alert("Tanggal berakhir tidak boleh lebih awal dari tanggal kalibrasi!");
+            }
+            setDateValue(tglAkhirInput, '');
+            return;
+        }
+        hitungInterval();
+    });
+
+    updateMinTanggalAkhir();
 });
 </script>
+@endpush
 @endsection

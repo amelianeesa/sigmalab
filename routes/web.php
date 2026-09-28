@@ -40,6 +40,10 @@ Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'
 
 Route::get('/public/alat/{kode_alat}', [AlatController::class, 'inputKalibrasiByKode'])->where('kode_alat', '.*')->name('alat.public-scan');
 
+Route::get('/alat/{id}/export-pdf', [AlatController::class, 'exportPdf'])->name('alat.export-pdf');
+Route::get('/alat/{id}/export-excel', [AlatController::class, 'exportExcel'])->name('alat.export-excel');
+Route::get('/alat/{id}/export-word', [AlatController::class, 'exportWord'])->name('alat.export-word');
+
 Route::middleware(['auth', 'force.password.change'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -94,9 +98,7 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::get('pemeliharaan/pdf', [AlatController::class, 'exportPemeliharaanPdf'])->name('pemeliharaan.pdf');
         Route::get('pemeliharaan/excel', [AlatController::class, 'exportPemeliharaanExcel'])->name('pemeliharaan.excel');
 
-        Route::get('export-pdf', [AlatController::class, 'exportPdf'])->name('export-pdf');
-        Route::get('export-excel', [AlatController::class, 'exportExcel'])->name('export-excel');
-        Route::get('export-word', [AlatController::class, 'exportWord'])->name('export-word');
+
 
         Route::post('perbaikan', [PerbaikanAlatController::class, 'store'])->name('perbaikan.store');
         Route::put('perbaikan/{riwayat_perbaikan_id}', [PerbaikanAlatController::class, 'update'])->name('perbaikan.update');
@@ -132,10 +134,7 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
     Route::post('/parameter-uji/crm-katalog', [ParameterUjiController::class, 'storeCrmKatalog'])->name('parameter-uji.store-crm');
     Route::delete('/parameter-uji/crm-katalog/{id}', [ParameterUjiController::class, 'destroyCrmKatalog'])->name('parameter-uji.destroy-crm');
 
-    // PENTING: group "tambah_ubah" (berisi route statis seperti /library/create dan /library/arsip)
-    // HARUS didaftarkan SEBELUM group "lihat" (berisi route dinamis /library/{id}).
-    // Kalau tidak, Laravel akan mencocokkan "create" atau "arsip" sebagai {id} duluan
-    // karena route dicocokkan berurutan dari atas ke bawah -> hasilnya 404.
+
     Route::middleware('modul:library_manage,tambah_ubah')->group(function () {
         Route::get('/library/create', [LibraryController::class, 'create'])->name('library.create');
         Route::get('/library/arsip', [LibraryController::class, 'archive'])->name('library.archive');

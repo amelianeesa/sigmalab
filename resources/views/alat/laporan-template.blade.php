@@ -16,9 +16,9 @@
         
         .logo { width: 140px; display: block; margin-left: auto; }
         
-        h2 { color: #004a99; margin: 0 0 2px 0; font-size: 15pt; }
+        h2 { color: black; margin: 0 0 2px 0; font-size: 15pt; }
         p { margin: 0; color: #555; font-size: 10pt; }
-        .divider { border-bottom: 2px solid #004a99; margin-bottom: 15px; margin-top: 5px; }
+        .divider { border-bottom: 2px solid #333; margin-bottom: 15px; margin-top: 5px; }
 
         .info-table { width: 100%; margin-bottom: 20px; border-collapse: collapse; }
         .info-table td { padding: 4px 0; border: none; font-size: 10pt; }
@@ -30,7 +30,7 @@
             border: 1px solid #777; 
             padding: 8px 6px; 
             text-align: center; 
-            font-size: 9.5pt;
+            font-size: 8.5pt;
             vertical-align: middle;
         }
         table.data-table th { background-color: #f2f2f2; font-weight: bold; }
@@ -94,19 +94,26 @@
     <table class="data-table">
         <thead>
             <tr>
-                <th style="width: 10%;">Urutan</th>
+                <th style="width: 8%;">Urutan</th>
                 <th style="width: 8%;">Jenis Kalibrasi</th>
-                <th style="width: 17%;">Tanggal Kalibrasi</th>
-                <th style="width: 22%;">Lembaga & Sertifikat</th>
-                <th style="width: 20%;">Range & Koreksi</th>
-                <th style="width: 8%;">Signifikan</th>
-                <th style="width: 15%;">Catatan</th>
+                <th style="width: 16%;">Tanggal Kalibrasi</th>
+                <th style="width: 20%;">Lembaga & Sertifikat</th>
+                <th style="width: 18%;">Range & Koreksi</th>
+                <th style="width: 7%;">Signifikan</th>
+                <th style="width: 23%;">Evaluasi</th>
             </tr>
         </thead>
         <tbody>
             @forelse($alat->riwayatKalibrasi as $index => $r)
+            @php
+                $query = $alat->evaluasiKalibrasi()->whereDate('tanggal_evaluasi', '>=', $r->tgl_kalibrasi);
+                if (!empty($r->tgl_akhir)) {
+                    $query->whereDate('tanggal_evaluasi', '<=', $r->tgl_akhir);
+                }
+                $evaluasiItem = $query->latest('tanggal_evaluasi')->first();
+            @endphp
             <tr>
-                <td style="font-weight: bold; color: #004a99;">Kalibrasi ke-{{ $index + 1 }}</td>
+                <td style="font-weight: bold; color: #004a99;">Kalibrasi Ke-{{ $index + 1 }}</td>
                 <td>{{ ucfirst($r->jenis_kalibrasi) }}</td>
                 <td>{{ \Carbon\Carbon::parse($r->tgl_kalibrasi)->format('d-m-Y') }}<br>s/d<br>{{ \Carbon\Carbon::parse($r->tgl_akhir)->format('d-m-Y') }}</td>
                 <td class="text-left">
@@ -118,7 +125,14 @@
                     <strong>Koreksi:</strong> {{ $r->faktor_koreksi ?? '-' }}
                 </td>
                 <td>{{ strtoupper($r->signifikan) }}</td>
-                <td>{{ $r->catatan_evaluasi ?? '-' }}</td>
+                <td class="text-left" style="font-size: 8pt;">
+                    @if($evaluasiItem)
+                        <div><strong>Keputusan:</strong> {{ ucfirst(strtolower($evaluasiItem->keputusan)) }}</div>
+                        <div><strong>Komentar:</strong> {{ $evaluasiItem->catatan ?? $evaluasiItem->komentar ?? '-' }}</div>
+                    @else
+                        <span>-</span>
+                    @endif
+                </td>
             </tr>
             @empty
             <tr>

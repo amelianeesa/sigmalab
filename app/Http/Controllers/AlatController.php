@@ -37,7 +37,7 @@ class AlatController extends Controller
         $filterStatus = $request->input('filter_status');
         $filterKondisi = $request->input('filter_kondisi');
 
-        $query = Alat::with(['riwayatKalibrasi', 'kegiatanAlat']);
+        $query = Alat::with(['riwayatKalibrasi', 'evaluasiKalibrasi', 'kegiatanAlat']);
 
         if ($search) {
             $query->where(function($q) use ($search) {
@@ -511,7 +511,7 @@ class AlatController extends Controller
         $alat = Alat::with('riwayatKalibrasi')->findOrFail($id);
         
         $user = Auth::user();
-        $namaUser = 'Petugas Lab';
+        $namaUser = 'Publik';
 
         if ($user) {
             $namaUser = $user->name ?? $user->username ?? $user->nama ?? 'Analis Laboratorium';
@@ -527,6 +527,12 @@ class AlatController extends Controller
     {
         $alat = Alat::with('riwayatKalibrasi')->findOrFail($id);
         $fileName = 'Laporan_' . $alat->nama_alat . '_' . $alat->kode_alat . '.xlsx';
+
+        $user = Auth::user();
+        $namaUser = 'Publik';
+        if ($user) {
+            $namaUser = $user->name ?? $user->username ?? $user->nama ?? 'Analis Laboratorium';
+        }
 
         return Excel::download(new class($alat) implements \Maatwebsite\Excel\Concerns\FromArray, WithStyles, WithColumnWidths, WithEvents {
             protected $alat;

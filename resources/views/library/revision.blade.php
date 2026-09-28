@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
 <style>
     .dashboard-container {
         padding: 4px 20px !important;
@@ -30,6 +31,9 @@
         border-color: #14253e !important;
         color: #ffffff !important;
     }
+    .flatpickr-input {
+        background-color: #fff !important;
+    }
 </style>
 
 <div class="container-fluid dashboard-container">
@@ -56,7 +60,7 @@
 
                     <div class="col-md-6">
                         <label class="form-label">Tanggal Berlaku</label>
-                        <input type="date" name="tanggal_berlaku" value="{{ old('tanggal_berlaku', now()->toDateString()) }}" class="form-control form-control-sm">
+                        <input type="text" name="tanggal_berlaku" value="{{ old('tanggal_berlaku', now()->toDateString()) }}" class="form-control form-control-sm flatpickr-date" autocomplete="off">
                     </div>
 
                     <div class="col-md-6">
@@ -75,4 +79,21 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+<script>
+    $(function () {
+        flatpickr.localize(flatpickr.l10ns.id);
+        $('.flatpickr-date').flatpickr({
+            dateFormat: 'Y-m-d',
+            altInput: true,
+            altFormat: 'd F Y',
+            allowInput: true,
+            disableMobile: true
+        });
+    });
+</script>
+@endpush
 @endsection

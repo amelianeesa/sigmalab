@@ -48,25 +48,17 @@
         overflow-x: auto;
     }
     
-    .sticky-no {
-        position: sticky !important;
-        left: 0 !important;
-        width: 50px !important;
-        min-width: 50px !important;
-        z-index: 3;
-        background-color: #ffffff !important;
-    }
-    
+    /* Sticky Kolom Alat */
     .sticky-alat {
         position: sticky !important;
-        left: 50px !important; 
-        width: 170px !important;
-        min-width: 170px !important;
+        left: 0 !important; 
+        width: 130px !important;
+        min-width: 130px !important;
         z-index: 3;
         background-color: #ffffff !important;
     }
 
-    thead th.sticky-no, thead th.sticky-alat {
+    thead th.sticky-alat {
         background-color: #1b3152 !important;
         z-index: 4;
     }
@@ -105,10 +97,10 @@
         <table class="table table-bordered table-striped align-middle text-center bg-white shadow-sm rounded-3">
             <thead class="align-middle">
                 <tr>
-                    <th class="sticky-no" style="width: 50px;">No</th>
-                    <th class="sticky-alat text-start" style="width: 170px; min-width: 170px;">Alat</th>
+                    <th style="width: 50px;">No</th>
+                    <th class="sticky-alat text-start" style="width: 130px; min-width: 130px;">Alat</th>
                     <th style="width: 90px;">Tanggal</th>
-                    <th style="width: 200px;">Keputusan</th>
+                    <th style="width: 110px;">Keputusan</th>
                     <th style="width: 150px;">Dievaluasi Oleh</th>
                     <th style="width: 80px;">Laporan</th>
                     <th style="width: 70px;">Aksi</th>
@@ -117,11 +109,11 @@
             <tbody>
                 @forelse($evaluasi as $index => $item)
                 <tr>
-                    <td class="sticky-no fw-semibold bg-white">
+                    <td class="fw-semibold">
                         {{ $evaluasi->firstItem() + $index }}
                     </td>
 
-                    <td class="sticky-alat text-start fw-bold bg-white text-truncate" style="max-width: 170px;">
+                    <td class="sticky-alat text-start fw-bold bg-white text-truncate" style="max-width: 130px;">
                         <a href="{{ route('evaluasi-kalibrasi.show', $item->evaluasi_id) }}" class="text-decoration-none text-primary">
                             {{ $item->alat->nama_alat ?? '-' }}
                         </a> 
@@ -134,16 +126,19 @@
                         @php
                             $keputusanLower = strtolower($item->keputusan);
                             $badge = 'secondary'; 
+                            $textColor = '';
                             
-                            if (str_contains($keputusanLower, 'layak') && !str_contains($keputusanLower, 'tidak')) {
-                                $badge = 'success'; 
+                            if (str_contains($keputusanLower, 'faktor') || str_contains($keputusanLower, 'penambahan') || (str_contains($keputusanLower, 'layak') && str_contains($keputusanLower, 'koreksi'))) {
+                                $badge = 'warning text-dark'; // Kuning dengan teks gelap
+                            } elseif (str_contains($keputusanLower, 'layak') && !str_contains($keputusanLower, 'tidak')) {
+                                $badge = 'success'; // Hijau
                             } elseif (str_contains($keputusanLower, 'tidak')) {
-                                $badge = 'danger';  
-                            } elseif ($keputusanLower == 'ya') {
-                                $badge = 'info';    
+                                $badge = 'danger'; // Merah
                             }
                         @endphp
-                        <span class="badge bg-{{ $badge }}" style="font-size: 0.65rem; padding: 0.3rem 0.5rem;">{{ strtoupper($item->keputusan) }}</span>
+                        <span class="badge bg-{{ $badge }}" style="font-size: 0.55rem; padding: 0.3em 0.4em; white-space: normal; display: inline-block; max-width: 100px; word-break: break-word; line-height: 1.2;">
+                            {{ strtoupper($item->keputusan) }}
+                        </span>
                     </td>
 
                     <td>{{ $item->evaluator->name ?? $item->evaluator->username ?? '-' }}</td>

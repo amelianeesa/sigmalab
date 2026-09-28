@@ -299,8 +299,6 @@
             color: #94a3b8;
             font-size: 0.85rem;
         }
-
-        /* ===== Responsif Mobile: top navbar & konten ===== */
         @media (max-width: 575.98px) {
             .top-navbar {
                 padding-left: 14px !important;

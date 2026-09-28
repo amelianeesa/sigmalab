@@ -18,7 +18,7 @@
 
         .header { 
             width: 100%; 
-            border-bottom: 2px solid #333; 
+            border-bottom: none; 
             padding-bottom: 4px; 
             padding-top: 1px;
             margin-bottom: 8px; 
