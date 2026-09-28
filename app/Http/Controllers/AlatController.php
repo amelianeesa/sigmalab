@@ -576,7 +576,7 @@ class AlatController extends Controller
             }
 
             public function columnWidths(): array {
-                return ['A' => 15, 'B' => 12, 'C' => 27, 'D' => 30, 'E' => 25, 'F' => 12, 'G' => 25];
+                return ['A' => 15, 'B' => 12, 'C' => 27, 'D' => 30, 'E' => 25, 'F' => 12, 'G' => 32];
             }
 
             public function registerEvents(): array {
@@ -597,13 +597,43 @@ class AlatController extends Controller
                         
                         $sheet->getStyle('A5:B9')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
 
-                        $headers = ['Urutan', 'Jenis', 'Tanggal Kalibrasi s/d Akhir', 'Lembaga & Sertifikat', 'Range & Faktor Koreksi', 'Signifikan', 'Catatan / Evaluasi'];
+                        $headers = ['Urutan', 'Jenis', 'Tanggal Kalibrasi s/d Akhir', 'Lembaga & Sertifikat', 'Range & Faktor Koreksi', 'Signifikan', 'Evaluasi'];
                         foreach ($headers as $col => $value) {
                             $sheet->setCellValue(Coordinate::stringFromColumnIndex($col + 1) . '11', $value);
                         }
                         
                         $rowNum = 12;
+                        // foreach($this->alat->riwayatKalibrasi as $index => $row) {
+                        //     $data = [
+                        //         'Kalibrasi ke-' . ($index + 1),
+                        //         ucfirst($row->jenis_kalibrasi),
+                        //         \Carbon\Carbon::parse($row->tgl_kalibrasi)->format('d-m-Y') . ' s/d ' . \Carbon\Carbon::parse($row->tgl_akhir)->format('d-m-Y'),
+                        //         "Lembaga: " . $row->lembaga_kalibrasi . "\nSertifikat: " . $row->no_sertifikat,
+                        //         "Range: " . ($row->range_kapasitas ?? '-') . "\nKoreksi: " . ($row->faktor_koreksi ?? '-'),
+                        //         strtoupper($row->signifikan),
+                        //         $row->catatan_evaluasi ?? '-',
+                        //     ];
+                        //     foreach ($data as $col => $value) {
+                        //         $sheet->setCellValue(Coordinate::stringFromColumnIndex($col + 1) . $rowNum, $value);
+                        //     }
+                        //     $rowNum++;
+                        // }
+                        
+                        
                         foreach($this->alat->riwayatKalibrasi as $index => $row) {
+                            $query = $this->alat->evaluasiKalibrasi()->whereDate('tanggal_evaluasi', '>=', $row->tgl_kalibrasi);
+                            if (!empty($row->tgl_akhir)) {
+                                $query->whereDate('tanggal_evaluasi', '<=', $row->tgl_akhir);
+                            }
+                            $evaluasiItem = $query->latest('tanggal_evaluasi')->first();
+
+                            $teksEvaluasi = "-";
+                            if ($evaluasiItem) {
+                                $keputusan = ucfirst(strtolower($evaluasiItem->keputusan));
+                                $komentar = $evaluasiItem->catatan ?? $evaluasiItem->komentar ?? '-';
+                                $teksEvaluasi = "Keputusan: " . $keputusan . "\nKomentar: " . $komentar;
+                            }
+
                             $data = [
                                 'Kalibrasi ke-' . ($index + 1),
                                 ucfirst($row->jenis_kalibrasi),
@@ -611,10 +641,17 @@ class AlatController extends Controller
                                 "Lembaga: " . $row->lembaga_kalibrasi . "\nSertifikat: " . $row->no_sertifikat,
                                 "Range: " . ($row->range_kapasitas ?? '-') . "\nKoreksi: " . ($row->faktor_koreksi ?? '-'),
                                 strtoupper($row->signifikan),
-                                $row->catatan_evaluasi ?? '-',
+                                $teksEvaluasi,
                             ];
+
                             foreach ($data as $col => $value) {
-                                $sheet->setCellValue(Coordinate::stringFromColumnIndex($col + 1) . $rowNum, $value);
+                                $cellCoordinate = Coordinate::stringFromColumnIndex($col + 1) . $rowNum;
+                                $sheet->setCellValue($cellCoordinate, $value);
+                                
+                                if ($col == 6) {
+                                    $sheet->getStyle($cellCoordinate)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+                                    $sheet->getStyle($cellCoordinate)->getAlignment()->setWrapText(true);
+                                }
                             }
                             $rowNum++;
                         }
