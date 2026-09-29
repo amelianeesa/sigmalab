@@ -7,7 +7,7 @@
 
         <div style="padding:24px;">
             <p style="font-size:1rem;color:#dc3545;font-weight:bold;margin-top:0;">
-                🔑 Permintaan Reset Password
+                 Permintaan Reset Password
             </p>
 
             <p>Halo, <strong>{{ $namaUser }}</strong>!</p>

@@ -71,12 +71,14 @@
         padding: 2px 6px !important;
     }
     .library-action-btn { 
-        width: 28px; 
-        height: 28px; 
+        width: 30px; 
+        height: 30px; 
         display: inline-flex; 
         align-items: center; 
         justify-content: center; 
-        font-size: 0.7rem;
+        font-size: 0.75rem;
+        padding: 0 !important;
+        border-radius: 6px;
     }
     .btn-corporate-blue {
         background-color: #1b3152 !important;
@@ -89,24 +91,6 @@
         background-color: #14253e !important;
         border-color: #14253e !important;
         color: #ffffff !important;
-    }
-    .dropdown-menu-compact {
-        min-width: 110px !important;
-        padding: 3px 0 !important;
-        font-size: 0.7rem !important;
-    }
-    .dropdown-menu-compact .dropdown-item {
-        padding: 4px 10px !important;
-        font-size: 0.7rem !important;
-        transition: background-color 0.15s ease, color 0.15s ease;
-    }
-    .dropdown-menu-compact .dropdown-item:hover {
-        background-color: #f1f5f9 !important;
-        color: #1b3152 !important;
-    }
-    .dropdown-menu-compact .dropdown-item.text-danger:hover {
-        background-color: #fdf2f2 !important;
-        color: #dc3545 !important;
     }
     .pagination .page-link {
         font-size: 0.72rem;
@@ -266,7 +250,7 @@
                             <th style="width: 80px;">Revisi</th>
                             <th style="width: 100px;">Tanggal Berlaku</th>
                             <th style="width: 130px;">Penerbit Dokumen</th>
-                            <th style="width: 110px;">Aksi</th>
+                            <th style="width: 140px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -299,26 +283,18 @@
                                             <button type="button" class="btn btn-outline-success btn-sm py-0 px-1.5 btn-activate" data-id="{{ $document->id }}" style="font-size: 0.65rem;"><i class="fas fa-rotate-left me-1"></i> Tampilkan</button>
                                         </form>
                                     @else
-                                        <a href="{{ route('library.show', $document->id) }}" class="btn btn-corporate-blue btn-sm library-action-btn shadow-sm" title="Detail dokumen"><i class="fas fa-eye"></i></a>
-                                        <a href="{{ route('library.download', $document->id) }}" class="btn btn-outline-secondary btn-sm library-action-btn" title="Unduh" aria-label="Unduh"><i class="fas fa-download"></i></a>
-                                        @if(Auth::user()->hasModulAccess('library_manage', 'tambah_ubah'))
-                                            <div class="dropdown d-inline-block">
-                                                <button class="btn btn-outline-secondary btn-sm library-action-btn" type="button" data-bs-toggle="dropdown" data-bs-strategy="fixed" aria-expanded="false" aria-label="Aksi lainnya">
-                                                    <i class="fas fa-ellipsis-vertical"></i>
-                                                </button>
-                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm dropdown-menu-compact">
-                                                    <li><a class="dropdown-item" href="{{ route('library.edit', $document->id) }}"><i class="fas fa-pen text-warning me-2"></i>Edit</a></li>
-                                                    <li><hr class="dropdown-divider my-1"></li>
-                                                    <li>
-                                                        <form id="form-delete-{{ $document->id }}" action="{{ route('library.destroy', $document->id) }}" method="POST">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="button" class="dropdown-item text-danger btn-delete" data-id="{{ $document->id }}"><i class="fas fa-trash me-2"></i>Hapus</button>
-                                                        </form>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        @endif
+                                        <div class="d-inline-flex align-items-center gap-1">
+                                            <a href="{{ route('library.show', $document->id) }}" class="btn btn-corporate-blue btn-sm library-action-btn shadow-sm" title="Detail dokumen" aria-label="Detail dokumen"><i class="fas fa-eye"></i></a>
+                                            <a href="{{ route('library.download', $document->id) }}" class="btn btn-success btn-sm library-action-btn shadow-sm" title="Unduh" aria-label="Unduh"><i class="fas fa-download"></i></a>
+                                            @if(Auth::user()->hasModulAccess('library_manage', 'tambah_ubah'))
+                                                <a href="{{ route('library.edit', $document->id) }}" class="btn btn-warning btn-sm library-action-btn shadow-sm" title="Edit" aria-label="Edit"><i class="fas fa-edit"></i></a>
+                                                <form id="form-delete-{{ $document->id }}" action="{{ route('library.destroy', $document->id) }}" method="POST" class="d-inline m-0">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="button" class="btn btn-danger btn-sm library-action-btn shadow-sm btn-delete" data-id="{{ $document->id }}" title="Hapus" aria-label="Hapus"><i class="fas fa-trash"></i></button>
+                                                </form>
+                                            @endif
+                                        </div>
                                     @endif
                                 </td>
                             </tr>

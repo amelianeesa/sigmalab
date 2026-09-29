@@ -236,6 +236,9 @@
             border-bottom: 1px solid #f1f5f9;
             background: #f8fafc;
         }
+        #notifDropdown .notif-header .fw-bold {
+            color: #1e293b !important;
+        }
         #notifDropdown .notif-list {
             max-height: 340px;
             overflow-y: auto;
@@ -310,6 +313,16 @@
             }
             #content {
                 padding: 12px 12px !important;
+            }
+            #notifDropdown {
+                position: fixed !important;
+                inset: 64px 8px auto 8px !important;
+                transform: none !important;
+                width: auto !important;
+                margin: 0 !important;
+            }
+            #notifDropdown .notif-list {
+                max-height: 60vh;
             }
         }
     </style>
@@ -513,7 +526,7 @@
                                     </span>
                                     <div class="flex-grow-1" style="min-width: 0;">
                                         <p class="notif-msg {{ $isDitolak ? 'text-danger-emphasis' : '' }}">{{ $notif->pesan }}</p>
-                                        <span class="notif-time">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</span>
+                                        <span class="notif-time">{{ \Carbon\Carbon::parse($notif->created_at)->locale('id')->diffForHumans() }}</span>
                                     </div>
                                 </a>
                             @endforeach
