@@ -80,7 +80,7 @@ class ForgotPasswordController extends Controller
 
         $user->update([
             'password' => Hash::make($request->password),
-            'must_change_password' => false,
+            // 'must_change_password' => false,
         ]);
 
         DB::table('password_reset_tokens')->where('email', $request->email)->delete();

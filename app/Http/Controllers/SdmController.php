@@ -335,7 +335,7 @@ class SdmController extends Controller
             'password' => Hash::make($passwordSementara),
             'role_id' => $data['role_id'],
             'status_aktif' => true,
-            'must_change_password' => true,
+            // 'must_change_password' => true,
         ]);
 
         Mail::to($user->email)->send(new AkunLoginMail(

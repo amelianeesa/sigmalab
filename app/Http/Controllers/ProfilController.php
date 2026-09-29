@@ -76,7 +76,7 @@ class ProfilController extends Controller
 
         $user->update([
             'password' => Hash::make($request->password_baru),
-            'must_change_password' => false,
+            // 'must_change_password' => false,
         ]);
 
         return redirect()->route('profil.index')->with('success', 'Password berhasil diperbarui.');
