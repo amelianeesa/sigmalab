@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+    @php
+        $bisaKelola = Auth::user()->bisaKelolaSdm();
+        $jumlahKolom = $bisaKelola ? 7 : 6;
+    @endphp
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
     <style>
         .page-container {
@@ -138,9 +143,11 @@
                     <h6 class="fw-bold text-dark mb-0" style="font-size: 0.9rem;">Training Data Record</h6>
                     <p class="text-muted small mb-0" style="font-size: 0.68rem;">Seluruh riwayat sertifikasi &amp; pelatihan yang pernah diikuti personil ini.</p>
                 </div>
-                <button type="button" class="btn btn-dark btn-sm px-2.5 py-1 fw-semibold rounded-pill" style="font-size: 0.73rem;" data-bs-toggle="modal" data-bs-target="#modalTambahSertifikasi">
-                    <i class="bi bi-plus-lg me-1"></i> Tambah Sertifikasi / Pelatihan
-                </button>
+                @if($bisaKelola)
+                    <button type="button" class="btn btn-dark btn-sm px-2.5 py-1 fw-semibold rounded-pill" style="font-size: 0.73rem;" data-bs-toggle="modal" data-bs-target="#modalTambahSertifikasi">
+                        <i class="bi bi-plus-lg me-1"></i> Tambah Sertifikasi / Pelatihan
+                    </button>
+                @endif
             </div>
             <div class="card-body px-3 pb-3 pt-0">
                 <div class="table-responsive">
@@ -153,7 +160,9 @@
                                 <th class="col-tanggal">Masa Berlaku Berakhir</th>
                                 <th class="col-status">Status</th>
                                 <th class="col-dokumen">Dokumen</th>
-                                <th class="col-aksi">Aksi</th>
+                                @if($bisaKelola)
+                                    <th class="col-aksi">Aksi</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -173,40 +182,40 @@
                                         <a href="{{ route('sdm.kompetensi.file', [$personil->personil_id, $komp->kompetensi_personil_id]) }}" target="_blank" rel="noopener" class="btn btn-corporate-outline btn-sm px-2.5 py-1 text-nowrap">
                                             <i class="bi bi-file-earmark-text me-1"></i> Lihat Dokumen
                                         </a>
-                                    @else
+                                    @elseif($bisaKelola)
                                         <form action="{{ route('sdm.kompetensi.file.upload', [$personil->personil_id, $komp->kompetensi_personil_id]) }}" method="POST" enctype="multipart/form-data" class="d-flex align-items-center justify-content-center gap-1 m-0">
                                             @csrf
                                             <input type="file" name="file_sertifikat" class="form-control form-control-sm px-1 table-upload-input" accept="image/*,application/pdf" required>
                                             <button type="submit" class="btn btn-sm btn-dark text-nowrap table-upload-btn">Unggah</button>
                                         </form>
+                                    @else
+                                        <span class="text-muted">-</span>
                                     @endif
                                 </td>
-                                <td class="text-center text-nowrap">
-                                    <button type="button" class="btn btn-warning btn-sm table-action-btn me-1" title="Edit"
-                                        data-bs-toggle="modal" data-bs-target="#modalEditSertifikasi"
-                                        data-action="{{ route('sdm.kompetensi.update', [$personil->personil_id, $komp->kompetensi_personil_id]) }}"
-                                        data-jenis="{{ $komp->jenis_sertifikasi }}"
-                                        data-no="{{ $komp->no_sertifikasi }}"
-                                        data-terbit="{{ $komp->tanggal_terbit?->format('Y-m-d') }}"
-                                        data-berakhir="{{ $komp->tanggal_berakhir?->format('Y-m-d') }}"
-                                        data-has-file="{{ $komp->file_sertifikat ? '1' : '0' }}">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <form action="{{ route('sdm.kompetensi.destroy', [$personil->personil_id, $komp->kompetensi_personil_id]) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus riwayat sertifikasi &quot;{{ $komp->jenis_sertifikasi }}&quot;? Dokumen terkait juga akan terhapus.')">
-                                        @csrf
-                                        @method('DELETE')
+                                @if($bisaKelola)
+                                    <td class="text-center text-nowrap">
+                                        <button type="button" class="btn btn-warning btn-sm table-action-btn me-1" title="Edit"
+                                            data-bs-toggle="modal" data-bs-target="#modalEditSertifikasi"
+                                            data-action="{{ route('sdm.kompetensi.update', [$personil->personil_id, $komp->kompetensi_personil_id]) }}"
+                                            data-jenis="{{ $komp->jenis_sertifikasi }}"
+                                            data-no="{{ $komp->no_sertifikasi }}"
+                                            data-terbit="{{ $komp->tanggal_terbit?->format('Y-m-d') }}"
+                                            data-berakhir="{{ $komp->tanggal_berakhir?->format('Y-m-d') }}"
+                                            data-has-file="{{ $komp->file_sertifikat ? '1' : '0' }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
                                         <button type="button" class="btn btn-danger btn-sm table-action-btn" title="Hapus"
-                                        data-bs-toggle="modal" data-bs-target="#modalHapusSertifikasi"
-                                        data-action="{{ route('sdm.kompetensi.destroy', [$personil->personil_id, $komp->kompetensi_personil_id]) }}"
-                                        data-namasertifikat="{{ $komp->jenis_sertifikasi }}">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                    </form>
-                                </td>
+                                            data-bs-toggle="modal" data-bs-target="#modalHapusSertifikasi"
+                                            data-action="{{ route('sdm.kompetensi.destroy', [$personil->personil_id, $komp->kompetensi_personil_id]) }}"
+                                            data-namasertifikat="{{ $komp->jenis_sertifikasi }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                @endif
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="7" class="text-center py-4 text-muted">
+                                <td colspan="{{ $jumlahKolom }}" class="text-center py-4 text-muted">
                                     <i class="bi bi-shield-exclamation fs-4 d-block mb-1"></i>
                                     Belum ada riwayat sertifikasi / pelatihan yang tercatat untuk personil ini.
                                 </td>
@@ -219,168 +228,170 @@
         </div>
     </div>
 
-    <div class="modal fade" id="modalTambahSertifikasi" tabindex="-1" aria-labelledby="modalTambahSertifikasiLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden" style="font-size: 0.78rem;">
-                <form action="{{ route('sdm.kompetensi.store', $personil->personil_id) }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="modal-header text-white py-1.5 px-3" style="background-color: #1b3152 !important;">
-                        <h5 class="modal-title fw-bold text-white mb-0" id="modalTambahSertifikasiLabel" style="font-size: 0.9rem;">Tambah Sertifikasi / Pelatihan</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body p-3">
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Jenis Sertifikasi / Pelatihan <span class="text-danger">*</span></label>
-                            <input type="text" name="jenis_sertifikasi" class="form-control form-control-sm py-1" placeholder="mis. Pelatihan K3 Laboratorium" required style="font-size: 0.73rem;">
+    @if($bisaKelola)
+        <div class="modal fade" id="modalTambahSertifikasi" tabindex="-1" aria-labelledby="modalTambahSertifikasiLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden" style="font-size: 0.78rem;">
+                    <form action="{{ route('sdm.kompetensi.store', $personil->personil_id) }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div class="modal-header text-white py-1.5 px-3" style="background-color: #1b3152 !important;">
+                            <h5 class="modal-title fw-bold text-white mb-0" id="modalTambahSertifikasiLabel" style="font-size: 0.9rem;">Tambah Sertifikasi / Pelatihan</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Nomor Sertifikat</label>
-                            <input type="text" name="no_sertifikasi" class="form-control form-control-sm py-1" placeholder="mis. K3-LAB/2026/001" style="font-size: 0.73rem;">
-                        </div>
-                        <div class="row g-2">
-                            <div class="col-md-6 mb-2">
-                                <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Tanggal Terbit</label>
-                                <input type="text" name="tanggal_terbit" id="addTanggalTerbit" class="form-control form-control-sm py-1 flatpickr-date" value="{{ date('Y-m-d') }}" placeholder="dd/mm/yyyy" autocomplete="off" style="font-size: 0.73rem;">
+                        <div class="modal-body p-3">
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Jenis Sertifikasi / Pelatihan <span class="text-danger">*</span></label>
+                                <input type="text" name="jenis_sertifikasi" class="form-control form-control-sm py-1" placeholder="mis. Pelatihan K3 Laboratorium" required style="font-size: 0.73rem;">
                             </div>
-                            <div class="col-md-6 mb-2">
-                                <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Tanggal Berakhir</label>
-                                <input type="text" name="tanggal_berakhir" id="addTanggalBerakhir" class="form-control form-control-sm py-1 flatpickr-date" placeholder="dd/mm/yyyy" autocomplete="off" style="font-size: 0.73rem;">
-                                <div class="form-text text-muted mt-0.5" style="font-size: 0.62rem;">Kosongkan bila tidak terbatas.</div>
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Nomor Sertifikat</label>
+                                <input type="text" name="no_sertifikasi" class="form-control form-control-sm py-1" placeholder="mis. K3-LAB/2026/001" style="font-size: 0.73rem;">
                             </div>
-                        </div>
-                        <div class="mb-1">
-                            <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Dokumen Sertifikat</label>
-                            <input type="file" name="file_sertifikat" class="form-control form-control-sm py-1" accept="image/*,application/pdf" style="font-size: 0.73rem;">
-                            <div class="form-text text-muted mt-0.5" style="font-size: 0.62rem;">Format: JPG, PNG, PDF (Maks. 2MB).</div>
-                        </div>
-                    </div>
-                    <div class="modal-footer bg-light py-1.5 px-3">
-                        <button type="button" class="btn btn-secondary btn-sm py-1 px-3" data-bs-dismiss="modal" style="font-size: 0.73rem;">Batal</button>
-                        <button type="submit" class="btn btn-sm py-1 px-3 text-white" style="background-color: #1b3152; font-size: 0.73rem;"><i class="fas fa-save me-1"></i> Simpan</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="modalEditSertifikasi" tabindex="-1" aria-labelledby="modalEditSertifikasiLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden" style="font-size: 0.78rem;">
-                <form id="formEditSertifikasi" action="" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
-                    <div class="modal-header text-white py-1.5 px-3" style="background-color: #1b3152 !important;">
-                        <h5 class="modal-title fw-bold text-white mb-0" id="modalEditSertifikasiLabel" style="font-size: 0.9rem;"><i class="fas fa-edit me-1"></i>Edit Sertifikasi / Pelatihan</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body p-3">
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Jenis Sertifikasi / Pelatihan <span class="text-danger">*</span></label>
-                            <input type="text" name="jenis_sertifikasi" id="editJenisSertifikasi" class="form-control form-control-sm py-1" required style="font-size: 0.73rem;">
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Nomor Sertifikat</label>
-                            <input type="text" name="no_sertifikasi" id="editNoSertifikasi" class="form-control form-control-sm py-1" style="font-size: 0.73rem;">
-                        </div>
-                        <div class="row g-2">
-                            <div class="col-md-6 mb-2">
-                                <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Tanggal Terbit</label>
-                                <input type="text" name="tanggal_terbit" id="editTanggalTerbit" class="form-control form-control-sm py-1 flatpickr-date" placeholder="dd/mm/yyyy" autocomplete="off" style="font-size: 0.73rem;">
+                            <div class="row g-2">
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Tanggal Terbit</label>
+                                    <input type="text" name="tanggal_terbit" id="addTanggalTerbit" class="form-control form-control-sm py-1 flatpickr-date" value="{{ date('Y-m-d') }}" placeholder="dd/mm/yyyy" autocomplete="off" style="font-size: 0.73rem;">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Tanggal Berakhir</label>
+                                    <input type="text" name="tanggal_berakhir" id="addTanggalBerakhir" class="form-control form-control-sm py-1 flatpickr-date" placeholder="dd/mm/yyyy" autocomplete="off" style="font-size: 0.73rem;">
+                                    <div class="form-text text-muted mt-0.5" style="font-size: 0.62rem;">Kosongkan bila tidak terbatas.</div>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-2">
-                                <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Tanggal Berakhir</label>
-                                <input type="text" name="tanggal_berakhir" id="editTanggalBerakhir" class="form-control form-control-sm py-1 flatpickr-date" placeholder="dd/mm/yyyy" autocomplete="off" style="font-size: 0.73rem;">
-                                <div class="form-text text-muted mt-0.5" style="font-size: 0.62rem;">Kosongkan bila tidak terbatas.</div>
+                            <div class="mb-1">
+                                <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Dokumen Sertifikat</label>
+                                <input type="file" name="file_sertifikat" class="form-control form-control-sm py-1" accept="image/*,application/pdf" style="font-size: 0.73rem;">
+                                <div class="form-text text-muted mt-0.5" style="font-size: 0.62rem;">Format: JPG, PNG, PDF (Maks. 2MB).</div>
                             </div>
                         </div>
-                        <div class="mb-1">
-                            <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Dokumen Sertifikat</label>
-                            <input type="file" name="file_sertifikat" class="form-control form-control-sm py-1" accept="image/*,application/pdf" style="font-size: 0.73rem;">
-                            <div class="form-text text-muted mt-0.5" style="font-size: 0.62rem;" id="editFileInfo">Kosongkan bila tidak ingin mengganti dokumen yang sudah ada.</div>
+                        <div class="modal-footer bg-light py-1.5 px-3">
+                            <button type="button" class="btn btn-secondary btn-sm py-1 px-3" data-bs-dismiss="modal" style="font-size: 0.73rem;">Batal</button>
+                            <button type="submit" class="btn btn-sm py-1 px-3 text-white" style="background-color: #1b3152; font-size: 0.73rem;"><i class="fas fa-save me-1"></i> Simpan</button>
                         </div>
-                    </div>
-                    <div class="modal-footer bg-light py-1.5 px-3">
-                        <button type="button" class="btn btn-secondary btn-sm py-1 px-3" data-bs-dismiss="modal" style="font-size: 0.73rem;">Batal</button>
-                        <button type="submit" class="btn btn-sm py-1 px-3 text-white" style="background-color: #1b3152; font-size: 0.73rem;"><i class="fas fa-save me-1"></i> Perbarui</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- DITAMBAHKAN -->
-<div class="modal fade" id="modalHapusSertifikasi" tabindex="-1" aria-labelledby="modalHapusSertifikasiLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
-        <div class="modal-content border-0 shadow text-center p-3" style="font-size: 0.82rem; border-radius: 8px;">
-            <div class="pt-2 pb-1">
-                <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 56px; height: 56px; background-color: #fff8e6; color: #f0ad4e; font-size: 24px; border: 2px solid #ffeeba;">
-                    <i class="fas fa-exclamation"></i>
+                    </form>
                 </div>
             </div>
-            <div class="modal-body px-2 py-2">
-                <h5 class="fw-bold text-dark mb-1" style="font-size: 1rem;">Apakah Anda yakin?</h5>
-                <p class="text-muted mb-0" style="font-size: 0.78rem;">Data riwayat sertifikasi <strong id="namaSertifikasiHapus" class="text-dark"></strong> ini akan dihapus secara permanen beserta dokumen terkait!</p>
-            </div>
-            <div class="modal-footer border-0 justify-content-center gap-2 pt-1 pb-2">
-                <button type="button" class="btn btn-secondary btn-sm py-1.5 px-3.5 fw-semibold rounded-2" data-bs-dismiss="modal" style="font-size: 0.78rem;">Batal</button>
-                <form id="formHapusSertifikasi" action="" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger btn-sm py-1.5 px-3.5 fw-semibold rounded-2" style="font-size: 0.78rem;">Ya, Hapus!</button>
-                </form>
+        </div>
+
+        <div class="modal fade" id="modalEditSertifikasi" tabindex="-1" aria-labelledby="modalEditSertifikasiLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden" style="font-size: 0.78rem;">
+                    <form id="formEditSertifikasi" action="" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+                        <div class="modal-header text-white py-1.5 px-3" style="background-color: #1b3152 !important;">
+                            <h5 class="modal-title fw-bold text-white mb-0" id="modalEditSertifikasiLabel" style="font-size: 0.9rem;"><i class="fas fa-edit me-1"></i>Edit Sertifikasi / Pelatihan</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-3">
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Jenis Sertifikasi / Pelatihan <span class="text-danger">*</span></label>
+                                <input type="text" name="jenis_sertifikasi" id="editJenisSertifikasi" class="form-control form-control-sm py-1" required style="font-size: 0.73rem;">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Nomor Sertifikat</label>
+                                <input type="text" name="no_sertifikasi" id="editNoSertifikasi" class="form-control form-control-sm py-1" style="font-size: 0.73rem;">
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Tanggal Terbit</label>
+                                    <input type="text" name="tanggal_terbit" id="editTanggalTerbit" class="form-control form-control-sm py-1 flatpickr-date" placeholder="dd/mm/yyyy" autocomplete="off" style="font-size: 0.73rem;">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Tanggal Berakhir</label>
+                                    <input type="text" name="tanggal_berakhir" id="editTanggalBerakhir" class="form-control form-control-sm py-1 flatpickr-date" placeholder="dd/mm/yyyy" autocomplete="off" style="font-size: 0.73rem;">
+                                    <div class="form-text text-muted mt-0.5" style="font-size: 0.62rem;">Kosongkan bila tidak terbatas.</div>
+                                </div>
+                            </div>
+                            <div class="mb-1">
+                                <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Dokumen Sertifikat</label>
+                                <input type="file" name="file_sertifikat" class="form-control form-control-sm py-1" accept="image/*,application/pdf" style="font-size: 0.73rem;">
+                                <div class="form-text text-muted mt-0.5" style="font-size: 0.62rem;" id="editFileInfo">Kosongkan bila tidak ingin mengganti dokumen yang sudah ada.</div>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light py-1.5 px-3">
+                            <button type="button" class="btn btn-secondary btn-sm py-1 px-3" data-bs-dismiss="modal" style="font-size: 0.73rem;">Batal</button>
+                            <button type="submit" class="btn btn-sm py-1 px-3 text-white" style="background-color: #1b3152; font-size: 0.73rem;"><i class="fas fa-save me-1"></i> Perbarui</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+        <div class="modal fade" id="modalHapusSertifikasi" tabindex="-1" aria-labelledby="modalHapusSertifikasiLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
+                <div class="modal-content border-0 shadow text-center p-3" style="font-size: 0.82rem; border-radius: 8px;">
+                    <div class="pt-2 pb-1">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 56px; height: 56px; background-color: #fff8e6; color: #f0ad4e; font-size: 24px; border: 2px solid #ffeeba;">
+                            <i class="fas fa-exclamation"></i>
+                        </div>
+                    </div>
+                    <div class="modal-body px-2 py-2">
+                        <h5 class="fw-bold text-dark mb-1" style="font-size: 1rem;">Apakah Anda yakin?</h5>
+                        <p class="text-muted mb-0" style="font-size: 0.78rem;">Data riwayat sertifikasi <strong id="namaSertifikasiHapus" class="text-dark"></strong> ini akan dihapus secara permanen beserta dokumen terkait!</p>
+                    </div>
+                    <div class="modal-footer border-0 justify-content-center gap-2 pt-1 pb-2">
+                        <button type="button" class="btn btn-secondary btn-sm py-1.5 px-3.5 fw-semibold rounded-2" data-bs-dismiss="modal" style="font-size: 0.78rem;">Batal</button>
+                        <form id="formHapusSertifikasi" action="" method="POST" class="d-inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger btn-sm py-1.5 px-3.5 fw-semibold rounded-2" style="font-size: 0.78rem;">Ya, Hapus!</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const commonOpts = {
-                dateFormat: 'Y-m-d',
-                altInput: true,
-                altFormat: 'd/m/Y',
-                allowInput: true
-            };
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
 
-            flatpickr('#addTanggalTerbit', commonOpts);
-            flatpickr('#addTanggalBerakhir', commonOpts);
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const commonOpts = {
+                    dateFormat: 'Y-m-d',
+                    altInput: true,
+                    altFormat: 'd/m/Y',
+                    allowInput: true
+                };
 
-            const fpEditTerbit = flatpickr('#editTanggalTerbit', commonOpts);
-            const fpEditBerakhir = flatpickr('#editTanggalBerakhir', commonOpts);
+                flatpickr('#addTanggalTerbit', commonOpts);
+                flatpickr('#addTanggalBerakhir', commonOpts);
 
-            const modalEdit = document.getElementById('modalEditSertifikasi');
-            if (!modalEdit) return;
+                const fpEditTerbit = flatpickr('#editTanggalTerbit', commonOpts);
+                const fpEditBerakhir = flatpickr('#editTanggalBerakhir', commonOpts);
 
-            modalEdit.addEventListener('show.bs.modal', function (event) {
-                const button = event.relatedTarget;
+                const modalEdit = document.getElementById('modalEditSertifikasi');
+                if (modalEdit) {
+                    modalEdit.addEventListener('show.bs.modal', function (event) {
+                        const button = event.relatedTarget;
 
-                document.getElementById('formEditSertifikasi').action = button.getAttribute('data-action');
-                document.getElementById('editJenisSertifikasi').value = button.getAttribute('data-jenis') || '';
-                document.getElementById('editNoSertifikasi').value = button.getAttribute('data-no') || '';
+                        document.getElementById('formEditSertifikasi').action = button.getAttribute('data-action');
+                        document.getElementById('editJenisSertifikasi').value = button.getAttribute('data-jenis') || '';
+                        document.getElementById('editNoSertifikasi').value = button.getAttribute('data-no') || '';
 
-                const terbit = button.getAttribute('data-terbit') || '';
-                const berakhir = button.getAttribute('data-berakhir') || '';
-                fpEditTerbit.setDate(terbit || null, true);
-                fpEditBerakhir.setDate(berakhir || null, true);
+                        const terbit = button.getAttribute('data-terbit') || '';
+                        const berakhir = button.getAttribute('data-berakhir') || '';
+                        fpEditTerbit.setDate(terbit || null, true);
+                        fpEditBerakhir.setDate(berakhir || null, true);
 
-                const hasFile = button.getAttribute('data-has-file') === '1';
-                document.getElementById('editFileInfo').textContent = hasFile
-                    ? 'Sudah ada dokumen tersimpan. Kosongkan bila tidak ingin menggantinya.'
-                    : 'Belum ada dokumen. Unggah di sini bila tersedia.';
+                        const hasFile = button.getAttribute('data-has-file') === '1';
+                        document.getElementById('editFileInfo').textContent = hasFile
+                            ? 'Sudah ada dokumen tersimpan. Kosongkan bila tidak ingin menggantinya.'
+                            : 'Belum ada dokumen. Unggah di sini bila tersedia.';
+                    });
+                }
+
+                const modalHapus = document.getElementById('modalHapusSertifikasi');
+                if (modalHapus) {
+                    modalHapus.addEventListener('show.bs.modal', function (event) {
+                        const button = event.relatedTarget;
+                        const actionUrl = button.getAttribute('data-action');
+                        const namaSertifikasi = button.getAttribute('data-namasertifikat');
+
+                        document.getElementById('formHapusSertifikasi').action = actionUrl;
+                        document.getElementById('namaSertifikasiHapus').textContent = '"' + namaSertifikasi + '"';
+                    });
+                }
             });
-        });
-        const modalHapus = document.getElementById('modalHapusSertifikasi');
-        if (modalHapus) {
-            modalHapus.addEventListener('show.bs.modal', function (event) {
-                const button = event.relatedTarget;
-                const actionUrl = button.getAttribute('data-action');
-                const namaSertifikasi = button.getAttribute('data-namasertifikat');
-            
-                document.getElementById('formHapusSertifikasi').action = actionUrl;
-                document.getElementById('namaSertifikasiHapus').textContent = `"${namaSertifikasi}"`;
-            });
-        }
-    </script>
+        </script>
+    @endif
 @endsection

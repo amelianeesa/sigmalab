@@ -161,12 +161,16 @@
         }
     }
 
-    /* ===== Info Card (Stok Kritis, Expired, Pengadaan) ===== */
     .info-card-link {
         text-decoration: none;
         color: inherit;
         display: block;
         height: 100%;
+    }
+    .info-card-link:focus-visible {
+        outline: 2px solid #1b3152;
+        outline-offset: 2px;
+        border-radius: 0.375rem;
     }
     .info-card-clickable {
         transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -175,6 +179,12 @@
     .info-card-clickable:hover {
         transform: translateY(-3px);
         box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.12) !important;
+    }
+    .summary-card-link i {
+        transition: transform 0.15s ease;
+    }
+    .info-card-link:hover .summary-card-link i {
+        transform: translateX(3px);
     }
     .info-card-icon {
         width: 46px;
@@ -235,51 +245,59 @@
 
     <div class="row g-2 g-sm-3 mb-3">
         <div class="col-6 col-lg-3">
-            <div class="card border-0 shadow-sm border-start border-4 border-suco-biru-tua h-100">
-                <div class="card-body summary-card-body">
-                    <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">OUTLIER (OPEN)</p>
-                    <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $outliers }}</h3>
-                    <a href="{{ route('tindak-lanjut.index') }}" class="text-decoration-none text-suco-biru-tua fw-semibold d-inline-block summary-card-link">
-                        Lihat Detail <i class="fas fa-arrow-right ms-1"></i>
-                    </a>
+            <a href="{{ route('tindak-lanjut.index') }}" class="info-card-link" aria-label="Lihat detail outlier">
+                <div class="card border-0 shadow-sm border-start border-4 border-suco-biru-tua h-100 info-card-clickable">
+                    <div class="card-body summary-card-body">
+                        <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">OUTLIER (OPEN)</p>
+                        <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $outliers }}</h3>
+                        <span class="text-suco-biru-tua fw-semibold d-inline-block summary-card-link">
+                            Lihat Detail <i class="fas fa-arrow-right ms-1"></i>
+                        </span>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-6 col-lg-3">
-            <div class="card border-0 shadow-sm border-start border-4 border-suco-biru h-100">
-                <div class="card-body summary-card-body">
-                    <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">PENGUJIAN AKTIF</p>
-                    <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $kegiatanBerjalan }}</h3>
-                    <a href="{{ route('kegiatan.index') }}" class="text-decoration-none text-suco-biru fw-semibold d-inline-block summary-card-link">
-                        Buka Modul QC <i class="fas fa-arrow-right ms-1"></i>
-                    </a>
+            <a href="{{ route('kegiatan.index') }}" class="info-card-link" aria-label="Buka modul QC">
+                <div class="card border-0 shadow-sm border-start border-4 border-suco-biru h-100 info-card-clickable">
+                    <div class="card-body summary-card-body">
+                        <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">PENGUJIAN AKTIF</p>
+                        <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $kegiatanBerjalan }}</h3>
+                        <span class="text-suco-biru fw-semibold d-inline-block summary-card-link">
+                            Buka Modul QC <i class="fas fa-arrow-right ms-1"></i>
+                        </span>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-6 col-lg-3">
-            <div class="card border-0 shadow-sm border-start border-4 border-suco-biru-muda h-100">
-                <div class="card-body summary-card-body">
-                    <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">PERALATAN & KALIBRASI</p>
-                    <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $tenggatKalibrasi }}</h3>
-                    <a href="{{ route('alat.index') }}" class="text-decoration-none text-suco-biru-muda fw-semibold d-inline-block summary-card-link">
-                        Kelola Aset <i class="fas fa-arrow-right ms-1"></i>
-                    </a>
+            <a href="{{ route('alat.index') }}" class="info-card-link" aria-label="Kelola aset peralatan dan kalibrasi">
+                <div class="card border-0 shadow-sm border-start border-4 border-suco-biru-muda h-100 info-card-clickable">
+                    <div class="card-body summary-card-body">
+                        <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">PERALATAN & KALIBRASI</p>
+                        <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $tenggatKalibrasi }}</h3>
+                        <span class="text-suco-biru-muda fw-semibold d-inline-block summary-card-link">
+                            Kelola Aset <i class="fas fa-arrow-right ms-1"></i>
+                        </span>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-6 col-lg-3">
-            <div class="card border-0 shadow-sm border-start border-4 border-suco-hijau h-100">
-                <div class="card-body summary-card-body">
-                    <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">SERTIFIKASI PERSONIL H-6</p>
-                    <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $sertifikasiHampirHabis }}</h3>
-                    <a href="{{ route('sdm.index') }}" class="text-decoration-none text-suco-hijau fw-semibold d-inline-block summary-card-link">
-                        Cek Sertifikasi <i class="fas fa-arrow-right ms-1"></i>
-                    </a>
+            <a href="{{ route('sdm.index') }}" class="info-card-link" aria-label="Cek sertifikasi personil">
+                <div class="card border-0 shadow-sm border-start border-4 border-suco-hijau h-100 info-card-clickable">
+                    <div class="card-body summary-card-body">
+                        <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">SERTIFIKASI PERSONIL H-6</p>
+                        <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $sertifikasiHampirHabis }}</h3>
+                        <span class="text-suco-hijau fw-semibold d-inline-block summary-card-link">
+                            Cek Sertifikasi <i class="fas fa-arrow-right ms-1"></i>
+                        </span>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
     </div>
 

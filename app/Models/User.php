@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\PeranPengguna;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -15,7 +15,7 @@ class User extends Authenticatable
 
     protected $table = 'users';
     protected $primaryKey = 'users_id';
-    
+
     protected $fillable = [
         'personil_id',
         'username',
@@ -23,6 +23,7 @@ class User extends Authenticatable
         'password',
         'role_id',
         'status_aktif',
+        'must_change_password',
     ];
 
     protected $hidden = [
@@ -33,6 +34,7 @@ class User extends Authenticatable
     {
         return [
             'status_aktif' => 'boolean',
+            'must_change_password' => 'boolean',
         ];
     }
 
@@ -52,5 +54,15 @@ class User extends Authenticatable
             return true;
         }
         return app(\App\Services\PermissionService::class)->userHasAccess($this, $kodeModul, $minLevel);
+    }
+
+    public function bisaKelolaSdm(): bool
+    {
+        return in_array($this->role?->nama_role, PeranPengguna::pengelolaSdm(), true);
+    }
+
+    public function bisaBuatAkun(): bool
+    {
+        return in_array($this->role?->nama_role, PeranPengguna::pembuatAkun(), true);
     }
 }
