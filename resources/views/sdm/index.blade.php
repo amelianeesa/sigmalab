@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+    @php
+        $bisaKelola = Auth::user()->bisaKelolaSdm();
+        $bisaBuatAkun = Auth::user()->bisaBuatAkun();
+    @endphp
+
     <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
     <style>
         .table thead, 
@@ -98,14 +103,7 @@
                     onmouseout="this.style.transform='translateY(0)'">
                     <i class="fas fa-shield-alt me-1"></i> Manajemen Hak Akses
                 </a>
-            @endif
 
-            @if(
-                Auth::user()->role && in_array(Auth::user()->role->nama_role, [
-                    \App\Enums\PeranPengguna::HR_OFFICER->value,
-                    \App\Enums\PeranPengguna::ADMIN_APLIKASI->value
-                ])
-            )
                 <a href="{{ route('kelola-user.index') }}" class="btn btn-sm rounded-pill px-3 shadow-sm text-white fw-bold"
                     style="background-color: #1b3152; font-size: 0.75rem; padding: 0.2rem 0.75rem; transition: transform 0.2s;"
                     onmouseover="this.style.transform='translateY(-2px)'"
@@ -197,10 +195,7 @@
                 </div>
 
                 <div class="col-md-3 col-sm-6">
-                    @if(
-                        Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value &&
-                        Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value
-                    )
+                    @if($bisaKelola)
                         <button type="button" class="btn btn-corporate-dark btn-sm w-100 text-truncate py-1"
                             data-bs-toggle="modal" data-bs-target="#modalTambahPersonil" style="font-size: 0.75rem;">
                             <i class="fas fa-plus me-1"></i> Tambah Personil
@@ -285,7 +280,7 @@
                                     <td class="fw-bold text-start">
                                         {{ $row->nama }}
 
-                                        @if(!$row->file_cv)
+                                        @if(!$row->file_cv && $bisaKelola)
                                             <br>
                                             <span class="badge bg-danger mt-0.5" style="font-size: 0.6rem; padding: 0.1rem 0.3rem;">
                                                 <i class="fas fa-exclamation-circle"></i> Lengkapi CV
@@ -334,10 +329,14 @@
                                                 @endif
                                             </div>
                                         @else
-                                            <a href="{{ route('sdm.kompetensi.detail', $row->personil_id) }}"
-                                                class="text-decoration-none text-muted small" style="font-size: 0.7rem;">
-                                                Belum ada — tambah?
-                                            </a>
+                                            @if($bisaKelola)
+                                                <a href="{{ route('sdm.kompetensi.detail', $row->personil_id) }}"
+                                                    class="text-decoration-none text-muted small" style="font-size: 0.7rem;">
+                                                    Belum ada — tambah?
+                                                </a>
+                                            @else
+                                                <span class="text-muted small" style="font-size: 0.7rem;">Belum ada</span>
+                                            @endif
                                         @endif
                                     </td>
 
@@ -371,11 +370,6 @@
                                     </td>
 
                                     <td class="text-center text-nowrap">
-                                        @php
-                                            $bisaKelola = Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value &&
-                                                Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value;
-                                        @endphp
-
                                         <div class="d-inline-flex align-items-center gap-1">
                                             <a href="{{ route('sdm.kompetensi.detail', $row->personil_id) }}"
                                                 class="btn btn-corporate-dark btn-sm sdm-action-btn shadow-sm"
@@ -383,20 +377,20 @@
                                                 <i class="fas fa-history"></i>
                                             </a>
 
-                                            @if($bisaKelola)
-                                                @unless($row->user)
-                                                    <button type="button"
-                                                        class="btn btn-info text-white btn-sm sdm-action-btn shadow-sm"
-                                                        title="Buat Akun Login"
-                                                        aria-label="Buat Akun Login"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#modalBuatAkun"
-                                                        data-personil-id="{{ $row->personil_id }}"
-                                                        data-personil-nama="{{ $row->nama }}">
-                                                        <i class="fas fa-user-plus"></i>
-                                                    </button>
-                                                @endunless
+                                            @if($bisaBuatAkun && !$row->user)
+                                                <button type="button"
+                                                    class="btn btn-info text-white btn-sm sdm-action-btn shadow-sm"
+                                                    title="Buat Akun Login"
+                                                    aria-label="Buat Akun Login"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#modalBuatAkun"
+                                                    data-personil-id="{{ $row->personil_id }}"
+                                                    data-personil-nama="{{ $row->nama }}">
+                                                    <i class="fas fa-user-plus"></i>
+                                                </button>
+                                            @endif
 
+                                            @if($bisaKelola)
                                                 <a href="{{ route('sdm.edit', $row->personil_id) }}"
                                                     class="btn btn-warning btn-sm sdm-action-btn shadow-sm"
                                                     title="Edit Personil" aria-label="Edit Personil">
@@ -476,353 +470,250 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="modalKonfirmasiAksi" tabindex="-1" aria-labelledby="modalKonfirmasiAksiLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
-            <div class="modal-content border-0 shadow rounded-3 p-2.5" style="font-size: 0.8rem;">
-                <form id="formKonfirmasiAksi" action="" method="POST">
-                    @csrf
-                    <input type="hidden" name="_method" id="formKonfirmasiMethod" value="POST">
 
-                    <div class="modal-body text-center py-3">
-                        <div class="d-flex justify-content-center mb-2">
-                            <div class="rounded-circle d-flex align-items-center justify-content-center" 
-                                style="width: 55px; height: 55px; border: 2px solid #ffbc6c; color: #f39c12; font-size: 26px; font-weight: 300;">
-                                !
-                            </div>
-                        </div>
+    @if($bisaKelola)
+        <div class="modal fade" id="modalKonfirmasiAksi" tabindex="-1" aria-labelledby="modalKonfirmasiAksiLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
+                <div class="modal-content border-0 shadow rounded-3 p-2.5" style="font-size: 0.8rem;">
+                    <form id="formKonfirmasiAksi" action="" method="POST">
+                        @csrf
+                        <input type="hidden" name="_method" id="formKonfirmasiMethod" value="POST">
 
-                        <h4 class="fw-bold text-dark mb-1.5" style="font-size: 1.1rem;">Apakah Anda yakin?</h4>
-                        <p class="text-muted mb-3 px-2" id="modalKonfirmasiMessage" style="font-size: 0.8rem;"></p>
-
-                        <div class="d-flex justify-content-center gap-2">
-                            <button type="button" class="btn btn-secondary px-3 py-1.5 text-white fw-semibold" data-bs-dismiss="modal" style="background-color: #6c757d; border-radius: 4px; font-size: 0.75rem; min-width: 85px;">
-                                Batal
-                            </button>
-                            <button type="submit" id="modalKonfirmasiBtnSubmit" class="btn px-3 py-1.5 text-white fw-semibold" style="border-radius: 4px; font-size: 0.75rem; min-width: 95px;">
-                                Ya, Hapus!
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <div class="modal fade"
-        id="modalTambahPersonil"
-        tabindex="-1"
-        aria-labelledby="modalTambahPersonilLabel"
-        aria-hidden="true">
-
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden" style="font-size: 0.8rem; z-index: 1055;">
-                <form action="{{ route('sdm.store') }}"
-                    method="POST"
-                    enctype="multipart/form-data">
-
-                    @csrf
-
-                    <div class="modal-header text-white py-1.5 px-3" style="background-color: #1b3152 !important; position: relative; z-index: 2;">
-                        <h5 class="modal-title fw-bold text-white mb-0" id="modalTambahPersonilLabel" style="font-size: 0.95rem;">
-                            <i class="fas fa-user-plus me-1"></i>
-                            Tambah Personil
-                        </h5>
-
-                        <button type="button"
-                            class="btn-close btn-close-white"
-                            data-bs-dismiss="modal"
-                            aria-label="Close">
-                        </button>
-                    </div>
-
-                    <div class="modal-body p-3 bg-white">
-                        <div class="mb-2.5">
-                            <span class="fw-bold text-dark d-block mb-2 pb-1 border-bottom" style="font-size: 0.85rem;">
-                                Data Induk Personil
-                            </span>
-
-                            <div class="row g-2">
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
-                                        Nama Lengkap
-                                    </label>
-                                    <input type="text"
-                                        name="nama"
-                                        class="form-control form-control-sm py-1"
-                                        value="{{ old('nama') }}"
-                                        required style="font-size: 0.75rem;">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
-                                        Nomor Pegawai
-                                    </label>
-                                    <input type="text"
-                                        name="no_induk"
-                                        class="form-control form-control-sm py-1"
-                                        value="{{ old('no_induk') }}"
-                                        required style="font-size: 0.75rem;">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <label class="form-label small fw-semibold mb-0" style="font-size: 0.75rem;">
-                                            Kategori Personil <span class="text-muted fw-normal">(Opsional)</span>
-                                        </label>
-                                        <button type="button"
-                                            class="btn btn-link btn-sm p-0"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#modalTambahKategori"
-                                            style="font-size: 0.7rem;">
-                                            <i class="fas fa-plus-circle"></i> Kategori Baru
-                                        </button>
-                                    </div>
-                                    <select name="kategori_personil"
-                                        id="kategoriPersonilTambah"
-                                        class="form-select form-select-sm py-1 select2-kategori" style="font-size: 0.75rem;">
-                                        <option value="">— Tanpa Kategori —</option>
-                                        @foreach($kategoriOptions as $value => $label)
-                                            <option value="{{ $value }}"
-                                                {{ old('kategori_personil') == $value ? 'selected' : '' }}>
-                                                {{ $label }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <div class="form-text text-muted mt-0.5" style="font-size: 0.65rem;">
-                                        Diisi khusus untuk personil lab. Kosongkan untuk pegawai non-lab.
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
-                                        Penempatan
-                                    </label>
-                                    <input type="text"
-                                        name="jabatan"
-                                        class="form-control form-control-sm py-1"
-                                        value="{{ old('jabatan') }}"
-                                        required style="font-size: 0.75rem;">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
-                                        Unit Kerja
-                                    </label>
-                                    <input type="text"
-                                        name="unit_kerja"
-                                        class="form-control form-control-sm py-1"
-                                        value="{{ old('unit_kerja') }}"
-                                        required style="font-size: 0.75rem;">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <label class="form-label small fw-semibold mb-0" style="font-size: 0.75rem;">
-                                            Upload CV
-                                        </label>
-                                        <a href="{{ asset('templates/' . rawurlencode('Template_CV_PT SUCOFINDO.docx')) }}"
-                                            download
-                                            class="small text-decoration-none" style="font-size: 0.7rem;">
-                                            <i class="fas fa-download me-1"></i> Unduh Template CV
-                                        </a>
-                                    </div>
-                                    <input type="file"
-                                        name="file_cv"
-                                        class="form-control form-control-sm py-1"
-                                        accept="image/*,application/pdf" style="font-size: 0.75rem;">
-                                    <div class="form-text text-muted mt-0.5" style="font-size: 0.65rem;">
-                                        Format: JPG, PNG, PDF (Maks. 2MB).
-                                    </div>
+                        <div class="modal-body text-center py-3">
+                            <div class="d-flex justify-content-center mb-2">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                                    style="width: 55px; height: 55px; border: 2px solid #ffbc6c; color: #f39c12; font-size: 26px; font-weight: 300;">
+                                    !
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="mt-3">
-                            <span class="fw-bold text-dark d-block mb-2 pb-1 border-bottom" style="font-size: 0.85rem;">
-                                Sertifikasi & Pelatihan Terakhir
-                            </span>
+                            <h4 class="fw-bold text-dark mb-1.5" style="font-size: 1.1rem;">Apakah Anda yakin?</h4>
+                            <p class="text-muted mb-3 px-2" id="modalKonfirmasiMessage" style="font-size: 0.8rem;"></p>
 
-                            <div class="row g-2">
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
-                                        Nama Sertifikasi / Pelatihan
-                                    </label>
-                                    <input type="text"
-                                        name="nama_sertifikasi"
-                                        class="form-control form-control-sm py-1"
-                                        value="{{ old('nama_sertifikasi') }}" style="font-size: 0.75rem;">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
-                                        Nomor Sertifikat
-                                    </label>
-                                    <input type="text"
-                                        name="no_sertifikasi"
-                                        class="form-control form-control-sm py-1"
-                                        value="{{ old('no_sertifikasi') }}" style="font-size: 0.75rem;">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
-                                        Tanggal Terbit
-                                    </label>
-                                    <input type="text"
-                                        name="tanggal_terbit"
-                                        class="form-control form-control-sm py-1 flatpickr-date"
-                                        value="{{ old('tanggal_terbit', date('Y-m-d')) }}"
-                                        autocomplete="off" style="font-size: 0.75rem;">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
-                                        Tanggal Berakhir
-                                    </label>
-                                    <input type="text"
-                                        name="tanggal_berakhir"
-                                        class="form-control form-control-sm py-1 flatpickr-date"
-                                        value="{{ old('tanggal_berakhir') }}"
-                                        autocomplete="off" style="font-size: 0.75rem;">
-                                </div>
+                            <div class="d-flex justify-content-center gap-2">
+                                <button type="button" class="btn btn-secondary px-3 py-1.5 text-white fw-semibold" data-bs-dismiss="modal" style="background-color: #6c757d; border-radius: 4px; font-size: 0.75rem; min-width: 85px;">
+                                    Batal
+                                </button>
+                                <button type="submit" id="modalKonfirmasiBtnSubmit" class="btn px-3 py-1.5 text-white fw-semibold" style="border-radius: 4px; font-size: 0.75rem; min-width: 95px;">
+                                    Ya, Hapus!
+                                </button>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="modal-footer bg-light py-1.5 px-3">
-                        <button type="button"
-                            class="btn btn-secondary btn-sm py-1 px-3"
-                            data-bs-dismiss="modal" style="font-size: 0.75rem;">
-                            Batal
-                        </button>
-
-                        <button type="submit"
-                            class="btn btn-corporate-dark btn-sm py-1 px-3" style="font-size: 0.75rem;">
-                            <i class="fas fa-save me-1"></i>
-                            Simpan Data
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade"
-        id="modalTambahKategori"
-        tabindex="-1"
-        aria-labelledby="modalTambahKategoriLabel"
-        aria-hidden="true">
-
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden" style="font-size: 0.8rem;">
-                <div class="modal-header text-white py-1.5 px-3" style="background-color: #1b3152 !important;">
-                    <h5 class="modal-title fw-bold text-white mb-0" id="modalTambahKategoriLabel" style="font-size: 0.95rem;">
-                        <i class="fas fa-tags me-1"></i>
-                        Kelola Kategori Personil
-                    </h5>
-
-                    <button type="button"
-                        class="btn-close btn-close-white"
-                        data-bs-dismiss="modal"
-                        aria-label="Close">
-                    </button>
+                    </form>
                 </div>
+            </div>
+        </div>
 
-                <div class="modal-body p-3">
-                    <form action="{{ route('sdm.kategori.store') }}"
+        <div class="modal fade"
+            id="modalTambahPersonil"
+            tabindex="-1"
+            aria-labelledby="modalTambahPersonilLabel"
+            aria-hidden="true">
+
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden" style="font-size: 0.8rem; z-index: 1055;">
+                    <form action="{{ route('sdm.store') }}"
                         method="POST"
-                        class="mb-2">
+                        enctype="multipart/form-data">
 
                         @csrf
 
-                        <input type="hidden"
-                            name="redirect_to"
-                            value="{{ url()->current() }}">
+                        <div class="modal-header text-white py-1.5 px-3" style="background-color: #1b3152 !important; position: relative; z-index: 2;">
+                            <h5 class="modal-title fw-bold text-white mb-0" id="modalTambahPersonilLabel" style="font-size: 0.95rem;">
+                                <i class="fas fa-user-plus me-1"></i>
+                                Tambah Personil
+                            </h5>
 
-                        <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
-                            Nama Kategori Baru
-                        </label>
+                            <button type="button"
+                                class="btn-close btn-close-white"
+                                data-bs-dismiss="modal"
+                                aria-label="Close">
+                            </button>
+                        </div>
 
-                        <div class="input-group input-group-sm">
-                            <input type="text"
-                                name="nama_kategori"
-                                class="form-control py-1"
-                                placeholder="mis. Supervisor Lab, QC Inspector"
-                                required style="font-size: 0.75rem;">
+                        <div class="modal-body p-3 bg-white">
+                            <div class="mb-2.5">
+                                <span class="fw-bold text-dark d-block mb-2 pb-1 border-bottom" style="font-size: 0.85rem;">
+                                    Data Induk Personil
+                                </span>
+
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
+                                            Nama Lengkap
+                                        </label>
+                                        <input type="text"
+                                            name="nama"
+                                            class="form-control form-control-sm py-1"
+                                            value="{{ old('nama') }}"
+                                            required style="font-size: 0.75rem;">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
+                                            Nomor Pegawai
+                                        </label>
+                                        <input type="text"
+                                            name="no_induk"
+                                            class="form-control form-control-sm py-1"
+                                            value="{{ old('no_induk') }}"
+                                            required style="font-size: 0.75rem;">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <label class="form-label small fw-semibold mb-0" style="font-size: 0.75rem;">
+                                                Kategori Personil <span class="text-muted fw-normal">(Opsional)</span>
+                                            </label>
+                                            <button type="button"
+                                                class="btn btn-link btn-sm p-0"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalTambahKategori"
+                                                style="font-size: 0.7rem;">
+                                                <i class="fas fa-plus-circle"></i> Kategori Baru
+                                            </button>
+                                        </div>
+                                        <select name="kategori_personil"
+                                            id="kategoriPersonilTambah"
+                                            class="form-select form-select-sm py-1 select2-kategori" style="font-size: 0.75rem;">
+                                            <option value="">— Tanpa Kategori —</option>
+                                            @foreach($kategoriOptions as $value => $label)
+                                                <option value="{{ $value }}"
+                                                    {{ old('kategori_personil') == $value ? 'selected' : '' }}>
+                                                    {{ $label }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <div class="form-text text-muted mt-0.5" style="font-size: 0.65rem;">
+                                            Diisi khusus untuk personil lab. Kosongkan untuk pegawai non-lab.
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
+                                            Penempatan
+                                        </label>
+                                        <input type="text"
+                                            name="jabatan"
+                                            class="form-control form-control-sm py-1"
+                                            value="{{ old('jabatan') }}"
+                                            required style="font-size: 0.75rem;">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
+                                            Unit Kerja
+                                        </label>
+                                        <input type="text"
+                                            name="unit_kerja"
+                                            class="form-control form-control-sm py-1"
+                                            value="{{ old('unit_kerja') }}"
+                                            required style="font-size: 0.75rem;">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <label class="form-label small fw-semibold mb-0" style="font-size: 0.75rem;">
+                                                Upload CV
+                                            </label>
+                                            <a href="{{ asset('templates/' . rawurlencode('Template_CV_PT SUCOFINDO.docx')) }}"
+                                                download
+                                                class="small text-decoration-none" style="font-size: 0.7rem;">
+                                                <i class="fas fa-download me-1"></i> Unduh Template CV
+                                            </a>
+                                        </div>
+                                        <input type="file"
+                                            name="file_cv"
+                                            class="form-control form-control-sm py-1"
+                                            accept="image/*,application/pdf" style="font-size: 0.75rem;">
+                                        <div class="form-text text-muted mt-0.5" style="font-size: 0.65rem;">
+                                            Format: JPG, PNG, PDF (Maks. 2MB).
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                <span class="fw-bold text-dark d-block mb-2 pb-1 border-bottom" style="font-size: 0.85rem;">
+                                    Sertifikasi & Pelatihan Terakhir
+                                </span>
+
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
+                                            Nama Sertifikasi / Pelatihan
+                                        </label>
+                                        <input type="text"
+                                            name="nama_sertifikasi"
+                                            class="form-control form-control-sm py-1"
+                                            value="{{ old('nama_sertifikasi') }}" style="font-size: 0.75rem;">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
+                                            Nomor Sertifikat
+                                        </label>
+                                        <input type="text"
+                                            name="no_sertifikasi"
+                                            class="form-control form-control-sm py-1"
+                                            value="{{ old('no_sertifikasi') }}" style="font-size: 0.75rem;">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
+                                            Tanggal Terbit
+                                        </label>
+                                        <input type="text"
+                                            name="tanggal_terbit"
+                                            class="form-control form-control-sm py-1 flatpickr-date"
+                                            value="{{ old('tanggal_terbit', date('Y-m-d')) }}"
+                                            autocomplete="off" style="font-size: 0.75rem;">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
+                                            Tanggal Berakhir
+                                        </label>
+                                        <input type="text"
+                                            name="tanggal_berakhir"
+                                            class="form-control form-control-sm py-1 flatpickr-date"
+                                            value="{{ old('tanggal_berakhir') }}"
+                                            autocomplete="off" style="font-size: 0.75rem;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer bg-light py-1.5 px-3">
+                            <button type="button"
+                                class="btn btn-secondary btn-sm py-1 px-3"
+                                data-bs-dismiss="modal" style="font-size: 0.75rem;">
+                                Batal
+                            </button>
 
                             <button type="submit"
-                                class="btn btn-corporate-dark px-3" style="font-size: 0.75rem;">
-                                <i class="fas fa-plus me-1"></i>
-                                Tambah
+                                class="btn btn-corporate-dark btn-sm py-1 px-3" style="font-size: 0.75rem;">
+                                <i class="fas fa-save me-1"></i>
+                                Simpan Data
                             </button>
                         </div>
                     </form>
-
-                    <hr class="my-2">
-
-                    <label class="form-label small fw-semibold text-muted mb-1" style="font-size: 0.75rem;">
-                        Kategori Saat Ini
-                    </label>
-
-                    <ul class="list-group list-group-flush" style="font-size: 0.75rem;">
-                        @forelse($kategoriOptions as $kode => $label)
-                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1">
-                                <span>{{ $label }}</span>
-
-                                <form action="{{ route('sdm.kategori.destroy', $kode) }}"
-                                    method="POST"
-                                    onsubmit="return confirm('Hapus kategori {{ $label }}?')">
-
-                                    @csrf
-                                    @method('DELETE')
-
-                                    <input type="hidden"
-                                        name="redirect_to"
-                                        value="{{ url()->current() }}">
-
-                                    <button type="submit"
-                                        class="btn btn-sm btn-outline-danger py-0 px-1"
-                                        title="Hapus kategori" style="font-size: 0.7rem;">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                            </li>
-                        @empty
-                            <li class="list-group-item px-0 text-muted small py-1" style="font-size: 0.75rem;">
-                                Belum ada kategori.
-                            </li>
-                        @endforelse
-                    </ul>
-                </div>
-
-                <div class="modal-footer bg-light py-1.5 px-3">
-                    <button type="button"
-                        class="btn btn-secondary btn-sm py-1 px-3"
-                        data-bs-dismiss="modal" style="font-size: 0.75rem;">
-                        Tutup
-                    </button>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="modal fade"
-        id="modalBuatAkun"
-        tabindex="-1"
-        aria-labelledby="modalBuatAkunLabel"
-        aria-hidden="true">
+        <div class="modal fade"
+            id="modalTambahKategori"
+            tabindex="-1"
+            aria-labelledby="modalTambahKategoriLabel"
+            aria-hidden="true">
 
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden" style="font-size: 0.8rem;">
-                <form id="formBuatAkun"
-                    action=""
-                    method="POST">
-
-                    @csrf
-
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden" style="font-size: 0.8rem;">
                     <div class="modal-header text-white py-1.5 px-3" style="background-color: #1b3152 !important;">
-                        <h5 class="modal-title fw-bold text-white mb-0" id="modalBuatAkunLabel" style="font-size: 0.95rem;">
-                            <i class="fas fa-user-plus me-1"></i>
-                            Buat Akun Login —
-                            <span id="modalBuatAkunNama"></span>
+                        <h5 class="modal-title fw-bold text-white mb-0" id="modalTambahKategoriLabel" style="font-size: 0.95rem;">
+                            <i class="fas fa-tags me-1"></i>
+                            Kelola Kategori Personil
                         </h5>
 
                         <button type="button"
@@ -833,63 +724,172 @@
                     </div>
 
                     <div class="modal-body p-3">
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
-                                Username
-                            </label>
-                            <input type="text"
-                                name="username"
-                                class="form-control form-control-sm py-1"
-                                required style="font-size: 0.75rem;">
-                        </div>
+                        <form action="{{ route('sdm.kategori.store') }}"
+                            method="POST"
+                            class="mb-2">
 
-                        <div class="mb-2">
+                            @csrf
+
+                            <input type="hidden"
+                                name="redirect_to"
+                                value="{{ url()->current() }}">
+
                             <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
-                                Email
+                                Nama Kategori Baru
                             </label>
-                            <input type="email"
-                                name="email"
-                                class="form-control form-control-sm py-1"
-                                required style="font-size: 0.75rem;">
-                            <div class="form-text text-muted mt-0.5" style="font-size: 0.68rem;">
-                                Password sementara akan otomatis dibuat sistem dan dikirim ke email ini.
+
+                            <div class="input-group input-group-sm">
+                                <input type="text"
+                                    name="nama_kategori"
+                                    class="form-control py-1"
+                                    placeholder="mis. Supervisor Lab, QC Inspector"
+                                    required style="font-size: 0.75rem;">
+
+                                <button type="submit"
+                                    class="btn btn-corporate-dark px-3" style="font-size: 0.75rem;">
+                                    <i class="fas fa-plus me-1"></i>
+                                    Tambah
+                                </button>
                             </div>
-                        </div>
+                        </form>
 
-                        <div class="mb-1">
-                            <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
-                                Hak Akses
-                            </label>
-                            <select name="role_id"
-                                class="form-select form-select-sm py-1 select2-in-modal"
-                                required style="font-size: 0.75rem;">
-                                <option value="">— Pilih Role —</option>
-                                @foreach($roles as $role)
-                                    <option value="{{ $role->roles_id }}">
-                                        {{ $role->nama_role }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                        <hr class="my-2">
+
+                        <label class="form-label small fw-semibold text-muted mb-1" style="font-size: 0.75rem;">
+                            Kategori Saat Ini
+                        </label>
+
+                        <ul class="list-group list-group-flush" style="font-size: 0.75rem;">
+                            @forelse($kategoriOptions as $kode => $label)
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1">
+                                    <span>{{ $label }}</span>
+
+                                    <form action="{{ route('sdm.kategori.destroy', $kode) }}"
+                                        method="POST"
+                                        onsubmit="return confirm('Hapus kategori {{ $label }}?')">
+
+                                        @csrf
+                                        @method('DELETE')
+
+                                        <input type="hidden"
+                                            name="redirect_to"
+                                            value="{{ url()->current() }}">
+
+                                        <button type="submit"
+                                            class="btn btn-sm btn-outline-danger py-0 px-1"
+                                            title="Hapus kategori" style="font-size: 0.7rem;">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </li>
+                            @empty
+                                <li class="list-group-item px-0 text-muted small py-1" style="font-size: 0.75rem;">
+                                    Belum ada kategori.
+                                </li>
+                            @endforelse
+                        </ul>
                     </div>
 
                     <div class="modal-footer bg-light py-1.5 px-3">
                         <button type="button"
                             class="btn btn-secondary btn-sm py-1 px-3"
                             data-bs-dismiss="modal" style="font-size: 0.75rem;">
-                            Batal
-                        </button>
-
-                        <button type="submit"
-                            class="btn btn-corporate-dark btn-sm py-1 px-3" style="font-size: 0.75rem;">
-                            <i class="fas fa-save me-1"></i>
-                            Buat Akun
+                            Tutup
                         </button>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
-    </div>
+    @endif
+
+    @if($bisaBuatAkun)
+        <div class="modal fade"
+            id="modalBuatAkun"
+            tabindex="-1"
+            aria-labelledby="modalBuatAkunLabel"
+            aria-hidden="true">
+
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden" style="font-size: 0.8rem;">
+                    <form id="formBuatAkun"
+                        action=""
+                        method="POST">
+
+                        @csrf
+
+                        <div class="modal-header text-white py-1.5 px-3" style="background-color: #1b3152 !important;">
+                            <h5 class="modal-title fw-bold text-white mb-0" id="modalBuatAkunLabel" style="font-size: 0.95rem;">
+                                <i class="fas fa-user-plus me-1"></i>
+                                Buat Akun Login —
+                                <span id="modalBuatAkunNama"></span>
+                            </h5>
+
+                            <button type="button"
+                                class="btn-close btn-close-white"
+                                data-bs-dismiss="modal"
+                                aria-label="Close">
+                            </button>
+                        </div>
+
+                        <div class="modal-body p-3">
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
+                                    Username
+                                </label>
+                                <input type="text"
+                                    name="username"
+                                    class="form-control form-control-sm py-1"
+                                    required style="font-size: 0.75rem;">
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
+                                    Email
+                                </label>
+                                <input type="email"
+                                    name="email"
+                                    class="form-control form-control-sm py-1"
+                                    required style="font-size: 0.75rem;">
+                                <div class="form-text text-muted mt-0.5" style="font-size: 0.68rem;">
+                                    Password sementara akan otomatis dibuat sistem dan dikirim ke email ini.
+                                </div>
+                            </div>
+
+                            <div class="mb-1">
+                                <label class="form-label small fw-semibold mb-1" style="font-size: 0.75rem;">
+                                    Hak Akses
+                                </label>
+                                <select name="role_id"
+                                    class="form-select form-select-sm py-1 select2-in-modal"
+                                    required style="font-size: 0.75rem;">
+                                    <option value="">— Pilih Role —</option>
+                                    @foreach($roles as $role)
+                                        <option value="{{ $role->roles_id }}">
+                                            {{ $role->nama_role }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer bg-light py-1.5 px-3">
+                            <button type="button"
+                                class="btn btn-secondary btn-sm py-1 px-3"
+                                data-bs-dismiss="modal" style="font-size: 0.75rem;">
+                                Batal
+                            </button>
+
+                            <button type="submit"
+                                class="btn btn-corporate-dark btn-sm py-1 px-3" style="font-size: 0.75rem;">
+                                <i class="fas fa-save me-1"></i>
+                                Buat Akun
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
