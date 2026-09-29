@@ -1,18 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-{{-- <<<<<<< HEAD
-<style>
-    tr:target > td { animation: sorotBaris 3s ease; }
-    @keyframes sorotBaris {
-        0%, 60% { background-color: #fff3cd; }
-        100% { background-color: transparent; }
-    }
-</style>
-
-<div class="container-fluid pt-0 pb-4 px-4">
-    <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
-======= --}}
 
 <style>
     .pengadaan-header-row {
@@ -171,7 +159,12 @@
                     <i class="fas fa-file-pdf me-1"></i> Export PDF
                 </button>
             @endif
-            @if(!in_array(Auth::user()->role->nama_role ?? '', [\App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value, \App\Enums\PeranPengguna::GA_OFFICER->value, 'GA', 'GA_OFFICER']))
+
+            @php
+                $allowedRoles = ['GA', 'Analis Lab', 'Koordinator Laboratorium', 'Admin Aplikasi', \App\Enums\PeranPengguna::GA_OFFICER->value];
+                $currentRole = Auth::user()->role->nama_role ?? '';
+            @endphp
+            @if(in_array($currentRole, $allowedRoles))
                 <button class="btn btn-sm text-white py-1 px-2 fw-bold" data-bs-toggle="modal" data-bs-target="#tambahPengadaanModal" style="font-size: 0.72rem; background-color: #1b3152;">
                     <i class="fas fa-plus me-1"></i> Ajukan Pengadaan
                 </button>

@@ -308,7 +308,7 @@
             <button type="button" class="btn btn-success-standard shadow-sm" data-bs-toggle="modal" data-bs-target="#cetakPeriodeModal">
                 <i class="fas fa-print me-1"></i> Cetak Laporan Periode
             </button>
-            @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
+            @if($canManageBarang)
 
             <a href="{{ route('barang.create') }}" class="btn btn-brand-standard shadow-sm">
                 <i class="fas fa-plus me-1"></i> Tambah Barang/Bahan
