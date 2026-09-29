@@ -63,20 +63,10 @@
         font-size: 0.72rem;
         padding: 0.2rem 0.55rem;
     }
-
-    .select2-container--bootstrap-5 .select2-selection {
-        font-size: 0.82rem !important;
-        min-height: 31px !important;
-    }
-    .select2-container--bootstrap-5 .select2-selection__rendered {
-        padding-top: 0 !important;
-    }
-    .select2-container--bootstrap-5 .select2-results__option {
-        font-size: 0.85rem !important;
-    }
 </style>
 
 <div class="container-fluid dashboard-container" style="font-size: 0.82rem;">
+
     @php
         $alatWarningCount = 0;
         foreach($alat as $item) {
@@ -94,6 +84,8 @@
         $userRoleName = Auth::user()->role->nama_role ?? '';
         $canModify = in_array($userRoleName, $allowedRoles);
     @endphp
+
+
     @if($alatWarningCount > 0)
         <div class="alert alert-warning alert-dismissible fade show shadow-sm py-1 px-2.5 mb-2 d-flex align-items-center justify-content-between" role="alert" style="font-size: 0.8rem;">
             <div class="pe-2">
@@ -150,14 +142,14 @@
                 <table class="table table-bordered table-striped align-middle text-center mb-0" style="font-size: 0.78rem;">
                     <thead class="align-middle">
                         <tr>
-                            <th rowspan="2" style="width: 45px;">No.</th>
+                            <th rowspan="2" class="sticky-no" style="width: 45px;">No.</th>
+                            <th rowspan="2" class="sticky-alat" style="width: 200px;">Alat</th>
                             <th rowspan="2" style="width: 65px;">QR Code</th>
-                            <th rowspan="2">Nama Alat</th>
-                            <th rowspan="2">CODE</th>
                             <th rowspan="2" style="min-width: 100px;">No. Inventaris</th>
                             <th colspan="5">Spesifikasi</th>
                             <th rowspan="2">Kondisi Alat</th>
                             <th rowspan="2">Status Alat</th>
+                            <th rowspan="2" style="width: 110px; max-width: 110px; background-color: #1b3152;">Keputusan Evaluasi</th>
                             <th rowspan="2" style="min-width: 100px;">No. Sertifikat/<br>Perijinan</th>
                             <th rowspan="2">Interval Kalibrasi</th>
                             <th colspan="2">Periode Kalibrasi/<br>Perijinan</th>
@@ -187,6 +179,8 @@
                             $jenisKalibrasi = optional($kalibrasiTerakhir)->jenis_kalibrasi;
                             $signifikan = optional($kalibrasiTerakhir)->signifikan;
 
+                            $evaluasiTerakhir = $item->evaluasiKalibrasi->sortByDesc('tanggal_evaluasi')->first();
+
                             $statusKalibrasiBadge = '';
                             if ($kalibrasiTerakhir && $kalibrasiTerakhir->tgl_akhir) {
                                 $tglAkhir = \Carbon\Carbon::parse($kalibrasiTerakhir->tgl_akhir);
@@ -206,7 +200,13 @@
                             $qrSvgLarge = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(160)->generate($qrData);
                         @endphp
                         <tr>
-                            <td>{{ $alat->firstItem() + $index }}</td>
+                            <td class="sticky-no">{{ $alat->firstItem() + $index }}</td>
+                            <td class="sticky-alat text-start fw-bold">
+                                <a href="{{ route('alat.input-kalibrasi', $item->alat_id) }}" class="text-decoration-none text-primary" title="Buka Halaman Kalibrasi">
+                                    {{ $item->nama_alat }} <i class="fas fa-external-link-alt ms-1" style="font-size: 0.6rem;"></i>
+                                </a>
+                                <div class="fw-normal text-muted" style="font-size: 0.7rem;">Code: <code class="text-dark">{{ $item->kode_alat }}</code></div>
+                            </td>
                             <td>
                                 <div class="p-1 bg-white d-inline-block shadow-sm rounded qr-thumbnail"
                                      style="cursor: pointer;"
@@ -219,12 +219,6 @@
                                     {!! $qrSvgCode !!}
                                 </div>
                             </td>
-                            <td class="fw-bold text-start">
-                                <a href="{{ route('alat.input-kalibrasi', $item->alat_id) }}" class="text-decoration-none text-primary" title="Buka Halaman Kalibrasi">
-                                    {{ $item->nama_alat }} <i class="fas fa-external-link-alt ms-1" style="font-size: 0.6rem;"></i>
-                                </a>
-                            </td>
-                            <td><code class="fw-bold text-dark">{{ $item->kode_alat }}</code></td>
                             <td>{{ $item->no_inventaris ?? '-' }}</td>
                             <td class="text-center">{{ $item->merk_tipe ?? '-' }}</td>
                             <td>{{ $item->no_seri ?? '-' }}</td>
@@ -240,6 +234,32 @@
                                 <span class="badge bg-{{ $item->status_barang == 'terpakai' ? 'primary' : 'secondary' }}" style="font-size: 0.7rem;">
                                     {{ ucfirst($item->status_barang) }}
                                 </span>
+                            </td>
+                            <td>
+                                @if($evaluasiTerakhir)
+                                    @php
+                                        $keputusanLower = strtolower($evaluasiTerakhir->keputusan);
+                                        $badgeBg = 'secondary';
+                                        
+                                        if (str_contains($keputusanLower, 'layak') && !str_contains($keputusanLower, 'tidak') && !str_contains($keputusanLower, 'faktor') && !str_contains($keputusanLower, 'penambahan')) {
+                                            $badgeBg = 'success';
+                                        } elseif (str_contains($keputusanLower, 'faktor') || str_contains($keputusanLower, 'penambahan')) {
+                                            $badgeBg = 'warning text-dark'; 
+                                        } elseif (str_contains($keputusanLower, 'tidak')) {
+                                            $badgeBg = 'danger';
+                                        }
+                                    @endphp
+                                    <a href="{{ route('evaluasi-kalibrasi.show', $evaluasiTerakhir->evaluasi_id) }}" class="text-decoration-none" title="Klik untuk melihat detail evaluasi">
+                                        <span class="badge bg-{{ $badgeBg }}" style="font-size: 0.55rem; padding: 0.3em 0.4em; white-space: normal; display: inline-block; max-width: 95px; word-break: break-word; line-height: 1.2;">
+                                            {{ strtoupper($evaluasiTerakhir->keputusan) }}
+                                        </span>
+                                    </a>
+                                    <div class="text-muted mt-1" style="font-size: 0.62rem;">
+                                        {{ \Carbon\Carbon::parse($evaluasiTerakhir->tanggal_evaluasi)->format('d/m/Y') }}
+                                    </div>
+                                @else
+                                    <span class="badge bg-light text-muted border" style="font-size: 0.62rem;">Belum Evaluasi</span>
+                                @endif
                             </td>
                             <td>
                                 {{ $kalibrasiTerakhir->no_sertifikat ?? '-' }}
@@ -305,7 +325,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="22" class="text-center text-muted py-3">Tidak ada data alat yang ditemukan</td>
+                            <td colspan="23" class="text-center text-muted py-3">Tidak ada data alat yang ditemukan</td>
                         </tr>
                         @endforelse
                     </tbody>

@@ -297,9 +297,11 @@ class BarangController extends Controller
         }
         
         $barang = $query->latest()->get();
+        $user = Auth::user();
+        $cetakOleh = $user->username ?? ($user->nama ?? ($user->name ?? 'System PT Sucofindo'));
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('barang.cetak-periode', compact('barang', 'bulan', 'tahun'));
-        $pdf->setPaper('A4', 'landscape');
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('barang.cetak-periode', compact('barang', 'bulan', 'tahun', 'cetakOleh'));
+        $pdf->setPaper('A4', 'portrait');
         
         return $pdf->stream('Laporan_Inventori_Bahan_' . $bulan . '_' . $tahun . '.pdf');
     }

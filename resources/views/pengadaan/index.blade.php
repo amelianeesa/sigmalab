@@ -1,6 +1,18 @@
 @extends('layouts.app')
 
 @section('content')
+{{-- <<<<<<< HEAD
+<style>
+    tr:target > td { animation: sorotBaris 3s ease; }
+    @keyframes sorotBaris {
+        0%, 60% { background-color: #fff3cd; }
+        100% { background-color: transparent; }
+    }
+</style>
+
+<div class="container-fluid pt-0 pb-4 px-4">
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-3">
+======= --}}
 
 <style>
     .pengadaan-header-row {
@@ -145,11 +157,12 @@
 
 <div class="container-fluid px-4 py-4">
     <div class="d-flex justify-content-between align-items-center mb-3 pengadaan-header-row">
+
         <div>
             <h5 class="fw-bold text-dark mb-1" style="font-size: 1.2rem;">Pengadaan Bahan / Barang</h5>
             <ol class="breadcrumb mb-0" style="font-size: 12px;">
                 <li class="breadcrumb-item"><a href="{{ route('barang.index') }}" class="text-decoration-none">Inventori Barang & Bahan</a></li>
-                <li class="breadcrumb-item active">Pengadaan Bahan & Bahan</li>
+                <li class="breadcrumb-item text-muted active">Pengadaan Barang & Bahan</li>
             </ol>
         </div>
         <div class="d-flex gap-2 pengadaan-header-actions">
@@ -170,17 +183,17 @@
         <div class="card-body p-2">
             <div class="scroll-hint-pengadaan"><i class="fas fa-arrows-alt-h me-1"></i> Geser tabel ke samping untuk melihat kolom lainnya</div>
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0 small">
-                    <thead class="table-light">
-                        <tr class="text-center">
-                            <th width="4%">No</th>
-                            <th>Nama Barang</th>
-                            <th>Tanggal</th>
-                            <th>Target Waktu</th>
-                            <th>Diajukan Oleh</th>
-                            <th>Jumlah</th>
-                            <th>Status</th>
-                            <th width="16%">Aksi</th>
+                <table class="table table-hover table-bordered align-middle mb-0" style="font-size: 0.75rem; border-color: #dee2e6;">
+                    <thead class="text-white">
+                        <tr class="text-center" style="background-color: #1b3152 !important;">
+                            <th width="4%" class="py-2 text-white" style="background-color: #1b3152 !important; border-right: 1px solid #ffffff !important;">No</th>
+                            <th class="py-2 text-white" style="background-color: #1b3152 !important; border-right: 1px solid #ffffff !important;">Nama Barang</th>
+                            <th class="py-2 text-white" style="background-color: #1b3152 !important; border-right: 1px solid #ffffff !important;">Tanggal</th>
+                            <th class="py-2 text-white" style="background-color: #1b3152 !important; border-right: 1px solid #ffffff !important;">Target Waktu</th>
+                            <th class="py-2 text-white" style="background-color: #1b3152 !important; border-right: 1px solid #ffffff !important;">Diajukan Oleh</th>
+                            <th class="py-2 text-white" style="background-color: #1b3152 !important; border-right: 1px solid #ffffff !important;">Jumlah</th>
+                            <th class="py-2 text-white" style="background-color: #1b3152 !important; border-right: 1px solid #ffffff !important;">Status</th>
+                            <th width="16%" class="py-2 text-white" style="background-color: #1b3152 !important;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -199,17 +212,17 @@
                                     $alasanText = trim($alasanText);
                                 }
                             @endphp
-                            <tr>
+                            <tr id="pengadaan-{{ $p->permintaan_id }}">
                                 <!-- 1. No -->
                                 <td class="text-center">{{ $loop->iteration }}</td>
                     
                                 <!-- 2. Nama Barang & Foto -->
                                 <td>
                                     <span class="fw-semibold">{{ $p->barang ? $p->barang->nama_barang : 'Barang Dihapus' }}</span><br>
-                                    <span class="text-muted" style="font-size:0.75rem;">{{ $p->alasan ?? 'Tidak ada catatan khusus' }}</span>
+                                    <span class="text-muted" style="font-size:0.7rem;">{{ $p->alasan ?? 'Tidak ada catatan khusus' }}</span>
                                     @if($p->foto)
                                     <div class="mt-1">
-                                        <a href="{{ asset($p->foto) }}" target="_blank" class="badge bg-light text-primary border text-decoration-none" style="font-size:0.68rem;">
+                                        <a href="{{ asset($p->foto) }}" target="_blank" class="badge bg-light text-primary border text-decoration-none" style="font-size:0.65rem;">
                                             <i class="fas fa-image me-1"></i>Foto
                                         </a>
                                     </div>
@@ -229,56 +242,55 @@
                     
                                 <!-- 6. Jumlah -->
                                 <td class="text-center fw-bold text-primary">
-                                    {{ (float) $p->jumlah_diminta }} <span class="text-muted fw-normal" style="font-size:0.72rem;">{{ $p->barang ? $p->barang->satuan : '' }}</span>
+                                    {{ (float) $p->jumlah_diminta }} <span class="text-muted fw-normal" style="font-size:0.7rem;">{{ $p->barang ? $p->barang->satuan : '' }}</span>
                                 </td>
                     
-<!-- 7. Status -->
-<td class="text-center" style="min-width:170px;">
-    @if($p->status == 'menunggu_koordinator' || $p->status == 'diajukan')
-        <span class="badge bg-secondary" style="font-size:0.7rem;">Menunggu Koordinator</span>
-    @elseif($p->status == 'menunggu_ga')
-        <span class="badge bg-warning text-dark" style="font-size:0.7rem;">Menunggu GA</span>
-    @elseif($p->status == 'disetujui')
-        <span class="badge bg-info text-dark" style="font-size:0.7rem;">Disetujui GA</span>
-    @elseif($p->status == 'ditolak')
-        <span class="badge bg-danger" style="font-size:0.7rem;">Ditolak</span>
-        <div class="mt-1 p-1 rounded text-start" style="background:#fdeaea; border:1px solid #f5c2c2; font-size:0.72rem;">
-            @if($labelPenolak)
-                <div class="fw-bold text-danger">{{ $labelPenolak }}</div>
-                <div class="text-danger">Alasan: {{ $alasanText }}</div>
-            @else
-                <div class="text-danger">{{ $catatan }}</div>
-            @endif
-        </div>
-    @elseif($p->status == 'batal')
-        <span class="badge bg-dark text-white" style="font-size:0.7rem;">Dibatalkan</span>
-        <div class="mt-1 p-1 rounded text-start" style="background:#f1f1f1; border:1px solid #dcdcdc; color:#333; font-size:0.72rem;">
-            @if($labelPenolak)
-                <div class="fw-bold text-dark">{{ $labelPenolak }}</div>
-                <div class="text-muted">Alasan: {{ $alasanText }}</div>
-            @else
-                <div class="text-dark">{{ $catatan }}</div>
-            @endif
-        </div>
-    @elseif($p->status == 'diproses_po' || $p->status == 'diproses')
-        <span class="badge bg-primary" style="font-size:0.7rem;">Diproses</span>
-        @if($p->catatan_po)
-            <div class="mt-1 p-1 rounded text-start" style="background:#fff3cd; border:1px solid #ffeeba; color:#856404; font-size:0.72rem;">
-                <i class="fas fa-info-circle me-1"></i> <b>Catatan:</b> {{ $p->catatan_po }}
-            </div>
-        @endif
-    
-    @elseif($p->status == 'pembelian')
-        <span class="badge bg-info text-dark" style="font-size:0.7rem;">Pembelian Langsung</span>
-        @if($p->catatan_po)
-            <div class="mt-1 p-1 rounded text-start" style="background:#fff3cd; border:1px solid #ffeeba; color:#856404; font-size:0.72rem;">
-                <i class="fas fa-info-circle me-1"></i> <b>Catatan:</b> {{ $p->catatan_po }}
-            </div>
-        @endif
-    @elseif($p->status == 'selesai')
-        <span class="badge bg-success" style="font-size:0.7rem;">Selesai (Stok Masuk)</span>
-    @endif
-</td>
+                                <!-- 7. Status -->
+                                <td class="text-center" style="min-width:170px;">
+                                    @if($p->status == 'menunggu_koordinator' || $p->status == 'diajukan')
+                                        <span class="badge bg-secondary" style="font-size:0.68rem;">Menunggu Koordinator</span>
+                                    @elseif($p->status == 'menunggu_ga')
+                                        <span class="badge bg-warning text-dark" style="font-size:0.68rem;">Menunggu GA</span>
+                                    @elseif($p->status == 'disetujui')
+                                        <span class="badge bg-info text-dark" style="font-size:0.68rem;">Disetujui GA</span>
+                                    @elseif($p->status == 'ditolak')
+                                        <span class="badge bg-danger" style="font-size:0.68rem;">Ditolak</span>
+                                        <div class="mt-1 p-1 rounded text-start" style="background:#fdeaea; border:1px solid #f5c2c2; font-size:0.7rem;">
+                                            @if($labelPenolak)
+                                                <div class="fw-bold text-danger">{{ $labelPenolak }}</div>
+                                                <div class="text-danger">Alasan: {{ $alasanText }}</div>
+                                            @else
+                                                <div class="text-danger">{{ $catatan }}</div>
+                                            @endif
+                                        </div>
+                                    @elseif($p->status == 'batal')
+                                        <span class="badge bg-dark text-white" style="font-size:0.68rem;">Dibatalkan</span>
+                                        <div class="mt-1 p-1 rounded text-start" style="background:#f1f1f1; border:1px solid #dcdcdc; color:#333; font-size:0.7rem;">
+                                            @if($labelPenolak)
+                                                <div class="fw-bold text-dark">{{ $labelPenolak }}</div>
+                                                <div class="text-muted">Alasan: {{ $alasanText }}</div>
+                                            @else
+                                                <div class="text-dark">{{ $catatan }}</div>
+                                            @endif
+                                        </div>
+                                    @elseif($p->status == 'diproses_po' || $p->status == 'diproses')
+                                        <span class="badge bg-primary" style="font-size:0.68rem;">Diproses</span>
+                                        @if($p->catatan_po)
+                                            <div class="mt-1 p-1 rounded text-start" style="background:#fff3cd; border:1px solid #ffeeba; color:#856404; font-size:0.7rem;">
+                                                <i class="fas fa-info-circle me-1"></i> <b>Catatan:</b> {{ $p->catatan_po }}
+                                            </div>
+                                        @endif
+                                    @elseif($p->status == 'pembelian')
+                                        <span class="badge bg-info text-dark" style="font-size:0.68rem;">Pembelian Langsung</span>
+                                        @if($p->catatan_po)
+                                            <div class="mt-1 p-1 rounded text-start" style="background:#fff3cd; border:1px solid #ffeeba; color:#856404; font-size:0.7rem;">
+                                                <i class="fas fa-info-circle me-1"></i> <b>Catatan:</b> {{ $p->catatan_po }}
+                                            </div>
+                                        @endif
+                                    @elseif($p->status == 'selesai')
+                                        <span class="badge bg-success" style="font-size:0.68rem;">Selesai (Stok Masuk)</span>
+                                    @endif
+                                </td>
                     
                                 <!-- 8. Aksi -->
                                 <td>
@@ -288,9 +300,9 @@
                                                 <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST" class="w-50">
                                                     @csrf
                                                     <input type="hidden" name="status" value="menunggu_ga">
-                                                    <button class="btn btn-sm btn-success w-100 py-1" style="font-size:0.72rem;"><i class="fas fa-check"></i> Setujui</button>
+                                                    <button class="btn btn-sm btn-success w-100 py-1" style="font-size:0.7rem;"><i class="fas fa-check"></i> Setujui</button>
                                                 </form>
-                                                <button type="button" class="btn btn-sm btn-danger w-50 py-1" style="font-size:0.72rem;" data-bs-toggle="modal" data-bs-target="#modalTolak{{ $p->permintaan_id }}">
+                                                <button type="button" class="btn btn-sm btn-danger w-50 py-1" style="font-size:0.7rem;" data-bs-toggle="modal" data-bs-target="#modalTolak{{ $p->permintaan_id }}">
                                                     <i class="fas fa-times"></i> Tolak
                                                 </button>
                                             </div>
@@ -301,19 +313,18 @@
                                                 <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST" class="w-50">
                                                     @csrf
                                                     <input type="hidden" name="status" value="disetujui">
-                                                    <button class="btn btn-sm btn-success w-100 py-1" style="font-size:0.72rem;"><i class="fas fa-check"></i> Setujui</button>
+                                                    <button class="btn btn-sm btn-success w-100 py-1" style="font-size:0.7rem;"><i class="fas fa-check"></i> Setujui</button>
                                                 </form>
-                                                <button type="button" class="btn btn-sm btn-danger w-50 py-1" style="font-size:0.72rem;" data-bs-toggle="modal" data-bs-target="#modalTolak{{ $p->permintaan_id }}">
+                                                <button type="button" class="btn btn-sm btn-danger w-50 py-1" style="font-size:0.7rem;" data-bs-toggle="modal" data-bs-target="#modalTolak{{ $p->permintaan_id }}">
                                                     <i class="fas fa-times"></i> Tolak
                                                 </button>
                                             </div>
                                         @endif
 
                                         @if($isGa && in_array($p->status, ['diproses', 'diproses_po', 'pembelian']))
-                                            <!-- Dropdown Tombol Aksi -->
                                             <div class="dropdown">
-                                                <button class="btn btn-sm btn-outline-primary dropdown-toggle w-100 py-1" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size:0.72rem;">
-                                                     Aksi
+                                                <button class="btn btn-sm btn-outline-primary dropdown-toggle w-100 py-1" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size:0.7rem;">
+                                                    Aksi
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm small">
                                                     <li>
@@ -332,6 +343,20 @@
                                         @endif
                                         
                                         @if($isGa && $p->status == 'disetujui')
+{{-- <<<<<<< HEAD
+                                            <button type="button" class="btn btn-sm btn-primary w-100 py-1 text-white" data-bs-toggle="modal" data-bs-target="#modalMetodeGa{{ $p->permintaan_id }}" style="font-size:0.7rem; background-color: #1b3152;">
+                                                <i class="fas fa-tasks me-1"></i> Proses Pengadaan
+                                            </button>
+                                        
+                                            <div class="modal fade" id="modalMetodeGa{{ $p->permintaan_id }}" tabindex="-1">
+                                                <div class="modal-dialog modal-sm">
+                                                    <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST" class="modal-content text-start">
+                                                        @csrf
+                                                        <input type="hidden" name="status" value="diproses">
+                                                        <div class="modal-header text-white py-2" style="background-color: #1b3152;">
+                                                            <h6 class="modal-title mb-0 fs-6"><i class="fas fa-shopping-cart me-1"></i>Pilih Metode Pengadaan</h6>
+                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+======= --}}
                                         <!-- Tombol Pemicu Modal Pilih Metode GA -->
                                         <button type="button" class="btn btn-sm btn-primary w-100 py-1" data-bs-toggle="modal" data-bs-target="#modalMetodeGa{{ $p->permintaan_id }}" style="font-size:0.72rem;">
                                             <i class="fas fa-tasks me-1"></i> Proses Pengadaan
@@ -363,32 +388,39 @@
                                                                     </ul>
                                                                 </div>
                                                             </div>
+
                                                         </div>
-                            
-                                                        <!-- Input Estimasi Hari / Catatan -->
-                                                        <div class="mb-2" id="divEstimasi{{ $p->permintaan_id }}">
-                                                            <label class="form-label fw-bold small" id="labelEstimasi{{ $p->permintaan_id }}">Catatan / Estimasi</label>
-                                                            <textarea name="catatan_po" class="form-control form-control-sm" rows="2" placeholder="Contoh: Estimasi tiba 3 hari..."></textarea>
+                                                        <div class="modal-body py-2">
+                                                            <div class="mb-2">
+                                                                <label class="form-label fw-bold small">Metode Penanganan <span class="text-danger">*</span></label>
+                                                                <select name="metode_proses" class="form-select form-select-sm" id="selectMetode{{ $p->permintaan_id }}" required onchange="toggleEstimasi(this, '{{ $p->permintaan_id }}')">
+                                                                    <option value="">-- Pilih Metode --</option>
+                                                                    <option value="PO">Purchase Order (PO)</option>
+                                                                    <option value="Pembelian">Pembelian Langsung</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="mb-2" id="divEstimasi{{ $p->permintaan_id }}">
+                                                                <label class="form-label fw-bold small" id="labelEstimasi{{ $p->permintaan_id }}">Catatan / Estimasi</label>
+                                                                <textarea name="catatan_po" class="form-control form-control-sm" rows="2" placeholder="Contoh: Estimasi tiba 3 hari..."></textarea>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                    
-                                                    <div class="modal-footer bg-light py-2">
-                                                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
-                                                        <button type="submit" class="btn btn-sm text-white" style="background-color: #1b3152;">Simpan & Proses</button>
-                                                    </div>
-                                                </form>
+                                                        <div class="modal-footer bg-light py-2">
+                                                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                                                            <button type="submit" class="btn btn-sm text-white" style="background-color: #1b3152;">Simpan & Proses</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
                                             </div>
-                                        </div>
-                                        @endif                            
-                            
-                                        <!-- Modal Penolakan -->
+                                        @endif    
+
+
                                         <div class="modal fade" id="modalTolak{{ $p->permintaan_id }}" tabindex="-1">
                                             <div class="modal-dialog modal-sm">
                                                 <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST" class="modal-content text-start">
                                                     @csrf
                                                     <input type="hidden" name="status" value="ditolak">
                                                     <div class="modal-header bg-danger text-white py-2">
-                                                        <h6 class="modal-title mb-0"><i class="fas fa-times-circle me-1"></i>Penolakan Pengadaan</h6>
+                                                        <h6 class="modal-title mb-0 fs-6"><i class="fas fa-times-circle me-1"></i>Penolakan Pengadaan</h6>
                                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                                     </div>
                                                     <div class="modal-body py-2">
@@ -404,31 +436,30 @@
                                         </div>
 
                                         @if($p->status == 'selesai' || $p->foto_diterima)
-                                        <div class="p-1 border rounded bg-light text-start" style="font-size:0.72rem;">
-                                            <span class="fw-bold text-dark">Penerima: {{ $p->nama_penerima ?? '-' }}</span><br>
-                                            @if($p->waktu_diterima)
-                                                <span class="text-muted" style="font-size:0.68rem;">
-                                                    <i class="fas fa-clock me-1 text-secondary"></i>{{ \Carbon\Carbon::parse($p->waktu_diterima)->format('d M Y, H:i') }}
-                                                </span><br>
-                                            @endif
-                                            @if($p->foto_diterima)
-                                                <a href="{{ asset($p->foto_diterima) }}" target="_blank" class="btn btn-sm btn-info mt-1 text-white py-0 px-2 w-100" style="font-size:0.68rem;">
-                                                    <i class="fas fa-image"></i> Lihat Bukti
-                                                </a>
-                                            @endif
-                                        </div>
-                                        @elseif($p->status == 'disetujui' || $p->status == 'diproses')
-                                            <button type="button" class="btn btn-sm btn-warning fw-bold w-100 py-1" data-bs-toggle="modal" data-bs-target="#modalTerima{{ $p->permintaan_id }}" style="font-size:0.72rem;">
+                                            <div class="p-1 border rounded bg-light text-start" style="font-size:0.7rem;">
+                                                <span class="fw-bold text-dark">Penerima: {{ $p->nama_penerima ?? '-' }}</span><br>
+                                                @if($p->waktu_diterima)
+                                                    <span class="text-muted" style="font-size:0.65rem;">
+                                                        <i class="fas fa-clock me-1 text-secondary"></i>{{ \Carbon\Carbon::parse($p->waktu_diterima)->format('d M Y, H:i') }}
+                                                    </span><br>
+                                                @endif
+                                                @if($p->foto_diterima)
+                                                    <a href="{{ asset($p->foto_diterima) }}" target="_blank" class="btn btn-sm btn-info mt-1 text-white py-0 px-2 w-100" style="font-size:0.65rem;">
+                                                        <i class="fas fa-image"></i> Lihat Bukti
+                                                    </a>
+                                                @endif
+                                            </div>
+                                        @elseif(in_array($p->status, ['disetujui', 'diproses', 'diproses_po', 'pembelian']))
+                                            <button type="button" class="btn btn-sm btn-warning fw-bold w-100 py-1" data-bs-toggle="modal" data-bs-target="#modalTerima{{ $p->permintaan_id }}" style="font-size:0.7rem;">
                                                 <i class="fas fa-camera"></i> Konfirmasi Terima
                                             </button>
                                         
-                                            <!-- Modal Konfirmasi Terima -->
                                             <div class="modal fade" id="modalTerima{{ $p->permintaan_id }}" tabindex="-1">
                                                 <div class="modal-dialog modal-sm">
                                                     <form action="{{ route('pengadaan.konfirmasiTerima', $p->permintaan_id) }}" method="POST" enctype="multipart/form-data" class="modal-content text-start">
                                                         @csrf
                                                         <div class="modal-header bg-dark text-white py-2">
-                                                            <h6 class="modal-title mb-0"><i class="fas fa-box-open me-1"></i>Konfirmasi Diterima</h6>
+                                                            <h6 class="modal-title mb-0 fs-6"><i class="fas fa-box-open me-1"></i>Konfirmasi Diterima</h6>
                                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                                         </div>
                                                         <div class="modal-body py-2">
@@ -452,21 +483,21 @@
                                                     </form>
                                                 </div>
                                             </div>
-                                        @endif
-                    
+                                        @endif 
+                            
                                         @if(Auth::id() == $p->diajukan_oleh && in_array($p->status, ['diajukan', 'menunggu_koordinator']))
                                             <form action="{{ route('pengadaan.destroy', $p->permintaan_id) }}" method="POST">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="btn btn-sm btn-outline-danger w-100 py-1" style="font-size:0.72rem;" onclick="return confirm('Batalkan pengajuan?')"><i class="fas fa-trash"></i> Batalkan</button>
+                                                <button class="btn btn-sm btn-outline-danger w-100 py-1" style="font-size:0.7rem;" onclick="return confirm('Batalkan pengajuan?')"><i class="fas fa-trash"></i> Batalkan</button>
                                             </form>
                                         @endif
-                    
+                            
                                         @if($isAdminAplikasi)
                                             <form action="{{ route('pengadaan.destroy', $p->permintaan_id) }}" method="POST">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="btn btn-sm btn-danger w-100 py-1" style="font-size:0.72rem;" onclick="return confirm('Yakin hapus permanen data pengadaan ini? Tindakan ini tidak bisa dibatalkan.')"><i class="fas fa-trash-alt"></i> Hapus</button>
+                                                <button class="btn btn-sm btn-danger w-100 py-1" style="font-size:0.7rem;" onclick="return confirm('Yakin hapus permanen data pengadaan ini?')"><i class="fas fa-trash-alt"></i> Hapus</button>
                                             </form>
                                         @endif
                                     </div>
@@ -484,8 +515,6 @@
     </div>
 </div>
 
-<!-- Modal Update Progres -->
-<!-- Modal Update Progres untuk GA -->
 @foreach($pengadaans as $p)
 @if(in_array($p->status, ['diproses', 'diproses_po', 'pembelian']))
 <div class="modal fade" id="updateProsesModal{{ $p->permintaan_id }}" tabindex="-1" aria-hidden="true">
@@ -671,7 +700,11 @@
     function toggleEstimasi(value, id) {
         const label = document.getElementById('labelEstimasi' + id);
         if (!label) return;
-        if (value === 'PO') {
+
+        if (selectObj.value === 'PO') {
+
+        // if (value === 'PO') {
+
             label.innerText = 'Estimasi PO (Hari / Keterangan)';
         } else if (value === 'Pembelian') {
             label.innerText = 'Estimasi Pembelian Langsung';

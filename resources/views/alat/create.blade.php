@@ -185,8 +185,13 @@
 
                 <div class="row g-2 mb-2">
                     <div class="col-md-12">
-                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Catatan / Evaluasi Kalibrasi</label>
-                        <textarea name="catatan_evaluasi" class="form-control form-control-sm" rows="2" placeholder="Tuliskan catatan evaluasi atau hasil analisis alat di sini...">{{ old('catatan_evaluasi') }}</textarea>
+                        <div class="p-2 bg-light border rounded text-muted" style="font-size: 11.5px;">
+                            <i class="fas fa-info-circle me-1" style="color: #1b3152;"></i> 
+                            Evaluasi dan catatan keputusan dikelola sub menu terpusat.
+                            <a href="{{ route('evaluasi-kalibrasi.index') }}" class="text-decoration-none fw-semibold text-primary ms-1">
+                                Evaluasi Kalibrasi <i class="fas fa-external-link-alt" style="font-size: 10px;"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
 

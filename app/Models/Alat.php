@@ -11,6 +11,7 @@ use App\Models\RiwayatKalibrasi;
 use App\Models\KegiatanAlat;
 use App\Models\ItemPemeliharaan;
 use App\Models\RiwayatPerbaikanAlat;
+use App\Models\EvaluasiKalibrasi;
 
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
@@ -59,6 +60,10 @@ class Alat extends BaseModel
     public function riwayatPerbaikan()
     {
         return $this->hasMany(RiwayatPerbaikanAlat::class, 'alat_id', 'alat_id');
+    }
+    public function evaluasiKalibrasi()
+    {
+        return $this->hasMany(EvaluasiKalibrasi::class, 'alat_id', 'alat_id');
     }
 
     public function getActivitylogOptions(): LogOptions

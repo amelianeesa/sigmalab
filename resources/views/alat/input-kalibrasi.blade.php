@@ -189,9 +189,29 @@
                                             {{ strtoupper($riwayat->signifikan) }}
                                         </span>
                                     </td>
-                                    <td class="text-start py-1">
-                                        {{ $riwayat->catatan_evaluasi ?? '-' }}
+                                    <td class="text-start py-1" style="font-size: 0.65rem;">
+                                        @php
+                                            $query = $alat->evaluasiKalibrasi()->whereDate('tanggal_evaluasi', '>=', $riwayat->tgl_kalibrasi);
+                                            
+                                            if (!empty($riwayat->tgl_akhir)) {
+                                                $query->whereDate('tanggal_evaluasi', '<=', $riwayat->tgl_akhir);
+                                            }
+                                            
+                                            $evaluasiItem = $query->latest('tanggal_evaluasi')->first();
+                                        @endphp
+
+                                        @if($evaluasiItem)
+                                            <div style="line-height: 1.3;">
+                                                <span class="fw-bold text-dark">Keputusan:</span> {{ ucfirst(strtolower($evaluasiItem->keputusan)) }}
+                                            </div>
+                                            <div style="line-height: 1.2;" class="text-muted">
+                                                <span class="fw-bold text-dark">Komentar:</span> {{ $evaluasiItem->catatan ?? $evaluasiItem->komentar ?? '-' }}
+                                            </div>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
                                     </td>
+
                                 </tr>
                                 @empty
                                 <tr>
@@ -204,7 +224,6 @@
                 </div>
             </div>
 
-            {{-- 3. FORM INPUT KALIBRASI BARU (Header Biru Pekat Sucofindo, Teks Putih) --}}
             @php
                 $allowedRoles = ['Koordinator Laboratorium', 'Analis Lab', 'Admin Aplikasi'];$userRoleName = Auth::user()->role->nama_role ?? '';
                 $canInputKalibrasi = Auth::check() && in_array($userRoleName,$allowedRoles);
@@ -269,9 +288,16 @@
                                     <option value="tidak">Tidak</option>
                                 </select>
                             </div>
-                            <div class="col-md-12">
-                                <label for="catatan_evaluasi" class="form-label fw-bold small mb-1" style="font-size: 11px;">Catatan / Evaluasi Kalibrasi</label>
-                                <textarea name="catatan_evaluasi" id="catatan_evaluasi" class="form-control form-control-sm" rows="2" placeholder="Tuliskan catatan evaluasi atau hasil analisis alat di sini..." autocomplete="off" style="font-size: 0.75rem;"></textarea>
+                            <div class="row g-2 mb-2">
+                                <div class="col-md-12">
+                                    <div class="p-2 bg-light border rounded text-muted" style="font-size: 11.5px;">
+                                        <i class="fas fa-info-circle me-1" style="color: #1b3152;"></i> 
+                                        Evaluasi dan catatan keputusan dikelola sub menu terpusat.
+                                        <a href="{{ route('evaluasi-kalibrasi.index') }}" class="text-decoration-none fw-semibold text-primary ms-1">
+                                            Evaluasi Kalibrasi <i class="fas fa-external-link-alt" style="font-size: 10px;"></i>
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="mt-3 text-end">

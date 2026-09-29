@@ -18,7 +18,6 @@
     }
 </style>
 <div class="container-fluid pt-1 pb-3 px-4" style="max-width: 1100px;">
-    <!-- Judul & Breadcrumb Lebih Dekat ke Topbar -->
     <h3 class="fw-bold mb-1">Evaluasi Kalibrasi</h3>
     <ol class="breadcrumb mb-3" style="font-size: 13.5px;">
         <li class="breadcrumb-item"><a href="{{ route('evaluasi-kalibrasi.index') }}">Evaluasi Kalibrasi</a></li>
@@ -35,7 +34,6 @@
         </div>
     @endif
 
-    <!-- Card Form dengan Warna Header Seragam dengan Topbar -->
     <div class="card shadow-sm border-0">
         <div class="card-header text-white py-2.5" style="background-color: #1b3152;">
             <h6 class="mb-0 fw-semibold"><i class="fas fa-edit me-1"></i> Form Input Evaluasi Kalibrasi</h6>
@@ -58,20 +56,17 @@
                         </select>
                     </div>
 
-                    <!-- Tanggal Evaluasi -->
                     <div class="col-md-6">
                         <label class="form-label small fw-bold">Tanggal Evaluasi <span class="text-danger">*</span></label>
                         <input type="text" name="tanggal_evaluasi" class="form-control form-control-sm flatpickr-date" autocomplete="off" value="{{ old('tanggal_evaluasi', date('Y-m-d')) }}" required>
                     </div>
 
-                    <!-- Upload Laporan -->
                     <div class="col-md-6">
                         <label class="form-label small fw-bold">Upload Laporan Evaluasi</label>
                         <input type="file" name="file_laporan" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png">
                         <div class="form-text" style="font-size: 11.5px;">Format: PDF, JPG, JPEG, PNG (Maks. 5MB)</div>
                     </div>
 
-                    <!-- Dropdown Keputusan -->
                     <div class="col-md-6">
                         <label class="form-label small fw-bold">Keputusan <span class="text-danger">*</span></label>
                         <select name="keputusan" class="form-select form-select-sm select2-basic" required>
@@ -82,7 +77,6 @@
                         </select>
                     </div>
 
-                    <!-- Catatan Spesifikasi -->
                     <div class="col-md-12">
                         <label class="form-label small fw-bold">Catatan Spesifikasi</label>
                         <textarea name="catatan_spesifikasi" class="form-control form-control-sm" rows="3" placeholder="Tuliskan catatan spesifikasi hasil evaluasi...">{{ old('catatan_spesifikasi') }}</textarea>

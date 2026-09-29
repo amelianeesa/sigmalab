@@ -285,6 +285,7 @@
             }
         }
     @endphp
+
     @if($barangHabisCount > 0 || $barangMenipisCount > 0)
         <div class="alert alert-warning alert-dismissible fade show shadow-sm py-2 d-flex align-items-center" role="alert" style="font-size: 0.85rem;">
             <div class="flex-grow-1">
@@ -303,16 +304,12 @@
 
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
         <h5 class="fw-bold mb-0">Data Inventory Barang/Bahan</h5>
-        <div class="header-action-btns">
-            @if(Auth::user()->hasModulAccess('pengadaan'))
-            <a href="{{ route('pengadaan.index') }}" class="btn btn-brand-standard shadow-sm">
-                <i class="fas fa-truck-loading me-1"></i> Cek Pengadaan
-            </a>
-            @endif
+        <div>
             <button type="button" class="btn btn-success-standard shadow-sm" data-bs-toggle="modal" data-bs-target="#cetakPeriodeModal">
                 <i class="fas fa-print me-1"></i> Cetak Laporan Periode
             </button>
-            @if($canManageBarang && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
+            @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
+
             <a href="{{ route('barang.create') }}" class="btn btn-brand-standard shadow-sm">
                 <i class="fas fa-plus me-1"></i> Tambah Barang/Bahan
             </a>

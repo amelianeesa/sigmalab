@@ -37,7 +37,7 @@ class AlatController extends Controller
         $filterStatus = $request->input('filter_status');
         $filterKondisi = $request->input('filter_kondisi');
 
-        $query = Alat::with(['riwayatKalibrasi', 'kegiatanAlat']);
+        $query = Alat::with(['riwayatKalibrasi', 'evaluasiKalibrasi', 'kegiatanAlat']);
 
         if ($search) {
             $query->where(function($q) use ($search) {
@@ -511,7 +511,7 @@ class AlatController extends Controller
         $alat = Alat::with('riwayatKalibrasi')->findOrFail($id);
         
         $user = Auth::user();
-        $namaUser = 'Petugas Lab';
+        $namaUser = 'Publik';
 
         if ($user) {
             $namaUser = $user->name ?? $user->username ?? $user->nama ?? 'Analis Laboratorium';
@@ -527,6 +527,12 @@ class AlatController extends Controller
     {
         $alat = Alat::with('riwayatKalibrasi')->findOrFail($id);
         $fileName = 'Laporan_' . $alat->nama_alat . '_' . $alat->kode_alat . '.xlsx';
+
+        $user = Auth::user();
+        $namaUser = 'Publik';
+        if ($user) {
+            $namaUser = $user->name ?? $user->username ?? $user->nama ?? 'Analis Laboratorium';
+        }
 
         return Excel::download(new class($alat) implements \Maatwebsite\Excel\Concerns\FromArray, WithStyles, WithColumnWidths, WithEvents {
             protected $alat;
@@ -570,7 +576,7 @@ class AlatController extends Controller
             }
 
             public function columnWidths(): array {
-                return ['A' => 15, 'B' => 12, 'C' => 27, 'D' => 30, 'E' => 25, 'F' => 12, 'G' => 25];
+                return ['A' => 15, 'B' => 12, 'C' => 27, 'D' => 30, 'E' => 25, 'F' => 12, 'G' => 32];
             }
 
             public function registerEvents(): array {
@@ -591,13 +597,43 @@ class AlatController extends Controller
                         
                         $sheet->getStyle('A5:B9')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
 
-                        $headers = ['Urutan', 'Jenis', 'Tanggal Kalibrasi s/d Akhir', 'Lembaga & Sertifikat', 'Range & Faktor Koreksi', 'Signifikan', 'Catatan / Evaluasi'];
+                        $headers = ['Urutan', 'Jenis', 'Tanggal Kalibrasi s/d Akhir', 'Lembaga & Sertifikat', 'Range & Faktor Koreksi', 'Signifikan', 'Evaluasi'];
                         foreach ($headers as $col => $value) {
                             $sheet->setCellValue(Coordinate::stringFromColumnIndex($col + 1) . '11', $value);
                         }
                         
                         $rowNum = 12;
+                        // foreach($this->alat->riwayatKalibrasi as $index => $row) {
+                        //     $data = [
+                        //         'Kalibrasi ke-' . ($index + 1),
+                        //         ucfirst($row->jenis_kalibrasi),
+                        //         \Carbon\Carbon::parse($row->tgl_kalibrasi)->format('d-m-Y') . ' s/d ' . \Carbon\Carbon::parse($row->tgl_akhir)->format('d-m-Y'),
+                        //         "Lembaga: " . $row->lembaga_kalibrasi . "\nSertifikat: " . $row->no_sertifikat,
+                        //         "Range: " . ($row->range_kapasitas ?? '-') . "\nKoreksi: " . ($row->faktor_koreksi ?? '-'),
+                        //         strtoupper($row->signifikan),
+                        //         $row->catatan_evaluasi ?? '-',
+                        //     ];
+                        //     foreach ($data as $col => $value) {
+                        //         $sheet->setCellValue(Coordinate::stringFromColumnIndex($col + 1) . $rowNum, $value);
+                        //     }
+                        //     $rowNum++;
+                        // }
+                        
+                        
                         foreach($this->alat->riwayatKalibrasi as $index => $row) {
+                            $query = $this->alat->evaluasiKalibrasi()->whereDate('tanggal_evaluasi', '>=', $row->tgl_kalibrasi);
+                            if (!empty($row->tgl_akhir)) {
+                                $query->whereDate('tanggal_evaluasi', '<=', $row->tgl_akhir);
+                            }
+                            $evaluasiItem = $query->latest('tanggal_evaluasi')->first();
+
+                            $teksEvaluasi = "-";
+                            if ($evaluasiItem) {
+                                $keputusan = ucfirst(strtolower($evaluasiItem->keputusan));
+                                $komentar = $evaluasiItem->catatan ?? $evaluasiItem->komentar ?? '-';
+                                $teksEvaluasi = "Keputusan: " . $keputusan . "\nKomentar: " . $komentar;
+                            }
+
                             $data = [
                                 'Kalibrasi ke-' . ($index + 1),
                                 ucfirst($row->jenis_kalibrasi),
@@ -605,10 +641,17 @@ class AlatController extends Controller
                                 "Lembaga: " . $row->lembaga_kalibrasi . "\nSertifikat: " . $row->no_sertifikat,
                                 "Range: " . ($row->range_kapasitas ?? '-') . "\nKoreksi: " . ($row->faktor_koreksi ?? '-'),
                                 strtoupper($row->signifikan),
-                                $row->catatan_evaluasi ?? '-',
+                                $teksEvaluasi,
                             ];
+
                             foreach ($data as $col => $value) {
-                                $sheet->setCellValue(Coordinate::stringFromColumnIndex($col + 1) . $rowNum, $value);
+                                $cellCoordinate = Coordinate::stringFromColumnIndex($col + 1) . $rowNum;
+                                $sheet->setCellValue($cellCoordinate, $value);
+                                
+                                if ($col == 6) {
+                                    $sheet->getStyle($cellCoordinate)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+                                    $sheet->getStyle($cellCoordinate)->getAlignment()->setWrapText(true);
+                                }
                             }
                             $rowNum++;
                         }
@@ -640,6 +683,12 @@ class AlatController extends Controller
         $bulan = $request->get('bulan', date('m'));
         $tahun = $request->get('tahun', date('Y'));
 
+        $user = Auth::user();
+        $namaUser = 'Petugas Lab';
+        if ($user) {
+            $namaUser = $user->name ?? $user->username ?? $user->nama ?? 'Analis Laboratorium';
+        }
+
         $rawLogs = LogPemeliharaan::where('alat_id', $id)
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
@@ -657,11 +706,11 @@ class AlatController extends Controller
             ];
         }
 
-        $pdf = Pdf::loadView('alat.pemeliharaan-template', compact('alat', 'logs', 'bulan', 'tahun'));
+        $pdf = Pdf::loadView('alat.pemeliharaan-template', compact('alat', 'logs', 'bulan', 'tahun', 'namaUser'));
         $pdf->setPaper('A4', 'portrait');
 
         $namaAlatSafe = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $alat->nama_alat);
-        return $pdf->download('Kartu_Pemeliharaan_' . $namaAlatSafe . '_' . $alat->kode_alat . '_' . $bulan . '_' . $tahun . '.pdf');
+        return $pdf->stream('Kartu_Pemeliharaan_' . $namaAlatSafe . '_' . $alat->kode_alat . '_' . $bulan . '_' . $tahun . '.pdf');
     }
 
     public function exportPemeliharaanExcel(Request $request, $id)
@@ -673,7 +722,7 @@ class AlatController extends Controller
         $namaAlatSafe = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $alat->nama_alat);
         $fileName = 'Kartu_Pemeliharaan_' . $namaAlatSafe . '_' . $bulan . '_' . $tahun . '_' . time() . '.xlsx';
 
-        return Excel::download(new class($alat, $bulan, $tahun) implements FromArray, WithStyles, WithColumnWidths, WithEvents {
+        return Excel::stream(new class($alat, $bulan, $tahun) implements FromArray, WithStyles, WithColumnWidths, WithEvents {
             protected $alat, $bulan, $tahun;
 
             public function __construct($alat, $bulan, $tahun) {

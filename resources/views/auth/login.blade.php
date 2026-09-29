@@ -6,8 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Login - SIGMALAB Sucofindo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
     <style>
+        input::-ms-reveal,
+        input::-ms-clear {
+            display: none !important;
+        }
+
         html,
         body {
             height: 100%;
@@ -194,6 +202,10 @@
             text-align: center;
         }
 
+        .text-birdong {
+            color: #0c3a68 !important;
+        }
+
         /* ===== Responsif Mobile ===== */
         @media (max-width: 767.98px) {
             html,
@@ -319,7 +331,7 @@
                             <div class="input-group">
                                 <input type="password" name="password" id="password" class="form-control" required
                                     style="border-right: none;">
-                                <button type="button" class="input-group-text bg-white" id="togglePassword"
+                                <button type="button" class="input-group-text bg-white text-birdong" id="togglePassword"
                                     style="border-left: none; cursor: pointer; border-color: #d7e1ea;">
                                     <i class="bi bi-eye-slash" id="toggleIcon"></i>
                                 </button>
@@ -337,8 +349,8 @@
         </div>
     </div>
     <script>
-        const togglePassword = document.getElementById('togglePassword');
         const password = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
         const toggleIcon = document.getElementById('toggleIcon');
 
         togglePassword.addEventListener('click', function (e) {
