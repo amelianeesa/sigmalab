@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Stabilitas - QC In-House')
 
 @section('content')
 <div class="container-fluid px-4 pb-5">
@@ -25,7 +26,10 @@
                     <div class="card-header bg-white pt-3 border-bottom-0">
                         <ul class="nav nav-tabs card-header-tabs" id="parameterTabs" role="tablist">
                             @foreach($batch->parameters as $index => $param)
-                                @php $code = strtoupper($param->parameterUji->nama_parameter); @endphp
+                                @php 
+                                    $rawCode = trim(strtoupper($param->parameterUji->nama_parameter)); 
+                            $code = in_array($rawCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)', 'TS']) ? 'TS' : $rawCode;
+                                @endphp
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link fw-bold {{ $index === 0 ? 'active' : '' }}" 
                                             id="tab-{{ $param->id }}" 
@@ -33,7 +37,7 @@
                                             data-bs-target="#pane-{{ $param->id }}" 
                                             type="button" role="tab"
                                             data-code="{{ $code }}">
-                                        {{ $code }}
+                                        {{ $rawCode }}
                                     </button>
                                 </li>
                             @endforeach
@@ -64,13 +68,14 @@
                         <div class="tab-content" id="parameterTabsContent">
                             @foreach($batch->parameters as $index => $param)
                                 @php 
-                                    $code = strtoupper($param->parameterUji->nama_parameter); 
+                                    $rawCode = trim(strtoupper($param->parameterUji->nama_parameter)); 
+                            $code = in_array($rawCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)', 'TS']) ? 'TS' : $rawCode;
                                     $pid = $param->id;
                                 @endphp
                                 <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}" id="pane-{{ $pid }}" role="tabpanel">
                                     
                                     <div class="table-responsive p-3">
-                                        <table class="table table-bordered table-sm align-middle text-center param-table" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
+                                        <table class="table table-bordered table-sm align-middle text-center param-table text-nowrap" style="min-width: 1500px;" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
                                             <thead class="table-light">
                                                 @if($code === 'IM')
                                                     <tr>
@@ -118,15 +123,14 @@
                                                         <th>%db</th>
                                                     </tr>
                                                 @elseif($code === 'TS')
-                                                    <tr>
-                                                        <th style="width: 15%">KODE SAMPEL</th>
-                                                        <th style="width: 5%">DISH NO.</th>
-                                                        <th style="width: 16%">Massa sample</th>
-                                                        <th class="bg-warning bg-opacity-25" style="width: 16%">TS (Adb)</th>
-                                                        <th style="width: 16%">Average %(adb)</th>
-                                                        <th style="width: 16%">Average % (Db)</th>
-                                                        <th style="width: 16%">%db</th>
-                                                    </tr>
+                                                <tr>
+                                                    <th width="10%">KODE SAMPEL</th>
+                                                    <th>DISH NO.</th>
+                                                    <th>Massa sample</th>
+                                                    <th class="bg-warning bg-opacity-25">TS (Adb)</th>
+                                                    <th>Average % (adb)</th>
+                                                    <th class="bg-warning bg-opacity-25">Average % (db)</th>
+                                                </tr>
                                                 @elseif($code === 'CV')
                                                     <tr>
                                                         <th width="8%">KODE SAMPEL</th>
@@ -215,11 +219,10 @@
                                                             <td rowspan="2" class="align-middle out-avg-db">-</td>
                                                             <td class="align-middle out-db-1 fw-bold text-success">-</td>
                                                         @elseif($code === 'TS')
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_1]" value="{{ $mentah['massa_1'] ?? '' }}"></td>
-                                                            <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" value="{{ $dh->nilai_d1 ?? '' }}"></td>
-                                                            <td rowspan="2" class="align-middle out-avg-adb fw-bold">-</td>
-                                                            <td rowspan="2" class="align-middle out-avg-db fw-bold">-</td>
-                                                            <td class="align-middle out-db-1 fw-bold text-success">-</td>
+                                                        <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_1]" value="{{ $mentah['massa_1'] ?? '' }}"></td>
+                                                        <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" value="{{ $dh->nilai_d1 ?? '' }}"></td>
+                                                        <td rowspan="2" class="align-middle out-avg-adb fw-bold">-</td>
+                                                        <td rowspan="2" class="align-middle out-avg-db fw-bold text-success">-</td>
                                                         @elseif($code === 'CV')
                                                             <td><input type="text" class="form-control form-control-sm in-callid-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][callid_1]" value="{{ $mentah['callid_1'] ?? '' }}"></td>
                                                             <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-weight-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][weight_1]" value="{{ $mentah['weight_1'] ?? '' }}"></td>
@@ -271,9 +274,8 @@
                                                             <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" readonly tabindex="-1"></td>
                                                             <td class="align-middle out-db-2 fw-bold text-success">-</td>
                                                         @elseif($code === 'TS')
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_2]" value="{{ $mentah['massa_2'] ?? '' }}"></td>
-                                                            <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" value="{{ $dh->nilai_d2 ?? '' }}"></td>
-                                                            <td class="align-middle out-db-2 fw-bold text-success">-</td>
+                                                        <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_2]" value="{{ $mentah['massa_2'] ?? '' }}"></td>
+                                                        <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" value="{{ $dh->nilai_d2 ?? '' }}"></td>
                                                         @elseif($code === 'CV')
                                                             <td><input type="text" class="form-control form-control-sm in-callid-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][callid_2]" value="{{ $mentah['callid_2'] ?? '' }}"></td>
                                                             <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-weight-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][weight_2]" value="{{ $mentah['weight_2'] ?? '' }}"></td>
@@ -294,6 +296,7 @@
                                             </tbody>
                                         </table>
                                     </div>
+                                    @if(in_array($batch->status, ['uji_stabilitas', 'gagal_stabilitas']))
                                     <div class="px-3 pb-3 d-flex justify-content-between">
                                         <div>
                                             <button type="button" class="btn btn-outline-primary btn-tambah-kemasan fw-bold me-2" data-pid="{{ $pid }}" data-code="{{ $code }}">
@@ -307,6 +310,7 @@
                                             <i class="fas fa-save me-1"></i> Simpan Tabel {{ $code }} Saja
                                         </button>
                                     </div>
+                                    @endif
                                 </div>
                             @endforeach
                         </div>
@@ -329,9 +333,11 @@
                 </div>
 
                 <div class="d-flex justify-content-end mb-5">
+                    @if(in_array($batch->status, ['uji_stabilitas', 'gagal_stabilitas']))
                     <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm" id="btnSubmit">
                         <i class="fas fa-check-double me-2"></i> Simpan Data Uji Stabilitas
                     </button>
+                    @endif
                 </div>
             </form>
         </div>
@@ -391,7 +397,10 @@
                     </div>
                     <div id="exportParamCheckboxes">
                         @foreach($batch->parameters as $param)
-                            @php $code = strtoupper($param->parameterUji->nama_parameter); @endphp
+                            @php 
+                                $rawCode = trim(strtoupper($param->parameterUji->nama_parameter)); 
+                            $code = in_array($rawCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)', 'TS']) ? 'TS' : $rawCode;
+                            @endphp
                             <div class="form-check">
                                 <input class="form-check-input chk-export-param" type="checkbox" value="{{ $code }}" id="chkExport{{ $code }}" checked>
                                 <label class="form-check-label" for="chkExport{{ $code }}">{{ $code }}</label>
@@ -446,7 +455,11 @@
 // STATE STORE
 const State = {};
 @foreach($batch->parameters as $param)
-    State["{{ strtoupper($param->parameterUji->nama_parameter) }}"] = {
+    @php 
+        $rawCode = trim(strtoupper($param->parameterUji->nama_parameter)); 
+                            $code = in_array($rawCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)', 'TS']) ? 'TS' : $rawCode;
+    @endphp
+    State["{{ $code }}"] = {
         id: {{ $param->id }},
         ready: false,
         data: Array.from({length: {{ max(3, $param->dataStabilitas->count()) }} }, () => ({ 
@@ -477,7 +490,8 @@ document.addEventListener('DOMContentLoaded', function() {
         @endphp
         @foreach($batch->parameters as $p)
         @php 
-            $pCode = strtoupper($p->parameterUji->nama_parameter);
+            $rawPCode = strtoupper($p->parameterUji->nama_parameter);
+            $pCode = in_array($rawPCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']) ? 'TS' : $rawPCode;
             $dbArr = [];
             foreach($p->dataHomogenitas as $dh) {
                 $m = $dh->data_mentah;
@@ -1240,12 +1254,16 @@ document.addEventListener('DOMContentLoaded', function() {
             tglFormatted = `${parts[2]}/${parts[1]}/${parts[0]}`;
         }
 
+        const logoUrl = window.location.origin + '/images/Logo_Suco_Nobg.png';
+
         let html = `
         <div style="font-size: 12px; line-height: 1.2; padding: 10px;">
-            <table style="width:100%; border-bottom: 2px solid black; margin-bottom: 10px;">
+            <table style="width:100%; border-bottom: 2px solid black; margin-bottom: 10px; page-break-inside: avoid;">
                 <tr>
-                    <td style="font-size: 16px; font-weight: bold; padding-bottom: 5px;">Perhitungan Uji Stabilitas Sampel <i>Inhouse Standard</i></td>
-                    <td style="text-align: right; color: #004b87; font-weight: 900; font-size: 16px; font-style: italic;">SUCOFINDO</td>
+                    <td style="font-size: 16px; font-weight: bold; padding-bottom: 5px; vertical-align: bottom;">Perhitungan Uji Stabilitas Sampel <i>Inhouse Standard</i></td>
+                    <td style="text-align: right; vertical-align: bottom; width: 150px; padding-bottom: 5px;">
+                        <img src="${logoUrl}" style="width: 140px; height: auto; display: block; margin-left: auto;" alt="SUCOFINDO">
+                    </td>
                 </tr>
             </table>
 
@@ -1377,17 +1395,27 @@ document.addEventListener('DOMContentLoaded', function() {
         this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Memproses...';
         this.disabled = true;
 
-        setTimeout(() => {
+        setTimeout(async () => {
             try {
-                if(format === 'excel') exportToExcel(selectedParams, part);
-                else if(format === 'pdf') exportToPdf(selectedParams, part);
-                else if(format === 'word') exportToWord(selectedParams, part);
+                if(format === 'excel') {
+                    exportToExcel(selectedParams, part);
+                    this.innerHTML = originalBtnHtml;
+                    this.disabled = false;
+                } else if(format === 'pdf') {
+                    await exportToPdf(selectedParams, part);
+                    this.innerHTML = originalBtnHtml;
+                    this.disabled = false;
+                } else if(format === 'word') {
+                    exportToWord(selectedParams, part);
+                    this.innerHTML = originalBtnHtml;
+                    this.disabled = false;
+                }
             } catch (e) {
                 console.error(e);
                 Swal.fire('Error', 'Kesalahan: ' + e.message, 'error');
+                this.innerHTML = originalBtnHtml;
+                this.disabled = false;
             }
-            this.innerHTML = originalBtnHtml;
-            this.disabled = false;
         }, 300);
     });
 
@@ -1473,26 +1501,28 @@ document.addEventListener('DOMContentLoaded', function() {
             .header-title { font-size: 18px; font-weight: bold; }
             .title-box { background-color: #e9ecef; font-weight: bold; padding: 3px 5px; }
             .bg-grey { background-color: #f0f0f0; }
-            .page-break { page-break-after: always; }
+            .page-break { page-break-before: always; display: block; height: 1px; width: 100%; clear: both; }
         </style></head><body>`;
         
         const oldCode = modalParamSelect.value;
         
         params.forEach((code, index) => {
-            if (index > 0) html += `<div class="page-break"></div>`;
             
             if(part === 'both' || part === 'main') {
                 const origTable = document.querySelector(`.param-table[data-code="${code}"]`);
                 if(origTable) {
+                    if (index > 0) html += `<div class="page-break"></div>`;
+                    html += `<div>`;
                     html += `<div style="font-size: 16px; font-weight: bold; text-align: center; margin-bottom: 10px;">DATA UTAMA UJI STABILITAS - ${code}</div>`;
                     const tableClone = origTable.cloneNode(true);
+                    tableClone.style.minWidth = 'auto'; // Hapus min-width agar pas di PDF
                     tableClone.querySelectorAll('input').forEach(inp => {
                         const text = document.createTextNode(inp.value);
                         inp.parentNode.replaceChild(text, inp);
                     });
                     tableClone.className = "official-table";
                     html += tableClone.outerHTML;
-                    if(part === 'both') html += `<div class="page-break"></div>`;
+                    html += `</div>`;
                 }
             }
             
@@ -1500,7 +1530,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 modalParamSelect.value = code;
                 renderModalTTest();
                 const prt = document.getElementById('modalPrintArea').innerHTML;
-                html += prt;
+                if (part === 'both' || index > 0) {
+                    html += `<div class="page-break"></div>`;
+                }
+                html += `<div>${prt}</div>`;
             }
         });
         
@@ -1521,10 +1554,11 @@ document.addEventListener('DOMContentLoaded', function() {
             filename:     'Laporan_Stabilitas.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { scale: 2 },
-            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
+            pagebreak:    { mode: 'css', avoid: ['tr', 'h5', 'h4', '.avoid-break'] }
         };
         
-        html2pdf().set(opt).from(container).save();
+        return html2pdf().set(opt).from(html).save();
     }
 
     function exportToWord(params, part) {

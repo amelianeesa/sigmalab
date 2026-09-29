@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Chart - QC Harian')
 
 @section('content')
 <div class="container-fluid px-4 pb-5">
@@ -17,9 +18,6 @@
                 <div class="col-md-8">
                     <h5 class="fw-bold mb-1">Batch: {{ $activeBatch->kode_batch }}</h5>
                     <p class="text-muted mb-0 small">Nilai acuan ditarik dari hasil Uji Homogenitas (Target).</p>
-                </div>
-                <div class="col-md-4 text-end">
-                    <a href="{{ route('qc-harian.index') }}" class="btn btn-outline-secondary rounded-pill px-4"><i class="fas fa-arrow-left me-2"></i>Kembali</a>
                 </div>
             </div>
 
@@ -41,11 +39,66 @@
             <div style="height: 500px; width: 100%;">
                 <canvas id="controlChart"></canvas>
             </div>
+
+            <!-- TABEL DATA CONTROL CHART -->
+            <hr class="my-5">
+            <h5 class="fw-bold mb-3"><i class="fas fa-table text-primary me-2"></i>Tabel Data Control Chart</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-hover text-center align-middle" style="font-size: 14px;">
+                    <thead class="table-light">
+                        <tr>
+                            <th rowspan="2" class="align-middle">Tanggal</th>
+                            <th rowspan="2" class="align-middle">Pengujian Ke</th>
+                            <th>LCL</th>
+                            <th>LWL</th>
+                            <th>&mu; - 1&sigma;</th>
+                            <th>&mu; (Mean)</th>
+                            <th>&mu; + 1&sigma;</th>
+                            <th>UWL</th>
+                            <th>UCL</th>
+                            <th rowspan="2" class="align-middle">Control</th>
+                        </tr>
+                        <tr>
+                            <th class="text-muted fw-normal">({{ number_format($m - 3*$sd, 2) }})</th>
+                            <th class="text-muted fw-normal">({{ number_format($m - 2*$sd, 2) }})</th>
+                            <th class="text-muted fw-normal">({{ number_format($m - 1*$sd, 2) }})</th>
+                            <th class="text-muted fw-normal">({{ number_format($m, 2) }})</th>
+                            <th class="text-muted fw-normal">({{ number_format($m + 1*$sd, 2) }})</th>
+                            <th class="text-muted fw-normal">({{ number_format($m + 2*$sd, 2) }})</th>
+                            <th class="text-muted fw-normal">({{ number_format($m + 3*$sd, 2) }})</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($logs as $index => $log)
+                            <tr>
+                                <td>{{ \Carbon\Carbon::parse($log->tanggal_uji)->format('d/m/Y') }}</td>
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ number_format($m - 3*$sd, 2) }}</td>
+                                <td>{{ number_format($m - 2*$sd, 2) }}</td>
+                                <td>{{ number_format($m - 1*$sd, 2) }}</td>
+                                <td>{{ number_format($m, 2) }}</td>
+                                <td>{{ number_format($m + 1*$sd, 2) }}</td>
+                                <td>{{ number_format($m + 2*$sd, 2) }}</td>
+                                <td>{{ number_format($m + 3*$sd, 2) }}</td>
+                                <td class="fw-bold {{ $log->status_evaluasi === 'outlier' ? 'text-danger' : ($log->status_evaluasi === 'warning' ? 'text-warning text-dark' : 'text-success') }}">
+                                    {{ number_format($log->nilai_akhir, 2) }}
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="10" class="text-muted py-4">Belum ada data pengujian harian untuk parameter ini.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('controlChart').getContext('2d');
@@ -73,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
             pointColors.push('rgba(255, 193, 7, 1)'); // Yellow
             pointRadii.push(6);
         } else {
-            pointColors.push('rgba(13, 110, 253, 1)'); // Blue
+            pointColors.push('rgba(0, 0, 0, 1)'); // Black
             pointRadii.push(4);
         }
     });
@@ -93,6 +146,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const arr1SD = Array(len).fill(mean + 1*sd);
     const arrM1SD = Array(len).fill(mean - 1*sd);
 
+    if (typeof ChartDataLabels !== 'undefined') {
+        Chart.register(ChartDataLabels);
+    }
     new Chart(ctx, {
         type: 'line',
         data: {
@@ -101,15 +157,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 {
                     label: 'Nilai QC',
                     data: dataPoints,
-                    borderColor: 'rgba(13, 110, 253, 0.5)',
+                    borderColor: 'rgba(0, 0, 0, 0.7)',
                     backgroundColor: 'transparent',
                     pointBackgroundColor: pointColors,
                     pointBorderColor: pointColors,
                     pointRadius: pointRadii,
                     pointHoverRadius: 8,
                     borderWidth: 2,
-                    tension: 0.1,
-                    order: 0
+                    tension: 0.4,
+                    order: 0,
+                    datalabels: {
+                        align: 'top',
+                        anchor: 'end',
+                        color: '#333',
+                        font: { weight: 'bold' },
+                        formatter: function(value, context) {
+                            return parseFloat(value).toFixed(2);
+                        }
+                    }
                 },
                 {
                     label: 'Mean',
@@ -117,7 +182,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     borderColor: 'rgba(25, 135, 84, 0.8)',
                     borderWidth: 2,
                     pointRadius: 0,
-                    order: 1
+                    order: 1,
+                    datalabels: { display: false }
                 },
                 {
                     label: 'UCL (+3SD)',
@@ -125,7 +191,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     borderColor: 'rgba(220, 53, 69, 0.8)',
                     borderWidth: 2,
                     pointRadius: 0,
-                    order: 2
+                    order: 2,
+                    datalabels: { display: false }
                 },
                 {
                     label: 'LCL (-3SD)',
@@ -133,7 +200,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     borderColor: 'rgba(220, 53, 69, 0.8)',
                     borderWidth: 2,
                     pointRadius: 0,
-                    order: 3
+                    order: 3,
+                    datalabels: { display: false }
                 },
                 {
                     label: 'UWL (+2SD)',
@@ -142,7 +210,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     borderWidth: 2,
                     borderDash: [5, 5],
                     pointRadius: 0,
-                    order: 4
+                    order: 4,
+                    datalabels: { display: false }
                 },
                 {
                     label: 'LWL (-2SD)',
@@ -151,7 +220,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     borderWidth: 2,
                     borderDash: [5, 5],
                     pointRadius: 0,
-                    order: 5
+                    order: 5,
+                    datalabels: { display: false }
                 },
                 {
                     label: '+1SD',
@@ -160,7 +230,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     borderWidth: 1,
                     borderDash: [2, 2],
                     pointRadius: 0,
-                    order: 6
+                    order: 6,
+                    datalabels: { display: false }
                 },
                 {
                     label: '-1SD',
@@ -169,7 +240,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     borderWidth: 1,
                     borderDash: [2, 2],
                     pointRadius: 0,
-                    order: 7
+                    order: 7,
+                    datalabels: { display: false }
                 }
             ]
         },
@@ -213,3 +285,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
+

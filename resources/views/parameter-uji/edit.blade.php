@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Edit Data - Parameter Uji')
 
 @section('content')
 <div class="container-fluid px-4">
@@ -56,14 +57,8 @@
                 <div class="card bg-light mb-3 border-0">
                     <div class="card-body py-2">
                         <p class="mb-2 text-muted fw-bold" style="font-size: 0.85rem;"><i class="fas fa-chart-line"></i> Input Data Statistik (In-House)</p>
-                        <div class="alert alert-info py-1 px-2 mb-2 d-flex justify-content-between align-items-center" style="font-size: 0.8rem;">
-                            <span>Sistem dapat menghitung <strong>Mean (Rata-rata)</strong> dan <strong>SD (Standar Deviasi)</strong> secara otomatis dari kumpulan baris data histori pengujian (setara dengan rumus <code>AVERAGE</code> dan <code>STDEV</code> di Excel).</span>
-                                                        <button type="button" class="btn btn-sm btn-primary py-0" id="btnCalculateStats">
-                                <i class="fas fa-magic"></i> Hitung dari Histori
-                            </button>
-                            <button type="button" class="btn btn-sm btn-warning py-0 text-dark fw-bold ms-2" id="btnUseCrm">
-                                <i class="fas fa-certificate"></i> Gunakan Nilai CRM
-                            </button>
+                        <div class="alert alert-info py-1 px-2 mb-2" style="font-size: 0.8rem;">
+                            <i class="fas fa-info-circle me-1"></i> Nilai <strong>Mean</strong> dan <strong>SD</strong> didapatkan secara otomatis dari hasil <strong>Uji Homogenitas</strong>. Jika dilakukan uji homogenitas ulang, maka nilai-nilai ini akan ikut berubah secara otomatis.
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
@@ -164,9 +159,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         const inputBatasAtas = document.getElementById('inputBatasAtas');
                         
                         
-
-                                                const btnCalculateStats = document.getElementById('btnCalculateStats');
-                        
                         function calculateLimits() {
                             const mean = parseFloat(inputMean.value) || 0;
                             const sd = parseFloat(inputSd.value) || 0;
@@ -186,68 +178,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         inputMean.addEventListener('input', calculateLimits);
                         inputSd.addEventListener('input', calculateLimits);
 
-                        const btnUseCrm = document.getElementById('btnUseCrm');
-                        if (btnUseCrm) {
-                            btnUseCrm.addEventListener('click', function() {
-                                const certVals = document.querySelectorAll('input[name*="[cert_value]"]');
-                                const certUs = document.querySelectorAll('input[name*="[cert_u]"]');
-                                let found = false;
-                                for (let i = 0; i < certVals.length; i++) {
-                                    const val = parseFloat(certVals[i].value);
-                                    const u = parseFloat(certUs[i].value) || 0;
-                                    if (!isNaN(val)) {
-                                        inputAcuan.value = val.toFixed(4);
-                                        inputBatasBawah.value = (val - u).toFixed(4);
-                                        inputBatasAtas.value = (val + u).toFixed(4);
-                                        
-                                        // Also clear mean and SD since we are using CRM
-                                        inputMean.value = 0;
-                                        inputSd.value = 0;
-                                        if (calcLcl) {
-                                            calcLcl.textContent = '0';
-                                            calcUwlBawah.textContent = '0';
-                                            calcUwlAtas.textContent = '0';
-                                            calcUcl.textContent = '0';
-                                        }
-                                        
-                                        alert('Berhasil! Nilai Acuan, Batas Bawah, dan Batas Atas telah diisi otomatis menggunakan nilai Sertifikat CRM.');
-                                        found = true;
-                                        break;
-                                    }
-                                }
-                                if (!found) {
-                                    alert('Tidak ada nilai Sertifikat CRM yang terisi. Silakan isi nilai sertifikat di tab CRM terlebih dahulu.');
-                                }
-                            });
-                        }
-                        if (btnCalculateStats) {
-                            btnCalculateStats.addEventListener('click', function() {
-                                const originalText = this.innerHTML;
-                                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghitung...';
-                                this.disabled = true;
-
-                                fetch(`{{ route('parameter-uji.calculate-stats', $parameterUji->parameter_uji_id) }}`)
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (data.count < 2) {
-                                            alert('Data histori kurang dari 2. Tidak bisa menghitung Standar Deviasi.');
-                                        } else {
-                                            inputMean.value = data.mean;
-                                            inputSd.value = data.sd;
-                                            calculateLimits();
-                                            alert(`Berhasil dihitung dari ${data.count} data histori Inhouse Control.`);
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error('Error:', error);
-                                        alert('Terjadi kesalahan saat menghitung histori.');
-                                    })
-                                    .finally(() => {
-                                        this.innerHTML = originalText;
-                                        this.disabled = false;
-                                    });
-                            });
-                        }
                         // Langkah Kalkulasi Dynamic Form
                         const tableBody = document.querySelector('#langkahTable tbody');
                         const btnAdd = document.getElementById('btnAddLangkah');

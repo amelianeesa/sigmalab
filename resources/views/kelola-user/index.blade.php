@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Daftar - Kelola User')
 
 @section('content')
 <style>

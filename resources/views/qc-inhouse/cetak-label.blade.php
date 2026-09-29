@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Cetak Label - QC In-House')
 
 @section('content')
 <div class="container-fluid px-4 pb-5 cetak-container">

@@ -16,13 +16,13 @@
                     </a>
                 </li>
                 <li>
-                    <a class="dropdown-item {{ $active === 'CRM' ? 'active' : '' }}" href="#">
+                    <a class="dropdown-item {{ $active === 'CRM' ? 'active' : '' }}" href="{{ route('qc-crm.index') }}">
                         <i class="fas fa-certificate me-2"></i> QC CRM
                     </a>
                 </li>
                 <li>
-                    <a class="dropdown-item {{ $active === 'Uji Banding' ? 'active' : '' }}" href="#">
-                        <i class="fas fa-balance-scale me-2"></i> QC Uji Banding
+                    <a class="dropdown-item {{ $active === 'Uji Banding' ? 'active' : '' }}" href="{{ route('qc-uji-banding.index') }}">
+                        <i class="fas fa-globe me-2"></i> QC Uji Banding
                     </a>
                 </li>
             </ul>
@@ -30,3 +30,4 @@
     </li>
     {{ $slot }}
 </ol>
+

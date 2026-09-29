@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Tambah Baru - QC In-House')
 
 @section('content')
 <div class="container-fluid px-4 pb-5">
@@ -23,7 +24,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('qc-inhouse.store') }}" method="POST" id="formPemilihan">
+                    <form action="{{ route('qc-inhouse.store') }}" method="POST" id="formPemilihan" autocomplete="off">
                         @csrf
                         
                         <div class="row g-4 mb-4">

@@ -1,0 +1,108 @@
+<div class="row g-2 mb-3 bg-light p-2 border">
+    <div class="col-md-3"><label class="small fw-bold">Reference No</label><input type="text" name="params[{{ $pid_c }}][ref_no]" class="form-control form-control-sm param-input-ext" disabled></div>
+    <div class="col-md-3"><label class="small fw-bold">Balance ID</label><input type="text" name="params[{{ $pid_c }}][blnc_id]" class="form-control form-control-sm param-input-ext" disabled></div>
+    <div class="col-md-3"><label class="small fw-bold">Calorimeter ID</label><input type="text" name="params[{{ $pid_c }}][furnace_id]" class="form-control form-control-sm param-input-ext" disabled></div>
+    <div class="col-md-3"><label class="small fw-bold">Reference Method</label><input type="text" name="params[{{ $pid_c }}][std_method]" class="form-control form-control-sm param-input-ext" disabled></div>
+</div>
+
+<div class="table-responsive mb-3" style="overflow-x: auto; white-space: nowrap;">
+    <table class="table table-bordered table-sm align-middle text-center param-table" id="table-{{ $pid_c }}" data-pid="{{ $pid_c }}" data-code="CHN">
+        <thead class="table-light">
+            <tr>
+                <th class="align-middle">Pengujian Ke-</th>
+                <th class="align-middle">Date</th>
+                <th class="align-middle">Parameter</th>
+                <th class="align-middle">Simplo</th>
+                <th class="align-middle">Duplo</th>
+                <th colspan="2" class="align-middle">ABSOLUTE DIFFERENCE</th>
+                <th class="align-middle bg-warning bg-opacity-25">Average %</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- weight -->
+            <tr class="row-entry" data-type="weight">
+                <td rowspan="4" class="align-middle">
+                    <input type="number" class="form-control form-control-sm text-center mx-auto" name="params[{{ $pid_c }}][data][0][pengujian_ke]" style="width: 70px; min-width: 70px;" value="1">
+                </td>
+                <td rowspan="4" class="align-middle">
+                    <input type="date" class="form-control form-control-sm" name="params[{{ $pid_c }}][data][0][tanggal_uji]" style="width: 130px; min-width: 130px;" value="{{ date('Y-m-d') }}">
+                </td>
+                <td class="fw-bold">Weight (mg)</td>
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-w-1" name="params[{{ $pid_c }}][data][0][mentah][w_1]" disabled></td>
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-w-2" name="params[{{ $pid_c }}][data][0][mentah][w_2]" disabled></td>
+                <td class="align-middle out-diff fw-bold">-</td>
+                <td class="align-middle p-1">
+                    <select class="form-select form-select-sm fw-bold" name="params[{{ $pid_c }}][data][0][mentah][w_yesno]" onchange="updateYesNoColor(this)">
+                        <option value=""></option>
+                        <option value="YES">YES</option>
+                        <option value="NO">NO</option>
+                    </select>
+                </td>
+                <td class="align-middle bg-warning bg-opacity-25 fw-bold fs-6"><span class="out-avg-txt">-</span></td>
+            </tr>
+
+            <!-- carbon -->
+            <tr class="row-entry" data-type="carbon">
+                <td class="fw-bold">Carbon %db</td>
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-c-1" name="params[{{ $pid_c }}][data][0][mentah][c_1]" disabled></td>
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-c-2" name="params[{{ $pid_c }}][data][0][mentah][c_2]" disabled></td>
+                <td class="align-middle out-diff fw-bold">-</td>
+                <td class="align-middle p-1">
+                    <select class="form-select form-select-sm fw-bold" name="params[{{ $pid_c }}][data][0][yesno]" onchange="updateYesNoColor(this)">
+                        <option value=""></option>
+                        <option value="YES">YES</option>
+                        <option value="NO">NO</option>
+                    </select>
+                </td>
+                <td class="align-middle bg-warning bg-opacity-25 fw-bold fs-6"><span class="out-avg-txt">-</span>
+                    <input type="hidden" class="in-hasil-1" name="params[{{ $pid_c }}][data][0][hasil_1]" disabled>
+                    <input type="hidden" class="in-hasil-2" name="params[{{ $pid_c }}][data][0][hasil_2]" disabled>
+                    <input type="hidden" class="in-d1" name="params[{{ $pid_c }}][data][0][d1]">
+                    <input type="hidden" class="in-d2" name="params[{{ $pid_c }}][data][0][d2]">
+                </td>
+            </tr>
+
+            <!-- hydrogen -->
+            <tr class="row-entry" data-type="hydrogen">
+                <td class="fw-bold">Hydrogen %db</td>
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-h-1" name="params[{{ $pid_h }}][data][0][mentah][h_1]" disabled></td>
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-h-2" name="params[{{ $pid_h }}][data][0][mentah][h_2]" disabled></td>
+                <td class="align-middle out-diff fw-bold">-</td>
+                <td class="align-middle p-1">
+                    <select class="form-select form-select-sm fw-bold" name="params[{{ $pid_h }}][data][0][yesno]" onchange="updateYesNoColor(this)">
+                        <option value=""></option>
+                        <option value="YES">YES</option>
+                        <option value="NO">NO</option>
+                    </select>
+                </td>
+                <td class="align-middle bg-warning bg-opacity-25 fw-bold fs-6"><span class="out-avg-txt">-</span>
+                    <input type="hidden" class="in-hasil-1" name="params[{{ $pid_h }}][data][0][hasil_1]" disabled>
+                    <input type="hidden" class="in-hasil-2" name="params[{{ $pid_h }}][data][0][hasil_2]" disabled>
+                    <input type="hidden" class="in-d1" name="params[{{ $pid_h }}][data][0][d1]">
+                    <input type="hidden" class="in-d2" name="params[{{ $pid_h }}][data][0][d2]">
+                </td>
+            </tr>
+            
+            <!-- ROW 4: NITROGEN -->
+            <tr class="row-entry" data-type="nitrogen">
+                <td class="fw-bold">Nitrogen %db</td>
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-n-1" name="params[{{ $pid_n }}][data][0][mentah][n_1]" disabled></td>
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-n-2" name="params[{{ $pid_n }}][data][0][mentah][n_2]" disabled></td>
+                <td class="align-middle out-diff fw-bold">-</td>
+                <td class="align-middle p-1">
+                    <select class="form-select form-select-sm fw-bold" name="params[{{ $pid_n }}][data][0][yesno]" onchange="updateYesNoColor(this)">
+                        <option value=""></option>
+                        <option value="YES">YES</option>
+                        <option value="NO">NO</option>
+                    </select>
+                </td>
+                <td class="align-middle bg-warning bg-opacity-25 fw-bold fs-6"><span class="out-avg-txt">-</span>
+                    <input type="hidden" class="in-hasil-1" name="params[{{ $pid_n }}][data][0][hasil_1]" disabled>
+                    <input type="hidden" class="in-hasil-2" name="params[{{ $pid_n }}][data][0][hasil_2]" disabled>
+                    <input type="hidden" class="in-d1" name="params[{{ $pid_n }}][data][0][d1]">
+                    <input type="hidden" class="in-d2" name="params[{{ $pid_n }}][data][0][d2]">
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

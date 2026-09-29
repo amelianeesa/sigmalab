@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Edit Data - Alat')
 
 @section('content')
 <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">

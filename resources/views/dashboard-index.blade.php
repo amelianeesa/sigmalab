@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'dashboard-index - views')
 
 @section('content')
 <style>

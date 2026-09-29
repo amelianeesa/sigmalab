@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Daftar - Monitoring Ruangan')
 
 @push('styles')
 <style>

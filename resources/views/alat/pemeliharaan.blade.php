@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Pemeliharaan - Alat')
 
 @section('content')
 <style>

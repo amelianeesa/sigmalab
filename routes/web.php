@@ -27,6 +27,8 @@ use App\Http\Controllers\QcInhouseController;
 use App\Http\Controllers\QcHarianController;
 use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\ParameterToleransiController;
+
 
 Route::get('/', [AuthController::class, 'showLogin']);
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -131,8 +133,44 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
     Route::get('/parameter-uji/{parameter_uji}/calculate-stats', [ParameterUjiController::class, 'calculateHistoricalStats'])->name('parameter-uji.calculate-stats');
     Route::get('/parameter-uji/{parameter_uji}/control-chart', [ParameterUjiController::class, 'controlChart'])->name('parameter-uji.control-chart');
     Route::match(['get', 'post'], 'parameter-uji/{parameter_uji}/cetak', [ParameterUjiController::class, 'cetakControlChart'])->name('parameter-uji.cetak-control-chart');
-    Route::post('/parameter-uji/crm-katalog', [ParameterUjiController::class, 'storeCrmKatalog'])->name('parameter-uji.store-crm');
-    Route::delete('/parameter-uji/crm-katalog/{id}', [ParameterUjiController::class, 'destroyCrmKatalog'])->name('parameter-uji.destroy-crm');
+
+    
+    Route::post('/parameter-uji/store-crm', [ParameterUjiController::class, 'storeCrmKatalog'])->name('parameter-uji.store-crm');
+    // CRM Katalog CRUD
+    Route::resource('crm-katalog', \App\Http\Controllers\CrmKatalogController::class);
+    Route::post('crm-katalog/{id}/sertifikat', [\App\Http\Controllers\CrmKatalogController::class, 'storeSertifikat'])->name('crm-katalog.store-sertifikat');
+    Route::delete('crm-katalog/{id}/sertifikat/{sertifikat_id}', [\App\Http\Controllers\CrmKatalogController::class, 'destroySertifikat'])->name('crm-katalog.destroy-sertifikat');
+    Route::get('crm-katalog/{id}/verifikasi-administratif', [\App\Http\Controllers\CrmKatalogController::class, 'verifikasiAdministratifForm'])->name('crm-katalog.verifikasi-administratif.form');
+    Route::post('crm-katalog/{id}/verifikasi-administratif', [\App\Http\Controllers\CrmKatalogController::class, 'verifikasiAdministratifStore'])->name('crm-katalog.verifikasi-administratif.store');
+    Route::get('crm-katalog/{id}/verifikasi-teknis', [\App\Http\Controllers\CrmKatalogController::class, 'verifikasiTeknisForm'])->name('crm-katalog.verifikasi-teknis.form');
+    Route::post('crm-katalog/{id}/verifikasi-teknis', [\App\Http\Controllers\CrmKatalogController::class, 'verifikasiTeknisStore'])->name('crm-katalog.verifikasi-teknis.store');
+
+    // Pengujian Harian QC CRM
+    Route::resource('qc-crm', \App\Http\Controllers\QcCrmController::class);
+    Route::get('qc-crm/chart/data', [\App\Http\Controllers\QcCrmController::class, 'chartData'])->name('qc-crm.chart.data');
+    Route::get('api/crm-katalog/{id}/parameters', [\App\Http\Controllers\QcCrmController::class, 'apiGetParameters'])->name('api.crm-katalog.parameters');
+
+    // QC Uji Banding
+
+    Route::get('qc-uji-banding/master-toleransi', [ParameterToleransiController::class, 'index'])->name('master.toleransi.index');
+    Route::post('qc-uji-banding/master-toleransi', [ParameterToleransiController::class, 'store'])->name('master.toleransi.store');
+    Route::put('qc-uji-banding/master-toleransi/{id}', [ParameterToleransiController::class, 'update'])->name('master.toleransi.update');
+    Route::delete('qc-uji-banding/master-toleransi/{id}', [ParameterToleransiController::class, 'destroy'])->name('master.toleransi.destroy');
+    Route::post('qc-uji-banding/draft', [\App\Http\Controllers\QcUjiBandingController::class, 'storeDraft'])->name('qc-uji-banding.draft.store');
+    Route::resource('qc-uji-banding', \App\Http\Controllers\QcUjiBandingController::class);
+    Route::get('qc-uji-banding/{id}/print-pdf', [\App\Http\Controllers\QcUjiBandingController::class, 'printPdf'])->name('qc-uji-banding.printPdf');
+    Route::get('qc-uji-banding/{id}/investigasi/{param_id}', [\App\Http\Controllers\QcUjiBandingController::class, 'investigasi'])->name('qc-uji-banding.investigasi');
+    Route::put('qc-uji-banding/{id}/investigasi/{param_id}', [\App\Http\Controllers\QcUjiBandingController::class, 'storeInvestigasi'])->name('qc-uji-banding.store-investigasi');
+    Route::get('qc-uji-banding/{id}/cetak/pdf/{param_id}', [\App\Http\Controllers\QcUjiBandingController::class, 'cetakLksPdf'])->name('qc-uji-banding.cetak.pdf');
+    Route::get('qc-uji-banding/{id}/cetak/word/{param_id}', [\App\Http\Controllers\QcUjiBandingController::class, 'cetakLksWord'])->name('qc-uji-banding.cetak.word');
+    Route::get('qc-uji-banding/{id}/evaluasi', [\App\Http\Controllers\QcUjiBandingController::class, 'evaluasiForm'])->name('qc-uji-banding.evaluasi.form');
+    Route::post('qc-uji-banding/{id}/evaluasi', [\App\Http\Controllers\QcUjiBandingController::class, 'evaluasiStore'])->name('qc-uji-banding.evaluasi.store');
+    Route::get('qc-uji-banding/{id}/ringkasan', [\App\Http\Controllers\QcUjiBandingController::class, 'ringkasanUnjukKerja'])->name('qc-uji-banding.ringkasan');
+
+    // AFT Kalibrasi Endpoints
+    Route::post('aft-kalibrasi', [\App\Http\Controllers\QcUjiBandingController::class, 'aftKalibrasiStore'])->name('aft.kalibrasi.store');
+    Route::get('aft-kalibrasi', [\App\Http\Controllers\QcUjiBandingController::class, 'aftKalibrasiList'])->name('aft.kalibrasi.list');
+    Route::get('aft-kalibrasi/{id}', [\App\Http\Controllers\QcUjiBandingController::class, 'aftKalibrasiShow'])->name('aft.kalibrasi.show');
 
 
     Route::middleware('modul:library_manage,tambah_ubah')->group(function () {
@@ -224,6 +262,7 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::get('/', [QcHarianController::class, 'index'])->name('index');
         Route::get('/create', [QcHarianController::class, 'create'])->name('create');
         Route::post('/', [QcHarianController::class, 'store'])->name('store');
+        Route::get('/print-pdf', [QcHarianController::class, 'printPdf'])->name('print-pdf');
         Route::get('/{parameter_uji_id}/chart', [QcHarianController::class, 'chart'])->name('chart');
         Route::get('/{id}/investigasi', [QcHarianController::class, 'investigasi'])->name('investigasi');
         Route::post('/{id}/investigasi', [QcHarianController::class, 'storeInvestigasi'])->name('investigasi.store');

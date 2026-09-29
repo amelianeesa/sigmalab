@@ -71,10 +71,14 @@ class AlatController extends Controller
             });
         }
 
+
         $alat = $query->latest()->paginate(10)->withQueryString();
 
         return view('alat.index', compact('alat', 'search', 'filterStatus', 'filterKondisi', 'alatWarningCount'));
     }
+// =======
+//         $alat = $alatList;
+// >>>>>>> b160c1b1b3071010e910ae8463ddb0d6c0423ff8
 
     private function whereKalibrasiTerakhir($query, \Closure $kondisi)
     {

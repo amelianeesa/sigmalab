@@ -50,5 +50,8 @@ class AuditLogController extends Controller
             : collect([$log]);
 
         return view('audit-log.show', compact('log', 'batchLogs'));
+// =======
+//         return view('audit-log.show', compact('log'));
+// >>>>>>> b160c1b1b3071010e910ae8463ddb0d6c0423ff8
     }
 }

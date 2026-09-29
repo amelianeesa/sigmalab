@@ -248,6 +248,10 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
             const lineUWL = Array(labels.length).fill(d.stats.plus2sd);
             const lineLWL = Array(labels.length).fill(d.stats.minus2sd);
             
+            if (typeof ChartDataLabels !== 'undefined') {
+                Chart.register(ChartDataLabels);
+            }
+
             new Chart(ctx, {
                 type: 'line',
                 data: {

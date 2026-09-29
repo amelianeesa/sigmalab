@@ -1,8 +1,8 @@
 @extends('layouts.app')
+@section('title', 'Control Chart - Hasil Uji')
 
 @section('content')
 <div class="container-fluid">
-    <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
@@ -18,7 +18,6 @@
         <h1 class="h3 mb-0 text-gray-800">Inhouse Control {{ $selectedParameter ? '- ' . $selectedParameter->nama_parameter : '' }}</h1>
     </div>
 
-    <!-- Filter Card -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Filter Data</h6>
@@ -66,7 +65,6 @@
     </div>
 
     @if($selectedParameter)
-    <!-- Form Cetak PDF (Hidden) -->
     <form id="formCetak" action="{{ route('hasil-uji.inhouse-control.cetak') }}" method="POST" target="_blank" style="display: none;">
         @csrf
         <input type="hidden" name="parameter_uji_id" value="{{ request('parameter_uji_id') }}">
@@ -77,7 +75,7 @@
     @endif
 
     @if(!isset($selectedParameter) || !$selectedParameter)
-        <!-- No Parameter Selected -->
+       
         <div class="alert alert-info shadow-sm" role="alert">
             <i class="fas fa-info-circle me-2"></i> Silakan pilih Parameter Uji terlebih dahulu untuk menampilkan Control Chart.
         </div>
@@ -291,6 +289,7 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
 @if(isset($chartData) && count($chartData['labels']) > 0)
 <script>
@@ -320,6 +319,7 @@
         const m2sdData = labels.map(() => lines.minus2sd);
         const m3sdData = labels.map(() => lines.minus3sd);
 
+        Chart.register(ChartDataLabels);
         const controlChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -328,10 +328,20 @@
                     {
                         label: 'Nilai Ukur',
                         data: values,
-                        borderColor: '#4e73df',
+                        datalabels: {
+                            align: 'top',
+                            anchor: 'end',
+                            color: '#333',
+                            font: { weight: 'bold' },
+                            formatter: function(value, context) {
+                                return parseFloat(value).toFixed(2);
+                            }
+                        },
+                        borderColor: 'rgba(0, 0, 0, 0.7)',
+                        tension: 0.4,
                         backgroundColor: pointColors,
-                        pointBackgroundColor: pointColors,
-                        pointBorderColor: pointColors,
+                        pointBackgroundColor: 'rgba(0, 0, 0, 1)',
+                        pointBorderColor: 'rgba(0, 0, 0, 1)',
                         pointRadius: 5,
                         pointHoverRadius: 7,
                         fill: false,
@@ -346,6 +356,7 @@
                         borderWidth: 2,
                         borderDash: [5, 5],
                         pointRadius: 0,
+                        datalabels: { display: false },
                         fill: false
                     },
                     @if(request('jenis_grafik') != 'crm')
@@ -356,6 +367,7 @@
                         borderWidth: 1,
                         borderDash: [3, 3],
                         pointRadius: 0,
+                        datalabels: { display: false },
                         fill: false
                     },
                     {
@@ -365,6 +377,7 @@
                         borderWidth: 1,
                         borderDash: [3, 3],
                         pointRadius: 0,
+                        datalabels: { display: false },
                         fill: false
                     },
                     {
@@ -374,6 +387,7 @@
                         borderWidth: 1,
                         borderDash: [4, 4],
                         pointRadius: 0,
+                        datalabels: { display: false },
                         fill: false
                     },
                     {
@@ -383,6 +397,7 @@
                         borderWidth: 1,
                         borderDash: [4, 4],
                         pointRadius: 0,
+                        datalabels: { display: false },
                         fill: false
                     },
                     @endif
@@ -393,6 +408,7 @@
                         borderWidth: 2,
                         borderDash: [5, 5],
                         pointRadius: 0,
+                        datalabels: { display: false },
                         fill: false
                     },
                     {
@@ -402,6 +418,7 @@
                         borderWidth: 2,
                         borderDash: [5, 5],
                         pointRadius: 0,
+                        datalabels: { display: false },
                         fill: false
                     }
                 ]
@@ -484,3 +501,4 @@
 </script>
 @endif
 @endpush
+

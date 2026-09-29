@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Daftar - Alat')
 
 @section('content')
 <style>

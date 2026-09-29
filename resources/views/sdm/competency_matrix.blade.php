@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Competency Matrix - SDM')
 
 @section('content')
 <style>

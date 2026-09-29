@@ -238,6 +238,10 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
             return 'green';
         });
 
+        if (typeof ChartDataLabels !== 'undefined') {
+            Chart.register(ChartDataLabels);
+        }
+
         new Chart(ctx, {
             type: 'line',
             data: {

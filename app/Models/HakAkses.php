@@ -13,6 +13,7 @@ class HakAkses extends BaseModel
     use HasFactory;
 
     protected $table = 'hak_akses';
+    protected $primaryKey = 'id';
 
     protected $fillable = [
         'role_id',

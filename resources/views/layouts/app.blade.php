@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Dashboard - SIGMALAB Sucofindo</title>
+
     <link rel="icon" type="image/png" href="{{ asset('images/logo-sucofindo.png') }}?v=1">
    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -393,10 +394,17 @@
                 @if(Auth::check() && (Auth::user()->hasModulAccess('sdm') || Auth::user()->hasModulAccess('manajemen_pengguna')))
                 <li class="{{ request()->is('sdm*') || request()->is('hak-akses*') ? 'active' : '' }}">
                     <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personil & Kompetensi</a>
+{{-- =======
+                {{-- 2. Personil & Kompetensi --}}
+                {{-- @if(Auth::check() && Auth::user()->hasModulAccess('sdm'))
+                <li class="{{ request()->is('sdm*') ? 'active' : '' }}">
+                    <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personel & Kompetensi</a>
+>>>>>>> b160c1b1b3071010e910ae8463ddb0d6c0423ff8 --}} 
                 </li>
                 @endif
 
                 @if(Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
+
                 @php
                     $qcIndexPath = trim((string) parse_url(route('kegiatan.index'), PHP_URL_PATH), '/');
                     $qcActive = request()->is('verifikasi-mutu*', 'qc-inhouse*', 'parameter-uji*', 'kegiatan*', 'tindak-lanjut*', 'reporting*')
@@ -443,6 +451,7 @@
                             @endif
                         </ul>
                     </div>
+
                 </li>
                 @endif
 
@@ -455,6 +464,13 @@
                 @if(Auth::check() && Auth::user()->hasModulAccess('audit_log'))
                 <li class="{{ request()->is('audit-log*') ? 'active' : '' }}">
                     <a href="{{ route('audit-log.index') }}"><i class="fas fa-history"></i> Audit Trail</a>
+                </li>
+                @endif
+
+                {{-- 7. Pengaturan Sistem --}}
+                @if(Auth::check() && Auth::user()->hasModulAccess('manajemen_pengguna'))
+                <li class="{{ request()->is('hak-akses*') || request()->is('kelola-user*') ? 'active' : '' }}">
+                    <a href="{{ route('hak-akses.index') }}"><i class="fas fa-user-shield"></i> Pengaturan Akses</a>
                 </li>
                 @endif
             </ul>

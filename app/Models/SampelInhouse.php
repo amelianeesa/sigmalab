@@ -19,6 +19,7 @@ class SampelInhouse extends BaseModel
         'jumlah_botol',
         'nomor_awal_botol',
         'data_pemilihan_sampel',
+        'data_screening',
         'data_equilibrium',
         'bobot_konstan_tercapai',
         'catatan_preparasi',
@@ -33,6 +34,7 @@ class SampelInhouse extends BaseModel
 
     protected $casts = [
         'data_pemilihan_sampel' => 'array',
+        'data_screening' => 'array',
         'data_equilibrium' => 'array',
         'urutan_acak_instrumen' => 'array',
         'bobot_konstan_tercapai' => 'boolean',

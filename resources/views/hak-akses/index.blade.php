@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Daftar - hak-akses')
 
 @section('content')
 <style>

@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Tambah Baru - Parameter Uji')
 
 @section('content')
 <div class="container-fluid px-4">
@@ -54,6 +55,9 @@
                 <div class="card bg-light mb-3 border-0">
                     <div class="card-body py-2">
                         <p class="mb-2 text-muted fw-bold" style="font-size: 0.85rem;"><i class="fas fa-chart-line"></i> Input Data Statistik (In-House)</p>
+                        <div class="alert alert-info py-1 px-2 mb-2" style="font-size: 0.8rem;">
+                            <i class="fas fa-info-circle me-1"></i> Nilai <strong>Mean</strong> dan <strong>SD</strong> didapatkan secara otomatis dari hasil <strong>Uji Homogenitas</strong>. Jika dilakukan uji homogenitas ulang, maka nilai-nilai ini akan ikut berubah secara otomatis.
+                        </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold text-primary" style="font-size: 0.85rem;">Mean (Rata-rata)</label>

@@ -69,16 +69,24 @@ class ParameterUji extends BaseModel
 
     public function hasInhouseLimits(): bool
     {
+        return !is_null($this->mean) && !is_null($this->sd);
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
         return LogOptions::defaults()
             ->logFillable()
             ->logOnlyDirty()
-            // ->dontSubmitEmptyLogs()
             ->setDescriptionForEvent(fn(string $eventName) => "Data parameter uji telah di-{$eventName}");
-        return !is_null($this->mean) && !is_null($this->sd);
     }
 
     public function sertifikatCrm()
     {
         return $this->hasMany(CrmSertifikat::class, 'parameter_uji_id', 'parameter_uji_id');
+    }
+
+    public function toleransis()
+    {
+        return $this->hasMany(ParameterToleransi::class, 'parameter_uji_id', 'parameter_uji_id');
     }
 }

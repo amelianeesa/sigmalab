@@ -14,7 +14,6 @@ class Notifikasi extends BaseModel
         'pesan',
         'url',
         'is_read',
-        'tipe'
     ];
 
     protected $casts = [

@@ -3,7 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+    {{-- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"> --}}
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - SIGMALAB Sucofindo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -47,6 +50,26 @@
             background: #ffffff;
             border-radius: 16px;
             overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .auth-row {
+                grid-template-columns: 1fr; 
+            }
+            .auth-side {
+                padding: 3.5rem 1.5rem; 
+                text-align: left;
+            }
+            .auth-side p {
+                max-width: 100%;
+                margin: 0;
+            }
+            .auth-card {
+                margin: 1rem;
+            }
+            .auth-side::before, .auth-side::after {
+                display: none;
+            }
         }
 
         .auth-side {

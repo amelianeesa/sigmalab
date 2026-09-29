@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Investigasi - QC Harian')
 
 @section('content')
 <div class="container-fluid px-4 pb-5">

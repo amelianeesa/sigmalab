@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('title', 'Detail Data - Audit Log')
 
 @section('content')
 

@@ -129,11 +129,11 @@
                             $textColor = '';
                             
                             if (str_contains($keputusanLower, 'faktor') || str_contains($keputusanLower, 'penambahan') || (str_contains($keputusanLower, 'layak') && str_contains($keputusanLower, 'koreksi'))) {
-                                $badge = 'warning text-dark'; // Kuning dengan teks gelap
+                                $badge = 'warning text-dark'; 
                             } elseif (str_contains($keputusanLower, 'layak') && !str_contains($keputusanLower, 'tidak')) {
-                                $badge = 'success'; // Hijau
+                                $badge = 'success'; 
                             } elseif (str_contains($keputusanLower, 'tidak')) {
-                                $badge = 'danger'; // Merah
+                                $badge = 'danger'; 
                             }
                         @endphp
                         <span class="badge bg-{{ $badge }}" style="font-size: 0.55rem; padding: 0.3em 0.4em; white-space: normal; display: inline-block; max-width: 100px; word-break: break-word; line-height: 1.2;">
