@@ -46,14 +46,32 @@
         padding: 2px 4px !important;
         font-size: 0.68rem !important;
     }
+    .header-action-btns {
+        display: flex !important;
+        gap: 10px !important; /* Memberikan jarak antar tombol secara permanen */
+        align-items: center;
+    }
 
-    /* CSS RESPONSIF MOBILE UTAMA */
     @media (max-width: 768px) {
+
+        .btn-toggle-acuan {
+            width: 100% !important;
+            max-width: 100% !important;
+            font-size: 0.75rem !important;
+            padding: 6px 10px !important;
+            text-align: center !important;
+        }
+
+        .card-body .d-flex.justify-content-between.align-items-center {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px;
+        }
+
         .table th, .table td {
             padding: 2px 1px !important;
             font-size: 0.58rem !important;
         }
-        /* Memaksa lebar kolom waktu Pagi & Sore agar muat teks jam 08:00 */
         .table th.waktu-pagi-col, 
         .table th.waktu-sore-col,
         .table th[style*="width: 90px;"] {
@@ -70,7 +88,6 @@
             font-size: 0.58rem !important;
             text-align: center;
         }
-        /* Tombol aksi atas dibuat berjajar rapi full width */
         .header-action-container {
             flex-direction: column !important;
             align-items: stretch !important;
@@ -78,7 +95,7 @@
         .header-action-btns {
             width: 100% !important;
             display: flex !important;
-            gap: 5px !important;
+            gap: 10px !important; 
             margin-top: 8px !important;
         }
         .header-action-btns .btn {
@@ -99,14 +116,13 @@
         $canManage = in_array($userRoleName, $allowedRoles);
     @endphp
 
-    <!-- Bagian Header & Tombol Aksi yang Diperbaiki agar tidak menumpuk -->
     <div class="d-flex justify-content-between align-items-center mb-3 header-action-container flex-wrap">
         <div>
             <h4 class="fw-bold text-dark mb-1" style="font-size: 1.1rem;">
                  Pencatatan Monitoring Suhu dan Kelembaban Udara
             </h4>
         </div>    
-        <div class="header-action-btns d-flex">
+        <div class="header-action-btns d-flex" style="gap: 5px !important;">
             <a href="{{ route('inventori.monitoring.index') }}" class="btn text-white btn-sm py-1 px-2 shadow-sm" style="font-size: 0.72rem; background-color: #1b3152;"><i class="fas fa-sync-alt me-1"></i> Refresh Data</a>
             @if(isset($alatId) && $alatId && isset($ruangan) && $ruangan)
                 <a href="{{ route('inventori.monitoring.exportPdf', ['alat_id' => $alatId, 'nama_ruangan' => $ruangan, 'bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="btn btn-danger btn-sm py-1 px-2" style="font-size: 0.72rem;"><i class="fas fa-file-pdf me-1"></i> Unduh Rekapan PDF</a>
@@ -121,8 +137,8 @@
                     <h6 class="fw-bold text-dark mb-0" style="font-size: 0.85rem;"><i class="fas fa-sliders-h text-primary me-2"></i>Manajemen Titik Acuan Kalibrasi & Dokumen Referensi</h6>
                     <p class="text-muted small mb-0" style="font-size: 0.7rem;">Klik tombol di sebelah kanan untuk membuka atau menyembunyikan detail titik acuan dan dokumen.</p>
                 </div>    
-                <button class="btn btn-outline-secondary btn-sm fw-bold px-2 py-1 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTitikAcuan" aria-expanded="false" aria-controls="collapseTitikAcuan" style="font-size: 0.7rem;">
-                    <i class="fas fa-chevron-down me-1"></i> Sembunyikan / Tampilkan
+                <button class="btn btn-outline-secondary btn-sm fw-bold px-2 py-1 shadow-sm btn-toggle-acuan" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTitikAcuan" aria-expanded="false" aria-controls="collapseTitikAcuan" style="font-size: 0.7rem;">
+                    <i class="fas fa-chevron-down me-1"></i> <span class="btn-text-label">Sembunyikan / Tampilkan</span>
                 </button>
             </div>
             <div class="collapse show mt-2" id="collapseTitikAcuan">
@@ -270,7 +286,7 @@
                    
                         @if($canManage)
                         <div class="mt-2 text-end">
-                            <button type="submit" class="btn btn-success btn-sm px-3 py-1 fw-bold" style="font-size: 0.72rem;"><i class="fas fa-save me-1"></i> Simpan Semua Titik Acuan</button>
+                            <button type="submit" class="btn btn-success btn-sm px-3 py-1 fw-bold" style="font-size: 0.72rem;"><i class="fas fa-save me-1"></i> Simpan Titik Acuan</button>
                         </div>
                         @endif
                     </form>
