@@ -55,14 +55,14 @@
             color: #ffffff !important;
         }
         .sdm-action-btn {
-            width: 30px;
-            height: 30px;
+            width: 24px;
+            height: 24px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
+            font-size: 0.62rem;
             padding: 0 !important;
-            border-radius: 6px;
+            border-radius: 5px;
         }
         .alert-dismissible .btn-close {
             padding: 0;
@@ -87,6 +87,31 @@
         }
         .flatpickr-input {
             background-color: #fff !important;
+        }
+
+        .sdm-table-wrap {
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .sdm-table-wrap::-webkit-scrollbar {
+            height: 10px;
+        }
+        .sdm-table-wrap::-webkit-scrollbar-track {
+            background: #e9ecef;
+            border-radius: 6px;
+        }
+        .sdm-table-wrap::-webkit-scrollbar-thumb {
+            background: #1b3152;
+            border-radius: 6px;
+        }
+        .sdm-table-wrap::-webkit-scrollbar-thumb:hover {
+            background: #14253e;
+        }
+        @supports not selector(::-webkit-scrollbar) {
+            .sdm-table-wrap {
+                scrollbar-width: thin;
+                scrollbar-color: #1b3152 #e9ecef;
+            }
         }
     </style>
 
@@ -245,7 +270,7 @@
                     @endif
                 </form>
 
-                <div class="table-responsive">
+                <div class="table-responsive sdm-table-wrap">
                     <table class="table table-bordered table-striped mb-0">
                         <thead>
                             <tr>
@@ -259,7 +284,7 @@
                                 <th style="width: 85px;">Masa Berlaku</th>
                                 <th style="width: 95px;">Status Kepatuhan</th>
                                 <th style="width: 75px;">CV</th>
-                                <th style="width: 150px;">Aksi</th>
+                                <th style="width: 120px;">Aksi</th>
                             </tr>
                         </thead>
 
@@ -848,7 +873,7 @@
                                     Email
                                 </label>
                                 <input type="email"
-                                    name="email"
+                                    name="email"  
                                     class="form-control form-control-sm py-1"
                                     required style="font-size: 0.75rem;">
                                 <div class="form-text text-muted mt-0.5" style="font-size: 0.68rem;">
