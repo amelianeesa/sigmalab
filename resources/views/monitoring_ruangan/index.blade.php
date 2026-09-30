@@ -16,9 +16,6 @@
         max-height: 160px !important;
         overflow-y: auto !important;
     }
-    .table td input.form-control, .table td input.form-control-sm {
-        min-width: 55px;
-    }
     .card-body {
         padding: 10px !important;
     }
@@ -49,32 +46,84 @@
         padding: 2px 4px !important;
         font-size: 0.68rem !important;
     }
+    .header-action-btns {
+        display: flex !important;
+        gap: 10px !important; /* Memberikan jarak antar tombol secara permanen */
+        align-items: center;
+    }
+
+    @media (max-width: 768px) {
+
+        .btn-toggle-acuan {
+            width: 100% !important;
+            max-width: 100% !important;
+            font-size: 0.75rem !important;
+            padding: 6px 10px !important;
+            text-align: center !important;
+        }
+
+        .card-body .d-flex.justify-content-between.align-items-center {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px;
+        }
+
+        .table th, .table td {
+            padding: 2px 1px !important;
+            font-size: 0.58rem !important;
+        }
+        .table th.waktu-pagi-col, 
+        .table th.waktu-sore-col,
+        .table th[style*="width: 90px;"] {
+            width: 58px !important;
+            min-width: 58px !important;
+            max-width: 58px !important;
+            padding: 1px !important;
+        }
+        .table td input[name="waktu_1"], 
+        .table td input[name="waktu_2"] {
+            width: 54px !important;
+            min-width: 52px !important;
+            padding: 1px 0 !important;
+            font-size: 0.58rem !important;
+            text-align: center;
+        }
+        .header-action-container {
+            flex-direction: column !important;
+            align-items: stretch !important;
+        }
+        .header-action-btns {
+            width: 100% !important;
+            display: flex !important;
+            gap: 10px !important; 
+            margin-top: 8px !important;
+        }
+        .header-action-btns .btn {
+            flex: 1 !important;
+            font-size: 0.68rem !important;
+            padding: 6px 4px !important;
+            text-align: center;
+        }
+    }   
 </style>
 @endpush
 
 @section('content')
 <div class="container-fluid dashboard-container">
     @php
-        // Daftar role yang diizinkan menginput dan mengelola data
         $allowedRoles = ['Koordinator Laboratorium', 'Koordinator Lab', 'Analis Lab', 'Analis', 'Admin Aplikasi'];
         $userRoleName = Auth::user()->role->nama_role ?? '';
         $canManage = in_array($userRoleName, $allowedRoles);
     @endphp
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 header-action-container flex-wrap">
         <div>
-            <h4 class="fw-bold text-dark mb-1">
+            <h4 class="fw-bold text-dark mb-1" style="font-size: 1.1rem;">
                  Pencatatan Monitoring Suhu dan Kelembaban Udara
             </h4>
-            <nav aria-label="breadcrumb">
-                {{-- <ol class="breadcrumb mb-0" style="font-size: 0.75rem;">
-                    <li class="breadcrumb-item"><a href="{{ url('alat') }}" class="text-decoration-none">Data Alat & Kalibrasi</a></li>
-                    <li class="breadcrumb-item active text-muted" aria-current="page">Monitoring Ruangan</li>
-                </ol> --}}
-            </nav>
         </div>    
-        <div>
-            <a href="{{ route('inventori.monitoring.index') }}" class="btn text-white btn-sm py-1 px-2 me-2 shadow-sm" style="font-size: 0.72rem; background-color: #1b3152;"><i class="fas fa-sync-alt me-1"></i> Refresh Data</a>
+        <div class="header-action-btns d-flex" style="gap: 5px !important;">
+            <a href="{{ route('inventori.monitoring.index') }}" class="btn text-white btn-sm py-1 px-2 shadow-sm" style="font-size: 0.72rem; background-color: #1b3152;"><i class="fas fa-sync-alt me-1"></i> Refresh Data</a>
             @if(isset($alatId) && $alatId && isset($ruangan) && $ruangan)
                 <a href="{{ route('inventori.monitoring.exportPdf', ['alat_id' => $alatId, 'nama_ruangan' => $ruangan, 'bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="btn btn-danger btn-sm py-1 px-2" style="font-size: 0.72rem;"><i class="fas fa-file-pdf me-1"></i> Unduh Rekapan PDF</a>
             @endif
@@ -88,8 +137,8 @@
                     <h6 class="fw-bold text-dark mb-0" style="font-size: 0.85rem;"><i class="fas fa-sliders-h text-primary me-2"></i>Manajemen Titik Acuan Kalibrasi & Dokumen Referensi</h6>
                     <p class="text-muted small mb-0" style="font-size: 0.7rem;">Klik tombol di sebelah kanan untuk membuka atau menyembunyikan detail titik acuan dan dokumen.</p>
                 </div>    
-                <button class="btn btn-outline-secondary btn-sm fw-bold px-2 py-1 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTitikAcuan" aria-expanded="false" aria-controls="collapseTitikAcuan" style="font-size: 0.7rem;">
-                    <i class="fas fa-chevron-down me-1"></i> Sembunyikan / Tampilkan
+                <button class="btn btn-outline-secondary btn-sm fw-bold px-2 py-1 shadow-sm btn-toggle-acuan" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTitikAcuan" aria-expanded="false" aria-controls="collapseTitikAcuan" style="font-size: 0.7rem;">
+                    <i class="fas fa-chevron-down me-1"></i> <span class="btn-text-label">Sembunyikan / Tampilkan</span>
                 </button>
             </div>
             <div class="collapse show mt-2" id="collapseTitikAcuan">
@@ -237,7 +286,7 @@
                    
                         @if($canManage)
                         <div class="mt-2 text-end">
-                            <button type="submit" class="btn btn-success btn-sm px-3 py-1 fw-bold" style="font-size: 0.72rem;"><i class="fas fa-save me-1"></i> Simpan Semua Titik Acuan</button>
+                            <button type="submit" class="btn btn-success btn-sm px-3 py-1 fw-bold" style="font-size: 0.72rem;"><i class="fas fa-save me-1"></i> Simpan Titik Acuan</button>
                         </div>
                         @endif
                     </form>
@@ -449,8 +498,8 @@
                             @endif
                         </tr>
                         <tr>
-                            <th class="py-1 bg-sesi-pagi" style="width: 90px;">Pagi</th>
-                            <th class="py-1 bg-sesi-sore" style="width: 90px;">Sore</th>
+                            <th class="py-1 bg-sesi-pagi waktu-pagi-col" style="width: 90px;">Pagi</th>
+                            <th class="py-1 bg-sesi-sore waktu-sore-col" style="width: 90px;">Sore</th>
                             
                             <th class="py-1 bg-sesi-pagi">Pembacaan 1</th>
                             <th class="py-1 bg-sesi-pagi">Koreksi 1</th>

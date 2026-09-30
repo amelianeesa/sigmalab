@@ -120,18 +120,24 @@
             padding: 0.55rem 0.95rem;
             font-size: 0.92rem;
             font-weight: 700;
-            color: #ffffff;
+            color: #ffffff !important;
             transition: all 0.2s ease;
         }
 
-        .btn-auth:hover { background: #0a2a4b; border-color: #0a2a4b; }
+        .btn-auth:hover, 
+        .btn-auth:focus, 
+        .btn-auth:active {
+            background: #0a2a4b !important; 
+            border-color: #0a2a4b !important;
+            color: #ffffff !important; 
+            box-shadow: none !important;
+        }
 
         .auth-link { color: #0d4c76; font-weight: 600; text-decoration: none; }
         .auth-link:hover { color: #0b3d5d; text-decoration: underline; }
 
         .auth-footer { margin-top: 0.85rem; color: #7b8a9d; font-size: 0.78rem; text-align: center; }
 
-        /* ===== Responsif Mobile ===== */
         @media (max-width: 767.98px) {
             html,
             body {
