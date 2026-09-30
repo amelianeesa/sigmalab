@@ -12,7 +12,7 @@
         <div class="col-xl-9 col-lg-10">
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-body p-5">
-                    <h3 class="fw-bold text-dark mb-1"><i class="fas fa-balance-scale text-primary me-2"></i>Tahap 2: Preparasi (Air-Drying & Pengemasan)</h3>
+                    <h3 class="fw-bold text-dark mb-1"><i class="fas fa-balance-scale text-primary me-2"></i>Tahap 2: Preparasi </h3>
                     <p class="text-muted mb-4">Lakukan penghamparan batubara bulk, periksa laju kehilangan bobot hingga mencapai ekuilibrium (< 0.1% per jam), lalu kemas ke dalam botol.</p>
                     
                     @if($errors->any())
@@ -27,8 +27,7 @@
 
                     <form action="{{ route('qc-inhouse.preparasi.store', $batch->sampel_inhouse_id) }}" method="POST" id="formPreparasi">
                         @csrf
-                        
-                        <!-- langkah 1: identitas -->
+
                         <div class="mb-4">
                             <h5 class="fw-bold text-dark border-bottom pb-2"><span class="badge bg-secondary me-2">Langkah 1</span>Identitas Acuan & Hamparan</h5>
                             <div class="row g-3 mt-1">
@@ -47,7 +46,6 @@
                             </div>
                         </div>
 
-                        <!-- LANGKAH 2 -->
                         <div class="mb-4 mt-5" id="sectionPengemasan">
                             <h5 class="fw-bold text-dark border-bottom pb-2"><span class="badge bg-secondary me-2">Langkah 2</span>Pengemasan & Pelabelan Botol</h5>
                             <p class="small text-muted mb-3">Bagian ini hanya boleh diisi setelah batubara mencapai bobot konstan, dikemas dalam plastik ganda, dan dimasukkan ke dalam botol.</p>
@@ -84,8 +82,7 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Sidebar Info -->
+
         <div class="col-xl-3 col-lg-2">
             <div class="card shadow-sm border-0 bg-info bg-opacity-10 mb-4">
                 <div class="card-body">

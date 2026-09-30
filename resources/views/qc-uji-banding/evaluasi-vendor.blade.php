@@ -2,6 +2,19 @@
 @section('title', 'Evaluasi Vendor - ' . $program->nama_program)
 
 @section('content')
+
+<style>
+    .table-corporate thead th {
+        background-color: #1b3152 !important;
+        color: #ffffff !important;
+        border-bottom: 2px solid #14253e !important;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+</style>
+
 <div class="container-fluid px-4 pb-5">
     <x-qc-breadcrumb active="Uji Banding">
         <li class="breadcrumb-item"><a href="{{ route('qc-uji-banding.show', $program->id) }}" class="text-decoration-none">{{ $program->nama_program }}</a></li>
@@ -20,13 +33,13 @@
         <div class="card border-0 shadow-sm">
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-bordered table-sm align-middle text-center mb-0" id="evalTable">
-                        <thead class="table-light">
+                    <table class="table table-bordered table-sm align-middle text-center mb-0 table-corporate" id="evalTable">
+                        <thead>
                             <tr>
                                 <th class="text-start">Parameter</th>
                                 <th>Units</th>
                                 <th style="width:120px;">Lab Value</th>
-                                <th style="width:140px;">Assigned Value<br><small class="text-muted">(Alg. Mean)</small></th>
+                                <th style="width:140px;">Assigned Value<br><small class="text-white-50">(Alg. Mean)</small></th>
                                 <th style="width:120px;">SDPA</th>
                                 <th style="width:100px;">Z-score</th>
                                 <th style="width:130px;">Comment</th>

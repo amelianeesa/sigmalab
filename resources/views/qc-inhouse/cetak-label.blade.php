@@ -26,7 +26,6 @@
         </div>
     </div>
 
-    <!-- Area Cetak Label -->
     <div class="print-area">
         <div class="row g-3">
             @foreach($labels as $label)

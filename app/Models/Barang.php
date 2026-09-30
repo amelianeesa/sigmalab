@@ -21,6 +21,7 @@ class Barang extends BaseModel
     use HasFactory, LogsActivity;
 
     protected $table = 'barang';
+    protected $primaryKey = 'barang_id';
 
 
     protected $fillable = [

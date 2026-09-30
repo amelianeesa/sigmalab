@@ -69,7 +69,6 @@
         <p class="text-muted">Sedang menggambar grafik dan mengonversi ke PDF, mohon tunggu sebentar.</p>
     </div>
 
-    <!-- MAIN EXPORT CONTAINER -->
     <div id="pdfContent">
         @foreach($reportData as $index => $data)
             @php 
@@ -80,7 +79,7 @@
             @endphp
             
             <div class="page-container">
-                <!-- KOP SURAT -->
+                
                 <div class="kop-surat">
                     <h4>Laboratorium PT Sucofindo Cabang Cilacap</h4>
                 </div>
@@ -92,7 +91,6 @@
                     <strong>Parameter:</strong> {{ strtoupper($param->nama_parameter) }}
                 </p>
 
-                <!-- BAGIAN 1: RIWAYAT / REKAPAN -->
                 @if($cetakRiwayat)
                     <div class="section-title">A. TABEL REKAPAN DATA PENGUJIAN HARIAN</div>
                     <table class="table table-bordered table-sm text-center align-middle mb-4">
@@ -129,14 +127,13 @@
                     </table>
                 @endif
 
-                <!-- BAGIAN 2: CONTROL CHART (Harus mulai di halaman baru agar grafik tidak terpotong, atau setidaknya diberi jeda) -->
                 @if($cetakChart)
                     @if($cetakRiwayat && count($logs) > 5)
-                        <!-- Jika ada tabel riwayat panjang, kita paksa page break sebelum grafik agar rapi -->
+                        
                         </div>
                         <div class="page-break"></div>
                         <div class="page-container">
-                        <!-- KOP SURAT (Halaman Lanjutan) -->
+                        
                         <div class="kop-surat">
                             <h4>LABORATORIUM SIGMALAB</h4>
                             <p>Jl. Contoh Alamat No. 123, Kota Industri, 12345</p>
@@ -151,7 +148,7 @@
                     @if(count($logs) === 0)
                         <div class="alert alert-light text-center border p-3">Data pengujian kosong. Grafik tidak tersedia.</div>
                     @else
-                        <!-- Data tersembunyi untuk dibaca JS -->
+                        
                         <div class="chart-data-source d-none" 
                             id="data_chart_{{ $param->parameter_uji_id }}"
                             data-mean="{{ $m }}"
@@ -159,7 +156,6 @@
                             @json($logs)
                         </div>
 
-                        <!-- Canvas Grafik -->
                         <div class="chart-container">
                             <canvas id="canvas_{{ $param->parameter_uji_id }}"></canvas>
                         </div>
@@ -209,8 +205,7 @@
                     @endif
                 @endif
             </div>
-            
-            <!-- Page break otomatis antar parameter (kecuali loop terakhir) -->
+
             @if(!$loop->last)
                 <div class="page-break"></div>
             @endif
@@ -219,12 +214,11 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', async function() {
-            // Register DataLabels
+
             if (typeof ChartDataLabels !== 'undefined') {
                 Chart.register(ChartDataLabels);
             }
 
-            // Fungsi render grafik per parameter
             const chartSources = document.querySelectorAll('.chart-data-source');
             
             for (let source of chartSources) {
@@ -240,7 +234,10 @@
                 const pointRadii = [];
                 
                 logs.forEach(log => {
-                    labels.push(log.tanggal_uji);
+                    // Format ISO date to simple format (e.g. 10 Sep 2026)
+                    let d = new Date(log.tanggal_uji);
+                    let formattedDate = d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+                    labels.push(formattedDate);
                     dataPoints.push(log.nilai_akhir);
                     
                     if (log.status_evaluasi === 'outlier') {
@@ -311,7 +308,6 @@
                 });
             }
 
-            // Beri waktu sebentar (1 detik) untuk memastikan semua canvas ter-render sempurna
             setTimeout(async () => {
                 const element = document.getElementById('pdfContent');
                 const filename = 'Laporan_QC_Harian_{{ str_replace(" ", "_", $periode) }}.pdf';
@@ -325,8 +321,7 @@
                 };
                 
                 await html2pdf().set(opt).from(element).save();
-                
-                // Ubah overlay menjadi tombol tutup
+
                 const overlay = document.getElementById('loadingOverlay');
                 overlay.innerHTML = `
                     <div class="text-success mb-3"><i class="fas fa-check-circle" style="font-size: 4rem;"></i></div>

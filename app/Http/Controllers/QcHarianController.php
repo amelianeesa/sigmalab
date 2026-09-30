@@ -65,25 +65,39 @@ class QcHarianController extends Controller
             return back()->with('error', 'Tidak ada batch aktif.');
         }
 
+        $isDraft = $request->input('is_draft') == 1;
+        $draftGroupId = $isDraft ? uniqid('DRF-') : null;
+
+        // Jika ini adalah update dari draft lama, hapus draft lamanya dulu
+        if ($request->filled('old_draft_group_id')) {
+            QcHarian::where('draft_group_id', $request->old_draft_group_id)->delete();
+        }
+
         $outlierParam = null;
         $outlierQch = null;
         $savedCount = 0;
         $results = [];
 
+        // Ambil data Section 1 untuk disimpan ke data_mentah
+        $section1 = [
+            'nama_sampel_uji' => $request->input('nama_sampel_uji'),
+        ];
+
         foreach ($request->input('params') as $paramUjiId => $data) {
-            // Hanya proses parameter yang dicentang
             if (empty($data['selected'])) continue;
 
             $paramUji = ParameterUji::find($paramUjiId);
             if (!$paramUji) continue;
 
-            // Pengecekan lock (outlier menunggu investigasi)
-            $locked = QcHarian::where('sampel_inhouse_id', $activeBatch->sampel_inhouse_id)
-                ->where('parameter_uji_id', $paramUji->parameter_uji_id)
-                ->where('status_evaluasi', 'outlier')
-                ->where('status_investigasi', 'menunggu_investigasi')
-                ->exists();
-            if ($locked) continue;
+            // Jika bukan draft, pastikan tidak terkunci outlier
+            if (!$isDraft) {
+                $locked = QcHarian::where('sampel_inhouse_id', $activeBatch->sampel_inhouse_id)
+                    ->where('parameter_uji_id', $paramUji->parameter_uji_id)
+                    ->where('status_evaluasi', 'outlier')
+                    ->where('status_investigasi', 'menunggu_investigasi')
+                    ->exists();
+                if ($locked) continue;
+            }
 
             $d1 = (float)($data['d1'] ?? 0);
             $d2 = (float)($data['d2'] ?? 0);
@@ -93,69 +107,93 @@ class QcHarianController extends Controller
             $pName = strtoupper($paramUji->nama_parameter);
             $needsDb = in_array($pName, ['ASH', 'VM', 'CV', 'TS', 'FC']);
 
+            $mentah = $data['mentah'] ?? [];
+            $mentah = array_merge($mentah, $section1);
+
+            $evalStatus = 'draft';
+            $evalRule = null;
+            $evalNilaiAkhir = null;
+
             if ($needsDb) {
                 $im1 = (float)($data['mentah']['im_d1'] ?? 0);
                 $im2 = (float)($data['mentah']['im_d2'] ?? 0);
-                
-                if ($im1 >= 100 || $im2 >= 100) continue;
+                $mentah['im_d1'] = $im1;
+                $mentah['im_d2'] = $im2;
 
-                $db1 = (100 / (100 - $im1)) * $d1;
-                $db2 = (100 / (100 - $im2)) * $d2;
-                $val1 = $db1;
-                $val2 = $db2;
+                if (!$isDraft) {
+                    if ($im1 >= 100 || $im2 >= 100) continue;
+                    $db1 = (100 / (100 - $im1)) * $d1;
+                    $db2 = (100 / (100 - $im2)) * $d2;
+                    $val1 = $db1;
+                    $val2 = $db2;
+                }
             } else {
-                $val1 = $d1;
-                $val2 = $d2;
+                if (!$isDraft) {
+                    $val1 = $d1;
+                    $val2 = $d2;
+                }
             }
 
             $meanAcuan = $paramUji->mean;
             $sdAcuan = $paramUji->sd;
-            if ($meanAcuan === null || $sdAcuan === null) continue;
 
-            // Ambil histori 9 data terakhir untuk Westgard
-            $history = QcHarian::where('sampel_inhouse_id', $activeBatch->sampel_inhouse_id)
-                ->where('parameter_uji_id', $paramUji->parameter_uji_id)
-                ->orderBy('tanggal_uji', 'desc')
-                ->orderBy('created_at', 'desc')
-                ->take(9)
-                ->get();
+            if (!$isDraft && $meanAcuan !== null && $sdAcuan !== null) {
+                $history = QcHarian::where('sampel_inhouse_id', $activeBatch->sampel_inhouse_id)
+                    ->where('parameter_uji_id', $paramUji->parameter_uji_id)
+                    ->where('status_pengujian', 'selesai') // Hanya historis yang final
+                    ->orderBy('tanggal_uji', 'desc')
+                    ->orderBy('created_at', 'desc')
+                    ->take(9)->get();
 
-            $eval = $this->westgard->evaluate($val1, $val2, $meanAcuan, $sdAcuan, $history);
-
-            // Coba ekstrak im_d1 dan im_d2 jika ada di tabel (untuk data mentah DB info)
-            $mentah = $data['mentah'] ?? [];
-            $mentah['nama_sampel_uji'] = $request->input('nama_sampel_uji');
-            
-            if ($needsDb) {
-                // If IM was pulled from VM table or explicitly passed
-                $mentah['im_d1'] = $im1;
-                $mentah['im_d2'] = $im2;
+                $eval = $this->westgard->evaluate($val1, $val2, $meanAcuan, $sdAcuan, $history);
+                $evalStatus = $eval['status'];
+                $evalRule = $eval['rule'] ? $eval['message'] : null;
+                $evalNilaiAkhir = $eval['nilai_akhir'];
             }
 
             $qch = QcHarian::create([
                 'sampel_inhouse_id' => $activeBatch->sampel_inhouse_id,
                 'parameter_uji_id' => $paramUji->parameter_uji_id,
                 'tanggal_uji' => $request->tanggal_uji,
-                'analis_id' => auth()->user()->personil_id ?? 1,
+                'analis_id' => auth()->id(),
                 'nilai_d1' => $d1,
                 'nilai_d2' => $d2,
                 'nilai_db_1' => $db1,
                 'nilai_db_2' => $db2,
-                'nilai_akhir' => $eval['nilai_akhir'],
+                'nilai_akhir' => $evalNilaiAkhir,
                 'mean_acuan' => $meanAcuan,
                 'sd_acuan' => $sdAcuan,
-                'status_evaluasi' => $eval['status'],
-                'pelanggaran_rule' => $eval['rule'] ? $eval['message'] : null,
-                'status_investigasi' => $eval['status'] === 'outlier' ? 'menunggu_investigasi' : 'aman',
+                'status_evaluasi' => $evalStatus,
+                'status_pengujian' => $isDraft ? 'draft' : 'selesai',
+                'draft_group_id' => $draftGroupId,
+                'pelanggaran_rule' => $evalRule,
+                'status_investigasi' => $evalStatus === 'outlier' ? 'menunggu_investigasi' : 'aman',
                 'data_mentah' => $mentah,
             ]);
 
             $savedCount++;
-            $results[] = strtoupper($pName) . ': ' . strtoupper($eval['status']);
 
-            if ($eval['status'] === 'outlier' && !$outlierParam) {
-                $outlierParam = $pName;
-                $outlierQch = $qch;
+            // --- AUTO-DEDUCT STOK BARANG (Hanya Jika Bukan Draft) ---
+            if (!$isDraft && isset($mentah['barang_ids']) && is_array($mentah['barang_ids'])) {
+                foreach ($mentah['barang_ids'] as $barangId) {
+                    $qtyDipakai = isset($mentah['barang_jumlah'][$barangId]) ? (float) $mentah['barang_jumlah'][$barangId] : 0;
+                    if ($qtyDipakai > 0) {
+                        $barang = \App\Models\Barang::find($barangId);
+                        if ($barang) {
+                            $barang->pengeluaran += $qtyDipakai;
+                            $barang->save();
+                        }
+                    }
+                }
+            }
+            // --------------------------------------------------------
+            
+            if (!$isDraft) {
+                $results[] = strtoupper($pName) . ': ' . strtoupper($evalStatus);
+                if ($evalStatus === 'outlier' && !$outlierParam) {
+                    $outlierParam = $pName;
+                    $outlierQch = $qch;
+                }
             }
         }
 
@@ -163,13 +201,64 @@ class QcHarianController extends Controller
             return back()->with('error', 'Tidak ada parameter yang berhasil disimpan. Pastikan Anda mencentang minimal 1 parameter dan mengisi nilainya.');
         }
 
-        // Jika ada outlier, arahkan ke form investigasi untuk outlier pertama
+        if ($isDraft) {
+            return redirect()->route('qc-harian.index')->with('success', "Draft berhasil disimpan ({$savedCount} parameter).");
+        }
+
         if ($outlierQch) {
             return redirect()->route('qc-harian.investigasi', $outlierQch->id)
                 ->with('error', "Peringatan Outlier pada {$outlierParam}! Anda diwajibkan mengisi form investigasi sebelum dapat melanjutkan.");
         }
 
-        return redirect()->route('qc-harian.index')->with('success', "Data QC Harian berhasil disimpan ({$savedCount} parameter). " . implode(' | ', $results));
+        return redirect()->route('qc-harian.index')
+            ->with('success', "Data Harian QC berhasil disimpan dan dievaluasi ({$savedCount} parameter). " . implode(' | ', $results));
+    }
+
+    public function editDraft($id)
+    {
+        $draft = QcHarian::findOrFail($id);
+        if ($draft->status_pengujian !== 'draft' || !$draft->draft_group_id) {
+            return redirect()->route('qc-harian.index')->with('error', 'Data tersebut bukan draft atau sudah diselesaikan.');
+        }
+
+        $activeBatch = SampelInhouse::where('status', 'aktif')->latest()->first();
+        $parameters = $activeBatch->parameters()->where('status_parameter', 'stabil')->with('parameterUji')->get();
+        $alatList = \App\Models\Alat::all();
+        $personilList = \App\Models\Personil::all();
+        $barangList = \App\Models\Barang::all();
+
+        // Cari semua draft yang satu kelompok (satu kali submit form)
+        $draftGroup = QcHarian::where('draft_group_id', $draft->draft_group_id)->get();
+        $serverDraft = [
+            'draft_group_id' => $draft->draft_group_id,
+            'tanggal_uji' => $draft->tanggal_uji,
+            'nama_sampel' => $draftGroup->first()->data_mentah['nama_sampel_uji'] ?? '',
+            'params' => []
+        ];
+
+        foreach ($draftGroup as $d) {
+            $pid = $d->parameter_uji_id;
+            $serverDraft['params'][$pid] = [
+                'selected' => true,
+                'd1' => $d->nilai_d1,
+                'd2' => $d->nilai_d2,
+                'mentah' => $d->data_mentah
+            ];
+        }
+
+        return view('qc-harian.create', compact('activeBatch', 'parameters', 'alatList', 'personilList', 'barangList', 'serverDraft'));
+    }
+
+    public function destroyDraft($id)
+    {
+        $draft = QcHarian::findOrFail($id);
+        if ($draft->draft_group_id) {
+            QcHarian::where('draft_group_id', $draft->draft_group_id)->delete();
+        } else {
+            $draft->delete();
+        }
+
+        return redirect()->route('qc-harian.index')->with('success', 'Draft berhasil dihapus.');
     }
 
     public function chart($parameter_uji_id)
@@ -273,6 +362,7 @@ class QcHarianController extends Controller
             'cetakChart'
         ));
     }
+    
 }
 
 

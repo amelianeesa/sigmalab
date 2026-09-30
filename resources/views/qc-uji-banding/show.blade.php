@@ -6,15 +6,28 @@
     <x-qc-breadcrumb active="Uji Banding">
         <li class="breadcrumb-item active">Detail</li>
     </x-qc-breadcrumb>
-    <div class="mb-4 d-flex justify-content-between align-items-center">
-        <div>
-            <h2 class="fw-bold text-dark mb-0"><i class="fas fa-balance-scale text-primary me-2"></i>Detail Uji Banding</h2>
+
+    <div class="row align-items-center mb-4 g-3">
+        <div class="col-12 col-lg-4">
+            <h2 class="fw-bold text-dark mb-0">
+                <i class="fas fa-balance-scale text-primary me-2"></i>Detail Uji Banding
+            </h2>
         </div>
-        <div>
-            <a href="{{ route('qc-uji-banding.edit', $program->id) }}" class="btn btn-outline-secondary me-2"><i class="fas fa-edit"></i> Edit Data</a>
-            <a href="{{ route('qc-uji-banding.evaluasi.form', $program->id) }}" class="btn btn-outline-primary me-2"><i class="fas fa-chart-bar"></i> Input Hasil Evaluasi Vendor</a>
-            <a href="{{ route('qc-uji-banding.ringkasan', $program->id) }}" class="btn btn-outline-success me-2"><i class="fas fa-table"></i> Ringkasan Unjuk Kerja</a>
-            <a href="{{ route('qc-uji-banding.printPdf', $program->id) }}" class="btn btn-danger" target="_blank"><i class="fas fa-file-pdf"></i> Cetak Laporan (PDF)</a>
+        <div class="col-12 col-lg-8">
+            <div class="d-flex flex-column flex-md-row flex-wrap justify-content-lg-end gap-2">
+                <a href="{{ route('qc-uji-banding.edit', $program->id) }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-edit"></i> Edit Data
+                </a>
+                <a href="{{ route('qc-uji-banding.evaluasi.form', $program->id) }}" class="btn btn-outline-primary">
+                    <i class="fas fa-chart-bar"></i> Input Hasil Evaluasi Vendor
+                </a>
+                <a href="{{ route('qc-uji-banding.ringkasan', $program->id) }}" class="btn btn-outline-success">
+                    <i class="fas fa-table"></i> Ringkasan Unjuk Kerja
+                </a>
+                <a href="{{ route('qc-uji-banding.printPdf', $program->id) }}" class="btn btn-danger" target="_blank">
+                    <i class="fas fa-file-pdf"></i> Cetak Laporan (PDF)
+                </a>
+            </div>
         </div>
     </div>
 

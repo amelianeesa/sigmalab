@@ -3,7 +3,6 @@
 
 @section('content')
 <style>
-    /* --- CSS CORPORATE BLUE DARI TEMANMU --- */
     .btn-corporate-blue {
         background-color: #1b3152 !important;
         border-color: #1b3152 !important;
@@ -16,7 +15,6 @@
         color: #ffffff !important;
     }
     
-    /* Header Tabel Warna Dongker */
     .table-corporate thead th {
         background-color: #1b3152 !important;
         color: #ffffff !important;
@@ -27,20 +25,35 @@
         padding-top: 15px;
         padding-bottom: 15px;
     }
+
+    .btn-outline-corporate {
+        color: #1b3152 !important;
+        border-color: #1b3152 !important;
+    }
+    .btn-outline-corporate:hover {
+        background-color: #1b3152 !important;
+        color: #ffffff !important;
+    }
 </style>
 
 <div class="container-fluid px-4 pb-5">
     <x-qc-breadcrumb active="In-House" />
 
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mt-3 mb-4 gap-3">
-        <h2 class="fw-bold text-dark mb-0">
-            <i class="fas fa-flask me-2" style="color: #1b3152;"></i>QC In-House
-        </h2>
-
-        <div class="d-grid d-md-block w-100 w-md-auto">
-            <a href="{{ route('qc-inhouse.create') }}" class="btn btn-corporate-blue shadow-sm rounded-pill px-4">
-                <i class="fas fa-plus me-1"></i> Buat Sampel Baru
-            </a>
+    <div class="row align-items-center mt-3 mb-4 g-3">
+        <div class="col-12 col-md-6">
+            <h2 class="fw-bold text-dark mb-0">
+                <i class="fas fa-flask me-2" style="color: #1b3152;"></i>QC In-House
+            </h2>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="d-grid d-md-flex gap-2 justify-content-md-end">
+                <a href="{{ route('qc-inhouse.create') }}" class="btn btn-outline-corporate shadow-sm rounded-pill px-4">
+                    <i class="fas fa-plus me-1"></i> Buat Sampel Baru
+                </a>
+                <a href="{{ route('qc-harian.create') }}" class="btn btn-corporate-blue shadow-sm rounded-pill px-4">
+                    <i class="fas fa-play me-1"></i> Mulai Pengujian Harian QC
+                </a>
+            </div>
         </div>
     </div>
 
@@ -139,23 +152,20 @@
 </div>
 
 <script>
-    // Fitur Auto-Submit saat filter diubah
+
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('filterForm');
         let timeout = null;
 
-        // Auto-submit saat mengetik (diberi jeda 500ms agar tidak lag)
         document.getElementById('search').addEventListener('input', function() {
             clearTimeout(timeout);
             timeout = setTimeout(() => form.submit(), 500);
         });
 
-        // Auto-submit saat memilih Dropdown
         document.getElementById('jenis_batubara').addEventListener('change', function() {
             form.submit();
         });
 
-        // Auto-submit saat periode lengkap terisi
         document.getElementById('start_date').addEventListener('change', checkDates);
         document.getElementById('end_date').addEventListener('change', checkDates);
 

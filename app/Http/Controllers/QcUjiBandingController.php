@@ -18,9 +18,19 @@ use PhpOffice\PhpWord\IOFactory;
 
 class QcUjiBandingController extends Controller
 {
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
-        $programs = QcUjiBanding::with('parameters')->orderBy('created_at', 'desc')->get();
+        $search = $request->input('search');
+
+        $programs = QcUjiBanding::with('parameters')
+            ->when($search, function ($query, $search) {
+                return $query->where('nama_program', 'like', "%{$search}%")
+                             ->orWhere('penyelenggara', 'like', "%{$search}%")
+                             ->orWhere('kode_sampel', 'like', "%{$search}%");
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
         return view('qc-uji-banding.index', compact('programs'));
     }
 

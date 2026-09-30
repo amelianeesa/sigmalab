@@ -29,7 +29,11 @@ class SampelInhouse extends BaseModel
         'dibuat_oleh',
         'dipreparasi_oleh',
         'urutan_acak_instrumen',
-        'status'
+        'status',
+        'akar_masalah',
+        'tindakan_perbaikan',
+        'tanggal_investigasi',
+        'diinvestigasi_oleh'
     ];
 
     protected $casts = [
@@ -56,6 +60,11 @@ class SampelInhouse extends BaseModel
     public function preparator()
     {
         return $this->belongsTo(User::class, 'dipreparasi_oleh', 'users_id');
+    }
+
+    public function investigator()
+    {
+        return $this->belongsTo(User::class, 'diinvestigasi_oleh', 'users_id');
     }
 
     public function getStatusLabelAttribute(): string

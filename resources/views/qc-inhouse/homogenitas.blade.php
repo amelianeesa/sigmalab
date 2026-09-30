@@ -2,23 +2,46 @@
 @section('title', 'Homogenitas - QC In-House')
 
 @section('content')
+
+<style>
+        @media print {
+        .potong-halaman {
+            page-break-before: always !important; 
+            break-before: page !important;
+        }
+    }
+
+    .html2pdf__page-break {
+        page-break-before: always !important;
+    }
+</style>
+
 <div class="container-fluid px-4 pb-5">
     <x-qc-breadcrumb active="In-House">
         <li class="breadcrumb-item"><a href="{{ route('qc-inhouse.show', $batch->sampel_inhouse_id) }}">{{ $batch->nama_sampel }}</a></li>
         <li class="breadcrumb-item active">Tahap 3: Uji Homogenitas</li>
     </x-qc-breadcrumb>
 
-    <div class="row mt-3">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-end mb-4">
-                <div>
-                    <h3 class="fw-bold text-dark mb-1"><i class="fas fa-edit text-primary me-2"></i>Input Uji Homogenitas (Tahap 3)</h3>
-                    <p class="text-muted mb-0">Metode Acuan: <strong>{{ strtoupper($batch->metode_acuan) }}</strong> | Jenis Batubara: <strong>{{ $batch->jenis_batubara }}</strong></p>
+        <div class="row mt-3">
+            <div class="col-12">
+            
+                <div class="row align-items-center mb-4">
+                    <div class="col-md-8 mb-3 mb-md-0">
+                        <h3 class="fw-bold text-dark mb-1">
+                            <i class="fas fa-edit text-primary me-2"></i>Input Uji Homogenitas (Tahap 3)
+                        </h3>
+                        <p class="text-muted mb-0">Metode Acuan: <strong>{{ strtoupper($batch->metode_acuan) }}</strong> | Jenis Batubara: <strong>{{ $batch->jenis_batubara }}</strong></p>
+                    </div>
+                
+                    <div class="col-md-4 text-md-end">
+                        <div class="d-grid d-md-block">
+                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalExport">
+                                <i class="fas fa-print me-2"></i>Cetak / Export
+                            </button>
+                        </div>
+                    </div>
+                    
                 </div>
-                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalExport">
-                    <i class="fas fa-print me-2"></i>Cetak / Export
-                </button>
-            </div>
             
             <form action="{{ route('qc-inhouse.homogenitas.store', $batch->sampel_inhouse_id) }}" method="POST" id="formHomogenitas">
                 @csrf
@@ -49,9 +72,7 @@
                         </div>
 
                         @php
-                            // Dihitung SEKALI untuk seluruh batch (bukan per parameter), karena
-                            // semua parameter menguji set kemasan fisik yang sama -- index ke-i
-                            // harus merujuk ke kemasan yang sama persis di semua tabel parameter.
+
                             $rowCount = max(3, $batch->parameters->max(function ($p) {
                                 return $p->dataHomogenitas->count();
                             }) ?? 0);
@@ -65,8 +86,128 @@
                                 @endphp
                                 <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}" id="pane-{{ $pid }}" role="tabpanel">
                                     
+                                                                        <!-- Tombol Buka Modal & Summary -->
+                                    <div class="px-3 pt-3">
+                                        <button type="button" class="btn btn-outline-primary btn-sm mb-2" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}">
+                                            <i class="fas fa-users-cog me-1"></i> Pilih Personil & Alat ({{ $code }})
+                                        </button>
+                                        <div id="summary_{{ $pid }}" class="p-2 border rounded bg-light small d-none">
+                                            <div class="fw-bold text-secondary mb-1">Informasi Pelaksanaan Pengujian:</div>
+                                            <div class="summary-content text-dark"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Modal Resource (Desain Tab Persis QC Harian) -->
+                                    <div class="modal fade modal-resource" id="modalResource-{{ $pid }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-light">
+                                                    <h5 class="modal-title fw-bold"><i class="fas fa-box-open text-primary me-2"></i>Personil & Alat: {{ $code }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body p-0">
+                                                    <ul class="nav nav-pills nav-justified mb-0 border-bottom" role="tablist">
+                                                        <li class="nav-item" role="presentation">
+                                                            <button class="nav-link active fw-bold text-dark py-3" data-bs-toggle="tab" data-bs-target="#tab-personil-{{ $pid }}" type="button" role="tab"><i class="fas fa-users text-primary me-2"></i>Personil</button>
+                                                        </li>
+                                                        <li class="nav-item" role="presentation">
+                                                            <button class="nav-link fw-bold text-dark py-3" data-bs-toggle="tab" data-bs-target="#tab-alat-{{ $pid }}" type="button" role="tab"><i class="fas fa-tools text-warning me-2"></i>Alat</button>
+                                                        </li>
+                                                        <li class="nav-item" role="presentation">
+                                                            <button class="nav-link fw-bold text-dark py-3" data-bs-toggle="tab" data-bs-target="#tab-bahan-{{ $pid }}" type="button" role="tab"><i class="fas fa-flask text-success me-2"></i>Bahan / Reagen</button>
+                                                        </li>
+                                                    </ul>
+                                                    
+                                                    <div class="tab-content p-4">
+                                                        <div class="d-flex justify-content-end mb-3">
+                                                            <button type="button" class="btn btn-sm btn-info text-white btn-copy-resource" data-pid="{{ $pid }}">
+                                                                <i class="fas fa-copy me-1"></i> Salin dari Parameter Sebelumnya
+                                                            </button>
+                                                        </div>
+
+                                                        <!-- Tab Personil -->
+                                                        <div class="tab-pane fade show active" id="tab-personil-{{ $pid }}" role="tabpanel">
+                                                            <div class="table-responsive border rounded" style="max-height: 350px; overflow-y: auto;">
+                                                                <table class="table table-hover table-sm mb-0 text-nowrap">
+                                                                    <thead class="table-light sticky-top">
+                                                                        <tr><th width="5%" class="text-center">Pilih</th><th>Nama Personil</th><th>Peran / Tugas</th></tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        @foreach($personilList as $personil)
+                                                                        <tr>
+                                                                            <td class="text-center align-middle">
+                                                                                <input class="form-check-input chk-personil" style="transform: scale(1.3);" type="checkbox" name="resource_{{ $pid }}[personil_ids][]" value="{{ $personil->personil_id }}">
+                                                                            </td>
+                                                                            <td class="align-middle">{{ $personil->nama }}</td>
+                                                                            <td><input type="text" class="form-control form-control-sm in-peran" name="resource_{{ $pid }}[personil_peran][{{ $personil->personil_id }}]" value="Analis" placeholder="Analis"></td>
+                                                                        </tr>
+                                                                        @endforeach
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Tab Alat -->
+                                                        <div class="tab-pane fade" id="tab-alat-{{ $pid }}" role="tabpanel">
+                                                            <div class="row">
+                                                                @foreach($alatList as $alat)
+                                                                <div class="col-md-6 mb-3">
+                                                                    <div class="form-check border p-2 rounded bg-light">
+                                                                        <input class="form-check-input chk-alat ms-1" style="transform: scale(1.3);" type="checkbox" name="resource_{{ $pid }}[alat_ids][]" value="{{ $alat->alat_id }}">
+                                                                        <label class="form-check-label ms-2 cursor-pointer w-100">
+                                                                            <strong>{{ $alat->nama_alat }}</strong> <br><small class="text-muted">({{ $alat->kode_alat }})</small>
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Tab Bahan -->
+                                                        <div class="tab-pane fade" id="tab-bahan-{{ $pid }}" role="tabpanel">
+                                                            <div class="table-responsive border rounded" style="max-height: 350px; overflow-y: auto;">
+                                                                <table class="table table-hover table-sm mb-0 text-nowrap">
+                                                                    <thead class="table-light sticky-top">
+                                                                        <tr><th width="5%" class="text-center">Pilih</th><th>Nama Bahan</th><th>Sisa Stok</th><th width="30%">Jumlah Dipakai</th></tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        @foreach($barangList as $barang)
+                                                                        @php
+                                                                            $saldoAkhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
+                                                                            $habis = $saldoAkhir <= 0;
+                                                                        @endphp
+                                                                        <tr class="{{ $habis ? 'table-danger' : '' }}">
+                                                                            <td class="text-center align-middle">
+                                                                                <input class="form-check-input chk-bahan" style="transform: scale(1.3);" type="checkbox" name="resource_{{ $pid }}[barang_ids][]" value="{{ $barang->barang_id }}" data-nama="{{ $barang->nama_barang }}">
+                                                                            </td>
+                                                                            <td class="align-middle">
+                                                                                <strong>{{ $barang->nama_barang }}</strong> 
+                                                                                @if($habis) <span class="badge bg-danger ms-1">Habis</span> @endif
+                                                                            </td>
+                                                                            <td class="align-middle {{ $habis ? 'text-danger fw-bold' : '' }}">{{ $saldoAkhir }} {{ $barang->satuan }}</td>
+                                                                            <td>
+                                                                                <div class="input-group input-group-sm">
+                                                                                    <input type="number" step="0.01" class="form-control in-qty" name="resource_{{ $pid }}[barang_jumlah][{{ $barang->barang_id }}]" placeholder="0">
+                                                                                    <span class="input-group-text">{{ $barang->satuan }}</span>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                        @endforeach
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer bg-light">
+                                                    <button type="button" class="btn btn-primary px-4 fw-bold" data-bs-dismiss="modal"><i class="fas fa-check me-1"></i> Simpan Pilihan</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="table-responsive p-3">
-                                        <table class="table table-bordered table-sm align-middle text-center param-table text-nowrap" style="min-width: 1500px;" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
+                                        <table class="table table-bordered table-sm align-middle text-center param-table text-nowrap" style="min-width: {{ in_array($code, ['TS']) ? '100%' : '1500px' }};" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
                                             <thead class="table-light">
                                                 @if($code === 'IM')
                                                     <tr>
@@ -92,9 +233,9 @@
                                                         <th>M3-M1</th>
                                                         <th class="bg-warning bg-opacity-25">ASH%</th>
                                                         <th colspan="2">ABSOLUTE DIFFERENCE</th>
-                                                        <th>AVERAGE %adb</th>
-                                                        <th>%db</th>
-                                                        <th>db</th>
+                                                        <th style="min-width: 100px;">AVERAGE %adb</th>
+                                                        <th style="min-width: 90px;">%db</th>
+                                                        <th style="min-width: 90px;">db</th>
                                                     </tr>
                                                 @elseif($code === 'VM')
                                                     <tr>
@@ -109,9 +250,9 @@
                                                         <th>IM</th>
                                                         <th class="bg-warning bg-opacity-25">VM%</th>
                                                         <th colspan="2">ABSOLUTE DIFFERENCE</th>
-                                                        <th>AVERAGE %adb</th>
-                                                        <th>AVERAGE %db</th>
-                                                        <th>%db</th>
+                                                        <th style="min-width: 100px;">AVERAGE %adb</th>
+                                                        <th style="min-width: 100px;">AVERAGE %db</th>
+                                                        <th style="min-width: 90px;">%db</th>
                                                     </tr>
                                                 @elseif($code === 'TS')
                                                     <tr>
@@ -125,7 +266,7 @@
                                                 @elseif($code === 'CV')
                                                     <tr>
                                                         <th width="8%">KODE SAMPEL</th>
-                                                        <th width="5%">DISH NO.</th>
+                                                        <th width="8%">VESSEL ID</th>
                                                         <th>CALL ID</th>
                                                         <th>Weight of Crucible</th>
                                                         <th>Sample Mass</th>
@@ -141,7 +282,7 @@
                                                         <th>%db</th>
                                                     </tr>
                                                 @else
-                                                    <!-- Fallback generic -->
+                                                    
                                                     <tr>
                                                         <th>KODE SAMPEL</th>
                                                         <th>DISH NO.</th>
@@ -158,7 +299,7 @@
                                                         $dh = $param->dataHomogenitas->where('nomor_sampel', $i)->first();
                                                         $mentah = $dh ? $dh->data_mentah : [];
                                                     @endphp
-                                                    <!-- SIMPLO ROW -->
+                                                    
                                                     <tr class="row-simplo">
                                                         <td rowspan="2" class="fw-bold align-middle bg-light border-end">
                                                             {{ $i }}
@@ -167,7 +308,7 @@
                                                             <input type="hidden" class="in-db-1" name="data_{{ $pid }}[{{ $i-1 }}][nilai_db_1]" value="{{ $mentah['nilai_db_1'] ?? '' }}">
                                                             <input type="hidden" class="in-db-2" name="data_{{ $pid }}[{{ $i-1 }}][nilai_db_2]" value="{{ $mentah['nilai_db_2'] ?? '' }}">
                                                         </td>
-                                                        <td class="bg-light fw-bold">1</td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center fw-bold bg-light" name="data_{{ $pid }}[{{ $i-1 }}][mentah][dish_1]" value="{{ $mentah['dish_1'] ?? '' }}" ></td>
                                                         
                                                         @if($code === 'IM')
                                                             <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_1]" value="{{ $mentah['m1_1'] ?? '' }}"></td>
@@ -231,9 +372,8 @@
                                                         @endif
                                                     </tr>
 
-                                                    <!-- DUPLO ROW -->
                                                     <tr class="row-duplo">
-                                                        <td class="bg-light fw-bold">2</td>
+                                                        <td><input type="text" class="form-control form-control-sm text-center fw-bold bg-light" name="data_{{ $pid }}[{{ $i-1 }}][mentah][dish_2]" value="{{ $mentah['dish_2'] ?? '' }}" ></td>
                                                         
                                                         @if($code === 'IM')
                                                             <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_2]" value="{{ $mentah['m1_2'] ?? '' }}"></td>
@@ -283,20 +423,22 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                    @if(in_array($batch->status, ['uji_homogenitas', 'gagal_homogenitas']))
-                                    <div class="px-3 pb-3 d-flex justify-content-between">
-                                        <div>
-                                            <button type="button" class="btn btn-outline-primary btn-tambah-kemasan fw-bold me-2" data-pid="{{ $pid }}" data-code="{{ $code }}">
-                                                <i class="fas fa-plus me-1"></i> Tambah Kemasan
-                                            </button>
-                                            <button type="button" class="btn btn-outline-danger btn-hapus-kemasan fw-bold" data-pid="{{ $pid }}" data-code="{{ $code }}">
-                                                <i class="fas fa-trash me-1"></i> Hapus Kemasan
-                                            </button>
+                                     @if(in_array($batch->status, ['uji_homogenitas', 'gagal_homogenitas']))
+                                        <div class="px-3 pb-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <button type="button" class="btn btn-outline-primary btn-tambah-kemasan fw-bold text-nowrap" data-pid="{{ $pid }}" data-code="{{ $code }}">
+                                                    <i class="fas fa-plus me-1"></i> Tambah Kemasan
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger btn-hapus-kemasan fw-bold text-nowrap" data-pid="{{ $pid }}" data-code="{{ $code }}">
+                                                    <i class="fas fa-trash me-1"></i> Hapus Kemasan
+                                                </button>
+                                             </div>
+                                            <div>
+                                                <button type="button" class="btn btn-outline-success btn-save-sheet fw-bold text-nowrap w-100" data-pid="{{ $pid }}" data-code="{{ $code }}">
+                                                    <i class="fas fa-save me-1"></i> Simpan Tabel {{ $code }} Saja
+                                                </button>
+                                            </div>
                                         </div>
-                                        <button type="button" class="btn btn-outline-success btn-save-sheet fw-bold" data-pid="{{ $pid }}" data-code="{{ $code }}">
-                                            <i class="fas fa-save me-1"></i> Simpan Tabel {{ $code }} Saja
-                                        </button>
-                                    </div>
                                     @endif
                                 </div>
                             @endforeach
@@ -314,7 +456,7 @@
                             </button>
                         </div>
                         <div class="row text-center mt-3" id="anovaPreviewBoxes">
-                            <!-- Injected by JS -->
+                            
                         </div>
                     </div>
                 </div>
@@ -330,7 +472,7 @@
         </div>
     </div>
 </div>
-<!-- MODAL EXPORT -->
+
 <div class="modal fade" id="modalExport" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -404,7 +546,6 @@
     </div>
 </div>
 
-<!-- MODAL DETAIL ANOVA -->
 <div class="modal fade" id="modalDetailAnova" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
@@ -413,7 +554,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4 bg-light">
-                <!-- Select Parameter in Modal -->
+                
                 <div class="mb-3 w-25">
                     <label class="fw-bold form-label">Pilih Parameter:</label>
                     <select class="form-select" id="modalParamSelect">
@@ -457,7 +598,6 @@
                         </table>
                     </div>
 
-                    <!-- RUMUS -->
                     <div class="row mt-4 align-items-center border-bottom pb-4 mb-4">
                         <div class="col-md-8">
                             <table class="table table-borderless table-sm mb-0">
@@ -525,7 +665,6 @@
                         </div>
                     </div>
 
-                    <!-- KESIMPULAN -->
                     <div class="row align-items-center">
                         <div class="col-md-5">
                             <table class="table table-bordered table-sm text-center fw-bold">
@@ -572,19 +711,15 @@
     </div>
 </div>
 
-<!-- Tambahkan script SweetAlert2 untuk notif elegan -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<!-- Tambahkan script SheetJS dan html2pdf untuk Export -->
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
-// Tabel F kritis (alpha=0.05) dari backend HomogenitasService, satu sumber
-// kebenaran yang sama dengan kalkulasi server -> preview live tidak pernah beda.
+
 const fTabelLookup = @json($fTabelLookup ?? []);
 
-// kode program ini ditambahkan pada tanggal 11 september 2026
 const botolAcakLookup = {
     @if(isset($tabelAcak))
         @foreach($tabelAcak as $key => $item)
@@ -600,7 +735,7 @@ function getFTabelForN(n) {
     const minN = keys[0], maxN = keys[keys.length-1];
     if (n < minN) return fTabelLookup[minN];
     if (n > maxN) return fTabelLookup[maxN];
-    // interpolasi linear antar n terdekat
+
     let lower = null, upper = null;
     for (const k of keys) {
         if (k <= n) lower = k;
@@ -613,7 +748,6 @@ function getFTabelForN(n) {
     return fTabelLookup[maxN];
 }
 
-// STATE STORE
 const State = {};
 @foreach($batch->parameters as $param)
     @php 
@@ -631,13 +765,12 @@ const State = {};
 @endforeach
 
 document.addEventListener('DOMContentLoaded', function() {
-    
-    // Bind Event Listeners
+
     const tablesByCode = {};
     document.querySelectorAll('.param-table').forEach(table => {
         const code = table.dataset.code;
         tablesByCode[code] = table;
-        // Bind Event Listeners using Event Delegation for maximum robustness
+
         table.addEventListener('input', function(e) {
             if(e.target.tagName === 'INPUT') {
                 processTable(code, table);
@@ -648,8 +781,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 processTable(code, table);
             }
         });
-        
-        // Trigger format on blur for manual inputs if they are results (like TS adb)
+
         table.addEventListener('blur', function(e) {
             if(e.target.tagName === 'INPUT' && (e.target.classList.contains('in-hasil-1') || e.target.classList.contains('in-hasil-2'))) {
                 if(e.target.value && !e.target.readOnly) e.target.value = rnd(e.target.value, 2);
@@ -657,8 +789,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, true); // capture phase since blur doesn't bubble
     });
 
-    // Tambah satu baris kemasan ke SATU tabel tertentu (dipakai internal oleh
-    // fungsi tambahKemasanSemuaParameter di bawah, agar semua tabel tetap sinkron)
     function tambahKemasanKeTabel(code) {
         const table = tablesByCode[code];
         if(!table) return;
@@ -674,8 +804,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const cloneSimplo = simploRows[0].cloneNode(true);
         const cloneDuplo = duploRows[0].cloneNode(true);
 
-        // Reindex nama field: hanya bracket numerik (index baris) yang diganti,
-        // bracket non-numerik seperti [mentah] atau [nilai_d1] tidak tersentuh.
         cloneSimplo.querySelectorAll('[name]').forEach(el => {
             el.name = el.name.replace(/\[\d+\]/, `[${newIndex}]`);
         });
@@ -683,33 +811,28 @@ document.addEventListener('DOMContentLoaded', function() {
             el.name = el.name.replace(/\[\d+\]/, `[${newIndex}]`);
         });
 
-        // Kosongkan input yang bisa diisi manual
         cloneSimplo.querySelectorAll('input').forEach(el => { if(el.type !== 'hidden') el.value = ''; });
         cloneDuplo.querySelectorAll('input').forEach(el => { if(el.type !== 'hidden') el.value = ''; });
 
-        // Reset field db tersembunyi
         const inDb1 = cloneSimplo.querySelector('.in-db-1');
         const inDb2 = cloneSimplo.querySelector('.in-db-2');
         if(inDb1) inDb1.value = '';
         if(inDb2) inDb2.value = '';
 
-        // Update nomor botol (tidak ada acuan tabel acak untuk kemasan tambahan ini,
-        // jadi diberi nomor urut berikutnya secara manual sebagai nomor botol fisik juga)
         const hiddenBotol = cloneSimplo.querySelector('input[name*="[nomor_botol_fisik]"]');
         if (hiddenBotol) hiddenBotol.value = newBotolFisik;
 
         const labelCell = cloneSimplo.querySelector('td[rowspan="2"]');
         if (labelCell) {
-            // Node pertama = teks nomor urut sequential (Kode Sampel)
+
             if (labelCell.firstChild && labelCell.firstChild.nodeType === Node.TEXT_NODE) {
                 labelCell.firstChild.textContent = ' ' + newUrutan + ' ';
             }
-            // Sub-label kecil menampilkan nomor botol fisik
+
             const subLabel = labelCell.querySelector('div.text-muted');
             if (subLabel) subLabel.textContent = 'Botol ' + newBotolFisik;
         }
 
-        // Reset kolom hasil kalkulasi ke '-'
         cloneSimplo.querySelectorAll('td.out-diff, td.out-tol, td.out-avg-adb, td.out-avg-db, td.out-db-1').forEach(td => td.textContent = '-');
         cloneDuplo.querySelectorAll('td.out-db-2').forEach(td => td.textContent = '-');
 
@@ -737,10 +860,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return true;
     }
 
-    // Event listener untuk tombol "Tambah Kemasan"
-    // PENTING: diterapkan ke SEMUA parameter sekaligus (bukan cuma tab aktif),
-    // karena kemasan ke-i harus merujuk ke botol fisik yang sama untuk semua
-    // parameter (IM, ASH, VM, TS, CV diuji dari kemasan yang identik).
     document.querySelectorAll('.btn-tambah-kemasan').forEach(btn => {
         btn.addEventListener('click', function() {
             Object.keys(tablesByCode).forEach(code => {
@@ -755,7 +874,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Event listener untuk tombol "Hapus Kemasan" -- juga diterapkan ke semua parameter
     document.querySelectorAll('.btn-hapus-kemasan').forEach(btn => {
         btn.addEventListener('click', function() {
             const anyTableCode = Object.keys(tablesByCode)[0];
@@ -783,18 +901,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Initial process to calculate pre-filled data in DEPENDENCY ORDER
     const executionOrder = ['IM', 'ASH', 'VM', 'TS', 'CV'];
     executionOrder.forEach(code => {
         if(tablesByCode[code]) processTable(code, tablesByCode[code]);
     });
-    // Process any remaining parameters not in the explicit list
+
     Object.keys(tablesByCode).forEach(code => {
         if(!executionOrder.includes(code)) processTable(code, tablesByCode[code]);
     });
-    
-    // Ultimate fallback for extensions/autofill that bypass DOM events:
-    // Check the active table every 500ms
+
     setInterval(() => {
         const activeTab = document.querySelector('.nav-link.active');
         if(activeTab) {
@@ -804,17 +919,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 500);
 
-    // Helper: format number
     function rnd(val, dec=4) {
         if(isNaN(val) || val === null || val === '') return '-';
         return Number(val).toFixed(dec);
     }
 
-    // Helper: get safe float value, handle commas and hidden characters
     function getVal(el) {
         if(!el || el.value === undefined || el.value === null || el.value === '') return NaN;
-        // Hapus semua karakter yang BUKAN angka, titik, koma, atau minus.
-        // Ini memastikan karakter aneh seperti Left-to-Right mark (\u200E) terhapus.
+
         let v = el.value.toString().replace(/[^\d.,\-]/g, '');
         v = v.replace(/,/g, '.');
         return parseFloat(v);
@@ -833,13 +945,11 @@ document.addEventListener('DOMContentLoaded', function() {
             let val1 = null;
             let val2 = null;
 
-            // -------- IM --------
             if(code === 'IM') {
                 const m1_1 = getVal(tr1.querySelector('.in-m1-1'));
                 const a_1 = getVal(tr1.querySelector('.in-a-1'));
                 const m3_1 = getVal(tr1.querySelector('.in-m3-1'));
-                
-                // Kalkulasi independen agar terlihat live walaupun baru isi 2 input
+
                 if(!isNaN(m1_1) && !isNaN(a_1)) tr1.querySelector('.in-m2-1').value = rnd(m1_1 + a_1, 4);
                 if(!isNaN(m1_1) && !isNaN(m3_1)) tr1.querySelector('.in-b-1').value = rnd(m3_1 - m1_1, 4);
 
@@ -860,7 +970,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     tr2.querySelector('.in-hasil-2').value = rnd(val2, 2);
                 } else { isComplete = false; tr2.querySelector('.in-hasil-2').value = ''; }
             }
-            // -------- ASH --------
+
             else if(code === 'ASH') {
                 const m1_1 = getVal(tr1.querySelector('.in-m1-1'));
                 const m2m1_1 = getVal(tr1.querySelector('.in-m2m1-1'));
@@ -918,7 +1028,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if(tr2.querySelector('.out-db-2')) tr2.querySelector('.out-db-2').textContent = '-';
                 }
             }
-            // -------- VM --------
+
             else if(code === 'VM') {
                 const im_s = State['IM'] ? State['IM'].data[i].simplo_adb : null;
                 const im_d = State['IM'] ? State['IM'].data[i].duplo_adb : null;
@@ -978,7 +1088,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if(tr2.querySelector('.out-db-2')) tr2.querySelector('.out-db-2').textContent = '-';
                 }
             }
-            // -------- TS --------
+
             else if(code === 'TS') {
                 val1 = getVal(tr1.querySelector('.in-hasil-1'));
                 val2 = getVal(tr2.querySelector('.in-hasil-2'));
@@ -986,7 +1096,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const mass2 = getVal(tr2.querySelector('.in-massa-2'));
                 if(isNaN(val1) || isNaN(val2)) isComplete = false;
             }
-            // -------- CV --------
+
             else if(code === 'CV') {
                 const ts_s = State['TS'] ? State['TS'].data[i].simplo_adb : null;
                 const ts_d = State['TS'] ? State['TS'].data[i].duplo_adb : null;
@@ -1025,7 +1135,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else { isComplete = false; tr2.querySelector('.in-hasil-2').value = ''; }
             }
 
-            // ---- SUMMARY ROW & DB CONVERSION ----
             if(val1 !== null && val2 !== null && !isNaN(val1) && !isNaN(val2)) {
                 val1 = parseFloat(rnd(val1, code === 'CV' ? 0 : 2));
                 val2 = parseFloat(rnd(val2, code === 'CV' ? 0 : 2));
@@ -1077,7 +1186,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } 
                 
                 if(code !== 'IM') {
-                    // Convert to DB
+
                     const im_avg = State['IM'] ? State['IM'].data[i].avg_adb : null;
                     if(im_avg !== null) {
                         const avg_db = (100 / (100 - im_avg)) * avg_adb;
@@ -1097,15 +1206,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         State[code].ready = isComplete;
-        
-        // Update Dependencies
+
         updateDependencies();
-        
-        // Calculate ANOVA
+
         if(isComplete) {
             calculateAnovaPreview(code);
         } else {
-            // Clear ANOVA preview if not complete
+
             State[code].anova = null;
             if(document.querySelector('.nav-link.active') && document.querySelector('.nav-link.active').dataset.code === code) {
                 renderPreview();
@@ -1117,7 +1224,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const isImReady = State['IM'] ? State['IM'].ready : true;
         const isTsReady = State['TS'] ? State['TS'].ready : true;
 
-        // Unlock TS if IM is ready
         if(State['TS']) {
             const pane = document.getElementById('pane-' + State['TS'].id);
             if(!isImReady) {
@@ -1127,7 +1233,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Unlock ASH, VM if IM ready
         ['ASH', 'VM'].forEach(c => {
             if(State[c]) {
                 const pane = document.getElementById('pane-' + State[c].id);
@@ -1135,13 +1240,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     pane.style.opacity = '0.4'; pane.style.pointerEvents = 'none';
                 } else {
                     pane.style.opacity = '1'; pane.style.pointerEvents = 'auto';
-                    // We DO NOT call processTable(c) here to avoid infinite recursion!
-                    // Instead, we just visually let the user click on it.
+
                 }
             }
         });
 
-        // Unlock CV if IM and TS ready
         if(State['CV']) {
             const pane = document.getElementById('pane-' + State['CV'].id);
             if(!isImReady || !isTsReady) {
@@ -1153,7 +1256,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function calculateAnovaPreview(code) {
-        // Pure JS ANOVA Calculation
+
         let sumA = 0, sumB = 0;
         const n = State[code].data.length;
         let ai = [], bi = [];
@@ -1241,7 +1344,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Modal Builder
     const modalParamSelect = document.getElementById('modalParamSelect');
     modalParamSelect.addEventListener('change', renderModalAnova);
     
@@ -1262,8 +1364,6 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('modalValMswFormulaAtas').textContent = '-';
             document.getElementById('modalValMswDivisor').textContent = '-';
             document.getElementById('modalValMswLengkap').textContent = '-';
-            document.getElementById('modalValMsb2').textContent = '-';
-            document.getElementById('modalValMsw2').textContent = '-';
             document.getElementById('modalValMean').textContent = '-';
             document.getElementById('modalValMsb').textContent = '-';
             document.getElementById('modalValMsw').textContent = '-';
@@ -1375,31 +1475,25 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('modalValKesimpulanTextB').innerHTML = a.isHomogen ? '<span class="text-success">HOMOGEN</span>' : '<span class="text-danger">TIDAK HOMOGEN</span>';
     }
 
-    // Trigger initial locks and preview listener
     document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(btn => {
         btn.addEventListener('shown.bs.tab', function (e) {
             renderPreview();
-            // retrigger processTable for this specific tab to pull IM db dependencies if needed
+
             const newCode = e.target.dataset.code;
             processTable(newCode, document.querySelector(`.param-table[data-code="${newCode}"]`));
         });
     });
-    
-    // AJAX Save Per Sheet
+
     document.querySelectorAll('.btn-save-sheet').forEach(btn => {
         btn.addEventListener('click', function() {
             const pid = this.dataset.pid;
             const code = this.dataset.code;
             const table = document.getElementById('table-' + pid);
-            
-            // HAPUS validasi required() agar bisa nyimpen setengah data (Draft)
-            
-            // Indicate loading
+
             const originalText = this.innerHTML;
             this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...';
             this.disabled = true;
 
-            // Serialize data for just this parameter + tandai sbg draft
             const formData = new FormData();
             formData.append('_token', document.querySelector('input[name="_token"]').value);
             formData.append('is_draft', '1');
@@ -1442,9 +1536,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // ==========================================
-    // EXPORT LOGIC
-    // ==========================================
     const chkExportAll = document.getElementById('chkExportAll');
     const paramCheckboxes = document.querySelectorAll('.chk-export-param');
     
@@ -1468,7 +1559,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Validate readiness
         let allReady = true;
         let notReadyParams = [];
         selectedParams.forEach(code => {
@@ -1517,8 +1607,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         params.forEach(code => {
             const ghost = document.createElement('div');
-            
-            // 1. Data Input Table
+
             if(part === 'both' || part === 'main') {
                 const origTable = document.querySelector(`.param-table[data-code="${code}"]`);
                 if(origTable) {
@@ -1530,8 +1619,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     ghost.appendChild(tableClone);
                 }
             }
-            
-            // 2. Data ANOVA
+
             if(part === 'both' || part === 'anova') {
                 modalParamSelect.value = code;
                 renderModalAnova();
@@ -1582,8 +1670,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const finalWs = XLSX.utils.aoa_to_sheet(combinedWsData);
             XLSX.utils.book_append_sheet(wb, finalWs, code);
         });
-        
-        // Restore ANOVA modal
+
         modalParamSelect.value = oldCode;
         renderModalAnova();
         
@@ -1591,17 +1678,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function buildExportHtml(params, part) {
-        // Gunakan URL gambar langsung
+
         const logoUrl = window.location.origin + '/images/Logo_Suco_Nobg.png';
 
         let html = `<html><head><meta charset="utf-8"><style>
             body { font-family: 'Arial', sans-serif; font-size: 11px; color: black; }
             .official-table { border-collapse: collapse; width: 100%; font-size: 10px; border: 2px solid black; }
-            .official-table th, .official-table td { border: 1px solid black; padding: 4px; text-align: center; }
+            .official-table th, .official-table td {
+                border: 1px solid black;
+                padding: 5px 4px;
+                text-align: center;
+                vertical-align: middle;
+                line-height: 1.4;
+                height: 22px;
+                overflow: visible;
+            }
             .official-table th { background-color: #e9ecef; font-weight: bold; border-bottom: 2px solid black; }
             .official-table thead { border: 2px solid black; }
-            .page-break { page-break-before: always; display: block; height: 1px; width: 100%; clear: both; }
+            .pdf-break { page-break-before: always; break-before: page; }
+            .official-table.table-wide { table-layout: fixed; width: 100%; font-size: 10px; }
+            .official-table.table-wide th,
+            .official-table.table-wide td { padding: 2px 1px; word-break: break-word; overflow-wrap: anywhere; }
         </style></head><body>`;
+
+        let sectionCount = 0;
+        function openSection() {
+            const isFirst = sectionCount++ === 0;
+            return isFirst
+                ? `<div class="pdf-section">`
+                : `<div class="pdf-section pdf-break" style="page-break-before: always; break-before: page;">`;
+        }
         
         const oldCode = modalParamSelect.value;
         
@@ -1610,16 +1716,18 @@ document.addEventListener('DOMContentLoaded', function() {
             if(part === 'both' || part === 'main') {
                 const origTable = document.querySelector(`.param-table[data-code="${code}"]`);
                 if(origTable) {
-                    if (index > 0) html += `<div class="page-break"></div>`;
-                    html += `<div>`;
+                    html += openSection();
                     html += `<div style="font-size: 16px; font-weight: bold; text-align: center; margin-bottom: 10px;">DATA UTAMA UJI HOMOGENITAS - ${code}</div>`;
                     const tableClone = origTable.cloneNode(true);
                     tableClone.style.minWidth = 'auto'; 
+                    tableClone.querySelectorAll('input[type="hidden"]').forEach(el => el.remove());
                     tableClone.querySelectorAll('input').forEach(inp => {
                         const text = document.createTextNode(inp.value);
                         inp.parentNode.replaceChild(text, inp);
                     });
                     tableClone.className = "official-table";
+                    if (['VM', 'CV', 'ASH'].includes(code)) tableClone.classList.add('table-wide');
+                    tableClone.style.width = '100%';
                     html += tableClone.outerHTML;
                     html += `</div>`;
                 }
@@ -1657,14 +1765,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 else if(code === 'VM') paramFull = 'Volatile Matter';
                 else if(code === 'TS') paramFull = 'Total Sulfur';
 
-                if (part === 'both' || index > 0) {
-                    html += `<div class="page-break"></div>`;
-                }
+                
 
                 html += `
+                ${openSection()}
                 <div style="width: 100%; margin: 0 auto;">
 
-                    <!-- KOP SURAT (Format Klasik) -->
                     <table width="100%" border="0" cellpadding="0" cellspacing="0">
                         <tr>
                             <td align="left" valign="bottom" style="font-size: 16px; font-weight: bold; padding-bottom: 5px;">
@@ -1677,7 +1783,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </table>
                     <hr size="4" color="black" style="background-color: black; border: none; margin: 0; padding: 0;">
                     <br>
-                    <!-- IDENTITAS PARAMETER -->
+                    
                     <table width="80%" border="0" cellpadding="4" cellspacing="0" style="font-size: 11px;">
                         <tr>
                             <td width="35%" align="left">Parameter Uji</td>
@@ -1685,7 +1791,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td width="45%" bgcolor="#e9ecef" align="center" style="border: 1px solid #ccc;"><b>${paramFull}</b></td>
                             <td width="15%" align="left">&nbsp;&nbsp;(db)</td>
                         </tr>
-                        <tr><td colspan="4" height="6"></td></tr> <!-- Jarak antar baris -->
+                        <tr><td colspan="4" height="6"></td></tr> 
                         <tr>
                             <td align="left">Kode Sampel Inhouse Standard</td>
                             <td align="center">:</td>
@@ -1702,13 +1808,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td width="73%" align="left">II. PERHITUNGAN:</td>
                         </tr>
                     </table>
-                    
-                    <!-- TABEL UTAMA ANOVA -->
+
                     ${tableHtml}
                     
-                    <br> <!-- Jarak lega setelah tabel utama -->
+                    <br> 
 
-                    <!-- RUMUS MSB & MSW -->
                     <table width="70%" border="0" cellpadding="5" cellspacing="0" bgcolor="#f0f0f0" style="font-size: 11px; margin-bottom: 8px;">
                         <tr>
                             <td align="right" width="10%"><b>MSB =</b></td>
@@ -1744,7 +1848,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td>III. PERHITUNGAN Nilai "F hitung" dan "F tabel":</td>
                         </tr>
                     </table>
-                    <!-- KESIMPULAN F-TEST -->
+                    
                     <table width="100%" border="0" cellpadding="10" cellspacing="0" bgcolor="#e9ecef" style="font-size: 11px; margin-bottom: 10px;">
                         <tr>
                             <td align="right" width="15%"><b>F hitung =</b></td>
@@ -1776,8 +1880,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             </td>
                         </tr>
                     </table>
-                    
-                    <!-- TANDA TANGAN -->
+
                     <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 11px;">
                         <tr>
                             <td align="left" width="15%">Disusun oleh</td>
@@ -1799,8 +1902,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </table>
                     
                     <br><br>
-                    
-                    <!-- FOOTER KODE DOKUMEN -->
+
                     <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 9px;">
                         <tr>
                             <td align="left" width="30%">FOR/COAL-OPS/214</td>
@@ -1809,6 +1911,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td align="right" width="20%">Hal 1 dari 1 hal</td>
                         </tr>
                     </table>
+                </div>
                 </div>
                 `;
             }
@@ -1823,19 +1926,53 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function exportToPdf(params, part) {
         const html = buildExportHtml(params, part);
-        const container = document.createElement('div');
-        container.innerHTML = html;
-        
-        var opt = {
+
+        // Pecah HTML jadi section-section terpisah
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const css = doc.querySelector('style') ? doc.querySelector('style').textContent : '';
+        const sections = Array.from(doc.querySelectorAll('.pdf-section'));
+
+        if (sections.length === 0) {
+            return Promise.reject(new Error('Tidak ada data untuk dicetak.'));
+        }
+
+        // Tiap section jadi elemen "halaman" sendiri (lengkap dengan CSS-nya)
+        const pages = sections.map(sec => {
+            sec.classList.remove('pdf-break');
+            sec.style.pageBreakBefore = 'auto';
+            sec.style.breakBefore = 'auto';
+
+            const wrap = document.createElement('div');
+            wrap.style.cssText = 'overflow: visible; padding-bottom: 10px;';
+            const style = document.createElement('style');
+            style.textContent = css;
+            wrap.appendChild(style);
+            wrap.appendChild(sec);
+            return wrap;
+        });
+
+        const opt = {
             margin:       [0.4, 0.4, 0.4, 0.4],
             filename:     'Hasil_Uji_Homogenitas.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2 },
+            html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
             jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-            pagebreak:    { mode: 'css', avoid: ['tr', 'h5', 'h4', '.avoid-break'] }
+            pagebreak:    { mode: ['css', 'legacy'] }   // tanpa avoid: ['tr']
         };
-        
-        return html2pdf().set(opt).from(html).save();
+
+        let worker = html2pdf().set(opt).from(pages[0]).toPdf();
+
+        for (let i = 1; i < pages.length; i++) {
+            worker = worker
+                .get('pdf')
+                .then(pdf => { pdf.addPage(); })
+                .from(pages[i])
+                .toContainer()
+                .toCanvas()
+                .toPdf();
+        }
+
+        return worker.save();
     }
 
     function exportToWord(params, part) {
@@ -1852,7 +1989,113 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.removeChild(link);
     }
 
+        // === LOGIKA RESOURCE MODAL (ALAT & BAHAN) ===
+    function updateResourceSummary(pid) {
+        let modal = document.getElementById('modalResource-' + pid);
+        if(!modal) return;
+        
+        let personils = [], alats = [], bahans = [];
+        
+        modal.querySelectorAll('.chk-personil:checked').forEach(cb => {
+            let peran = cb.closest('tr').querySelector('.in-peran').value || 'Analis';
+            let text = cb.closest('tr').querySelectorAll('td')[1].innerText;
+            personils.push(`${text} (${peran})`);
+        });
+        
+        modal.querySelectorAll('.chk-alat:checked').forEach(cb => {
+            let text = cb.closest('.form-check').querySelector('strong').innerText;
+            alats.push(text);
+        });
+        
+        modal.querySelectorAll('.chk-bahan:checked').forEach(cb => {
+            let qty = cb.closest('tr').querySelector('.in-qty').value || '0';
+            let satuan = cb.closest('tr').querySelector('.input-group-text').innerText;
+            bahans.push(`${cb.dataset.nama} (${qty} ${satuan})`);
+        });
+
+        let summaryDiv = document.getElementById('summary_' + pid);
+        let contentDiv = summaryDiv.querySelector('.summary-content');
+        
+        if (personils.length || alats.length || bahans.length) {
+                let html = '';
+                if(personils.length) html += `<div><strong class="text-primary">Analis:</strong> ${personils.join(', ')}</div>`;
+                if(alats.length) html += `<div><strong class="text-success">Alat:</strong> ${alats.join(', ')}</div>`;
+                if(bahans.length) html += `<div><strong class="text-warning">Bahan:</strong> ${bahans.join(', ')}</div>`;
+            
+            contentDiv.innerHTML = html;
+            summaryDiv.classList.remove('d-none');
+        } else {
+            summaryDiv.classList.add('d-none');
+        }
+    }
+
+    document.querySelectorAll('.modal-resource').forEach(modal => {
+        modal.addEventListener('hidden.bs.modal', function () {
+            let pid = this.id.replace('modalResource-', '');
+            updateResourceSummary(pid);
+        });
+    });
+
+    document.querySelectorAll('.btn-copy-resource').forEach(btn => {
+        btn.addEventListener('click', function() {
+            let currentPid = this.dataset.pid;
+            let currentTab = document.querySelector('#parameterTabs .nav-link.active');
+            let prevTabItem = currentTab.closest('li.nav-item').previousElementSibling;
+            
+            if (prevTabItem) {
+                let prevTabLink = prevTabItem.querySelector('.nav-link');
+                let prevPid = prevTabLink.dataset.pid || prevTabLink.id.replace('tab-', '');
+                
+                let prevModal = document.getElementById('modalResource-' + prevPid);
+                let currModal = document.getElementById('modalResource-' + currentPid);
+                
+                if (prevModal && currModal) {
+                    currModal.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                    currModal.querySelectorAll('.in-peran, .in-qty').forEach(inpt => inpt.value = '');
+
+                    prevModal.querySelectorAll('.chk-personil:checked').forEach(cb => {
+                        let targetCb = currModal.querySelector(`.chk-personil[value="${cb.value}"]`);
+                        if(targetCb) {
+                            targetCb.checked = true;
+                            targetCb.closest('tr').querySelector('.in-peran').value = cb.closest('tr').querySelector('.in-peran').value;
+                        }
+                    });
+
+                    prevModal.querySelectorAll('.chk-alat:checked').forEach(cb => {
+                        let targetCb = currModal.querySelector(`.chk-alat[value="${cb.value}"]`);
+                        if(targetCb) targetCb.checked = true;
+                    });
+
+                    prevModal.querySelectorAll('.chk-bahan:checked').forEach(cb => {
+                        let targetCb = currModal.querySelector(`.chk-bahan[value="${cb.value}"]`);
+                        if(targetCb) {
+                            targetCb.checked = true;
+                            targetCb.closest('tr').querySelector('.in-qty').value = cb.closest('tr').querySelector('.in-qty').value;
+                        }
+                    });
+                    alert('Berhasil menyalin data dari parameter sebelumnya!');
+                    updateResourceSummary(currentPid);
+                }
+            } else {
+                alert('Ini adalah parameter pertama, tidak ada data sebelumnya yang bisa disalin.');
+            }
+        });
+    });
+
+    document.querySelectorAll('.in-qty').forEach(input => {
+        input.addEventListener('input', function() {
+            let tr = this.closest('tr');
+            let checkbox = tr.querySelector('.chk-bahan');
+            if (this.value && parseFloat(this.value) > 0) {
+                checkbox.checked = true;
+            } else {
+                checkbox.checked = false;
+            }
+        });
+    });
+    
 });
+
 </script>
 
 <style>
@@ -1868,7 +2111,6 @@ document.addEventListener('DOMContentLoaded', function() {
 .param-table td {
     padding: 0.2rem;
 }
-/* Hilangkan validasi bawaan browser krn kita main manual + draft */
 input:invalid {
     box-shadow: none;
 }

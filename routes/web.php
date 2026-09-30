@@ -262,12 +262,17 @@ Route::middleware(['auth'])->group(function () {
 
         // Aktivasi
         Route::post('/{id}/aktifkan', [QcInhouseController::class, 'aktifkan'])->name('aktifkan');
+        Route::post('/{id}/nonaktifkan', [QcInhouseController::class, 'nonaktifkan'])->name('nonaktifkan'); 
+        Route::post('/{id}/investigasi', [QcInhouseController::class, 'storeInvestigasi'])->name('investigasi');
+        Route::post('/{id}/preparasi-ulang', [QcInhouseController::class, 'preparasiUlang'])->name('preparasi-ulang');
     });
 
     Route::prefix('qc-harian')->name('qc-harian.')->group(function () {
         Route::get('/', [QcHarianController::class, 'index'])->name('index');
         Route::get('/create', [QcHarianController::class, 'create'])->name('create');
         Route::post('/', [QcHarianController::class, 'store'])->name('store');
+        Route::get('/draft/{id}/edit', [QcHarianController::class, 'editDraft'])->name('draft.edit');
+        Route::delete('/draft/{id}', [QcHarianController::class, 'destroyDraft'])->name('draft.destroy');
         Route::get('/print-pdf', [QcHarianController::class, 'printPdf'])->name('print-pdf');
         Route::get('/{parameter_uji_id}/chart', [QcHarianController::class, 'chart'])->name('chart');
         Route::get('/{id}/investigasi', [QcHarianController::class, 'investigasi'])->name('investigasi');

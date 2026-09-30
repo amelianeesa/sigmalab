@@ -28,7 +28,6 @@
         color: #ffffff !important;
         border-bottom: 2px solid #14253e !important;
         font-size: 0.85rem;
-        text-transform: uppercase;
         letter-spacing: 0.5px;
         padding-top: 15px;
         padding-bottom: 15px;
@@ -59,6 +58,16 @@
     @endif
 
     <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 fw-bold" style="color: #1b3152;"><i class="fas fa-list me-2"></i>Data Program Uji Banding</h6>
+            <form action="{{ route('qc-uji-banding.index') }}" method="GET" id="searchForm" class="m-0" style="width: 300px;">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white text-muted border-end-0"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control border-start-0" name="search" id="searchInput" placeholder="Ketik untuk mencari..." value="{{ request('search') }}">
+                </div>
+            </form>
+        </div>
+
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0 table-corporate">
@@ -128,8 +137,41 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="p-3 border-top">
+                {{ $programs->appends(['search' => request('search')])->links('pagination::bootstrap-5') }}
+            </div>
+
         </div>
     </div>
 </div>
 @endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let typingTimer;                
+        const doneTypingInterval = 500; // waktu tunggu setengah detik
+        const searchInput = document.getElementById('searchInput');
+        const searchForm = document.getElementById('searchForm');
+        if(searchInput) {
+            searchInput.addEventListener('keyup', function () {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(() => {
+                    searchForm.submit();
+                }, doneTypingInterval);
+            });
+            searchInput.addEventListener('search', function () {
+                searchForm.submit();
+            });
+            if(searchInput.value) {
+                searchInput.focus();
+                const val = searchInput.value;
+                searchInput.value = '';
+                searchInput.value = val;
+            }
+        }
+    });
+</script>
+@endsection 
 

@@ -2,6 +2,14 @@
 @section('title', 'Pengujian Harian QC')
 
 @section('content')
+<style>
+    .table-corporate thead th {
+        background-color: #1b3152 !important;
+        color: #ffffff !important;
+        border-bottom: 2px solid #0f1c2f !important;
+    }
+</style>
+
 <div class="container-fluid px-4 pb-5">
     <x-qc-breadcrumb active="In-House">
         @if($activeBatch)
@@ -9,9 +17,22 @@
         @endif
         <li class="breadcrumb-item active">Pengujian Harian QC</li>
     </x-qc-breadcrumb>
-    <div class="d-flex justify-content-between align-items-center mb-4"><h1 class="fw-bold text-dark mb-0">
-        <i class="fas fa-chart-line text-danger me-2"></i>Pengujian Harian QC
-    </h1><a href="{{ route('parameter-uji.index') }}" class="btn btn-outline-secondary btn-sm shadow-sm"><i class="fas fa-cogs me-1"></i> Master Parameter Uji</a></div>
+
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h1 class="fw-bold text-dark mb-0">
+                <i class="fas fa-chart-line text-danger me-2"></i>Pengujian Harian QC
+            </h1>
+        </div>
+
+        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+            <div class="d-grid d-md-inline-block">
+                <a href="{{ route('parameter-uji.index') }}" class="btn btn-outline-secondary shadow-sm">
+                    <i class="fas fa-cogs me-1"></i> Master Parameter Uji
+                </a>
+            </div>
+        </div>
+    </div>
 
     @if(!$activeBatch)
     <div class="alert alert-warning border-0 shadow-sm">
@@ -20,31 +41,36 @@
     @else
     
     <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body bg-light rounded d-flex justify-content-between align-items-center">
-            <div>
-                <h5 class="fw-bold mb-1">Batch Aktif: {{ $activeBatch->kode_batch }}</h5>
-                <p class="text-muted mb-0 small">Masa Berlaku: {{ $activeBatch->tanggal_dibuat ? \Carbon\Carbon::parse($activeBatch->tanggal_dibuat)->format('d M Y') : '-' }} s/d Selesai</p>
-            </div>
-            <div>
-                <button type="button" class="btn btn-outline-danger rounded-pill px-3 shadow-sm me-2" data-bs-toggle="modal" data-bs-target="#modalCetakPdf">
-                    <i class="fas fa-file-pdf me-1"></i> Cetak Laporan
-                </button>
-                <a href="{{ route('qc-harian.create') }}" class="btn btn-danger rounded-pill px-4 shadow-sm">
-                    <i class="fas fa-plus me-1"></i> Input Data Harian
-                </a>
+        <div class="card-body bg-light rounded">
+            <div class="row align-items-center">
+                
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <h5 class="fw-bold mb-1">Batch Aktif: {{ $activeBatch->kode_batch }}</h5>
+                    <p class="text-muted mb-0 small">Masa Berlaku: {{ $activeBatch->tanggal_dibuat ? \Carbon\Carbon::parse($activeBatch->tanggal_dibuat)->format('d M Y') : '-' }} s/d Selesai</p>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="d-flex flex-column flex-md-row justify-content-start justify-content-md-end gap-2">
+                        <button type="button" class="btn btn-outline-danger rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalCetakPdf">
+                            <i class="fas fa-file-pdf me-1"></i> Cetak Laporan
+                        </button>
+                        <a href="{{ route('qc-harian.create') }}" class="btn btn-danger rounded-pill px-4 shadow-sm">
+                            <i class="fas fa-plus me-1"></i> Input Data Harian
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Parameter Status Table (Redesigned as requested) -->
     <div class="card shadow-sm border-0 mb-5">
         <div class="card-header bg-white py-3">
             <h5 class="fw-bold mb-0 text-primary"><i class="fas fa-list me-2"></i>Daftar Parameter Uji Harian</h5>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover table-striped align-middle mb-0" style="font-size: 0.9rem;">
-                    <thead class="table-dark">
+                <table class="table table-hover table-striped table-corporate align-middle mb-0" style="font-size: 0.9rem;">
+                    <thead>
                         <tr>
                             <th class="text-center" style="width: 50px;">No</th>
                             <th>Nama Parameter</th>
@@ -101,7 +127,6 @@
         </div>
     </div>
 
-    <!-- Tabel Riwayat Semua Data -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4 class="mb-0 fw-bold"><i class="fas fa-history me-2 text-secondary"></i>Riwayat Pengujian</h4>
         <div class="d-flex gap-2">
@@ -135,8 +160,8 @@
     <div class="card shadow-sm border-0">
         <div class="card-body p-3">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="tableRiwayat">
-                    <thead class="table-light">
+                <table class="table table-hover table-corporate align-middle mb-0" id="tableRiwayat">
+                    <thead>
                         <tr>
                             <th class="ps-4">Tanggal</th>
                             <th>Parameter</th>
@@ -149,58 +174,71 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($recentLogs as $log)
-                        <tr>
-                            <td class="ps-4">{{ \Carbon\Carbon::parse($log->tanggal_uji)->format('d M Y') }}</td>
-                            <td class="fw-bold">{{ strtoupper($log->parameterUji->nama_parameter) }}</td>
-                            <td>{{ number_format($log->nilai_d1, 2) }}</td>
-                            <td>{{ $log->nilai_d2 ? number_format($log->nilai_d2, 2) : '-' }}</td>
-                            <td class="fw-bold">{{ number_format($log->nilai_akhir, 2) }}</td>
-                            <td>
-                                @if($log->status_evaluasi === 'inlier')
-                                    <span class="badge bg-success"><i class="fas fa-check me-1"></i> Inlier</span>
-                                @elseif($log->status_evaluasi === 'warning')
-                                    <span class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle me-1"></i> Warning</span>
-                                    <small class="d-block text-muted mt-1">{{ $log->pelanggaran_rule }}</small>
-                                @elseif($log->status_evaluasi === 'outlier')
-                                    <span class="badge bg-danger"><i class="fas fa-times me-1"></i> Outlier</span>
-                                    <small class="d-block text-danger mt-1 fw-bold">{{ $log->pelanggaran_rule }}</small>
-                                @endif
-                            </td>
-                            <td>{{ $log->analis ? $log->analis->username : '-' }}</td>
-                            <td class="pe-4 text-center">
-<button type="button" class="btn btn-sm btn-info text-white me-1 mb-1 btn-detail-qc"
-                                    data-tanggal="{{ \Carbon\Carbon::parse($log->tanggal_uji)->format('d M Y') }}"
-                                    data-parameter="{{ strtoupper($log->parameterUji->nama_parameter) }}"
-                                    data-analis="{{ $log->analis ? $log->analis->username : '-' }}"
-                                    data-d1="{{ number_format($log->nilai_d1, 2) }}"
-                                    data-d2="{{ $log->nilai_d2 ? number_format($log->nilai_d2, 2) : '-' }}"
-                                    data-akhir="{{ number_format($log->nilai_akhir, 2) }}"
-                                    data-db1="{{ $log->nilai_db_1 ? number_format($log->nilai_db_1, 4) : '-' }}"
-                                    data-db2="{{ $log->nilai_db_2 ? number_format($log->nilai_db_2, 4) : '-' }}"
-                                    data-mean="{{ number_format($log->mean_acuan, 4) }}"
-                                    data-sd="{{ number_format($log->sd_acuan, 4) }}"
-                                    data-status="{{ $log->status_evaluasi }}"
-                                    data-rule="{{ $log->pelanggaran_rule ?? '-' }}"
-                                    data-investigasi="{{ $log->catatan_investigasi ?? '-' }}"
-                                    data-mentah="{{ htmlspecialchars(json_encode($log->data_mentah ?? []), ENT_QUOTES, 'UTF-8') }}">
-                                    <i class="fas fa-eye"></i> Detail
-                                </button>
-
-                                @if($log->status_evaluasi === 'outlier')
-                                    @if($log->status_investigasi === 'menunggu_investigasi')
-                                        <a href="{{ route('qc-harian.investigasi', $log->id) }}" class="btn btn-sm btn-danger pulse-button mb-1"><i class="fas fa-edit"></i> Isi Investigasi</a>
-                                    @else
-                                        <button class="btn btn-sm btn-outline-success mb-1" disabled><i class="fas fa-check-double"></i> Investigasi Selesai</button>
+                        @foreach($recentLogs as $log)
+                            <tr>
+                                <td class="ps-4">{{ \Carbon\Carbon::parse($log->tanggal_uji)->format('d M Y') }}</td>
+                                <td class="fw-bold">
+                                    {{ strtoupper($log->parameterUji->nama_parameter) }}
+                                    @if($log->status_pengujian === 'draft')
+                                        <span class="badge bg-secondary ms-2" style="font-size: 0.65rem;">DRAFT</span>
                                     @endif
-                                @endif
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="8" class="text-center py-5 text-muted">Belum ada data pengujian harian.</td>
-                        </tr>
-                        @endforelse
+                                </td>
+                                <td>{{ number_format($log->nilai_d1, 2) }}</td>
+                                <td>{{ $log->nilai_d2 ? number_format($log->nilai_d2, 2) : '-' }}</td>
+                                <td class="fw-bold">
+                                    {{ $log->status_pengujian === 'draft' ? '-' : number_format($log->nilai_akhir, 2) }}
+                                </td>
+                                <td>
+                                    @if($log->status_pengujian === 'draft')
+                                        <span class="badge bg-light text-secondary border"><i class="fas fa-pencil-alt me-1"></i> Belum Selesai</span>
+                                    @else
+                                        @if($log->status_evaluasi === 'inlier')
+                                            <span class="badge bg-success"><i class="fas fa-check me-1"></i> Inlier</span>
+                                        @elseif($log->status_evaluasi === 'warning')
+                                            <span class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle me-1"></i> Warning</span>
+                                            <small class="d-block text-muted mt-1">{{ $log->pelanggaran_rule }}</small>
+                                        @elseif($log->status_evaluasi === 'outlier')
+                                            <span class="badge bg-danger"><i class="fas fa-times me-1"></i> Outlier</span>
+                                            <small class="d-block text-danger mt-1 fw-bold">{{ $log->pelanggaran_rule }}</small>
+                                        @endif
+                                    @endif
+                                </td>
+                                <td>{{ $log->analis ? $log->analis->username : '-' }}</td>
+                                <td class="pe-4 text-center">
+                                    @if($log->status_pengujian === 'draft')
+                                        
+                                        <a href="{{ route('qc-harian.draft.edit', $log->id) }}" class="btn btn-sm btn-warning text-dark me-1 mb-1 shadow-sm" title="Lanjutkan Draft">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </a>
+                                        
+                                        <form action="{{ route('qc-harian.draft.destroy', $log->id) }}" method="POST" class="d-inline form-delete-draft">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger mb-1 shadow-sm" title="Hapus Draft">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    @else
+                                        
+                                        <button type="button" class="btn btn-sm btn-info text-white me-1 mb-1 btn-detail-qc"
+                                                data-tanggal="{{ \Carbon\Carbon::parse($log->tanggal_uji)->format('d M Y') }}"
+                                                data-parameter="{{ strtoupper($log->parameterUji->nama_parameter) }}"
+                                                data-analis="{{ $log->analis ? $log->analis->username : '-' }}"
+                                                data-d1="{{ number_format($log->nilai_d1, 2) }}"
+                                                data-d2="{{ $log->nilai_d2 ? number_format($log->nilai_d2, 2) : '-' }}"
+                                                data-akhir="{{ number_format($log->nilai_akhir, 2) }}"
+                                                data-db1="{{ $log->nilai_db_1 ? number_format($log->nilai_db_1, 4) : '-' }}"
+                                                data-db2="{{ $log->nilai_db_2 ? number_format($log->nilai_db_2, 4) : '-' }}"
+                                                data-mean="{{ number_format($log->mean_acuan, 4) }}"
+                                                data-sd="{{ number_format($log->sd_acuan, 4) }}"
+                                                data-pelanggaran="{{ $log->pelanggaran_rule }}"
+                                                title="Lihat Detail">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
@@ -210,7 +248,6 @@
 
 </div>
 
-<!-- Modal Detail QC Harian -->
 <div class="modal fade" id="modalDetailQcHarian" tabindex="-1" aria-labelledby="modalDetailQcHarianLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -267,8 +304,7 @@
                         </tr>
                     </tbody>
                 </table>
-                
-                <!-- Container untuk tabel kalkulasi pengujian mentah -->
+
                 <h6 class="mt-4 mb-2 fw-bold text-secondary"><i class="fas fa-calculator me-2"></i>Tabel Kalkulasi Pengujian</h6>
                 <div id="detTableKalkulasi" class="table-responsive"></div>
                 
@@ -280,7 +316,6 @@
     </div>
 </div>
 
-<!-- MODAL CETAK PDF -->
 <div class="modal fade" id="modalCetakPdf" tabindex="-1" aria-labelledby="modalCetakPdfLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <form action="{{ route('qc-harian.print-pdf') }}" method="GET" target="_blank" class="modal-content">
@@ -401,7 +436,6 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('detRule').innerText = this.getAttribute('data-rule');
             document.getElementById('detInvestigasi').innerText = this.getAttribute('data-investigasi');
             
-            // Generate Tabel Kalkulasi
             const code = this.getAttribute('data-parameter').toUpperCase();
             let mentahRaw = this.getAttribute('data-mentah');
             let m = {};
@@ -642,7 +676,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 </style>
 
-<!-- DataTables CSS & JS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -650,20 +683,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script>
 $(document).ready(function() {
-    // Custom DataTables filter for Bulan & Tahun
     $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
         let filterBulan = $('#filterBulan').val();
         let filterTahun = $('#filterTahun').val();
         
-        // Kolom pertama adalah Tanggal (contoh: 21 Apr 2026 atau 21 April 2026)
         let dateStr = data[0] || ""; 
         
-        // Cek filter bulan
         if (filterBulan && !dateStr.includes(filterBulan)) {
             return false;
         }
         
-        // Cek filter tahun
         if (filterTahun && !dateStr.includes(filterTahun)) {
             return false;
         }
@@ -672,7 +701,7 @@ $(document).ready(function() {
     });
 
     let table = $('#tableRiwayat').DataTable({
-        "order": [], // Maintain default server sort (created_at desc)
+        "order": [], 
         "pageLength": 10,
         "language": {
             "search": "Live Search:",
@@ -690,11 +719,35 @@ $(document).ready(function() {
         }
     });
 
-    // Re-draw table ketika dropdown diubah
     $('#filterBulan, #filterTahun').on('change', function() {
         table.draw();
     });
 });
+
+    $('.form-delete-draft').on('submit', function(e) {
+        e.preventDefault(); 
+        let form = this;
+        
+        Swal.fire({
+            title: 'Hapus Draft Ini?',
+            text: "Data pengujian yang belum selesai ini akan hilang permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545', 
+            cancelButtonColor: '#1b3152', 
+            confirmButtonText: '<i class="fas fa-trash-alt me-1"></i> Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Menghapus...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+                form.submit(); 
+            }
+        });
+    });
 </script>
 
 @endsection

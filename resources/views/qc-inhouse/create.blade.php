@@ -101,7 +101,6 @@
                             </div>
                         </div>
 
-                        <!-- Physics Auto-Calc Display -->
                         <div class="mt-4 p-4 bg-light border rounded">
                             <div class="row align-items-center">
                                 <div class="col-md-8">
@@ -126,8 +125,7 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Sidebar Info -->
+
         <div class="col-xl-3 col-lg-2">
             <div class="card shadow-sm border-0 bg-info bg-opacity-10">
                 <div class="card-body">
@@ -207,7 +205,6 @@ document.addEventListener('DOMContentLoaded', function() {
         let hasError = false;
         let errMsg = '';
 
-        // Check 1: TM > MAD
         if (!isNaN(valTm) && !isNaN(valMad)) {
             if (valTm <= valMad) {
                 hasError = true;
@@ -215,7 +212,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Check 2: Proximate Balance
         if (!isNaN(valMad) && !isNaN(valAsh) && !isNaN(valVm)) {
             let total = valMad + valAsh + valVm;
             let fc = 100 - total;
@@ -234,7 +230,6 @@ document.addEventListener('DOMContentLoaded', function() {
             fcDisplay.className = 'fw-bold text-success mb-0';
         }
 
-        // UI Update
         if (hasError) {
             warningBox.classList.remove('d-none');
             warningText.textContent = errMsg;
@@ -251,7 +246,6 @@ document.addEventListener('DOMContentLoaded', function() {
     ash.addEventListener('input', checkPhysics);
     vm.addEventListener('input', checkPhysics);
 
-    // Initial check (in case of old input on error redirect)
     updateLimits();
     checkPhysics();
 });

@@ -8,8 +8,8 @@
         <li class="breadcrumb-item active">Tahap 4: Penetapan Target</li>
     </x-qc-breadcrumb>
 
-    <div class="row justify-content-center mt-3">
-        <div class="col-xl-10">
+    <div class="row mt-3">
+        <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h3 class="fw-bold text-dark mb-0"><i class="fas fa-bullseye text-primary me-2"></i>Penetapan Nilai Target (Tahap 4)</h3>
             </div>
