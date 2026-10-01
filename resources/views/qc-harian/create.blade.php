@@ -904,7 +904,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 if (errorMsg) {
-                    e.preventDefault(); // Hentikan form agar tidak me-refresh!
+                    e.preventDefault(); 
                     Swal.fire({
                         icon: 'error',
                         title: 'Data Bahan Tidak Lengkap!',

@@ -4,45 +4,274 @@
 @section('content')
 
 <style>
+    :root {
+        --brand-navy: #1b3a5c;
+        --brand-navy-light: #2c5282;
+    }
+
     .card-header-custom {
         background-color: #f8f9fa;
-        font-weight: bold;
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 0.5rem 0.9rem;
     }
-    /* Memaksa background dan teks header tabel menjadi hitam */
-    .table-header-custom, 
-    .table-header-custom th, 
+
+    .table-header-custom,
     .table-header-custom tr {
-        background-color: #212529 !important;
+        background-color: var(--brand-navy) !important;
         color: #ffffff !important;
-        border-color: #454d55 !important;
+        border-color: var(--brand-navy-light) !important;
     }
+    .table-header-custom th {
+        background-color: var(--brand-navy) !important;
+        color: #ffffff !important;
+        border-color: #ffffff !important;
+    }
+
+    .modal-header-brand {
+        background-color: var(--brand-navy) !important;
+        color: #ffffff !important;
+    }
+    .modal-header-brand .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+
     .table-responsive-custom {
+        font-size: 0.68rem;
+    }
+    .table-responsive-custom th,
+    .table-responsive-custom td {
+        padding: 0.25rem 0.35rem;
+        vertical-align: middle;
+    }
+
+    .badge-custom-size {
+        font-size: 0.55rem;
+        padding: 0.2em 0.4em;
+    }
+
+    .btn-brand-standard {
+        background-color: var(--brand-navy);
+        border-color: var(--brand-navy);
+        color: #ffffff;
+        font-size: 0.8rem;
+        padding: 0.35rem 1rem;
+        border-radius: 0.375rem; 
+        transition: transform 0.15s, background-color 0.15s;
+    }
+    .btn-brand-standard:hover {
+        background-color: var(--brand-navy-light);
+        border-color: var(--brand-navy-light);
+        color: #ffffff;
+        transform: translateY(-2px);
+    }
+    .btn-success-standard {
+        background-color: #198754;
+        border-color: #198754;
+        color: #ffffff;
+        font-size: 0.8rem;
+        padding: 0.35rem 1rem;
+        border-radius: 0.375rem;
+        transition: transform 0.15s, background-color 0.15s;
+    }
+    .btn-success-standard:hover {
+        background-color: #157347;
+        border-color: #146c43;
+        color: #ffffff;
+        transform: translateY(-2px);
+    }
+    .btn-sm {
         font-size: 0.75rem;
     }
-    .badge-custom-size {
-        font-size: 0.65rem;
+    .form-control-sm,
+    .form-select-sm {
+        font-size: 0.78rem;
+    }
+    .pagination .page-link {
+        font-size: 0.72rem;
+        padding: 0.2rem 0.55rem;
+    }
+
+    .alert-dismissible {
+        position: relative;
+        padding-right: 3rem;
+    }
+    .alert-dismissible .btn-close {
+        position: absolute !important;
+        top: 50% !important;
+        right: 1rem !important;
+        transform: translateY(-50%) !important;
+        margin: 0 !important;
+        padding: 0.5rem;
+    }
+    .modal {
+        overflow: visible !important;
+    }
+    .modal-body {
+        overflow: visible !important;
+    }
+
+    .swal2-popup {
+        font-size: 0.85rem !important;
+        padding: 1.5rem 1.25rem 1.75rem !important;
+        border-radius: 1rem !important;
+        width: 30em !important;
+    }
+    .swal2-title {
+        font-size: 1.15rem !important;
+        font-weight: 700 !important;
+        padding: 0 !important;
+        margin-bottom: 0.4rem !important;
+        color: #212529 !important;
+    }
+    .swal2-html-container {
+        font-size: 0.85rem !important;
+        color: #6c757d !important;
+        margin: 0.4rem 0.25rem 0 !important;
+    }
+    .swal2-icon {
+        width: 3.6em !important;
+        height: 3.6em !important;
+        margin: 0.3em auto 0.7em !important;
+    }
+    .swal2-icon .swal2-icon-content {
+        font-size: 2em !important;
+    }
+    .swal2-actions {
+        margin-top: 1.35rem !important;
+        gap: 0.75rem !important;
+    }
+    .swal2-styled {
+        font-size: 0.85rem !important;
+        font-weight: 600 !important;
+        padding: 0.55rem 1.3rem !important;
+        border-radius: 0.4rem !important;
+        white-space: nowrap !important;
+        line-height: 1.3 !important;
+    }
+    .custom-dropdown-item:hover, 
+    .custom-dropdown-item:focus {
+        background-color: rgba(27, 58, 92, 0.15) !important;
+        color: #1b3a5c !important;
+    }
+
+    .header-action-btns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .scroll-hint {
+        display: none;
+        font-size: 0.68rem;
+        color: #6c757d;
+        margin-bottom: 0.4rem;
+    }
+
+    .filter-select {
+        position: relative;
+        font-size: 0.78rem;
+    }
+    .filter-select-trigger {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        padding: 0.32rem 0.6rem;
+        font-size: 0.78rem;
+        cursor: pointer;
+        text-align: left;
+        color: #212529;
+    }
+    .filter-select-trigger:after {
+        content: "";
+        width: 0;
+        height: 0;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 5px solid #6c757d;
+        margin-left: 6px;
+        flex-shrink: 0;
+    }
+    .filter-select.open .filter-select-trigger {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15);
+    }
+    .filter-select-options {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1050;
+        margin-top: 2px;
+        max-height: 220px;
+        overflow-y: auto;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+        list-style: none;
+        padding: 4px 0;
+    }
+    .filter-select.open .filter-select-options {
+        display: block;
+    }
+    .filter-select-options li {
+        padding: 6px 10px;
+        font-size: 0.78rem;
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .filter-select-options li:hover {
+        background-color: #f1f3f5;
+    }
+    .filter-select-options li.selected {
+        background-color: #0d6efd;
+        color: #fff;
+    }
+
+    @media (max-width: 768px) {
+        .table-responsive-custom {
+            font-size: 0.62rem;
+        }
+        .table-responsive-custom th,
+        .table-responsive-custom td {
+            padding: 0.2rem 0.25rem;
+        }
+        .badge-custom-size {
+            font-size: 0.5rem;
+        }
+        .scroll-hint {
+            display: block;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .header-action-btns {
+            width: 100%;
+            flex-direction: column;
+        }
+        .header-action-btns a,
+        .header-action-btns button {
+            width: 100%;
+            text-align: center;
+        }
     }
 </style>
 
 <div class="container-fluid px-4">
-    <!-- <ol class="breadcrumb mb-1 mt-3">
-        <li class="breadcrumb-item"><a href="{{ url('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
-        <li class="breadcrumb-item active">Inventori Barang</li>
-    </ol>
-    <h1 class="mb-4">Laporan Inventori Barang Persediaan (Stock)</h1> -->
-
-    <div class="d-flex flex-wrap gap-3 mb-4 mt-2">
-        @if(Auth::user()->hasModulAccess('pengadaan'))
-        <a href="{{ route('pengadaan.index') }}" class="btn btn-info rounded-pill px-4 shadow-sm text-white fw-bold" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-            <i class="fas fa-truck-loading me-2"></i> Cek Pengadaan Barang/Bahan
-        </a>
-        {{-- <a href="{{ route('inventori.monitoring.index') }}" class="btn btn-success ms-2">
-            <i class="fas fa-thermometer-half me-1"></i> Monitoring Ruangan
-        </a> --}}
-        @endif
-    </div>
 
     @php
+        $allowedManageRoles = ['Koordinator Laboratorium', 'GA', 'Analis Lab', 'Admin Aplikasi'];
+        $userRoleName = Auth::user()->role->nama_role ?? '';
+        $canManageBarang = in_array($userRoleName, $allowedManageRoles);
+
         $barangHabisCount = 0;
         $barangMenipisCount = 0;
         foreach($barang as $item) {
@@ -59,33 +288,39 @@
     @endphp
 
     @if($barangHabisCount > 0 || $barangMenipisCount > 0)
-        <div class="alert alert-warning alert-dismissible fade show shadow-sm" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i> <strong>Perhatian!</strong> 
-            @if($barangHabisCount > 0)
-                Terdapat <strong>{{ $barangHabisCount }} barang</strong> yang stoknya sudah <strong>Habis</strong>. 
-            @endif
-            @if($barangMenipisCount > 0)
-                Terdapat <strong>{{ $barangMenipisCount }} barang</strong> yang <strong>Stok Menipis</strong>. 
-            @endif
-            Mohon segera lakukan pengecekan
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="alert alert-warning alert-dismissible fade show shadow-sm py-2 d-flex align-items-center" role="alert" style="font-size: 0.85rem;">
+            <div class="flex-grow-1">
+                <i class="fas fa-exclamation-triangle me-2"></i> <strong>Perhatian!</strong>
+                @if($barangHabisCount > 0)
+                    Terdapat <strong>{{ $barangHabisCount }} barang</strong> yang stoknya sudah <strong>Habis</strong>.
+                @endif
+                @if($barangMenipisCount > 0)
+                    Terdapat <strong>{{ $barangMenipisCount }} barang</strong> yang <strong>Stok Menipis</strong>.
+                @endif
+                Mohon segera lakukan pengecekan
+            </div>
+            <button type="button" class="btn-close ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div><i class="fas fa-boxes me-1"></i> Data Barang Persediaan & Sisa Stock</div>
-            <div>
-                <button type="button" class="btn btn-success btn-sm me-1" data-bs-toggle="modal" data-bs-target="#cetakPeriodeModal">
-                    <i class="fas fa-print"></i> Cetak Laporan Periode
-                </button>
-                @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
-                <a href="{{ route('barang.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Tambah Barang/Bahan</a>
-                @endif
-            </div>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h5 class="fw-bold mb-0">Data Inventory Barang/Bahan</h5>
+        <div>
+            <button type="button" class="btn btn-success-standard shadow-sm" data-bs-toggle="modal" data-bs-target="#cetakPeriodeModal">
+                <i class="fas fa-print me-1"></i> Cetak Laporan Periode
+            </button>
+            @if($canManageBarang)
+
+            <a href="{{ route('barang.create') }}" class="btn btn-brand-standard shadow-sm">
+                <i class="fas fa-plus me-1"></i> Tambah Barang/Bahan
+            </a>
+            @endif
         </div>
+    </div>
+    
+    <div class="card mb-4 shadow-sm">
         <div class="card-body">
-            
+
             <form action="{{ route('barang.index') }}" method="GET" id="filterForm" class="row g-2 mb-3 align-items-center live-search-form" data-target="#table-container">
                 <div class="col-md-7">
                     <div class="input-group input-group-sm">
@@ -94,22 +329,32 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <select name="filter_kondisi" id="filterKondisi" class="form-select form-select-sm">
-                        <option value="">-- Filter Kondisi Barang --</option>
-                        <option value="baik" {{ (isset($filterKondisi) && $filterKondisi == 'baik') ? 'selected' : '' }}>Baik</option>
-                        <option value="rusak" {{ (isset($filterKondisi) && $filterKondisi == 'rusak') ? 'selected' : '' }}>Rusak</option>
-                    </select>
+                    @php
+                        $kondisiLabels = ['' => '-- Filter Kondisi Barang --', 'baik' => 'Baik', 'rusak' => 'Rusak'];
+                        $selectedKondisi = $filterKondisi ?? '';
+                    @endphp
+                    <div class="filter-select" id="selectFilterKondisi">
+                        <input type="hidden" name="filter_kondisi" id="filterKondisi" value="{{ $selectedKondisi }}">
+                        <button type="button" class="filter-select-trigger">{{ $kondisiLabels[$selectedKondisi] }}</button>
+                        <ul class="filter-select-options">
+                            @foreach($kondisiLabels as $value => $label)
+                                <li data-value="{{ $value }}" class="{{ $selectedKondisi === $value ? 'selected' : '' }}">{{ $label }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
                 <div class="col-md-1 d-flex gap-1">
                     <a href="{{ route('barang.index') }}" class="btn btn-outline-secondary btn-sm w-100" title="Reset"><i class="fas fa-sync-alt"></i></a>
                 </div>
             </form>
 
+            <div class="scroll-hint"><i class="fas fa-arrows-alt-h me-1"></i> Geser tabel ke samping untuk melihat kolom lainnya</div>
+
             <div class="table-responsive" id="table-container">
-                <table class="table table-bordered table-striped align-middle text-center table-responsive-custom">
+                <table class="table table-bordered table-striped align-middle text-center table-responsive-custom mb-0">
                     <thead class="table-header-custom text-center">
                         <tr>
-                            <th rowspan="2" class="text-center align-middle"style="width: 35px;">No.</th>
+                            <th rowspan="2" class="text-center align-middle" style="width: 35px;">No.</th>
                             <th rowspan="2" class="text-center align-middle">Nama Barang/Bahan</th>
                             <th rowspan="2" class="text-center align-middle">Satuan</th>
                             <th rowspan="2" class="text-center align-middle">Kode Barang/Bahan</th>
@@ -121,7 +366,9 @@
                             <th rowspan="2" class="text-center align-middle">Nilai</th>
                             <th rowspan="2" class="text-center align-middle">Kondisi</th>
                             <th rowspan="2" class="text-center align-middle">Tanggal Expired Date</th>
+                            @if($canManageBarang && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
                             <th rowspan="2" class="text-center align-middle" style="width: 80px;">Aksi</th>
+                            @endif
                         </tr>
                         <tr>
                             <th>Penerimaan</th>
@@ -135,7 +382,7 @@
                             $penerimaan = $item->penerimaan ?? 0;
                             $pengeluaran = $item->pengeluaran ?? 0;
                             $saldoAkhir = ($saldoAwal + $penerimaan) - $pengeluaran;
-                            
+
                             $hargaRata = $item->harga_rata ?? 0;
                             $nilaiTotal = $saldoAkhir * $hargaRata;
 
@@ -143,7 +390,7 @@
                             $isMenipis = !$isHabis && ($saldoAkhir <= $item->minimal_stok);
                         @endphp
                         <tr class="{{ $isHabis ? 'table-danger' : ($isMenipis ? 'table-warning' : '') }}">
-                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $barang->firstItem() + $index }}</td>
                             <td class="fw-bold text-start">{{ $item->nama_barang }}</td>
                             <td>{{ $item->satuan }}</td>
                             <td><code class="fw-bold">{{ $item->kode_barang }}</code></td>
@@ -154,11 +401,11 @@
                             <td class="fw-bold {{ $isHabis ? 'text-danger' : '' }}">
                                 {{ number_format($saldoAkhir, 0, ',', '.') }}
                                 @if($isHabis)
-                                    <a href="{{ route('pengadaan.index', $item->pengadaan_id ?? 1) }}" class="badge bg-danger mt-1 d-block text-decoration-none text-white shadow-sm badge-custom-size" title="Klik untuk atur stok barang">
+                                    <a href="{{ route('pengadaan.index') }}" class="badge bg-danger mt-1 d-block text-decoration-none text-white shadow-sm badge-custom-size" title="Klik untuk cek pengadaan barang">
                                         <i class="fas fa-times-circle"></i> Habis
                                     </a>
                                 @elseif($isMenipis)
-                                    <a href="{{ route('pengadaan.index', $item->pengadaan_id ?? 1) }}" class="badge bg-warning text-dark mt-1 d-block text-decoration-none shadow-sm badge-custom-size" title="Klik untuk atur stok barang">
+                                    <a href="{{ route('pengadaan.index') }}" class="badge bg-warning text-dark mt-1 d-block text-decoration-none shadow-sm badge-custom-size" title="Klik untuk cek pengadaan barang">
                                         <i class="fas fa-exclamation-triangle"></i> Stok Menipis
                                     </a>
                                 @endif
@@ -166,13 +413,12 @@
                             <td>Rp {{ number_format($item->harga_rata, 2, ',', '.') }}</td>
                             <td>Rp {{ number_format($nilaiTotal, 2, ',', '.') }}</td>
                             <td>
-                                <span class="badge bg-{{ $item->kondisi == 'baik' ? 'success' : 'danger' }}">
+                                <span class="badge badge-custom-size bg-{{ $item->kondisi == 'baik' ? 'success' : 'danger' }}">
                                     {{ ucfirst($item->kondisi) }}
                                 </span>
                             </td>
                             <td>
                                 @php
-                                    // Mencari 1 batch aktif terdekat yang sisa stoknya masih > 0
                                     $nearestBatch = $item->transaksiBarang()
                                         ->select('tgl_exp', \Illuminate\Support\Facades\DB::raw('SUM(jumlah_penerimaan) - SUM(jumlah_pengeluaran) as sisa_stok'))
                                         ->whereNotNull('tgl_exp')
@@ -181,31 +427,29 @@
                                         ->orderBy('tgl_exp', 'asc')
                                         ->first();
                                 @endphp
-                            
+
                                 @if($nearestBatch)
                                     {{ \Carbon\Carbon::parse($nearestBatch->tgl_exp)->format('d M Y') }}
                                     <br>
-                                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none mt-1" data-bs-toggle="modal" data-bs-target="#modalBatch{{ $item->barang_id }}" style="font-size: 0.70rem;">
+                                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none mt-1" data-bs-toggle="modal" data-bs-target="#modalBatch{{ $item->barang_id }}" style="font-size: 0.68rem;">
                                         <i class="fas fa-history"></i> Detail Stok
                                     </button>
                                 @else
                                     {{ $item->tgl_exp ? \Carbon\Carbon::parse($item->tgl_exp)->format('d M Y') : '-' }}
                                 @endif
                             </td>
+                            @if($canManageBarang && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
                             <td class="text-nowrap">
-                                @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
-                                    <a href="{{ route('barang.edit', $item->barang_id) }}" class="btn btn-warning btn-sm py-0 px-1" title="Edit"><i class="fas fa-edit"></i></a>
-                                    <form action="{{ route('barang.destroy', $item->barang_id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" class="btn btn-danger btn-sm py-0 px-1" title="Hapus" onclick="confirmDelete(this, {{ $saldoAkhir }}, '{{ $item->nama_barang }}')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                @else
-                                    -
-                                @endif
+                                <a href="{{ route('barang.edit', $item->barang_id) }}" class="btn btn-warning btn-sm py-0 px-1" title="Edit"><i class="fas fa-edit"></i></a>
+                                <form action="{{ route('barang.destroy', $item->barang_id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" class="btn btn-danger btn-sm py-0 px-1" title="Hapus" onclick="confirmDelete(this, {{ $saldoAkhir }}, '{{ addslashes($item->nama_barang) }}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
                             </td>
+                            @endif
                         </tr>
                         @empty
                         <tr>
@@ -215,6 +459,10 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="mt-3">
+                {{ $barang->withQueryString()->links('vendor.pagination.custom', ['size' => 'sm']) }}
+            </div>
         </div>
     </div>
 </div>
@@ -223,21 +471,21 @@
 <div class="modal fade" id="modalBatch{{ $item->barang_id }}" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-light">
+            <div class="modal-header modal-header-brand">
                 <h5 class="modal-title fs-6 fw-bold"><i class="fas fa-boxes me-2"></i>Rincian Batch & Expired: {{ $item->nama_barang }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="table-responsive">
                     <table class="table table-sm table-bordered align-middle">
-                        <thead class="table-header-custom text-center" style="font-size: 0.85rem;">
+                        <thead class="table-header-custom text-center" style="font-size: 0.78rem;">
                             <tr>
                                 <th>Tanggal Masuk</th>
                                 <th>Sisa Stok Batch</th>
                                 <th>Tanggal Expired</th>
                             </tr>
                         </thead>
-                        <tbody style="font-size: 0.85rem;">
+                        <tbody style="font-size: 0.78rem;">
                             @php
                                 $itemBatches = $item->transaksiBarang()
                                                 ->select('tgl_exp', 'created_at', \Illuminate\Support\Facades\DB::raw('SUM(jumlah_penerimaan) - SUM(jumlah_pengeluaran) as sisa_stok'))
@@ -252,7 +500,7 @@
                                     <td class="text-center">
                                         {{ $batch->created_at ? \Carbon\Carbon::parse($batch->created_at)->timezone('Asia/Jakarta')->format('d/m/Y H:i') : '-' }}
                                     </td>
-                                    <td class="text-center fw-bold text-primary">{{ (float)$batch->sisa_stok }} {{ $item->satuan }}</td>
+                                    <td class="text-center fw-bold" style="color: var(--brand-navy);">{{ (float)$batch->sisa_stok }} {{ $item->satuan }}</td>
                                     <td class="text-center">
                                         {{ $batch->tgl_exp ? \Carbon\Carbon::parse($batch->tgl_exp)->format('d M Y') : '-' }}
                                     </td>
@@ -278,42 +526,68 @@
 @endforeach
 
 <div class="modal fade" id="cetakPeriodeModal" tabindex="-1" aria-labelledby="cetakPeriodeModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow">
             <form action="{{ route('barang.cetak-periode') }}" method="GET" target="_blank">
-                <div class="modal-header bg-dark text-white">
-                    <h5 class="modal-title fs-6" id="cetakPeriodeModalLabel"><i class="fas fa-print me-2"></i>Cetak Laporan Periode</h5>
+                <div class="modal-header modal-header-brand" style="background-color: var(--brand-navy); color: #ffffff;">
+                    <h5 class="modal-title fs-6 fw-bold" id="cetakPeriodeModalLabel"><i class="fas fa-print me-2"></i>Cetak Laporan Periode</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="bulan" class="form-label">Bulan</label>
-                        <select name="bulan" id="bulan" class="form-select" required>
-                            @php
-                                $bulans = [
-                                    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                                    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                                    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
-                                ];
-                            @endphp
-                            @foreach($bulans as $key => $namaBulan)
-                                <option value="{{ $key }}" {{ date('n') == $key ? 'selected' : '' }}>{{ $namaBulan }}</option>
-                            @endforeach
-                        </select>
+                <div class="modal-body py-3" style="overflow: visible;">
+                    
+                    <div class="mb-3 position-relative">
+                        <label class="form-label small fw-bold">Bulan</label>
+                        @php
+                            $bulans = [
+                                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                            ];
+                            $currentMonth = date('n');
+                        @endphp
+                        
+                        <input type="hidden" name="bulan" id="selected_bulan" value="{{ $currentMonth }}">
+                        
+                        <div class="dropdown">
+                            <button class="btn btn-light w-100 text-start d-flex justify-content-between align-items-center border form-control form-control-sm py-2" type="button" id="dropdownBulanBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span id="bulan_label" class="fs-6">{{ $bulans[$currentMonth] }}</span>
+                                <i class="fas fa-chevron-down text-muted small"></i>
+                            </button>
+                            <ul class="dropdown-menu w-100 shadow-sm" aria-labelledby="dropdownBulanBtn" style="max-height: 160px; overflow-y: auto;">
+                                @foreach($bulans as $key => $namaBulan)
+                                    <li><a class="dropdown-item py-2 px-3 bulan-option custom-dropdown-item" href="#" data-value="{{ $key }}" data-text="{{ $namaBulan }}">{{ $namaBulan }}</a></li>
+                                @endforeach
+                            </ul>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="tahun" class="form-label">Tahun</label>
-                        <select name="tahun" id="tahun" class="form-select" required>
-                            @php $tahunSekarang = date('Y'); @endphp
-                            @for($i = $tahunSekarang; $i >= 2020; $i--)
-                                <option value="{{ $i }}">{{ $i }}</option>
-                            @endfor
-                        </select>
+
+                    <div class="mb-3 position-relative">
+                        <label class="form-label small fw-bold">Tahun</label>
+                        @php 
+                            $tahunSekarang = date('Y'); 
+                        @endphp
+                        
+                        <input type="hidden" name="tahun" id="selected_tahun" value="{{ $tahunSekarang }}">
+                        
+                        <div class="dropdown">
+                            <button class="btn btn-light w-100 text-start d-flex justify-content-between align-items-center border form-control form-control-sm py-2" type="button" id="dropdownTahunBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span id="tahun_label" class="fs-6">{{ $tahunSekarang }}</span>
+                                <i class="fas fa-chevron-down text-muted small"></i>
+                            </button>
+                            <ul class="dropdown-menu w-100 shadow-sm" aria-labelledby="dropdownTahunBtn" style="max-height: 160px; overflow-y: auto;">
+                                @for($i = $tahunSekarang; $i >= 2020; $i--)
+                                    <li><a class="dropdown-item py-2 px-3 tahun-option custom-dropdown-item" href="#" data-value="{{ $i }}" data-text="{{ $i }}">{{ $i }}</a></li>
+                                @endfor
+                            </ul>
+                        </div>
                     </div>
+
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <button type="submit" class="btn btn-success"><i class="fas fa-file-pdf"></i> Cetak PDF</button>
+                <div class="modal-footer py-2 bg-light">
+                    <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-sm px-3 text-white" style="background-color: var(--brand-navy); border-color: var(--brand-navy);">
+                        <i class="fas fa-print me-1"></i> Cetak PDF
+                    </button>
                 </div>
             </form>
         </div>
@@ -321,53 +595,94 @@
 </div>
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-function confirmDelete(button, saldoAkhir, namaBarang) {
-    if (saldoAkhir > 0) {
-        Swal.fire({
-            title: 'Tidak Dapat Dihapus!',
-            text: `Stok barang "${namaBarang}" masih tersisa ${saldoAkhir}. Barang hanya bisa dihapus jika stok sudah habis (0)`,
-            icon: 'error',
-            confirmButtonColor: '#3085d6',
-            confirmButtonText: 'Mengerti'
-        });
-    } else {
-        Swal.fire({
-            title: 'Konfirmasi Hapus Barang',
-            text: `Stok barang "${namaBarang}" sudah habis. Apakah Anda yakin ingin menghapus barang ini secara permanen?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Ya, Hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                button.closest('form').submit();
-            }
-        });
+    function confirmDelete(button, saldoAkhir, namaBarang) {
+        if (saldoAkhir > 0) {
+            Swal.fire({
+                title: 'Tidak Dapat Dihapus!',
+                text: `Stok barang "${namaBarang}" masih tersisa ${saldoAkhir}. Barang hanya bisa dihapus jika stok sudah habis (0)`,
+                icon: 'error',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'Mengerti'
+            });
+        } else {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: 'Data barang beserta riwayat transaksi/stoknya akan dihapus permanen!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    button.closest('form').submit();
+                }
+            });
+        }
     }
-}
 
-document.addEventListener("DOMContentLoaded", function() {
-    const searchInput = document.getElementById('searchInput');
-    const filterKondisi = document.getElementById('filterKondisi');
-    const filterForm = document.getElementById('filterForm');
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.bulan-option').forEach(function (item) {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.getElementById('selected_bulan').value = this.getAttribute('data-value');
+                document.getElementById('bulan_label').innerText = this.getAttribute('data-text');
+            });
+        });
 
-    let timeout = null;
+        document.querySelectorAll('.tahun-option').forEach(function (item) {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.getElementById('selected_tahun').value = this.getAttribute('data-value');
+                document.getElementById('tahun_label').innerText = this.getAttribute('data-text');
+            });
+        });
 
-    searchInput.addEventListener('input', function() {
-        clearTimeout(timeout);
-        timeout = setTimeout(function() {
-            filterForm.submit();
-        }, 500);
+        document.querySelectorAll('.filter-select').forEach(function (wrapper) {
+            const trigger = wrapper.querySelector('.filter-select-trigger');
+            const hiddenInput = wrapper.querySelector('input[type="hidden"]');
+            const options = wrapper.querySelectorAll('.filter-select-options li');
+            const form = wrapper.closest('form');
+
+            trigger.addEventListener('click', function (e) {
+                e.stopPropagation();
+                document.querySelectorAll('.filter-select.open').forEach(function (other) {
+                    if (other !== wrapper) other.classList.remove('open');
+                });
+                wrapper.classList.toggle('open');
+            });
+
+            options.forEach(function (li) {
+                li.addEventListener('click', function () {
+                    hiddenInput.value = li.getAttribute('data-value');
+                    trigger.textContent = li.textContent;
+                    options.forEach(function (o) { o.classList.remove('selected'); });
+                    li.classList.add('selected');
+                    wrapper.classList.remove('open');
+                    form.submit();
+                });
+            });
+        });
+
+        document.addEventListener('click', function () {
+            document.querySelectorAll('.filter-select.open').forEach(function (wrapper) {
+                wrapper.classList.remove('open');
+            });
+        });
+
+        const searchInput = document.getElementById('searchInput');
+        const filterForm = document.getElementById('filterForm');
+        let timeout = null;
+
+        searchInput.addEventListener('input', function () {
+            clearTimeout(timeout);
+            timeout = setTimeout(function () {
+                filterForm.submit();
+            }, 500);
+        });
     });
-
-    filterKondisi.addEventListener('change', function() {
-        filterForm.submit();
-    });
-});
 </script>
 @endpush
 @endsection

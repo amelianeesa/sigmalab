@@ -4,39 +4,39 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Spatie\Activitylog\Models\Activity;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class AuditLogController extends Controller
 {
     public function index(Request $request)
     {
         $query = Activity::with('causer')
-            ->where(function($q) {
+            ->where(function ($q) {
                 $q->where('log_name', 'default')
                   ->orWhere('subject_type', 'like', '%Alat%')
                   ->orWhere('subject_type', 'like', '%RiwayatPerbaikanAlat%');
             })
             ->latest();
 
-        // Filter berdasarkan pencarian jika ada
-        if ($request->has('search') && $request->search != '') {
+        // Filter dropdown Event (created / updated / deleted)
+        if ($request->filled('event')) {
+            $query->where('event', $request->event);
+        }
+
+        // Filter nama entitas (Barang, Kegiatan, dst.)
+        if ($request->filled('subject_type')) {
+            $query->where('subject_type', 'like', '%' . $request->subject_type . '%');
+        }
+
+        // Search umum (kalau masih dipakai)
+        if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('description', 'like', "%{$search}%")
                   ->orWhere('properties', 'like', "%{$search}%");
             });
         }
 
-        // Menggunakan LengthAwarePaginator agar pagination rapi
-        $perPage = 15;
-        $page = LengthAwarePaginator::resolveCurrentPage();
-        $total = $query->count();
-        $results = $query->skip(($page - 1) * $perPage)->take($perPage)->get();
-        
-        $logs = new LengthAwarePaginator($results, $total, $perPage, $page, [
-            'path' => LengthAwarePaginator::resolveCurrentPath(),
-            'query' => $request->query(),
-        ]);
+        $logs = $query->paginate(15);
 
         return view('audit-log.index', compact('logs'));
     }
@@ -45,6 +45,13 @@ class AuditLogController extends Controller
     {
         $log = Activity::with(['causer.personil', 'causer.role'])->findOrFail($id);
 
-        return view('audit-log.show', compact('log'));
+        $batchLogs = $log->batch_uuid
+            ? Activity::where('batch_uuid', $log->batch_uuid)->with(['causer.personil', 'causer.role'])->get()
+            : collect([$log]);
+
+        return view('audit-log.show', compact('log', 'batchLogs'));
+// =======
+//         return view('audit-log.show', compact('log'));
+// >>>>>>> b160c1b1b3071010e910ae8463ddb0d6c0423ff8
     }
 }

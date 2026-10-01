@@ -39,10 +39,8 @@ class CekKalibrasiKadaluwarsa extends Command
             $kodeAlat = $item->alat->kode_alat ?? '-';
 
             if ($sisaBulan >= 4) {
-                // bulan 6 - 4
                 $pesan = "Pengingat Pemeliharaan Alat: Masa kalibrasi {$namaAlat} ({$kodeAlat}) telah memasuki paruh waktu (Sisa {$sisaBulan} bulan). Harap segera menjadwalkan Kalibrasi Ulang serta Pengecekan Antara (khusus timbangan) untuk memastikan akurasi alat";
             } else {
-                // bulan 3 -1
                 $pesan = "Peringatan Masa Berlaku Kalibrasi: Masa berlaku kalibrasi alat {$namaAlat} ({$kodeAlat}) akan berakhir dalam {$sisaBulan} bulan lagi. Harap segera menjadwalkan Kalibrasi Ulang.";
             }
 
@@ -56,7 +54,8 @@ class CekKalibrasiKadaluwarsa extends Command
                 ->exists();
 
             if (!$notifTerakhir) {
-                
+                $url = route('alat.show', $item->alat, false);
+
                 $analisList = User::whereHas('role', function($q) { 
                     $q->where('nama_role', 'LIKE', '%Analis%'); 
                 })->get();
@@ -82,9 +81,9 @@ class CekKalibrasiKadaluwarsa extends Command
                         'users_id' => $analis->users_id,
                         'jenis_notifikasi' => 'kalibrasi',
                         'pesan' => "[TO] " . $pesan,
+                        'url' => $url,
                         'is_read' => 0,
                         'created_at' => now(),
-                        'updated_at' => now(),
                     ]);
                 }
 
@@ -93,9 +92,9 @@ class CekKalibrasiKadaluwarsa extends Command
                         'users_id' => $koordinator->users_id,
                         'jenis_notifikasi' => 'kalibrasi',
                         'pesan' => "[CC] " . $pesan,
+                        'url' => $url,
                         'is_read' => 0,
                         'created_at' => now(),
-                        'updated_at' => now(),
                     ]);
                 }
 

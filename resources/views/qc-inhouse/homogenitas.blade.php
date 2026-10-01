@@ -4,9 +4,608 @@
 @section('content')
 
 <style>
-        @media print {
+    .hom-page {
+        font-size: 0.8rem;
+        color: #000;
+    }
+
+    .hom-page .hom-container {
+        padding: 0 20px !important;
+        margin-top: -8px !important;
+        padding-bottom: 1.5rem !important;
+    }
+
+    .hom-page nav[aria-label="breadcrumb"],
+    .hom-page .hom-container > nav {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .hom-page .breadcrumb {
+        margin: 0 0 6px 0 !important;
+        padding: 0 !important;
+        font-size: 0.75rem !important;
+        line-height: 1.4;
+        flex-wrap: wrap;
+        align-items: center;
+        background: transparent !important;
+    }
+
+    .hom-page .breadcrumb .breadcrumb-item,
+    .hom-page .breadcrumb .breadcrumb-item a {
+        font-size: 0.75rem !important;
+        font-weight: 500 !important;
+        color: #0d6efd !important;
+        text-decoration: none;
+    }
+
+    .hom-page .breadcrumb .breadcrumb-item a:hover {
+        color: #0a58ca !important;
+        text-decoration: underline;
+    }
+
+    .hom-page .breadcrumb .breadcrumb-item.active {
+        color: #000000 !important;
+        font-weight: 700 !important;
+    }
+
+    .hom-page .breadcrumb .breadcrumb-item + .breadcrumb-item {
+        padding-left: 0.4rem;
+    }
+
+    .hom-page .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+        color: #6c757d !important;
+        padding-right: 0.4rem;
+        font-weight: 400;
+    }
+
+    .hom-page .breadcrumb .breadcrumb-item .dropdown-menu {
+        min-width: 190px;
+        padding: 4px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    }
+
+    .hom-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item {
+        color: #000000 !important;
+        font-size: 0.78rem !important;
+        font-weight: 500 !important;
+        text-decoration: none !important;
+        background-color: transparent;
+        padding: 7px 12px;
+        border-radius: 5px;
+    }
+
+    .hom-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:hover,
+    .hom-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
+    .hom-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
+    .hom-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
+        background-color: rgba(27, 49, 82, 0.15) !important;
+        color: #000000 !important;
+        text-decoration: none !important;
+    }
+
+    .hom-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
+        font-weight: 700 !important;
+    }
+
+    .hom-page .text-primary {
+        color: #1b3152 !important;
+    }
+
+    .hom-page .text-muted {
+        color: #495057 !important;
+    }
+
+    .hom-page .hom-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #000;
+    }
+
+    .hom-page .hom-sub {
+        font-size: 0.75rem;
+        line-height: 1.5;
+        color: #000 !important;
+    }
+
+    .hom-page .hom-head {
+        margin-bottom: 0.75rem !important;
+    }
+
+    .hom-page .card {
+        border-radius: 0.5rem;
+        border-color: #dee2e6;
+    }
+
+    .hom-page .card-header {
+        padding: 0.6rem 0.75rem 0 0.75rem !important;
+        background-color: #ffffff;
+    }
+
+    .hom-page .card-footer {
+        padding: 0.9rem 1rem !important;
+        background-color: #f8fafc !important;
+        border-top: 1px solid #dee2e6;
+    }
+
+    .hom-page .card-footer h5 {
+        font-size: 0.95rem;
+        color: #1b3152 !important;
+    }
+
+    .hom-page .card-footer .small {
+        font-size: 0.75rem !important;
+    }
+
+    .hom-page .nav-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        border-bottom: 1px solid #dee2e6;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .hom-page .nav-tabs .nav-link {
+        font-size: 0.78rem;
+        padding: 0.45rem 0.9rem;
+        color: #495057;
+        white-space: nowrap;
+        border-radius: 0.4rem 0.4rem 0 0;
+    }
+
+    .hom-page .nav-tabs .nav-link:hover {
+        color: #1b3152;
+    }
+
+    .hom-page .nav-tabs .nav-link.active {
+        color: #ffffff;
+        background-color: #1b3152;
+        border-color: #1b3152;
+    }
+
+    .hom-page .alert-info {
+        margin: 10px 12px !important;
+        padding: 8px 12px;
+        font-size: 0.75rem;
+        line-height: 1.5;
+        color: #000;
+        background-color: rgba(27, 49, 82, 0.08);
+        border: 0;
+        border-left: 4px solid #1b3152 !important;
+        border-radius: 6px !important;
+    }
+
+    .hom-page .alert-info i {
+        color: #1b3152;
+    }
+
+    .hom-page .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.78rem;
+        font-weight: 600;
+        line-height: 1.3;
+        padding: 0.38rem 0.85rem;
+        border-radius: 0.375rem;
+        transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .hom-page .btn-sm {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.7rem;
+    }
+
+    .hom-page .btn-lg {
+        font-size: 0.88rem;
+        padding: 0.55rem 1.5rem;
+    }
+
+    .hom-page .btn-primary {
+        background-color: #1b3152;
+        border-color: #1b3152;
+        color: #ffffff;
+    }
+
+    .hom-page .btn-primary:hover,
+    .hom-page .btn-primary:focus,
+    .hom-page .btn-primary:active {
+        background-color: #14253e;
+        border-color: #14253e;
+        color: #ffffff;
+    }
+
+    .hom-page .btn-outline-primary,
+    .hom-page .btn-outline-dark {
+        color: #1b3152;
+        border-color: #1b3152;
+        background-color: transparent;
+    }
+
+    .hom-page .btn-outline-primary:hover,
+    .hom-page .btn-outline-primary:focus,
+    .hom-page .btn-outline-primary:active,
+    .hom-page .btn-outline-dark:hover,
+    .hom-page .btn-outline-dark:focus,
+    .hom-page .btn-outline-dark:active {
+        background-color: #1b3152;
+        border-color: #1b3152;
+        color: #ffffff;
+    }
+
+    .hom-page .btn-outline-success {
+        color: #198754;
+        border-color: #198754;
+        background-color: transparent;
+    }
+
+    .hom-page .btn-outline-success:hover,
+    .hom-page .btn-outline-success:focus,
+    .hom-page .btn-outline-success:active {
+        background-color: #198754;
+        border-color: #198754;
+        color: #ffffff;
+    }
+
+    .hom-page .btn-outline-danger {
+        color: #dc3545;
+        border-color: #dc3545;
+        background-color: transparent;
+    }
+
+    .hom-page .btn-outline-danger:hover,
+    .hom-page .btn-outline-danger:focus,
+    .hom-page .btn-outline-danger:active {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: #ffffff;
+    }
+
+    .hom-page .btn-info {
+        background-color: #3a5a8c;
+        border-color: #3a5a8c;
+        color: #ffffff !important;
+    }
+
+    .hom-page .btn-info:hover,
+    .hom-page .btn-info:focus,
+    .hom-page .btn-info:active {
+        background-color: #2d4770;
+        border-color: #2d4770;
+        color: #ffffff !important;
+    }
+
+    .hom-page .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: #ffffff;
+    }
+
+    .hom-page .btn-secondary:hover,
+    .hom-page .btn-secondary:focus,
+    .hom-page .btn-secondary:active {
+        background-color: #565e64;
+        border-color: #565e64;
+        color: #ffffff;
+    }
+
+    .hom-page .form-label {
+        font-size: 0.78rem;
+    }
+
+    .hom-page .form-control,
+    .hom-page .form-select {
+        font-size: 0.8rem;
+    }
+
+    .hom-page .form-check-input:checked {
+        background-color: #1b3152;
+        border-color: #1b3152;
+    }
+
+    .hom-page .form-check-input:focus,
+    .hom-page .form-control:focus,
+    .hom-page .form-select:focus {
+        border-color: #1b3152;
+        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+    }
+
+    .hom-page .tab-pane .table-responsive {
+        padding: 0.6rem !important;
+    }
+
+    .hom-page .tab-pane > .px-3 {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+
+    .hom-page #parameterTabsContent [id^="summary_"] {
+        font-size: 0.75rem;
+        background-color: #f8fafc !important;
+    }
+
+    .hom-page .param-table {
+        width: 100%;
+        min-width: 560px;
+        margin-bottom: 0;
+        table-layout: fixed;
+        font-size: 0.75rem;
+        border-color: #cfd6df;
+    }
+
+    .hom-page .param-table[data-code="IM"] { min-width: 860px; }
+    .hom-page .param-table[data-code="ASH"] { min-width: 1040px; }
+    .hom-page .param-table[data-code="VM"] { min-width: 1240px; }
+    .hom-page .param-table[data-code="TS"] { min-width: 620px; }
+    .hom-page .param-table[data-code="CV"] { min-width: 1380px; }
+
+    .hom-page .param-table thead {
+        --bs-table-bg: #1b3152;
+        --bs-table-color: #ffffff;
+        --bs-table-border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .hom-page .param-table thead th {
+        background-color: #1b3152 !important;
+        color: #ffffff;
+        font-size: 0.7rem;
+        font-weight: 600;
+        line-height: 1.25;
+        padding: 0.4rem 0.3rem;
+        vertical-align: middle;
+        white-space: normal !important;
+        border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .hom-page .param-table thead th.bg-warning {
+        background-color: #3a5a8c !important;
+    }
+
+    .hom-page .param-table td {
+        padding: 0.15rem 0.2rem;
+        font-size: 0.75rem;
+        vertical-align: middle;
+        border-color: #dfe4ea;
+    }
+
+    .hom-page .param-table td.bg-warning {
+        background-color: rgba(27, 49, 82, 0.07) !important;
+    }
+
+    .hom-page .param-table td.bg-light {
+        font-size: 0.78rem;
+    }
+
+    .hom-page .param-table td .small {
+        font-size: 0.68rem;
+    }
+
+    .hom-page .param-table input.form-control-sm {
+        width: 100%;
+        min-width: 0;
+        font-size: 0.75rem;
+        padding: 0.2rem 0.25rem;
+        text-align: center;
+        border-radius: 0.2rem;
+    }
+
+    .hom-page .param-table .out-diff,
+    .hom-page .param-table .out-tol,
+    .hom-page .param-table .out-avg-adb,
+    .hom-page .param-table .out-avg-db,
+    .hom-page .param-table .out-db-1,
+    .hom-page .param-table .out-db-2 {
+        font-size: 0.75rem;
+    }
+
+    .hom-page #anovaPreviewBoxes > .col-2,
+    .hom-page #anovaPreviewBoxes > .col-4 {
+        flex: 0 0 auto;
+        width: 20%;
+    }
+
+    .hom-page #anovaPreviewBoxes .small {
+        font-size: 0.7rem !important;
+    }
+
+    .hom-page #anovaPreviewBoxes h4 {
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+
+    .hom-page .modal-header {
+        padding: 0.7rem 1rem;
+    }
+
+    .hom-page .modal-title {
+        font-size: 0.95rem;
+    }
+
+    .hom-page .modal-header.bg-primary {
+        background-color: #1b3152 !important;
+    }
+
+    .hom-page .modal-footer {
+        padding: 0.6rem 1rem;
+    }
+
+    .hom-page .modal-resource .nav-pills .nav-link {
+        font-size: 0.8rem;
+        padding: 0.65rem 0.5rem !important;
+        color: #000 !important;
+        border-radius: 0;
+        background-color: transparent;
+    }
+
+    .hom-page .modal-resource .nav-pills .nav-link.active {
+        color: #1b3152 !important;
+        background-color: rgba(27, 49, 82, 0.1);
+        box-shadow: inset 0 -3px 0 #1b3152;
+    }
+
+    .hom-page .modal-resource .modal-body > .tab-content {
+        padding: 1rem !important;
+    }
+
+    .hom-page .modal-resource .table {
+        font-size: 0.78rem;
+    }
+
+    .hom-page .modal-resource .table thead th {
+        font-size: 0.72rem;
+    }
+
+    .hom-page .modal-resource .form-check {
+        font-size: 0.78rem;
+    }
+
+    .hom-page .modal-resource .text-warning,
+    .hom-page .modal-resource .text-success {
+        color: #1b3152 !important;
+    }
+
+    .hom-page #modalDetailAnova .modal-body {
+        padding: 1rem !important;
+    }
+
+    .hom-page #modalDetailAnova table {
+        font-size: 0.78rem;
+    }
+
+    .hom-page #modalDetailAnova h4 {
+        font-size: 1.05rem;
+    }
+
+    .hom-page #modalDetailAnova .fs-5 {
+        font-size: 0.95rem !important;
+    }
+
+    .hom-page #modalDetailAnova .fs-6 {
+        font-size: 0.82rem !important;
+    }
+
+    .hom-page #modalDetailAnova .p-4 {
+        padding: 1rem !important;
+    }
+
+    .hom-page #modalExport .modal-body {
+        font-size: 0.8rem;
+    }
+
+    @media (max-width: 991.98px) {
+        .hom-page .param-table thead th:first-child,
+        .hom-page .param-table tbody tr.row-simplo > td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+        }
+
+        .hom-page .param-table tbody tr.row-simplo > td:first-child {
+            background-color: #f8f9fa !important;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .hom-page .hom-container {
+            padding: 0 10px !important;
+            padding-bottom: 1.25rem !important;
+        }
+
+        .hom-page .breadcrumb,
+        .hom-page .breadcrumb .breadcrumb-item,
+        .hom-page .breadcrumb .breadcrumb-item a {
+            font-size: 0.72rem !important;
+        }
+
+        .hom-page .breadcrumb .breadcrumb-item + .breadcrumb-item {
+            padding-left: 0.3rem;
+        }
+
+        .hom-page .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+            padding-right: 0.3rem;
+        }
+
+        .hom-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item {
+            font-size: 0.85rem !important;
+            padding: 10px 14px;
+        }
+
+        .hom-page .hom-title {
+            font-size: 1rem;
+        }
+
+        .hom-page .hom-head .btn {
+            width: 100%;
+            min-height: 40px;
+        }
+
+        .hom-page .card-header {
+            padding: 0.5rem 0.5rem 0 0.5rem !important;
+        }
+
+        .hom-page .alert-info {
+            margin: 8px !important;
+        }
+
+        .hom-page .tab-pane .table-responsive {
+            padding: 0.4rem !important;
+        }
+
+        .hom-page .tab-pane > .d-flex {
+            flex-direction: column;
+            align-items: stretch !important;
+        }
+
+        .hom-page .tab-pane > .d-flex > div,
+        .hom-page .tab-pane > .d-flex > div .btn {
+            width: 100%;
+        }
+
+        .hom-page .tab-pane > .d-flex > div.d-flex .btn {
+            flex: 1 1 0;
+        }
+
+        .hom-page .card-footer {
+            padding: 0.75rem !important;
+        }
+
+        .hom-page .card-footer > .d-flex .btn {
+            width: 100%;
+        }
+
+        .hom-page #anovaPreviewBoxes > .col-2,
+        .hom-page #anovaPreviewBoxes > .col-4 {
+            width: 50%;
+            margin-bottom: 0.5rem;
+        }
+
+        .hom-page #anovaPreviewBoxes > .col-4 {
+            width: 100%;
+        }
+
+        .hom-page #btnSubmit {
+            width: 100%;
+            min-height: 44px;
+        }
+
+        .hom-page #modalDetailAnova .mb-3.w-25 {
+            width: 100% !important;
+        }
+
+        .hom-page .modal-resource .modal-body > .tab-content {
+            padding: 0.75rem !important;
+        }
+
+        .hom-page .modal-resource .nav-pills .nav-link {
+            font-size: 0.72rem;
+        }
+    }
+
+    @media print {
         .potong-halaman {
-            page-break-before: always !important; 
+            page-break-before: always !important;
             break-before: page !important;
         }
     }
@@ -14,25 +613,30 @@
     .html2pdf__page-break {
         page-break-before: always !important;
     }
+
+    input:invalid {
+        box-shadow: none;
+    }
 </style>
 
-<div class="container-fluid px-4 pb-5">
+<div class="hom-page">
+<div class="container-fluid hom-container pb-4">
     <x-qc-breadcrumb active="In-House">
         <li class="breadcrumb-item"><a href="{{ route('qc-inhouse.show', $batch->sampel_inhouse_id) }}">{{ $batch->nama_sampel }}</a></li>
         <li class="breadcrumb-item active">Tahap 3: Uji Homogenitas</li>
     </x-qc-breadcrumb>
 
-        <div class="row mt-3">
+        <div class="row mt-2">
             <div class="col-12">
-            
-                <div class="row align-items-center mb-4">
-                    <div class="col-md-8 mb-3 mb-md-0">
-                        <h3 class="fw-bold text-dark mb-1">
+
+                <div class="row align-items-center hom-head">
+                    <div class="col-md-8 mb-2 mb-md-0">
+                        <h3 class="hom-title mb-1">
                             <i class="fas fa-edit text-primary me-2"></i>Input Uji Homogenitas (Tahap 3)
                         </h3>
-                        <p class="text-muted mb-0">Metode Acuan: <strong>{{ strtoupper($batch->metode_acuan) }}</strong> | Jenis Batubara: <strong>{{ $batch->jenis_batubara }}</strong></p>
+                        <p class="hom-sub text-muted mb-0">Metode Acuan: <strong>{{ strtoupper($batch->metode_acuan) }}</strong> | Jenis Batubara: <strong>{{ $batch->jenis_batubara }}</strong></p>
                     </div>
-                
+
                     <div class="col-md-4 text-md-end">
                         <div class="d-grid d-md-block">
                             <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalExport">
@@ -40,24 +644,24 @@
                             </button>
                         </div>
                     </div>
-                    
+
                 </div>
-            
+
             <form action="{{ route('qc-inhouse.homogenitas.store', $batch->sampel_inhouse_id) }}" method="POST" id="formHomogenitas">
                 @csrf
-                <div class="card shadow-sm border-0 mb-4">
+                <div class="card shadow-sm border-0 mb-3">
                     <div class="card-header bg-white pt-3 border-bottom-0">
                         <ul class="nav nav-tabs card-header-tabs" id="parameterTabs" role="tablist">
                             @foreach($batch->parameters as $index => $param)
-                                @php 
-                                    $rawCode = trim(strtoupper($param->parameterUji->nama_parameter)); 
+                                @php
+                                    $rawCode = trim(strtoupper($param->parameterUji->nama_parameter));
                                     $code = in_array($rawCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']) ? 'TS' : $rawCode;
                                 @endphp
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link fw-bold {{ $index === 0 ? 'active' : '' }}" 
-                                            id="tab-{{ $param->id }}" 
-                                            data-bs-toggle="tab" 
-                                            data-bs-target="#pane-{{ $param->id }}" 
+                                    <button class="nav-link fw-bold {{ $index === 0 ? 'active' : '' }}"
+                                            id="tab-{{ $param->id }}"
+                                            data-bs-toggle="tab"
+                                            data-bs-target="#pane-{{ $param->id }}"
                                             type="button" role="tab"
                                             data-code="{{ $code }}">
                                         {{ $rawCode }}
@@ -79,14 +683,13 @@
                         @endphp
                         <div class="tab-content" id="parameterTabsContent">
                             @foreach($batch->parameters as $index => $param)
-                                @php 
-                                    $rawCode = trim(strtoupper($param->parameterUji->nama_parameter)); 
+                                @php
+                                    $rawCode = trim(strtoupper($param->parameterUji->nama_parameter));
                                     $code = in_array($rawCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']) ? 'TS' : $rawCode;
                                     $pid = $param->id;
                                 @endphp
                                 <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}" id="pane-{{ $pid }}" role="tabpanel">
-                                    
-                                                                        <!-- Tombol Buka Modal & Summary -->
+
                                     <div class="px-3 pt-3">
                                         <button type="button" class="btn btn-outline-primary btn-sm mb-2" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}">
                                             <i class="fas fa-users-cog me-1"></i> Pilih Personil & Alat ({{ $code }})
@@ -97,7 +700,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Modal Resource (Desain Tab Persis QC Harian) -->
                                     <div class="modal fade modal-resource" id="modalResource-{{ $pid }}" tabindex="-1" aria-hidden="true">
                                         <div class="modal-dialog modal-lg">
                                             <div class="modal-content">
@@ -111,13 +713,13 @@
                                                             <button class="nav-link active fw-bold text-dark py-3" data-bs-toggle="tab" data-bs-target="#tab-personil-{{ $pid }}" type="button" role="tab"><i class="fas fa-users text-primary me-2"></i>Personil</button>
                                                         </li>
                                                         <li class="nav-item" role="presentation">
-                                                            <button class="nav-link fw-bold text-dark py-3" data-bs-toggle="tab" data-bs-target="#tab-alat-{{ $pid }}" type="button" role="tab"><i class="fas fa-tools text-warning me-2"></i>Alat</button>
+                                                            <button class="nav-link fw-bold text-dark py-3" data-bs-toggle="tab" data-bs-target="#tab-alat-{{ $pid }}" type="button" role="tab"><i class="fas fa-tools text-primary me-2"></i>Alat</button>
                                                         </li>
                                                         <li class="nav-item" role="presentation">
-                                                            <button class="nav-link fw-bold text-dark py-3" data-bs-toggle="tab" data-bs-target="#tab-bahan-{{ $pid }}" type="button" role="tab"><i class="fas fa-flask text-success me-2"></i>Bahan / Reagen</button>
+                                                            <button class="nav-link fw-bold text-dark py-3" data-bs-toggle="tab" data-bs-target="#tab-bahan-{{ $pid }}" type="button" role="tab"><i class="fas fa-flask text-primary me-2"></i>Bahan / Reagen</button>
                                                         </li>
                                                     </ul>
-                                                    
+
                                                     <div class="tab-content p-4">
                                                         <div class="d-flex justify-content-end mb-3">
                                                             <button type="button" class="btn btn-sm btn-info text-white btn-copy-resource" data-pid="{{ $pid }}">
@@ -125,7 +727,6 @@
                                                             </button>
                                                         </div>
 
-                                                        <!-- Tab Personil -->
                                                         <div class="tab-pane fade show active" id="tab-personil-{{ $pid }}" role="tabpanel">
                                                             <div class="table-responsive border rounded" style="max-height: 350px; overflow-y: auto;">
                                                                 <table class="table table-hover table-sm mb-0 text-nowrap">
@@ -147,7 +748,6 @@
                                                             </div>
                                                         </div>
 
-                                                        <!-- Tab Alat -->
                                                         <div class="tab-pane fade" id="tab-alat-{{ $pid }}" role="tabpanel">
                                                             <div class="row">
                                                                 @foreach($alatList as $alat)
@@ -163,7 +763,6 @@
                                                             </div>
                                                         </div>
 
-                                                        <!-- Tab Bahan -->
                                                         <div class="tab-pane fade" id="tab-bahan-{{ $pid }}" role="tabpanel">
                                                             <div class="table-responsive border rounded" style="max-height: 350px; overflow-y: auto;">
                                                                 <table class="table table-hover table-sm mb-0 text-nowrap">
@@ -181,7 +780,7 @@
                                                                                 <input class="form-check-input chk-bahan" style="transform: scale(1.3);" type="checkbox" name="resource_{{ $pid }}[barang_ids][]" value="{{ $barang->barang_id }}" data-nama="{{ $barang->nama_barang }}">
                                                                             </td>
                                                                             <td class="align-middle">
-                                                                                <strong>{{ $barang->nama_barang }}</strong> 
+                                                                                <strong>{{ $barang->nama_barang }}</strong>
                                                                                 @if($habis) <span class="badge bg-danger ms-1">Habis</span> @endif
                                                                             </td>
                                                                             <td class="align-middle {{ $habis ? 'text-danger fw-bold' : '' }}">{{ $saldoAkhir }} {{ $barang->satuan }}</td>
@@ -207,7 +806,7 @@
                                     </div>
 
                                     <div class="table-responsive p-3">
-                                        <table class="table table-bordered table-sm align-middle text-center param-table text-nowrap" style="min-width: {{ in_array($code, ['TS']) ? '100%' : '1500px' }};" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
+                                        <table class="table table-bordered table-sm align-middle text-center param-table text-nowrap" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
                                             <thead class="table-light">
                                                 @if($code === 'IM')
                                                     <tr>
@@ -282,7 +881,7 @@
                                                         <th>%db</th>
                                                     </tr>
                                                 @else
-                                                    
+
                                                     <tr>
                                                         <th>KODE SAMPEL</th>
                                                         <th>DISH NO.</th>
@@ -294,12 +893,12 @@
                                             </thead>
                                             <tbody>
                                                 @for($i = 1; $i <= $rowCount; $i++)
-                                                    @php 
-                                                        $botolNomor = $tabelAcak[$i]->nomor_botol ?? $i; 
+                                                    @php
+                                                        $botolNomor = $tabelAcak[$i]->nomor_botol ?? $i;
                                                         $dh = $param->dataHomogenitas->where('nomor_sampel', $i)->first();
                                                         $mentah = $dh ? $dh->data_mentah : [];
                                                     @endphp
-                                                    
+
                                                     <tr class="row-simplo">
                                                         <td rowspan="2" class="fw-bold align-middle bg-light border-end">
                                                             {{ $i }}
@@ -309,7 +908,7 @@
                                                             <input type="hidden" class="in-db-2" name="data_{{ $pid }}[{{ $i-1 }}][nilai_db_2]" value="{{ $mentah['nilai_db_2'] ?? '' }}">
                                                         </td>
                                                         <td><input type="text" class="form-control form-control-sm text-center fw-bold bg-light" name="data_{{ $pid }}[{{ $i-1 }}][mentah][dish_1]" value="{{ $mentah['dish_1'] ?? '' }}" ></td>
-                                                        
+
                                                         @if($code === 'IM')
                                                             <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_1]" value="{{ $mentah['m1_1'] ?? '' }}"></td>
                                                             <td><input type="text" class="form-control form-control-sm in-m2-1 bg-light border-0" readonly tabindex="-1"></td>
@@ -374,7 +973,7 @@
 
                                                     <tr class="row-duplo">
                                                         <td><input type="text" class="form-control form-control-sm text-center fw-bold bg-light" name="data_{{ $pid }}[{{ $i-1 }}][mentah][dish_2]" value="{{ $mentah['dish_2'] ?? '' }}" ></td>
-                                                        
+
                                                         @if($code === 'IM')
                                                             <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_2]" value="{{ $mentah['m1_2'] ?? '' }}"></td>
                                                             <td><input type="text" class="form-control form-control-sm in-m2-2 bg-light border-0" readonly tabindex="-1"></td>
@@ -424,17 +1023,17 @@
                                         </table>
                                     </div>
                                      @if(in_array($batch->status, ['uji_homogenitas', 'gagal_homogenitas']))
-                                        <div class="px-3 pb-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                                        <div class="px-3 pb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
                                             <div class="d-flex flex-wrap gap-2">
-                                                <button type="button" class="btn btn-outline-primary btn-tambah-kemasan fw-bold text-nowrap" data-pid="{{ $pid }}" data-code="{{ $code }}">
+                                                <button type="button" class="btn btn-outline-primary btn-sm btn-tambah-kemasan fw-bold text-nowrap" data-pid="{{ $pid }}" data-code="{{ $code }}">
                                                     <i class="fas fa-plus me-1"></i> Tambah Kemasan
                                                 </button>
-                                                <button type="button" class="btn btn-outline-danger btn-hapus-kemasan fw-bold text-nowrap" data-pid="{{ $pid }}" data-code="{{ $code }}">
+                                                <button type="button" class="btn btn-outline-danger btn-sm btn-hapus-kemasan fw-bold text-nowrap" data-pid="{{ $pid }}" data-code="{{ $code }}">
                                                     <i class="fas fa-trash me-1"></i> Hapus Kemasan
                                                 </button>
                                              </div>
                                             <div>
-                                                <button type="button" class="btn btn-outline-success btn-save-sheet fw-bold text-nowrap w-100" data-pid="{{ $pid }}" data-code="{{ $code }}">
+                                                <button type="button" class="btn btn-outline-success btn-sm btn-save-sheet fw-bold text-nowrap w-100" data-pid="{{ $pid }}" data-code="{{ $code }}">
                                                     <i class="fas fa-save me-1"></i> Simpan Tabel {{ $code }} Saja
                                                 </button>
                                             </div>
@@ -446,22 +1045,22 @@
 
                     </div>
                     <div class="card-footer bg-light p-4">
-                        <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div>
                                 <h5 class="fw-bold mb-1 text-primary">Live ANOVA Summary (Preview)</h5>
                                 <p class="small text-muted mb-0">Klik tombol di sebelah kanan untuk melihat detail tabel perhitungan (Ai+Bi) seperti di Excel.</p>
                             </div>
-                            <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#modalDetailAnova">
+                            <button type="button" class="btn btn-outline-dark btn-sm" data-bs-toggle="modal" data-bs-target="#modalDetailAnova">
                                 <i class="fas fa-table me-2"></i>Lihat Detail Kalkulasi Statistik
                             </button>
                         </div>
                         <div class="row text-center mt-3" id="anovaPreviewBoxes">
-                            
+
                         </div>
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-end mb-5">
+                <div class="d-flex justify-content-end mb-3">
                     @if(in_array($batch->status, ['uji_homogenitas', 'gagal_homogenitas']))
                     <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm" id="btnSubmit">
                         <i class="fas fa-check-double me-2"></i> Kunci Semua & Lanjut ke Penetapan Target
@@ -483,7 +1082,7 @@
             <div class="modal-body p-4">
                 <div class="mb-4">
                     <label class="form-label fw-bold">Pilih Format Cetak:</label>
-                    <div class="d-flex gap-3">
+                    <div class="d-flex flex-wrap gap-3">
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="exportFormat" id="fmtExcel" value="excel" checked>
                             <label class="form-check-label" for="fmtExcel"><i class="fas fa-file-excel text-success me-1"></i> Excel</label>
@@ -525,8 +1124,8 @@
                     </div>
                     <div id="exportParamCheckboxes">
                         @foreach($batch->parameters as $param)
-                            @php 
-                                $rawCode = trim(strtoupper($param->parameterUji->nama_parameter)); 
+                            @php
+                                $rawCode = trim(strtoupper($param->parameterUji->nama_parameter));
                                 $code = in_array($rawCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']) ? 'TS' : $rawCode;
                             @endphp
                             <div class="form-check">
@@ -554,13 +1153,13 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4 bg-light">
-                
+
                 <div class="mb-3 w-25">
                     <label class="fw-bold form-label">Pilih Parameter:</label>
                     <select class="form-select" id="modalParamSelect">
                         @foreach($batch->parameters as $param)
-                            @php 
-                                $rawCode = trim(strtoupper($param->parameterUji->nama_parameter)); 
+                            @php
+                                $rawCode = trim(strtoupper($param->parameterUji->nama_parameter));
                                 $code = in_array($rawCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']) ? 'TS' : $rawCode;
                             @endphp
                             <option value="{{ $code }}">{{ $rawCode }}</option>
@@ -623,7 +1222,7 @@
                                     <td class="text-center align-middle">2 . (n-1)</td>
                                 </tr>
                             </table>
-                            
+
                             <table class="table table-borderless table-sm mt-3 mb-0">
                                 <tr>
                                     <td class="text-end align-middle fw-bold w-25">MSW =</td>
@@ -710,6 +1309,7 @@
         </div>
     </div>
 </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -750,17 +1350,17 @@ function getFTabelForN(n) {
 
 const State = {};
 @foreach($batch->parameters as $param)
-    @php 
-        $rawCode = trim(strtoupper($param->parameterUji->nama_parameter)); 
+    @php
+        $rawCode = trim(strtoupper($param->parameterUji->nama_parameter));
         $code = in_array($rawCode, ['TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']) ? 'TS' : $rawCode;
     @endphp
     State["{{ $code }}"] = {
         id: {{ $param->id }},
         ready: false,
-        data: Array.from({length: {{ $rowCount }} }, () => ({ 
-            simplo_adb: null, duplo_adb: null, avg_adb: null 
+        data: Array.from({length: {{ $rowCount }} }, () => ({
+            simplo_adb: null, duplo_adb: null, avg_adb: null
         })),
-        limit: {{ $tolerances[$param->id] ?? 0.09 }} // Default fixed limit unless IM dynamic
+        limit: {{ $tolerances[$param->id] ?? 0.09 }}
     };
 @endforeach
 
@@ -786,7 +1386,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if(e.target.tagName === 'INPUT' && (e.target.classList.contains('in-hasil-1') || e.target.classList.contains('in-hasil-2'))) {
                 if(e.target.value && !e.target.readOnly) e.target.value = rnd(e.target.value, 2);
             }
-        }, true); // capture phase since blur doesn't bubble
+        }, true);
     });
 
     function tambahKemasanKeTabel(code) {
@@ -797,10 +1397,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const simploRows = tbody.querySelectorAll('.row-simplo');
         const duploRows = tbody.querySelectorAll('.row-duplo');
 
-        const newIndex = simploRows.length; // 0-indexed, dipakai untuk nama field
-        const newUrutan = newIndex + 1; // nomor tampilan, 1-indexed
+        const newIndex = simploRows.length;
+        const newUrutan = newIndex + 1;
 
-        const newBotolFisik = botolAcakLookup[newUrutan] !== undefined ? botolAcakLookup[newUrutan] : newUrutan; // fallback ke urutan jika tidak ada di lookup
+        const newBotolFisik = botolAcakLookup[newUrutan] !== undefined ? botolAcakLookup[newUrutan] : newUrutan;
         const cloneSimplo = simploRows[0].cloneNode(true);
         const cloneDuplo = duploRows[0].cloneNode(true);
 
@@ -941,7 +1541,7 @@ document.addEventListener('DOMContentLoaded', function() {
         for(let i=0; i<rowCount; i++) {
             const tr1 = simploRowsAll[i];
             const tr2 = duploRowsAll[i];
-            
+
             let val1 = null;
             let val2 = null;
 
@@ -961,7 +1561,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const m1_2 = getVal(tr2.querySelector('.in-m1-2'));
                 const a_2 = getVal(tr2.querySelector('.in-a-2'));
                 const m3_2 = getVal(tr2.querySelector('.in-m3-2'));
-                
+
                 if(!isNaN(m1_2) && !isNaN(a_2)) tr2.querySelector('.in-m2-2').value = rnd(m1_2 + a_2, 4);
                 if(!isNaN(m1_2) && !isNaN(m3_2)) tr2.querySelector('.in-b-2').value = rnd(m3_2 - m1_2, 4);
 
@@ -975,7 +1575,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const m1_1 = getVal(tr1.querySelector('.in-m1-1'));
                 const m2m1_1 = getVal(tr1.querySelector('.in-m2m1-1'));
                 const m3_1 = getVal(tr1.querySelector('.in-m3-1'));
-                
+
                 if(!isNaN(m1_1) && !isNaN(m2m1_1)) {
                     tr1.querySelector('.in-m2-1').value = rnd(m1_1 + m2m1_1, 4);
                 } else {
@@ -987,23 +1587,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 if(!isNaN(m1_1) && !isNaN(m2m1_1) && !isNaN(m3_1)) {
                     val1 = ((m3_1 - m1_1) / m2m1_1) * 100;
                     tr1.querySelector('.in-hasil-1').value = rnd(val1, 2);
-                    
+
                     const im_s = State['IM'] ? State['IM'].data[i].simplo_adb : null;
                     if(im_s !== null) {
                         tr1.querySelector('.out-db-1').textContent = rnd((100 / (100 - im_s)) * val1, 2);
                     } else {
                         tr1.querySelector('.out-db-1').textContent = '-';
                     }
-                } else { 
-                    isComplete = false; 
-                    tr1.querySelector('.in-hasil-1').value = ''; 
+                } else {
+                    isComplete = false;
+                    tr1.querySelector('.in-hasil-1').value = '';
                     if(tr1.querySelector('.out-db-1')) tr1.querySelector('.out-db-1').textContent = '-';
                 }
 
                 const m1_2 = getVal(tr2.querySelector('.in-m1-2'));
                 const m2m1_2 = getVal(tr2.querySelector('.in-m2m1-2'));
                 const m3_2 = getVal(tr2.querySelector('.in-m3-2'));
-                
+
                 if(!isNaN(m1_2) && !isNaN(m2m1_2)) {
                     tr2.querySelector('.in-m2-2').value = rnd(m1_2 + m2m1_2, 4);
                 } else {
@@ -1015,16 +1615,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 if(!isNaN(m1_2) && !isNaN(m2m1_2) && !isNaN(m3_2)) {
                     val2 = ((m3_2 - m1_2) / m2m1_2) * 100;
                     tr2.querySelector('.in-hasil-2').value = rnd(val2, 2);
-                    
+
                     const im_d = State['IM'] ? State['IM'].data[i].duplo_adb : null;
                     if(im_d !== null) {
                         tr2.querySelector('.out-db-2').textContent = rnd((100 / (100 - im_d)) * val2, 2);
                     } else {
                         tr2.querySelector('.out-db-2').textContent = '-';
                     }
-                } else { 
-                    isComplete = false; 
-                    tr2.querySelector('.in-hasil-2').value = ''; 
+                } else {
+                    isComplete = false;
+                    tr2.querySelector('.in-hasil-2').value = '';
                     if(tr2.querySelector('.out-db-2')) tr2.querySelector('.out-db-2').textContent = '-';
                 }
             }
@@ -1039,7 +1639,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const m1_1 = getVal(tr1.querySelector('.in-m1-1'));
                 const m2m1_1 = getVal(tr1.querySelector('.in-m2m1-1'));
                 const m3_1 = getVal(tr1.querySelector('.in-m3-1'));
-                
+
                 if(!isNaN(m1_1) && !isNaN(m2m1_1)) tr1.querySelector('.in-m2-1').value = rnd(m2m1_1 + m1_1, 4);
                 if(!isNaN(m1_1) && !isNaN(m2m1_1) && !isNaN(m3_1)) {
                     const m2 = m2m1_1 + m1_1;
@@ -1047,25 +1647,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     const loss = (m2m3 / m2m1_1) * 100;
                     tr1.querySelector('.in-m2m3-1').value = rnd(m2m3, 4);
                     tr1.querySelector('.in-loss-1').value = rnd(loss, 2);
-                    
+
                     if(im_s !== null) {
                         val1 = loss - im_s;
                         tr1.querySelector('.in-hasil-1').value = rnd(val1, 2);
-                        
+
                         tr1.querySelector('.out-db-1').textContent = rnd((100 / (100 - im_s)) * val1, 2);
                     } else {
                         tr1.querySelector('.out-db-1').textContent = '-';
                     }
-                } else { 
-                    isComplete = false; 
-                    tr1.querySelector('.in-hasil-1').value = ''; 
+                } else {
+                    isComplete = false;
+                    tr1.querySelector('.in-hasil-1').value = '';
                     if(tr1.querySelector('.out-db-1')) tr1.querySelector('.out-db-1').textContent = '-';
                 }
 
                 const m1_2 = getVal(tr2.querySelector('.in-m1-2'));
                 const m2m1_2 = getVal(tr2.querySelector('.in-m2m1-2'));
                 const m3_2 = getVal(tr2.querySelector('.in-m3-2'));
-                
+
                 if(!isNaN(m1_2) && !isNaN(m2m1_2)) tr2.querySelector('.in-m2-2').value = rnd(m2m1_2 + m1_2, 4);
                 if(!isNaN(m1_2) && !isNaN(m2m1_2) && !isNaN(m3_2)) {
                     const m2 = m2m1_2 + m1_2;
@@ -1077,14 +1677,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     if(im_d !== null) {
                         val2 = loss - im_d;
                         tr2.querySelector('.in-hasil-2').value = rnd(val2, 2);
-                        
+
                         tr2.querySelector('.out-db-2').textContent = rnd((100 / (100 - im_d)) * val2, 2);
                     } else {
                         tr2.querySelector('.out-db-2').textContent = '-';
                     }
-                } else { 
-                    isComplete = false; 
-                    tr2.querySelector('.in-hasil-2').value = ''; 
+                } else {
+                    isComplete = false;
+                    tr2.querySelector('.in-hasil-2').value = '';
                     if(tr2.querySelector('.out-db-2')) tr2.querySelector('.out-db-2').textContent = '-';
                 }
             }
@@ -1138,20 +1738,20 @@ document.addEventListener('DOMContentLoaded', function() {
             if(val1 !== null && val2 !== null && !isNaN(val1) && !isNaN(val2)) {
                 val1 = parseFloat(rnd(val1, code === 'CV' ? 0 : 2));
                 val2 = parseFloat(rnd(val2, code === 'CV' ? 0 : 2));
-                
+
                 State[code].data[i].simplo_adb = val1;
                 State[code].data[i].duplo_adb = val2;
-                
+
                 let avg_adb = (val1 + val2) / 2.0;
                 avg_adb = parseFloat(rnd(avg_adb, code === 'CV' ? 0 : 2));
                 State[code].data[i].avg_adb = avg_adb;
-                
+
                 if (code === 'ASH' || code === 'VM' || code === 'TS' || code === 'CV') {
                     const im_s = State['IM'] ? State['IM'].data[i].simplo_adb : null;
                     State[code].data[i].simplo_db = im_s !== null ? parseFloat(rnd((100 / (100 - im_s)) * val1, code === 'CV' ? 0 : 2)) : null;
                     const im_d = State['IM'] ? State['IM'].data[i].duplo_adb : null;
                     State[code].data[i].duplo_db = im_d !== null ? parseFloat(rnd((100 / (100 - im_d)) * val2, code === 'CV' ? 0 : 2)) : null;
-                    
+
                     if (code === 'TS' || code === 'CV') {
                         tr1.querySelector('.out-db-1') ? tr1.querySelector('.out-db-1').textContent = State[code].data[i].simplo_db ?? '-' : null;
                         tr2.querySelector('.out-db-2') ? tr2.querySelector('.out-db-2').textContent = State[code].data[i].duplo_db ?? '-' : null;
@@ -1174,7 +1774,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else if(code === 'VM') {
                         isOk = diff < 1;
                     } else if(code === 'TS') {
-                        isOk = diff < 0.05; // Dummy tolerance for TS for now, wait, what is TS tolerance? 0.05 is commonly used for low TS. I will set it to 0.05 but user might complain. Actually, wait! In excel does TS have a YES/NO? Let me check line 810. Wait, I should just set isOk = true so it says YES. Or I can check tolerance from $tolerances[$param->id]. Let me use `limit` from State.
+                        isOk = diff < 0.05;
                         isOk = diff < State[code].limit;
                     }
                     const outTolEl = tr1.querySelector('.out-tol');
@@ -1183,8 +1783,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         outTolEl.classList.remove('text-success', 'text-danger');
                         outTolEl.classList.add(isOk ? 'text-success' : 'text-danger');
                     }
-                } 
-                
+                }
+
                 if(code !== 'IM') {
 
                     const im_avg = State['IM'] ? State['IM'].data[i].avg_adb : null;
@@ -1197,7 +1797,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 State[code].data[i].simplo_adb = null;
                 State[code].data[i].duplo_adb = null;
                 State[code].data[i].avg_adb = null;
-                
+
                 tr1.querySelector('.out-diff') ? tr1.querySelector('.out-diff').textContent = '-' : null;
                 tr1.querySelector('.out-tol') ? tr1.querySelector('.out-tol').textContent = '-' : null;
                 tr1.querySelector('.out-avg-adb') ? tr1.querySelector('.out-avg-adb').textContent = '-' : null;
@@ -1264,13 +1864,13 @@ document.addEventListener('DOMContentLoaded', function() {
         for(let i=0; i<n; i++) {
             let a = State[code].data[i].simplo_adb;
             let b = State[code].data[i].duplo_adb;
-            
+
             if (code === 'ASH' || code === 'VM' || code === 'TS' || code === 'CV') {
                 a = State[code].data[i].simplo_db;
                 b = State[code].data[i].duplo_db;
             }
-            
-            if(a === null || b === null || a === undefined || b === undefined || isNaN(a) || isNaN(b)) return; // Prevent calc if data is corrupt
+
+            if(a === null || b === null || a === undefined || b === undefined || isNaN(a) || isNaN(b)) return;
             ai.push(a); bi.push(b);
             sumA += a; sumB += b;
         }
@@ -1294,7 +1894,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         let MSB = msbSum / (2 * (n-1));
         let MSW = mswSum / (2 * n);
-        
+
         let F = MSB / MSW;
         let FTabel = getFTabelForN(n);
         let isHomogen = FTabel !== null ? (F < FTabel) : false;
@@ -1307,7 +1907,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const activeTab = document.querySelector('.nav-link.active');
         if(!activeTab) return;
         const code = activeTab.dataset.code;
-        
+
         const elParamName = document.getElementById('modalParamName');
         if (elParamName) elParamName.textContent = code;
 
@@ -1346,7 +1946,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const modalParamSelect = document.getElementById('modalParamSelect');
     modalParamSelect.addEventListener('change', renderModalAnova);
-    
+
     document.getElementById('modalDetailAnova').addEventListener('show.bs.modal', function () {
         const activeTabCode = document.querySelector('.nav-link.active').dataset.code;
         modalParamSelect.value = activeTabCode;
@@ -1380,7 +1980,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const n = a.n;
         let sumA = 0, sumB = 0;
         let ai = a.ai, bi = a.bi;
-        
+
         for(let i=0; i<n; i++) { sumA += ai[i]; sumB += bi[i]; }
         const Xab = (sumA + sumB) / n;
         const XabMinus = (sumA - sumB) / n;
@@ -1409,7 +2009,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${rnd(ambX2, 4)}</td>
             </tr>`;
         }
-        
+
         document.getElementById('modalTableCombined').innerHTML = htmlCombined;
 
         document.getElementById('modalTableCombinedFoot').innerHTML = `
@@ -1437,7 +2037,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td colspan="2"></td>
             </tr>
         `;
-        
+
         const paramNames = {
             'IM': 'Inherent Moisture',
             'ASH': 'Ash Content',
@@ -1450,27 +2050,27 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('modalValMsbFormulaAtas').textContent = rnd(a.msbSum);
         document.getElementById('modalValMsbDivisor').textContent = 2 * (n - 1);
         document.getElementById('modalValMsbLengkap').textContent = rnd(a.MSB, 6);
-        
+
         document.getElementById('modalValMswFormulaAtas').textContent = rnd(a.mswSum);
         document.getElementById('modalValMswDivisor').textContent = 2 * n;
         document.getElementById('modalValMswLengkap').textContent = rnd(a.MSW, 6);
-        
+
         let sdVal = Math.sqrt(Math.max(0, (a.MSB - a.MSW) / 2));
         document.getElementById('modalValSd').textContent = rnd(sdVal);
         document.getElementById('modalValMean').textContent = rnd((sumA+sumB)/(2*n), 2);
 
         document.getElementById('modalValMsb').textContent = rnd(a.MSB);
         document.getElementById('modalValMsw').textContent = rnd(a.MSW);
-        
+
         const fHitungVal = rnd(a.F);
         const fTabelVal = a.FTabel !== null ? rnd(a.FTabel) : '-';
         document.getElementById('modalValFhitung').textContent = fHitungVal;
         document.getElementById('modalValFtabel').textContent = fTabelVal;
         document.getElementById('modalValFtabelLabel').textContent = `F Tabel (v1=${n-1}, v2=${n})`;
-        
+
         const opText = a.isHomogen ? '<' : '>';
         document.getElementById('modalValKesimpulanOp').textContent = opText;
-        
+
         document.getElementById('modalValKesimpulanTextA').textContent = `F hitung (${fHitungVal}) ${opText} F tabel (${fTabelVal})`;
         document.getElementById('modalValKesimpulanTextB').innerHTML = a.isHomogen ? '<span class="text-success">HOMOGEN</span>' : '<span class="text-danger">TIDAK HOMOGEN</span>';
     }
@@ -1497,7 +2097,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const formData = new FormData();
             formData.append('_token', document.querySelector('input[name="_token"]').value);
             formData.append('is_draft', '1');
-            
+
             table.querySelectorAll('input').forEach(inp => {
                 if (inp.name) {
                     formData.append(inp.name, inp.value);
@@ -1538,7 +2138,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const chkExportAll = document.getElementById('chkExportAll');
     const paramCheckboxes = document.querySelectorAll('.chk-export-param');
-    
+
     chkExportAll.addEventListener('change', function() {
         paramCheckboxes.forEach(chk => chk.checked = this.checked);
     });
@@ -1553,7 +2153,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const format = document.querySelector('input[name="exportFormat"]:checked').value;
         const part = document.querySelector('input[name="exportPart"]:checked').value;
         const selectedParams = Array.from(paramCheckboxes).filter(chk => chk.checked).map(chk => chk.value);
-        
+
         if(selectedParams.length === 0) {
             Swal.fire('Peringatan', 'Pilih minimal satu parameter untuk dicetak.', 'warning');
             return;
@@ -1604,7 +2204,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function exportToExcel(params, part) {
         const wb = XLSX.utils.book_new();
         const oldCode = modalParamSelect.value;
-        
+
         params.forEach(code => {
             const ghost = document.createElement('div');
 
@@ -1623,18 +2223,18 @@ document.addEventListener('DOMContentLoaded', function() {
             if(part === 'both' || part === 'anova') {
                 modalParamSelect.value = code;
                 renderModalAnova();
-                
+
                 const anovaTable = document.getElementById('modalTableCombined').closest('table');
                 if(anovaTable) {
                     const anovaClone = anovaTable.cloneNode(true);
                     ghost.appendChild(anovaClone);
                 }
             }
-            
+
             let combinedWsData = [];
             let tableIndex = 0;
             const tablesInGhost = ghost.querySelectorAll('table');
-            
+
             if(part === 'both' || part === 'main') {
                 if(tablesInGhost[tableIndex]) {
                     const ws1 = XLSX.utils.table_to_sheet(tablesInGhost[tableIndex]);
@@ -1644,7 +2244,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     tableIndex++;
                 }
             }
-            
+
             if(part === 'both' || part === 'anova') {
                 if(tablesInGhost[tableIndex]) {
                     if(combinedWsData.length > 0) {
@@ -1656,7 +2256,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const ws2 = XLSX.utils.table_to_sheet(tablesInGhost[tableIndex]);
                     const json2 = XLSX.utils.sheet_to_json(ws2, {header:1, raw:false});
                     combinedWsData = combinedWsData.concat(json2);
-                    
+
                     combinedWsData.push([]);
                     combinedWsData.push(['KESIMPULAN F-TEST']);
                     combinedWsData.push(['MSB = ', document.getElementById('modalValMsbLengkap').textContent]);
@@ -1666,14 +2266,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     combinedWsData.push(['Status = ', document.getElementById('modalValKesimpulanTextB').innerText]);
                 }
             }
-            
+
             const finalWs = XLSX.utils.aoa_to_sheet(combinedWsData);
             XLSX.utils.book_append_sheet(wb, finalWs, code);
         });
 
         modalParamSelect.value = oldCode;
         renderModalAnova();
-        
+
         XLSX.writeFile(wb, `Hasil_Uji_Homogenitas.xlsx`);
     }
 
@@ -1708,18 +2308,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 ? `<div class="pdf-section">`
                 : `<div class="pdf-section pdf-break" style="page-break-before: always; break-before: page;">`;
         }
-        
+
         const oldCode = modalParamSelect.value;
-        
+
         params.forEach((code, index) => {
-            
+
             if(part === 'both' || part === 'main') {
                 const origTable = document.querySelector(`.param-table[data-code="${code}"]`);
                 if(origTable) {
                     html += openSection();
                     html += `<div style="font-size: 16px; font-weight: bold; text-align: center; margin-bottom: 10px;">DATA UTAMA UJI HOMOGENITAS - ${code}</div>`;
                     const tableClone = origTable.cloneNode(true);
-                    tableClone.style.minWidth = 'auto'; 
+                    tableClone.style.minWidth = 'auto';
                     tableClone.querySelectorAll('input[type="hidden"]').forEach(el => el.remove());
                     tableClone.querySelectorAll('input').forEach(inp => {
                         const text = document.createTextNode(inp.value);
@@ -1732,14 +2332,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     html += `</div>`;
                 }
             }
-            
+
             if(part === 'both' || part === 'anova') {
                 modalParamSelect.value = code;
                 renderModalAnova();
-                
+
                 const a = State[code].anova;
                 if(!a) return;
-                
+
                 const anovaTable = document.getElementById('modalTableCombined').closest('table');
                 let tableHtml = '';
                 if(anovaTable) {
@@ -1748,7 +2348,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     anovaClone.style.minWidth = '100%';
                     tableHtml = anovaClone.outerHTML;
                 }
-                
+
                 const msbFormulaAtas = document.getElementById('modalValMsbFormulaAtas').textContent;
                 const mswFormulaAtas = document.getElementById('modalValMswFormulaAtas').textContent;
                 const msb = document.getElementById('modalValMsbLengkap').textContent;
@@ -1757,15 +2357,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 const fTabel = a.FTabel !== null ? a.FTabel.toFixed(4) : '-';
                 const isHomogen = a.isHomogen;
                 const opText = isHomogen ? '<' : '>';
-                
+
                 let paramFull = code;
                 if(code === 'CV') paramFull = 'Gross Calorific Value';
                 else if(code === 'IM') paramFull = 'Inherent Moisture';
                 else if(code === 'ASH') paramFull = 'Ash Content';
                 else if(code === 'VM') paramFull = 'Volatile Matter';
                 else if(code === 'TS') paramFull = 'Total Sulfur';
-
-                
 
                 html += `
                 ${openSection()}
@@ -1783,7 +2381,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </table>
                     <hr size="4" color="black" style="background-color: black; border: none; margin: 0; padding: 0;">
                     <br>
-                    
+
                     <table width="80%" border="0" cellpadding="4" cellspacing="0" style="font-size: 11px;">
                         <tr>
                             <td width="35%" align="left">Parameter Uji</td>
@@ -1791,7 +2389,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td width="45%" bgcolor="#e9ecef" align="center" style="border: 1px solid #ccc;"><b>${paramFull}</b></td>
                             <td width="15%" align="left">&nbsp;&nbsp;(db)</td>
                         </tr>
-                        <tr><td colspan="4" height="6"></td></tr> 
+                        <tr><td colspan="4" height="6"></td></tr>
                         <tr>
                             <td align="left">Kode Sampel Inhouse Standard</td>
                             <td align="center">:</td>
@@ -1799,8 +2397,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td></td>
                         </tr>
                     </table>
-                    
-                    <br><br> 
+
+                    <br><br>
 
                     <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size:11px; font-weight:bold; margin-bottom:5px;">
                         <tr>
@@ -1810,8 +2408,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     </table>
 
                     ${tableHtml}
-                    
-                    <br> 
+
+                    <br>
 
                     <table width="70%" border="0" cellpadding="5" cellspacing="0" bgcolor="#f0f0f0" style="font-size: 11px; margin-bottom: 8px;">
                         <tr>
@@ -1827,7 +2425,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td align="left" width="30%"><b>${msb}</b></td>
                         </tr>
                     </table>
-                    <br> 
+                    <br>
                     <table width="70%" border="0" cellpadding="5" cellspacing="0" bgcolor="#f0f0f0" style="font-size: 11px; margin-bottom: 25px;">
                         <tr>
                             <td align="right" width="10%"><b>MSW =</b></td>
@@ -1848,7 +2446,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td>III. PERHITUNGAN Nilai "F hitung" dan "F tabel":</td>
                         </tr>
                     </table>
-                    
+
                     <table width="100%" border="0" cellpadding="10" cellspacing="0" bgcolor="#e9ecef" style="font-size: 11px; margin-bottom: 10px;">
                         <tr>
                             <td align="right" width="15%"><b>F hitung =</b></td>
@@ -1861,13 +2459,13 @@ document.addEventListener('DOMContentLoaded', function() {
                             </td>
                             <td align="center" width="5%"><b>${opText}</b></td>
                             <td align="left" width="45%">
-                                <b>F tabel (p=0.05 ; v1= ${a.n - 1}; v2= ${a.n} ) =</b> &nbsp;&nbsp;&nbsp; 
+                                <b>F tabel (p=0.05 ; v1= ${a.n - 1}; v2= ${a.n} ) =</b> &nbsp;&nbsp;&nbsp;
                                 <span style="background-color: #fff; padding: 4px 15px; border: 1px solid #ccc;"><b>${fTabel}</b></span>
                             </td>
                         </tr>
                     </table>
                     <br>
-                    
+
                     <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 11px; margin-bottom: 20px;">
                         <tr>
                             <td align="left" valign="top" width="15%"><b>IV. KESIMPULAN:</b></td>
@@ -1900,7 +2498,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td></td>
                         </tr>
                     </table>
-                    
+
                     <br><br>
 
                     <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 9px;">
@@ -1916,10 +2514,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 `;
             }
         });
-        
+
         modalParamSelect.value = oldCode;
         renderModalAnova();
-        
+
         html += `</body></html>`;
         return html;
     }
@@ -1927,7 +2525,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function exportToPdf(params, part) {
         const html = buildExportHtml(params, part);
 
-        // Pecah HTML jadi section-section terpisah
         const doc = new DOMParser().parseFromString(html, 'text/html');
         const css = doc.querySelector('style') ? doc.querySelector('style').textContent : '';
         const sections = Array.from(doc.querySelectorAll('.pdf-section'));
@@ -1936,7 +2533,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return Promise.reject(new Error('Tidak ada data untuk dicetak.'));
         }
 
-        // Tiap section jadi elemen "halaman" sendiri (lengkap dengan CSS-nya)
         const pages = sections.map(sec => {
             sec.classList.remove('pdf-break');
             sec.style.pageBreakBefore = 'auto';
@@ -1957,7 +2553,7 @@ document.addEventListener('DOMContentLoaded', function() {
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
             jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-            pagebreak:    { mode: ['css', 'legacy'] }   // tanpa avoid: ['tr']
+            pagebreak:    { mode: ['css', 'legacy'] }
         };
 
         let worker = html2pdf().set(opt).from(pages[0]).toPdf();
@@ -1989,24 +2585,23 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.removeChild(link);
     }
 
-        // === LOGIKA RESOURCE MODAL (ALAT & BAHAN) ===
     function updateResourceSummary(pid) {
         let modal = document.getElementById('modalResource-' + pid);
         if(!modal) return;
-        
+
         let personils = [], alats = [], bahans = [];
-        
+
         modal.querySelectorAll('.chk-personil:checked').forEach(cb => {
             let peran = cb.closest('tr').querySelector('.in-peran').value || 'Analis';
             let text = cb.closest('tr').querySelectorAll('td')[1].innerText;
             personils.push(`${text} (${peran})`);
         });
-        
+
         modal.querySelectorAll('.chk-alat:checked').forEach(cb => {
             let text = cb.closest('.form-check').querySelector('strong').innerText;
             alats.push(text);
         });
-        
+
         modal.querySelectorAll('.chk-bahan:checked').forEach(cb => {
             let qty = cb.closest('tr').querySelector('.in-qty').value || '0';
             let satuan = cb.closest('tr').querySelector('.input-group-text').innerText;
@@ -2015,13 +2610,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let summaryDiv = document.getElementById('summary_' + pid);
         let contentDiv = summaryDiv.querySelector('.summary-content');
-        
+
         if (personils.length || alats.length || bahans.length) {
                 let html = '';
                 if(personils.length) html += `<div><strong class="text-primary">Analis:</strong> ${personils.join(', ')}</div>`;
                 if(alats.length) html += `<div><strong class="text-success">Alat:</strong> ${alats.join(', ')}</div>`;
                 if(bahans.length) html += `<div><strong class="text-warning">Bahan:</strong> ${bahans.join(', ')}</div>`;
-            
+
             contentDiv.innerHTML = html;
             summaryDiv.classList.remove('d-none');
         } else {
@@ -2041,14 +2636,14 @@ document.addEventListener('DOMContentLoaded', function() {
             let currentPid = this.dataset.pid;
             let currentTab = document.querySelector('#parameterTabs .nav-link.active');
             let prevTabItem = currentTab.closest('li.nav-item').previousElementSibling;
-            
+
             if (prevTabItem) {
                 let prevTabLink = prevTabItem.querySelector('.nav-link');
                 let prevPid = prevTabLink.dataset.pid || prevTabLink.id.replace('tab-', '');
-                
+
                 let prevModal = document.getElementById('modalResource-' + prevPid);
                 let currModal = document.getElementById('modalResource-' + currentPid);
-                
+
                 if (prevModal && currModal) {
                     currModal.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
                     currModal.querySelectorAll('.in-peran, .in-qty').forEach(inpt => inpt.value = '');
@@ -2093,26 +2688,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
 });
 
 </script>
-
-<style>
-.param-table input.form-control-sm {
-    font-size: 0.8rem;
-    padding: 0.2rem 0.4rem;
-    border-radius: 0;
-}
-.param-table th {
-    font-size: 0.75rem;
-    vertical-align: middle;
-}
-.param-table td {
-    padding: 0.2rem;
-}
-input:invalid {
-    box-shadow: none;
-}
-</style>
 @endsection

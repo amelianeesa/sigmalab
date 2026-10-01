@@ -2,82 +2,102 @@
 @section('title', 'Tambah Baru - Alat')
 
 @section('content')
-<div class="container-fluid px-4">
-    <ol class="breadcrumb mb-1 mt-3">
-        <li class="breadcrumb-item"><a href="{{ route('alat.index') }}" class="text-decoration-none">Alat</a></li>
-        <li class="breadcrumb-item active">Tambah</li>
-    </ol>
-    <h1 class="mb-4">Tambah Alat & Informasi Kalibrasi</h1>
+<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+<style>
+    .select2-container--bootstrap-5 .select2-selection {
+        font-size: 0.8rem !important;
+        min-height: 31px !important;
+    }
+    .select2-container--bootstrap-5 .select2-selection__rendered {
+        padding-top: 0 !important;
+    }
+    .select2-container--bootstrap-5 .select2-results__option {
+        font-size: 0.82rem !important;
+    }
+    .flatpickr-input {
+        background-color: #fff !important;
+    }
+</style>
+<div class="container-fluid pt-0 pb-4 px-4" style="max-width: 1050px;">
+    <div class="pt-2 mb-2">
+        <h5 class="fw-bold mb-1" style="font-size: 1.2rem; color: #333;">Tambah Alat & Informasi Kalibrasi</h5>
+        <ol class="breadcrumb mb-0" style="font-size: 12px;">
+            <li class="breadcrumb-item"><a href="{{ route('alat.index') }}" class="text-decoration-none">Data Alat & Kalibrasi</a></li>
+            <li class="breadcrumb-item text-muted active">Tambah</li>
+        </ol>
+    </div>
 
-    <div class="card mb-4">
-        <div class="card-header"><i class="fas fa-plus-circle me-1"></i> Form Input Data Master & Kalibrasi</div>
-        <div class="card-body">
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header text-white py-1.5 px-3" style="background-color: #1b3152;">
+            <h6 class="mb-0 fw-semibold" style="font-size: 13px;"> Form Input Data Master & Kalibrasi</h6>
+        </div>
+        <div class="card-body px-3 py-2.5">
             <form action="{{ route('alat.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 
-                <h5 class="text-primary mb-3"><i class="fas fa-tools"></i> Informasi Spesifikasi Alat</h5>
-                <div class="row mb-3">
+                <h6 class="fw-bold mb-2 text-dark" style="font-size: 13px;">Informasi Spesifikasi Alat</h6>
+                <div class="row g-2 mb-2">
                     <div class="col-md-6">
-                        <label class="form-label">Kode Alat (CODE) <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <input type="text" id="kode_alat_input" name="kode_alat" class="form-control @error('kode_alat') is-invalid @enderror" placeholder="mis. CLC1204-10001" value="{{ old('kode_alat') }}">
-                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#scannerModal" title="Scan Barcode">
-                                <i class="fas fa-qrcode"></i> Scan
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Kode Alat (CODE) <span class="text-danger">*</span></label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" id="kode_alat_input" name="kode_alat" class="form-control form-control-sm @error('kode_alat') is-invalid @enderror" placeholder="mis. CLC1204-10001" value="{{ old('kode_alat') }}">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#scannerModal" title="Scan Barcode">
+                                 Scan
                             </button>
                         </div>
                         @error('kode_alat') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label">Nama Barang / Alat <span class="text-danger">*</span></label>
-                        <input type="text" name="nama_alat" class="form-control @error('nama_alat') is-invalid @enderror" placeholder="mis. Sulfur Analyzer" value="{{ old('nama_alat') }}" required>
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Nama Barang / Alat <span class="text-danger">*</span></label>
+                        <input type="text" name="nama_alat" class="form-control form-control-sm @error('nama_alat') is-invalid @enderror" placeholder="mis. Sulfur Analyzer" value="{{ old('nama_alat') }}" required>
                         @error('nama_alat') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                 </div>    
-                <div class="row mb-3">
+
+                <div class="row g-2 mb-2">
                     <div class="col-md-4">
-                        <label class="form-label">No. Inventaris</label>
-                        <input type="text" name="no_inventaris" class="form-control @error('no_inventaris') is-invalid @enderror" placeholder="mis. INV-001" value="{{ old('no_inventaris') }}">
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">No. Inventaris</label>
+                        <input type="text" name="no_inventaris" class="form-control form-control-sm @error('no_inventaris') is-invalid @enderror" placeholder="mis. INV-001" value="{{ old('no_inventaris') }}">
                         @error('no_inventaris') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Merk / Tipe</label>
-                        <input type="text" name="merk_tipe" class="form-control" placeholder="mis. Labfit CS 1232" value="{{ old('merk_tipe') }}">
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Merk / Tipe</label>
+                        <input type="text" name="merk_tipe" class="form-control form-control-sm" placeholder="mis. Labfit CS 1232" value="{{ old('merk_tipe') }}">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Serial Number</label>
-                        <input type="text" name="no_seri" class="form-control" placeholder="mis. 17050068" value="{{ old('no_seri') }}">
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Serial Number</label>
+                        <input type="text" name="no_seri" class="form-control form-control-sm" placeholder="mis. 17050068" value="{{ old('no_seri') }}">
                     </div>
                 </div>
 
-                <div class="row mb-3">
+                <div class="row g-2 mb-2">
                     <div class="col-md-4">
-                        <label class="form-label">Warna</label>
-                        <input type="text" name="warna" class="form-control" placeholder="mis. WHITE" value="{{ old('warna') }}">
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Warna</label>
+                        <input type="text" name="warna" class="form-control form-control-sm" placeholder="mis. WHITE" value="{{ old('warna') }}">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Ukuran</label>
-                        <input type="text" name="ukuran" class="form-control" placeholder="Ukuran" value="{{ old('ukuran') }}">
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Ukuran</label>
+                        <input type="text" name="ukuran" class="form-control form-control-sm" placeholder="Ukuran" value="{{ old('ukuran') }}">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Unit Kerja Pemilik</label>
-                        <input type="text" name="unit_kerja_pemilik" class="form-control" placeholder="Nama Unit Kerja" value="{{ old('unit_kerja_pemilik') }}">
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Unit Kerja Pemilik</label>
+                        <input type="text" name="unit_kerja_pemilik" class="form-control form-control-sm" placeholder="Nama Unit Kerja" value="{{ old('unit_kerja_pemilik') }}">
                     </div>
                 </div>
 
-                <div class="row mb-4">
+                <div class="row g-2 mb-2">
                     <div class="col-md-6">
-                        <label class="form-label">Kondisi Barang</label>
-                        <select name="kondisi_barang" class="form-select" required>
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Kondisi Barang</label>
+                        <select name="kondisi_barang" class="form-select form-select-sm select2-basic" required>
                             <option value="">--Pilih Kondisi--</option>
                             <option value="baik" {{ old('kondisi_barang') == 'baik' ? 'selected' : '' }}>Baik</option>
-                            <option value="perbaikan" {{ old('kondisi_barang') == 'perbaikan' ? 'selected' : '' }}>Perbaikan</option>
                             <option value="rusak" {{ old('kondisi_barang') == 'rusak' ? 'selected' : '' }}>Rusak</option>
                         </select>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Status Barang</label>
-                        <select name="status_barang" class="form-select" required>
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Status Barang</label>
+                        <select name="status_barang" class="form-select form-select-sm select2-basic" required>
                             <option value="">--Pilih Status--</option>
                             <option value="idle" {{ old('status_barang') == 'idle' ? 'selected' : '' }}>Idle</option>
                             <option value="terpakai" {{ old('status_barang') == 'terpakai' ? 'selected' : '' }}>Terpakai</option>
@@ -85,32 +105,32 @@
                     </div>
                 </div>
 
-                <hr class="my-4">
+                <hr class="my-2">
 
-                <h5 class="text-primary mb-3"><i class="fas fa-certificate"></i> Informasi Kalibrasi Terakhir</h5>
+                <h6 class="fw-bold mb-2 text-dark" style="font-size: 13px;">Informasi Kalibrasi Terakhir</h6>
                 
-                <div class="alert alert-primary d-flex align-items-center mb-4 border-primary bg-white shadow-sm" style="border-left: 5px solid #0d6efd !important;">
-                    <i class="fas fa-magic fa-2x me-3 text-primary"></i>
+                <div class="alert d-flex align-items-center mb-2 bg-white shadow-sm py-1.5 px-3" style="border-left: 4px solid #1b3152 !important;">
+                    
                     <div class="w-100">
-                        <h6 class="mb-1 fw-bold text-primary">Auto-Fill dari Sertifikat (OCR)</h6>
-                        <p class="mb-2 small text-muted">Unggah dokumen PDF sertifikat kalibrasi untuk mengisi form tanggal dan lembaga kalibrasi secara otomatis.</p>
+                        <h6 class="mb-0 fw-bold small text-dark" style="font-size: 11.5px;">Auto-Fill dari Sertifikat (OCR)</h6>
+                        <p class="mb-1 text-muted" style="font-size: 11px;">Unggah dokumen PDF sertifikat kalibrasi untuk mengisi form secara otomatis.</p>
                         <div class="input-group input-group-sm w-75">
-                            <input type="file" class="form-control" id="sertifikat_ocr" accept=".pdf">
-                            <button class="btn btn-primary" type="button" id="btn_ocr_scan"><i class="fas fa-search me-1"></i> Pindai Dokumen</button>
+                            <input type="file" class="form-control form-control-sm" id="sertifikat_ocr" accept=".pdf">
+                            <button class="btn btn-sm text-white" type="button" id="btn_ocr_scan" style="background-color: #1b3152;"><i class="fas fa-search me-1"></i> Pindai</button>
                         </div>
                         <small class="text-danger d-none mt-1" id="ocr_error"></small>
                         <small class="text-success d-none mt-1" id="ocr_success"></small>
                     </div>
                 </div>
                 
-                <div class="row mb-3">
+                <div class="row g-2 mb-2">
                     <div class="col-md-6">
-                        <label class="form-label">No. Sertifikat Kalibrasi / Perijinan</label>
-                        <input type="text" name="no_sertifikat" class="form-control" placeholder="mis. 20059/ENBPAQ" value="{{ old('no_sertifikat') }}">
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">No. Sertifikat Kalibrasi / Perijinan</label>
+                        <input type="text" name="no_sertifikat" class="form-control form-control-sm" placeholder="mis. 20059/ENBPAQ" value="{{ old('no_sertifikat') }}">
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Jenis Kalibrasi</label>
-                        <select name="jenis_kalibrasi" class="form-select">
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Jenis Kalibrasi</label>
+                        <select name="jenis_kalibrasi" class="form-select form-select-sm select2-basic">
                             <option value="">--Pilih Jenis Kalibrasi--</option>
                             <option value="eksternal" {{ old('jenis_kalibrasi') == 'eksternal' ? 'selected' : '' }}>Eksternal</option>
                             <option value="internal" {{ old('jenis_kalibrasi') == 'internal' ? 'selected' : '' }}>Internal</option>
@@ -118,45 +138,45 @@
                     </div>
                 </div>
 
-                <div class="row mb-3">
+                <div class="row g-2 mb-2">
                     <div class="col-md-6">
-                        <label for="file_sertifikat" class="form-label">Upload File / Foto Sertifikat Kalibrasi <small class="text-muted">(PDF/Gambar)</small></label>
+                        <label for="file_sertifikat" class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Upload File / Foto Sertifikat Kalibrasi <small class="text-muted">(PDF/Gambar)</small></label>
                         <input type="file" name="file_sertifikat" id="file_sertifikat" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png">
-                        <div class="form-text text-muted" style="font-size: 0.75rem;">Format yang diizinkan: PDF, JPG, JPEG, PNG. Maks: 2MB</div>
+                        <div class="form-text text-muted" style="font-size: 10.5px;">Format: PDF, JPG, JPEG, PNG. Maks: 2MB</div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Lembaga Kalibrasi</label>
-                        <input type="text" name="lembaga_kalibrasi" class="form-control" placeholder="mis. PT SUCOFINDO" value="{{ old('lembaga_kalibrasi') }}">
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Lembaga Kalibrasi</label>
+                        <input type="text" name="lembaga_kalibrasi" class="form-control form-control-sm" placeholder="mis. PT SUCOFINDO" value="{{ old('lembaga_kalibrasi') }}">
                     </div>
                 </div>
 
-                <div class="row mb-3">
+                <div class="row g-2 mb-2">
                     <div class="col-md-4">
-                        <label class="form-label">Tanggal Kalibrasi</label>
-                        <input type="date" name="tgl_kalibrasi" id="tgl_kalibrasi" class="form-control" value="{{ old('tgl_kalibrasi') }}">
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Tanggal Kalibrasi</label>
+                        <input type="text" name="tgl_kalibrasi" id="tgl_kalibrasi" class="form-control form-control-sm flatpickr-date" autocomplete="off" value="{{ old('tgl_kalibrasi') }}">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Interval Kalibrasi</label>
-                        <input type="text" name="interval_kalibrasi" id="interval_kalibrasi" class="form-control" placeholder="mis. 1 Tahun" value="{{ old('interval_kalibrasi') }}" autocomplete="off">
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Interval Kalibrasi</label>
+                        <input type="text" name="interval_kalibrasi" id="interval_kalibrasi" class="form-control form-control-sm" placeholder="mis. 1 Tahun" value="{{ old('interval_kalibrasi') }}" autocomplete="off">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Tanggal Berakhirnya Masa Kalibrasi</label>
-                        <input type="date" name="tgl_akhir" id="tgl_akhir" class="form-control" value="{{ old('tgl_akhir') }}">
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Tanggal Berakhirnya Masa Kalibrasi</label>
+                        <input type="text" name="tgl_akhir" id="tgl_akhir" class="form-control form-control-sm flatpickr-date" autocomplete="off" value="{{ old('tgl_akhir') }}">
                     </div>
                 </div>
 
-                <div class="row mb-3">
+                <div class="row g-2 mb-2">
                     <div class="col-md-4">
-                        <label class="form-label">Range / Kapasitas</label>
-                        <input type="text" name="range_kapasitas" class="form-control" placeholder="mis. 0 - 1400 °C" value="{{ old('range_kapasitas') }}">
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Range / Kapasitas</label>
+                        <input type="text" name="range_kapasitas" class="form-control form-control-sm" placeholder="mis. 0 - 1400 °C" value="{{ old('range_kapasitas') }}">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Faktor Koreksi</label>
-                        <input type="text" name="faktor_koreksi" class="form-control" placeholder="mis. 32 °C" value="{{ old('faktor_koreksi') }}">
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Faktor Koreksi</label>
+                        <input type="text" name="faktor_koreksi" class="form-control form-control-sm" placeholder="mis. 32 °C" value="{{ old('faktor_koreksi') }}">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Signifikan</label>
-                        <select name="signifikan" class="form-select">
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Signifikan</label>
+                        <select name="signifikan" class="form-select form-select-sm select2-basic">
                             <option value="">--Pilih Signifikan--</option>
                             <option value="ya" {{ old('signifikan') == 'ya' ? 'selected' : '' }}>Ya</option>
                             <option value="tidak" {{ old('signifikan') == 'tidak' ? 'selected' : '' }}>Tidak</option>
@@ -164,42 +184,39 @@
                     </div>
                 </div>
 
-                <div class="row mb-3">
-                    {{-- <div class="row mb-3">
-                        <div class="col-md-12">
-                            <label class="form-label">Dokumen Faktor Koreksi <small class="text-muted">(PDF/Gambar)</small></label>
-                            <input type="file" name="file_faktor_koreksi" class="form-control" accept=".pdf,image/*">
-                            <small class="text-muted">Maksimal ukuran file 2MB.</small>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-12">
+                        <div class="p-2 bg-light border rounded text-muted" style="font-size: 11.5px;">
+                            <i class="fas fa-info-circle me-1" style="color: #1b3152;"></i> 
+                            Evaluasi dan catatan keputusan dikelola sub menu terpusat.
+                            <a href="{{ route('evaluasi-kalibrasi.index') }}" class="text-decoration-none fw-semibold text-primary ms-1">
+                                Evaluasi Kalibrasi <i class="fas fa-external-link-alt" style="font-size: 10px;"></i>
+                            </a>
                         </div>
-                    </div> --}}
-                    <div class="col-md-12 mt-3">
-                        <label class="form-label">Catatan / Evaluasi Kalibrasi</label>
-                        <textarea name="catatan_evaluasi" class="form-control" rows="3" placeholder="Tuliskan catatan evaluasi atau hasil analisis alat di sini...">{{ old('catatan_evaluasi') }}</textarea>
                     </div>
                 </div>
 
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan Data Alat & Kalibrasi</button>
-                    <a href="{{ route('alat.index') }}" class="btn btn-secondary">Kembali</a>
+                <div class="mt-3 text-end">
+                    <button type="submit" class="btn btn-sm text-white px-3" style="background-color: #1b3152;"><i class="fas fa-save me-1"></i> Simpan</button>
+                    <a href="{{ route('alat.index') }}" class="btn btn-sm btn-secondary px-3">Kembali</a>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Scanner Modal -->
 <div class="modal fade" id="scannerModal" tabindex="-1" aria-labelledby="scannerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
+            <div class="modal-header text-white py-2" style="background-color: #1b3152;">
                 <h5 class="modal-title fs-6" id="scannerModalLabel"><i class="fas fa-qrcode me-2"></i>Scan Barcode / QR Code</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
                 <div id="reader" width="100%"></div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            <div class="modal-footer py-1">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
@@ -232,6 +249,43 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function onScanFailure(error) {}
+});
+</script>
+@endpush
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+<script>
+$(function () {
+    $('.select2-basic').select2({
+        theme: 'bootstrap-5',
+        width: '100%'
+    });
+
+    flatpickr.localize(flatpickr.l10ns.id);
+    $('.flatpickr-date').flatpickr({
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd F Y',
+        allowInput: true,
+        disableMobile: true
+    });
+
+    // Helper: set nilai input tanggal dengan aman, baik dia sudah jadi flatpickr atau belum
+    function setDateValue(input, value) {
+        if (input._flatpickr) {
+            input._flatpickr.setDate(value || null, true);
+        } else {
+            input.value = value || '';
+        }
+    }
+
+    function setMinDate(input, value) {
+        if (input._flatpickr) {
+            input._flatpickr.set('minDate', value || null);
+        }
+    }
 
     const tglKalibrasiInput = document.getElementById('tgl_kalibrasi');
     const intervalInput = document.getElementById('interval_kalibrasi');
@@ -240,9 +294,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateMinTanggalAkhir() {
         if (tglKalibrasiInput.value) {
-            tglAkhirInput.min = tglKalibrasiInput.value;
+            setMinDate(tglAkhirInput, tglKalibrasiInput.value);
             if (tglAkhirInput.value && tglAkhirInput.value < tglKalibrasiInput.value) {
-                tglAkhirInput.value = '';
+                setDateValue(tglAkhirInput, '');
             }
         }
     }
@@ -275,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let bulan = String(tanggal.getMonth() + 1).padStart(2, '0');
         let hari = String(tanggal.getDate()).padStart(2, '0');
 
-        tglAkhirInput.value = `${tahun}-${bulan}-${hari}`;
+        setDateValue(tglAkhirInput, `${tahun}-${bulan}-${hari}`);
     }
 
     function hitungInterval() {
@@ -321,21 +375,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     tglAkhirInput.addEventListener('change', function() {
         if (tglKalibrasiInput.value && tglAkhirInput.value < tglKalibrasiInput.value) {
-            alert("Tanggal berakhir tidak boleh lebih awal dari tanggal kalibrasi!");
-            tglAkhirInput.value = '';
+            Swal.fire({
+                icon: 'warning',
+                title: 'Tanggal tidak valid',
+                text: 'Tanggal berakhir tidak boleh lebih awal dari tanggal kalibrasi!'
+            });
+            setDateValue(tglAkhirInput, '');
             return;
         }
         hitungInterval();
     });
 
     updateMinTanggalAkhir();
-});
-</script>
-@endpush
-@endsection
 
-@push('scripts')
-<script>
+    // ===== OCR Auto-Fill =====
     document.getElementById('btn_ocr_scan').addEventListener('click', function() {
         let fileInput = document.getElementById('sertifikat_ocr');
         if (!fileInput.files.length) {
@@ -374,12 +427,14 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.disabled = false;
             
             if (data.success) {
-                if(data.data.tgl_kalibrasi) document.getElementById('tgl_kalibrasi').value = data.data.tgl_kalibrasi;
-                if(data.data.tgl_akhir) document.getElementById('tgl_akhir').value = data.data.tgl_akhir;
-                if(data.data.sertifikat_oleh) {
+                if (data.data.tgl_kalibrasi) setDateValue(tglKalibrasiInput, data.data.tgl_kalibrasi);
+                if (data.data.tgl_akhir) setDateValue(tglAkhirInput, data.data.tgl_akhir);
+                if (data.data.sertifikat_oleh) {
                     let lembaga = document.querySelector('input[name="lembaga_kalibrasi"]');
-                    if(lembaga) lembaga.value = data.data.sertifikat_oleh;
+                    if (lembaga) lembaga.value = data.data.sertifikat_oleh;
                 }
+
+                updateMinTanggalAkhir();
                 
                 successEl.textContent = 'Berhasil membaca dokumen! Form telah diisi.';
                 successEl.classList.remove('d-none');
@@ -387,7 +442,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 Swal.fire({
                     icon: 'success',
                     title: 'Auto-Fill Berhasil',
-                    text: 'Data berhasil diekstrak dari dokumen PDF. Silakan periksa kembali kebenarannya di kolom input.',
+                    text: 'Data berhasil diekstrak dari dokumen PDF. Silakan periksa kembali.',
                     toast: true,
                     position: 'top-end',
                     showConfirmButton: false,
@@ -405,5 +460,7 @@ document.addEventListener('DOMContentLoaded', function() {
             errorEl.classList.remove('d-none');
         });
     });
+});
 </script>
 @endpush
+@endsection
