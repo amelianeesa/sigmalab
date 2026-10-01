@@ -1,7 +1,7 @@
 <div class="row g-2 mb-3 bg-light p-2 border">
     <div class="col-md-3"><label class="small fw-bold">Reference No</label><input type="text" name="params[{{ $pid_c }}][ref_no]" class="form-control form-control-sm param-input-ext" disabled></div>
     <div class="col-md-3"><label class="small fw-bold">Balance ID</label><input type="text" name="params[{{ $pid_c }}][blnc_id]" class="form-control form-control-sm param-input-ext" disabled></div>
-    <div class="col-md-3"><label class="small fw-bold">Calorimeter ID</label><input type="text" name="params[{{ $pid_c }}][furnace_id]" class="form-control form-control-sm param-input-ext" disabled></div>
+    <div class="col-md-3"><label class="small fw-bold">Instrument ID</label><input type="text" name="params[{{ $pid_c }}][furnace_id]" class="form-control form-control-sm param-input-ext" disabled></div>
     <div class="col-md-3"><label class="small fw-bold">Reference Method</label><input type="text" name="params[{{ $pid_c }}][std_method]" class="form-control form-control-sm param-input-ext" disabled></div>
 </div>
 

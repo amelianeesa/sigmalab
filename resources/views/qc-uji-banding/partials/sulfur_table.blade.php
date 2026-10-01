@@ -32,7 +32,7 @@
                     <input type="hidden" class="in-db-1" name="params[{{ $pid }}][data][0][db1]">
                 </td>
                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-mass-1" name="params[{{ $pid }}][data][0][mentah][mass_1]" disabled></td>
-                <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="params[{{ $pid }}][data][0][mentah][ts_1]" disabled></td>
+                <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="params[{{ $pid }}][data][0][mentah][ts_1]"></td>
                 
                 <!-- Absolute Diff (Kiri) dan Dropdown YES/NO (Kanan) -->
                 <td rowspan="2" class="align-middle out-diff">-</td>
@@ -53,7 +53,7 @@
                     <input type="hidden" class="in-db-2" name="params[{{ $pid }}][data][0][db2]">
                 </td>
                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-mass-2" name="params[{{ $pid }}][data][0][mentah][mass_2]" disabled></td>
-                <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="params[{{ $pid }}][data][0][mentah][ts_2]" disabled></td>
+                <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="params[{{ $pid }}][data][0][mentah][ts_2]"></td>
             </tr>
         </tbody>
         <tfoot>

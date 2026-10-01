@@ -3,13 +3,11 @@
 <div>
 
     @if(!isset($selectedParameter) || !$selectedParameter)
-        <!-- No Parameter Selected -->
         <div class="alert alert-info shadow-sm" role="alert">
             <i class="fas fa-info-circle me-2"></i> Silakan pilih Parameter Uji terlebih dahulu untuk menampilkan Inhouse Control.
         </div>
     @else
         
-        <!-- Raw Data Logger (Duplo) -->
         <div class="card shadow mb-4 border-left-primary">
             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between bg-white">
                 <h6 class="m-0 font-weight-bold text-primary">Tabel Raw Data Logger (Duplo Testing)</h6>

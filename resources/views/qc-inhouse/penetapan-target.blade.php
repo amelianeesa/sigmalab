@@ -13,7 +13,7 @@
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h3 class="fw-bold text-dark mb-0"><i class="fas fa-bullseye text-primary me-2"></i>Penetapan Nilai Target (Tahap 4)</h3>
             </div>
-            <p class="text-muted">Sesuai prosedur operasional standar, Nilai Target (Mean) dan Simpangan Baku (Standar Deviasi) diwarisi otomatis secara presisi dari kalkulasi <strong>Global Mean</strong> dan <strong>Global Standard Deviation</strong> dari 20 titik uji Homogenitas (Tahap 3) yang telah lolos validasi statistik.</p>
+            <p class="text-muted">Sesuai prosedur operasional standar, Nilai Target (Mean) dan Simpangan Baku (Standar Deviasi) diwarisi otomatis secara presisi dari kalkulasi <strong>Global Mean</strong> dan <strong>Global Standard Deviation</strong> dari {{ $batch->jumlah_botol * 2 }} titik uji Homogenitas (Tahap 3) yang telah lolos validasi statistik.</p>
 
             @if($errors->any())
                 <div class="alert alert-danger"><ul class="mb-0">@foreach($errors->all() as $err)<li>{{ $err }}</li>@endforeach</ul></div>
@@ -43,13 +43,16 @@
                     @foreach($batch->parameters as $idx => $param)
                         @php 
                             $pid = $param->id; 
-                            $mean = round($param->mean_target ?? $param->mean_global, 2);
-                            $sd = round($param->sd_target ?? $param->sd_global, 2);
-                            
-                            $ucl = round($mean + (3 * $sd), 2);
-                            $lcl = round($mean - (3 * $sd), 2);
-                            $uwl = round($mean + (2 * $sd), 2);
-                            $lwl = round($mean - (2 * $sd), 2);
+                            $rawMean = (float) ($param->mean_target ?? $param->mean_global);
+                            $rawSd = (float) ($param->sd_target ?? $param->sd_global);
+
+                            $ucl = round($rawMean + (3 * $rawSd), 2);
+                            $lcl = round($rawMean - (3 * $rawSd), 2);
+                            $uwl = round($rawMean + (2 * $rawSd), 2);
+                            $lwl = round($rawMean - (2 * $rawSd), 2);
+
+                            $mean = round($rawMean, 2);
+                            $sd = round($rawSd, 2);
                         @endphp
                         <div class="tab-pane fade {{ $idx === 0 ? 'show active' : '' }}" id="pane-{{ $pid }}" role="tabpanel">
                             <div class="card shadow-sm border-0 mb-4">

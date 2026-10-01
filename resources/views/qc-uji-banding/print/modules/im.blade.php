@@ -31,8 +31,9 @@
     </table>
 
     <table class="table table-bordered border-dark table-sm mt-4 print-full-table align-middle text-center" style="font-size: 14px;">
-        <!-- Akan diisi otomatis oleh JS agar dinamis menyesuaikan jumlah pengujian -->
         <tbody id="print-im-dynamic-tbody">
         </tbody>
     </table>
+
+    @include('qc-uji-banding.print.footer_ttd', ['idPrefix' => 'im', 'kodeDokumen' => 'FOR/COAL-OPS/026', 'rev' => '01', 'tglBerlaku' => '21/02/2018'])
 </div>

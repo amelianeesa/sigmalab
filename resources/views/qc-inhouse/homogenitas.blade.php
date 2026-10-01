@@ -73,7 +73,7 @@
 
                         @php
 
-                            $rowCount = max(3, $batch->parameters->max(function ($p) {
+                            $rowCount = max(10, $batch->parameters->max(function ($p) {
                                 return $p->dataHomogenitas->count();
                             }) ?? 0);
                         @endphp
@@ -1494,15 +1494,15 @@ document.addEventListener('DOMContentLoaded', function() {
             this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...';
             this.disabled = true;
 
+            const allForm = new FormData(document.getElementById('formHomogenitas'));
             const formData = new FormData();
-            formData.append('_token', document.querySelector('input[name="_token"]').value);
-            formData.append('is_draft', '1');
             
-            table.querySelectorAll('input').forEach(inp => {
-                if (inp.name) {
-                    formData.append(inp.name, inp.value);
+            for (let [k, v] of allForm.entries()) {
+                if (k === '_token' || k.startsWith(`data_${pid}[`) || k.startsWith(`resource_${pid}[`)) {
+                    formData.append(k, v);
                 }
-            });
+            }
+            formData.append('is_draft', '1');
 
             fetch(document.getElementById('formHomogenitas').action, {
                 method: 'POST',

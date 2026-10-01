@@ -2,14 +2,51 @@
 @section('title', 'Tambah Baru - QC Uji Banding')
 
 @section('content')
+<style>
+    .param-form-wrapper .table-responsive {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        border: 1px solid #dee2e6; 
+        border-radius: 5px;
+    }
+
+    .param-form-wrapper table {
+        white-space: nowrap !important;
+        min-width: 1400px !important; 
+    }
+
+    .param-form-wrapper table input.form-control-sm {
+        min-width: 85px !important;
+    }
+
+    .param-form-wrapper table select.form-select-sm {
+        min-width: 110px !important;
+    }
+
+    .param-form-wrapper table td.out-diff,
+    .param-form-wrapper table td.out-abs,
+    .param-form-wrapper table td.out-avg-adb,
+    .param-form-wrapper table td.out-avg-ar,
+    .param-form-wrapper table td.out-avg-db {
+        min-width: 80px !important; 
+        text-align: center;         
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+</style>
+
+
 <div class="container-fluid px-4 pb-5">
+
     <x-qc-breadcrumb active="Uji Banding">
         <li class="breadcrumb-item active">Input Data</li>
     </x-qc-breadcrumb>
+
     <h2 class="mb-4 fw-bold text-dark">
         <i class="fas fa-plus-circle text-danger me-2"></i>Input Data Blind Test Uji Banding
     </h2>
 
+    {{-- Pesan error --}}
     @if(session('error'))
         <div class="alert alert-danger shadow-sm border-0">
             <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
@@ -28,32 +65,37 @@
         </div>
     @endif
 
+
     <form action="{{ route('qc-uji-banding.store') }}" method="POST" id="formQc" autocomplete="off">
         @csrf
         <input type="hidden" name="draft_id" id="draft_id_input" value="{{ $draftId ?? '' }}">
-
-        
         <div class="card shadow-sm border-0 mb-4">
+
             <div class="card-header text-white py-3" style="background-color: #1b3152;">
                 <h5 class="mb-0 fw-bold"><i class="fas fa-clipboard-list me-2"></i>Section 1: Data Dasar Pengujian</h5>
             </div>
-            <div class="card-body p-4">
 
-                {{-- Informasi Umum Program --}}
-                <h6 class="mb-3 text-primary border-bottom pb-2"><i class="fas fa-info-circle me-2"></i>Informasi Umum Program Uji Banding</h6>
+            <div class="card-body p-4">
+                <h6 class="mb-3 text-primary border-bottom pb-2">
+                    <i class="fas fa-info-circle me-2"></i>Informasi Umum Program Uji Banding
+                </h6>
+
                 <div class="row mb-4 g-3">
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Nama Program Uji Banding <span class="text-danger">*</span></label>
                         <input type="text" name="nama_program" class="form-control" placeholder="Contoh: Proficiency Testing D-QA 2026" required>
                     </div>
+
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Penyelenggara (Vendor) <span class="text-danger">*</span></label>
                         <input type="text" name="penyelenggara" class="form-control" placeholder="Contoh: D-QA / FAPAS" required>
                     </div>
+
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Kode Sampel <span class="text-danger">*</span></label>
                         <input type="text" name="kode_sampel" class="form-control" required>
                     </div>
+
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Tanggal Terima <span class="text-danger">*</span></label>
                         <input type="date" name="tanggal_terima" class="form-control" required>
@@ -65,8 +107,11 @@
                     </div>
                 </div>
 
-                {{-- Bahan Digunakan --}}
-                <h6 class="mb-3 text-primary border-bottom pb-2"><i class="fas fa-box-open me-2"></i>Bahan Digunakan</h6>
+                <!-- bahan -->
+                <h6 class="mb-3 text-primary border-bottom pb-2">
+                    <i class="fas fa-box-open me-2"></i>Bahan Digunakan
+                </h6>
+
                 <div class="mb-0">
                     <div class="table-responsive">
                         <table class="table table-bordered table-sm mb-0">
@@ -84,17 +129,23 @@
                                         $saldoAkhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
                                         $habis = $saldoAkhir <= 0;
                                     @endphp
+
                                     <tr class="{{ $habis ? 'table-danger' : '' }}">
                                         <td class="text-center align-middle">
                                             <input class="form-check-input" type="checkbox" name="barang_ids[]" value="{{ $barang->barang_id }}" id="barang_{{ $barang->barang_id }}" {{ $habis ? 'disabled' : '' }}>
                                         </td>
+
                                         <td class="align-middle">
                                             <label for="barang_{{ $barang->barang_id }}" class="mb-0 cursor-pointer {{ $habis ? 'text-muted' : '' }}">
                                                 {{ $barang->nama_barang }}
                                                 @if($habis) <span class="badge bg-danger ms-1">Habis</span> @endif
                                             </label>
                                         </td>
-                                        <td class="align-middle">{{ number_format($saldoAkhir, 0, ',', '.') }} {{ $barang->satuan }}</td>
+
+                                        <td class="align-middle">
+                                            {{ number_format($saldoAkhir, 0, ',', '.') }} {{ $barang->satuan }}
+                                        </td>
+
                                         <td>
                                             <div class="input-group input-group-sm">
                                                 <input type="number" step="0.01" min="0" class="form-control barang-input" name="barang_jumlah[{{ $barang->barang_id }}]" placeholder="0" {{ $habis ? 'disabled' : '' }}>
@@ -111,13 +162,16 @@
             </div>
         </div>
 
-        {{-- SECTION 2: INPUT DATA PENGUJIAN --}}
+        <!-- bagian input data pengujian -->
         <div class="card shadow-sm border-0 mb-4">
+
             <div class="card-header text-white py-3" style="background-color: #1b3152;">
                 <h5 class="mb-0 fw-bold"><i class="fas fa-table me-2"></i>Section 2: Input Data Pengujian</h5>
             </div>
+
             <div class="card-body p-0">
-                {{-- NAV TABS: 4 Sheet --}}
+
+                <!-- tab -->
                 <ul class="nav nav-tabs px-3 pt-3" id="section2Tabs" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active fw-bold" id="tab-input-data-tab" data-bs-toggle="tab" data-bs-target="#tab-input-data" type="button" role="tab">
@@ -142,31 +196,37 @@
                 </ul>
 
                 <div class="tab-content" id="section2TabContent">
-                    {{-- TAB PANE 1: INPUT DATA --}}
+
+                    <!-- tab input data -->
                     <div class="tab-pane fade show active" id="tab-input-data" role="tabpanel">
+
                         <div class="alert alert-info m-3 rounded-0 border-start border-4 border-info">
                             <i class="fas fa-info-circle me-2"></i> Centang kotak di samping nama parameter untuk mengaktifkan form inputnya.
                         </div>
 
                         @php
                             $groupedParameters = $allParameters->groupBy(function($item) {
-                            return $item->kategori_parameter ?: 'Lain-lain';
+                                return $item->kategori_parameter ?: 'Lain-lain';
                             });
                         @endphp
 
                         <div class="accordion accordion-flush" id="moduleAccordion">
+
                             @foreach($groupedParameters as $kategori => $params)
+
                                 @if(!in_array($kategori, [
-                                    'Proximate Analysis', 
-                                    'Determination of Sulfur by IR Spectrometry', 
-                                    'Determination of Gross Calorific Value', 
-                                    'Calorific Value & Sulfur', 
-                                    'Residual Moisture', 
-                                    'Determination of Total Moisture', 
-                                    'Determination of Carbon, Hydrogen, Nitrogen by Instrument', 
+                                    'Proximate Analysis',
+                                    'Determination of Sulfur by IR Spectrometry',
+                                    'Determination of Gross Calorific Value',
+                                    'Calorific Value & Sulfur',
+                                    'Residual Moisture',
+                                    'Determination of Total Moisture',
+                                    'Determination of Carbon, Hydrogen, Nitrogen by Instrument',
                                     'Ultimate Analysis',
-                                    'Determination of Net Calorific Value'])) @continue 
+                                    'Determination of Net Calorific Value']))
+                                    @continue
                                 @endif
+
                                 @php
                                     if ($kategori === 'Proximate Analysis') {
                                         $order = ['IM' => 1, 'ASH' => 2, 'VM' => 3, 'FC' => 4];
@@ -178,7 +238,9 @@
                                     $catId = Str::slug($kategori);
                                 @endphp
 
+                                {{-- ----- Satu modul (kategori) accordion ----- --}}
                                 <div class="accordion-item border-bottom mb-2">
+
                                     <h2 class="accordion-header" id="heading-cat-{{ $catId }}">
                                         <div class="d-flex align-items-center w-100 bg-light">
                                             <div class="p-3">
@@ -194,39 +256,103 @@
                                         <div class="accordion-body p-4 bg-white">
 
                                             @if($kategori === 'Determination of Carbon, Hydrogen, Nitrogen by Instrument')
+
+                                                {{-- ================= MODUL CHN ================= --}}
                                                 @php
                                                     $pid_c = $params->where('nama_parameter', 'C')->first()->parameter_uji_id ?? 4;
                                                     $pid_h = $params->where('nama_parameter', 'H')->first()->parameter_uji_id ?? 5;
                                                     $pid_n = $params->where('nama_parameter', 'N')->first()->parameter_uji_id ?? 6;
                                                     $pid   = $pid_c; // Default ke C
                                                 @endphp
+
                                                 <div class="col-12 param-container" data-pid="{{ $pid }}">
+
                                                     <div class="d-flex align-items-center mb-3 border-bottom pb-2">
                                                         <input class="form-check-input param-enable-check me-2" type="checkbox" name="params[{{ $pid }}][selected]" value="1" data-pid="{{ $pid }}" data-cat="{{ $catId }}" style="transform: scale(1.3);">
                                                         <h5 class="fw-bold text-dark mb-0 ms-2 text-primary">Aktifkan Pengujian CHN</h5>
                                                     </div>
-                                                    
+
                                                     <div class="param-form-wrapper" style="opacity: 0.5; pointer-events: none;">
-                                                        <!-- ANALIS & ALAT (CHN) -->
-                                                        <div class="row g-3 bg-light p-3 rounded mb-3 border border-info align-items-center">
-                                                            <div class="col-md-6">
-                                                                <label class="form-label small fw-bold mb-1">Analis / Personil</label>
-                                                                <select name="params[{{ $pid }}][analis_id]" class="form-select form-select-sm param-input-ext" disabled>
-                                                                    <option value="">-- Pilih Analis --</option>
-                                                                    @foreach($personilList as $personil)
-                                                                        <option value="{{ $personil->personil_id }}">{{ $personil->nama }}</option>
-                                                                    @endforeach
-                                                                </select>
+
+                                                        <div class="row align-items-center bg-light p-3 rounded mb-3 border border-info mx-0">
+                                                            <div class="col-md-8 mb-2 mb-md-0">
+                                                                <div class="d-flex flex-column gap-1" style="font-size: 0.85rem;">
+                                                                    <div><i class="fas fa-user text-primary me-2"></i><strong>Analis:</strong> <span id="sum-personil-{{ $pid }}" class="text-muted fst-italic">Belum dipilih</span></div>
+                                                                    <div><i class="fas fa-tools text-warning me-2"></i><strong>Instrumen:</strong> <span id="sum-alat-{{ $pid }}" class="text-muted fst-italic">Belum dipilih</span></div>
+                                                                </div>
                                                             </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label small fw-bold mb-1">Instrumen/Alat</label>
-                                                                <select name="params[{{ $pid }}][alat_id]" class="form-select form-select-sm param-input-ext" disabled>
-                                                                    <option value="">-- Pilih Alat --</option>
-                                                                    <option value="1">CLC1204-10001 - Sulfur Analyzer</option>
-                                                                    <option value="2">CLC1206-10001 - Calorimeter</option>
-                                                                    <option value="3">CLC1156-10002 - MFS/1 ASTM Oven</option>
-                                                                    <option value="4">CLC3208-10001 - MFS/1 ASTM Oven</option>
-                                                                </select>
+                                                            <div class="col-md-4 text-md-end">
+                                                                <button type="button" class="btn btn-sm w-100 shadow-sm text-white param-input-ext" style="background-color: #1b3152; border-color: #1b3152;" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}" disabled>
+                                                                    <i class="fas fa-cog me-1"></i> Atur Analis & Alat
+                                                                </button>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- MODAL POP-UP RESOURCE -->
+                                                        <div class="modal fade modal-resource" id="modalResource-{{ $pid }}" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content border-0 shadow-lg">
+                                                                    <div class="modal-header text-white" style="background-color: #1b3152;">
+                                                                        <h5 class="modal-title fw-bold"><i class="fas fa-tasks me-2"></i>Atur Analis & Alat: {{ $code ?? 'Parameter' }}</h5>
+                                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    </div>
+                                                                    <div class="modal-body p-0">
+                                                                        <ul class="nav nav-tabs nav-fill bg-light m-0" role="tablist">
+                                                                            <li class="nav-item">
+                                                                                <button class="nav-link active fw-bold text-dark py-3" data-bs-toggle="tab" data-bs-target="#tab-personil-{{ $pid }}" type="button"><i class="fas fa-user text-primary me-2"></i>Analis</button>
+                                                                            </li>
+                                                                            <li class="nav-item">
+                                                                                <button class="nav-link fw-bold text-dark py-3" data-bs-toggle="tab" data-bs-target="#tab-alat-{{ $pid }}" type="button"><i class="fas fa-tools text-warning me-2"></i>Instrumen</button>
+                                                                            </li>
+                                                                        </ul>
+                                                                        <div class="tab-content p-4">
+                                                                            <div class="tab-pane fade show active" id="tab-personil-{{ $pid }}" role="tabpanel">
+                                                                                <div class="table-responsive border rounded" style="max-height: 250px; overflow-y: auto;">
+                                                                                    <table class="table table-hover table-sm mb-0 text-nowrap">
+                                                                                        <thead class="table-light sticky-top">
+                                                                                            <tr>
+                                                                                                <th width="10%" class="text-center">Pilih</th>
+                                                                                                <th>Nama Personil</th>
+                                                                                                <th width="40%">Peran / Tugas</th>
+                                                                                            </tr>
+                                                                                        </thead>
+                                                                                        <tbody>
+                                                                                            @foreach($personilList as $personil)
+                                                                                            <tr>
+                                                                                                <td class="text-center align-middle">
+                                                                                                    <input class="form-check-input chk-personil" style="transform: scale(1.3);" type="checkbox" name="params[{{ $pid }}][mentah][personil_ids][]" value="{{ $personil->personil_id }}" data-nama="{{ $personil->nama }}">
+                                                                                                </td>
+                                                                                                <td class="align-middle fw-bold">{{ $personil->nama }}</td>
+                                                                                                <td>
+                                                                                                    <input type="text" class="form-control form-control-sm in-peran" name="params[{{ $pid }}][mentah][personil_peran][{{ $personil->personil_id }}]" value="Analis" placeholder="Analis">
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                            @endforeach
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="tab-pane fade" id="tab-alat-{{ $pid }}" role="tabpanel">
+                                                                                <div class="list-group" style="max-height: 250px; overflow-y: auto;">
+                                                                                    @foreach($alatList as $alat)
+                                                                                    <label class="list-group-item d-flex gap-3 align-items-center cursor-pointer">
+                                                                                        <input class="form-check-input flex-shrink-0 chk-alat" style="transform: scale(1.3);" type="checkbox" name="params[{{ $pid }}][mentah][alat_ids][]" value="{{ $alat->alat_id }}" data-nama="{{ $alat->nama_alat }}">
+                                                                                        <span>
+                                                                                            <strong class="d-block">{{ $alat->nama_alat }}</strong>
+                                                                                            <small class="text-muted">({{ $alat->kode_alat }})</small>
+                                                                                        </span>
+                                                                                    </label>
+                                                                                    @endforeach
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="modal-footer bg-light">
+                                                                        <button type="button" class="btn px-4 rounded-pill text-white" style="background-color: #1b3152;" data-bs-dismiss="modal">
+                                                                            <i class="fas fa-check me-2"></i>Simpan Pilihan
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
 
@@ -240,10 +366,12 @@
                                                             <input type="hidden" id="tol-data-{{ $pid_c }}" value='{{ $chnToleransis->toJson() }}'>
                                                             <input type="hidden" id="tol-data-{{ $pid_h }}" value='{{ $chnToleransis->toJson() }}'>
                                                             <input type="hidden" id="tol-data-{{ $pid_n }}" value='{{ $chnToleransis->toJson() }}'>
+
                                                             <div class="mt-3 p-3 bg-light border rounded">
                                                                 <h6 class="fw-bold text-secondary mb-2" style="font-size: 0.85rem;">
                                                                     <i class="fas fa-info-circle me-1"></i> Referensi Batas Toleransi Master CHN
                                                                 </h6>
+
                                                                 <div class="table-responsive">
                                                                     <table class="table table-bordered table-sm text-center align-middle mb-0 bg-white" style="font-size: 0.8rem;">
                                                                         <thead class="table-secondary">
@@ -267,20 +395,25 @@
                                                                             @endforeach
                                                                         </tbody>
                                                                     </table>
-                                                                </div>
-                                                            </div>
+                                                                </div>{{-- /table-responsive --}}
+                                                            </div>{{-- /referensi toleransi CHN --}}
                                                         @endif
-                                                        
-                                                    </div>
-                                                </div>
+
+                                                    </div>{{-- /param-form-wrapper CHN --}}
+                                                </div>{{-- /param-container CHN --}}
 
                                             @else
+
+                                                {{-- ================= MODUL UMUM (per parameter) ================= --}}
+
+                                                {{-- Tab header: satu tab per parameter --}}
                                                 <ul class="nav nav-tabs mb-4" id="tabs-cat-{{ $catId }}" role="tablist">
                                                     @foreach($params as $index => $param)
                                                         @php
                                                             $pid = $param->parameter_uji_id;
                                                             $code = strtoupper(str_replace(' - %', '', $param->nama_parameter));
                                                         @endphp
+
                                                         <li class="nav-item" role="presentation">
                                                             <button class="nav-link fw-bold {{ $index === 0 ? 'active' : '' }}" id="tab-{{ $pid }}" data-bs-toggle="tab" data-bs-target="#pane-{{ $pid }}" type="button" role="tab">
                                                                 {{ $code }}
@@ -289,42 +422,111 @@
                                                     @endforeach
                                                 </ul>
 
+                                                {{-- Tab content: satu pane per parameter --}}
                                                 <div class="tab-content" id="content-cat-{{ $catId }}">
                                                     @foreach($params as $index => $param)
                                                         @php
                                                             $code = strtoupper(str_replace(' - %', '', $param->nama_parameter));
                                                             $pid = $param->parameter_uji_id;
                                                         @endphp
+
                                                         <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}" id="pane-{{ $pid }}" role="tabpanel">
                                                             <div class="col-12 param-container" data-pid="{{ $pid }}">
+
                                                                 <div class="d-flex align-items-center mb-3 border-bottom pb-2">
                                                                     <input class="form-check-input param-enable-check me-2" type="checkbox" name="params[{{ $pid }}][selected]" value="1" data-pid="{{ $pid }}" data-cat="{{ $catId }}" style="transform: scale(1.3);">
-                                                                    <h5 class="fw-bold text-dark mb-0 ms-2 text-primary">Aktifkan Pengujian {{ $code }} <span class="badge bg-secondary ms-2">{{ $param->satuan }}</span></h5>
+                                                                    <h5 class="fw-bold text-dark mb-0 ms-2 text-primary">
+                                                                        Aktifkan Pengujian {{ $code }}
+                                                                        <span class="badge bg-secondary ms-2">{{ $param->satuan }}</span>
+                                                                    </h5>
                                                                 </div>
+
                                                                 <div class="param-form-wrapper" style="opacity: 0.5; pointer-events: none;">
-                                                                    <!-- ANALIS & ALAT (UMUM) -->
-                                                                    <div class="row g-3 bg-light p-3 rounded mb-3 border border-info align-items-center">
-                                                                        <div class="col-md-6">
-                                                                            <label class="form-label small fw-bold mb-1">Analis / Personil</label>
-                                                                            <select name="params[{{ $pid }}][analis_id]" class="form-select form-select-sm param-input-ext" disabled>
-                                                                                <option value="">-- Pilih Analis --</option>
-                                                                                @foreach($personilList as $personil)
-                                                                                    <option value="{{ $personil->personil_id }}">{{ $personil->nama }}</option>
-                                                                                @endforeach
-                                                                            </select>
+
+                                                                    <div class="row align-items-center bg-light p-3 rounded mb-3 border border-info mx-0">
+                                                                        <div class="col-md-8 mb-2 mb-md-0">
+                                                                            <div class="d-flex flex-column gap-1" style="font-size: 0.85rem;">
+                                                                                <div><i class="fas fa-user text-primary me-2"></i><strong>Analis:</strong> <span id="sum-personil-{{ $pid }}" class="text-muted fst-italic">Belum dipilih</span></div>
+                                                                                <div><i class="fas fa-tools text-warning me-2"></i><strong>Instrumen:</strong> <span id="sum-alat-{{ $pid }}" class="text-muted fst-italic">Belum dipilih</span></div>
+                                                                            </div>
                                                                         </div>
-                                                                        <div class="col-md-6">
-                                                                            <label class="form-label small fw-bold mb-1">Instrumen/Alat</label>
-                                                                            <select name="params[{{ $pid }}][alat_id]" class="form-select form-select-sm param-input-ext" disabled>
-                                                                                <option value="">-- Pilih Alat --</option>
-                                                                                <option value="1">CLC1204-10001 - Sulfur Analyzer</option>
-                                                                                <option value="2">CLC1206-10001 - Calorimeter</option>
-                                                                                <option value="3">CLC1156-10002 - MFS/1 ASTM Oven</option>
-                                                                                <option value="4">CLC3208-10001 - MFS/1 ASTM Oven</option>
-                                                                            </select>
+                                                                        <div class="col-md-4 text-md-end">
+                                                                            <button type="button" class="btn btn-sm w-100 shadow-sm text-white param-input-ext" style="background-color: #1b3152; border-color: #1b3152;" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}" disabled>
+                                                                                <i class="fas fa-cog me-1"></i> Atur Analis & Alat
+                                                                            </button>
                                                                         </div>
                                                                     </div>
 
+                                                                    <!-- MODAL POP-UP RESOURCE -->
+                                                                    <div class="modal fade modal-resource" id="modalResource-{{ $pid }}" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+                                                                        <div class="modal-dialog">
+                                                                            <div class="modal-content border-0 shadow-lg">
+                                                                                <div class="modal-header text-white" style="background-color: #1b3152;">
+                                                                                    <h5 class="modal-title fw-bold"><i class="fas fa-tasks me-2"></i>Atur Analis & Alat: {{ $code ?? 'Parameter' }}</h5>
+                                                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                                </div>
+                                                                                <div class="modal-body p-0">
+                                                                                    <ul class="nav nav-tabs nav-fill bg-light m-0" role="tablist">
+                                                                                        <li class="nav-item">
+                                                                                            <button class="nav-link active fw-bold text-dark py-3" data-bs-toggle="tab" data-bs-target="#tab-personil-{{ $pid }}" type="button"><i class="fas fa-user text-primary me-2"></i>Analis</button>
+                                                                                        </li>
+                                                                                        <li class="nav-item">
+                                                                                            <button class="nav-link fw-bold text-dark py-3" data-bs-toggle="tab" data-bs-target="#tab-alat-{{ $pid }}" type="button"><i class="fas fa-tools text-warning me-2"></i>Instrumen</button>
+                                                                                        </li>
+                                                                                    </ul>
+                                                                                    <div class="tab-content p-4">
+                                                                                        <div class="tab-pane fade show active" id="tab-personil-{{ $pid }}" role="tabpanel">
+                                                                                            <div class="table-responsive border rounded" style="max-height: 250px; overflow-y: auto;">
+                                                                                                <table class="table table-hover table-sm mb-0 text-nowrap">
+                                                                                                    <thead class="table-light sticky-top">
+                                                                                                        <tr>
+                                                                                                            <th width="10%" class="text-center">Pilih</th>
+                                                                                                            <th>Nama Personil</th>
+                                                                                                            <th width="40%">Peran / Tugas</th>
+                                                                                                        </tr>
+                                                                                                    </thead>
+                                                                                                    <tbody>
+                                                                                                        @foreach($personilList as $personil)
+                                                                                                        <tr>
+                                                                                                            <td class="text-center align-middle">
+                                                                                                                <input class="form-check-input chk-personil" style="transform: scale(1.3);" type="checkbox" name="params[{{ $pid }}][mentah][personil_ids][]" value="{{ $personil->personil_id }}" data-nama="{{ $personil->nama }}">
+                                                                                                            </td>
+                                                                                                            <td class="align-middle fw-bold">{{ $personil->nama }}</td>
+                                                                                                            <td>
+                                                                                                                <input type="text" class="form-control form-control-sm in-peran" name="params[{{ $pid }}][mentah][personil_peran][{{ $personil->personil_id }}]" value="Analis" placeholder="Analis">
+                                                                                                            </td>
+                                                                                                        </tr>
+                                                                                                        @endforeach
+                                                                                                    </tbody>
+                                                                                                </table>
+                                                                                            </div>
+                                                                                        </div>
+
+                                                                                        <div class="tab-pane fade" id="tab-alat-{{ $pid }}" role="tabpanel">
+                                                                                            <div class="list-group" style="max-height: 250px; overflow-y: auto;">
+                                                                                                @foreach($alatList as $alat)
+                                                                                                <label class="list-group-item d-flex gap-3 align-items-center cursor-pointer">
+                                                                                                    <input class="form-check-input flex-shrink-0 chk-alat" style="transform: scale(1.3);" type="checkbox" name="params[{{ $pid }}][mentah][alat_ids][]" value="{{ $alat->alat_id }}" data-nama="{{ $alat->nama_alat }}">
+                                                                                                    <span>
+                                                                                                        <strong class="d-block">{{ $alat->nama_alat }}</strong>
+                                                                                                        <small class="text-muted">({{ $alat->kode_alat }})</small>
+                                                                                                    </span>
+                                                                                                </label>
+                                                                                                @endforeach
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="modal-footer bg-light">
+                                                                                    <button type="button" class="btn px-4 rounded-pill text-white" style="background-color: #1b3152;" data-bs-dismiss="modal">
+                                                                                        <i class="fas fa-check me-2"></i>Simpan Pilihan
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {{-- Pilih tabel input sesuai jenis parameter --}}
                                                                     @if(in_array($code, ['IM', 'ASH', 'VM', 'FC', 'RM']))
                                                                         @include('qc-uji-banding.partials.proximate_table')
                                                                     @elseif($kategori === 'Determination of Sulfur by IR Spectrometry')
@@ -343,12 +545,15 @@
                                                                         $toleransiList = \App\Models\ParameterToleransi::where('parameter_uji_id', $pid)->get();
                                                                     @endphp
 
+                                                                    {{-- Referensi toleransi --}}
                                                                     @if($toleransiList->count() > 0)
                                                                         <input type="hidden" id="tol-data-{{ $pid }}" value='{{ $toleransiList->toJson() }}'>
+
                                                                         <div class="mt-3 p-3 bg-light border rounded">
                                                                             <h6 class="fw-bold text-secondary mb-2" style="font-size: 0.85rem;">
                                                                                 <i class="fas fa-info-circle me-1"></i> Referensi Batas Toleransi Master (ASTM / ISO)
                                                                             </h6>
+
                                                                             <div class="table-responsive">
                                                                                 <table class="table table-bordered table-sm text-center align-middle mb-0 bg-white" style="font-size: 0.8rem;">
                                                                                     <thead class="table-secondary">
@@ -368,6 +573,7 @@
                                                                                             @if($code !== 'VM')
                                                                                                 <th>Range</th>
                                                                                             @endif
+
                                                                                             <th class="text-danger">Repeatability (r)</th>
                                                                                             <th class="text-success">Reproducibility (R)</th>
                                                                                         </tr>
@@ -397,22 +603,28 @@
                                                                                         @endforeach
                                                                                     </tbody>
                                                                                 </table>
-                                                                            </div>
-                                                                        </div>
+                                                                            </div>{{-- /table-responsive --}}
+                                                                        </div>{{-- /referensi toleransi --}}
                                                                     @endif
 
-                                                                </div>
-                                                            </div>
-                                                        </div>
+                                                                </div>{{-- /param-form-wrapper --}}
+                                                            </div>{{-- /param-container --}}
+                                                        </div>{{-- /tab-pane pane-{pid} --}}
+
                                                     @endforeach
-                                                </div>
-                                            @endif  
-                                        </div>
-                                    </div>
-                                </div>
+                                                </div>{{-- /tab-content content-cat --}}
+
+                                            @endif
+
+                                        </div>{{-- /accordion-body --}}
+                                    </div>{{-- /accordion-collapse --}}
+                                </div>{{-- /accordion-item --}}
+
                             @endforeach
-                        </div>
+                        </div>{{-- /accordion moduleAccordion --}}
+
                     </div>{{-- /tab-pane input-data --}}
+
 
                     {{-- TAB PANE 2: PROXIMATE --}}
                     <div class="tab-pane fade" id="tab-proximate" role="tabpanel">
@@ -428,43 +640,48 @@
                     <div class="tab-pane fade" id="tab-aft-correction" role="tabpanel">
                         @include('qc-uji-banding.partials.aft_correction')
                     </div>
-                </div>{{-- /tab-content --}}
-            </div>{{-- /card-body --}}
+
+                </div>{{-- /tab-content section2TabContent --}}
+            </div>{{-- /card-body Section 2 --}}
         </div>{{-- /card Section 2 --}}
 
-        {{-- TOMBOL SUBMIT & DRAFT (RESPONSIVE) --}}
+
+        {{-- ===================================================== --}}
+        {{-- TOMBOL SUBMIT & DRAFT (RESPONSIVE)                    --}}
+        {{-- ===================================================== --}}
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3 mt-4">
-            
+
             <!-- Tombol Batal pindah ke bawah saat di HP (order-last) -->
             <a href="{{ route('qc-uji-banding.index') }}" class="btn btn-light border px-4 rounded-pill order-last order-md-first">
                 Batal
             </a>
-            
+
             <!-- Tombol Simpan berbaris ke bawah di HP, menyamping di Laptop -->
             <div class="d-flex flex-column flex-md-row gap-2 order-first order-md-last">
                 <button type="button" class="btn btn-warning px-4 rounded-pill shadow-sm" id="btnDraft">
                     <i class="fas fa-save me-2"></i>Simpan Draft
                 </button>
-                
+
                 <button type="submit" class="btn btn-danger px-5 rounded-pill shadow-sm" id="btnSubmit">
                     <i class="fas fa-check-circle me-2"></i>Simpan Data Uji Banding
                 </button>
             </div>
-            
+
         </div>
+
     </form>
-</div>
+</div>{{-- /container-fluid --}}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
+
     function parseNum(val) {
         const n = parseFloat(val);
         return isNaN(n) ? 0 : n;
+    }
 
-    };
-    
-    window.updateYesNoColor = function(selectEl) {
+    window.updateYesNoColor = function (selectEl) {
         if (selectEl.value === 'YES') {
             selectEl.className = 'form-select form-select-sm fw-bold bg-success text-white border-success';
         } else if (selectEl.value === 'NO') {
@@ -472,13 +689,13 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             selectEl.className = 'form-select form-select-sm fw-bold'; // Kembali normal
         }
-    }
+    };
 
     function runToleranceValidation(container, pid, code) {
         // 1. Deteksi kelas out-diff atau out-abs (untuk Total Moisture)
         let diffNode = container.querySelector('.out-diff') || container.querySelector('.out-abs');
         let diffText = diffNode?.textContent;
-        
+
         let avgText = '-';
         if (code === 'TM' || code === 'TOTAL MOISTURE') {
             avgText = container.querySelector('.out-avg-ar')?.textContent;
@@ -489,9 +706,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         let selectYesNo = container.querySelector('select[name$="[yesno]"]');
-        if(!selectYesNo) return; 
+        if (!selectYesNo) return;
 
-        if(!diffText || diffText === '-' || !avgText || avgText === '-') {
+        if (!diffText || diffText === '-' || !avgText || avgText === '-') {
             selectYesNo.value = '';
             updateYesNoColor(selectYesNo);
             return;
@@ -501,15 +718,15 @@ document.addEventListener('DOMContentLoaded', function() {
         let avg = parseFloat(avgText);
 
         let tolInput = document.getElementById('tol-data-' + pid);
-        if(!tolInput) return;
+        if (!tolInput) return;
 
         let tolData = [];
-        try { tolData = JSON.parse(tolInput.value); } catch(e) { return; }
+        try { tolData = JSON.parse(tolInput.value); } catch (e) { return; }
 
         let matchedRule = null;
         let rowType = container.dataset.type; // Untuk CHN ('carbon', 'hydrogen', 'nitrogen')
 
-        for(let rule of tolData) {
+        for (let rule of tolData) {
             if (code === 'CHN') {
                 let targetSub = '';
                 if (rowType === 'carbon') targetSub = 'C';
@@ -534,49 +751,49 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        if(!matchedRule || !matchedRule.formula_r) {
-             selectYesNo.value = '';
-             updateYesNoColor(selectYesNo);
-             return;
+        if (!matchedRule || !matchedRule.formula_r) {
+            selectYesNo.value = '';
+            updateYesNoColor(selectYesNo);
+            return;
         }
 
         let formula = matchedRule.formula_r;
-        formula = formula.replace(/(\d)\s*[Xu]/gi, '$1 * X'); 
+        formula = formula.replace(/(\d)\s*[Xu]/gi, '$1 * X');
         let evalFormula = formula.replace(/X/gi, avg).replace(/u/gi, avg);
         let limitR = 0;
-        
-        try { limitR = math.evaluate(evalFormula); } 
-        catch(e) { limitR = parseFloat(formula); }
+
+        try { limitR = math.evaluate(evalFormula); }
+        catch (e) { limitR = parseFloat(formula); }
 
         selectYesNo.value = (diff <= limitR) ? 'YES' : 'NO';
         updateYesNoColor(selectYesNo);
     }
 
-    // Kalkulasi per baris khusus Uji Banding
     function calculateRow(row, pid) {
-        if(!row) return;
+        if (!row) return;
+
         let i = row.querySelector('.in-hasil-1') ? 1 : 2;
         let scope = {};
         const table = row.closest('table');
-        if(!table) return;
+        if (!table) return;
         const code = table.dataset.code;
 
         // Ambil semua input
         const inputs = row.querySelectorAll('input[class*="in-"]');
         inputs.forEach(inp => {
             const match = inp.className.match(/in-([a-zA-Z0-9_]+)-\d/);
-            if(match) {
+            if (match) {
                 const varName = match[1].toLowerCase();
                 scope[varName] = parseNum(inp.value);
             }
         });
 
         const tbody = row.closest('tbody');
-        if(!tbody) return;
+        if (!tbody) return;
 
         let result = 0;
 
-        // Hitung otomatis untuk IM
+        // ---------- IM / RM ----------
         if (code === 'IM' || code === 'RM') {
             if (scope.m1 > 0 && scope.a > 0) {
                 scope.m2 = scope.m1 + scope.a;
@@ -590,7 +807,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             if (scope.a > 0) result = ((scope.a - scope.b) / scope.a) * 100;
         }
-        // Hitung otomatis untuk ASH
+
+        // ---------- ASH ----------
         else if (code === 'ASH') {
             if (scope.m1 > 0 && scope.m2m1 > 0) {
                 let m2 = scope.m1 + scope.m2m1;
@@ -604,7 +822,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             if (scope.m2m1 > 0) result = (scope.m3m1 / scope.m2m1) * 100;
         }
-        // Hitung otomatis untuk VM
+
+        // ---------- VM ----------
         else if (code === 'VM') {
             let vmInp = parseNum(row.querySelector('.in-hasil-' + i)?.value); // %VM input
 
@@ -648,14 +867,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         }
+
+        // ---------- FC ----------
         else if (code === 'FC') {
             const myTbodyIndex = tbody.dataset.index || 0;
 
             let im1 = 0, im2 = 0;
             const imTable = document.querySelector('table[data-code="IM"]');
-            if(imTable) {
+            if (imTable) {
                 const targetTbody = imTable.querySelectorAll('.proximate-tbody')[myTbodyIndex];
-                if(targetTbody) {
+                if (targetTbody) {
                     im1 = parseNum(targetTbody.querySelector('.in-hasil-1')?.value);
                     im2 = parseNum(targetTbody.querySelector('.in-hasil-2')?.value);
                 }
@@ -663,9 +884,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             let ash1 = 0, ash2 = 0;
             const ashTable = document.querySelector('table[data-code="ASH"]');
-            if(ashTable) {
+            if (ashTable) {
                 const targetTbody = ashTable.querySelectorAll('.proximate-tbody')[myTbodyIndex];
-                if(targetTbody) {
+                if (targetTbody) {
                     ash1 = parseNum(targetTbody.querySelector('.in-hasil-1')?.value);
                     ash2 = parseNum(targetTbody.querySelector('.in-hasil-2')?.value);
                 }
@@ -673,9 +894,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             let vm1 = 0, vm2 = 0;
             const vmTable = document.querySelector('table[data-code="VM"]');
-            if(vmTable) {
+            if (vmTable) {
                 const targetTbody = vmTable.querySelectorAll('.proximate-tbody')[myTbodyIndex];
-                if(targetTbody) {
+                if (targetTbody) {
                     vm1 = parseNum(targetTbody.querySelector('.in-hasil-1')?.value);
                     vm2 = parseNum(targetTbody.querySelector('.in-hasil-2')?.value);
                 }
@@ -685,26 +906,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 let inIm1 = tbody.querySelector('.in-im-1');
                 let inAsh1 = tbody.querySelector('.in-ash-1');
                 let inVm1 = tbody.querySelector('.in-vm-1');
-                if(inIm1) inIm1.value = im1 > 0 ? im1.toFixed(4) : '';
-                if(inAsh1) inAsh1.value = ash1 > 0 ? ash1.toFixed(4) : '';
-                if(inVm1) inVm1.value = vm1 > 0 ? vm1.toFixed(4) : '';
+                if (inIm1) inIm1.value = im1 > 0 ? im1.toFixed(4) : '';
+                if (inAsh1) inAsh1.value = ash1 > 0 ? ash1.toFixed(4) : '';
+                if (inVm1) inVm1.value = vm1 > 0 ? vm1.toFixed(4) : '';
 
                 if (im1 > 0 && ash1 > 0 && vm1 > 0) result = 100 - im1 - ash1 - vm1;
             } else {
                 let inIm2 = tbody.querySelector('.in-im-2');
                 let inAsh2 = tbody.querySelector('.in-ash-2');
                 let inVm2 = tbody.querySelector('.in-vm-2');
-                if(inIm2) inIm2.value = im2 > 0 ? im2.toFixed(4) : '';
-                if(inAsh2) inAsh2.value = ash2 > 0 ? ash2.toFixed(4) : '';
-                if(inVm2) inVm2.value = vm2 > 0 ? vm2.toFixed(4) : '';
+                if (inIm2) inIm2.value = im2 > 0 ? im2.toFixed(4) : '';
+                if (inAsh2) inAsh2.value = ash2 > 0 ? ash2.toFixed(4) : '';
+                if (inVm2) inVm2.value = vm2 > 0 ? vm2.toFixed(4) : '';
 
                 if (im2 > 0 && ash2 > 0 && vm2 > 0) result = 100 - im2 - ash2 - vm2;
             }
         }
+
+       // ---------- TS ----------
         else if (code === 'TS') {
-            result = scope.mass || 0;
+            let tsInp = row.querySelector('.in-hasil-' + i);
+            result = tsInp ? parseNum(tsInp.value) : 0;
         }
-        // --- TAMBAHKAN BLOK KODE TM DI SINI ---
+
+        // ---------- TM ----------
         else if (code === 'TM' || code === 'TOTAL MOISTURE') {
             let adl1Inp = row.querySelector('.in-adl1');
             let adl2Inp = row.querySelector('.in-adl2');
@@ -782,9 +1007,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            runToleranceValidation(tbody, pid, code); 
-            return; 
+            runToleranceValidation(tbody, pid, code);
+            return;
         }
+
+        // ---------- CHN ----------
         else if (code === 'CHN') {
             const tbody = row.closest('tbody');
             if (!tbody) return;
@@ -849,6 +1076,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // ---------- GCV ----------
         else if (code === 'GCV') {
             // Weight of Crucible + Sample = weight of crucible + sample mass
             const wcs = scope.wc + scope.mass;
@@ -881,39 +1109,45 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
+        // ---------- NCV ----------
         else if (code === 'NCV') {
             syncAndCalculateNcv();
             return;
         }
 
+
+       // ---------- Tulis hasil ke input hasil / d ----------
         const inHasil = row.querySelector(`.in-hasil-${i}`);
         const inD = row.querySelector(`.in-d${i}`);
-        if(inHasil && !inHasil.hasAttribute('disabled')) {
+        if (inHasil && !inHasil.hasAttribute('disabled')) {
             const dec = (code === 'CV' || code === 'GCV') ? 0 : 2;
-            if (code !== 'VM' && code !== 'TOTAL SULFUR (%AD/DB)') {
+            // TAMBAHKAN pengecualian untuk TS di bawah ini
+            if (code !== 'VM' && code !== 'TS' && code !== 'TOTAL SULFUR (%AD/DB)') {
                 inHasil.value = result > 0 ? result.toFixed(dec) : '';
-                if(inD) inD.value = result > 0 ? result.toFixed(dec) : '';
+                if (inD) inD.value = result > 0 ? result.toFixed(dec) : '';
             } else {
-                if(inD) inD.value = inHasil.value;
+                // Biarkan analis mengetik manual tanpa diintervensi oleh sistem
+                if (inD) inD.value = inHasil.value;
             }
         }
 
+        // ---------- Ambil nilai IM untuk konversi basis ----------
         let im1 = 0, im2 = 0;
         if (code === 'VM') {
             const imTable = document.querySelector('table[data-code="IM"]');
-            if(imTable) {
+            if (imTable) {
                 const targetTbody = imTable.querySelectorAll('.proximate-tbody')[tbody.dataset.index || 0];
-                if(targetTbody) {
+                if (targetTbody) {
                     im1 = parseNum(targetTbody.querySelector('.in-hasil-1')?.value);
                     im2 = parseNum(targetTbody.querySelector('.in-hasil-2')?.value);
                 }
             }
         } else {
             const imTable = document.querySelector('table[data-code="IM"]');
-            if(imTable && document.querySelector(`.param-enable-check[data-pid="${imTable.dataset.pid}"]`)?.checked) {
+            if (imTable && document.querySelector(`.param-enable-check[data-pid="${imTable.dataset.pid}"]`)?.checked) {
                 const myTbodyIndex = tbody.dataset.index || 0;
                 const targetTbody = imTable.querySelectorAll('.proximate-tbody')[myTbodyIndex];
-                if(targetTbody) {
+                if (targetTbody) {
                     im1 = parseNum(targetTbody.querySelector('.in-hasil-1')?.value);
                     im2 = parseNum(targetTbody.querySelector('.in-hasil-2')?.value);
                 }
@@ -925,12 +1159,13 @@ document.addEventListener('DOMContentLoaded', function() {
         let avgDb = 0;
 
         const outDiff = tbody.querySelector('.out-diff');
-        if(outDiff && d1 > 0 && d2 > 0) {
+        if (outDiff && d1 > 0 && d2 > 0) {
             const diff = Math.abs(d1 - d2);
             outDiff.textContent = diff.toFixed(2);
         }
 
-        if(code === 'CV' || code === 'TS' || code === 'ASH' || code === 'VM') {
+        // ---------- Dry basis ----------
+        if (code === 'CV' || code === 'TS' || code === 'ASH' || code === 'VM') {
             const inDb1 = tbody.querySelector('.in-db-1');
             const outDb1 = tbody.querySelector('.out-db-1');
             const inDb2 = tbody.querySelector('.in-db-2');
@@ -938,25 +1173,26 @@ document.addEventListener('DOMContentLoaded', function() {
             const outAvgDb = tbody.querySelector('.out-avg-db');
 
             let db1 = 0, db2 = 0;
-            if(im1 > 0 && d1 > 0) {
+            if (im1 > 0 && d1 > 0) {
                 db1 = d1 * (100 / (100 - im1));
-                if(outDb1) outDb1.textContent = db1.toFixed(2);
-                if(inDb1) inDb1.value = db1.toFixed(4);
+                if (outDb1) outDb1.textContent = db1.toFixed(2);
+                if (inDb1) inDb1.value = db1.toFixed(4);
             }
-            if(im2 > 0 && d2 > 0) {
+            if (im2 > 0 && d2 > 0) {
                 db2 = d2 * (100 / (100 - im2));
-                if(outDb2) outDb2.textContent = db2.toFixed(2);
-                if(inDb2) inDb2.value = db2.toFixed(4);
+                if (outDb2) outDb2.textContent = db2.toFixed(2);
+                if (inDb2) inDb2.value = db2.toFixed(4);
             }
 
-            if(im1 > 0 && im2 > 0 && d1 > 0 && d2 > 0) {
+            if (im1 > 0 && im2 > 0 && d1 > 0 && d2 > 0) {
                 avgDb = (db1 + db2) / 2;
-                if(outAvgDb) outAvgDb.textContent = avgDb.toFixed(2);
+                if (outAvgDb) outAvgDb.textContent = avgDb.toFixed(2);
             }
         }
 
+        // ---------- Average air dry basis ----------
         const outAvgAdb = tbody.querySelector('.out-avg-adb');
-        if(outAvgAdb && d1 > 0 && d2 > 0) {
+        if (outAvgAdb && d1 > 0 && d2 > 0) {
             const avgAdb = (d1 + d2) / 2;
             outAvgAdb.textContent = avgAdb.toFixed(2);
         }
@@ -964,6 +1200,10 @@ document.addEventListener('DOMContentLoaded', function() {
         runToleranceValidation(tbody, pid, code);
     }
 
+
+    // =====================================================
+    // SINKRONISASI & KALKULASI NCV
+    // =====================================================
     function syncAndCalculateNcv() {
         const ncvTable = document.querySelector('table[data-code="NCV"]');
         if (!ncvTable) return;
@@ -1068,30 +1308,36 @@ document.addEventListener('DOMContentLoaded', function() {
         if (d2Inp) d2Inp.value = qparj !== 0 ? qparcal.toFixed(2) : '';
     }
 
+
+    // =====================================================
+    // LISTENER INPUT, TAMBAH / HAPUS BARIS
+    // =====================================================
     function setupInputListener(input) {
-        input.addEventListener('input', function() {
+        input.addEventListener('input', function () {
             const table = this.closest('table');
-            if(!table) return;
+            if (!table) return;
             calculateRow(this.closest('.row-entry'), table.dataset.pid);
 
             const myTbody = this.closest('tbody');
-            if(myTbody) {
+            if (myTbody) {
                 const myIndex = myTbody.dataset.index;
-                if(table.dataset.code === 'IM') {
+
+                if (table.dataset.code === 'IM') {
                     const vmTable = document.querySelector('table[data-code="VM"]');
-                    if(vmTable) {
+                    if (vmTable) {
                         const vmtbody = vmTable.querySelectorAll('.proximate-tbody')[myIndex];
-                        if(vmtbody) {
+                        if (vmtbody) {
                             calculateRow(vmtbody.querySelector('.simplo-row'), vmTable.dataset.pid);
                             calculateRow(vmtbody.querySelector('.duplo-row'), vmTable.dataset.pid);
                         }
                     }
                 }
-                if(['IM', 'ASH', 'VM'].includes(table.dataset.code)) {
+
+                if (['IM', 'ASH', 'VM'].includes(table.dataset.code)) {
                     const fcTable = document.querySelector('table[data-code="FC"]');
-                    if(fcTable) {
+                    if (fcTable) {
                         const fctbody = fcTable.querySelectorAll('.proximate-tbody')[myIndex];
-                        if(fctbody) {
+                        if (fctbody) {
                             calculateRow(fctbody.querySelector('.simplo-row'), fcTable.dataset.pid);
                             calculateRow(fctbody.querySelector('.duplo-row'), fcTable.dataset.pid);
                         }
@@ -1105,12 +1351,14 @@ document.addEventListener('DOMContentLoaded', function() {
         setupInputListener(input);
     });
 
-    document.addEventListener('click', function(e) {
-        if(e.target.closest('.btn-add-row')) {
+    document.addEventListener('click', function (e) {
+
+        // Tambah baris
+        if (e.target.closest('.btn-add-row')) {
             const btn = e.target.closest('.btn-add-row');
             const table = btn.closest('table');
             const tbodies = table.querySelectorAll('tbody');
-            if(tbodies.length === 0) return;
+            if (tbodies.length === 0) return;
             const lastTbody = tbodies[tbodies.length - 1];
 
             const newTbody = lastTbody.cloneNode(true);
@@ -1118,10 +1366,12 @@ document.addEventListener('DOMContentLoaded', function() {
             newTbody.dataset.index = newIndex;
 
             newTbody.querySelectorAll('input, select').forEach(inp => {
-                if(inp.name) {
+                if (inp.name) {
                     inp.name = inp.name.replace(/\[data\]\[\d+\]/, `[data][${newIndex}]`);
                 }
-                if(inp.type !== 'hidden' && !inp.hasAttribute('readonly') && inp.type !== 'date') {
+                if (inp.name && inp.name.endsWith('[pengujian_ke]')) {
+                    inp.value = newIndex + 1;   // pengujian ke-2, 3, dst.
+                } else if (inp.type !== 'hidden' && !inp.hasAttribute('readonly') && inp.type !== 'date') {
                     inp.value = '';
                 }
             });
@@ -1135,11 +1385,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        if(e.target.closest('.btn-remove-last-row')) {
+        // Hapus baris terakhir
+        if (e.target.closest('.btn-remove-last-row')) {
             const btn = e.target.closest('.btn-remove-last-row');
             const table = btn.closest('table');
             const tbodies = table.querySelectorAll('tbody');
-            if(tbodies.length > 1) {
+            if (tbodies.length > 1) {
                 tbodies[tbodies.length - 1].remove();
             } else {
                 alert('Minimal harus ada 1 pengujian.');
@@ -1147,32 +1398,36 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+
+    // =====================================================
+    // CHECKBOX AKTIFKAN KATEGORI / PARAMETER
+    // =====================================================
     document.querySelectorAll('.cat-enable-check').forEach(cb => {
-        cb.addEventListener('change', function() {
+        cb.addEventListener('change', function () {
             const catId = this.dataset.cat;
             const isChecked = this.checked;
 
             document.querySelectorAll(`.param-enable-check[data-cat="${catId}"]`).forEach(paramCb => {
-                if(paramCb.checked !== isChecked) {
+                if (paramCb.checked !== isChecked) {
                     paramCb.checked = isChecked;
                     paramCb.dispatchEvent(new Event('change'));
                 }
             });
 
             const collapseEl = document.getElementById('collapse-cat-' + catId);
-            if(collapseEl && isChecked) {
-                const bsCollapse = bootstrap.Collapse.getInstance(collapseEl) || new bootstrap.Collapse(collapseEl, {toggle: false});
+            if (collapseEl && isChecked) {
+                const bsCollapse = bootstrap.Collapse.getInstance(collapseEl) || new bootstrap.Collapse(collapseEl, { toggle: false });
                 bsCollapse.show();
             }
         });
     });
 
     document.querySelectorAll('.param-enable-check').forEach(cb => {
-        cb.addEventListener('change', function() {
+        cb.addEventListener('change', function () {
             const container = this.closest('.param-container');
-            if(container) {
+            if (container) {
                 const wrapper = container.querySelector('.param-form-wrapper');
-                if(this.checked) {
+                if (this.checked) {
                     wrapper.style.opacity = '1';
                     wrapper.style.pointerEvents = 'auto';
                     wrapper.querySelectorAll('input, select, button').forEach(el => el.removeAttribute('disabled'));
@@ -1186,11 +1441,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // DRAFT LOGIC
-    const DRAFT_KEY = 'qc_uji_banding_draft_form';
+    // draft
     const btnDraft = document.getElementById('btnDraft');
-    if(btnDraft) {
-        btnDraft.addEventListener('click', function() {
+
+    if (btnDraft) {
+        btnDraft.addEventListener('click', function () {
             const draft = {};
             draft.nama_program = document.querySelector('input[name="nama_program"]')?.value || '';
             draft.penyelenggara = document.querySelector('input[name="penyelenggara"]')?.value || '';
@@ -1198,10 +1453,11 @@ document.addEventListener('DOMContentLoaded', function() {
             draft.tanggal_terima = document.querySelector('input[name="tanggal_terima"]')?.value || '';
             draft.keterangan = document.querySelector('textarea[name="keterangan"]')?.value || '';
             draft.proximate_adl = document.getElementById('proximate-adl')?.value || '';
+
             draft.proximate_methods = {};
             document.querySelectorAll('.prox-method').forEach(inp => {
                 const param = inp.closest('tr').dataset.param;
-                if(inp.value) draft.proximate_methods[param] = inp.value;
+                if (inp.value) draft.proximate_methods[param] = inp.value;
             });
 
             draft.alat_ids = [];
@@ -1212,20 +1468,39 @@ document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('input[name="barang_ids[]"]:checked').forEach(cb => draft.barang_ids.push(cb.value));
             document.querySelectorAll('.barang-input').forEach(inp => {
                 const match = inp.name.match(/barang_jumlah\[(\d+)\]/);
-                if(match && inp.value) draft.barang_jumlah[match[1]] = inp.value;
+                if (match && inp.value) draft.barang_jumlah[match[1]] = inp.value;
             });
 
             draft.params = {};
             document.querySelectorAll('.param-enable-check').forEach(check => {
                 const pid = check.dataset.pid;
                 const table = document.getElementById('table-' + pid);
-                if(!table) return;
+                if (!table) return;
+
+                const modal = document.getElementById('modalResource-' + pid);
+                
+                let arrAnalis = [];
+                if (modal) {
+                    modal.querySelectorAll('.chk-personil:checked').forEach(cb => {
+                        let peran = cb.closest('tr').querySelector('.in-peran').value || 'Analis';
+                        arrAnalis.push({ id: cb.value, peran: peran });
+                    });
+                }
+
+                // Ambil semua alat yang dicentang dalam bentuk array
+                let arrAlat = [];
+                if (modal) {
+                    modal.querySelectorAll('.chk-alat:checked').forEach(cb => {
+                        arrAlat.push(cb.value);
+                    });
+                }
 
                 draft.params[pid] = {
                     selected: check.checked,
+                    analis_data: arrAnalis, // Simpan array analis
+                    alat_data: arrAlat,     // Simpan array alat
+                    
                     tanggal_uji: document.querySelector(`input[name="params[${pid}][tanggal_uji]"]`)?.value || '',
-                    analis_id: document.querySelector(`select[name="params[${pid}][analis_id]"]`)?.value || '',
-                    alat_id: document.querySelector(`select[name="params[${pid}][alat_id]"]`)?.value || '',
                     metode_uji: document.querySelector(`input[name="params[${pid}][metode_uji]"]`)?.value || '',
                     uncertainty_lab: document.querySelector(`input[name="params[${pid}][uncertainty_lab]"]`)?.value || '',
                     ref_no: document.querySelector(`input[name="params[${pid}][ref_no]"]`)?.value || '',
@@ -1238,8 +1513,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 };
 
                 table.querySelectorAll('input, select').forEach(inp => {
-                    const classes = Array.from(inp.classList).filter(c => c.startsWith('in-') || c === 'form-select');
-                    if(classes.length > 0 && inp.name) {
+                    if (inp.name) {
                         draft.params[pid].inputs[inp.name] = inp.value;
                     }
                 });
@@ -1261,7 +1535,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(res => res.json())
             .then(data => {
-                if(data.success) {
+                if (data.success) {
                     if (document.getElementById('draft_id_input')) {
                         document.getElementById('draft_id_input').value = data.draft_id;
                     }
@@ -1283,67 +1557,110 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+
+    // =====================================================
+    // DRAFT: MUAT
+    // =====================================================
     (function loadDraft() {
         @if(isset($draftData) && $draftData)
         try {
             const draft = {!! json_encode($draftData) !!};
 
-            if(draft.nama_program) document.querySelector('input[name="nama_program"]').value = draft.nama_program;
-            if(draft.penyelenggara) document.querySelector('input[name="penyelenggara"]').value = draft.penyelenggara;
-            if(draft.kode_sampel) document.querySelector('input[name="kode_sampel"]').value = draft.kode_sampel;
-            if(draft.tanggal_terima) document.querySelector('input[name="tanggal_terima"]').value = draft.tanggal_terima;
-            if(draft.keterangan) document.querySelector('textarea[name="keterangan"]').value = draft.keterangan;
-            if(draft.proximate_adl && document.getElementById('proximate-adl')) { document.getElementById('proximate-adl').value = draft.proximate_adl; setTimeout(calculateProximateBases, 100); }
-            if(draft.proximate_methods) {
+            if (draft.nama_program) document.querySelector('input[name="nama_program"]').value = draft.nama_program;
+            if (draft.penyelenggara) document.querySelector('input[name="penyelenggara"]').value = draft.penyelenggara;
+            if (draft.kode_sampel) document.querySelector('input[name="kode_sampel"]').value = draft.kode_sampel;
+            if (draft.tanggal_terima) document.querySelector('input[name="tanggal_terima"]').value = draft.tanggal_terima;
+            if (draft.keterangan) document.querySelector('textarea[name="keterangan"]').value = draft.keterangan;
+
+            if (draft.proximate_adl && document.getElementById('proximate-adl')) {
+                document.getElementById('proximate-adl').value = draft.proximate_adl;
+                setTimeout(calculateProximateBases, 100);
+            }
+
+            if (draft.proximate_methods) {
                 Object.keys(draft.proximate_methods).forEach(param => {
                     const row = document.querySelector(`tr[data-param="${param}"]`);
-                    if(row) {
+                    if (row) {
                         const inp = row.querySelector('.prox-method');
-                        if(inp) inp.value = draft.proximate_methods[param];
+                        if (inp) inp.value = draft.proximate_methods[param];
                     }
                 });
             }
 
-            if(draft.alat_ids) {
+            if (draft.alat_ids) {
                 draft.alat_ids.forEach(id => {
                     const cb = document.querySelector(`input[name="alat_ids[]"][value="${id}"]`);
-                    if(cb) cb.checked = true;
+                    if (cb) cb.checked = true;
                 });
             }
 
-            if(draft.barang_ids) {
+            if (draft.barang_ids) {
                 draft.barang_ids.forEach(id => {
                     const cb = document.querySelector(`input[name="barang_ids[]"][value="${id}"]`);
-                    if(cb) {
+                    if (cb) {
                         cb.checked = true;
                         cb.dispatchEvent(new Event('change'));
                     }
                 });
             }
-            if(draft.barang_jumlah) {
+
+            if (draft.barang_jumlah) {
                 setTimeout(() => {
                     Object.keys(draft.barang_jumlah).forEach(id => {
                         const inp = document.querySelector(`input[name="barang_jumlah[${id}]"]`);
-                        if(inp) inp.value = draft.barang_jumlah[id];
+                        if (inp) inp.value = draft.barang_jumlah[id];
                     });
                 }, 100);
             }
 
-            if(draft.params) {
+            if (draft.params) {
                 Object.keys(draft.params).forEach(pid => {
                     const pData = draft.params[pid];
                     const check = document.querySelector(`.param-enable-check[data-pid="${pid}"]`);
                     const table = document.getElementById('table-' + pid);
-                    if(!check || !table) return;
+                    if (!check || !table) return;
 
-                    if(pData.selected) {
+                    if (pData.selected) {
+                        const catId = check.dataset.cat;
+                        if (catId) {
+                            const catCheck = document.querySelector(`.cat-enable-check[data-cat="${catId}"]`);
+                            if (catCheck && !catCheck.checked) {
+                                catCheck.checked = true; 
+                            
+                                const collapseEl = document.getElementById('collapse-cat-' + catId);
+                                if (collapseEl) {
+                                    const bsCollapse = bootstrap.Collapse.getInstance(collapseEl) || new bootstrap.Collapse(collapseEl, { toggle: false });
+                                    bsCollapse.show();
+                                }
+                            }
+                        }
+
                         check.checked = true;
                         check.dispatchEvent(new Event('change'));
 
                         setTimeout(() => {
+                            const modal = document.getElementById('modalResource-' + pid);
+                            
+                            if (pData.analis_data && Array.isArray(pData.analis_data) && modal) {
+                                pData.analis_data.forEach(item => {
+                                    let cb = modal.querySelector(`.chk-personil[value="${item.id}"]`);
+                                    if (cb) { 
+                                        cb.checked = true; 
+                                        let peranInput = cb.closest('tr').querySelector('.in-peran');
+                                        if(peranInput) peranInput.value = item.peran;
+                                    }
+                                });
+                            }
+
+                            if (pData.alat_data && Array.isArray(pData.alat_data) && modal) {
+                                pData.alat_data.forEach(id => {
+                                    let cb = modal.querySelector(`.chk-alat[value="${id}"]`);
+                                    if (cb) cb.checked = true; 
+                                });
+                            }
+
+                            if (modal) updateResourceSummary(pid);
                             const tglInp = document.querySelector(`input[name="params[${pid}][tanggal_uji]"]`);
-                            const analisSel = document.querySelector(`select[name="params[${pid}][analis_id]"]`);
-                            const alatSel = document.querySelector(`select[name="params[${pid}][alat_id]"]`);
                             const metInp = document.querySelector(`input[name="params[${pid}][metode_uji]"]`);
                             const uInp = document.querySelector(`input[name="params[${pid}][uncertainty_lab]"]`);
                             const refNoInp = document.querySelector(`input[name="params[${pid}][ref_no]"]`);
@@ -1353,41 +1670,68 @@ document.addEventListener('DOMContentLoaded', function() {
                             const stdInp = document.querySelector(`input[name="params[${pid}][std_method]"]`) || document.querySelector(`.param-container[data-pid="${pid}"] input[data-meta="std_method"]`);
                             const indInp = document.querySelector(`input[name="params[${pid}][indicate_t]"]`);
 
-                            if(tglInp && pData.tanggal_uji) tglInp.value = pData.tanggal_uji;
-                            if(analisSel && pData.analis_id) analisSel.value = pData.analis_id;
-                            if(alatSel && pData.alat_id) alatSel.value = pData.alat_id;
-                            if(metInp && pData.metode_uji) metInp.value = pData.metode_uji;
-                            if(uInp && pData.uncertainty_lab) uInp.value = pData.uncertainty_lab;
-                            if(refNoInp && pData.ref_no) refNoInp.value = pData.ref_no;
-                            if(blncInp && pData.blnc_id) blncInp.value = pData.blnc_id;
-                            if(timeInp && pData.time) timeInp.value = pData.time;
-                            if(furnaceInp && pData.furnace_id) furnaceInp.value = pData.furnace_id;
-                            if(stdInp && pData.std_method) stdInp.value = pData.std_method;
-                            if(indInp && pData.indicate_t) indInp.value = pData.indicate_t;
+                            if (tglInp && pData.tanggal_uji) tglInp.value = pData.tanggal_uji;
+                            if (metInp && pData.metode_uji) metInp.value = pData.metode_uji;
+                            if (uInp && pData.uncertainty_lab) uInp.value = pData.uncertainty_lab;
+                            if (refNoInp && pData.ref_no) refNoInp.value = pData.ref_no;
+                            if (blncInp && pData.blnc_id) blncInp.value = pData.blnc_id;
+                            if (timeInp && pData.time) timeInp.value = pData.time;
+                            if (furnaceInp && pData.furnace_id) furnaceInp.value = pData.furnace_id;
+                            if (stdInp && pData.std_method) stdInp.value = pData.std_method;
+                            if (indInp && pData.indicate_t) indInp.value = pData.indicate_t;
 
-                            if(pData.inputs) {
+                            if (pData.inputs) {
+                                
+                                let maxIndex = 0;
+                                Object.keys(pData.inputs).forEach(name => {
+                                    let match = name.match(/\[data\]\[(\d+)\]/);
+                                    if (match) {
+                                        let idx = parseInt(match[1]);
+                                        if (idx > maxIndex) maxIndex = idx;
+                                    }
+                                });
+
+                                let btnAdd = table.querySelector('.btn-add-row');
+                                if (btnAdd && maxIndex > 0) {
+                                    for (let i = 0; i < maxIndex; i++) {
+                                        let tempDisabled = btnAdd.disabled;
+                                        btnAdd.disabled = false; // Paksa tombol aktif sebentar
+                                        btnAdd.click();          // Klik otomatis untuk membuat baris
+                                        btnAdd.disabled = tempDisabled; // Kembalikan status tombol
+                                    }
+                                }
+
                                 Object.keys(pData.inputs).forEach(name => {
                                     const inp = table.querySelector(`[name="${name}"]`);
-                                    if(inp) inp.value = pData.inputs[name];
+                                    if (inp) {
+                                        inp.value = pData.inputs[name];
+                                    }
                                 });
-                                table.querySelectorAll('.row-entry').forEach(row => {
-                                    const rowInp = row.querySelector('input');
-                                    if(rowInp) rowInp.dispatchEvent(new Event('input'));
+
+                                table.querySelectorAll('tbody').forEach(tbody => {
+                                    tbody.querySelectorAll('.row-entry').forEach(row => {
+                                        const inp = row.querySelector('input[type="text"]:not([readonly]), input[inputmode="decimal"]');
+                                        if (inp) inp.dispatchEvent(new Event('input', { bubbles: true }));
+                                    });
                                 });
                             }
                         }, 50);
                     }
                 });
             }
-        } catch(e) {
+        } catch (e) {
             console.error('Failed to parse draft', e);
         }
         @endif
     })();
 
+
+    // =====================================================
+    // VALIDASI SUBMIT FORM
+    // =====================================================
     const formQc = document.getElementById('formQc');
-    if(formQc) {
-        formQc.addEventListener('submit', function(e) {
+    if (formQc) {
+        formQc.addEventListener('submit', function (e) {
             if (document.querySelectorAll('.param-enable-check:checked').length === 0) {
                 e.preventDefault();
                 alert('Silakan centang minimal 1 parameter yang ingin diuji.');
@@ -1397,19 +1741,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ========== TAB PROXIMATE LOGIC ==========
+
+    // =====================================================
+    // TAB PROXIMATE
+    // =====================================================
     const tab2SampleId = document.getElementById('proximate-sample-id');
     const tab2Adl = document.getElementById('proximate-adl');
 
-    // Function to calculate all bases in Tab 2
-        function calculateProximateBases() {
+    // Hitung semua basis (AR, ADB, DB, DAF) di Tab Proximate
+    function calculateProximateBases() {
         const adl = parseFloat(tab2Adl?.value) || 0;
 
         let tmAr = parseFloat(document.querySelector('tr[data-param="TM"] .prox-ar')?.textContent) || 0;
         let imAdb = parseFloat(document.querySelector('tr[data-param="IM"] .prox-adb')?.textContent) || 0;
         let ashAdb = parseFloat(document.querySelector('tr[data-param="ASH"] .prox-adb')?.textContent) || 0;
         let ashDb = 0; // Needed for VM, FC, TS, GCV, C/H/N, O DAF calculation
-        let vmDb = 0; // Needed for FC db
+        let vmDb = 0;  // Needed for FC db
 
         // --- 1. ASH CONTENT ---
         const ashRow = document.querySelector('tr[data-param="ASH"]');
@@ -1503,7 +1850,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Listen to ADL input changes
     if (tab2Adl) {
-        // Kita buat fungsi khusus agar bisa dipanggil kapan saja
+
+        // Fungsi khusus agar bisa dipanggil kapan saja
         function syncAdlToTm() {
             const adlVal = tab2Adl.value;
 
@@ -1512,7 +1860,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (inp.value !== adlVal) {
                     inp.value = adlVal;
                 }
-
                 inp.dispatchEvent(new Event('input', { bubbles: true }));
             });
 
@@ -1535,7 +1882,10 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(syncAdlToTm, 800);
     }
 
-    // Function to sync averages from Tab 1 to Tab 2
+
+    // =====================================================
+    // SINKRONISASI TAB 1 -> TAB 2
+    // =====================================================
     function syncTab1ToTab2() {
         const mappings = [
             { code: 'TM', paramRow: 'TM', targetBasis: 'ar' },
@@ -1543,7 +1893,7 @@ document.addEventListener('DOMContentLoaded', function() {
             { code: 'ASH', paramRow: 'ASH', targetBasis: 'adb' },
             { code: 'VM', paramRow: 'VM', targetBasis: 'adb' },
             { code: 'FC', paramRow: 'FC', targetBasis: 'adb' },
-            { code: 'TOTAL SULFUR (%AD/DB)', paramRow: 'TS', targetBasis: 'adb' },
+            { code: 'TS', paramRow: 'TS', targetBasis: 'adb' },
             { code: 'GCV', paramRow: 'GCV', targetBasis: 'adb' },
             { code: 'O', paramRow: 'O', targetBasis: 'adb' }
         ];
@@ -1648,7 +1998,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Sync Methods from Tab 1 to Tab 2
         const methodMap = {
-            'TM': 'TM', 'IM': 'IM', 'ASH': 'ASH', 'VM': 'VM', 'FC': 'FC', 'TS': 'TOTAL SULFUR (%AD/DB)', 'GCV': 'GCV', 'C': 'C', 'H': 'H', 'N': 'N', 'O': 'O'
+            'TM': 'TM', 'IM': 'IM', 'ASH': 'ASH', 'VM': 'VM', 'FC': 'FC',
+            'TS': 'TS', 'GCV': 'GCV',
+            'C': 'C', 'H': 'H', 'N': 'N', 'O': 'O'
         };
 
         Object.keys(methodMap).forEach(proxParam => {
@@ -1709,16 +2061,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         syncAndCalculateNcv(); // Sync NCV if needed
-        
+
         // Run once on load to catch any existing data
         setTimeout(syncTab1ToTab2, 1000);
     }
 
-    // We need to run syncTab1ToTab2 whenever any input in Tab 1 changes
-    // We already have `calculateRow` which updates the DOM. Let's observe the DOM or just attach an event listener to tab-input-data
+    // Jalankan syncTab1ToTab2 setiap ada perubahan input di Tab 1
     const tabInputData = document.getElementById('tab-input-data');
     if (tabInputData) {
-        // Use event listeners for immediate input
+
+        // Event listener untuk input langsung
         tabInputData.addEventListener('input', () => {
             setTimeout(syncTab1ToTab2, 200);
         });
@@ -1726,7 +2078,7 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(syncTab1ToTab2, 200);
         });
 
-        // Use MutationObserver to catch any textContent changes (like out-avg-adb)
+        // MutationObserver untuk menangkap perubahan textContent (misal out-avg-adb)
         const observer = new MutationObserver((mutations) => {
             let shouldSync = false;
             for (const mutation of mutations) {
@@ -1739,6 +2091,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(syncTab1ToTab2, 200);
             }
         });
+
         observer.observe(tabInputData, {
             childList: true,
             subtree: true,
@@ -1746,7 +2099,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ========== AFT KALIBRASI LOGIC ==========
+
+    // =====================================================
+    // AFT KALIBRASI
+    // =====================================================
     const aftBody = document.getElementById('aft-calib-body');
     const btnAftAdd = document.getElementById('aft-add-row');
     const btnAftRemove = document.getElementById('aft-remove-row');
@@ -1756,6 +2112,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const aftSelect = document.getElementById('aft-history-select');
 
     if (aftBody) {
+
         // Add row
         btnAftAdd.addEventListener('click', () => {
             const tr = document.createElement('tr');
@@ -1810,7 +2167,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             for (let i = 0; i < points.length - 1; i++) {
                 let p1 = points[i];
-                let p2 = points[i+1];
+                let p2 = points[i + 1];
 
                 html += `<div class="col-md-3 mb-3">
                             <table class="table table-bordered table-sm text-center">
@@ -1827,12 +2184,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 html += `</tbody></table></div>`;
             }
+
             html += '</div>';
             aftInterpContainer.innerHTML = html;
         }
 
         // Global AFT Lookup function for Tab 1
-        window.getAftCorrection = function(suhu) {
+        window.getAftCorrection = function (suhu) {
             if (!window.aftCalibrationPoints || window.aftCalibrationPoints.length < 2) return 0;
             const points = window.aftCalibrationPoints;
             let temp = parseFloat(suhu);
@@ -1840,7 +2198,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             for (let i = 0; i < points.length - 1; i++) {
                 let p1 = points[i];
-                let p2 = points[i+1];
+                let p2 = points[i + 1];
                 if (temp >= p1.eq && temp <= p2.eq) {
                     let Y = p1.std + ((temp - p1.eq) * (p2.std - p1.std)) / (p2.eq - p1.eq);
                     return Y; // return Std Reading
@@ -1900,7 +2258,7 @@ document.addEventListener('DOMContentLoaded', function() {
             generateAftInterpolation();
         }
 
-        aftSelect.addEventListener('change', function() {
+        aftSelect.addEventListener('change', function () {
             if (!this.value) {
                 aftBody.innerHTML = `<tr class="aft-calib-row">
                     <td><input type="text" class="form-control form-control-sm text-center aft-eq" placeholder="e.g. 1000"></td>
@@ -1954,7 +2312,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(res => res.json())
             .then(res => {
-                if(res.success) {
+                if (res.success) {
                     Swal.fire('Berhasil', 'Kalibrasi AFT baru disimpan & diaktifkan.', 'success');
                     loadAftHistory();
                 } else {
@@ -1971,20 +2329,103 @@ document.addEventListener('DOMContentLoaded', function() {
         loadAftHistory();
     }
 
-    
-    setTimeout(function() {
+    function updateResourceSummary(pid) {
+        const modal = document.getElementById('modalResource-' + pid);
+        if(!modal) return;
+
+        let personils = [];
+        modal.querySelectorAll('.chk-personil:checked').forEach(cb => {
+            let nama = cb.getAttribute('data-nama');
+            let peran = cb.closest('tr').querySelector('.in-peran').value || 'Analis';
+            personils.push(`${nama} (${peran})`);
+        });
+
+        document.getElementById('sum-personil-' + pid).innerHTML = personils.length 
+            ? `<span class="text-dark fw-bold">${personils.join(', ')}</span>` 
+            : '<span class="text-danger fst-italic">Belum dipilih</span>';
+
+        
+        let alats = [];
+        modal.querySelectorAll('.chk-alat:checked').forEach(cb => {
+            alats.push(cb.getAttribute('data-nama'));
+        });
+
+        document.getElementById('sum-alat-' + pid).innerHTML = alats.length 
+            ? `<span class="text-dark fw-bold">${alats.join(', ')}</span>` 
+            : '<span class="text-danger fst-italic">Belum dipilih</span>';
+    }
+
+    document.querySelectorAll('.modal-resource').forEach(modal => {
+        modal.addEventListener('hidden.bs.modal', function () {
+            let pid = this.id.replace('modalResource-', '');
+            updateResourceSummary(pid);
+        });
+    });
+
+    document.querySelectorAll('.btn-copy-resource').forEach(btn => {
+        btn.addEventListener('click', function() {
+            let currentPid = this.getAttribute('data-pid');
+            let activeChecks = Array.from(document.querySelectorAll('.param-enable-check:checked'));
+            let currentIndex = activeChecks.findIndex(cb => cb.dataset.pid === currentPid);
+
+            if (currentIndex <= 0) {
+                Swal.fire('Tidak Bisa Menyalin', 'Ini adalah parameter pertama yang diaktifkan, atau tidak ada parameter aktif di atasnya untuk disalin.', 'info');
+                return;
+            }
+
+            let prevPid = activeChecks[currentIndex - 1].dataset.pid;
+            let prevModal = document.getElementById('modalResource-' + prevPid);
+            let currModal = document.getElementById('modalResource-' + currentPid);
+            
+            if (prevModal && currModal) {
+                currModal.querySelectorAll('.chk-personil').forEach(cb => cb.checked = false);
+                currModal.querySelectorAll('.in-peran').forEach(inp => inp.value = 'Analis');
+                currModal.querySelectorAll('.chk-alat').forEach(cb => cb.checked = false);
+
+                prevModal.querySelectorAll('.chk-personil:checked').forEach(cb => {
+                    let targetCb = currModal.querySelector(`.chk-personil[value="${cb.value}"]`);
+                    if (targetCb) {
+                        targetCb.checked = true;
+                        let prevPeran = cb.closest('tr').querySelector('.in-peran').value;
+                        targetCb.closest('tr').querySelector('.in-peran').value = prevPeran;
+                    }
+                });
+
+                prevModal.querySelectorAll('.chk-alat:checked').forEach(cb => {
+                    let targetCb = currModal.querySelector(`.chk-alat[value="${cb.value}"]`);
+                    if (targetCb) targetCb.checked = true;
+                });
+
+                updateResourceSummary(currentPid);
+            }
+        });
+    });
+
+    document.querySelectorAll('.modal-resource').forEach(modal => {
+        modal.addEventListener('hidden.bs.modal', function () {
+            let pid = this.id.replace('modalResource-', '');
+            updateResourceSummary(pid);
+        });
+    });
+
+    setTimeout(function () {
         document.querySelectorAll('.param-table, .input-table').forEach(table => {
             const pid = table.dataset.pid;
             const check = document.querySelector(`.param-enable-check[data-pid="${pid}"]`);
-            
+
             if (check && check.checked) {
-                const firstInput = table.querySelector('.row-entry input[type="text"]');
+                table.querySelectorAll('.row-entry').forEach(row => {
+                    const inp = row.querySelector('input[type="text"]:not([readonly])');
+                    if (inp) inp.dispatchEvent(new Event('input', { bubbles: true }));
+                });
                 if (firstInput) {
                     firstInput.dispatchEvent(new Event('input', { bubbles: true }));
                 }
             }
         });
     }, 1500);
-});
+
+
+}); // /DOMContentLoaded
 </script>
 @endsection
