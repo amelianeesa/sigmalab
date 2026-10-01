@@ -2,25 +2,110 @@
 @section('title', 'Tambah Baru - QC CRM')
 
 @section('content')
+@include('qc-crm._qc-compact')
+
+@php
+    // Validitas kalibrasi alat dihitung sekali di sini (dipakai untuk notifikasi & daftar alat)
+    $alatValid = [];
+    $alatExpiredCount = 0;
+    foreach ($alatList as $alat) {
+        $kal = $alat->riwayatKalibrasi()->whereNull('deleted_at')->latest('tgl_akhir')->first();
+        $valid = !(!$kal || $kal->tgl_akhir < now());
+        $alatValid[$alat->alat_id] = $valid;
+        if (!$valid) $alatExpiredCount++;
+    }
+
+    $barangHabisCount = 0;
+    foreach ($barangList as $b) {
+        if ((($b->saldo_awal + $b->penerimaan) - $b->pengeluaran) <= 0) $barangHabisCount++;
+    }
+@endphp
+
 <style>
+    .qc-page { padding: 4px 20px !important; }
+
+    /* ===== Tombol (sama dengan alat/index) ===== */
+    .qc-page .btn-corporate-blue {
+        background-color: #1b3152 !important; border-color: #1b3152 !important; color: #fff !important;
+    }
+    .qc-page .btn-corporate-blue:hover, .qc-page .btn-corporate-blue:focus, .qc-page .btn-corporate-blue:active {
+        background-color: #14253e !important; border-color: #14253e !important; color: #fff !important;
+    }
+    .qc-page .btn-outline-corporate { color: #1b3152 !important; border: 1px solid #1b3152 !important; background: #fff !important; }
+    .qc-page .btn-outline-corporate:hover { background-color: #1b3152 !important; color: #fff !important; }
+    .qc-action-btn {
+        width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
+        font-size: 0.75rem; padding: 0 !important; border-radius: 6px;
+    }
+
+    /* ===== Tabel umum ===== */
+    .qc-page .table-qc th, .qc-page .table-qc td {
+        padding: 8px 10px !important; vertical-align: middle !important; font-size: 0.75rem !important;
+    }
+    .qc-page .table-qc thead th {
+        background-color: #1b3152 !important; color: #fff !important; border-color: #fff !important;
+        font-size: 0.75rem !important; white-space: nowrap;
+    }
+
+    /* ===== Tabel input parameter ===== */
     .param-table { min-width: max-content; }
     .param-table th, .param-table td { white-space: nowrap; padding-left: 10px !important; padding-right: 10px !important; }
     .param-table td input.form-control { min-width: 90px; }
+
+    /* ===== Judul section ===== */
+    .qc-section-title { color: #1b3152; font-size: 0.85rem !important; font-weight: 700; border-bottom: 1px solid #dee2e6; padding-bottom: 6px; margin-bottom: 12px; }
+
+    .analis-select { width: 200px; }
+
+    /* ===== Mobile ===== */
+    @media (max-width: 767.98px) {
+        .qc-page { padding: 4px 10px !important; }
+        .analis-select { width: 100%; }
+
+        /* tabel jadi kartu (recent logs & bahan) */
+        .table-stack thead { display: none; }
+        .table-stack, .table-stack tbody, .table-stack tr, .table-stack td { display: block; width: 100%; }
+        .table-stack tbody tr {
+            border: 1px solid #dee2e6; border-radius: 8px; margin: 0 0 10px; padding: 6px 12px;
+            background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
+        }
+        .table-stack tbody tr.table-danger { background: #f8d7da; }
+        .table-stack td {
+            display: flex; justify-content: space-between; align-items: center; gap: 12px;
+            text-align: right; border: 0 !important; padding: 5px 0 !important; background: transparent !important;
+        }
+        .table-stack td[data-label]::before {
+            content: attr(data-label); font-weight: 600; color: #1b3152; text-align: left; flex-shrink: 0; max-width: 45%;
+        }
+        .table-stack td.td-detail { flex-direction: column; align-items: stretch; text-align: left; }
+        .table-stack td.td-aksi { justify-content: flex-end; border-top: 1px solid #eee !important; margin-top: 4px; padding-top: 8px !important; }
+        .table-stack td.td-aksi::before { display: none; }
+        .table-stack td .input-group { max-width: 180px; }
+
+        /* tabel input parameter: kolom pertama menempel saat digeser */
+        .param-table th:first-child, .param-table td:first-child { position: sticky; left: 0; z-index: 2; background: #f8f9fa; }
+
+        /* live preview: 2 kolom */
+        .preview-col.border-start { border-left: 0 !important; }
+    }
 </style>
-<div class="container-fluid px-4 pb-5">
+
+<div class="container-fluid qc-page qc-compact pb-4">
     <x-qc-breadcrumb active="CRM">
         <li class="breadcrumb-item active" aria-current="page">Input Data</li>
     </x-qc-breadcrumb>
-    
-    <h2 class="mb-4 fw-bold text-dark">
-        <i class="fas fa-plus-circle text-purple me-2"></i>Input Data Harian QC CRM
-    </h2>
 
+    <div class="mt-2 mb-3">
+        <h5 class="fw-bold mb-0" style="font-size: 1.1rem;">
+            <i class="fas fa-plus-circle me-2" style="color: #1b3152;"></i>Input Data Harian QC CRM
+        </h5>
+    </div>
 
+    {{-- ERROR VALIDASI --}}
     @if($errors->any())
-    <div class="alert alert-danger shadow-sm border-0">
-        <i class="fas fa-exclamation-triangle me-2"></i> Terdapat kesalahan pada isian form:
-        <ul class="mb-0 mt-1">
+    <div class="alert alert-danger shadow-sm border-0 py-2">
+        <i class="fas fa-exclamation-triangle me-1"></i> Terdapat kesalahan pada isian form:
+        <ul class="mb-0 mt-1 ps-3">
             @foreach($errors->all() as $error)
                 <li>{{ $error }}</li>
             @endforeach
@@ -28,42 +113,55 @@
     </div>
     @endif
 
+    {{-- NOTIFIKASI --}}
+    @if($alatExpiredCount > 0)
+    <div class="alert alert-warning alert-dismissible fade show shadow-sm py-2 ps-3 pe-5 mb-2" role="alert" style="font-size: 0.8rem;">
+        <i class="fas fa-exclamation-triangle me-1"></i> <strong>Perhatian!</strong>
+        Terdapat <strong>{{ $alatExpiredCount }} alat</strong> yang masa kalibrasinya sudah kedaluwarsa (ditandai merah pada daftar alat).
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size: 0.65rem; padding: 0.9rem;"></button>
+    </div>
+    @endif
+    @if($barangHabisCount > 0)
+    <div class="alert alert-info alert-dismissible fade show shadow-sm py-2 ps-3 pe-5 mb-2" role="alert" style="font-size: 0.8rem;">
+        <i class="fas fa-info-circle me-1"></i> Terdapat <strong>{{ $barangHabisCount }} bahan</strong> dengan stok habis sehingga tidak dapat dipilih.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size: 0.65rem; padding: 0.9rem;"></button>
+    </div>
+    @endif
+
+    {{-- DATA TERSIMPAN (save & add) --}}
     @if(isset($recentLogs) && $recentLogs->isNotEmpty())
-    <div class="alert alert-success shadow-sm border-0 border-start border-4 border-success mb-4">
-        <h6 class="fw-bold mb-3 text-success">
+    <div class="alert alert-success shadow-sm border-0 border-start border-4 border-success mb-3">
+        <h6 class="fw-bold mb-2 text-success">
             <i class="fas fa-check-circle me-1"></i> Telah Disimpan ke Lembar Kerja: {{ old('no_lembar_kerja') }}
         </h6>
         <div class="table-responsive">
-            <table class="table table-sm table-bordered bg-white mb-0 text-center align-middle">
-                <thead class="table-light">
+            <table class="table table-sm table-bordered bg-white mb-0 text-center align-middle table-qc table-stack">
+                <thead>
                     <tr>
-                        <th width="15%">Botol CRM</th>
-                        <th width="15%">Parameter Terisi</th>
+                        <th style="width: 15%;">Botol CRM</th>
+                        <th style="width: 15%;">Parameter Terisi</th>
                         <th class="text-start">Detail Inputan & Kalkulasi</th>
-                        <th width="15%">Nilai Akhir</th>
-                        <th width="5%">Aksi</th>
+                        <th style="width: 15%;">Nilai Akhir</th>
+                        <th style="width: 5%;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($recentLogs as $log)
                     <tr>
-                        <td class="fw-bold">{{ $log->crmKatalog->nomor_lot ?? '-' }}</td>
-                        <td>
-                            <span class="badge bg-secondary fs-6">{{ $log->parameterUji->nama_parameter ?? '-' }}</span>
-                        </td>
-                        
-                        <td class="text-start">
+                        <td data-label="Botol CRM" class="fw-bold">{{ $log->crmKatalog->nomor_lot ?? '-' }}</td>
+                        <td data-label="Parameter"><span class="badge bg-secondary">{{ $log->parameterUji->nama_parameter ?? '-' }}</span></td>
+
+                        <td class="text-start td-detail" data-label="Detail">
                             @php
-                                // Decode JSON data mentah dari database
                                 $mentah = is_string($log->data_mentah) ? json_decode($log->data_mentah, true) : $log->data_mentah;
                             @endphp
-                            
+
                             @if($mentah && is_array($mentah))
                                 <div class="d-flex flex-wrap gap-1 mb-2">
                                 @foreach($mentah as $key => $val)
                                     @if($val !== null && $val !== '')
-                                        <span class="badge bg-light text-dark border border-secondary" style="font-size: 0.75rem;">
-                                            <span class="text-muted">{{ strtoupper(str_replace('_', ' ', $key)) }}:</span> 
+                                        <span class="badge bg-light text-dark border border-secondary" style="font-size: 0.7rem;">
+                                            <span class="text-muted">{{ strtoupper(str_replace('_', ' ', $key)) }}:</span>
                                             <strong>{{ $val }}</strong>
                                         </span>
                                     @endif
@@ -73,24 +171,24 @@
 
                             <div class="d-flex flex-wrap gap-1">
                                 @if($log->nilai_d1 !== null)
-                                    <span class="badge bg-warning text-dark border border-warning" style="font-size: 0.75rem;"><span class="text-muted">Hasil 1:</span> {{ $log->nilai_d1 }}</span>
+                                    <span class="badge bg-warning text-dark border border-warning" style="font-size: 0.7rem;"><span class="text-muted">Hasil 1:</span> {{ $log->nilai_d1 }}</span>
                                 @endif
                                 @if($log->nilai_d2 !== null)
-                                    <span class="badge bg-warning text-dark border border-warning" style="font-size: 0.75rem;"><span class="text-muted">Hasil 2:</span> {{ $log->nilai_d2 }}</span>
+                                    <span class="badge bg-warning text-dark border border-warning" style="font-size: 0.7rem;"><span class="text-muted">Hasil 2:</span> {{ $log->nilai_d2 }}</span>
                                 @endif
                                 @if($log->nilai_db_1 !== null)
-                                    <span class="badge bg-info text-dark border border-info" style="font-size: 0.75rem;"><span class="text-muted">DB 1:</span> {{ $log->nilai_db_1 }}</span>
+                                    <span class="badge bg-info text-dark border border-info" style="font-size: 0.7rem;"><span class="text-muted">DB 1:</span> {{ $log->nilai_db_1 }}</span>
                                 @endif
                                 @if($log->nilai_db_2 !== null)
-                                    <span class="badge bg-info text-dark border border-info" style="font-size: 0.75rem;"><span class="text-muted">DB 2:</span> {{ $log->nilai_db_2 }}</span>
+                                    <span class="badge bg-info text-dark border border-info" style="font-size: 0.7rem;"><span class="text-muted">DB 2:</span> {{ $log->nilai_db_2 }}</span>
                                 @endif
                             </div>
                         </td>
 
-                        <td class="fw-bold fs-5 text-primary">{{ $log->nilai_akhir }}</td>
+                        <td data-label="Nilai Akhir" class="fw-bold text-primary">{{ $log->nilai_akhir }}</td>
 
-                        <td class="text-center align-middle">
-                            <a href="{{ route('qc-crm.edit', $log->id) }}" class="btn btn-sm btn-outline-warning border-0" title="Edit / Perbaiki Data">
+                        <td class="text-center td-aksi">
+                            <a href="{{ route('qc-crm.edit', $log->id) }}" class="btn btn-warning btn-sm qc-action-btn shadow-sm" title="Edit / Perbaiki Data" aria-label="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>
                         </td>
@@ -111,56 +209,52 @@
         {{-- ============================================================ --}}
         {{-- SECTION 1: DATA DASAR PENGUJIAN --}}
         {{-- ============================================================ --}}
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-header text-white py-3" style="background-color: #1b3152;">
+        <div class="card shadow-sm border-0 mb-3">
+            <div class="card-header text-white py-2 px-3" style="background-color: #1b3152;">
                 <h5 class="mb-0 fw-bold"><i class="fas fa-clipboard-list me-2"></i>Section 1: Data Dasar Pengujian</h5>
             </div>
-            <div class="card-body p-4">
-                {{-- Info Batch & Tanggal --}}
-                <h6 class="mb-3 border-bottom pb-2 fw-bold" style="color: #1b3152;"><i class="fas fa-info-circle me-2"></i>Informasi Umum</h6>
-                <div class="row mb-4">
-                    <div class="col-md-6">
+            <div class="card-body p-3">
+
+                <h6 class="qc-section-title"><i class="fas fa-info-circle me-2"></i>Informasi Umum</h6>
+                <div class="row g-2 mb-3">
+                    <div class="col-12 col-md-5">
                         <label class="form-label fw-bold">Pilih Botol CRM <span class="text-danger">*</span></label>
-                        <select name="crm_katalog_id" id="crmKatalogSelect" class="form-select form-select-lg" style="border-color: #6f42c1;" required>
+                        <select name="crm_katalog_id" id="crmKatalogSelect" class="form-select form-select-sm" required>
                             <option value="">-- Pilih Botol / Batch CRM --</option>
                             @foreach($activeCrms as $crm)
                                 <option value="{{ $crm->id }}" data-nomor="{{ $crm->nomor_lot }}" data-nama="{{ $crm->nama_produk }}">{{ $crm->nomor_lot }} - {{ $crm->nama_produk }}</option>
                             @endforeach
                         </select>
                     </div>
-                    
-                    <div class="col-md-3">
+
+                    <div class="col-12 col-sm-5 col-md-3">
                         <label class="form-label fw-bold">Tanggal Uji <span class="text-danger">*</span></label>
-                        <input type="date" name="tanggal_uji" class="form-control" value="{{ old('tanggal_uji', $serverDraft->tanggal_uji ?? date('Y-m-d')) }}" required max="{{ date('Y-m-d') }}">
+                        <input type="date" name="tanggal_uji" class="form-control form-control-sm" value="{{ old('tanggal_uji', $serverDraft->tanggal_uji ?? date('Y-m-d')) }}" required max="{{ date('Y-m-d') }}">
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-dark">No. Lembar Kerja <span class="text-danger">*</span></label>
-                        <input type="text" name="no_lembar_kerja" id="no_lembar_kerja" class="form-control bg-light" 
-                            placeholder="Contoh: WK-2026-09-001" 
+                    <div class="col-12 col-sm-7 col-md-4">
+                        <label class="form-label fw-bold">No. Lembar Kerja <span class="text-danger">*</span></label>
+                        <input type="text" name="no_lembar_kerja" id="no_lembar_kerja" class="form-control form-control-sm"
+                            placeholder="Contoh: WK-2026-09-001"
                             value="{{ old('no_lembar_kerja', $serverDraft->no_lembar_kerja ?? '') }}">
-                        <div class="form-text text-muted"><i class="fas fa-info-circle me-1"></i>Digunakan untuk menelusuri sampel batch mana yang dikerjakan bersamaan.</div>
                     </div>
-                    
+                    <div class="col-12">
+                        <div class="form-text text-muted"><i class="fas fa-info-circle me-1"></i>No. Lembar Kerja digunakan untuk menelusuri sampel batch mana yang dikerjakan bersamaan.</div>
+                    </div>
                 </div>
 
-                <h6 class="mb-3 text-primary border-bottom pb-2"><i class="fas fa-tools me-2"></i>Alat Digunakan</h6>
-                <div class="mb-4">
-                    <div class="row">
+                {{-- Alat Digunakan --}}
+                <h6 class="qc-section-title"><i class="fas fa-tools me-2"></i>Alat Digunakan</h6>
+                <div class="mb-3">
+                    <div class="row g-1">
                         @foreach($alatList as $alat)
-                        <div class="col-md-4 mb-2">
-                            @php
-                                $kalibrasiValid = true;
-                                $kalibrasi = $alat->riwayatKalibrasi()->whereNull('deleted_at')->latest('tgl_akhir')->first();
-                                if(!$kalibrasi || $kalibrasi->tgl_akhir < now()) {
-                                    $kalibrasiValid = false;
-                                }
-                            @endphp
+                        @php $kalibrasiValid = $alatValid[$alat->alat_id]; @endphp
+                        <div class="col-12 col-sm-6 col-lg-4">
                             <div class="form-check">
                                 <input class="form-check-input alat-checkbox" type="checkbox" name="alat_ids[]" value="{{ $alat->alat_id }}" id="alat_{{ $alat->alat_id }}" {{ in_array($alat->alat_id, old('alat_ids', [])) ? 'checked' : '' }} data-nama="{{ $alat->nama_alat }}" data-valid="{{ $kalibrasiValid ? 'true' : 'false' }}">
                                 <label class="form-check-label {{ !$kalibrasiValid ? 'text-danger' : '' }}" for="alat_{{ $alat->alat_id }}">
                                     {{ $alat->nama_alat }} ({{ $alat->kode_alat }})
-                                    @if(!$kalibrasiValid) <i class="fas fa-exclamation-triangle ms-1" title="Kedaluwarsa"></i> @endif
+                                    @if(!$kalibrasiValid) <i class="fas fa-exclamation-triangle ms-1" title="Kalibrasi kedaluwarsa"></i> @endif
                                 </label>
                             </div>
                         </div>
@@ -169,46 +263,44 @@
                 </div>
 
                 {{-- Bahan Digunakan --}}
-                <h6 class="mb-3 text-primary border-bottom pb-2"><i class="fas fa-box-open me-2"></i>Bahan Digunakan</h6>
-                <div class="mb-0">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-sm mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th width="5%" class="text-center">Pilih</th>
-                                    <th>Nama Barang (Bahan)</th>
-                                    <th>Sisa Stok (Saldo Akhir)</th>
-                                    <th width="20%">Jumlah Digunakan</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($barangList as $barang)
-                                @php
-                                    $saldoAkhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
-                                    $habis = $saldoAkhir <= 0;
-                                @endphp
-                                <tr class="{{ $habis ? 'table-danger' : '' }}">
-                                    <td class="text-center align-middle">
-                                        <input class="form-check-input" type="checkbox" name="barang_ids[]" value="{{ $barang->barang_id }}" id="barang_{{ $barang->barang_id }}" {{ in_array($barang->barang_id, old('barang_ids', [])) ? 'checked' : '' }} {{ $habis ? 'disabled' : '' }}>
-                                    </td>
-                                    <td class="align-middle">
-                                        <label for="barang_{{ $barang->barang_id }}" class="mb-0 cursor-pointer {{ $habis ? 'text-muted' : '' }}">
-                                            {{ $barang->nama_barang }}
-                                            @if($habis) <span class="badge bg-danger ms-1">Habis</span> @endif
-                                        </label>
-                                    </td>
-                                    <td class="align-middle">{{ number_format($saldoAkhir, 0, ',', '.') }} {{ $barang->satuan }}</td>
-                                    <td>
-                                        <div class="input-group input-group-sm">
-                                            <input type="number" step="0.01" min="0" class="form-control barang-input" name="barang_jumlah[{{ $barang->barang_id }}]" value="{{ old('barang_jumlah.'.$barang->barang_id, '') }}" placeholder="0" {{ $habis ? 'disabled' : '' }} data-nama="{{ $barang->nama_barang }}" data-stok="{{ $saldoAkhir }}">
-                                            <span class="input-group-text">{{ $barang->satuan }}</span>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                <h6 class="qc-section-title"><i class="fas fa-box-open me-2"></i>Bahan Digunakan</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm mb-0 table-qc table-stack">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;" class="text-center">Pilih</th>
+                                <th>Nama Barang (Bahan)</th>
+                                <th>Sisa Stok (Saldo Akhir)</th>
+                                <th style="width: 20%;">Jumlah Digunakan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($barangList as $barang)
+                            @php
+                                $saldoAkhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
+                                $habis = $saldoAkhir <= 0;
+                            @endphp
+                            <tr class="{{ $habis ? 'table-danger' : '' }}">
+                                <td data-label="Pilih" class="text-center align-middle">
+                                    <input class="form-check-input" type="checkbox" name="barang_ids[]" value="{{ $barang->barang_id }}" id="barang_{{ $barang->barang_id }}" {{ in_array($barang->barang_id, old('barang_ids', [])) ? 'checked' : '' }} {{ $habis ? 'disabled' : '' }}>
+                                </td>
+                                <td data-label="Nama Barang" class="align-middle">
+                                    <label for="barang_{{ $barang->barang_id }}" class="mb-0 {{ $habis ? 'text-muted' : '' }}" style="cursor: pointer;">
+                                        {{ $barang->nama_barang }}
+                                        @if($habis) <span class="badge bg-danger ms-1">Habis</span> @endif
+                                    </label>
+                                </td>
+                                <td data-label="Sisa Stok" class="align-middle">{{ number_format($saldoAkhir, 0, ',', '.') }} {{ $barang->satuan }}</td>
+                                <td data-label="Jumlah">
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" step="0.01" min="0" class="form-control barang-input" name="barang_jumlah[{{ $barang->barang_id }}]" value="{{ old('barang_jumlah.'.$barang->barang_id, '') }}" placeholder="0" inputmode="decimal" {{ $habis ? 'disabled' : '' }} data-nama="{{ $barang->nama_barang }}" data-stok="{{ $saldoAkhir }}">
+                                        <span class="input-group-text">{{ $barang->satuan }}</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -216,13 +308,13 @@
         {{-- ============================================================ --}}
         {{-- SECTION 2: INPUT DATA PENGUJIAN --}}
         {{-- ============================================================ --}}
-        <div class="card shadow-sm border-0 mb-4" id="section2" style="display: none;">
-            <div class="card-header text-white py-3" style="background-color: #1b3152;">
+        <div class="card shadow-sm border-0 mb-3" id="section2" style="display: none;">
+            <div class="card-header text-white py-2 px-3" style="background-color: #1b3152;">
                 <h5 class="mb-0 fw-bold"><i class="fas fa-table me-2"></i>Section 2: Input Data Pengujian</h5>
             </div>
             <div class="card-body p-0">
-                <div class="alert alert-info m-3 rounded-0 border-start border-4 border-info">
-                    <i class="fas fa-info-circle me-2"></i> Centang kotak di samping nama parameter untuk mengaktifkan tabel inputnya. Hanya parameter yang dimiliki botol CRM terpilih yang akan tampil di bawah ini.
+                <div class="alert alert-info m-2 border-0 border-start border-4 border-info">
+                    <i class="fas fa-info-circle me-1"></i> Centang kotak di samping nama parameter untuk mengaktifkan tabel inputnya. Hanya parameter yang dimiliki botol CRM terpilih yang tampil di bawah ini.
                 </div>
 
                 <div class="accordion accordion-flush" id="parameterAccordion">
@@ -235,22 +327,22 @@
                         <h2 class="accordion-header" id="heading-{{ $pid }}">
                             <div class="d-flex align-items-center w-100 bg-light border-bottom">
                                 <div class="p-3">
-                                    <input class="form-check-input param-enable-check" type="checkbox" name="params[{{ $pid }}][selected]" value="1" data-pid="{{ $pid }}" style="transform: scale(1.5);">
+                                    <input class="form-check-input param-enable-check" type="checkbox" name="params[{{ $pid }}][selected]" value="1" data-pid="{{ $pid }}">
                                 </div>
-                                <button class="accordion-button collapsed py-3 fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $pid }}" aria-expanded="false" aria-controls="collapse-{{ $pid }}">
+                                <button class="accordion-button collapsed py-2 fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $pid }}" aria-expanded="false" aria-controls="collapse-{{ $pid }}">
                                     {{ $code }} - {{ $param->satuan }}
                                 </button>
                             </div>
                         </h2>
                         <div id="collapse-{{ $pid }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ $pid }}" data-bs-parent="#parameterAccordion">
-                            <div class="accordion-body bg-white p-4">
+                            <div class="accordion-body bg-white">
 
-                                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-                                    <h5 class="fw-bold text-dark mb-0"><i class="fas fa-flask text-primary me-2"></i>Pengujian {{ $code }}</h5>
-                                    
-                                    <div class="d-flex align-items-center">
-                                        <label class="me-2 text-muted small fw-bold">Dikerjakan Oleh:</label>
-                                        <select class="form-select form-select-sm in-analis-id" name="params[{{ $pid }}][analis_id]" style="width: 200px;">
+                                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center border-bottom pb-2 mb-3 gap-2">
+                                    <h6 class="fw-bold text-dark mb-0"><i class="fas fa-flask me-2" style="color: #1b3152;"></i>Pengujian {{ $code }}</h6>
+
+                                    <div class="d-flex align-items-center gap-2">
+                                        <label class="text-muted small fw-bold text-nowrap mb-0">Dikerjakan Oleh:</label>
+                                        <select class="form-select form-select-sm in-analis-id analis-select" name="params[{{ $pid }}][analis_id]">
                                             <option value="">-- Pilih Analis --</option>
                                             @foreach($personilList as $personil)
                                                 <option value="{{ $personil->personil_id }}">{{ $personil->nama }}</option>
@@ -258,6 +350,8 @@
                                         </select>
                                     </div>
                                 </div>
+
+                                <div class="d-md-none small text-muted mb-1"><i class="fas fa-arrows-alt-h me-1"></i>Geser tabel ke samping untuk melihat semua kolom.</div>
                                 <div class="table-responsive pb-2">
                                 <table class="table table-bordered table-sm align-middle text-center param-table {{ in_array($code, ['TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']) ? 'w-auto' : '' }}" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
                                         <thead class="table-light">
@@ -375,7 +469,7 @@
 
                                             <!-- DUPLO -->
                                             <tr class="row-entry">
-                                                <td class="fw-bold text-start border-start-0">
+                                                <td class="fw-bold text-start border-start-0 bg-light">
                                                     <input type="text" class="form-control form-control-sm text-center fw-bold in-dish-2" name="params[{{ $pid }}][mentah][dish_2]" placeholder="D2" value="Duplo">
                                                     <input type="hidden" class="in-d2" name="params[{{ $pid }}][d2]">
                                                     <input type="hidden" class="in-db-2" name="params[{{ $pid }}][db2]">
@@ -432,41 +526,37 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                                                    
-                                                                {{-- KOTAK LIVE PREVIEW TERBARU --}}
+
+                                {{-- LIVE PREVIEW --}}
                                 <div class="card bg-light border-0 mt-3 mb-2 preview-box-{{ $pid }}">
                                     <div class="card-body py-3">
-                                        <h6 class="text-primary fw-bold mb-3"><i class="fas fa-desktop me-2"></i>Live Preview Pengujian</h6>
-                                        <div class="row text-center justify-content-center">
-                                            
-                                            {{-- Kolom True Value (Nilai akan diisi otomatis oleh AJAX) --}}
-                                            <div class="col">
+                                        <h6 class="fw-bold mb-3" style="color: #1b3152;"><i class="fas fa-desktop me-2"></i>Live Preview Pengujian</h6>
+                                        <div class="row g-2 text-center justify-content-center">
+
+                                            <div class="col-12 col-md preview-col">
                                                 <span class="small text-muted d-block">True Value (Sertifikat)</span>
-                                                <strong class="fs-5" style="color: #6f42c1;">
+                                                <strong class="fs-5" style="color: #1b3152;">
                                                     <span class="cert-val-{{ $pid }}">-</span> &plusmn; <span class="cert-u-{{ $pid }}">-</span>
                                                 </strong>
                                             </div>
 
-                                            {{-- Kolom Rata-rata ADB --}}
-                                            <div class="col border-start">
+                                            <div class="col-6 col-md border-start preview-col">
                                                 <span class="small text-muted d-block">Rata-rata (ADB)</span>
                                                 <strong class="fs-5 text-dark out-mean-adb-{{ $pid }}">-</strong>
                                             </div>
 
-                                            {{-- Kolom Rata-rata DB (Dihilangkan khusus untuk IM/Moisture) --}}
                                             @if(!in_array($code, ['IM', 'RM', 'MOISTURE']))
-                                            <div class="col border-start">
+                                            <div class="col-6 col-md border-start preview-col">
                                                 <span class="small text-muted d-block">Rata-rata Basis Kering (DB)</span>
                                                 <strong class="fs-5 text-dark out-mean-db-{{ $pid }}">-</strong>
                                             </div>
                                             @endif
 
-                                            {{-- Kolom Toleransi --}}
-                                            <div class="col border-start">
+                                            <div class="col-12 col-md border-start preview-col">
                                                 <span class="small text-muted d-block">Status Toleransi</span>
                                                 <strong class="fs-5 out-tol-status-{{ $pid }}">-</strong>
                                             </div>
-                                            
+
                                         </div>
                                     </div>
                                 </div>
@@ -478,27 +568,25 @@
             </div>
         </div>
 
-        {{-- TOMBOL SUBMIT (RESPONSIVE) --}}
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3">
-            
-            <a href="{{ route('qc-crm.index') }}" class="btn btn-light border px-4 rounded-pill order-last order-md-first">
+        {{-- TOMBOL AKSI --}}
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2">
+
+            <a href="{{ route('qc-crm.index') }}" class="btn btn-light border order-last order-md-first">
                 Batal
             </a>
-        
-            <div class="d-flex flex-column flex-md-row gap-2 order-first order-md-last">
-                
-                <button type="submit" name="action" value="draft" class="btn btn-warning px-3 rounded-pill shadow-sm" id="btnDraft">
+
+            <div class="d-grid d-md-flex gap-2 order-first order-md-last">
+                <button type="submit" name="action" value="draft" class="btn btn-warning shadow-sm fw-semibold" id="btnDraft">
                     <i class="fas fa-save me-1"></i>Simpan Draft
                 </button>
-                
-                <button type="submit" name="action" value="save_and_add" class="btn btn-outline-danger px-3 rounded-pill shadow-sm">
+
+                <button type="submit" name="action" value="save_and_add" class="btn btn-outline-corporate shadow-sm fw-semibold">
                     <i class="fas fa-plus-circle me-1"></i>Simpan & Tambah Botol Lain
                 </button>
 
-                <button type="submit" name="action" value="final" class="btn btn-danger px-4 rounded-pill shadow-sm" id="btnSubmit">
+                <button type="submit" name="action" value="final" class="btn btn-corporate-blue shadow-sm fw-semibold" id="btnSubmit">
                     <i class="fas fa-check-circle me-1"></i>Simpan & Evaluasi
                 </button>
-                
             </div>
         </div>
     </form>
@@ -507,6 +595,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Select2 untuk dropdown botol (sama seperti alat/index)
+    const $selectCrm = $('#crmKatalogSelect');
+    $selectCrm.select2({ theme: 'bootstrap-5', width: '100%' });
+
+    // Aktifkan tooltip (info rumus)
+    if (window.bootstrap) {
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+    }
+
     // Inject ParameterUji config
     const paramConfigs = {
         @if(isset($allParameters))
@@ -582,38 +679,36 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    const selectCrm = document.getElementById('crmKatalogSelect');
-    if (selectCrm) {
-        selectCrm.addEventListener('change', function() {
-            const val = this.value;
-            window.crmCertificates = {};
+    // Dipasang lewat jQuery supaya ikut terpicu oleh select2
+    $selectCrm.on('change', function() {
+        const val = this.value;
+        window.crmCertificates = {};
 
-            if (!val) {
-                resetSection2();
-                return;
-            }
+        if (!val) {
+            resetSection2();
+            return;
+        }
 
-            fetch('/api/crm-katalog/' + val + '/parameters')
-                .then(r => r.json())
-                .then(data => {
-                    data.forEach(item => {
-                        window.crmCertificates[item.parameter_uji_id] = { val: item.cert_value, u: item.cert_u };
-                    });
-
-                    showParametersForCrm(data);
-
-                    if(window.pendingDraftToLoad) {
-                        window.applyDraft(window.pendingDraftToLoad);
-                        window.pendingDraftToLoad = null;
-                    }
-
-                    document.querySelectorAll('.in-hasil-1').forEach(inp => inp.dispatchEvent(new Event('input')));
-                })
-                .catch(() => {
-                    resetSection2();
+        fetch('/api/crm-katalog/' + val + '/parameters')
+            .then(r => r.json())
+            .then(data => {
+                data.forEach(item => {
+                    window.crmCertificates[item.parameter_uji_id] = { val: item.cert_value, u: item.cert_u };
                 });
-        });
-    }
+
+                showParametersForCrm(data);
+
+                if(window.pendingDraftToLoad) {
+                    window.applyDraft(window.pendingDraftToLoad);
+                    window.pendingDraftToLoad = null;
+                }
+
+                document.querySelectorAll('.in-hasil-1').forEach(inp => inp.dispatchEvent(new Event('input')));
+            })
+            .catch(() => {
+                resetSection2();
+            });
+    });
 
     // Kalkulasi per baris
     function calculateRow(row, pid, isSyncing = false) {
@@ -1062,7 +1157,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-        // --- FUNGSI INI KEMBALI KITA PASANG KARENA SEMPAT IKUT TERHAPUS ---
+    // Terapkan draft (dari server) ke form
     window.applyDraft = function(draft) {
         if(draft.tanggal_uji) {
             const tanggal = document.querySelector('input[name="tanggal_uji"]');
@@ -1077,33 +1172,26 @@ document.addEventListener('DOMContentLoaded', function() {
             const paramDraft = draft.params[pid];
             const check = document.querySelector(`.param-enable-check[data-pid="${pid}"]`);
             const table = document.getElementById('table-' + pid);
-            
+
             if(!check || !table) return;
 
             if(paramDraft.selected) {
-                // Centang otomatis dan munculkan form
+                // Centang otomatis dan aktifkan input
                 check.checked = true;
                 check.dispatchEvent(new Event('change'));
 
-                // Isikan nilai-nilai yang sudah pernah diketik
+                // Isikan nilai yang pernah diketik
                 if(paramDraft.inputs) {
+                    const scopeEl = table.closest('.accordion-body');
                     Object.keys(paramDraft.inputs).forEach(className => {
-                        const inp = table.querySelector('.' + className);
+                        const inp = scopeEl.querySelector('.' + className);
                         if(inp && paramDraft.inputs[className] !== null) {
                             inp.value = paramDraft.inputs[className];
-
-                            Object.keys(paramDraft.inputs).forEach(className => {
-                                const inp = table.closest('.accordion-body').querySelector('.' + className); // <-- Ubah pencarian elemennya sedikit
-                                if(inp && paramDraft.inputs[className] !== null) {
-                                    inp.value = paramDraft.inputs[className];
-                                }
-                            });
                         }
                     });
 
                     // Picu perhitungan otomatis agar angkanya ter-refresh
-                    const rows = table.querySelectorAll('.row-entry');
-                    rows.forEach(row => {
+                    table.querySelectorAll('.row-entry').forEach(row => {
                         calculateRow(row, pid);
                     });
                 }
@@ -1111,17 +1199,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 
-        // LOAD DRAFT DARI SERVER
+    // LOAD DRAFT DARI SERVER
     (function loadDraft() {
         @if(isset($serverDraft) && $serverDraft)
             let draft = {!! json_encode($serverDraft) !!};
             if(draft.crm_katalog_id) {
-                const crm = document.querySelector('select[name="crm_katalog_id"]');
-                if(crm) {
-                    window.pendingDraftToLoad = draft; // Kirim ke fungsi AJAX yang sudah ada
-                    crm.value = draft.crm_katalog_id;
-                    crm.dispatchEvent(new Event('change'));
-                }
+                window.pendingDraftToLoad = draft; // diterapkan setelah data parameter botol dimuat
+                $selectCrm.val(draft.crm_katalog_id).trigger('change');
             }
         @endif
     })();

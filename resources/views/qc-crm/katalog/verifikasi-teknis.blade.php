@@ -2,6 +2,7 @@
 @section('title', 'Verifikasi Teknis - ' . $katalog->nomor_lot)
 
 @section('content')
+@include('qc-crm._qc-compact')
 
 <style>
     .param-table { min-width: max-content; }
@@ -14,7 +15,7 @@
     .historical-outlier input, .historical-outlier select { background-color: #f8d7da !important; color: #842029; border-color: #f5c2c7; pointer-events: none; }
 </style>
 
-<div class="container-fluid px-4 pb-5">
+<div class="container-fluid px-4 pb-5 qc-compact">
     <x-qc-breadcrumb active="CRM">
         <li class="breadcrumb-item"><a href="{{ route('crm-katalog.index') }}" class="text-decoration-none">Master Botol CRM</a></li>
         <li class="breadcrumb-item"><a href="{{ route('crm-katalog.show', $katalog->id) }}" class="text-decoration-none">{{ $katalog->nomor_lot }}</a></li>

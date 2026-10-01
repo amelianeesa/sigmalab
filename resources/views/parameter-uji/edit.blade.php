@@ -2,23 +2,132 @@
 @section('title', 'Edit Data - Parameter Uji')
 
 @section('content')
-<div class="container-fluid px-4">
-    <ol class="breadcrumb mb-1 mt-3">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
+<style>
+    .pu-container { padding-top: 2px; }
+    .pu-breadcrumb { font-size: 0.72rem; }
+    .pu-title { font-size: 1.1rem; }
+
+    .card-header-custom {
+        background-color: #1b3152 !important;
+        color: #ffffff !important;
+        font-weight: 600;
+        font-size: 0.85rem !important;
+    }
+    .btn-corporate-blue {
+        background-color: #1b3152 !important;
+        border-color: #1b3152 !important;
+        color: #ffffff !important;
+    }
+    .btn-corporate-blue:hover,
+    .btn-corporate-blue:focus,
+    .btn-corporate-blue:active {
+        background-color: #14253e !important;
+        border-color: #14253e !important;
+        color: #ffffff !important;
+    }
+
+    .form-label { font-size: 0.75rem !important; font-weight: 600; }
+    .form-control, .form-select,
+    .form-control-sm, .form-select-sm { font-size: 0.8rem !important; }
+    .form-text, small.text-muted { font-size: 0.7rem !important; }
+
+    .nav-tabs { flex-wrap: wrap; }
+    .nav-tabs .nav-link { font-size: 0.8rem; }
+
+    .flatpickr-input { font-size: 0.8rem !important; }
+    .flatpickr-calendar { font-size: 0.85rem; }
+
+    .pu-modal-header { background-color: #1b3152 !important; color: #ffffff !important; padding: 0.5rem 0.9rem; }
+    .pu-modal-header .modal-title { font-size: 0.9rem !important; }
+    .modal .modal-body { font-size: 0.8rem; }
+    .modal .modal-footer { padding: 0.5rem 0.9rem; }
+
+    .filter-select {
+        position: relative;
+        font-size: 0.8rem;
+    }
+    .filter-select-trigger {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        padding: 0.375rem 0.65rem;
+        font-size: 0.8rem;
+        cursor: pointer;
+        text-align: left;
+        color: #212529;
+    }
+    .filter-select-trigger:after {
+        content: "";
+        width: 0; height: 0;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 5px solid #6c757d;
+        margin-left: 6px;
+        flex-shrink: 0;
+    }
+    .filter-select.open .filter-select-trigger {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15);
+    }
+    .filter-select-options {
+        display: none;
+        position: absolute;
+        top: 100%; left: 0; right: 0;
+        z-index: 1055;
+        margin-top: 2px;
+        max-height: 220px;
+        overflow-y: auto;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+        list-style: none;
+        padding: 4px 0;
+    }
+    .filter-select.open .filter-select-options { display: block; }
+    .filter-select-options li { padding: 6px 10px; font-size: 0.8rem; cursor: pointer; }
+    .filter-select-options li:hover { background-color: #f1f3f5; }
+    .filter-select-options li.selected { background-color: #1b3152; color: #fff; }
+
+    .pu-form-actions .btn {
+        font-size: 0.8rem !important;
+        padding: 0.4rem 1rem !important;
+    }
+    .input-group .btn {
+        font-size: 0.8rem !important;
+        padding: 0.4rem 0.9rem !important;
+    }
+
+    .swal2-popup { font-size: 0.9rem !important; }
+    .swal2-title { font-size: 1.1rem !important; }
+    .swal2-html-container { font-size: 0.82rem !important; }
+
+    @media (max-width: 575.98px) {
+        .pu-form-actions { flex-direction: column-reverse; }
+        .pu-form-actions a, .pu-form-actions button { width: 100%; text-align: center; }
+    }
+</style>
+
+<div class="container-fluid px-4 pu-container">
+    <ol class="breadcrumb mb-1 mt-1 pu-breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
         <li class="breadcrumb-item"><a href="{{ route('kegiatan.index') }}" class="text-decoration-none">Verifikasi Mutu</a></li>
         <li class="breadcrumb-item"><a href="{{ route('parameter-uji.index') }}" class="text-decoration-none">Parameter Uji</a></li>
         <li class="breadcrumb-item active">Edit</li>
     </ol>
-    <h1 class="mb-4">Edit Parameter Uji</h1>
+    <h4 class="fw-bold text-dark mb-3 pu-title">Edit Parameter Uji</h4>
 
     <div class="card mb-4 shadow-sm border-0">
-        <div class="card-header bg-white py-3 border-bottom">
-            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-edit me-2"></i>Form Edit Parameter Uji</h6>
-        </div>
+        <div class="card-header card-header-custom"><i class="fas fa-edit me-2"></i>Form Edit Parameter Uji</div>
         <div class="card-body">
             @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul class="mb-0">
+                <div class="alert alert-danger py-2" style="font-size: 0.8rem;">
+                    <ul class="mb-0 ps-3">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
@@ -29,7 +138,7 @@
             <form action="{{ route('parameter-uji.update', $parameterUji->parameter_uji_id) }}" method="POST">
                 @csrf
                 @method('PUT')
-                
+
                 <div class="row mb-3">
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Nama Parameter <span class="text-danger">*</span></label>
@@ -41,9 +150,7 @@
                     </div>
                 </div>
 
-                
-
-                                <ul class="nav nav-tabs mb-4" id="configTabs" role="tablist">
+                <ul class="nav nav-tabs mb-4" id="configTabs" role="tablist">
                     <li class="nav-item">
                         <a class="nav-link active fw-bold" id="inhouse-tab" data-bs-toggle="tab" href="#inhouse" role="tab">In-House Control & Pengaturan Umum</a>
                     </li>
@@ -51,41 +158,41 @@
                         <a class="nav-link fw-bold" id="crm-tab" data-bs-toggle="tab" href="#crm" role="tab">Sertifikat Pabrik (CRM)</a>
                     </li>
                 </ul>
-                <div class="tab-content border-start border-end border-bottom p-4 mb-4" id="configTabsContent" style="margin-top: -25px; background: white;">
+                <div class="tab-content border-start border-end border-bottom p-3 p-md-4 mb-4" id="configTabsContent" style="margin-top: -25px; background: white;">
                     <div class="tab-pane fade show active" id="inhouse" role="tabpanel">
 
                 <div class="card bg-light mb-3 border-0">
                     <div class="card-body py-2">
-                        <p class="mb-2 text-muted fw-bold" style="font-size: 0.85rem;"><i class="fas fa-chart-line"></i> Input Data Statistik (In-House)</p>
-                        <div class="alert alert-info py-1 px-2 mb-2" style="font-size: 0.8rem;">
+                        <p class="mb-2 text-muted fw-bold" style="font-size: 0.8rem;"><i class="fas fa-chart-line"></i> Input Data Statistik (In-House)</p>
+                        <div class="alert alert-info py-1 px-2 mb-2" style="font-size: 0.75rem;">
                             <i class="fas fa-info-circle me-1"></i> Nilai <strong>Mean</strong> dan <strong>SD</strong> didapatkan secara otomatis dari hasil <strong>Uji Homogenitas</strong>. Jika dilakukan uji homogenitas ulang, maka nilai-nilai ini akan ikut berubah secara otomatis.
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-bold text-primary" style="font-size: 0.85rem;">Mean (Rata-rata)</label>
+                                <label class="form-label fw-bold text-primary">Mean (Rata-rata)</label>
                                 <input type="number" step="0.0001" name="mean" id="inputMean" class="form-control" value="{{ old('mean', $parameterUji->mean ? number_format($parameterUji->mean, 4, '.', '') : '') }}">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold text-primary" style="font-size: 0.85rem;">SD (Standard Deviation)</label>
+                                <label class="form-label fw-bold text-primary">SD (Standard Deviation)</label>
                                 <input type="number" step="0.0001" name="sd" id="inputSd" class="form-control" value="{{ old('sd', $parameterUji->sd ? number_format($parameterUji->sd, 4, '.', '') : '') }}">
                             </div>
                         </div>
-                        
-                        <div class="row">
-                            <div class="col">
-                                <label class="form-label text-muted" style="font-size: 0.75rem;">LCL (-3 SD)</label>
+
+                        <div class="row g-2">
+                            <div class="col-6 col-md">
+                                <label class="form-label text-muted">LCL (-3 SD)</label>
                                 <input type="text" id="calcLcl" name="lcl" class="form-control form-control-sm bg-white" readonly value="{{ old('lcl', $parameterUji->lcl ? number_format($parameterUji->lcl, 4, '.', '') : '') }}">
                             </div>
-                            <div class="col">
-                                <label class="form-label text-muted" style="font-size: 0.75rem;">LWL (-2 SD)</label>
+                            <div class="col-6 col-md">
+                                <label class="form-label text-muted">LWL (-2 SD)</label>
                                 <input type="text" id="calcUwlBawah" name="uwl_bawah" class="form-control form-control-sm bg-white" readonly value="{{ old('uwl_bawah', $parameterUji->uwl_bawah ? number_format($parameterUji->uwl_bawah, 4, '.', '') : '') }}">
                             </div>
-                            <div class="col">
-                                <label class="form-label text-muted" style="font-size: 0.75rem;">UWL (+2 SD)</label>
+                            <div class="col-6 col-md">
+                                <label class="form-label text-muted">UWL (+2 SD)</label>
                                 <input type="text" id="calcUwlAtas" name="uwl_atas" class="form-control form-control-sm bg-white" readonly value="{{ old('uwl_atas', $parameterUji->uwl_atas ? number_format($parameterUji->uwl_atas, 4, '.', '') : '') }}">
                             </div>
-                            <div class="col">
-                                <label class="form-label text-muted" style="font-size: 0.75rem;">UCL (+3 SD)</label>
+                            <div class="col-6 col-md">
+                                <label class="form-label text-muted">UCL (+3 SD)</label>
                                 <input type="text" id="calcUcl" name="ucl" class="form-control form-control-sm bg-white" readonly value="{{ old('ucl', $parameterUji->ucl ? number_format($parameterUji->ucl, 4, '.', '') : '') }}">
                             </div>
                         </div>
@@ -107,103 +214,6 @@
                     </div>
                 </div>
 
-                <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if there is a hash in the URL and switch tab
-    if(window.location.hash) {
-        var hash = window.location.hash;
-        // Search for either button or a tag with href or data-bs-target matching the hash
-        var tabTrigger = document.querySelector('[data-bs-target="' + hash + '"]') || document.querySelector('[href="' + hash + '"]');
-        if (tabTrigger) {
-            var tab = new bootstrap.Tab(tabTrigger);
-            tab.show();
-        }
-    }
-});
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.btn-delete-crm').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const id = this.dataset.id;
-            const lot = this.dataset.lot;
-            if (confirm(`Apakah Anda yakin ingin menghapus botol CRM Lot ${lot} ini? Penghapusan ini bersifat permanen dan akan menghapus nilai sertifikatnya di semua parameter.`)) {
-                fetch(`/parameter-uji/crm-katalog/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Botol CRM berhasil dihapus.');
-                        window.location.reload();
-                    } else {
-                        alert('Gagal menghapus: ' + data.message);
-                    }
-                });
-            }
-        });
-    });
-                        const inputMean = document.getElementById('inputMean');
-                        const inputSd = document.getElementById('inputSd');
-                        const calcLcl = document.getElementById('calcLcl');
-                        const calcUwlBawah = document.getElementById('calcUwlBawah');
-                        const calcUwlAtas = document.getElementById('calcUwlAtas');
-                        const calcUcl = document.getElementById('calcUcl');
-                        
-                        const inputAcuan = document.getElementById('inputAcuan');
-                        const inputBatasBawah = document.getElementById('inputBatasBawah');
-                        const inputBatasAtas = document.getElementById('inputBatasAtas');
-                        
-                        
-                        function calculateLimits() {
-                            const mean = parseFloat(inputMean.value) || 0;
-                            const sd = parseFloat(inputSd.value) || 0;
-                            
-                            if (calcLcl) calcLcl.textContent = (mean - 3 * sd).toFixed(4);
-                            if (calcUwlBawah) calcUwlBawah.textContent = (mean - 2 * sd).toFixed(4);
-                            if (calcUwlAtas) calcUwlAtas.textContent = (mean + 2 * sd).toFixed(4);
-                            if (calcUcl) calcUcl.textContent = (mean + 3 * sd).toFixed(4);
-
-                            if (mean !== 0) {
-                                inputAcuan.value = mean.toFixed(4);
-                                inputBatasBawah.value = (mean - 3 * sd).toFixed(4);
-                                inputBatasAtas.value = (mean + 3 * sd).toFixed(4);
-                            }
-                        }
-                        
-                        inputMean.addEventListener('input', calculateLimits);
-                        inputSd.addEventListener('input', calculateLimits);
-
-                        // Langkah Kalkulasi Dynamic Form
-                        const tableBody = document.querySelector('#langkahTable tbody');
-                        const btnAdd = document.getElementById('btnAddLangkah');
-                        let stepCount = {{ is_array(old('langkah_kalkulasi', $parameterUji->langkah_kalkulasi ?? [])) ? count(old('langkah_kalkulasi', $parameterUji->langkah_kalkulasi ?? [])) : 0 }};
-
-                        btnAdd.addEventListener('click', function() {
-                            const tr = document.createElement('tr');
-                            tr.innerHTML = `
-                                <td><input type="text" name="langkah_kalkulasi[${stepCount}][var]" class="form-control form-control-sm" placeholder="Contoh: M2_D1"></td>
-                                <td><input type="text" name="langkah_kalkulasi[${stepCount}][rumus]" class="form-control form-control-sm" placeholder="Contoh: M1_D1 + A_D1"></td>
-                                <td class="text-center"><button type="button" class="btn btn-sm btn-danger btn-remove-langkah"><i class="fas fa-trash"></i></button></td>
-                            `;
-                            tableBody.appendChild(tr);
-                            stepCount++;
-                        });
-
-                        if(tableBody) {
-                            tableBody.addEventListener('click', function(e) {
-                                if (e.target.closest('.btn-remove-langkah')) {
-                                    e.target.closest('tr').remove();
-                                }
-                            });
-                        }
-                    });
-                </script>
-
                 <div class="row mb-4">
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold">Metode / Kriteria</label>
@@ -213,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <label class="form-label fw-bold">Rumus Kalkulasi Nilai Akhir</label>
                         <div class="input-group">
                             <input type="text" name="rumus_kalkulasi" class="form-control" value="{{ old('rumus_kalkulasi', $parameterUji->rumus_kalkulasi) }}" placeholder="Contoh: (M1 - M2) / M3 * 100">
-                            <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#modalLangkahKalkulasi">
+                            <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalLangkahKalkulasi">
                                 <i class="fas fa-list-ol"></i> Detail Rumus
                             </button>
                         </div>
@@ -230,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="modal fade" id="modalLangkahKalkulasi" tabindex="-1" aria-labelledby="modalLangkahKalkulasiLabel" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
-                            <div class="modal-header bg-primary text-white">
+                            <div class="modal-header pu-modal-header">
                                 <h5 class="modal-title" id="modalLangkahKalkulasiLabel"><i class="fas fa-list-ol me-2"></i> Detail Langkah Kalkulasi Per Kolom</h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
@@ -246,9 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @php
-                                                $langkahs = old('langkah_kalkulasi', $parameterUji->langkah_kalkulasi ?? []);
-                                            @endphp
+                                            @php $langkahs = old('langkah_kalkulasi', $parameterUji->langkah_kalkulasi ?? []); @endphp
                                             @if(is_array($langkahs) && count($langkahs) > 0)
                                                 @foreach($langkahs as $index => $langkah)
                                                 <tr>
@@ -264,39 +272,44 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </div>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="row mb-4">
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold">Status Aktif</label>
-                        <select name="status_aktif" class="form-select">
-                            <option value="1" {{ old('status_aktif', $parameterUji->status_aktif) == 1 ? 'selected' : '' }}>Aktif</option>
-                            <option value="0" {{ old('status_aktif', $parameterUji->status_aktif) == 0 ? 'selected' : '' }}>Nonaktif</option>
-                        </select>
+                        @php $statusAktifSelected = old('status_aktif', $parameterUji->status_aktif); @endphp
+                        <div class="filter-select" id="selectStatusAktif">
+                            <input type="hidden" name="status_aktif" value="{{ $statusAktifSelected }}">
+                            <button type="button" class="filter-select-trigger">{{ $statusAktifSelected == 1 ? 'Aktif' : 'Nonaktif' }}</button>
+                            <ul class="filter-select-options">
+                                <li data-value="1" class="{{ $statusAktifSelected == 1 ? 'selected' : '' }}">Aktif</li>
+                                <li data-value="0" class="{{ $statusAktifSelected == 0 ? 'selected' : '' }}">Nonaktif</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
-                                    </div> <!-- end inhouse tab -->
-                    
+                    </div> <!-- end inhouse tab -->
+
                     <div class="tab-pane fade" id="crm" role="tabpanel">
-                        <p class="mb-3 text-muted fw-bold" style="font-size: 0.85rem;"><i class="fas fa-certificate"></i> Pengaturan Nilai Sertifikat per Lot CRM</p>
-                        <div class="alert alert-warning py-1 px-2 mb-3 d-flex justify-content-between align-items-center" style="font-size: 0.8rem;">
+                        <p class="mb-3 text-muted fw-bold" style="font-size: 0.8rem;"><i class="fas fa-certificate"></i> Pengaturan Nilai Sertifikat per Lot CRM</p>
+                        <div class="alert alert-warning py-1 px-2 mb-3" style="font-size: 0.75rem;">
                             <span>Anda dapat mengisi nilai Sertifikat (Cert Value) dan Uncertainty (U) untuk masing-masing kode Lot CRM yang saat ini aktif. Nilai ini akan digunakan untuk mengevaluasi akurasi hasil uji.</span>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="m-0 font-weight-bold text-secondary">Daftar Botol / Lot CRM</h6>
-                            <button type="button" class="btn btn-sm btn-info text-white fw-bold" data-bs-toggle="modal" data-bs-target="#modalAddCrm">
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                            <h6 class="m-0 font-weight-bold text-secondary" style="font-size: 0.85rem;">Daftar Botol / Lot CRM</h6>
+                            <button type="button" class="btn btn-sm btn-corporate-blue shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#modalAddCrm">
                                 <i class="fas fa-plus"></i> Tambah Lot CRM
                             </button>
                         </div>
-                        
+
                         @if(isset($katalogCrmList) && $katalogCrmList->count() > 0)
                             <div class="table-responsive">
-                                <table class="table table-sm table-bordered">
+                                <table class="table table-sm table-bordered" style="font-size: 0.8rem;">
                                     <thead class="table-light">
                                         <tr>
                                             <th>Kode Lot CRM</th>
@@ -308,9 +321,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     </thead>
                                     <tbody>
                                         @foreach($katalogCrmList as $katalog)
-                                            @php
-                                                $sert = $parameterUji->sertifikatCrm->where('crm_katalog_id', $katalog->id)->first();
-                                            @endphp
+                                            @php $sert = $parameterUji->sertifikatCrm->where('crm_katalog_id', $katalog->id)->first(); @endphp
                                             <tr>
                                                 <td class="align-middle fw-bold">{{ $katalog->nomor_lot }}</td>
                                                 <td class="align-middle">{{ $katalog->produsen ? $katalog->produsen . " - " : "" }}{{ $katalog->nama_produk }}</td>
@@ -334,9 +345,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div> <!-- end crm tab -->
                 </div> <!-- end tab content -->
 
-                <div class="d-flex justify-content-end gap-2">
-                    <a href="{{ route('parameter-uji.index') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan Perubahan</button>
+                <div class="d-flex justify-content-end gap-2 pu-form-actions">
+                    <a href="{{ route('parameter-uji.index') }}" class="btn btn-secondary btn-sm px-3 py-2"><i class="fas fa-arrow-left"></i> Kembali</a>
+                    <button type="submit" class="btn btn-corporate-blue btn-sm px-3 py-2"><i class="fas fa-save"></i> Simpan Perubahan</button>
                 </div>
             </form>
         </div>
@@ -346,21 +357,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- Modal Tambah CRM -->
 <div class="modal fade" id="modalAddCrm" tabindex="-1" aria-labelledby="modalAddCrmLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header bg-info text-white">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header pu-modal-header">
         <h5 class="modal-title" id="modalAddCrmLabel"><i class="fas fa-certificate"></i> Tambah Lot CRM Baru</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <form id="formAddCrm">
           <input type="hidden" id="crm_parameter_uji_id" value="{{ $parameterUji->parameter_uji_id }}">
-          
+
           <div class="mb-3">
             <label class="form-label fw-bold">Nomor Lot / Kode Sampel <span class="text-danger">*</span></label>
             <input type="text" class="form-control" id="crm_nomor_lot" required>
           </div>
-          
+
           <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="form-label fw-bold">Produsen / Brand</label>
@@ -368,16 +379,27 @@ document.addEventListener('DOMContentLoaded', function() {
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label fw-bold">Jenis / Tipe Material <span class="text-danger">*</span></label>
-                <select class="form-select" id="crm_nama_produk" required>
-                    <option value="" disabled selected>Pilih Tipe Material...</option>
-                    <option value="lignite coal standard">Lignite Coal Standard</option>
-                    <option value="sub-bituminous coal standard">Sub-Bituminous Coal Standard</option>
-                    <option value="bituminous coal standard">Bituminous Coal Standard</option>
-                    <option value="lainnya">Lainnya...</option>
-                </select>
+                @php
+                    $tipeMaterialLabels = [
+                        '' => 'Pilih Tipe Material...',
+                        'lignite coal standard' => 'Lignite Coal Standard',
+                        'sub-bituminous coal standard' => 'Sub-Bituminous Coal Standard',
+                        'bituminous coal standard' => 'Bituminous Coal Standard',
+                        'lainnya' => 'Lainnya...',
+                    ];
+                @endphp
+                <div class="filter-select" id="selectCrmNamaProduk">
+                    <input type="hidden" id="crm_nama_produk" value="">
+                    <button type="button" class="filter-select-trigger">Pilih Tipe Material...</button>
+                    <ul class="filter-select-options">
+                        @foreach($tipeMaterialLabels as $value => $label)
+                            <li data-value="{{ $value }}">{{ $label }}</li>
+                        @endforeach
+                    </ul>
+                </div>
               </div>
           </div>
-          
+
           <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="form-label fw-bold">Nilai Sertifikat (Cert Value)</label>
@@ -390,41 +412,88 @@ document.addEventListener('DOMContentLoaded', function() {
               </div>
           </div>
 
-          <div class="mb-3">
+          <div class="mb-1">
             <label class="form-label fw-bold">Tanggal Kadaluarsa (Exp)</label>
-            <input type="date" class="form-control" id="crm_tanggal_expired">
+            <input type="text" class="form-control flatpickr-date" id="crm_tanggal_expired" placeholder="dd/mm/yyyy" autocomplete="off">
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="button" class="btn btn-info text-white" id="btnSaveCrm">Simpan CRM</button>
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-corporate-blue btn-sm fw-semibold" id="btnSaveCrm">Simpan CRM</button>
       </div>
     </div>
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    flatpickr('#crm_tanggal_expired', {
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd/m/Y',
+        altInputClass: 'form-control form-control-sm flatpickr-alt',
+        allowInput: true,
+        disableMobile: true
+    });
+
     // Check if there is a hash in the URL and switch tab
     if(window.location.hash) {
         var hash = window.location.hash;
-        // Search for either button or a tag with href or data-bs-target matching the hash
         var tabTrigger = document.querySelector('[data-bs-target="' + hash + '"]') || document.querySelector('[href="' + hash + '"]');
         if (tabTrigger) {
             var tab = new bootstrap.Tab(tabTrigger);
             tab.show();
         }
     }
-});
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
+
+    document.querySelectorAll('.filter-select').forEach(function (wrapper) {
+        const trigger = wrapper.querySelector('.filter-select-trigger');
+        const hiddenInput = wrapper.querySelector('input[type="hidden"]');
+        const options = wrapper.querySelectorAll('.filter-select-options li');
+
+        trigger.addEventListener('click', function (e) {
+            e.stopPropagation();
+            document.querySelectorAll('.filter-select.open').forEach(function (other) {
+                if (other !== wrapper) other.classList.remove('open');
+            });
+            wrapper.classList.toggle('open');
+        });
+
+        options.forEach(function (li) {
+            li.addEventListener('click', function () {
+                hiddenInput.value = li.getAttribute('data-value');
+                trigger.textContent = li.textContent;
+                options.forEach(function (o) { o.classList.remove('selected'); });
+                li.classList.add('selected');
+                wrapper.classList.remove('open');
+            });
+        });
+    });
+    document.addEventListener('click', function () {
+        document.querySelectorAll('.filter-select.open').forEach(function (wrapper) {
+            wrapper.classList.remove('open');
+        });
+    });
+
     document.querySelectorAll('.btn-delete-crm').forEach(btn => {
         btn.addEventListener('click', function() {
             const id = this.dataset.id;
             const lot = this.dataset.lot;
-            if (confirm(`Apakah Anda yakin ingin menghapus botol CRM Lot ${lot} ini? Penghapusan ini bersifat permanen dan akan menghapus nilai sertifikatnya di semua parameter.`)) {
+
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                html: `Hapus botol CRM Lot <strong>${lot}</strong> ini? Penghapusan ini bersifat permanen dan akan menghapus nilai sertifikatnya di semua parameter.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (!result.isConfirmed) return;
+
                 fetch(`/parameter-uji/crm-katalog/${id}`, {
                     method: 'DELETE',
                     headers: {
@@ -435,32 +504,105 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Botol CRM berhasil dihapus.');
-                        window.location.reload();
+                        Swal.fire({
+                            title: 'Berhasil!',
+                            text: 'Botol CRM berhasil dihapus.',
+                            icon: 'success',
+                            confirmButtonColor: '#1b3152'
+                        }).then(() => window.location.reload());
                     } else {
-                        alert('Gagal menghapus: ' + data.message);
+                        Swal.fire({
+                            title: 'Gagal!',
+                            text: data.message || 'Terjadi kesalahan saat menghapus.',
+                            icon: 'error',
+                            confirmButtonColor: '#1b3152'
+                        });
                     }
                 });
-            }
+            });
         });
     });
+
+    const inputMean = document.getElementById('inputMean');
+    const inputSd = document.getElementById('inputSd');
+    const calcLcl = document.getElementById('calcLcl');
+    const calcUwlBawah = document.getElementById('calcUwlBawah');
+    const calcUwlAtas = document.getElementById('calcUwlAtas');
+    const calcUcl = document.getElementById('calcUcl');
+
+    const inputAcuan = document.getElementById('inputAcuan');
+    const inputBatasBawah = document.getElementById('inputBatasBawah');
+    const inputBatasAtas = document.getElementById('inputBatasAtas');
+
+    function calculateLimits() {
+        const mean = parseFloat(inputMean.value) || 0;
+        const sd = parseFloat(inputSd.value) || 0;
+
+        if (calcLcl) calcLcl.value = (mean - 3 * sd).toFixed(4);
+        if (calcUwlBawah) calcUwlBawah.value = (mean - 2 * sd).toFixed(4);
+        if (calcUwlAtas) calcUwlAtas.value = (mean + 2 * sd).toFixed(4);
+        if (calcUcl) calcUcl.value = (mean + 3 * sd).toFixed(4);
+
+        if (mean !== 0) {
+            inputAcuan.value = mean.toFixed(4);
+            inputBatasBawah.value = (mean - 3 * sd).toFixed(4);
+            inputBatasAtas.value = (mean + 3 * sd).toFixed(4);
+        }
+    }
+
+    inputMean.addEventListener('input', calculateLimits);
+    inputSd.addEventListener('input', calculateLimits);
+
+    // Langkah Kalkulasi Dynamic Form
+    const tableBody = document.querySelector('#langkahTable tbody');
+    const btnAdd = document.getElementById('btnAddLangkah');
+    let stepCount = {{ is_array(old('langkah_kalkulasi', $parameterUji->langkah_kalkulasi ?? [])) ? count(old('langkah_kalkulasi', $parameterUji->langkah_kalkulasi ?? [])) : 0 }};
+
+    btnAdd.addEventListener('click', function() {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="text" name="langkah_kalkulasi[${stepCount}][var]" class="form-control form-control-sm" placeholder="Contoh: M2_D1"></td>
+            <td><input type="text" name="langkah_kalkulasi[${stepCount}][rumus]" class="form-control form-control-sm" placeholder="Contoh: M1_D1 + A_D1"></td>
+            <td class="text-center"><button type="button" class="btn btn-sm btn-danger btn-remove-langkah"><i class="fas fa-trash"></i></button></td>
+        `;
+        tableBody.appendChild(tr);
+        stepCount++;
+    });
+
+    if(tableBody) {
+        tableBody.addEventListener('click', function(e) {
+            if (e.target.closest('.btn-remove-langkah')) {
+                e.target.closest('tr').remove();
+            }
+        });
+    }
+
     const btnSaveCrm = document.getElementById('btnSaveCrm');
     if (btnSaveCrm) {
         btnSaveCrm.addEventListener('click', function() {
             const btn = this;
             const originalText = btn.innerHTML;
-            
-            // Validate required fields
+
             const noLot = document.getElementById('crm_nomor_lot').value;
             const namaProd = document.getElementById('crm_nama_produk').value;
             const paramId = document.getElementById('crm_parameter_uji_id').value;
-            
+
             if (!noLot || !namaProd) {
-                alert('Nomor Lot dan Jenis Material wajib diisi!');
+                Swal.fire({
+                    title: 'Data Belum Lengkap',
+                    text: 'Nomor Lot dan Jenis Material wajib diisi!',
+                    icon: 'warning',
+                    confirmButtonColor: '#1b3152'
+                });
                 return;
             }
             if (!paramId) {
-                alert('Parameter Uji ID belum tersedia. Harap simpan Parameter Uji terlebih dahulu sebelum menambah Lot CRM.');
+                Swal.fire({
+                    title: 'Belum Bisa Disimpan',
+                    text: 'Parameter Uji ID belum tersedia. Harap simpan Parameter Uji terlebih dahulu sebelum menambah Lot CRM.',
+                    icon: 'warning',
+                    confirmButtonColor: '#1b3152'
+                });
                 return;
             }
 
@@ -489,16 +631,30 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(res => {
                 if (res.success) {
-                    alert('CRM Baru berhasil ditambahkan beserta nilai sertifikatnya! Halaman akan dimuat ulang.');
-                    window.location.reload();
+                    Swal.fire({
+                        title: 'Berhasil!',
+                        text: 'CRM Baru berhasil ditambahkan beserta nilai sertifikatnya. Halaman akan dimuat ulang.',
+                        icon: 'success',
+                        confirmButtonColor: '#1b3152'
+                    }).then(() => window.location.reload());
                 } else {
-                    alert('Gagal menambahkan CRM: ' + (res.message || 'Cek kembali isian Anda.'));
+                    Swal.fire({
+                        title: 'Gagal!',
+                        text: res.message || 'Cek kembali isian Anda.',
+                        icon: 'error',
+                        confirmButtonColor: '#1b3152'
+                    });
                     btn.innerHTML = originalText;
                     btn.disabled = false;
                 }
             })
             .catch(err => {
-                alert('Terjadi kesalahan sistem.');
+                Swal.fire({
+                    title: 'Gagal!',
+                    text: 'Terjadi kesalahan sistem.',
+                    icon: 'error',
+                    confirmButtonColor: '#1b3152'
+                });
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             });
@@ -506,4 +662,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-@endsection
+@endsection 
