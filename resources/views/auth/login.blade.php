@@ -58,11 +58,12 @@
             }
             .auth-side {
                 padding: 3.5rem 1.5rem; 
-                text-align: left;
+                text-align: center;
+                align-items: center;
             }
             .auth-side p {
                 max-width: 100%;
-                margin: 0;
+                margin: 0 auto;
             }
             .auth-card {
                 margin: 1rem;

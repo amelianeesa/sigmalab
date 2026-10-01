@@ -147,7 +147,6 @@
 
         .auth-footer { margin-top: 0.85rem; color: #7b8a9d; font-size: 0.78rem; text-align: center; }
 
-        /* ===== Responsif Mobile ===== */
         @media (max-width: 767.98px) {
             html,
             body {

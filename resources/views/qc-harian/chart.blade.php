@@ -21,7 +21,6 @@
                 </div>
             </div>
 
-            <!-- Legenda Nilai Acuan -->
             <div class="row g-2 mb-4">
                 @php
                     $m = (float)$paramUji->mean;
@@ -40,7 +39,6 @@
                 <canvas id="controlChart"></canvas>
             </div>
 
-            <!-- TABEL DATA CONTROL CHART -->
             <hr class="my-5">
             <h5 class="fw-bold mb-3"><i class="fas fa-table text-primary me-2"></i>Tabel Data Control Chart</h5>
             <div class="table-responsive">
@@ -102,21 +100,23 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('controlChart').getContext('2d');
-    
-    // Data dari Controller
+
     const logs = @json($logs);
     
     const mean = {{ $m }};
     const sd = {{ $sd }};
-    
-    // Siapkan array data
+
     const labels = [];
     const dataPoints = [];
     const pointColors = [];
     const pointRadii = [];
 
     logs.forEach((log, index) => {
-        labels.push(log.tanggal_uji);
+
+        let d = new Date(log.tanggal_uji);
+        let tgl = ("0" + d.getDate()).slice(-2) + "/" + ("0" + (d.getMonth() + 1)).slice(-2) + "/" + d.getFullYear();
+        labels.push(tgl);
+        
         dataPoints.push(log.nilai_akhir);
         
         if (log.status_evaluasi === 'outlier') {
@@ -131,8 +131,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Buat array konstan untuk garis acuan sepanjang jumlah data
-    // Minimal 10 titik agar garis tetap panjang walau data masih sedikit
     const len = Math.max(10, labels.length);
     if(labels.length < 10) {
         for(let i = labels.length; i < 10; i++) labels.push('...');
@@ -248,6 +246,11 @@ document.addEventListener('DOMContentLoaded', function() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    bottom: 15 // Memberikan ruang tambahan di bawah agar label tidak terpotong
+                }
+            },
             plugins: {
                 tooltip: {
                     callbacks: {
@@ -267,7 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     position: 'bottom',
                     labels: {
                         filter: function(item, chart) {
-                            // Sembunyikan 1SD dari legend biar ga keramaian
+
                             return !item.text.includes('1SD');
                         }
                     }
@@ -275,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             scales: {
                 y: {
-                    // Agar range grafik tidak terlalu nempel dengan garis 3SD
+
                     suggestedMax: mean + (3.5 * sd),
                     suggestedMin: mean - (3.5 * sd)
                 }
