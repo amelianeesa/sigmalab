@@ -2,45 +2,89 @@
 @section('title', 'Control Chart - Parameter Uji')
 
 @section('content')
-<div class="container-fluid px-4">
+<style>
+    .cc-page { font-size: 0.82rem; }
+    .cc-page .breadcrumb { font-size: 0.78rem; }
+
+    .cc-header {
+        background-color: #1b3152 !important; color: #ffffff !important;
+        font-weight: 600; font-size: 0.85rem !important;
+    }
+
+    .cc-chart-wrap { position: relative; width: 100%; height: 400px; }
+
+    .cc-head th {
+        background-color: #1b3152 !important; color: #ffffff !important; border-color: #ffffff !important;
+        font-size: 0.72rem !important; vertical-align: middle !important;
+    }
+    .cc-head th.cc-accent { background-color: #0d6efd !important; }
+    .cc-table td { font-size: 0.75rem !important; vertical-align: middle !important; }
+
+    .cc-chip { border: 1px solid #dee2e6; border-radius: 6px; padding: 4px 8px; text-align: center; background: #fff; }
+    .cc-chip small { display: block; font-size: 0.62rem; color: #6c757d; }
+    .cc-chip strong { font-size: 0.75rem; }
+
+    @media (max-width: 767.98px) {
+        .cc-chart-wrap { height: 320px; }
+        .cc-table th, .cc-table td { padding: 6px 6px !important; }
+    }
+</style>
+
+<div class="container-fluid px-2 px-md-4 cc-page pb-4">
     <ol class="breadcrumb mb-1 mt-3">
         <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
         <li class="breadcrumb-item"><a href="{{ route('kegiatan.index') }}" class="text-decoration-none">Verifikasi Mutu</a></li>
         <li class="breadcrumb-item"><a href="{{ route('parameter-uji.index') }}" class="text-decoration-none">Parameter Uji</a></li>
         <li class="breadcrumb-item active">Control Chart</li>
     </ol>
-    <h1 class="mb-4">Control Chart: {{ $parameterUji->nama_parameter }}</h1>
+    <h5 class="fw-bold mb-3" style="font-size: 1.1rem;">
+        <i class="fas fa-chart-line me-2" style="color: #1b3152;"></i>Control Chart: {{ $parameterUji->nama_parameter }}
+    </h5>
 
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">
-                <i class="fas fa-chart-line me-2"></i> Grafik Control Chart (Westgard Rules)
-            </h6>
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-header cc-header py-2">
+            <i class="fas fa-chart-line me-1"></i> Grafik Control Chart (Westgard Rules)
         </div>
-        <div class="card-body">
-            <canvas id="controlChartCanvas" style="width: 100%; height: 400px;"></canvas>
+        <div class="card-body p-2 p-md-3">
+            <div class="cc-chart-wrap">
+                <canvas id="controlChartCanvas"></canvas>
+            </div>
         </div>
     </div>
 
-    <div class="card mb-4 shadow-sm border-0">
-        <div class="card-header bg-white py-3">
-            <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-table me-2"></i>Tabel Data: Control Chart Inhouse {{ $parameterUji->nama_parameter }} In The Analysis</h6>
+    <div class="card mb-3 shadow-sm border-0">
+        <div class="card-header cc-header py-2">
+            <i class="fas fa-table me-1"></i> Tabel Data: Control Chart Inhouse {{ $parameterUji->nama_parameter }} In The Analysis
         </div>
         <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover table-striped align-middle border mb-0 text-center" style="font-size: 0.85rem;">
-                    <thead class="table-dark">
+
+            {{-- Ringkasan batas kontrol (HP) — di layar besar tampil sebagai kolom tabel --}}
+            <div class="d-md-none px-2 pt-2">
+                <div class="row g-1">
+                    <div class="col-4"><div class="cc-chip"><small>LCL</small><strong class="text-danger">{{ number_format($parameterUji->lcl, 2, ',', '.') }}</strong></div></div>
+                    <div class="col-4"><div class="cc-chip"><small>LWL</small><strong class="text-warning">{{ number_format($parameterUji->uwl_bawah, 2, ',', '.') }}</strong></div></div>
+                    <div class="col-4"><div class="cc-chip"><small>µ-1σ</small><strong class="text-success">{{ number_format($minus1Sd, 2, ',', '.') }}</strong></div></div>
+                    <div class="col-4"><div class="cc-chip"><small>µ</small><strong class="text-primary">{{ number_format($parameterUji->mean, 2, ',', '.') }}</strong></div></div>
+                    <div class="col-4"><div class="cc-chip"><small>µ+1σ</small><strong class="text-success">{{ number_format($plus1Sd, 2, ',', '.') }}</strong></div></div>
+                    <div class="col-4"><div class="cc-chip"><small>UWL</small><strong class="text-warning">{{ number_format($parameterUji->uwl_atas, 2, ',', '.') }}</strong></div></div>
+                    <div class="col-12"><div class="cc-chip"><small>UCL</small><strong class="text-danger">{{ number_format($parameterUji->ucl, 2, ',', '.') }}</strong></div></div>
+                </div>
+            </div>
+
+            <div class="table-responsive mt-2 mt-md-0">
+                <table class="table table-hover table-striped align-middle border mb-0 text-center cc-table">
+                    <thead class="cc-head">
                         <tr>
                             <th>Tanggal</th>
                             <th>Pengujian Ke-</th>
-                            <th>LCL ({{ number_format($parameterUji->lcl, 2, ',', '.') }})</th>
-                            <th>LWL ({{ number_format($parameterUji->uwl_bawah, 2, ',', '.') }})</th>
-                            <th>µ-1σ ({{ number_format($minus1Sd, 2, ',', '.') }})</th>
-                            <th class="bg-primary text-white">µ ({{ number_format($parameterUji->mean, 2, ',', '.') }})</th>
-                            <th>µ+1σ ({{ number_format($plus1Sd, 2, ',', '.') }})</th>
-                            <th>UWL ({{ number_format($parameterUji->uwl_atas, 2, ',', '.') }})</th>
-                            <th>UCL ({{ number_format($parameterUji->ucl, 2, ',', '.') }})</th>
-                            <th class="bg-info text-white">Control</th>
+                            <th class="d-none d-md-table-cell">LCL ({{ number_format($parameterUji->lcl, 2, ',', '.') }})</th>
+                            <th class="d-none d-md-table-cell">LWL ({{ number_format($parameterUji->uwl_bawah, 2, ',', '.') }})</th>
+                            <th class="d-none d-md-table-cell">µ-1σ ({{ number_format($minus1Sd, 2, ',', '.') }})</th>
+                            <th class="d-none d-md-table-cell cc-accent">µ ({{ number_format($parameterUji->mean, 2, ',', '.') }})</th>
+                            <th class="d-none d-md-table-cell">µ+1σ ({{ number_format($plus1Sd, 2, ',', '.') }})</th>
+                            <th class="d-none d-md-table-cell">UWL ({{ number_format($parameterUji->uwl_atas, 2, ',', '.') }})</th>
+                            <th class="d-none d-md-table-cell">UCL ({{ number_format($parameterUji->ucl, 2, ',', '.') }})</th>
+                            <th class="cc-accent">Control</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -48,13 +92,13 @@
                         <tr>
                             <td>{{ $item->created_at->format('d/m/Y') }}</td>
                             <td>{{ $index + 1 }}</td>
-                            <td>{{ number_format($parameterUji->lcl, 2, ',', '.') }}</td>
-                            <td>{{ number_format($parameterUji->uwl_bawah, 2, ',', '.') }}</td>
-                            <td>{{ number_format($minus1Sd, 2, ',', '.') }}</td>
-                            <td class="fw-bold">{{ number_format($parameterUji->mean, 2, ',', '.') }}</td>
-                            <td>{{ number_format($plus1Sd, 2, ',', '.') }}</td>
-                            <td>{{ number_format($parameterUji->uwl_atas, 2, ',', '.') }}</td>
-                            <td>{{ number_format($parameterUji->ucl, 2, ',', '.') }}</td>
+                            <td class="d-none d-md-table-cell">{{ number_format($parameterUji->lcl, 2, ',', '.') }}</td>
+                            <td class="d-none d-md-table-cell">{{ number_format($parameterUji->uwl_bawah, 2, ',', '.') }}</td>
+                            <td class="d-none d-md-table-cell">{{ number_format($minus1Sd, 2, ',', '.') }}</td>
+                            <td class="d-none d-md-table-cell fw-bold">{{ number_format($parameterUji->mean, 2, ',', '.') }}</td>
+                            <td class="d-none d-md-table-cell">{{ number_format($plus1Sd, 2, ',', '.') }}</td>
+                            <td class="d-none d-md-table-cell">{{ number_format($parameterUji->uwl_atas, 2, ',', '.') }}</td>
+                            <td class="d-none d-md-table-cell">{{ number_format($parameterUji->ucl, 2, ',', '.') }}</td>
                             <td class="fw-bold">{{ number_format($item->nilai_hasil, 2, ',', '.') }}</td>
                         </tr>
                         @empty
@@ -165,7 +209,9 @@
                 },
                 plugins: {
                     legend: {
-                        position: 'right',
+                        // Di HP legenda dipindah ke bawah supaya area grafik tidak menyempit
+                        position: window.innerWidth < 768 ? 'bottom' : 'right',
+                        labels: { boxWidth: 12, font: { size: 11 } }
                     },
                     tooltip: {
                         mode: 'index',
