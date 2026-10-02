@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Reset Password - SIGMALAB Sucofindo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         html, body { height: 100%; overflow: hidden; }
 
@@ -113,6 +114,38 @@
             box-shadow: 0 0 0 0.2rem rgba(26, 96, 130, 0.12);
         }
 
+        .password-field {
+            position: relative;
+        }
+
+        .password-field .form-control {
+            padding-right: 2.6rem;
+        }
+
+        .password-toggle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 2.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+            background: transparent;
+            color: #6b7280;
+            font-size: 1.05rem;
+            border-radius: 0 10px 10px 0;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .password-toggle:hover,
+        .password-toggle:focus {
+            color: #0c3a68;
+            outline: none;
+        }
+
         .btn-auth {
             background: #0c3a68;
             border: 1px solid #0c3a68;
@@ -205,6 +238,15 @@
                 padding: 0.5rem 0.85rem;
             }
 
+            .password-field .form-control {
+                padding-right: 2.8rem;
+            }
+
+            .password-toggle {
+                width: 2.8rem;
+                font-size: 1.15rem;
+            }
+
             .btn-auth {
                 font-size: 0.95rem;
                 padding: 0.7rem 0.95rem;
@@ -247,12 +289,22 @@
                         <input type="hidden" name="email" value="{{ $email }}">
 
                         <div class="mb-3">
-                            <label class="form-label">Password Baru</label>
-                            <input type="password" name="password" class="form-control" required minlength="6">
+                            <label class="form-label" for="inputPasswordBaru">Password Baru</label>
+                            <div class="password-field">
+                                <input type="password" id="inputPasswordBaru" name="password" class="form-control" required minlength="6">
+                                <button type="button" class="password-toggle" data-target="inputPasswordBaru" aria-label="Tampilkan password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Konfirmasi Password Baru</label>
-                            <input type="password" name="password_confirmation" class="form-control" required minlength="6">
+                            <label class="form-label" for="inputPasswordKonfirmasi">Konfirmasi Password Baru</label>
+                            <div class="password-field">
+                                <input type="password" id="inputPasswordKonfirmasi" name="password_confirmation" class="form-control" required minlength="6">
+                                <button type="button" class="password-toggle" data-target="inputPasswordKonfirmasi" aria-label="Tampilkan password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-auth w-100">Simpan Password Baru</button>
                     </form>
@@ -265,5 +317,19 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.querySelectorAll('.password-toggle').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var input = document.getElementById(btn.getAttribute('data-target'));
+                var icon = btn.querySelector('i');
+                var tampilkan = input.type === 'password';
+
+                input.type = tampilkan ? 'text' : 'password';
+                icon.className = tampilkan ? 'bi bi-eye-slash' : 'bi bi-eye';
+                btn.setAttribute('aria-label', tampilkan ? 'Sembunyikan password' : 'Tampilkan password');
+            });
+        });
+    </script>
 </body>
 </html>

@@ -239,19 +239,9 @@
                     <div class="mb-2">
                         <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Email</label>
                         <input type="email" name="email" class="form-control form-control-sm py-1" value="{{ old('email') }}" required style="font-size: 0.73rem;">
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Password</label>
-                        <input type="password" name="password" class="form-control form-control-sm py-1" minlength="6" required style="font-size: 0.73rem;">
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Hubungkan ke Personil <span class="text-muted fw-normal">(opsional)</span></label>
-                        <select name="personil_id" class="form-select form-select-sm py-1" style="font-size: 0.73rem;">
-                            <option value="">— Tidak terhubung —</option>
-                            @foreach($personilTanpaAkun as $p)
-                                <option value="{{ $p->personil_id }}" {{ old('personil_id') == $p->personil_id ? 'selected' : '' }}>{{ $p->nama }}</option>
-                            @endforeach
-                        </select>
+                        <div class="form-text text-muted mt-0.5" style="font-size: 0.68rem;">
+                            Password sementara akan otomatis dibuat sistem dan dikirim ke email ini.
+                        </div>
                     </div>
                     <div class="mb-1">
                         <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Hak Akses (Role)</label>
@@ -261,6 +251,9 @@
                                 <option value="{{ $role->roles_id }}" {{ old('role_id') == $role->roles_id ? 'selected' : '' }}>{{ $role->nama_role }}</option>
                             @endforeach
                         </select>
+                        <div class="form-text text-muted mt-0.5" style="font-size: 0.68rem;">
+                            Untuk akun non-personil seperti HR, GA, atau Admin Aplikasi. Akun personil lab (analis, chemist, dll) dibuat lewat menu Data Personil.
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer bg-light py-1.5 px-3">

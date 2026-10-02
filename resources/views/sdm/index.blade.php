@@ -116,29 +116,6 @@
     </style>
 
     <div class="container-fluid px-3 pt-1 pb-2" style="font-size: 0.8rem;">
-        <div class="d-flex flex-wrap gap-2 mb-2 mt-1">
-            @if(
-                Auth::user()->role &&
-                in_array(Auth::user()->role->nama_role, [
-                    \App\Enums\PeranPengguna::HR_OFFICER->value,
-                    \App\Enums\PeranPengguna::ADMIN_APLIKASI->value
-                ])
-            )
-                <a href="{{ route('hak-akses.index') }}" class="btn btn-warning btn-sm rounded-pill px-3 shadow-sm text-dark fw-bold"
-                    style="font-size: 0.75rem; padding: 0.2rem 0.75rem; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'"
-                    onmouseout="this.style.transform='translateY(0)'">
-                    <i class="fas fa-shield-alt me-1"></i> Manajemen Hak Akses
-                </a>
-
-                <a href="{{ route('kelola-user.index') }}" class="btn btn-sm rounded-pill px-3 shadow-sm text-white fw-bold"
-                    style="background-color: #1b3152; font-size: 0.75rem; padding: 0.2rem 0.75rem; transition: transform 0.2s;"
-                    onmouseover="this.style.transform='translateY(-2px)'"
-                    onmouseout="this.style.transform='translateY(0)'">
-                    <i class="fas fa-user-gear me-1"></i> Kelola User
-                </a>
-            @endif
-        </div>
-
         @if($errors->any())
             <div class="alert alert-danger alert-dismissible fade show shadow-sm py-1.5 mb-2 pe-5 position-relative" role="alert" style="font-size: 0.75rem;">
                 <i class="bi bi-exclamation-triangle-fill me-1"></i> Data belum dapat disimpan. Periksa isian berikut.

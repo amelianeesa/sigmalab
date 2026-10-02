@@ -159,7 +159,6 @@
             </div>
         </div>
 
-        {{-- Daftar Parameter Sertifikat --}}
         <div class="col-12 col-lg-8">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-bottom-0 pt-3 pb-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -209,7 +208,6 @@
     </div>
 </div>
 
-{{-- Modal konfirmasi hapus (di luar tabel, gaya sama dengan alat/index) --}}
 <div id="modalHapusParamWrap">
     @foreach($katalog->sertifikats as $s)
     <div class="modal fade" id="modalHapusParam{{ $s->id }}" tabindex="-1" aria-hidden="true">
@@ -239,8 +237,6 @@
     </div>
     @endforeach
 </div>
-
-{{-- Modal Tambah Parameter --}}
 <div class="modal fade" id="addParamModal" tabindex="-1" aria-labelledby="addParamModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <form action="{{ route('crm-katalog.store-sertifikat', $katalog->id) }}" method="POST" class="w-100">
@@ -283,14 +279,11 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Select2 di dalam modal harus diberi dropdownParent supaya bisa diklik & dicari
     $('#selectParameterUji').select2({
         theme: 'bootstrap-5',
         width: '100%',
         dropdownParent: $('#addParamModal')
     });
-
-    // Reset isian saat modal ditutup
     document.getElementById('addParamModal').addEventListener('hidden.bs.modal', function () {
         this.querySelector('form').reset();
         $('#selectParameterUji').val('').trigger('change.select2');
