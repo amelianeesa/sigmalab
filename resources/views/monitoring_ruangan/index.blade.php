@@ -389,7 +389,7 @@
                             <span class="badge bg-primary" style="font-size: 10px;">{{ isset($dokumenList) ? count($dokumenList) : 0 }} File</span>
                         </div>
                         <div class="card-body p-3">
-                            <div class="row g-3 align-items-center">
+                            <div class="row g-3">
                                 @if($canManage)
                                 <div class="col-md-5 border-end pe-md-3">
                                     <form action="{{ route('inventori.monitoring.uploadReferensi') }}" method="POST" enctype="multipart/form-data">
@@ -417,7 +417,7 @@
                                     <label class="form-label fw-bold text-secondary mb-1" style="font-size: 11px;">DAFTAR DOKUMEN TERSEDIA</label>
                                     <div class="table-responsive rounded border" style="max-height: 120px; overflow-y: auto;">
                                         <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.72rem;">
-                                            <thead class="table-light sticky-top">
+                                            <thead class="table-light">
                                                 <tr>
                                                     <th class="ps-2">Nama File</th>
                                                     <th class="text-center" style="width: 120px;">Aksi</th>

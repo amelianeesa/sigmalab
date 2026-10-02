@@ -4,6 +4,10 @@
 @section('content')
 @php
     $showArchived = $showArchived ?? false;
+
+    $allowedRoles = ['Admin Aplikasi', 'Koordinator Laboratorium', 'Analis Lab'];
+    $userRoleName = Auth::user()->role->nama_role ?? '';
+    $canManage = in_array($userRoleName, $allowedRoles);
 @endphp
 <style>
     .dashboard-container {
@@ -180,7 +184,7 @@
             <p class="text-muted small mb-0" style="font-size: 0.72rem;">{{ $showArchived ? 'Dokumen yang disembunyikan dari daftar aktif.' : 'Daftar induk dokumen prosedur, formulir, dan instruksi kerja.' }}</p>
         </div>
 
-        @if(Auth::check() && Auth::user()->hasModulAccess('library_manage', 'tambah_ubah'))
+        @if($canManage)
             <div class="d-flex gap-2">
                 @if($showArchived)
                     <a href="{{ route('library.index') }}" class="btn btn-outline-secondary btn-sm py-1" style="font-size: 0.72rem;"><i class="fas fa-arrow-left me-1"></i> Dokumen Aktif</a>
@@ -287,7 +291,7 @@
                                         <div class="d-inline-flex align-items-center gap-1">
                                             <a href="{{ route('library.show', $document->id) }}" class="btn btn-corporate-blue btn-sm library-action-btn shadow-sm" title="Detail dokumen" aria-label="Detail dokumen"><i class="fas fa-eye"></i></a>
                                             <a href="{{ route('library.download', $document->id) }}" class="btn btn-success btn-sm library-action-btn shadow-sm" title="Unduh" aria-label="Unduh"><i class="fas fa-download"></i></a>
-                                            @if(Auth::user()->hasModulAccess('library_manage', 'tambah_ubah'))
+                                            @if($canManage)
                                                 <a href="{{ route('library.edit', $document->id) }}" class="btn btn-warning btn-sm library-action-btn shadow-sm" title="Edit" aria-label="Edit"><i class="fas fa-edit"></i></a>
                                                 <form id="form-delete-{{ $document->id }}" action="{{ route('library.destroy', $document->id) }}" method="POST" class="d-inline m-0">
                                                     @csrf
