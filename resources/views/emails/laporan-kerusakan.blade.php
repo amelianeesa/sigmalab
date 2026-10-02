@@ -26,7 +26,7 @@
                 </tr>
                 <tr>
                     <td style="padding:10px; border:1px solid #e2e8f0; background:#f8fafc;"><b>Tanggal Lapor</b></td>
-                    <td style="padding:10px; border:1px solid #e2e8f0;">{{ $perbaikan->tanggal_rusak }}</td>
+                    <td style="padding:10px; border:1px solid #e2e8f0;">{{ $perbaikan->tanggal_rusak ? \Carbon\Carbon::parse($perbaikan->tanggal_rusak)->format('d-m-Y') : '-' }}</td>
                 </tr>
                 <tr>
                     <td style="padding:10px; border:1px solid #e2e8f0; background:#f8fafc;"><b>Deskripsi Kerusakan</b></td>

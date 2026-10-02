@@ -109,20 +109,6 @@
 
                 <h6 class="fw-bold mb-2 text-dark" style="font-size: 13px;">Informasi Kalibrasi Terakhir</h6>
                 
-                <div class="alert d-flex align-items-center mb-2 bg-white shadow-sm py-1.5 px-3" style="border-left: 4px solid #1b3152 !important;">
-                    
-                    <div class="w-100">
-                        <h6 class="mb-0 fw-bold small text-dark" style="font-size: 11.5px;">Auto-Fill dari Sertifikat (OCR)</h6>
-                        <p class="mb-1 text-muted" style="font-size: 11px;">Unggah dokumen PDF sertifikat kalibrasi untuk mengisi form secara otomatis.</p>
-                        <div class="input-group input-group-sm w-75">
-                            <input type="file" class="form-control form-control-sm" id="sertifikat_ocr" accept=".pdf">
-                            <button class="btn btn-sm text-white" type="button" id="btn_ocr_scan" style="background-color: #1b3152;"><i class="fas fa-search me-1"></i> Pindai</button>
-                        </div>
-                        <small class="text-danger d-none mt-1" id="ocr_error"></small>
-                        <small class="text-success d-none mt-1" id="ocr_success"></small>
-                    </div>
-                </div>
-                
                 <div class="row g-2 mb-2">
                     <div class="col-md-6">
                         <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">No. Sertifikat Kalibrasi / Perijinan</label>
@@ -387,79 +373,6 @@ $(function () {
     });
 
     updateMinTanggalAkhir();
-
-    // ===== OCR Auto-Fill =====
-    document.getElementById('btn_ocr_scan').addEventListener('click', function() {
-        let fileInput = document.getElementById('sertifikat_ocr');
-        if (!fileInput.files.length) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Perhatian',
-                text: 'Silakan pilih file PDF Sertifikat Kalibrasi terlebih dahulu.',
-            });
-            return;
-        }
-
-        let formData = new FormData();
-        formData.append('sertifikat', fileInput.files[0]);
-        formData.append('_token', '{{ csrf_token() }}');
-
-        let btn = this;
-        let originalHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Memindai...';
-        btn.disabled = true;
-        
-        let errorEl = document.getElementById('ocr_error');
-        let successEl = document.getElementById('ocr_success');
-        errorEl.classList.add('d-none');
-        successEl.classList.add('d-none');
-
-        fetch('{{ route('alat.parse-sertifikat') }}', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            btn.innerHTML = originalHtml;
-            btn.disabled = false;
-            
-            if (data.success) {
-                if (data.data.tgl_kalibrasi) setDateValue(tglKalibrasiInput, data.data.tgl_kalibrasi);
-                if (data.data.tgl_akhir) setDateValue(tglAkhirInput, data.data.tgl_akhir);
-                if (data.data.sertifikat_oleh) {
-                    let lembaga = document.querySelector('input[name="lembaga_kalibrasi"]');
-                    if (lembaga) lembaga.value = data.data.sertifikat_oleh;
-                }
-
-                updateMinTanggalAkhir();
-                
-                successEl.textContent = 'Berhasil membaca dokumen! Form telah diisi.';
-                successEl.classList.remove('d-none');
-                
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Auto-Fill Berhasil',
-                    text: 'Data berhasil diekstrak dari dokumen PDF. Silakan periksa kembali.',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 4000
-                });
-            } else {
-                errorEl.textContent = data.message;
-                errorEl.classList.remove('d-none');
-            }
-        })
-        .catch(err => {
-            btn.innerHTML = originalHtml;
-            btn.disabled = false;
-            errorEl.textContent = 'Terjadi kesalahan sistem saat menghubungi server.';
-            errorEl.classList.remove('d-none');
-        });
-    });
 });
 </script>
 @endpush
