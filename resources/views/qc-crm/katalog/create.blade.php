@@ -189,8 +189,6 @@
         }
 
         addBtn.addEventListener('click', () => addRow());
-
-        // Hapus baris (event delegation)
         paramWrapper.addEventListener('click', function(e) {
             const btn = e.target.closest('.remove-param');
             if (!btn) return;
@@ -204,7 +202,6 @@
             }
         });
 
-        // Notifikasi tanggal expired
         const expInput = document.querySelector('input[name="tanggal_expired"]');
         const expHint = document.getElementById('expiredHint');
 

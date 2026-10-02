@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\AkunLoginMail;
 use App\Models\Personil;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class KelolaUserController extends Controller
 { 
@@ -48,20 +51,30 @@ class KelolaUserController extends Controller
             'personil_id' => 'nullable|exists:personil,personil_id|unique:users,personil_id',
             'username' => 'required|string|max:50|unique:users,username',
             'email' => 'required|email|max:100|unique:users,email',
-            'password' => 'required|string|min:6',
             'role_id' => 'required|exists:roles,roles_id',
         ]);
 
-        User::create([
+        $passwordSementara = Str::password(10, symbols: false);
+
+        $user = User::create([
             'personil_id' => $data['personil_id'] ?? null,
             'username' => $data['username'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'password' => Hash::make($passwordSementara),
             'role_id' => $data['role_id'],
             'status_aktif' => true,
         ]);
 
-        return redirect()->route('kelola-user.index')->with('success', 'Akun berhasil ditambahkan.');
+        $namaPenerima = $user->personil->nama ?? $user->username;
+
+        Mail::to($user->email)->send(new AkunLoginMail(
+            $namaPenerima,
+            $user->username,
+            $user->email,
+            $passwordSementara
+        ));
+
+        return redirect()->route('kelola-user.index')->with('success', 'Akun berhasil ditambahkan. Password sementara telah dikirim ke email pengguna.');
     }
 
     public function update(Request $request, $id)

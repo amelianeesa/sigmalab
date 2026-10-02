@@ -5,11 +5,10 @@
 @include('qc-crm._qc-compact')
 
 @php
-    // Batas "segera kedaluwarsa" (hari) untuk botol CRM — ubah di sini kalau perlu
     $batasHariExpired = 90;
 
-    $expState = [];   // id botol => none|aktif|segera|kedaluwarsa
-    $sisaHari = [];   // id botol => sisa hari
+    $expState = [];   
+    $sisaHari = [];   
     $expiredCount = 0;
     $segeraCount = 0;
     $menungguCount = 0;
@@ -43,14 +42,12 @@
         }
     }
 
-    // Opsi filter status dibuat otomatis dari data yang ada
     $statusOptions = $katalogs->groupBy('status')->map(fn ($g) => $g->first()->statusLabel());
 @endphp
 
 <style>
     .qc-page { padding: 4px 20px !important; font-size: 0.82rem; }
 
-    /* ===== Tombol (sama dengan alat/index) ===== */
     .qc-page .btn-corporate-blue {
         background-color: #1b3152 !important; border-color: #1b3152 !important; color: #fff !important;
     }
@@ -69,7 +66,6 @@
         font-size: 0.75rem; padding: 0 !important; border-radius: 6px;
     }
 
-    /* ===== Notifikasi atas (kedaluwarsa / verifikasi): dibuat lebih ringkas ===== */
     .qc-page > .alert {
         padding-top: 0.35rem !important;
         padding-bottom: 0.35rem !important;
@@ -83,7 +79,6 @@
         padding: 0.5rem !important;
     }
 
-    /* ===== Catatan di tab Riwayat: teks kecil, bukan kotak alert ===== */
     #harian > .alert-info {
         background: transparent !important;
         border: 0 !important;
@@ -107,20 +102,17 @@
     }
     .qc-page .table-qc .badge { font-size: 0.68rem; }
 
-    /* ===== Tab utama ===== */
     .qc-tabs { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; white-space: nowrap; scrollbar-width: none; }
     .qc-tabs::-webkit-scrollbar { display: none; }
     .qc-tabs .nav-link { font-size: 0.82rem; padding: 0.5rem 1rem; color: #495057; }
     .qc-tabs .nav-link.active { color: #1b3152; border-bottom: 2px solid #1b3152; }
 
-    /* ===== Pagination DataTables ===== */
     .dataTables_wrapper .dataTables_info { font-size: 0.72rem; padding: 0 12px; }
     .dataTables_wrapper .dataTables_paginate { float: right; margin: 10px 12px; }
     .dataTables_wrapper .pagination { margin: 0; flex-wrap: wrap; }
     .dataTables_wrapper .page-link { font-size: 0.72rem; padding: 0.2rem 0.55rem; color: #1b3152; }
     .dataTables_wrapper .page-item.active .page-link { background-color: #1b3152; border-color: #1b3152; color: #fff; }
 
-    /* ===== Dropdown "Tampil ... data" (DataTables length) ===== */
     .dataTables_wrapper .dataTables_length {
         padding: 0 !important;
         margin-bottom: 10px;
@@ -141,19 +133,18 @@
         min-width: 72px;
         display: inline-block;
         margin: 0 !important;
-        padding: 0.25rem 2rem 0.25rem 0.6rem !important;  /* ruang kanan untuk panah */
+        padding: 0.25rem 2rem 0.25rem 0.6rem !important;  
         font-size: 0.75rem;
         line-height: 1.4;
         height: auto;
         border-radius: 6px;
-        background-position: right 0.6rem center;          /* panah rapi di kanan */
+        background-position: right 0.6rem center;       
         background-size: 12px 10px;
         -webkit-appearance: none;
         -moz-appearance: none;
         appearance: none;
     }
 
-    /* ===== Chart ===== */
     .chart-wrap { height: 450px; width: 100%; position: relative; }
 
     .pulse-button { animation: pulse 1.5s infinite; }
@@ -164,7 +155,6 @@
     }
     @media (prefers-reduced-motion: reduce) { .pulse-button { animation: none; } }
 
-    /* ===== Mobile: tabel jadi kartu ===== */
     @media (max-width: 767.98px) {
         .qc-page { padding: 4px 10px !important; }
         .qc-tabs .nav-link { padding: 0.45rem 0.75rem; font-size: 0.78rem; }
@@ -189,7 +179,6 @@
         .dataTables_wrapper .dataTables_paginate { float: none; display: flex; justify-content: center; }
         .dataTables_wrapper .dataTables_info { text-align: center; }
 
-        /* Dropdown "Tampil ... data" di HP */
         .dataTables_wrapper .dataTables_length { text-align: left; }
         .dataTables_wrapper .dataTables_length label { width: 100%; }
         .dataTables_wrapper .dataTables_length select { min-width: 80px; }
@@ -199,7 +188,6 @@
 <div class="container-fluid qc-page qc-compact pb-4">
     <x-qc-breadcrumb active="CRM" />
 
-    {{-- HEADER --}}
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-2 mb-3 gap-2">
         <h5 class="fw-bold mb-0" style="font-size: 1.1rem;">
             <i class="fas fa-certificate me-2" style="color: #1b3152;"></i>QC CRM Dashboard
@@ -215,7 +203,6 @@
         </div>
     </div>
 
-    {{-- NOTIFIKASI --}}
     @if($expiredCount > 0 || $segeraCount > 0)
         <div class="alert alert-warning alert-dismissible fade show shadow-sm py-2 ps-3 pe-5 mb-2" role="alert" style="font-size: 0.8rem;">
             <i class="fas fa-exclamation-triangle me-1"></i> <strong>Perhatian!</strong>
@@ -242,7 +229,6 @@
         </div>
     @endif
 
-    {{-- TABS NAV --}}
     <ul class="nav nav-tabs qc-tabs mb-3 mt-3" id="qcCrmTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active fw-bold" id="katalog-tab" data-bs-toggle="tab" data-bs-target="#katalog" type="button" role="tab" aria-controls="katalog" aria-selected="true">
@@ -267,12 +253,10 @@
 
     <div class="tab-content" id="qcCrmTabsContent">
 
-        {{-- ================= TAB 1: MASTER BOTOL & VERIFIKASI ================= --}}
         <div class="tab-pane fade show active" id="katalog" role="tabpanel" aria-labelledby="katalog-tab">
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-2 p-md-3">
 
-                    {{-- FILTER --}}
                     <div class="row g-2 mb-3 align-items-center">
                         <div class="col-12 col-md-5">
                             <div class="input-group input-group-sm">
@@ -417,7 +401,6 @@
                             </div>
                             <div class="modal-body p-0">
 
-                                {{-- Tab per parameter --}}
                                 <div class="bg-light pt-2 px-2 border-bottom">
                                     <ul class="nav nav-tabs qc-tabs border-bottom-0" role="tablist">
                                         <li class="nav-item" role="presentation">
@@ -479,7 +462,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- DATA MENTAH PER PARAMETER --}}
                                     @foreach($r->verifikasiTeknis as $verif)
                                     @php
                                         $code = strtoupper($verif->parameterUji->nama_parameter ?? '');
@@ -510,7 +492,7 @@
                                                 </thead>
                                                 <tbody>
                                                     @forelse($dataMentahList as $index => $mentah)
-                                                    {{-- SIMPLO --}}
+                    
                                                     <tr>
                                                         <td rowspan="2" class="fw-bold bg-light">{{ $index + 1 }}</td>
                                                         <td class="fw-bold text-start ps-3">Simplo</td>
@@ -604,8 +586,6 @@
                 @endif
             @endforeach
         </div>
-
-        {{-- ================= TAB 2: PENGUJIAN HARIAN ================= --}}
         <div class="tab-pane fade" id="harian" role="tabpanel" aria-labelledby="harian-tab">
 
             <div class="alert alert-info border-0 shadow-sm py-2 px-3 mb-2" style="font-size: 0.8rem;">
@@ -614,8 +594,6 @@
 
             <div class="card shadow-sm border-0">
                 <div class="card-body p-2 p-md-3">
-
-                    {{-- FILTER --}}
                     @php
                         $uniqueParams = $kegiatanList->pluck('parameterUji.nama_parameter')->filter()->unique()->sort();
                     @endphp
@@ -691,13 +669,11 @@
             </div>
         </div>
 
-        {{-- ================= TAB 3: CONTROL CHART ================= --}}
         <div class="tab-pane fade" id="chartCrm" role="tabpanel" aria-labelledby="chart-tab">
             <div class="card shadow-sm border-0">
                 <div class="card-body p-2 p-md-3">
                     <h6 class="fw-bold mb-3"><i class="fas fa-chart-area me-2" style="color: #1b3152;"></i>Control Chart CRM</h6>
 
-                    {{-- FILTER --}}
                     <div class="row g-2 mb-3 align-items-end">
                         <div class="col-12 col-md-4">
                             <label class="form-label text-muted fw-semibold mb-1" style="font-size: 0.72rem;">Pilih Botol CRM</label>
@@ -720,14 +696,10 @@
                             </button>
                         </div>
                     </div>
-
-                    {{-- ALERT TREND --}}
                     <div id="alertTrend" class="alert alert-warning border-start border-4 border-warning shadow-sm py-2 d-none" role="alert" style="font-size: 0.8rem;">
                         <i class="fas fa-exclamation-triangle me-1"></i>
                         <strong>Terdeteksi Trend!</strong> <span id="alertTrendMsg"></span>
                     </div>
-
-                    {{-- GRAFIK --}}
                     <div id="chartContainer" style="display: none;">
                         <div class="row g-2 mb-3" id="chartLegendBoxes"></div>
                         <div class="chart-wrap">
@@ -753,7 +725,6 @@
                         </div>
                     </div>
 
-                    {{-- PESAN KOSONG --}}
                     <div id="chartEmpty" class="text-center py-4 text-muted">
                         <i class="fas fa-chart-line fa-3x mb-3 opacity-25"></i>
                         <p class="mb-0">Pilih Botol CRM dan Parameter Uji, lalu klik <strong>Tampilkan Chart</strong>.</p>
@@ -764,8 +735,6 @@
 
     </div>
 </div>
-
-{{-- Library --}}
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 <script>window.jQuery || document.write('<script src="https://code.jquery.com/jquery-3.7.0.min.js"><\/script>');</script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -776,10 +745,8 @@
 <script>
 $(function () {
 
-    // ---------- Select2 (sama seperti alat/index) ----------
     $('.select2-qc').select2({ theme: 'bootstrap-5', width: '100%' });
 
-    // ---------- TAB 1: filter master botol ----------
     function filterKatalog() {
         const q  = $('#katalogSearch').val().toLowerCase().trim();
         const st = $('#filterStatusBotol').val();
@@ -809,8 +776,6 @@ $(function () {
         $('#filterStatusBotol, #filterExpiry').val('').trigger('change.select2');
         filterKatalog();
     });
-
-    // ---------- TAB 2: DataTables riwayat harian ----------
     const tableHarian = $('#tableHarianCRM').DataTable({
         dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'>>" +
              "<'row'<'col-sm-12'tr>>" +
@@ -850,8 +815,6 @@ $(function () {
         $('#filterPeriode').val('');
         tableHarian.draw();
     });
-
-    // ---------- TAB 3: Control Chart ----------
     let crmChart = null;
     if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
 
@@ -924,7 +887,6 @@ $(function () {
         const batasAtas = certVal + certU;
         const batasBawah = certVal - certU;
 
-        // Alert trend
         const alertEl = document.getElementById('alertTrend');
         if (result.trend_warning) {
             alertEl.classList.remove('d-none');

@@ -392,15 +392,51 @@
                 @endif
                 
                 @if(Auth::check() && (Auth::user()->hasModulAccess('sdm') || Auth::user()->hasModulAccess('manajemen_pengguna')))
+                @php
+                    $sdmMenuActive = request()->is('sdm*');
+                    $hakAksesMenuActive = request()->is('hak-akses*');
+                    $kelolaUserMenuActive = request()->is('kelola-user*');
+                    $bisaLihatHakAkses = Auth::user()->hasModulAccess('manajemen_pengguna');
+                    $personilMenuOpen = $sdmMenuActive || $hakAksesMenuActive || $kelolaUserMenuActive;
+                @endphp
+
+                @if($bisaLihatHakAkses)
+                <li class="nav-item">
+                    <a class="nav-link d-flex justify-content-between align-items-center {{ $personilMenuOpen ? 'active text-primary fw-bold' : 'collapsed' }}"
+                       data-bs-toggle="collapse"
+                       href="#menuPersonilKompetensi"
+                       role="button"
+                       aria-expanded="{{ $personilMenuOpen ? 'true' : 'false' }}"
+                       aria-controls="menuPersonilKompetensi">
+                        <span><i class="fas fa-users me-2"></i> Personil & Kompetensi</span>
+                        <i class="fas fa-chevron-down small" style="font-size: 0.7rem;"></i>
+                    </a>
+
+                    <div class="collapse {{ $personilMenuOpen ? 'show' : '' }}" id="menuPersonilKompetensi">
+                        <ul class="nav flex-column ms-3 ps-2 border-start mt-1" style="font-size: 0.9rem;">
+    <li class="nav-item">
+        <a class="nav-link py-1 {{ $sdmMenuActive ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('sdm.index') }}">
+            <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Data Personil
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link py-1 {{ $kelolaUserMenuActive ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('kelola-user.index') }}">
+            <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Kelola User
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link py-1 {{ $hakAksesMenuActive ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('hak-akses.index') }}">
+            <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Manajemen Hak Akses
+        </a>
+    </li>
+</ul>
+                    </div>
+                </li>
+                @else
                 <li class="{{ request()->is('sdm*') || request()->is('hak-akses*') ? 'active' : '' }}">
                     <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personil & Kompetensi</a>
-{{-- =======
-                {{-- 2. Personil & Kompetensi --}}
-                {{-- @if(Auth::check() && Auth::user()->hasModulAccess('sdm'))
-                <li class="{{ request()->is('sdm*') ? 'active' : '' }}">
-                    <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personel & Kompetensi</a>
->>>>>>> b160c1b1b3071010e910ae8463ddb0d6c0423ff8 --}} 
                 </li>
+                @endif
                 @endif
 
                 @if(Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
@@ -464,13 +500,6 @@
                 @if(Auth::check() && Auth::user()->hasModulAccess('audit_log'))
                 <li class="{{ request()->is('audit-log*') ? 'active' : '' }}">
                     <a href="{{ route('audit-log.index') }}"><i class="fas fa-history"></i> Audit Trail</a>
-                </li>
-                @endif
-
-                {{-- 7. Pengaturan Sistem --}}
-                @if(Auth::check() && Auth::user()->hasModulAccess('manajemen_pengguna'))
-                <li class="{{ request()->is('hak-akses*') || request()->is('kelola-user*') ? 'active' : '' }}">
-                    <a href="{{ route('hak-akses.index') }}"><i class="fas fa-user-shield"></i> Pengaturan Akses</a>
                 </li>
                 @endif
             </ul>
