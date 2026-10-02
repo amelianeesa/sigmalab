@@ -175,7 +175,7 @@
                                 <td class="text-center">{{ $komp->tanggal_berakhir?->format('d/m/Y') ?? 'Tidak Terbatas' }}</td>
                                 <td class="text-center">
                                     <span class="badge {{ $komp->status['class'] }} px-1.5 py-1 text-nowrap" style="font-size: 0.65rem;">
-                                        <i class="bi bi-{{ $komp->status['icon'] }} me-0.5"></i>{{ $komp->status['label'] }}
+                                        <i class="bi bi-{{ $komp->status['icon'] }} me-2"></i>{{ $komp->status['label'] }}
                                     </span>
                                 </td>
                                 <td class="text-center">

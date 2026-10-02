@@ -226,7 +226,7 @@
                     <label class="library-filter-label d-block" style="visibility: hidden;">Aksi</label>
                     <div class="d-flex gap-1">
                         @if(!$showArchived)
-                            <button type="button" onclick="exportPdf(document.getElementById('library-filter-form'))" class="btn btn-outline-success btn-sm flex-grow-1 text-nowrap py-1" title="Cetak Rekap Daftar Induk Dokumen sesuai filter saat ini" style="font-size: 0.72rem;">
+                            <button type="button" onclick="exportPdf(document.getElementById('library-filter-form'))" class="btn btn-danger btn-sm flex-grow-1 text-nowrap py-1" title="Cetak Rekap Daftar Induk Dokumen sesuai filter saat ini" style="font-size: 0.72rem;">
                                 <i class="fas fa-file-pdf me-1"></i>Cetak PDF
                             </button>
                         @endif
