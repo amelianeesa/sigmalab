@@ -396,7 +396,11 @@
                     $sdmMenuActive = request()->is('sdm*');
                     $hakAksesMenuActive = request()->is('hak-akses*');
                     $kelolaUserMenuActive = request()->is('kelola-user*');
-                    $bisaLihatHakAkses = Auth::user()->hasModulAccess('manajemen_pengguna');
+
+                    // Submenu (Data Personil, Kelola User, Manajemen Hak Akses) hanya tampil untuk role HR
+                    $isHR = Auth::user()->role && Auth::user()->role->nama_role === 'HR';
+                    $bisaLihatHakAkses = $isHR;
+
                     $personilMenuOpen = $sdmMenuActive || $hakAksesMenuActive || $kelolaUserMenuActive;
                 @endphp
 
@@ -414,26 +418,26 @@
 
                     <div class="collapse {{ $personilMenuOpen ? 'show' : '' }}" id="menuPersonilKompetensi">
                         <ul class="nav flex-column ms-3 ps-2 border-start mt-1" style="font-size: 0.9rem;">
-    <li class="nav-item">
-        <a class="nav-link py-1 {{ $sdmMenuActive ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('sdm.index') }}">
-            <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Data Personil
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link py-1 {{ $kelolaUserMenuActive ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('kelola-user.index') }}">
-            <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Kelola User
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link py-1 {{ $hakAksesMenuActive ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('hak-akses.index') }}">
-            <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Manajemen Hak Akses
-        </a>
-    </li>
-</ul>
+                            <li class="nav-item">
+                                <a class="nav-link py-1 {{ $sdmMenuActive ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('sdm.index') }}">
+                                    <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Data Personil
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link py-1 {{ $kelolaUserMenuActive ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('kelola-user.index') }}">
+                                    <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Kelola User
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link py-1 {{ $hakAksesMenuActive ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('hak-akses.index') }}">
+                                    <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Manajemen Hak Akses
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </li>
                 @else
-                <li class="{{ request()->is('sdm*') || request()->is('hak-akses*') ? 'active' : '' }}">
+                <li class="{{ request()->is('sdm*') ? 'active' : '' }}">
                     <a href="{{ route('sdm.index') }}"><i class="fas fa-users"></i> Personil & Kompetensi</a>
                 </li>
                 @endif
