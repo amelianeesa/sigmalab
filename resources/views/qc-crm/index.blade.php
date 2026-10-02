@@ -5,11 +5,10 @@
 @include('qc-crm._qc-compact')
 
 @php
-    // Batas "segera kedaluwarsa" (hari) untuk botol CRM — ubah di sini kalau perlu
     $batasHariExpired = 90;
 
-    $expState = [];   // id botol => none|aktif|segera|kedaluwarsa
-    $sisaHari = [];   // id botol => sisa hari
+    $expState = [];   
+    $sisaHari = [];   
     $expiredCount = 0;
     $segeraCount = 0;
     $menungguCount = 0;

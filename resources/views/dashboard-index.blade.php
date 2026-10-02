@@ -133,18 +133,57 @@
         font-size: 0.72rem;
     }
 
-    @media (max-width: 420px) {
+    @media (min-width: 992px) {
         .summary-card-body {
-            padding: 8px 10px !important;
-        }
-        .summary-card-value {
-            font-size: 1.15rem;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            column-gap: 12px;
+            align-items: center;
         }
         .summary-card-label {
-            font-size: 0.6rem;
+            grid-column: 1;
+            grid-row: 1;
         }
         .summary-card-link {
-            font-size: 0.66rem;
+            grid-column: 1;
+            grid-row: 2;
+            justify-self: start;
+        }
+        .summary-card-value {
+            grid-column: 2;
+            grid-row: 1 / span 2;
+            font-size: 2rem;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .summary-card-body {
+            padding: 8px 8px !important;
+        }
+        .summary-card-value {
+            font-size: 1.2rem;
+        }
+        .summary-card-label {
+            font-size: 0.56rem;
+            letter-spacing: 0.2px;
+            line-height: 1.2;
+            min-height: 2.4em;
+        }
+        .summary-card-link {
+            font-size: 0.6rem;
+            line-height: 1.2;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .summary-card-label {
+            font-size: 0.5rem;
+        }
+        .summary-card-value {
+            font-size: 1.05rem;
+        }
+        .summary-card-link {
+            font-size: 0.54rem;
         }
     }
 
@@ -180,12 +219,6 @@
     .info-card-clickable:hover {
         transform: translateY(-3px);
         box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.12) !important;
-    }
-    .summary-card-link i {
-        transition: transform 0.15s ease;
-    }
-    .info-card-link:hover .summary-card-link i {
-        transform: translateX(3px);
     }
     .info-card-icon {
         width: 46px;
@@ -245,56 +278,42 @@
     </div>
 
     <div class="row g-2 g-sm-3 mb-3">
-        <div class="col-6 col-lg-3">
-            <a href="{{ route('tindak-lanjut.index') }}" class="info-card-link" aria-label="Lihat detail outlier">
-                <div class="card border-0 shadow-sm border-start border-4 border-suco-biru-tua h-100 info-card-clickable">
-                    <div class="card-body summary-card-body">
-                        <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">OUTLIER (OPEN)</p>
-                        <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $outliers }}</h3>
-                        <span class="text-suco-biru-tua fw-semibold d-inline-block summary-card-link">
-                            Lihat Detail <i class="fas fa-arrow-right ms-1"></i>
-                        </span>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-6 col-lg-3">
+        <div class="col-4">
             <a href="{{ route('kegiatan.index') }}" class="info-card-link" aria-label="Buka modul QC">
                 <div class="card border-0 shadow-sm border-start border-4 border-suco-biru h-100 info-card-clickable">
                     <div class="card-body summary-card-body">
                         <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">PENGUJIAN AKTIF</p>
                         <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $kegiatanBerjalan }}</h3>
                         <span class="text-suco-biru fw-semibold d-inline-block summary-card-link">
-                            Buka Modul QC <i class="fas fa-arrow-right ms-1"></i>
+                            Buka Modul QC
                         </span>
                     </div>
                 </div>
             </a>
         </div>
 
-        <div class="col-6 col-lg-3">
-            <a href="{{ route('alat.index') }}" class="info-card-link" aria-label="Kelola aset peralatan dan kalibrasi">
+        <div class="col-4">
+            <a href="{{ route('alat.index') }}" class="info-card-link" aria-label="Cek alat yang masa kalibrasinya hampir habis">
                 <div class="card border-0 shadow-sm border-start border-4 border-suco-biru-muda h-100 info-card-clickable">
                     <div class="card-body summary-card-body">
-                        <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">PERALATAN & KALIBRASI</p>
+                        <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">KALIBRASI ALAT H-6 BULAN</p>
                         <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $tenggatKalibrasi }}</h3>
                         <span class="text-suco-biru-muda fw-semibold d-inline-block summary-card-link">
-                            Kelola Aset <i class="fas fa-arrow-right ms-1"></i>
+                            Cek Kalibrasi
                         </span>
                     </div>
                 </div>
             </a>
         </div>
 
-        <div class="col-6 col-lg-3">
+        <div class="col-4">
             <a href="{{ route('sdm.index') }}" class="info-card-link" aria-label="Cek sertifikasi personil">
                 <div class="card border-0 shadow-sm border-start border-4 border-suco-hijau h-100 info-card-clickable">
                     <div class="card-body summary-card-body">
                         <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">SERTIFIKASI PERSONIL H-6</p>
                         <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $sertifikasiHampirHabis }}</h3>
                         <span class="text-suco-hijau fw-semibold d-inline-block summary-card-link">
-                            Cek Sertifikasi <i class="fas fa-arrow-right ms-1"></i>
+                            Cek Sertifikasi
                         </span>
                     </div>
                 </div>
