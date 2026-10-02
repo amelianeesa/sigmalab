@@ -21,7 +21,20 @@ class EvaluasiKalibrasiController extends Controller
             $query->where('keputusan', $request->keputusan);
         }
 
-        $evaluasi = $query->latest('evaluasi_id')->paginate(15);
+        if ($request->filled('q')) {
+            $kataKunci = trim($request->q);
+
+            $query->whereHas('alat', function ($alat) use ($kataKunci) {
+                $alat->where('nama_alat', 'like', "%{$kataKunci}%")
+                    ->orWhere('kode_alat', 'like', "%{$kataKunci}%");
+            });
+        }
+
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal_evaluasi', $request->tanggal);
+        }
+
+        $evaluasi = $query->latest('evaluasi_id')->paginate(15)->withQueryString();
 
         return view('evaluasi-kalibrasi.index', compact('evaluasi'));
     }
@@ -117,6 +130,7 @@ class EvaluasiKalibrasiController extends Controller
     {
         $evaluasi = EvaluasiKalibrasi::where('evaluasi_id', $id)->firstOrFail();
         $alatList = Alat::orderBy('nama_alat')->get();
+
         return view('evaluasi-kalibrasi.edit', compact('evaluasi', 'alatList'));
     }
 
@@ -134,7 +148,7 @@ class EvaluasiKalibrasiController extends Controller
 
         DB::transaction(function () use ($request, $evaluasi) {
             $alat = Alat::findOrFail($request->alat_id);
-            
+
             $data = [
                 'alat_id' => $request->alat_id,
                 'tanggal_evaluasi' => $request->tanggal_evaluasi,
@@ -149,7 +163,6 @@ class EvaluasiKalibrasiController extends Controller
                 $data['file_laporan'] = $request->file('file_laporan')->store('laporan_evaluasi', 'public');
             }
 
-            // Update menggunakan query builder / instance model langsung berdasarkan primary key yang pasti
             EvaluasiKalibrasi::where('evaluasi_id', $evaluasi->evaluasi_id)->update($data);
 
             switch ($request->keputusan) {

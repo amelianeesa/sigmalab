@@ -24,8 +24,8 @@
         border-color: #1b3152 !important;
         color: #ffffff !important;
     }
-    .btn-corporate-blue:hover, 
-    .btn-corporate-blue:focus, 
+    .btn-corporate-blue:hover,
+    .btn-corporate-blue:focus,
     .btn-corporate-blue:active {
         background-color: #14253e !important;
         border-color: #14253e !important;
@@ -44,14 +44,27 @@
         border-color: #1b3152 !important;
     }
 
+    .filter-bar .form-control,
+    .filter-bar .form-label {
+        font-size: 0.76rem;
+    }
+    .filter-bar .form-label {
+        margin-bottom: 2px;
+        font-weight: 600;
+        color: #1b3152;
+    }
+    .filter-bar .form-control:focus {
+        border-color: #1b3152;
+        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+    }
+
     .table-responsive {
         overflow-x: auto;
     }
-    
-    /* Sticky Kolom Alat */
+
     .sticky-alat {
         position: sticky !important;
-        left: 0 !important; 
+        left: 0 !important;
         width: 130px !important;
         min-width: 130px !important;
         z-index: 3;
@@ -79,6 +92,7 @@
         $allowedRoles = ['Koordinator Laboratorium', 'Analis Lab', 'Admin Aplikasi'];
         $userRoleName = Auth::user()->role->nama_role ?? '';
         $canInputEvaluasi = in_array($userRoleName, $allowedRoles);
+        $adaFilter = request()->filled('q') || request()->filled('tanggal');
     @endphp
 
     <div class="mb-2">
@@ -92,6 +106,34 @@
             </a>
         @endif
     </div>
+
+    <form method="GET" action="{{ route('evaluasi-kalibrasi.index') }}" class="filter-bar card border-0 shadow-sm p-2 mb-2">
+        <div class="row g-2 align-items-end">
+            <div class="col-12 col-md-6">
+                <label for="q" class="form-label">Cari Alat</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
+                    <input type="text" id="q" name="q" value="{{ request('q') }}" class="form-control" placeholder="Nama atau kode alat...">
+                </div>
+            </div>
+
+            <div class="col-12 col-md-3">
+                <label for="tanggal" class="form-label">Tanggal Evaluasi</label>
+                <input type="date" id="tanggal" name="tanggal" value="{{ request('tanggal') }}" class="form-control form-control-sm">
+            </div>
+
+            <div class="col-12 col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-corporate-blue btn-sm flex-fill fw-semibold" style="font-size: 0.73rem;">
+                    <i class="fas fa-filter me-1"></i> Terapkan
+                </button>
+                @if($adaFilter)
+                    <a href="{{ route('evaluasi-kalibrasi.index') }}" class="btn btn-outline-secondary btn-sm flex-fill fw-semibold" style="font-size: 0.73rem;">
+                        <i class="fas fa-undo me-1"></i> Reset
+                    </a>
+                @endif
+            </div>
+        </div>
+    </form>
 
     <div class="table-responsive">
         <table class="table table-bordered table-striped align-middle text-center bg-white shadow-sm rounded-3">
@@ -116,7 +158,7 @@
                     <td class="sticky-alat text-start fw-bold bg-white text-truncate" style="max-width: 130px;">
                         <a href="{{ route('evaluasi-kalibrasi.show', $item->evaluasi_id) }}" class="text-decoration-none text-primary">
                             {{ $item->alat->nama_alat ?? '-' }}
-                        </a> 
+                        </a>
                         <code class="text-dark fw-normal d-block" style="font-size: 0.68rem;">({{ $item->alat->kode_alat ?? '-' }})</code>
                     </td>
 
@@ -125,19 +167,18 @@
                     <td>
                         @php
                             $keputusanLower = strtolower($item->keputusan);
-                            $badge = 'secondary'; 
-                            $textColor = '';
-                            
-                            if (str_contains($keputusanLower, 'faktor') || str_contains($keputusanLower, 'penambahan') || (str_contains($keputusanLower, 'layak') && str_contains($keputusanLower, 'koreksi'))) {
-                                $badge = 'warning text-dark'; 
-                            } elseif (str_contains($keputusanLower, 'layak') && !str_contains($keputusanLower, 'tidak')) {
-                                $badge = 'success'; 
-                            } elseif (str_contains($keputusanLower, 'tidak')) {
-                                $badge = 'danger'; 
+                            $badge = 'secondary';
+
+                            if (str_contains($keputusanLower, 'tidak')) {
+                                $badge = 'danger';
+                            } elseif (str_contains($keputusanLower, 'faktor') || str_contains($keputusanLower, 'koreksi') || str_contains($keputusanLower, 'penambahan')) {
+                                $badge = 'warning text-dark';
+                            } elseif (str_contains($keputusanLower, 'layak')) {
+                                $badge = 'success';
                             }
                         @endphp
                         <span class="badge bg-{{ $badge }}" style="font-size: 0.55rem; padding: 0.3em 0.4em; white-space: normal; display: inline-block; max-width: 100px; word-break: break-word; line-height: 1.2;">
-                            {{ strtoupper($item->keputusan) }}
+                            {{ strtoupper(str_replace('_', ' ', $item->keputusan)) }}
                         </span>
                     </td>
 
@@ -160,12 +201,16 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="7" class="text-center text-muted py-3">Belum ada data evaluasi.</td></tr>
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-3">
+                        {{ $adaFilter ? 'Data evaluasi tidak ditemukan untuk filter yang dipilih.' : 'Belum ada data evaluasi.' }}
+                    </td>
+                </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-    
+
     <div class="mt-2">
         {{ $evaluasi->links() }}
     </div>

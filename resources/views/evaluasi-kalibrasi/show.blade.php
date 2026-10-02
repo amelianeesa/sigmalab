@@ -22,8 +22,8 @@
         border-color: #1b3152 !important;
         color: #ffffff !important;
     }
-    .btn-corporate-blue:hover, 
-    .btn-corporate-blue:focus, 
+    .btn-corporate-blue:hover,
+    .btn-corporate-blue:focus,
     .btn-corporate-blue:active {
         background-color: #14253e !important;
         border-color: #14253e !important;
@@ -34,9 +34,8 @@
 
 @section('content')
 <div class="container-fluid pt-0 pb-3 px-4" style="max-width: 950px;">
-    
+
     @php
-        // Daftar role yang diizinkan untuk mengedit dan menghapus data evaluasi
         $allowedRoles = ['Admin Aplikasi', 'Analis Lab', 'Koordinator Laboratorium'];
         $userRoleName = Auth::user()->role->nama_role ?? '';
         $canModify = in_array($userRoleName, $allowedRoles);
@@ -53,7 +52,7 @@
                 <a href="{{ route('evaluasi-kalibrasi.edit', $evaluasi->evaluasi_id) }}" class="btn btn-sm text-nowrap py-1 px-2 shadow-sm d-flex align-items-center text-white" style="background-color: #1b3152 !important; border-color: #1b3152 !important; font-size: 11px; gap: 5px;">
                     <i class="fas fa-edit text-white"></i> <span class="text-white">Edit</span>
                 </a>
-                
+
                 <button type="button" class="btn btn-danger btn-sm fw-bold py-1 px-2 shadow-sm" style="font-size: 11px;" data-bs-toggle="modal" data-bs-target="#modalHapusEvaluasi">
                     <i class="fas fa-trash me-1"></i> Hapus
                 </button>
@@ -66,7 +65,7 @@
             Informasi Detail Evaluasi Kalibrasi
         </div>
         <div class="card-body">
-            
+
             <table class="table table-borderless mb-0 table-detail-evaluasi">
                 <tr>
                     <td style="width: 180px;" class="fw-bold text-secondary">Tanggal Evaluasi</td>
@@ -78,18 +77,7 @@
                 </tr>
                 <tr>
                     <td class="fw-bold text-secondary">Keputusan</td>
-                    <td>: 
-                        @php
-                            $keputusanLower = strtolower($evaluasi->keputusan);
-                            $badge = 'secondary';
-                            if (str_contains($keputusanLower, 'layak') && !str_contains($keputusanLower, 'tidak')) {
-                                $badge = 'success';
-                            } elseif (str_contains($keputusanLower, 'tidak')) {
-                                $badge = 'danger';
-                            }
-                        @endphp
-                        <span class="badge bg-{{ $badge }}" style="font-size: 0.68rem; padding: 0.25rem 0.5rem;">{{ strtoupper($evaluasi->keputusan) }}</span>
-                    </td>
+                    <td>: <span class="text-dark fw-semibold">{{ $evaluasi->keputusan ?? '-' }}</span></td>
                 </tr>
                 <tr>
                     <td class="fw-bold text-secondary">Dievaluasi Oleh</td>
@@ -101,7 +89,7 @@
                 </tr>
                 <tr>
                     <td class="fw-bold text-secondary">Laporan Evaluasi</td>
-                    <td>: 
+                    <td>:
                         @if($evaluasi->file_laporan)
                             <a href="{{ asset('storage/' . $evaluasi->file_laporan) }}" target="_blank" class="btn btn-sm text-nowrap py-1 px-2 shadow-sm d-inline-flex align-items-center text-white" style="background-color: #1b3152 !important; border-color: #1b3152 !important; font-size: 11px; gap: 5px;">
                                 <i class="fas fa-file-pdf text-white"></i> <span class="text-white">Lihat Dokumen</span>
@@ -118,7 +106,6 @@
 </div>
 
 @if($canModify)
-<!-- Modal Konfirmasi Hapus Bootstrap -->
 <div class="modal fade" id="modalHapusEvaluasi" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 360px;">
         <div class="modal-content border-0 shadow text-center p-3" style="font-size: 0.78rem; border-radius: 8px;">

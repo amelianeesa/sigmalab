@@ -7,10 +7,10 @@
         padding: 10px 20px !important;
     }
     .bg-sesi-pagi {
-        background-color: #e3f2fd !important; 
+        background-color: #e3f2fd !important;
     }
     .bg-sesi-sore {
-        background-color: #e8f5e9 !important; 
+        background-color: #e8f5e9 !important;
     }
     .select2-results__options {
         max-height: 160px !important;
@@ -21,7 +21,7 @@
     }
 
     .table-responsive[style*="max-height"] {
-        max-height: 110px !important; 
+        max-height: 110px !important;
     }
     .select2-container--bootstrap-5 .select2-dropdown {
         top: 100% !important;
@@ -37,6 +37,39 @@
         display: none !important;
     }
 
+    .filter-select-wrap {
+        position: relative;
+    }
+    .filter-select-wrap > .select2-container:not(.select2) {
+        top: 100% !important;
+        bottom: auto !important;
+        left: 0 !important;
+        right: auto !important;
+        margin-top: 2px;
+        width: 100% !important;
+    }
+    #filterForm .select2-container--bootstrap-5 .select2-selection {
+        min-height: 28px !important;
+        padding: 0.15rem 1.75rem 0.15rem 0.5rem !important;
+        font-size: 0.75rem !important;
+    }
+    #filterForm .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+        line-height: 1.5 !important;
+        padding: 0 !important;
+    }
+    #filterForm .select2-container--bootstrap-5 .select2-results__option {
+        display: flex;
+        align-items: center;
+        min-height: 1.6rem;
+        padding: 0 0.6rem !important;
+        font-size: 0.72rem !important;
+        line-height: 1.2 !important;
+    }
+    .select2-bulan-dropdown .select2-results__options {
+        max-height: 9.6rem !important;
+        overflow-y: auto !important;
+    }
+
     input[type="date"].form-control-sm {
         padding: 2px 6px !important;
         font-size: 0.72rem !important;
@@ -46,9 +79,30 @@
         padding: 2px 4px !important;
         font-size: 0.68rem !important;
     }
+
+    .dashboard-container input::placeholder,
+    .dashboard-container input::-webkit-input-placeholder,
+    .dashboard-container input::-moz-placeholder,
+    .dashboard-container input:-ms-input-placeholder {
+        color: #adb5bd !important;
+        opacity: 0.12 !important;
+    }
+    .dashboard-container input:focus::placeholder {
+        opacity: 0 !important;
+    }
+
+    .input-luar-batas {
+        border: 1px solid #dc3545 !important;
+        background-image: none !important;
+    }
+    .input-luar-batas:focus {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.25) !important;
+    }
+
     .header-action-btns {
         display: flex !important;
-        gap: 10px !important; /* Memberikan jarak antar tombol secara permanen */
+        gap: 10px !important;
         align-items: center;
     }
 
@@ -72,7 +126,7 @@
             padding: 2px 1px !important;
             font-size: 0.58rem !important;
         }
-        .table th.waktu-pagi-col, 
+        .table th.waktu-pagi-col,
         .table th.waktu-sore-col,
         .table th[style*="width: 90px;"] {
             width: 58px !important;
@@ -80,7 +134,7 @@
             max-width: 58px !important;
             padding: 1px !important;
         }
-        .table td input[name="waktu_1"], 
+        .table td input[name="waktu_1"],
         .table td input[name="waktu_2"] {
             width: 54px !important;
             min-width: 52px !important;
@@ -95,7 +149,7 @@
         .header-action-btns {
             width: 100% !important;
             display: flex !important;
-            gap: 10px !important; 
+            gap: 10px !important;
             margin-top: 8px !important;
         }
         .header-action-btns .btn {
@@ -104,7 +158,36 @@
             padding: 6px 4px !important;
             text-align: center;
         }
-    }   
+
+        .table-responsive {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+        }
+        .tabel-monitoring {
+            min-width: 860px;
+        }
+        .tabel-monitoring td input[inputmode="decimal"],
+        .tabel-monitoring td input[type="text"] {
+            width: 100% !important;
+            min-width: 65px !important;
+            box-sizing: border-box !important;
+            padding: 2px 4px !important;
+            text-align: center;
+        }
+        .tabel-monitoring th:first-child,
+        .tabel-monitoring td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background-color: #f8f9fa !important;
+        }
+        #tabelTemperature input, #tabelHumidity input {
+            min-width: 55px;
+        }
+        #filterForm .col-md-3, #filterForm .col-md-2 {
+            width: 100%;
+        }
+    }
 </style>
 @endpush
 
@@ -121,7 +204,7 @@
             <h4 class="fw-bold text-dark mb-1" style="font-size: 1.1rem;">
                  Pencatatan Monitoring Suhu dan Kelembaban Udara
             </h4>
-        </div>    
+        </div>
         <div class="header-action-btns d-flex" style="gap: 5px !important;">
             <a href="{{ route('inventori.monitoring.index') }}" class="btn text-white btn-sm py-1 px-2 shadow-sm" style="font-size: 0.72rem; background-color: #1b3152;"><i class="fas fa-sync-alt me-1"></i> Refresh Data</a>
             @if(isset($alatId) && $alatId && isset($ruangan) && $ruangan)
@@ -136,15 +219,15 @@
                 <div>
                     <h6 class="fw-bold text-dark mb-0" style="font-size: 0.85rem;"><i class="fas fa-sliders-h text-primary me-2"></i>Manajemen Titik Acuan Kalibrasi & Dokumen Referensi</h6>
                     <p class="text-muted small mb-0" style="font-size: 0.7rem;">Klik tombol di sebelah kanan untuk membuka atau menyembunyikan detail titik acuan dan dokumen.</p>
-                </div>    
+                </div>
                 <button class="btn btn-outline-secondary btn-sm fw-bold px-2 py-1 shadow-sm btn-toggle-acuan" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTitikAcuan" aria-expanded="false" aria-controls="collapseTitikAcuan" style="font-size: 0.7rem;">
                     <i class="fas fa-chevron-down me-1"></i> <span class="btn-text-label">Sembunyikan / Tampilkan</span>
                 </button>
             </div>
             <div class="collapse show mt-2" id="collapseTitikAcuan">
                 @if(isset($alatAktif) && $alatAktif)
-                    @php 
-                        $idAlat = $alatAktif->alat_id ?? $alatAktif->id; 
+                    @php
+                        $idAlat = $alatAktif->alat_id ?? $alatAktif->id;
                         $hasAnyKalibrasi = isset($titikKalibrasiList) && count($titikKalibrasiList) > 0;
 
                         $tglKalibVal = $alatAktif->tanggal_kalibrasi ?? date('Y-m-d');
@@ -215,8 +298,8 @@
 
                                                     @if(!$hasTemp && $canManage)
                                                     <tr>
-                                                        <td><input type="number" step="0.01" name="temperature_equipment[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
-                                                        <td><input type="number" step="0.01" name="temperature_standard[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
+                                                        <td><input type="text" inputmode="decimal" autocomplete="off" name="temperature_equipment[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
+                                                        <td><input type="text" inputmode="decimal" autocomplete="off" name="temperature_standard[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
                                                         <td><button type="button" class="btn btn-sm text-danger p-0 border-0 bg-transparent hapus-baris"><i class="fas fa-times"></i></button></td>
                                                     </tr>
                                                     @endif
@@ -268,8 +351,8 @@
 
                                                     @if(!$hasHumidity && $canManage)
                                                     <tr>
-                                                        <td><input type="number" step="0.01" name="humidity_equipment[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
-                                                        <td><input type="number" step="0.01" name="humidity_standard[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
+                                                        <td><input type="text" inputmode="decimal" autocomplete="off" name="humidity_equipment[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
+                                                        <td><input type="text" inputmode="decimal" autocomplete="off" name="humidity_standard[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
                                                         <td><button type="button" class="btn btn-sm text-danger p-0 border-0 bg-transparent hapus-baris"><i class="fas fa-times"></i></button></td>
                                                     </tr>
                                                     @endif
@@ -283,7 +366,7 @@
                                 </div>
                             </div>
                         </div>
-                   
+
                         @if($canManage)
                         <div class="mt-2 text-end">
                             <button type="submit" class="btn btn-success btn-sm px-3 py-1 fw-bold" style="font-size: 0.72rem;"><i class="fas fa-save me-1"></i> Simpan Titik Acuan</button>
@@ -300,7 +383,6 @@
                         @endforeach
                     @endif
 
-                    <!-- DOKUMEN REFERENSI RUANGAN -->
                     <div class="card border bg-white shadow-sm mt-3">
                         <div class="card-header bg-light py-2 px-3 d-flex justify-content-between align-items-center">
                             <span class="fw-bold text-dark small" style="font-size: 0.75rem;"><i class="fas fa-file-alt text-primary me-1"></i> DOKUMEN REFERENSI RUANGAN</span>
@@ -428,14 +510,16 @@
             <form method="GET" action="{{ route('inventori.monitoring.index') }}" id="filterForm" class="row g-2 align-items-end">
                 <div class="col-md-3">
                     <label class="fw-bold text-muted small" style="font-size: 0.7rem;">PILIH ALAT</label>
-                    <select name="alat_id" id="selectAlat" class="form-select form-select-sm">
-                        <option value="">-- Pilih Alat --</option>
-                        @foreach($daftarAlat as $alat)
-                            <option value="{{ $alat->alat_id ?? $alat->id }}" {{ $alatId == ($alat->alat_id ?? $alat->id) ? 'selected' : '' }}>
-                                {{ $alat->nama_alat }} ({{ $alat->kode_alat ?? '' }})
-                            </option>
-                        @endforeach
-                    </select>
+                    <div id="wrapAlat" class="filter-select-wrap">
+                        <select name="alat_id" id="selectAlat" class="form-select form-select-sm">
+                            <option value="">-- Pilih Alat --</option>
+                            @foreach($daftarAlat as $alat)
+                                <option value="{{ $alat->alat_id ?? $alat->id }}" {{ $alatId == ($alat->alat_id ?? $alat->id) ? 'selected' : '' }}>
+                                    {{ $alat->nama_alat }} ({{ $alat->kode_alat ?? '' }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
 
                 <div class="col-md-3">
@@ -445,16 +529,18 @@
 
                 <div class="col-md-2">
                     <label class="fw-bold text-muted small" style="font-size: 0.7rem;">BULAN</label>
-                    <select name="bulan" class="form-select form-select-sm py-1" style="font-size: 0.75rem;">
-                        @foreach(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $b)
-                            <option value="{{ $b }}" {{ $bulan == $b ? 'selected' : '' }}>{{ $b }}</option>
-                        @endforeach
-                    </select>
+                    <div id="wrapBulan" class="filter-select-wrap">
+                        <select name="bulan" id="selectBulan" class="form-select form-select-sm">
+                            @foreach(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $b)
+                                <option value="{{ $b }}" {{ $bulan == $b ? 'selected' : '' }}>{{ $b }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
 
                 <div class="col-md-2">
                     <label class="fw-bold text-muted small" style="font-size: 0.7rem;">TAHUN</label>
-                    <input type="number" name="tahun" value="{{ $tahun }}" class="form-control form-control-sm py-1" style="font-size: 0.75rem;">
+                    <input type="text" inputmode="numeric" maxlength="4" autocomplete="off" name="tahun" value="{{ $tahun }}" class="form-control form-control-sm py-1" style="font-size: 0.75rem;">
                 </div>
 
                 <div class="col-md-2">
@@ -464,7 +550,7 @@
                 <input type="hidden" name="persyaratan_suhu" id="hiddenPersyaratanSuhu" value="{{ $persyaratanSuhu }}">
                 <input type="hidden" name="persyaratan_kelembaban" id="hiddenPersyaratanKelembaban" value="{{ $persyaratanKelembaban }}">
             </form>
-            
+
             <hr class="my-2">
             <div class="row text-secondary small align-items-center" style="font-size: 0.72rem;">
                 <div class="col-md-12">
@@ -484,7 +570,7 @@
     <div class="card border-0 shadow-sm">
         <div class="card-body px-0 pt-0">
             <div class="table-responsive">
-                <table class="table table-bordered text-center align-middle small mb-0" style="font-size: 0.68rem;">
+                <table class="table table-bordered text-center align-middle small mb-0 tabel-monitoring" style="font-size: 0.68rem;">
                     <thead class="table-light align-middle">
                         <tr>
                             <th rowspan="2" style="width: 45px;" class="bg-light">Tanggal</th>
@@ -500,20 +586,20 @@
                         <tr>
                             <th class="py-1 bg-sesi-pagi waktu-pagi-col" style="width: 90px;">Pagi</th>
                             <th class="py-1 bg-sesi-sore waktu-sore-col" style="width: 90px;">Sore</th>
-                            
+
                             <th class="py-1 bg-sesi-pagi">Pembacaan 1</th>
                             <th class="py-1 bg-sesi-pagi">Koreksi 1</th>
                             <th class="py-1 bg-sesi-sore">Pembacaan 2</th>
                             <th class="py-1 bg-sesi-sore">Koreksi 2</th>
-                            
+
                             <th class="py-1 bg-sesi-pagi">Pembacaan 1</th>
                             <th class="py-1 bg-sesi-pagi">Koreksi 1</th>
                             <th class="py-1 bg-sesi-sore">Pembacaan 2</th>
                             <th class="py-1 bg-sesi-sore">Koreksi 2</th>
-                            
+
                             <th class="py-1 bg-white" style="width: 60px;">Diterima</th>
                             <th class="py-1 bg-white" style="width: 60px;">Ditolak</th>
-                
+
                             <th class="py-1 bg-sesi-pagi" style="width: 110px;">1</th>
                             <th class="py-1 bg-sesi-sore" style="width: 110px;">2</th>
                         </tr>
@@ -525,12 +611,12 @@
                             $minHum  = isset($titikKalibrasiList) ? collect($titikKalibrasiList)->filter(fn($t) => strtolower($t->kategori) == 'humidity')->min('equipment_reading') : null;
                             $maxHum  = isset($titikKalibrasiList) ? collect($titikKalibrasiList)->filter(fn($t) => strtolower($t->kategori) == 'humidity')->max('equipment_reading') : null;
                         @endphp
-               
+
                         @for($tgl = 1; $tgl <= 31; $tgl++)
-                        @php 
-                            $row = $monitoringData[$tgl] ?? null; 
+                        @php
+                            $row = $monitoringData[$tgl] ?? null;
                             $sudahAdaData = $row ? true : false;
-               
+
                             $isS1Out = ($minTemp !== null && $row?->suhu_pembacaan_1 !== null && ($row->suhu_pembacaan_1 < $minTemp || $row->suhu_pembacaan_1 > $maxTemp));
                             $isS2Out = ($minTemp !== null && $row?->suhu_pembacaan_2 !== null && ($row->suhu_pembacaan_2 < $minTemp || $row->suhu_pembacaan_2 > $maxTemp));
                             $isH1Out = ($minHum !== null && $row?->kelembaban_pembacaan_1 !== null && ($row->kelembaban_pembacaan_1 < $minHum || $row->kelembaban_pembacaan_1 > $maxHum));
@@ -544,59 +630,59 @@
                                 <input type="hidden" name="tahun" value="{{ $tahun }}">
                                 <input type="hidden" name="nama_ruangan" value="{{ $ruangan }}">
                                 <input type="hidden" name="tanggal" value="{{ $tgl }}">
-                                
+
                                 <input type="hidden" name="persyaratan_suhu" class="row-persyaratan-suhu" value="{{ $persyaratanSuhu ?: $otomatisSuhu }}">
                                 <input type="hidden" name="persyaratan_kelembaban" class="row-persyaratan-kelembaban" value="{{ $persyaratanKelembaban ?: $otomatisKelembaban }}">
-                    
+
                                 <td class="fw-bold bg-light">{{ $tgl }}</td>
-                                
+
                                 <td class="bg-sesi-pagi">
                                     <input type="text" name="waktu_1" value="{{ $row?->waktu_1 }}" class="form-control form-control-sm text-center px-1 bg-white py-0" placeholder="08:00" style="font-size: 0.68rem;" {{ !$canManage ? 'readonly' : '' }}>
                                 </td>
                                 <td class="bg-sesi-sore">
                                     <input type="text" name="waktu_2" value="{{ $row?->waktu_2 }}" class="form-control form-control-sm text-center px-1 bg-white py-0" placeholder="13:00" style="font-size: 0.68rem;" {{ !$canManage ? 'readonly' : '' }}>
                                 </td>
-                    
+
                                 <td class="bg-sesi-pagi">
-                                    <input type="number" step="0.01" name="suhu_pembacaan_1" value="{{ $row?->suhu_pembacaan_1 }}" class="form-control form-control-sm text-center px-1 input-suhu-1 bg-white py-0 {{ $isS1Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;" {{ !$canManage ? 'readonly' : '' }}>
+                                    <input type="text" inputmode="decimal" autocomplete="off" name="suhu_pembacaan_1" value="{{ $row?->suhu_pembacaan_1 }}" class="form-control form-control-sm text-center px-1 input-suhu-1 bg-white py-0 {{ $isS1Out ? 'input-luar-batas text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;" {{ !$canManage ? 'readonly' : '' }}>
                                 </td>
                                 <td class="fw-bold text-primary bg-sesi-pagi">
                                     <span id="suhu-terkoreksi-1-text-{{ $tgl }}">{{ $row?->suhu_terkoreksi_1 ?? '-' }}</span>
                                     <input type="hidden" name="suhu_terkoreksi_1" id="suhu-terkoreksi-1-input-{{ $tgl }}" value="{{ $row?->suhu_terkoreksi_1 }}">
                                 </td>
-                    
+
                                 <td class="bg-sesi-sore">
-                                    <input type="number" step="0.01" name="suhu_pembacaan_2" value="{{ $row?->suhu_pembacaan_2 }}" class="form-control form-control-sm text-center px-1 input-suhu-2 bg-white py-0 {{ $isS2Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;" {{ !$canManage ? 'readonly' : '' }}>
+                                    <input type="text" inputmode="decimal" autocomplete="off" name="suhu_pembacaan_2" value="{{ $row?->suhu_pembacaan_2 }}" class="form-control form-control-sm text-center px-1 input-suhu-2 bg-white py-0 {{ $isS2Out ? 'input-luar-batas text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;" {{ !$canManage ? 'readonly' : '' }}>
                                 </td>
                                 <td class="fw-bold text-success bg-sesi-sore">
                                     <span id="suhu-terkoreksi-2-text-{{ $tgl }}">{{ $row?->suhu_terkoreksi_2 ?? '-' }}</span>
                                     <input type="hidden" name="suhu_terkoreksi_2" id="suhu-terkoreksi-2-input-{{ $tgl }}" value="{{ $row?->suhu_terkoreksi_2 }}">
                                 </td>
-                    
+
                                 <td class="bg-sesi-pagi">
-                                    <input type="number" step="0.01" name="kelembaban_pembacaan_1" value="{{ $row?->kelembaban_pembacaan_1 }}" class="form-control form-control-sm text-center px-1 input-lembap-1 bg-white py-0 {{ $isH1Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;" {{ !$canManage ? 'readonly' : '' }}>
+                                    <input type="text" inputmode="decimal" autocomplete="off" name="kelembaban_pembacaan_1" value="{{ $row?->kelembaban_pembacaan_1 }}" class="form-control form-control-sm text-center px-1 input-lembap-1 bg-white py-0 {{ $isH1Out ? 'input-luar-batas text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;" {{ !$canManage ? 'readonly' : '' }}>
                                 </td>
                                 <td class="fw-bold text-primary bg-sesi-pagi">
                                     <span id="lembap-terkoreksi-1-text-{{ $tgl }}">{{ $row?->kelembaban_terkoreksi_1 ?? '-' }}</span>
                                     <input type="hidden" name="kelembaban_terkoreksi_1" id="lembap-terkoreksi-1-input-{{ $tgl }}" value="{{ $row?->kelembaban_terkoreksi_1 }}">
                                 </td>
-                    
+
                                 <td class="bg-sesi-sore">
-                                    <input type="number" step="0.01" name="kelembaban_pembacaan_2" value="{{ $row?->kelembaban_pembacaan_2 }}" class="form-control form-control-sm text-center px-1 input-lembap-2 bg-white py-0 {{ $isH2Out ? 'is-invalid text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;" {{ !$canManage ? 'readonly' : '' }}>
+                                    <input type="text" inputmode="decimal" autocomplete="off" name="kelembaban_pembacaan_2" value="{{ $row?->kelembaban_pembacaan_2 }}" class="form-control form-control-sm text-center px-1 input-lembap-2 bg-white py-0 {{ $isH2Out ? 'input-luar-batas text-danger fw-bold' : '' }}" data-tgl="{{ $tgl }}" placeholder="0.00" style="font-size: 0.68rem;" {{ !$canManage ? 'readonly' : '' }}>
                                 </td>
                                 <td class="fw-bold text-success bg-sesi-sore">
                                     <span id="lembap-terkoreksi-2-text-{{ $tgl }}">{{ $row?->kelembaban_terkoreksi_2 ?? '-' }}</span>
                                     <input type="hidden" name="kelembaban_terkoreksi_2" id="lembap-terkoreksi-2-input-{{ $tgl }}" value="{{ $row?->kelembaban_terkoreksi_2 }}">
                                 </td>
-                    
+
                                 <td class="bg-white text-center align-middle">
                                     <input class="form-check-input" type="radio" name="status" value="Diterima" {{ ($row?->status == 'Diterima') ? 'checked' : '' }} {{ !$canManage ? 'disabled' : '' }}>
                                 </td>
-                    
+
                                 <td class="bg-white text-center align-middle">
                                     <input class="form-check-input" type="radio" name="status" value="Ditolak" {{ ($row?->status == 'Ditolak') ? 'checked' : '' }} {{ !$canManage ? 'disabled' : '' }}>
                                 </td>
-                    
+
                                 <td class="bg-sesi-pagi text-center small fw-bold text-dark text-truncate" style="max-width: 65px;" title="{{ $row?->paraf_1 }}">
                                     {{ $row?->paraf_1 ?? '-' }}
                                 </td>
@@ -604,7 +690,7 @@
                                 <td class="bg-sesi-sore text-center small fw-bold text-dark text-truncate" style="max-width: 65px;" title="{{ $row?->paraf_2 }}">
                                     {{ $row?->paraf_2 ?? '-' }}
                                 </td>
-                    
+
                                 @if($canManage)
                                 <td class="bg-light text-center">
                                     <button type="submit" class="btn btn-sm btn-success px-1.5 py-0.5" style="font-size: 0.65rem;" title="Simpan Baris"><i class="fas fa-save"></i></button>
@@ -624,18 +710,6 @@
 @push('scripts')
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        if (typeof jQuery !== 'undefined') {
-            $(document).ready(function() {
-                if ($.fn.select2) {
-                    $('#selectAlat').select2({
-                        theme: 'bootstrap-5',
-                        placeholder: '-- Pilih Alat --',
-                        allowClear: false
-                    });
-                }
-            });
-        }
-
         document.querySelectorAll('.btn-hapus-titik').forEach(button => {
             button.addEventListener('click', function() {
                 let id = this.getAttribute('data-id');
@@ -680,6 +754,48 @@
     });
 
     $(document).ready(function() {
+        const namaBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+        $(document).on('input', 'input[inputmode="decimal"]', function() {
+            let v = this.value.replace(/,/g, '.').replace(/[^0-9.\-]/g, '');
+            let neg = v.charAt(0) === '-';
+            v = v.replace(/-/g, '');
+            let parts = v.split('.');
+            if (parts.length > 1) v = parts[0] + '.' + parts.slice(1).join('');
+            if (neg) v = '-' + v;
+            if (v !== this.value) this.value = v;
+        });
+
+        $(document).on('input', 'input[inputmode="numeric"]', function() {
+            let v = this.value.replace(/\D/g, '');
+            if (v !== this.value) this.value = v;
+        });
+
+        if ($.fn.select2) {
+            $('#selectAlat').select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: '-- Pilih Alat --',
+                allowClear: false,
+                dropdownParent: $('#wrapAlat'),
+                dropdownCssClass: 'select2-alat-dropdown'
+            });
+
+            $('#selectBulan').select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                minimumResultsForSearch: Infinity,
+                dropdownParent: $('#wrapBulan'),
+                dropdownCssClass: 'select2-bulan-dropdown'
+            });
+
+            $('#selectAlat, #selectBulan').on('select2:open', function() {
+                let wrap = $(this).closest('.filter-select-wrap');
+                wrap.find('.select2-dropdown--above').removeClass('select2-dropdown--above').addClass('select2-dropdown--below');
+                wrap.find('.select2-container--above').removeClass('select2-container--above').addClass('select2-container--below');
+            });
+        }
+
         function updateRentangOtomatis() {
             let suhuVals = [];
             $('#tabelTemperature tbody tr').each(function() {
@@ -743,9 +859,9 @@
             let p2 = points[1];
 
             for (let i = 0; i < points.length - 1; i++) {
-                if (nilaiInput >= points[i].x && nilaiInput <= points[i+1].x) {
+                if (nilaiInput >= points[i].x && nilaiInput <= points[i + 1].x) {
                     p1 = points[i];
-                    p2 = points[i+1];
+                    p2 = points[i + 1];
                     break;
                 }
             }
@@ -773,15 +889,15 @@
                 let minEq = pointsSuhu[0].x;
                 let maxEq = pointsSuhu[pointsSuhu.length - 1].x;
                 if (valS1 < minEq || valS1 > maxEq) {
-                    inputS1.addClass('is-invalid text-danger fw-bold');
+                    inputS1.addClass('input-luar-batas text-danger fw-bold');
                     textS1.text('-').addClass('text-danger fw-bold').removeClass('text-primary');
                     hidS1.val('');
                 } else {
-                    inputS1.removeClass('is-invalid text-danger fw-bold');
+                    inputS1.removeClass('input-luar-batas text-danger fw-bold');
                     textS1.removeClass('text-danger fw-bold').addClass('text-primary');
                 }
             } else {
-                inputS1.removeClass('is-invalid text-danger fw-bold');
+                inputS1.removeClass('input-luar-batas text-danger fw-bold');
             }
 
             let inputS2 = $('.input-suhu-2[data-tgl="' + tgl + '"]');
@@ -793,15 +909,15 @@
                 let minEq = pointsSuhu[0].x;
                 let maxEq = pointsSuhu[pointsSuhu.length - 1].x;
                 if (valS2 < minEq || valS2 > maxEq) {
-                    inputS2.addClass('is-invalid text-danger fw-bold');
+                    inputS2.addClass('input-luar-batas text-danger fw-bold');
                     textS2.text('-').addClass('text-danger fw-bold').removeClass('text-success');
                     hidS2.val('');
                 } else {
-                    inputS2.removeClass('is-invalid text-danger fw-bold');
+                    inputS2.removeClass('input-luar-batas text-danger fw-bold');
                     textS2.removeClass('text-danger fw-bold').addClass('text-success');
                 }
             } else {
-                inputS2.removeClass('is-invalid text-danger fw-bold');
+                inputS2.removeClass('input-luar-batas text-danger fw-bold');
             }
 
             let inputH1 = $('.input-lembap-1[data-tgl="' + tgl + '"]');
@@ -813,15 +929,15 @@
                 let minEq = pointsHum[0].x;
                 let maxEq = pointsHum[pointsHum.length - 1].x;
                 if (valH1 < minEq || valH1 > maxEq) {
-                    inputH1.addClass('is-invalid text-danger fw-bold');
+                    inputH1.addClass('input-luar-batas text-danger fw-bold');
                     textH1.text('-').addClass('text-danger fw-bold').removeClass('text-primary');
                     hidH1.val('');
                 } else {
-                    inputH1.removeClass('is-invalid text-danger fw-bold');
+                    inputH1.removeClass('input-luar-batas text-danger fw-bold');
                     textH1.removeClass('text-danger fw-bold').addClass('text-primary');
                 }
             } else {
-                inputH1.removeClass('is-invalid text-danger fw-bold');
+                inputH1.removeClass('input-luar-batas text-danger fw-bold');
             }
 
             let inputH2 = $('.input-lembap-2[data-tgl="' + tgl + '"]');
@@ -833,15 +949,15 @@
                 let minEq = pointsHum[0].x;
                 let maxEq = pointsHum[pointsHum.length - 1].x;
                 if (valH2 < minEq || valH2 > maxEq) {
-                    inputH2.addClass('is-invalid text-danger fw-bold');
+                    inputH2.addClass('input-luar-batas text-danger fw-bold');
                     textH2.text('-').addClass('text-danger fw-bold').removeClass('text-success');
                     hidH2.val('');
                 } else {
-                    inputH2.removeClass('is-invalid text-danger fw-bold');
+                    inputH2.removeClass('input-luar-batas text-danger fw-bold');
                     textH2.removeClass('text-danger fw-bold').addClass('text-success');
                 }
             } else {
-                inputH2.removeClass('is-invalid text-danger fw-bold');
+                inputH2.removeClass('input-luar-batas text-danger fw-bold');
             }
         }
 
@@ -880,7 +996,7 @@
         $(document).on('submit', '.form-monitoring', function(e) {
             let sudahAda = $(this).data('sudah-ada');
             if (sudahAda === true || sudahAda === 'true') {
-                e.preventDefault(); 
+                e.preventDefault();
                 let form = this;
                 Swal.fire({
                     title: 'Konfirmasi Perubahan',
@@ -902,8 +1018,8 @@
         $(document).off('click', '#tambahHumidity').on('click', '#tambahHumidity', function(e) {
             e.preventDefault();
             let row = `<tr>
-                <td><input type="number" step="0.01" name="humidity_equipment[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
-                <td><input type="number" step="0.01" name="humidity_standard[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
+                <td><input type="text" inputmode="decimal" autocomplete="off" name="humidity_equipment[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
+                <td><input type="text" inputmode="decimal" autocomplete="off" name="humidity_standard[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
                 <td><button type="button" class="btn btn-sm text-danger p-0 border-0 bg-transparent hapus-baris"><i class="fas fa-times"></i></button></td>
             </tr>`;
             $('#tabelHumidity tbody').append(row);
@@ -912,33 +1028,41 @@
         $(document).off('click', '#tambahTemperature').on('click', '#tambahTemperature', function(e) {
             e.preventDefault();
             let row = `<tr>
-                <td><input type="number" step="0.01" name="temperature_equipment[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
-                <td><input type="number" step="0.01" name="temperature_standard[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
+                <td><input type="text" inputmode="decimal" autocomplete="off" name="temperature_equipment[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
+                <td><input type="text" inputmode="decimal" autocomplete="off" name="temperature_standard[]" class="form-control form-control-sm text-center py-0" placeholder="0.00" style="font-size: 0.7rem;"></td>
                 <td><button type="button" class="btn btn-sm text-danger p-0 border-0 bg-transparent hapus-baris"><i class="fas fa-times"></i></button></td>
             </tr>`;
             $('#tabelTemperature tbody').append(row);
         });
 
-        $(document).on('click', '.hapus-baris', function() {$(this).closest('tr').remove();
+        $(document).on('click', '.hapus-baris', function() {
+            $(this).closest('tr').remove();
         });
 
         $('#inputPersyaratanSuhu').on('input', function() {
-            let val = $(this).val();$('#hiddenPersyaratanSuhu').val(val);
+            let val = $(this).val();
+            $('#hiddenPersyaratanSuhu').val(val);
             $('.row-persyaratan-suhu').val(val);
         });
 
         $('#inputPersyaratanKelembaban').on('input', function() {
-            let val = $(this).val();$('#hiddenPersyaratanKelembaban').val(val);
+            let val = $(this).val();
+            $('#hiddenPersyaratanKelembaban').val(val);
             $('.row-persyaratan-kelembaban').val(val);
         });
 
         $('#selectAlat').on('change', function() {
+            let sekarang = new Date();
+
             $('input[name="nama_ruangan"]').val('');
             $('#inputPersyaratanSuhu').val('');
             $('#hiddenPersyaratanSuhu').val('');
             $('#inputPersyaratanKelembaban').val('');
             $('#hiddenPersyaratanKelembaban').val('');
-        });            
+
+            $('#selectBulan').val(namaBulan[sekarang.getMonth()]).trigger('change');
+            $('#filterForm input[name="tahun"]').val(sekarang.getFullYear());
+        });
     });
 </script>
 @endpush
