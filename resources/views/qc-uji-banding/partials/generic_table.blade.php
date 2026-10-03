@@ -78,7 +78,7 @@
                                             @endif
                                         </thead>
                                         <tbody>
-                                            <!-- SIMPLO -->
+                                            
                                             <tr class="row-entry">
                                                 <td class="fw-bold bg-light">
                                                     Simplo (D1)
@@ -133,7 +133,6 @@
                                                 @endif
                                             </tr>
 
-                                            <!-- DUPLO -->
                                             <tr class="row-entry">
                                                 <td class="fw-bold bg-light">
                                                     Duplo (D2)

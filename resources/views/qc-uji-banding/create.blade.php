@@ -35,7 +35,6 @@
     }
 </style>
 
-
 <div class="container-fluid px-4 pb-5">
 
     <x-qc-breadcrumb active="Uji Banding">
@@ -46,7 +45,6 @@
         <i class="fas fa-plus-circle text-danger me-2"></i>Input Data Blind Test Uji Banding
     </h2>
 
-    {{-- Pesan error --}}
     @if(session('error'))
         <div class="alert alert-danger shadow-sm border-0">
             <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
@@ -64,7 +62,6 @@
             </ul>
         </div>
     @endif
-
 
     <form action="{{ route('qc-uji-banding.store') }}" method="POST" id="formQc" autocomplete="off">
         @csrf
@@ -107,7 +104,6 @@
                     </div>
                 </div>
 
-                <!-- bahan -->
                 <h6 class="mb-3 text-primary border-bottom pb-2">
                     <i class="fas fa-box-open me-2"></i>Bahan Digunakan
                 </h6>
@@ -132,11 +128,11 @@
 
                                     <tr class="{{ $habis ? 'table-danger' : '' }}">
                                         <td class="text-center align-middle">
-                                            <input class="form-check-input" type="checkbox" name="barang_ids[]" value="{{ $barang->barang_id }}" id="barang_{{ $barang->barang_id }}" {{ $habis ? 'disabled' : '' }}>
+                                            <input class="form-check-input" type="checkbox" name="barang_ids[]" value="{{ $barang->barang_id }}" id="barang_{{ $barang->barang_id }}">
                                         </td>
 
                                         <td class="align-middle">
-                                            <label for="barang_{{ $barang->barang_id }}" class="mb-0 cursor-pointer {{ $habis ? 'text-muted' : '' }}">
+                                            <label for="barang_{{ $barang->barang_id }}" class="mb-0 cursor-pointer">
                                                 {{ $barang->nama_barang }}
                                                 @if($habis) <span class="badge bg-danger ms-1">Habis</span> @endif
                                             </label>
@@ -148,7 +144,7 @@
 
                                         <td>
                                             <div class="input-group input-group-sm">
-                                                <input type="number" step="0.01" min="0" class="form-control barang-input" name="barang_jumlah[{{ $barang->barang_id }}]" placeholder="0" {{ $habis ? 'disabled' : '' }}>
+                                                <input type="number" step="0.01" min="0" class="form-control barang-input" name="barang_jumlah[{{ $barang->barang_id }}]" placeholder="0">
                                                 <span class="input-group-text">{{ $barang->satuan }}</span>
                                             </div>
                                         </td>
@@ -162,7 +158,6 @@
             </div>
         </div>
 
-        <!-- bagian input data pengujian -->
         <div class="card shadow-sm border-0 mb-4">
 
             <div class="card-header text-white py-3" style="background-color: #1b3152;">
@@ -171,7 +166,6 @@
 
             <div class="card-body p-0">
 
-                <!-- tab -->
                 <ul class="nav nav-tabs px-3 pt-3" id="section2Tabs" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active fw-bold" id="tab-input-data-tab" data-bs-toggle="tab" data-bs-target="#tab-input-data" type="button" role="tab">
@@ -197,7 +191,6 @@
 
                 <div class="tab-content" id="section2TabContent">
 
-                    <!-- tab input data -->
                     <div class="tab-pane fade show active" id="tab-input-data" role="tabpanel">
 
                         <div class="alert alert-info m-3 rounded-0 border-start border-4 border-info">
@@ -238,7 +231,6 @@
                                     $catId = Str::slug($kategori);
                                 @endphp
 
-                                {{-- ----- Satu modul (kategori) accordion ----- --}}
                                 <div class="accordion-item border-bottom mb-2">
 
                                     <h2 class="accordion-header" id="heading-cat-{{ $catId }}">
@@ -257,7 +249,6 @@
 
                                             @if($kategori === 'Determination of Carbon, Hydrogen, Nitrogen by Instrument')
 
-                                                {{-- ================= MODUL CHN ================= --}}
                                                 @php
                                                     $pid_c = $params->where('nama_parameter', 'C')->first()->parameter_uji_id ?? 4;
                                                     $pid_h = $params->where('nama_parameter', 'H')->first()->parameter_uji_id ?? 5;
@@ -288,7 +279,6 @@
                                                             </div>
                                                         </div>
 
-                                                        <!-- MODAL POP-UP RESOURCE -->
                                                         <div class="modal fade modal-resource" id="modalResource-{{ $pid }}" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
                                                             <div class="modal-dialog">
                                                                 <div class="modal-content border-0 shadow-lg">
@@ -395,18 +385,15 @@
                                                                             @endforeach
                                                                         </tbody>
                                                                     </table>
-                                                                </div>{{-- /table-responsive --}}
-                                                            </div>{{-- /referensi toleransi CHN --}}
+                                                                </div>
+                                                            </div>
                                                         @endif
 
-                                                    </div>{{-- /param-form-wrapper CHN --}}
-                                                </div>{{-- /param-container CHN --}}
+                                                    </div>
+                                                </div>
 
                                             @else
 
-                                                {{-- ================= MODUL UMUM (per parameter) ================= --}}
-
-                                                {{-- Tab header: satu tab per parameter --}}
                                                 <ul class="nav nav-tabs mb-4" id="tabs-cat-{{ $catId }}" role="tablist">
                                                     @foreach($params as $index => $param)
                                                         @php
@@ -422,7 +409,6 @@
                                                     @endforeach
                                                 </ul>
 
-                                                {{-- Tab content: satu pane per parameter --}}
                                                 <div class="tab-content" id="content-cat-{{ $catId }}">
                                                     @foreach($params as $index => $param)
                                                         @php
@@ -457,7 +443,6 @@
                                                                         </div>
                                                                     </div>
 
-                                                                    <!-- MODAL POP-UP RESOURCE -->
                                                                     <div class="modal fade modal-resource" id="modalResource-{{ $pid }}" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
                                                                         <div class="modal-dialog">
                                                                             <div class="modal-content border-0 shadow-lg">
@@ -526,7 +511,6 @@
                                                                         </div>
                                                                     </div>
 
-                                                                    {{-- Pilih tabel input sesuai jenis parameter --}}
                                                                     @if(in_array($code, ['IM', 'ASH', 'VM', 'FC', 'RM']))
                                                                         @include('qc-uji-banding.partials.proximate_table')
                                                                     @elseif($kategori === 'Determination of Sulfur by IR Spectrometry')
@@ -545,7 +529,6 @@
                                                                         $toleransiList = \App\Models\ParameterToleransi::where('parameter_uji_id', $pid)->get();
                                                                     @endphp
 
-                                                                    {{-- Referensi toleransi --}}
                                                                     @if($toleransiList->count() > 0)
                                                                         <input type="hidden" id="tol-data-{{ $pid }}" value='{{ $toleransiList->toJson() }}'>
 
@@ -603,60 +586,50 @@
                                                                                         @endforeach
                                                                                     </tbody>
                                                                                 </table>
-                                                                            </div>{{-- /table-responsive --}}
-                                                                        </div>{{-- /referensi toleransi --}}
+                                                                            </div>
+                                                                        </div>
                                                                     @endif
 
-                                                                </div>{{-- /param-form-wrapper --}}
-                                                            </div>{{-- /param-container --}}
-                                                        </div>{{-- /tab-pane pane-{pid} --}}
+                                                                </div>
+                                                            </div>
+                                                        </div>
 
                                                     @endforeach
-                                                </div>{{-- /tab-content content-cat --}}
+                                                </div>
 
                                             @endif
 
-                                        </div>{{-- /accordion-body --}}
-                                    </div>{{-- /accordion-collapse --}}
-                                </div>{{-- /accordion-item --}}
+                                        </div>
+                                    </div>
+                                </div>
 
                             @endforeach
-                        </div>{{-- /accordion moduleAccordion --}}
+                        </div>
 
-                    </div>{{-- /tab-pane input-data --}}
+                    </div>
 
-
-                    {{-- TAB PANE 2: PROXIMATE --}}
                     <div class="tab-pane fade" id="tab-proximate" role="tabpanel">
                         @include('qc-uji-banding.partials.proximate_sheet')
                     </div>
 
-                    {{-- TAB PANE 3: CETAK FORM --}}
                     <div class="tab-pane fade" id="tab-cetak-form" role="tabpanel">
                         @include('qc-uji-banding.partials.cetak_form')
                     </div>
 
-                    {{-- TAB PANE 4: AFT CORRECTION --}}
                     <div class="tab-pane fade" id="tab-aft-correction" role="tabpanel">
                         @include('qc-uji-banding.partials.aft_correction')
                     </div>
 
-                </div>{{-- /tab-content section2TabContent --}}
-            </div>{{-- /card-body Section 2 --}}
-        </div>{{-- /card Section 2 --}}
+                </div>
+            </div>
+        </div>
 
-
-        {{-- ===================================================== --}}
-        {{-- TOMBOL SUBMIT & DRAFT (RESPONSIVE)                    --}}
-        {{-- ===================================================== --}}
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3 mt-4">
 
-            <!-- Tombol Batal pindah ke bawah saat di HP (order-last) -->
             <a href="{{ route('qc-uji-banding.index') }}" class="btn btn-light border px-4 rounded-pill order-last order-md-first">
                 Batal
             </a>
 
-            <!-- Tombol Simpan berbaris ke bawah di HP, menyamping di Laptop -->
             <div class="d-flex flex-column flex-md-row gap-2 order-first order-md-last">
                 <button type="button" class="btn btn-warning px-4 rounded-pill shadow-sm" id="btnDraft">
                     <i class="fas fa-save me-2"></i>Simpan Draft
@@ -670,7 +643,7 @@
         </div>
 
     </form>
-</div>{{-- /container-fluid --}}
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
 <script>
@@ -692,7 +665,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     function runToleranceValidation(container, pid, code) {
-        // 1. Deteksi kelas out-diff atau out-abs (untuk Total Moisture)
+
         let diffNode = container.querySelector('.out-diff') || container.querySelector('.out-abs');
         let diffText = diffNode?.textContent;
 
@@ -734,7 +707,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 else if (rowType === 'nitrogen') targetSub = 'N';
 
                 let sub = (rule.sub_parameter || '').toUpperCase();
-                // Dibuat fleksibel agar bisa membaca 'C', 'CARBON', 'H', 'HYDROGEN', dst.
+
                 if (sub === targetSub || sub.startsWith(targetSub) || sub.includes(targetSub)) {
                     let min = (rule.range_min !== null && rule.range_min !== '') ? parseFloat(rule.range_min) : -Infinity;
                     let max = (rule.range_max !== null && rule.range_max !== '') ? parseFloat(rule.range_max) : Infinity;
@@ -778,7 +751,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!table) return;
         const code = table.dataset.code;
 
-        // Ambil semua input
         const inputs = row.querySelectorAll('input[class*="in-"]');
         inputs.forEach(inp => {
             const match = inp.className.match(/in-([a-zA-Z0-9_]+)-\d/);
@@ -793,7 +765,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let result = 0;
 
-        // ---------- IM / RM ----------
         if (code === 'IM' || code === 'RM') {
             if (scope.m1 > 0 && scope.a > 0) {
                 scope.m2 = scope.m1 + scope.a;
@@ -808,7 +779,6 @@ document.addEventListener('DOMContentLoaded', function () {
             if (scope.a > 0) result = ((scope.a - scope.b) / scope.a) * 100;
         }
 
-        // ---------- ASH ----------
         else if (code === 'ASH') {
             if (scope.m1 > 0 && scope.m2m1 > 0) {
                 let m2 = scope.m1 + scope.m2m1;
@@ -823,18 +793,16 @@ document.addEventListener('DOMContentLoaded', function () {
             if (scope.m2m1 > 0) result = (scope.m3m1 / scope.m2m1) * 100;
         }
 
-        // ---------- VM ----------
         else if (code === 'VM') {
-            let vmInp = parseNum(row.querySelector('.in-hasil-' + i)?.value); // %VM input
+            let vmInp = parseNum(row.querySelector('.in-hasil-' + i)?.value); 
 
             if (scope.m1 > 0 && scope.m2m1 > 0) {
-                // M2 = M1 + (M2-M1)
+
                 let m2 = scope.m1 + scope.m2m1;
                 let m2Inp = row.querySelector('.in-m2-' + i);
                 if (m2Inp) m2Inp.value = m2.toFixed(4);
             }
 
-            // Get %Mad from IM table
             let imValue = 0;
             const imTable = document.querySelector('table[data-code="IM"]');
             if (imTable) {
@@ -845,20 +813,18 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             let imInp = row.querySelector('.in-im-' + i);
-            if (imInp) imInp.value = imValue > 0 ? imValue.toFixed(4) : '';
+            if (imInp) imInp.value = imValue > 0 ? parseFloat(imValue.toFixed(4)) : '';
 
             if (vmInp > 0 && imValue > 0 && scope.m2m1 > 0) {
-                // %LOSS = %VM + %Mad
+
                 let loss = vmInp + imValue;
                 let ml = row.querySelector('.in-loss-' + i);
-                if (ml) ml.value = loss.toFixed(4);
+                if (ml) ml.value = parseFloat(loss.toFixed(4));
 
-                // M2-M3 = (%LOSS * (M2-M1)) / 100
                 let m2m3 = (loss * scope.m2m1) / 100;
                 let m2m3Inp = row.querySelector('.in-m2m3-' + i);
                 if (m2m3Inp) m2m3Inp.value = m2m3.toFixed(4);
 
-                // M3 = M2 - (M2-M3)
                 if (scope.m1 > 0) {
                     let m2 = scope.m1 + scope.m2m1;
                     let m3 = m2 - m2m3;
@@ -868,7 +834,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // ---------- FC ----------
         else if (code === 'FC') {
             const myTbodyIndex = tbody.dataset.index || 0;
 
@@ -923,13 +888,11 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-       // ---------- TS ----------
         else if (code === 'TS') {
             let tsInp = row.querySelector('.in-hasil-' + i);
             result = tsInp ? parseNum(tsInp.value) : 0;
         }
 
-        // ---------- TM ----------
         else if (code === 'TM' || code === 'TOTAL MOISTURE') {
             let adl1Inp = row.querySelector('.in-adl1');
             let adl2Inp = row.querySelector('.in-adl2');
@@ -941,7 +904,7 @@ document.addEventListener('DOMContentLoaded', function () {
             let rm = parseNum(rmInp?.value);
 
             let tmPrime = 0;
-            // Hitung TM' jika ADL2 dan RM ada (atau diisi 0 jika memang nilainya 0)
+
             if (rmInp?.value !== '' && adl2Inp?.value !== '') {
                 tmPrime = (rm * (100 - adl2) / 100) + adl2;
                 if (tmPrimeInp) tmPrimeInp.value = tmPrime.toFixed(2);
@@ -952,10 +915,10 @@ document.addEventListener('DOMContentLoaded', function () {
             let finalResult = 0;
             if (tmPrime > 0) {
                 if (adl1Inp?.value !== '') {
-                    // Skenario 2: Dengan ADL 1
+
                     finalResult = (tmPrime * (100 - adl1) / 100) + adl1;
                 } else {
-                    // Skenario 1: Tanpa ADL 1
+
                     finalResult = tmPrime;
                 }
             }
@@ -966,7 +929,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 outTm.dataset.val = finalResult; // Simpan nilai asli di belakang layar untuk rata-rata
             }
 
-            // Hitung Absolute Difference dan Average secara instan
+            const hidD = row.querySelector(row.dataset.type === 'simplo' ? '.in-d1' : '.in-d2');
+            if (hidD) hidD.value = finalResult > 0 ? finalResult.toFixed(2) : '';
+
             const tbody = row.closest('tbody');
             if (tbody) {
                 const outTmSimplo = tbody.querySelector('tr[data-type="simplo"] .out-tm');
@@ -985,16 +950,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (outAbs) outAbs.textContent = diff.toFixed(2);
                     if (outAvg) outAvg.textContent = avg.toFixed(2);
 
-                    // Update LANGSUNG ke tab Proximate, tanpa nunggu bubbling/observer
                     const proxTmCell = document.querySelector('tr[data-param="TM"] .prox-ar');
                     if (proxTmCell) proxTmCell.textContent = avg.toFixed(2);
 
-                    // Trigger ulang perhitungan basis lain di Proximate (FC dsb butuh TM)
                     if (typeof calculateProximateBases === 'function') {
                         calculateProximateBases();
                     }
 
-                    // Tetap panggil syncTab1ToTab2 untuk sinkronkan parameter lain (opsional, tetap dipertahankan)
                     if (typeof syncTab1ToTab2 === 'function') {
                         setTimeout(syncTab1ToTab2, 100);
                     }
@@ -1011,7 +973,6 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // ---------- CHN ----------
         else if (code === 'CHN') {
             const tbody = row.closest('tbody');
             if (!tbody) return;
@@ -1058,7 +1019,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (elD2) elD2.value = '';
                 }
 
-                // PANGGIL VALIDASI UNTUK CARBON, HYDROGEN, NITROGEN
                 if (r.type !== 'weight') {
                     let rowPid = pid;
                     let anyInput = tr.querySelector('[name^="params["]');
@@ -1076,62 +1036,52 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // ---------- GCV ----------
         else if (code === 'GCV') {
-            // Weight of Crucible + Sample = weight of crucible + sample mass
+
             const wcs = scope.wc + scope.mass;
             const wcsInp = row.querySelector(`.in-wcs-${i}`);
             if (wcsInp) wcsInp.value = wcs > 0 ? wcs.toFixed(4) : '';
 
-            // t = preliminary result / Ee * sample mass
             const t = scope.ee > 0 ? (scope.pre / scope.ee) * scope.mass : 0;
             const tInp = row.querySelector(`.in-t-${i}`);
             if (tInp) tInp.value = t !== 0 ? t.toFixed(4) : '';
 
-            // e1 = 14.3 * volume of titrant * normality of titrant
             const e1 = 14.3 * scope.vt * scope.nt;
             const e1Inp = row.querySelector(`.in-e1-${i}`);
             if (e1Inp) e1Inp.value = e1 !== 0 ? e1.toFixed(4) : '';
 
-            // e2 = length of fuse * heat of combustion of fuse
             const e2 = scope.lf * scope.hf;
             const e2Inp = row.querySelector(`.in-e2-${i}`);
             if (e2Inp) e2Inp.value = e2 !== 0 ? e2.toFixed(4) : '';
 
-            // e3 = total sulfur * 13.3 * sample mass
             const e3 = scope.ts * 13.3 * scope.mass;
             const e3Inp = row.querySelector(`.in-e3-${i}`);
             if (e3Inp) e3Inp.value = e3 !== 0 ? e3.toFixed(4) : '';
 
-            // Final Result = preliminary result - e1 - e2 - e3
             if (scope.pre > 0) {
                 result = scope.pre - e1 - e2 - e3;
             }
         }
 
-        // ---------- NCV ----------
         else if (code === 'NCV') {
             syncAndCalculateNcv();
             return;
         }
 
-
-       // ---------- Tulis hasil ke input hasil / d ----------
         const inHasil = row.querySelector(`.in-hasil-${i}`);
         const inD = row.querySelector(`.in-d${i}`);
         if (inHasil && !inHasil.hasAttribute('disabled')) {
             const dec = (code === 'CV' || code === 'GCV') ? 0 : 2;
-            // TAMBAHKAN pengecualian untuk TS di bawah ini
+
             if (code !== 'VM' && code !== 'TS' && code !== 'TOTAL SULFUR (%AD/DB)') {
                 inHasil.value = result > 0 ? result.toFixed(dec) : '';
                 if (inD) inD.value = result > 0 ? result.toFixed(dec) : '';
             } else {
-                // Biarkan analis mengetik manual tanpa diintervensi oleh sistem
+
                 if (inD) inD.value = inHasil.value;
             }
         }
 
-        // ---------- Ambil nilai IM untuk konversi basis ----------
         let im1 = 0, im2 = 0;
         if (code === 'VM') {
             const imTable = document.querySelector('table[data-code="IM"]');
@@ -1164,7 +1114,6 @@ document.addEventListener('DOMContentLoaded', function () {
             outDiff.textContent = diff.toFixed(2);
         }
 
-        // ---------- Dry basis ----------
         if (code === 'CV' || code === 'TS' || code === 'ASH' || code === 'VM') {
             const inDb1 = tbody.querySelector('.in-db-1');
             const outDb1 = tbody.querySelector('.out-db-1');
@@ -1190,7 +1139,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // ---------- Average air dry basis ----------
         const outAvgAdb = tbody.querySelector('.out-avg-adb');
         if (outAvgAdb && d1 > 0 && d2 > 0) {
             const avgAdb = (d1 + d2) / 2;
@@ -1200,17 +1148,12 @@ document.addEventListener('DOMContentLoaded', function () {
         runToleranceValidation(tbody, pid, code);
     }
 
-
-    // =====================================================
-    // SINKRONISASI & KALKULASI NCV
-    // =====================================================
     function syncAndCalculateNcv() {
         const ncvTable = document.querySelector('table[data-code="NCV"]');
         if (!ncvTable) return;
         const tbody = ncvTable.querySelector('tbody');
         if (!tbody) return;
 
-        // 1. Bomb No, Call ID, Qv(ad) gross → ditarik dari modul GCV
         const gcvTable = document.querySelector('table[data-code="GCV"]');
         if (gcvTable) {
             const gcvSimplo = gcvTable.querySelector('.simplo-row');
@@ -1231,24 +1174,20 @@ document.addEventListener('DOMContentLoaded', function () {
             if (tQv2) tQv2.value = gcvDuplo?.querySelector('.in-hasil-2')?.value || '';
         }
 
-        // 2. Avg. Qv (ad) gross → average (cal/g) dari modul GCV
         let avgQv = gcvTable ? parseNum(gcvTable.querySelector('.out-avg-adb')?.textContent) : 0;
         const avgQvInp = tbody.querySelector('.in-avgqv');
         if (avgQvInp) avgQvInp.value = avgQv > 0 ? avgQv.toFixed(2) : '';
 
-        // 3. Total Moisture → average dari modul TM
         const tmTable = document.querySelector('table[data-code="TM"]');
         let tmVal = tmTable ? parseNum(tmTable.querySelector('.out-avg-ar')?.textContent) : 0;
         const tmInp = tbody.querySelector('.in-tm');
         if (tmInp) tmInp.value = tmVal > 0 ? tmVal.toFixed(2) : '';
 
-        // 4. Moisture in Analysis → average dari modul IM (Proximate Analysis)
         const imTable = document.querySelector('table[data-code="IM"]');
         let imVal = imTable ? parseNum(imTable.querySelector('.out-avg-adb')?.textContent) : 0;
         const imInp = tbody.querySelector('.in-im');
         if (imInp) imInp.value = imVal > 0 ? imVal.toFixed(2) : '';
 
-        // 5. Hydrogen/Nitrogen/Oxygen (ad) → tab Proximate, kolom Air Dry Basis
         const hVal = parseNum(document.querySelector('tr[data-param="H"] .prox-adb')?.textContent);
         const nVal = parseNum(document.querySelector('tr[data-param="N"] .prox-adb')?.textContent);
         const oVal = parseNum(document.querySelector('tr[data-param="O"] .prox-adb')?.textContent);
@@ -1260,12 +1199,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (nInp) nInp.value = nVal > 0 ? nVal.toFixed(2) : '';
         if (oInp) oInp.value = oVal > 0 ? oVal.toFixed(2) : '';
 
-        // 6. R, T, Hvap → manual (dibaca langsung dari input di tabel ini)
         const rVal = parseNum(tbody.querySelector('.in-r')?.value);
         const tVal = parseNum(tbody.querySelector('.in-t')?.value);
         const hvapVal = parseNum(tbody.querySelector('.in-hvap')?.value);
 
-        // 7. Rumus kalkulasi otomatis
         let qvp = 0, qh = 0, qmar = 0, qvadj = 0, qparj = 0, qparcal = 0;
 
         if (rVal > 0 && tVal > 0) {
@@ -1308,10 +1245,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (d2Inp) d2Inp.value = qparj !== 0 ? qparcal.toFixed(2) : '';
     }
 
-
-    // =====================================================
-    // LISTENER INPUT, TAMBAH / HAPUS BARIS
-    // =====================================================
     function setupInputListener(input) {
         input.addEventListener('input', function () {
             const table = this.closest('table');
@@ -1353,7 +1286,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.addEventListener('click', function (e) {
 
-        // Tambah baris
         if (e.target.closest('.btn-add-row')) {
             const btn = e.target.closest('.btn-add-row');
             const table = btn.closest('table');
@@ -1362,21 +1294,30 @@ document.addEventListener('DOMContentLoaded', function () {
             const lastTbody = tbodies[tbodies.length - 1];
 
             const newTbody = lastTbody.cloneNode(true);
-            const newIndex = parseInt(lastTbody.dataset.index) + 1;
+            const lastIndex = (lastTbody.dataset.index !== undefined && lastTbody.dataset.index !== "") ? parseInt(lastTbody.dataset.index) : 0;
+            const newIndex = lastIndex + 1;
             newTbody.dataset.index = newIndex;
 
             newTbody.querySelectorAll('input, select').forEach(inp => {
                 if (inp.name) {
                     inp.name = inp.name.replace(/\[data\]\[\d+\]/, `[data][${newIndex}]`);
                 }
+
                 if (inp.name && inp.name.endsWith('[pengujian_ke]')) {
-                    inp.value = newIndex + 1;   // pengujian ke-2, 3, dst.
-                } else if (inp.type !== 'hidden' && !inp.hasAttribute('readonly') && inp.type !== 'date') {
-                    inp.value = '';
+                    inp.value = newIndex + 1;
+                    return;
                 }
+            
+                if (inp.type === 'date') return;
+
+                inp.value = '';
+                if (inp.tagName === 'SELECT') updateYesNoColor(inp);
             });
 
-            newTbody.querySelectorAll('.out-diff, .out-avg-adb').forEach(el => el.textContent = '-');
+            newTbody.querySelectorAll('.out-diff, .out-abs, .out-avg-adb, .out-avg-ar, .out-avg-txt, .out-db-1, .out-db-2, .out-avg-db').forEach(el => {
+                el.textContent = '-';
+                delete el.dataset.val;
+            });
 
             table.insertBefore(newTbody, table.querySelector('tfoot'));
 
@@ -1385,7 +1326,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        // Hapus baris terakhir
         if (e.target.closest('.btn-remove-last-row')) {
             const btn = e.target.closest('.btn-remove-last-row');
             const table = btn.closest('table');
@@ -1398,10 +1338,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-
-    // =====================================================
-    // CHECKBOX AKTIFKAN KATEGORI / PARAMETER
-    // =====================================================
     document.querySelectorAll('.cat-enable-check').forEach(cb => {
         cb.addEventListener('change', function () {
             const catId = this.dataset.cat;
@@ -1441,11 +1377,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // draft
     const btnDraft = document.getElementById('btnDraft');
 
     if (btnDraft) {
         btnDraft.addEventListener('click', function () {
+
+            const originalHtml = btnDraft.innerHTML;
+            btnDraft.disabled = true;
+            btnDraft.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan Draft...';
+
             const draft = {};
             draft.nama_program = document.querySelector('input[name="nama_program"]')?.value || '';
             draft.penyelenggara = document.querySelector('input[name="penyelenggara"]')?.value || '';
@@ -1487,7 +1427,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
                 }
 
-                // Ambil semua alat yang dicentang dalam bentuk array
                 let arrAlat = [];
                 if (modal) {
                     modal.querySelectorAll('.chk-alat:checked').forEach(cb => {
@@ -1497,8 +1436,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 draft.params[pid] = {
                     selected: check.checked,
-                    analis_data: arrAnalis, // Simpan array analis
-                    alat_data: arrAlat,     // Simpan array alat
+                    analis_data: arrAnalis, 
+                    alat_data: arrAlat,    
                     
                     tanggal_uji: document.querySelector(`input[name="params[${pid}][tanggal_uji]"]`)?.value || '',
                     metode_uji: document.querySelector(`input[name="params[${pid}][metode_uji]"]`)?.value || '',
@@ -1509,6 +1448,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     furnace_id: document.querySelector(`input[name="params[${pid}][furnace_id]"]`)?.value || document.querySelector(`.param-container[data-pid="${pid}"] input[data-meta="oven_id"]`)?.value || '',
                     std_method: document.querySelector(`input[name="params[${pid}][std_method]"]`)?.value || document.querySelector(`.param-container[data-pid="${pid}"] input[data-meta="std_method"]`)?.value || '',
                     indicate_t: document.querySelector(`input[name="params[${pid}][indicate_t]"]`)?.value || '',
+                    calorimeter_id: document.querySelector(`input[name="params[${pid}][calorimeter_id]"]`)?.value || '',
                     inputs: {}
                 };
 
@@ -1535,6 +1475,10 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .then(res => res.json())
             .then(data => {
+
+                btnDraft.disabled = false;
+                btnDraft.innerHTML = originalHtml;
+
                 if (data.success) {
                     if (document.getElementById('draft_id_input')) {
                         document.getElementById('draft_id_input').value = data.draft_id;
@@ -1551,16 +1495,34 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             })
             .catch(err => {
+                btnDraft.disabled = false;
+                btnDraft.innerHTML = originalHtml;
+
                 console.error(err);
                 Swal.fire('Gagal', 'Terjadi kesalahan jaringan/sistem.', 'error');
             });
         });
     }
 
+    const formQc = document.getElementById('formQc');
+    const btnSubmit = document.getElementById('btnSubmit');
 
-    // =====================================================
-    // DRAFT: MUAT
-    // =====================================================
+    if (formQc) {
+        formQc.addEventListener('submit', function (e) {
+            if (document.querySelectorAll('.param-enable-check:checked').length === 0) {
+                e.preventDefault();
+                alert('Silakan centang minimal 1 parameter yang ingin diuji.');
+                return;
+            }
+
+            if (btnSubmit) {
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan Data...';
+            }
+
+        });
+    }
+
     (function loadDraft() {
         @if(isset($draftData) && $draftData)
         try {
@@ -1669,7 +1631,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             const furnaceInp = document.querySelector(`input[name="params[${pid}][furnace_id]"]`) || document.querySelector(`.param-container[data-pid="${pid}"] input[data-meta="oven_id"]`);
                             const stdInp = document.querySelector(`input[name="params[${pid}][std_method]"]`) || document.querySelector(`.param-container[data-pid="${pid}"] input[data-meta="std_method"]`);
                             const indInp = document.querySelector(`input[name="params[${pid}][indicate_t]"]`);
-
+                            const calInp = document.querySelector(`input[name="params[${pid}][calorimeter_id]"]`);
+                            
                             if (tglInp && pData.tanggal_uji) tglInp.value = pData.tanggal_uji;
                             if (metInp && pData.metode_uji) metInp.value = pData.metode_uji;
                             if (uInp && pData.uncertainty_lab) uInp.value = pData.uncertainty_lab;
@@ -1679,7 +1642,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             if (furnaceInp && pData.furnace_id) furnaceInp.value = pData.furnace_id;
                             if (stdInp && pData.std_method) stdInp.value = pData.std_method;
                             if (indInp && pData.indicate_t) indInp.value = pData.indicate_t;
-
+                            if (calInp && pData.calorimeter_id) calInp.value = pData.calorimeter_id;
                             if (pData.inputs) {
                                 
                                 let maxIndex = 0;
@@ -1725,30 +1688,9 @@ document.addEventListener('DOMContentLoaded', function () {
         @endif
     })();
 
-
-    // =====================================================
-    // VALIDASI SUBMIT FORM
-    // =====================================================
-    const formQc = document.getElementById('formQc');
-    if (formQc) {
-        formQc.addEventListener('submit', function (e) {
-            if (document.querySelectorAll('.param-enable-check:checked').length === 0) {
-                e.preventDefault();
-                alert('Silakan centang minimal 1 parameter yang ingin diuji.');
-                return;
-            }
-            localStorage.removeItem(DRAFT_KEY);
-        });
-    }
-
-
-    // =====================================================
-    // TAB PROXIMATE
-    // =====================================================
     const tab2SampleId = document.getElementById('proximate-sample-id');
     const tab2Adl = document.getElementById('proximate-adl');
 
-    // Hitung semua basis (AR, ADB, DB, DAF) di Tab Proximate
     function calculateProximateBases() {
         const adl = parseFloat(tab2Adl?.value) || 0;
 
@@ -1758,7 +1700,6 @@ document.addEventListener('DOMContentLoaded', function () {
         let ashDb = 0; // Needed for VM, FC, TS, GCV, C/H/N, O DAF calculation
         let vmDb = 0;  // Needed for FC db
 
-        // --- 1. ASH CONTENT ---
         const ashRow = document.querySelector('tr[data-param="ASH"]');
         if (ashRow && ashAdb > 0) {
             let ar = (100 - tmAr) / (100 - imAdb) * ashAdb;
@@ -1770,7 +1711,6 @@ document.addEventListener('DOMContentLoaded', function () {
             ashRow.querySelector('.prox-daf').textContent = '-'; // strip
         }
 
-        // --- 2. VOLATILE MATTER ---
         const vmRow = document.querySelector('tr[data-param="VM"]');
         let vmAdb = parseFloat(vmRow?.querySelector('.prox-adb')?.textContent) || 0;
         if (vmRow && vmAdb > 0) {
@@ -1784,7 +1724,6 @@ document.addEventListener('DOMContentLoaded', function () {
             vmRow.querySelector('.prox-daf').textContent = daf.toFixed(2);
         }
 
-        // --- 3. FIXED CARBON ---
         const fcRow = document.querySelector('tr[data-param="FC"]');
         if (fcRow) {
             let ar = 100 - tmAr - parseFloat(ashRow?.querySelector('.prox-ar')?.textContent || 0) - parseFloat(vmRow?.querySelector('.prox-ar')?.textContent || 0);
@@ -1798,7 +1737,6 @@ document.addEventListener('DOMContentLoaded', function () {
             fcRow.querySelector('.prox-daf').textContent = daf.toFixed(2);
         }
 
-        // --- 3.5 CARBON / HYDROGEN / NITROGEN (sumber: Dry Basis, dari average CHN) ---
         ['C', 'H', 'N'].forEach(param => {
             const row = document.querySelector(`tr[data-param="${param}"]`);
             if (!row) return;
@@ -1814,7 +1752,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // --- 4. TOTAL SULFUR & GCV ---
         const otherRows = ['TS', 'GCV'];
         otherRows.forEach(param => {
             const row = document.querySelector(`tr[data-param="${param}"]`);
@@ -1831,7 +1768,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // --- 5. OXYGEN (by difference) ---
         const oRow = document.querySelector('tr[data-param="O"]');
         if (oRow) {
             const g = (param, basis) => parseFloat(document.querySelector(`tr[data-param="${param}"] .prox-${basis}`)?.textContent) || 0;
@@ -1848,14 +1784,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Listen to ADL input changes
     if (tab2Adl) {
 
-        // Fungsi khusus agar bisa dipanggil kapan saja
         function syncAdlToTm() {
             const adlVal = tab2Adl.value;
 
-            // 1. Tembakkan angka dari Tab Proximate ke semua kolom %ADL 2 di layar
             document.querySelectorAll('.in-adl2').forEach(inp => {
                 if (inp.value !== adlVal) {
                     inp.value = adlVal;
@@ -1863,29 +1796,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 inp.dispatchEvent(new Event('input', { bubbles: true }));
             });
 
-            // 2. Pancing kalkulasi tabel TM (tanpa bergantung pada data-code)
             const firstAdl2 = document.querySelector('.in-adl2');
             if (firstAdl2) {
-                // Memaksa sistem merasa ada "ketikan" agar rumus otomatis berjalan
+
                 firstAdl2.dispatchEvent(new Event('input', { bubbles: true }));
             }
         }
 
-        // Jalankan SECARA REAL-TIME setiap analis mengetik di kotak ADL
         tab2Adl.addEventListener('input', () => {
             calculateProximateBases(); // Hitung proximate
             syncAdlToTm();             // Lempar datanya ke modul TM
         });
 
-        // Jalankan OTOMATIS saat halaman pertama kali load
-        // (Ini menuntaskan masalah "belum sinkron" saat memuat data dari Draft)
         setTimeout(syncAdlToTm, 800);
     }
 
-
-    // =====================================================
-    // SINKRONISASI TAB 1 -> TAB 2
-    // =====================================================
     function syncTab1ToTab2() {
         const mappings = [
             { code: 'TM', paramRow: 'TM', targetBasis: 'ar' },
@@ -1900,20 +1825,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let updated = false;
 
-        // Sync TM Average to TM_ar in Tab 2
         const tmTable = document.querySelector('table[data-code="TM"]'); // Need to find TM code
         if (tmTable) {
             const tbody = tmTable.querySelector('tbody');
             if (tbody) {
                 const avgArStr = tbody.querySelector('.out-avg-ar')?.textContent || '-';
-                // Wait, in Proximate table TM is not row! It's just used for calculations. We don't have TM in Proximate table row. Wait, yes we do, if the user requested it? No, the user didn't request a TM row in Proximate. They requested TM_ar to be used in calculations. Let's store it globally or hidden input.
-                // Ah, the user didn't ask for a TM row in Proximate. They just said "Total moisture: kolom as received basis: nilai datanya ambil nilai data average di modul determination of total moisture".
-                // Wait, if there's no row, where do we put it? Let's assume there IS a row, or we just put it in window.tmAverage
+
                 window.tmAverage = parseFloat(avgArStr) || 0;
             }
         }
 
-        // Sync RM Average to RM input in Tab 2
         const rmTable = document.querySelector('table[data-code="RM"]');
         if (rmTable) {
             const tbody = rmTable.querySelector('tbody');
@@ -1923,22 +1844,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (rmInput && rmInput.value !== avgAdbStr) {
                     rmInput.value = avgAdbStr;
                     updated = true;
-                    // Trigger calculate row for TM if RM changed
+
                     const inRms = document.querySelectorAll('.in-rm');
                     inRms.forEach((inRm, idx) => {
-                        // wait, rm needs simplo/duplo results, not just average!
+
                     });
                 }
             }
         }
 
-        // Let's actually pull RM simplo/duplo/average results for TM directly here
         if (rmTable) {
-            // 1. Ambil nilai M% Simplo dan Duplo dari RM
+
             const simploOut = rmTable.querySelector('.simplo-row .in-hasil-1')?.value;
             const duploOut = rmTable.querySelector('.duplo-row .in-hasil-2')?.value;
 
-            // 2. Ambil nilai Average dari RM
             let rmAverage = rmTable.querySelector('.out-avg-adb')?.textContent;
             if (rmAverage === '-') rmAverage = ''; // Bersihkan jika belum ada hasil
 
@@ -1947,28 +1866,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 const tmSimploRM = tmTableNode.querySelector('tr[data-type="simplo"] .in-rm');
                 const tmDuploRM = tmTableNode.querySelector('tr[data-type="duplo"] .in-rm');
 
-                // 3. LOGIKA BARU SESUAI EXCEL:
-
-                // A. Simplo TM mengambil dari Average RM.
-                // (Catatan: Jika average belum muncul, ia akan mengambil simploOut sementara agar kolom tidak kosong)
                 if (tmSimploRM) {
                     let targetValSimplo = rmAverage ? rmAverage : (simploOut || '');
                     if (tmSimploRM.value !== targetValSimplo) tmSimploRM.value = targetValSimplo;
                 }
 
-                // B. Duplo TM TETAP mengambil dari M% RM Duplo.
                 if (tmDuploRM && tmDuploRM.value !== duploOut) {
                     tmDuploRM.value = duploOut || '';
                 }
 
-                // Trigger TM recalculation
                 if (tmTableNode.dataset.code) {
-                    // Kalkulasi TM otomatis tereksekusi saat input berubah
+
                 }
             }
         }
 
-        // Sync CHN (Carbon/Hydrogen/Nitrogen) averages ke baris C/H/N di Proximate
         const chnTable = document.querySelector('table[data-code="CHN"]');
         if (chnTable) {
             const chnCheck = document.querySelector(`.param-enable-check[data-pid="${chnTable.dataset.pid}"]`);
@@ -1996,7 +1908,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // Sync Methods from Tab 1 to Tab 2
         const methodMap = {
             'TM': 'TM', 'IM': 'IM', 'ASH': 'ASH', 'VM': 'VM', 'FC': 'FC',
             'TS': 'TS', 'GCV': 'GCV',
@@ -2008,18 +1919,18 @@ document.addEventListener('DOMContentLoaded', function () {
             const tab1Table = document.querySelector(`table[data-code="${tab1Code}"]`);
 
             if (tab1Table) {
-                // 1. Kunci pencarian hanya di dalam kotak modul (container) tabel ini saja
+
                 const container = tab1Table.closest('.param-container');
 
                 if (container) {
-                    // 2. Kode Sapu Jagat: Cari input yang namanya mengandung "[std_method]" ATAU memiliki "data-meta='std_method'"
+
                     const stdMethodInput = container.querySelector('input[name*="[std_method]"], input[data-meta="std_method"]');
 
                     if (stdMethodInput) {
                         const proxRow = document.querySelector(`tr[data-param="${proxParam}"]`);
                         if (proxRow) {
                             const methodInp = proxRow.querySelector('.prox-method');
-                            // 3. Jika ketemu dan isinya beda, langsung tembak/sinkronkan ke Tab Proximate
+
                             if (methodInp && methodInp.value !== stdMethodInput.value) {
                                 methodInp.value = stdMethodInput.value;
                             }
@@ -2059,18 +1970,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (updated) {
             calculateProximateBases();
         }
-
-        syncAndCalculateNcv(); // Sync NCV if needed
-
-        // Run once on load to catch any existing data
-        setTimeout(syncTab1ToTab2, 1000);
+        syncAndCalculateNcv(); 
     }
 
-    // Jalankan syncTab1ToTab2 setiap ada perubahan input di Tab 1
     const tabInputData = document.getElementById('tab-input-data');
     if (tabInputData) {
 
-        // Event listener untuk input langsung
         tabInputData.addEventListener('input', () => {
             setTimeout(syncTab1ToTab2, 200);
         });
@@ -2078,7 +1983,6 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(syncTab1ToTab2, 200);
         });
 
-        // MutationObserver untuk menangkap perubahan textContent (misal out-avg-adb)
         const observer = new MutationObserver((mutations) => {
             let shouldSync = false;
             for (const mutation of mutations) {
@@ -2098,11 +2002,8 @@ document.addEventListener('DOMContentLoaded', function () {
             characterData: true
         });
     }
+    setTimeout(syncTab1ToTab2, 1000);
 
-
-    // =====================================================
-    // AFT KALIBRASI
-    // =====================================================
     const aftBody = document.getElementById('aft-calib-body');
     const btnAftAdd = document.getElementById('aft-add-row');
     const btnAftRemove = document.getElementById('aft-remove-row');
@@ -2113,7 +2014,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (aftBody) {
 
-        // Add row
         btnAftAdd.addEventListener('click', () => {
             const tr = document.createElement('tr');
             tr.className = 'aft-calib-row';
@@ -2125,7 +2025,6 @@ document.addEventListener('DOMContentLoaded', function () {
             aftBody.appendChild(tr);
         });
 
-        // Remove row
         btnAftRemove.addEventListener('click', () => {
             if (aftBody.children.length > 2) {
                 aftBody.lastElementChild.remove();
@@ -2134,7 +2033,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // Generate Interpolation
         btnAftGenerate.addEventListener('click', generateAftInterpolation);
 
         function generateAftInterpolation() {
@@ -2160,7 +2058,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             points.sort((a, b) => a.eq - b.eq);
 
-            // Simpan data points globally supaya bisa dipakai Tab 1
             window.aftCalibrationPoints = points;
 
             let html = '<div class="row g-2">';
@@ -2177,7 +2074,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 <tbody>`;
 
                 for (let temp = p1.eq + 5; temp < p2.eq; temp += 5) {
-                    // Linear interpolation formula: Y = Y1 + ((X - X1) * (Y2 - Y1)) / (X2 - X1)
+
                     let Y = p1.std + ((temp - p1.eq) * (p2.std - p1.std)) / (p2.eq - p1.eq);
                     html += `<tr><td>${temp}</td><td>${Y.toFixed(2)}</td></tr>`;
                 }
@@ -2189,7 +2086,6 @@ document.addEventListener('DOMContentLoaded', function () {
             aftInterpContainer.innerHTML = html;
         }
 
-        // Global AFT Lookup function for Tab 1
         window.getAftCorrection = function (suhu) {
             if (!window.aftCalibrationPoints || window.aftCalibrationPoints.length < 2) return 0;
             const points = window.aftCalibrationPoints;
@@ -2207,7 +2103,6 @@ document.addEventListener('DOMContentLoaded', function () {
             return 0; // Out of bounds
         };
 
-        // Load History List
         function loadAftHistory() {
             fetch('/aft-kalibrasi')
                 .then(res => res.json())
@@ -2224,7 +2119,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         aftSelect.appendChild(opt);
                     });
 
-                    // Auto load the active one
                     const active = data.find(i => i.is_active);
                     if (active) renderAftData(active.data_points);
                     setAftViewingBadge(false);
@@ -2281,7 +2175,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // Save new Calibration
         btnAftSave.addEventListener('click', () => {
             const rows = document.querySelectorAll('.aft-calib-row');
             let points = [];
@@ -2325,7 +2218,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
-        // Initial load
         loadAftHistory();
     }
 
@@ -2344,7 +2236,6 @@ document.addEventListener('DOMContentLoaded', function () {
             ? `<span class="text-dark fw-bold">${personils.join(', ')}</span>` 
             : '<span class="text-danger fst-italic">Belum dipilih</span>';
 
-        
         let alats = [];
         modal.querySelectorAll('.chk-alat:checked').forEach(cb => {
             alats.push(cb.getAttribute('data-nama'));
@@ -2408,6 +2299,16 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    const tabCetak = document.getElementById('tab-cetak-form-tab');
+    if (tabCetak) {
+        tabCetak.addEventListener('shown.bs.tab', function () {
+            const modulSelector = document.getElementById('cetak-modul-selector');
+            if (modulSelector && modulSelector.value) {
+                modulSelector.dispatchEvent(new Event('change'));
+            }
+        });
+    }
+
     setTimeout(function () {
         document.querySelectorAll('.param-table, .input-table').forEach(table => {
             const pid = table.dataset.pid;
@@ -2418,13 +2319,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     const inp = row.querySelector('input[type="text"]:not([readonly])');
                     if (inp) inp.dispatchEvent(new Event('input', { bubbles: true }));
                 });
-                if (firstInput) {
-                    firstInput.dispatchEvent(new Event('input', { bubbles: true }));
-                }
             }
         });
     }, 1500);
-
 
 }); // /DOMContentLoaded
 </script>

@@ -27,6 +27,7 @@
                 <th style="min-width: 100px;">Qh</th>
                 <th style="min-width: 100px;">Qm (ar)</th>
                 <th style="min-width: 130px;">Qv (ad) gross (J/g)</th>
+                <th style="min-width: 130px;" class="bg-warning bg-opacity-10">Qpar (net) (J/g)</th>
                 <th style="min-width: 130px;" class="bg-warning bg-opacity-25">Qpar (net)</th>
             </tr>
         </thead>
@@ -74,7 +75,7 @@
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="18" class="text-start">
+                <td colspan="20" class="text-start">
                     <small class="text-muted"><i class="fas fa-info-circle me-1"></i> Bomb No, Call ID, dan Qv (ad) gross otomatis diambil dari modul Determination of Gross Calorific Value (GCV).</small>
                 </td>
             </tr>

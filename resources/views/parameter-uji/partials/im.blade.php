@@ -130,5 +130,5 @@
     @endif
     
     @include('parameter-uji.partials.override-modal')
-    @include('qc-uji-banding.print.footer_ttd', ['idPrefix' => 'im', 'kodeDokumen' => 'FOR/COAL-OPS/119', 'rev' => '02', 'tglBerlaku' => '03/08/2021'])
+    @include('qc-uji-banding.print.footer_ttd', ['idPrefix' => 'im', 'kodeDokumen' => 'FOR/COAL-OPS/026', 'rev' => '03', 'tglBerlaku' => '16/08/2021'])
 </div>

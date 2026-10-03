@@ -18,8 +18,9 @@
                 <th class="align-middle bg-warning bg-opacity-25">Average %</th>
             </tr>
         </thead>
-        <tbody>
-            <!-- weight -->
+
+        <tbody class="chn-tbody" data-index="0">
+            
             <tr class="row-entry" data-type="weight">
                 <td rowspan="4" class="align-middle">
                     <input type="number" class="form-control form-control-sm text-center mx-auto" name="params[{{ $pid_c }}][data][0][pengujian_ke]" style="width: 70px; min-width: 70px;" value="1">
@@ -41,7 +42,6 @@
                 <td class="align-middle bg-warning bg-opacity-25 fw-bold fs-6"><span class="out-avg-txt">-</span></td>
             </tr>
 
-            <!-- carbon -->
             <tr class="row-entry" data-type="carbon">
                 <td class="fw-bold">Carbon %db</td>
                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-c-1" name="params[{{ $pid_c }}][data][0][mentah][c_1]" disabled></td>
@@ -62,7 +62,6 @@
                 </td>
             </tr>
 
-            <!-- hydrogen -->
             <tr class="row-entry" data-type="hydrogen">
                 <td class="fw-bold">Hydrogen %db</td>
                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-h-1" name="params[{{ $pid_h }}][data][0][mentah][h_1]" disabled></td>
@@ -82,8 +81,7 @@
                     <input type="hidden" class="in-d2" name="params[{{ $pid_h }}][data][0][d2]">
                 </td>
             </tr>
-            
-            <!-- ROW 4: NITROGEN -->
+
             <tr class="row-entry" data-type="nitrogen">
                 <td class="fw-bold">Nitrogen %db</td>
                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-n-1" name="params[{{ $pid_n }}][data][0][mentah][n_1]" disabled></td>
@@ -104,5 +102,19 @@
                 </td>
             </tr>
         </tbody>
+
+        <tfoot>
+            <tr>
+                <td colspan="8" class="text-start">
+                    <button type="button" class="btn btn-sm btn-outline-primary btn-add-row mt-2" data-pid="{{ $pid_c }}" data-code="CHN" disabled>
+                        <i class="fas fa-plus"></i> Tambah Pengujian
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-last-row mt-2" data-pid="{{ $pid_c }}" disabled>
+                        <i class="fas fa-minus"></i> Hapus Pengujian Terakhir
+                    </button>
+                </td>
+            </tr>
+        </tfoot>
+        
     </table>
 </div>

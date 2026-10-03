@@ -58,7 +58,7 @@
             @endif
         </thead>
         <tbody class="proximate-tbody" data-index="0">
-            <!-- SIMPLO -->
+            
             <tr class="row-entry simplo-row">
                 <td rowspan="2" class="align-middle">
                     <input type="number" class="form-control form-control-sm text-center mx-auto" name="params[{{ $pid }}][data][0][pengujian_ke]" style="width: 70px; min-width: 70px;" value="1">
@@ -66,7 +66,7 @@
                 <td rowspan="2" class="align-middle">
                     <input type="date" class="form-control form-control-sm" name="params[{{ $pid }}][data][0][tanggal_uji]" style="width: 130px; min-width: 130px;" value="{{ date('Y-m-d') }}">
                 </td>
-                <!-- Kolom Date Dihapus, hidden input pindah ke sini -->
+                
                 <td>
                     <input type="text" class="form-control form-control-sm in-dish-1" name="params[{{ $pid }}][data][0][dish_1]" placeholder="S" disabled>
                     <input type="hidden" class="in-d1" name="params[{{ $pid }}][data][0][d1]">
@@ -79,8 +79,7 @@
                 @if($code === 'ASH' || $code === 'VM')
                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m2m1-1" name="params[{{ $pid }}][data][0][mentah][m2m1_1]" disabled></td>
                 @endif
-                
-                <!-- Ini M3 Simplo (Pakai angka 1) -->
+
                 <td><input type="text" class="form-control form-control-sm in-m3-1 bg-light border-0" name="params[{{ $pid }}][data][0][mentah][m3_1]" readonly tabindex="-1"></td>
                 
                 @if($code === 'IM' || $code === 'RM')
@@ -111,7 +110,7 @@
                 <td rowspan="2" class="align-middle out-avg-adb">-</td>
                 
             </tr>
-            <!-- DUPLO -->
+            
             <tr class="row-entry duplo-row">
                 <td><input type="text" class="form-control form-control-sm in-dish-2" name="params[{{ $pid }}][data][0][dish_2]" placeholder="D" disabled>
                     <input type="hidden" class="in-d2" name="params[{{ $pid }}][data][0][d2]">
@@ -124,8 +123,7 @@
                 @if($code === 'ASH' || $code === 'VM')
                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m2m1-2" name="params[{{ $pid }}][data][0][mentah][m2m1_2]" disabled></td>
                 @endif
-                
-                <!-- Ini M3 Duplo (Pakai angka 2) -->
+
                 <td><input type="text" class="form-control form-control-sm in-m3-2 bg-light border-0" name="params[{{ $pid }}][data][0][mentah][m3_2]" readonly tabindex="-1"></td>
                 
                 @if($code === 'IM' || $code === 'RM')

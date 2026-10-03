@@ -19,7 +19,7 @@
                 <th>AVERAGE %</th>
             </tr>
         </thead>
-        <tbody class="generic-tbody">
+        <tbody class="generic-tbody" data-index="0">
             <tr class="row-entry simplo-row">
                 <td rowspan="2" class="align-middle">
                     <input type="number" class="form-control form-control-sm text-center mx-auto" name="params[{{ $pid }}][data][0][pengujian_ke]" style="width: 70px; min-width: 70px;" value="1">
@@ -33,8 +33,7 @@
                 </td>
                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-mass-1" name="params[{{ $pid }}][data][0][mentah][mass_1]" disabled></td>
                 <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="params[{{ $pid }}][data][0][mentah][ts_1]"></td>
-                
-                <!-- Absolute Diff (Kiri) dan Dropdown YES/NO (Kanan) -->
+
                 <td rowspan="2" class="align-middle out-diff">-</td>
                 <td rowspan="2" class="align-middle p-1">
                     <select class="form-select form-select-sm fw-bold" name="params[{{ $pid }}][data][0][yesno]" onchange="updateYesNoColor(this)">
@@ -43,8 +42,7 @@
                         <option value="NO">NO</option>
                     </select>
                 </td>
-                
-                <!-- Average -->
+
                 <td rowspan="2" class="align-middle fw-bold out-avg-adb">-</td>
             </tr>
             <tr class="row-entry duplo-row">
