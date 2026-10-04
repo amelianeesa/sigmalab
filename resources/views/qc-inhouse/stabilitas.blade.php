@@ -991,8 +991,41 @@ const State = {};
     };
 @endforeach
 
+@if(session('error'))
+    Swal.fire({ icon: 'error', title: 'Gagal Menyimpan', text: @json(session('error')) });
+@endif
+@if(session('success'))
+    Swal.fire({ icon: 'success', title: 'Berhasil', text: @json(session('success')), timer: 2500, showConfirmButton: false });
+@endif
+
 document.addEventListener('DOMContentLoaded', function() {
 
+    let invalidHandled = false;
+    document.getElementById('formStabilitas').addEventListener('invalid', function(e) {
+        if (invalidHandled) return;
+        
+        const pane = e.target.closest('.tab-pane');
+        if (!pane) return;
+        const btn = document.querySelector(`[data-bs-target="#${pane.id}"]`);
+        if (!btn) return;
+
+        invalidHandled = true;
+        setTimeout(() => invalidHandled = false, 1500);
+
+        Swal.fire({ 
+            toast: true, 
+            position: 'top-end', 
+            icon: 'warning',
+            title: 'Harap lengkapi semua isian botol (termasuk di tab lain).',
+            showConfirmButton: false, 
+            timer: 3000 
+        });
+        
+        bootstrap.Tab.getOrCreateInstance(btn).show();
+    }, true);
+
+    const tTableMap = @json($tTabelLookup);
+    
     const rawXData = {
         @php
             $imParam = $batch->parameters->filter(function($p) {
@@ -1035,8 +1068,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 if ($v2 === null) $v2 = $dh->nilai_d2;
 
-                if($v1 !== null) $dbArr[] = (float)$v1;
-                if($v2 !== null) $dbArr[] = (float)$v2;
+                if($v1 !== null) $dbArr[] = round((float)$v1, 2);
+                if($v2 !== null) $dbArr[] = round((float)$v2, 2);
             }
         @endphp
         "{{ $pCode }}": {!! json_encode($dbArr) !!},
@@ -1049,13 +1082,21 @@ document.addEventListener('DOMContentLoaded', function() {
         tablesByCode[code] = table;
 
         table.addEventListener('input', function(e) {
-            if(e.target.tagName === 'INPUT') {
-                processTable(code, table);
+            if (e.target.tagName === 'INPUT') {
+                if (code === 'IM') {
+                    executionOrder.forEach(c => { if (tablesByCode[c]) processTable(c, tablesByCode[c]); });
+                } else {
+                    processTable(code, table);
+                }
             }
         });
         table.addEventListener('change', function(e) {
             if(e.target.tagName === 'INPUT') {
-                processTable(code, table);
+                if (code === 'IM') {
+                    executionOrder.forEach(c => { if (tablesByCode[c]) processTable(c, tablesByCode[c]); });
+                } else {
+                    processTable(code, table);
+                }
             }
         });
 
@@ -1088,8 +1129,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 el.name = el.name.replace(/\[\d+\]/, `[${newIndex}]`);
             });
 
-            cloneSimplo.querySelectorAll('input').forEach(el => { if(el.type !== 'hidden') el.value = ''; });
-            cloneDuplo.querySelectorAll('input').forEach(el => { if(el.type !== 'hidden') el.value = ''; });
+            cloneSimplo.querySelectorAll('input').forEach(el => { el.value = ''; });
+            cloneDuplo.querySelectorAll('input').forEach(el => { el.value = ''; });
             cloneSimplo.querySelectorAll('select').forEach(el => { el.value = ''; });
 
             cloneSimplo.querySelectorAll('td').forEach(td => {
@@ -1161,7 +1202,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const filteredData = new FormData();
 
             for (let [key, value] of allFormData.entries()) {
-                if (key === '_token' || key.startsWith('kondisi[') || key.startsWith(`data_${pid}[`)) {
+                if (key === '_token' || key.startsWith('kondisi[') || key.startsWith(`data_${pid}[`) || key.startsWith(`resource_${pid}[`)) {
                     filteredData.append(key, value);
                 }
             }
@@ -1173,23 +1214,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: filteredData
             })
-            .then(response => {
-                if (response.ok) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Tersimpan!',
+            .then(async response => {
+                let data = null;
+                try { data = await response.json(); } catch (e) {}
+
+                if (response.ok && data && data.success) {
+                    Swal.fire({ icon: 'success', title: 'Tersimpan!',
                         text: `Data Parameter ${code} berhasil disimpan sementara.`,
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
+                        timer: 2000, showConfirmButton: false });
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: `Terjadi kesalahan saat menyimpan tabel ${code}.`,
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
+                    Swal.fire({ icon: 'error', title: 'Gagal Menyimpan',
+                        text: (data && data.message) || `Terjadi kesalahan saat menyimpan tabel ${code}.` });
                 }
             })
             .catch(error => {
@@ -1205,12 +1240,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.innerHTML = origHtml;
                 this.disabled = false;
             });
-        });
-    });
-
-    document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(btn => {
-        btn.addEventListener('shown.bs.tab', function (e) {
-            renderLivePreview();
         });
     });
 
@@ -1409,8 +1438,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             else if(code === 'CV') {
-                const ts_s = State['TS'] ? State['TS'].data[i].simplo_adb : null;
-                const ts_d = State['TS'] ? State['TS'].data[i].duplo_adb : null;
+                const ts_s = (State['TS'] && State['TS'].data[i]) ? State['TS'].data[i].simplo_adb : null;
+                const ts_d = (State['TS'] && State['TS'].data[i]) ? State['TS'].data[i].duplo_adb : null;
 
                 tr1.querySelector('.in-ts-1').value = rnd(ts_s, 2);
                 tr2.querySelector('.in-ts-2').value = rnd(ts_d, 2);
@@ -1508,11 +1537,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 State[code].data[i].simplo_adb = null;
                 State[code].data[i].duplo_adb = null;
                 State[code].data[i].avg_adb = null;
+                State[code].data[i].simplo_db = null;
+                State[code].data[i].duplo_db = null;
 
                 tr1.querySelector('.out-diff') ? tr1.querySelector('.out-diff').textContent = '-' : null;
                 tr1.querySelector('.out-tol') ? tr1.querySelector('.out-tol').textContent = '-' : null;
                 tr1.querySelector('.out-avg-adb') ? tr1.querySelector('.out-avg-adb').textContent = '-' : null;
                 tr1.querySelector('.out-avg-db') ? tr1.querySelector('.out-avg-db').textContent = '-' : null;
+                
+                if(tr1.querySelector('.in-db-1')) tr1.querySelector('.in-db-1').value = '';
+                if(tr1.querySelector('.in-db-2')) tr1.querySelector('.in-db-2').value = '';
+            
             }
         }
 
@@ -1520,10 +1555,11 @@ document.addEventListener('DOMContentLoaded', function() {
         renderLivePreview();
     }
 
-    document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(btn => {
+    document.querySelectorAll('#parameterTabs button[data-bs-toggle="tab"]').forEach(btn => {
         btn.addEventListener('shown.bs.tab', function (e) {
             const newCode = e.target.dataset.code;
-            processTable(newCode, document.querySelector(`.param-table[data-code="${newCode}"]`));
+            const tbl = document.querySelector(`.param-table[data-code="${newCode}"]`);
+            if (tbl) processTable(newCode, tbl);
         });
     });
 
@@ -1587,15 +1623,10 @@ document.addEventListener('DOMContentLoaded', function() {
             tHitung = Math.abs(meanX - meanY) / sGab;
         }
 
-        const tTableMap = {
-            20: 2.086, 21: 2.080, 22: 2.074, 23: 2.069, 24: 2.064, 25: 2.060,
-            26: 2.056, 27: 2.052, 28: 2.048, 29: 2.045, 30: 2.042, 31: 2.040,
-            32: 2.037, 33: 2.035, 34: 2.032, 35: 2.030, 36: 2.028, 37: 2.026,
-            38: 2.024, 39: 2.023, 40: 2.021, 60: 2.000, 120: 1.980
-        };
-        const tTabel = tTableMap[df] || 2.0;
+        const tTabel = tTableMap[df] ?? 1.98;
 
         const isStabil = tHitung < tTabel;
+
         const html = `
             <div class="col-6 col-md-3">
                 <div class="border rounded p-2 bg-white shadow-sm h-100">
@@ -1710,13 +1741,7 @@ document.addEventListener('DOMContentLoaded', function() {
             tHitung = Math.abs(meanX - meanY) / sGab;
         }
 
-        const tTableMap = {
-            20: 2.086, 21: 2.080, 22: 2.074, 23: 2.069, 24: 2.064, 25: 2.060,
-            26: 2.056, 27: 2.052, 28: 2.048, 29: 2.045, 30: 2.042, 31: 2.040,
-            32: 2.037, 33: 2.035, 34: 2.032, 35: 2.030, 36: 2.028, 37: 2.026,
-            38: 2.024, 39: 2.023, 40: 2.021, 60: 2.000, 120: 1.980
-        };
-        const tTabel = tTableMap[df] || 2.0;
+        const tTabel = tTableMap[df] ?? 1.98;
 
         const paramNames = {
             'IM': 'Moisture in the analysis sample',
@@ -1915,6 +1940,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 const origTable = document.querySelector(`.param-table[data-code="${code}"]`);
                 if(origTable) {
                     const tableClone = origTable.cloneNode(true);
+
+                    const origSelects = origTable.querySelectorAll('select');
+                    tableClone.querySelectorAll('select').forEach((sel, idx) => {
+                        const o = origSelects[idx];
+                        const text = o && o.selectedIndex >= 0 ? o.options[o.selectedIndex].text : '';
+                        sel.parentNode.replaceChild(document.createTextNode(text), sel);
+                    });
+
                     tableClone.querySelectorAll('input[type="hidden"]').forEach(el => el.remove());
                     tableClone.querySelectorAll('input').forEach(inp => {
                         const text = document.createTextNode(inp.value);

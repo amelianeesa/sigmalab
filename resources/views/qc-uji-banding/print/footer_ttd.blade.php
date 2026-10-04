@@ -11,11 +11,15 @@
     </div>
 </div>
 
-<table class="table table-borderless table-sm mt-4 mb-0" style="font-size: 11px;">
-    <tr>
-        <td style="width: 30%;">{{ $kodeDokumen ?? '-' }}</td>
-        <td style="width: 20%; text-align: center;">Rev: {{ $rev ?? '-' }}</td>
-        <td style="width: 30%; text-align: center;">Tgl. Berlaku: {{ $tglBerlaku ?? '-' }}</td>
-        <td style="width: 20%; text-align: right;">Hal 1 dari 1 hal</td>
-    </tr>
-</table>
+<div style="margin-top: 80px;"> 
+    <div class="border-top border-dark border-1 pt-2"> 
+        <table class="table table-borderless table-sm mb-0 w-100" style="font-size: 11px;">
+            <tr>
+                <td class="p-0 text-start" style="width: 25%;">{{ $kodeDokumen ?? '-' }}</td>
+                <td class="p-0 text-center" style="width: 25%;">Rev: {{ $rev ?? '-' }}</td>
+                <td class="p-0 text-center" style="width: 25%;">Tgl. Berlaku: {{ $tglBerlaku ?? '-' }}</td>
+                <td class="p-0 text-end" style="width: 25%;">Hal 1 dari 1 hal</td>
+            </tr>
+        </table>
+    </div>
+</div>

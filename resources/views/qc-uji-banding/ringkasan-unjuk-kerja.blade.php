@@ -19,12 +19,11 @@
     </div>
 
     @php
-        // Mapping nama parameter agar konsisten dengan halaman evaluasi vendor
+
         $paramMap = [];
         $allowedParams = ['IM', 'TM', 'ASH', 'VM', 'C', 'H', 'N', 'CV', 'GCV'];
         $sulfurAliases = ['TOTAL SULFUR (%AD/DB)', 'TOTAL SULFUR', 'TS'];
 
-        // Lookup TM untuk IM
         $tmParam = $program->parameters->first(function($x) {
             return strtoupper($x->parameterUji->nama_parameter ?? '') === 'TM';
         });
@@ -64,7 +63,6 @@
         }
     @endphp
 
-    {{-- ============ TABEL RINGKASAN ============ --}}
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -117,7 +115,7 @@
                                 </td>
                             </tr>
                         @endforeach
-                        {{-- Baris Relative Density (hardcoded) --}}
+                        
                         <tr>
                             <td class="text-start fw-bold">Relative Density</td>
                             <td>db</td>
@@ -135,12 +133,11 @@
         </div>
     </div>
 
-    {{-- ============ DETAIL PER PARAMETER ============ --}}
     @foreach($paramMap as $idx => $item)
         @php $p = $item['param']; @endphp
         <div class="card border-0 shadow-sm mb-4" id="detail-{{ $idx }}">
             <div class="card-body">
-                {{-- Header --}}
+                
                 <div class="text-center mb-3">
                     <h5 class="fw-bold mb-0">Sucofindo Proficiency Test - Coal</h5>
                     <p class="text-muted mb-1">Historical Performance</p>
@@ -148,7 +145,6 @@
                     <p class="mb-0">Laboratory : <strong>{{ $program->nama_lab ?? 'PT SUCOFINDO Cabang Cilacap' }}</strong></p>
                 </div>
 
-                {{-- Tabel Historical --}}
                 <div class="table-responsive mb-4">
                     <table class="table table-bordered table-sm align-middle text-center" style="max-width: 700px; margin: 0 auto;">
                         <thead class="table-light">
@@ -187,7 +183,6 @@
                     </table>
                 </div>
 
-                {{-- Chart Z-Score per Period --}}
                 <div class="text-center mb-2">
                     <h6 class="fw-bold">{{ $item['name'] }}</h6>
                 </div>

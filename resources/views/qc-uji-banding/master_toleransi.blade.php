@@ -51,12 +51,11 @@
     </div>
 
     @php
-        // 1. Ekstrak data khusus C, H, N untuk digabung
+
         $chnParams = $parameters->filter(fn($p) => in_array($p->nama_parameter, ['C', 'H', 'N']));
         $chnIds = $chnParams->pluck('parameter_uji_id')->toArray();
         $chnToleransis = $chnParams->pluck('toleransis')->flatten();
-        
-        // 2. Urutan Modul
+
         $urutanModul = [
             'Proximate Analysis', 
             'Determination of Sulfur by IR Spectrometry', 
@@ -72,7 +71,6 @@
             return $pos === false ? 999 : $pos; 
         });
 
-        // 3. Tentukan Active Tab (Termasuk deteksi jika yang aktif adalah salah satu dari CHN)
         $firstParamId = $groupedParameters->first() ? $groupedParameters->first()->first()->parameter_uji_id : null;
         $activeTab = session('active_tab', $firstParamId);
         $isChnActive = in_array($activeTab, $chnIds);
@@ -81,7 +79,7 @@
     <div class="card shadow-sm">
         <div class="card-body">
             <div class="row">
-                <!-- SISI KIRI: Daftar Modul & Parameter -->
+                
                 <div class="col-md-3 border-end">
                     <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                         @foreach($groupedParameters as $kategori => $params)
@@ -91,7 +89,7 @@
                             </div>
                             
                             @foreach($params as $param)
-                                <!-- Sembunyikan tab H dan N, biarkan C yang menjadi wakil tab Gabungan -->
+                                
                                 @if(in_array($param->nama_parameter, ['H', 'N']))
                                     @continue
                                 @endif
@@ -116,12 +114,11 @@
                     </div>
                 </div>
 
-                <!-- SISI KANAN: Konten Tabel & Modal -->
                 <div class="col-md-9">
                     <div class="tab-content" id="v-pills-tabContent">
                         
                         @foreach($parameters as $param)
-                            <!-- Sama seperti sidebar, lewati loop H dan N -->
+                            
                             @if(in_array($param->nama_parameter, ['H', 'N']))
                                 @continue
                             @endif
@@ -130,7 +127,7 @@
                                 $isCHN = $param->nama_parameter == 'C';
                                 $tabId = $isCHN ? 'chn' : $param->parameter_uji_id;
                                 $isActive = $isCHN ? $isChnActive : ($param->parameter_uji_id == $activeTab);
-                                // Gunakan data gabungan jika ini tab CHN
+
                                 $currentToleransis = $isCHN ? $chnToleransis : $param->toleransis;
                                 $tabTitle = $isCHN ? 'CHN (Carbon, Hydrogen, Nitrogen)' : $param->nama_parameter;
                             @endphp
@@ -174,7 +171,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <!-- Loop menggunakan $currentToleransis agar CHN tampil semua -->
+                                            
                                             @forelse($currentToleransis as $tol)
                                                 <tr>
                                                     @if(in_array($param->nama_parameter, ['IM', 'TM', 'RM']))
@@ -209,7 +206,6 @@
                                                             <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
                                                         </form>
 
-                                                        <!-- MODAL EDIT -->
                                                         <div class="modal fade" id="modalEdit-{{ $tol->id }}" tabindex="-1" aria-hidden="true">
                                                             <div class="modal-dialog modal-lg text-start">
                                                                 <form action="{{ route('master.toleransi.update', $tol->id) }}" method="POST">
@@ -239,7 +235,7 @@
                                                                                     </div>
                                                                                     <div class="col-md-6">
                                                                                         <label class="form-label small fw-bold">Element</label>
-                                                                                        <!-- Readonly saat edit agar ID parameter tidak inkonsisten -->
+                                                                                        
                                                                                         <input type="text" class="form-control form-control-sm bg-light" name="sub_parameter" value="{{ $tol->sub_parameter }}" readonly title="Hapus dan buat aturan baru jika ingin mengganti elemen.">
                                                                                     </div>
                                                                                 @elseif($param->nama_parameter == 'VM')
@@ -314,13 +310,11 @@
                                 </div>
                             </div>
 
-                            <!-- MODAL TAMBAH ATURAN -->
                             <div class="modal fade" id="modalTambah-{{ $tabId }}" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-lg">
                                     <form action="{{ route('master.toleransi.store') }}" method="POST">
                                         @csrf
-                                        
-                                        <!-- Penanganan ID Parameter Khusus CHN -->
+
                                         @if($isCHN)
                                             <input type="hidden" name="parameter_uji_id" id="chn_param_id">
                                             <input type="hidden" name="sub_parameter" id="chn_sub_param">
@@ -353,7 +347,7 @@
                                                         </div>
                                                         <div class="col-md-6">
                                                             <label class="form-label small fw-bold">Element</label>
-                                                            <!-- Dropdown CHN yang langsung mengisi ID parameter di background -->
+                                                            
                                                             <select class="form-select form-select-sm" required
                                                                     onchange="document.getElementById('chn_param_id').value = this.options[this.selectedIndex].getAttribute('data-id'); document.getElementById('chn_sub_param').value = this.value;">
                                                                 <option value="">-- Pilih Element --</option>

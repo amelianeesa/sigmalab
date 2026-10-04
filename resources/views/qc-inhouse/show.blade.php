@@ -671,6 +671,62 @@
                     </dl>
                 </div>
             </div>
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white pt-3 pb-2">
+                    <h5 class="fw-bold"><i class="fas id-card text-success me-2"></i>Resource Pelaksanaan Pengujian</h5>
+                </div>
+                <div class="card-body">
+                    @foreach($batch->parameters as $p)
+                        @php
+                            $firstStabilitas = $p->dataStabilitas->first();
+                            $firstHomogen = $p->dataHomogenitas->first();
+                            $mentah = $firstStabilitas ? $firstStabilitas->data_mentah : ($firstHomogen ? $firstHomogen->data_mentah : []);
+                            
+                            $personilIds = $mentah['personil_ids'] ?? [];
+                            $alatIds = $mentah['alat_ids'] ?? [];
+                            $barangIds = $mentah['barang_ids'] ?? [];
+                            $barangJumlah = $mentah['barang_jumlah'] ?? [];
+                        @endphp
+
+                        <div class="mb-3 pb-2 border-bottom">
+                            <span class="fw-bold text-primary">{{ $p->parameterUji->nama_parameter }}</span>
+                            <ul class="list-unstyled mb-0 small mt-1">
+                                <li>
+                                    <strong>Analis:</strong> 
+                                    @if(count($personilIds) > 0)
+                                        {{ \App\Models\Personil::whereIn('personil_id', $personilIds)->pluck('nama')->join(', ') }}
+                                    @else
+                                        <span class="text-muted fst-italic">Tidak tercatat</span>
+                                    @endif
+                                </li>
+                                <li>
+                                    <strong>Alat:</strong> 
+                                    @if(count($alatIds) > 0)
+                                        {{ \App\Models\Alat::whereIn('alat_id', $alatIds)->pluck('nama_alat')->join(', ') }}
+                                    @else
+                                        <span class="text-muted fst-italic">Tidak tercatat</span>
+                                    @endif
+                                </li>
+                                <li>
+                                    <strong>Bahan:</strong> 
+                                    @if(count($barangIds) > 0)
+                                        @php
+                                            $listBarang = \App\Models\Barang::whereIn('barang_id', $barangIds)->get();
+                                        @endphp
+                                        <span class="text-dark">
+                                            @foreach($listBarang as $bhn)
+                                                {{ $bhn->nama_barang }} ({{ $barangJumlah[$bhn->barang_id] ?? 0 }} {{ $bhn->satuan }}){{ !$loop->last ? ', ' : '' }}
+                                            @endforeach
+                                        </span>
+                                    @else
+                                        <span class="text-muted fst-italic">Tidak ada bahan tercatat</span>
+                                    @endif
+                                </li>
+                            </ul>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
         </div>
 
         <div class="col-xl-9 col-lg-8">
