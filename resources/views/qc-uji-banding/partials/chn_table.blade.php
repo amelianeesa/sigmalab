@@ -103,7 +103,7 @@
             </tr>
         </tbody>
 
-        <tfoot>
+        <!-- <tfoot>
             <tr>
                 <td colspan="8" class="text-start">
                     <button type="button" class="btn btn-sm btn-outline-primary btn-add-row mt-2" data-pid="{{ $pid_c }}" data-code="CHN" disabled>
@@ -114,7 +114,7 @@
                     </button>
                 </td>
             </tr>
-        </tfoot>
+        </tfoot> -->
         
     </table>
 </div>

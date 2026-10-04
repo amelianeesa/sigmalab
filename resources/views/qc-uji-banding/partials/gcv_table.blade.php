@@ -106,7 +106,7 @@
                 <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" readonly tabindex="-1"></td>
             </tr>
         </tbody>
-        <tfoot>
+        <!-- <tfoot>
             <tr>
                 <td colspan="22" class="text-start">
                     <button type="button" class="btn btn-sm btn-outline-primary btn-add-row mt-2" data-pid="{{ $pid }}" data-code="GCV" disabled>
@@ -117,6 +117,6 @@
                     </button>
                 </td>
             </tr>
-        </tfoot>
+        </tfoot> -->
     </table>
 </div>

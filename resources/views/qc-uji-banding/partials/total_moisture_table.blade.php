@@ -46,13 +46,15 @@
                 <td rowspan="2" class="align-middle">
                     <input type="date" class="form-control form-control-sm" name="params[{{ $pid }}][data][0][tanggal_uji]" style="width: 130px; min-width: 130px;" value="{{ date('Y-m-d') }}">
                 </td>
-                <td class="fw-bold">Simplo</td>
+                <td class="fw-bold">
+                    Simplo
+                    <input type="hidden" class="in-d1" name="params[{{ $pid }}][data][0][d1]">
+                </td>
                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-adl1" name="params[{{ $pid }}][data][0][mentah][adl1_1]" placeholder="-" disabled></td>
                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-adl2 bg-light border-0" name="params[{{ $pid }}][data][0][mentah][adl2_1]" readonly tabindex="-1" placeholder="-" disabled></td>
                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-rm bg-light border-0" name="params[{{ $pid }}][data][0][mentah][rm_1]" readonly tabindex="-1" placeholder="-" disabled></td>
                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-tm-prime bg-light border-0" name="params[{{ $pid }}][data][0][mentah][tm_prime_1]" readonly tabindex="-1" placeholder="-" disabled></td>
                 <td class="out-tm bg-info bg-opacity-10 fw-bold">-</td>
-<input type="hidden" class="in-d1" name="params[{{ $pid }}][data][0][d1]" disabled>
 
                 <td class="out-abs bg-light" rowspan="2">-</td>
                 <td class="align-middle p-1" rowspan="2">
@@ -66,7 +68,10 @@
             </tr>
             
             <tr class="row-entry" data-type="duplo">
-                <td class="fw-bold">Duplo</td>
+                <td class="fw-bold">
+                    Duplo
+                    <input type="hidden" class="in-d2" name="params[{{ $pid }}][data][0][d2]">
+                </td>
                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-adl1" name="params[{{ $pid }}][data][0][mentah][adl1_2]" placeholder="-" disabled></td>
                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-adl2 bg-light border-0" name="params[{{ $pid }}][data][0][mentah][adl2_2]" readonly tabindex="-1" placeholder="-" disabled></td>
                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-rm bg-light border-0" name="params[{{ $pid }}][data][0][mentah][rm_2]" readonly tabindex="-1" placeholder="-" disabled></td>

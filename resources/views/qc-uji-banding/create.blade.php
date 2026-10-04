@@ -63,8 +63,11 @@
         </div>
     @endif
 
-    <form action="{{ route('qc-uji-banding.store') }}" method="POST" id="formQc" autocomplete="off">
+    <form action="{{ isset($is_edit) && $is_edit ? route('qc-uji-banding.update', $qc->id) : route('qc-uji-banding.store') }}" method="POST" id="formQc" autocomplete="off">
         @csrf
+        @if(isset($is_edit) && $is_edit)
+            @method('PUT')
+        @endif
         <input type="hidden" name="draft_id" id="draft_id_input" value="{{ $draftId ?? '' }}">
         <div class="card shadow-sm border-0 mb-4">
 

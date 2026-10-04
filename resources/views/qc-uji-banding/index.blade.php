@@ -73,7 +73,7 @@
                 <table class="table table-hover align-middle mb-0 table-corporate">
                     <thead class="table-light">
                         <tr>
-                            <th class="ps-4">Tgl Terima & Uji</th>
+                            <th class="ps-4">Tanggal Terima</th>
                             <th>Nama Program</th>
                             <th>Penyelenggara</th>
                             <th>Kode Sampel</th>
@@ -84,9 +84,8 @@
                     <tbody>
                         @forelse($programs as $prog)
                         <tr>
-                            <td class="ps-4">
-                                <span class="d-block text-muted small">Terima: {{ $prog->tanggal_terima ? $prog->tanggal_terima->format('d/m/Y') : '-' }}</span>
-                                <span class="fw-bold">Uji: {{ $prog->tanggal_uji ? $prog->tanggal_uji->format('d/m/Y') : '-' }}</span>
+                            <td class="ps-4 fw-bold text-dark">
+                                {{ $prog->tanggal_terima ? $prog->tanggal_terima->format('d/m/Y') : '-' }}
                             </td>
                             <td class="fw-bold">
                                 {{ $prog->nama_program }}
@@ -103,9 +102,11 @@
                                     $outlier = $prog->parameters->where('status_evaluasi', 'outlier')->count();
                                     $warning = $prog->parameters->where('status_evaluasi', 'warning')->count();
                                 @endphp
-                                @if($menunggu > 0)
-                                    <span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> {{ $menunggu }} Menunggu Vendor</span>
-                                @endif
+                                <!-- @if($menunggu > 0)
+                                        <a href="{{ route('qc-uji-banding.evaluasi.form', $prog->id) }}" class="btn btn-sm btn-outline-warning">
+                                            <i class="fas fa-chart-bar me-1"></i>Input Hasil Vendor
+                                        </a>
+                                    @endif  -->
                                 @if($inlier > 0)
                                     <span class="badge bg-success"><i class="fas fa-check-circle"></i> {{ $inlier }} Inlier</span>
                                 @endif

@@ -111,10 +111,13 @@ class QcUjiBandingController extends Controller
             }
 
             $params = $request->input('params');
+            $proximateAdl = $request->input('proximate_adl');
 
             if (!empty($params[4]['selected'])) {
                 foreach ([5, 6] as $pid) {
-                    if (!isset($params[$pid])) continue;
+                    if (!isset($params[$pid])) {
+                        $params[$pid] = [];
+                    }
                     $params[$pid]['selected'] = 1;
                     foreach (['mentah', 'ref_no', 'blnc_id', 'furnace_id', 'std_method'] as $k) {
                         if (!isset($params[$pid][$k]) && isset($params[4][$k])) {
@@ -171,6 +174,7 @@ class QcUjiBandingController extends Controller
 
                     'data_mentah' => array_merge($data['mentah'] ?? [], [
                         'rows' => $rows,
+                        'proximate_adl' => $proximateAdl ?? null,  
                         'meta' => Arr::only($data, [
                             'ref_no', 'blnc_id', 'time', 'furnace_id', 'std_method',
                             'indicate_t', 'calorimeter_id', 'metode_uji', 'uncertainty_lab',
@@ -198,9 +202,82 @@ class QcUjiBandingController extends Controller
     {
         $qc = QcUjiBanding::with('parameters')->findOrFail($id);
 
+        $draftData = [
+            'nama_program' => $qc->nama_program,
+            'penyelenggara' => $qc->penyelenggara,
+            'kode_sampel' => $qc->kode_sampel,
+            'tanggal_terima' => $qc->tanggal_terima ? $qc->tanggal_terima->format('Y-m-d') : null,
+            'keterangan' => $qc->keterangan,
+            'params' => [],
+        ];
+
+        foreach ($qc->parameters as $p) {
+            $pid = $p->parameter_uji_id;
+            $mentah = is_string($p->data_mentah) ? json_decode($p->data_mentah, true) : ($p->data_mentah ?? []);
+
+            if (isset($mentah['proximate_adl'])) {
+                $draftData['proximate_adl'] = $mentah['proximate_adl'];
+            }
+            
+            $analis_data = [];
+            if (!empty($mentah['personil_ids'])) {
+                foreach ((array) $mentah['personil_ids'] as $personil_id) {
+                    $peran = $mentah['personil_peran'][$personil_id] ?? 'Analis';
+                    $analis_data[] = ['id' => $personil_id, 'peran' => $peran];
+                }
+            }
+
+            $alat_ids = $mentah['alat_ids'] ?? [];
+
+            $inputs = [];
+            if (!empty($mentah['rows'])) {
+                foreach ($mentah['rows'] as $idx => $row) {
+                    foreach ($row as $colName => $colValue) {
+                        
+                        if ($colName === 'mentah' && is_array($colValue)) {
+                            foreach ($colValue as $subColName => $subColValue) {
+                                $inputName = "params[{$pid}][data][{$idx}][mentah][{$subColName}]";
+                                $inputs[$inputName] = $subColValue;
+                            }
+                        } else {
+                            $inputName = "params[{$pid}][data][{$idx}][{$colName}]";
+                            $inputs[$inputName] = $colValue;
+                        }
+                    }
+                }
+            }
+
+            $draftData['params'][$pid] = [
+                'selected' => '1',
+                'analis_data' => $analis_data,
+                'alat_data' => $alat_ids, // <--- SUDAH BENAR
+                'inputs' => $inputs,
+            ];
+            
+            if (isset($mentah['meta'])) {
+                foreach ($mentah['meta'] as $k => $v) {
+                    $draftData['params'][$pid][$k] = $v;
+                    $inputName = "params[{$pid}][{$k}]";
+                    $draftData['params'][$pid]['inputs'][$inputName] = $v;
+                }
+            }
+        }
+
+        if (isset($draftData['params'][4])) {
+            foreach ([5, 6] as $pidHN) {
+                if (isset($draftData['params'][$pidHN]['inputs'])) {
+                    $draftData['params'][4]['inputs'] = array_merge(
+                        $draftData['params'][4]['inputs'], 
+                        $draftData['params'][$pidHN]['inputs']
+                    );
+                }
+            }
+        }
+
         return view('qc-uji-banding.create', [
             'is_edit' => true,
             'qc' => $qc,
+            'draftData' => $draftData,
             'barangList' => \App\Models\Barang::all(),
             'allParameters' => \App\Models\ParameterUji::all(),
             'personilList' => \App\Models\Personil::all(),
@@ -208,7 +285,7 @@ class QcUjiBandingController extends Controller
         ]);
     }
 
-        public function update(Request $request, $id)
+    public function update(Request $request, $id)
     {
         $request->validate([
             'nama_program' => 'required|string',
@@ -234,10 +311,13 @@ class QcUjiBandingController extends Controller
             $qc->parameters()->delete();
 
             $params = $request->input('params');
+            $proximateAdl = $request->input('proximate_adl');
 
             if (!empty($params[4]['selected'])) {
                 foreach ([5, 6] as $pid) {
-                    if (!isset($params[$pid])) continue;
+                    if (!isset($params[$pid])) {
+                        $params[$pid] = [];
+                    }
                     $params[$pid]['selected'] = 1;
                     foreach (['mentah', 'ref_no', 'blnc_id', 'furnace_id', 'std_method'] as $k) {
                         if (!isset($params[$pid][$k]) && isset($params[4][$k])) {
@@ -295,6 +375,7 @@ class QcUjiBandingController extends Controller
 
                     'data_mentah' => array_merge($dataParams['mentah'] ?? [], [
                         'rows' => $rows,
+                        'proximate_adl' => $proximateAdl ?? null,
                         'meta' => Arr::only($dataParams, [
                             'ref_no', 'blnc_id', 'time', 'furnace_id', 'std_method',
                             'indicate_t', 'calorimeter_id', 'metode_uji', 'uncertainty_lab',
@@ -442,34 +523,17 @@ class QcUjiBandingController extends Controller
         return response()->json($kalibrasi);
     }
 
-    public function evaluasiForm($id)
+    public function evaluasiForm(Request $request, $id)
     {
         $program = QcUjiBanding::with(['parameters.parameterUji'])->findOrFail($id);
-
-        $cParam = $program->parameters->where('parameter_uji_id', 4)->first();
-        if ($cParam) {
-            $hasH = $program->parameters->where('parameter_uji_id', 5)->first();
-            $hasN = $program->parameters->where('parameter_uji_id', 6)->first();
-            if (!$hasH) {
-                QcUjiBandingParameter::create([
-                    'qc_uji_banding_id' => $id,
-                    'parameter_uji_id' => 5,
-                    'nilai_akhir' => 0,
-                    'status_evaluasi' => 'menunggu'
-                ]);
-            }
-            if (!$hasN) {
-                QcUjiBandingParameter::create([
-                    'qc_uji_banding_id' => $id,
-                    'parameter_uji_id' => 6,
-                    'nilai_akhir' => 0,
-                    'status_evaluasi' => 'menunggu'
-                ]);
-            }
-            if (!$hasH || !$hasN) {
-                $program = QcUjiBanding::with(['parameters.parameterUji'])->findOrFail($id);
-            }
+        
+        $selectedIds = $request->input('p', []);
+        
+        if (empty($selectedIds)) {
+            return back()->with('error', 'Silakan centang minimal satu parameter untuk dievaluasi.');
         }
+
+        $program->setRelation('parameters', $program->parameters->whereIn('id', $selectedIds));
 
         return view('qc-uji-banding.evaluasi-vendor', compact('program'));
     }
@@ -541,7 +605,6 @@ class QcUjiBandingController extends Controller
             return null;
         }
         
-        // Ganti koma dengan titik (berjaga-jaga jika terinput format desimal Indonesia)
         $value = str_replace(',', '.', $value);
         
         return floatval($value);

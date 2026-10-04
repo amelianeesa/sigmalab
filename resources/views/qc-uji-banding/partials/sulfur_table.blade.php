@@ -54,7 +54,7 @@
                 <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="params[{{ $pid }}][data][0][mentah][ts_2]"></td>
             </tr>
         </tbody>
-        <tfoot>
+        <!-- <tfoot>
             <tr>
                 <td colspan="6" class="text-start">
                     <button type="button" class="btn btn-sm btn-outline-primary btn-add-row mt-2" data-pid="{{ $pid }}" data-code="{{ $code }}" disabled>
@@ -65,6 +65,6 @@
                     </button>
                 </td>
             </tr>
-        </tfoot>
+        </tfoot> -->
     </table>
 </div>

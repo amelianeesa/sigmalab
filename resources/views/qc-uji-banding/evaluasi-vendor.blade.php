@@ -79,13 +79,11 @@
                                         return (isset($draftInputs[$key]) && is_numeric($draftInputs[$key])) ? floatval($draftInputs[$key]) : null;
                                     };
 
-                                    if ($rawName === 'IM' || $rawName === 'TM') {
+                                    if ($rawName === 'TM') {
                                         $mappedName = 'Total Moisture';
                                         $unit = '%, ar';
                                         if ($labValue == 0) {
-
                                             $labValue = floatval($tmParam->nilai_akhir ?? 0);
-
                                             if ($labValue == 0) {
                                                 $tmPid = $tmParam->parameter_uji_id ?? $pid;
                                                 $tmInputs = $draft['params'][$tmPid]['inputs'] ?? [];
@@ -95,7 +93,15 @@
                                                 elseif ($val1 !== null) $labValue = $val1;
                                             }
                                         }
-                                        if ($rawName === 'TM') $showRow = false;
+                                    } elseif ($rawName === 'IM') {
+                                        $mappedName = 'Inherent Moisture';
+                                        $unit = '%, adb';
+                                        if ($labValue == 0) {
+                                            $val1 = $getDraftVal('[d1]');
+                                            $val2 = $getDraftVal('[d2]');
+                                            if ($val1 !== null && $val2 !== null) $labValue = ($val1 + $val2) / 2;
+                                            elseif ($val1 !== null) $labValue = $val1;
+                                        }
                                     } elseif ($rawName === 'ASH') {
                                         $mappedName = 'Ash Content';
                                         $unit = '%, db';
@@ -114,7 +120,7 @@
                                             if ($val1 !== null && $val2 !== null) $labValue = ($val1 + $val2) / 2;
                                             elseif ($val1 !== null) $labValue = $val1;
                                         }
-                                    } elseif ($rawName === 'TOTAL SULFUR (%AD/DB)' || $rawName === 'TOTAL SULFUR' || strpos($rawName, 'SULFUR') !== false) {
+                                    } elseif ($rawName === 'TS' || $rawName === 'TOTAL SULFUR (%AD/DB)' || $rawName === 'TOTAL SULFUR' || strpos($rawName, 'SULFUR') !== false) {
                                         $mappedName = 'Total Sulfur';
                                         $unit = '%, db';
                                         if ($labValue == 0) {
@@ -189,9 +195,10 @@
                                             if ($val1 !== null && $val2 !== null) $labValue = ($val1 + $val2) / 2;
                                             elseif ($val1 !== null) $labValue = $val1;
                                         }
-                                    } else {
-                                        $showRow = false;
-                                    }
+                                        } else {
+                                            $mappedName = $rawName;
+                                            $unit = '-';
+                                        }
                                     
                                     $labValueFormatted = is_numeric($labValue) && $labValue != 0 ? number_format($labValue, 4, '.', '') : '';
                                 @endphp
