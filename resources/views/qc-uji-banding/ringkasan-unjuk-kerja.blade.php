@@ -2,18 +2,20 @@
 @section('title', 'Ringkasan Unjuk Kerja - ' . $program->nama_program)
 
 @section('content')
-<div class="container-fluid px-4 pb-5">
+@include('qc-uji-banding.partials._style')
+
+<div class="container-fluid qc-page pb-4">
     <x-qc-breadcrumb active="Uji Banding">
         <li class="breadcrumb-item"><a href="{{ route('qc-uji-banding.show', $program->id) }}" class="text-decoration-none">{{ $program->nama_program }}</a></li>
         <li class="breadcrumb-item active" aria-current="page">Ringkasan Unjuk Kerja</li>
     </x-qc-breadcrumb>
 
-    <div class="d-flex justify-content-between align-items-end mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
         <div>
-            <h2 class="fw-bold text-dark mb-1"><i class="fas fa-chart-bar text-primary me-2"></i>Ringkasan Unjuk Kerja</h2>
-            <p class="text-muted mb-0">{{ $program->nama_program }} — {{ $program->kode_sampel }}</p>
+            <h5 class="qc-title"><i class="fas fa-chart-bar text-primary me-1"></i> Ringkasan Unjuk Kerja</h5>
+            <p class="qc-subtitle">{{ $program->nama_program }} — {{ $program->kode_sampel }}</p>
         </div>
-        <a href="{{ route('qc-uji-banding.evaluasi.form', $program->id) }}" class="btn btn-outline-secondary btn-sm">
+        <a href="{{ route('qc-uji-banding.evaluasi.form', $program->id) }}" class="btn btn-outline-secondary btn-sm py-1 px-3">
             <i class="fas fa-edit me-1"></i> Edit Hasil Evaluasi
         </a>
     </div>
@@ -63,11 +65,11 @@
         }
     @endphp
 
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body p-0">
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered table-sm align-middle text-center mb-0">
-                    <thead class="table-light">
+                <table class="table table-bordered table-striped table-sm align-middle text-center mb-0 qc-table-min">
+                    <thead>
                         <tr>
                             <th class="text-start">Parameter</th>
                             <th>Units</th>
@@ -102,10 +104,10 @@
                                     @endif
                                 </td>
                                 <td>{{ $p->metode_uji ?? '-' }}</td>
-                                <td>
+                                <td class="text-nowrap">
                                     @if($p->status_evaluasi === 'outlier')
                                         @if($p->status_investigasi === 'menunggu_investigasi')
-                                            <a href="{{ route('qc-uji-banding.investigasi', [$program->id, $p->id]) }}" class="btn btn-sm btn-danger">
+                                            <a href="{{ route('qc-uji-banding.investigasi', [$program->id, $p->id]) }}" class="btn btn-sm btn-danger py-1 px-2">
                                                 <i class="fas fa-edit"></i> Isi LKS
                                             </a>
                                         @else
@@ -135,19 +137,19 @@
 
     @foreach($paramMap as $idx => $item)
         @php $p = $item['param']; @endphp
-        <div class="card border-0 shadow-sm mb-4" id="detail-{{ $idx }}">
+        <div class="card border-0 shadow-sm mb-3" id="detail-{{ $idx }}">
             <div class="card-body">
                 
                 <div class="text-center mb-3">
-                    <h5 class="fw-bold mb-0">Sucofindo Proficiency Test - Coal</h5>
+                    <h5 class="fw-bold mb-0" style="font-size: 0.95rem;">Sucofindo Proficiency Test - Coal</h5>
                     <p class="text-muted mb-1">Historical Performance</p>
-                    <h5 class="fw-bold">{{ $item['name'] }}</h5>
+                    <h5 class="fw-bold" style="font-size: 0.95rem;">{{ $item['name'] }}</h5>
                     <p class="mb-0">Laboratory : <strong>{{ $program->nama_lab ?? 'PT SUCOFINDO Cabang Cilacap' }}</strong></p>
                 </div>
 
-                <div class="table-responsive mb-4">
-                    <table class="table table-bordered table-sm align-middle text-center" style="max-width: 700px; margin: 0 auto;">
-                        <thead class="table-light">
+                <div class="table-responsive mb-3">
+                    <table class="table table-bordered table-striped table-sm align-middle text-center" style="max-width: 700px; margin: 0 auto;">
+                        <thead>
                             <tr>
                                 <th>Period</th>
                                 <th>Year</th>
@@ -184,9 +186,9 @@
                 </div>
 
                 <div class="text-center mb-2">
-                    <h6 class="fw-bold">{{ $item['name'] }}</h6>
+                    <h6 class="fw-bold" style="font-size: 0.88rem;">{{ $item['name'] }}</h6>
                 </div>
-                <div style="max-width: 600px; margin: 0 auto;">
+                <div style="max-width: 600px; width: 100%; margin: 0 auto;">
                     <canvas id="chartParam{{ $idx }}" height="200"></canvas>
                 </div>
             </div>

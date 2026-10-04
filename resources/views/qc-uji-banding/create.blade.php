@@ -2,6 +2,8 @@
 @section('title', 'Tambah Baru - QC Uji Banding')
 
 @section('content')
+@include('qc-uji-banding.partials._style')
+
 <style>
     .param-form-wrapper .table-responsive {
         overflow-x: auto !important;
@@ -35,65 +37,60 @@
     }
 </style>
 
-<div class="container-fluid px-4 pb-5">
+<div class="container-fluid qc-page pb-4">
 
     <x-qc-breadcrumb active="Uji Banding">
         <li class="breadcrumb-item active">Input Data</li>
     </x-qc-breadcrumb>
 
-    <h2 class="mb-4 fw-bold text-dark">
-        <i class="fas fa-plus-circle text-danger me-2"></i>Input Data Blind Test Uji Banding
-    </h2>
-
-    @if(session('error'))
-        <div class="alert alert-danger shadow-sm border-0">
-            <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
-        </div>
-    @endif
+    <h5 class="qc-title mb-3">
+        <i class="fas fa-plus-circle text-danger me-1"></i> Input Data Blind Test Uji Banding
+    </h5>
 
     @if($errors->any())
-        <div class="alert alert-danger shadow-sm border-0">
-            <i class="fas fa-exclamation-triangle me-2"></i>
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0" role="alert">
+            <i class="fas fa-exclamation-triangle me-1"></i>
             <strong>Terdapat kesalahan:</strong>
             <ul class="mb-0 mt-1">
                 @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="padding: 0.6rem;"></button>
         </div>
     @endif
 
     <form action="{{ route('qc-uji-banding.store') }}" method="POST" id="formQc" autocomplete="off">
         @csrf
         <input type="hidden" name="draft_id" id="draft_id_input" value="{{ $draftId ?? '' }}">
-        <div class="card shadow-sm border-0 mb-4">
+        <div class="card shadow-sm border-0 mb-3">
 
-            <div class="card-header text-white py-3" style="background-color: #1b3152;">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-clipboard-list me-2"></i>Section 1: Data Dasar Pengujian</h5>
+            <div class="card-header text-white" style="background-color: #1b3152;">
+                <h5 class="fw-bold"><i class="fas fa-clipboard-list me-1"></i> Section 1: Data Dasar Pengujian</h5>
             </div>
 
-            <div class="card-body p-4">
-                <h6 class="mb-3 text-primary border-bottom pb-2">
-                    <i class="fas fa-info-circle me-2"></i>Informasi Umum Program Uji Banding
+            <div class="card-body">
+                <h6 class="mb-3 text-primary border-bottom pb-2" style="font-size: 0.85rem;">
+                    <i class="fas fa-info-circle me-1"></i> Informasi Umum Program Uji Banding
                 </h6>
 
-                <div class="row mb-4 g-3">
-                    <div class="col-md-6">
+                <div class="row mb-3 g-2">
+                    <div class="col-12 col-md-6">
                         <label class="form-label fw-bold">Nama Program Uji Banding <span class="text-danger">*</span></label>
                         <input type="text" name="nama_program" class="form-control" placeholder="Contoh: Proficiency Testing D-QA 2026" required>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label fw-bold">Penyelenggara (Vendor) <span class="text-danger">*</span></label>
                         <input type="text" name="penyelenggara" class="form-control" placeholder="Contoh: D-QA / FAPAS" required>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label fw-bold">Kode Sampel <span class="text-danger">*</span></label>
                         <input type="text" name="kode_sampel" class="form-control" required>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label fw-bold">Tanggal Terima <span class="text-danger">*</span></label>
                         <input type="date" name="tanggal_terima" class="form-control" required>
                     </div>
@@ -104,8 +101,8 @@
                     </div>
                 </div>
 
-                <h6 class="mb-3 text-primary border-bottom pb-2">
-                    <i class="fas fa-box-open me-2"></i>Bahan Digunakan
+                <h6 class="mb-3 text-primary border-bottom pb-2" style="font-size: 0.85rem;">
+                    <i class="fas fa-box-open me-1"></i> Bahan Digunakan
                 </h6>
 
                 <div class="mb-0">
@@ -158,10 +155,10 @@
             </div>
         </div>
 
-        <div class="card shadow-sm border-0 mb-4">
+        <div class="card shadow-sm border-0 mb-3">
 
-            <div class="card-header text-white py-3" style="background-color: #1b3152;">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-table me-2"></i>Section 2: Input Data Pengujian</h5>
+            <div class="card-header text-white" style="background-color: #1b3152;">
+                <h5 class="fw-bold"><i class="fas fa-table me-1"></i> Section 2: Input Data Pengujian</h5>
             </div>
 
             <div class="card-body p-0">
@@ -194,7 +191,7 @@
                     <div class="tab-pane fade show active" id="tab-input-data" role="tabpanel">
 
                         <div class="alert alert-info m-3 rounded-0 border-start border-4 border-info">
-                            <i class="fas fa-info-circle me-2"></i> Centang kotak di samping nama parameter untuk mengaktifkan form inputnya.
+                            <i class="fas fa-info-circle me-1"></i> Centang kotak di samping nama parameter untuk mengaktifkan form inputnya.
                         </div>
 
                         @php
@@ -624,19 +621,19 @@
             </div>
         </div>
 
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3 mt-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2 mt-3">
 
-            <a href="{{ route('qc-uji-banding.index') }}" class="btn btn-light border px-4 rounded-pill order-last order-md-first">
+            <a href="{{ route('qc-uji-banding.index') }}" class="btn btn-light border px-4 order-last order-md-first">
                 Batal
             </a>
 
             <div class="d-flex flex-column flex-md-row gap-2 order-first order-md-last">
-                <button type="button" class="btn btn-warning px-4 rounded-pill shadow-sm" id="btnDraft">
-                    <i class="fas fa-save me-2"></i>Simpan Draft
+                <button type="button" class="btn btn-warning px-4 shadow-sm" id="btnDraft">
+                    <i class="fas fa-save me-1"></i>Simpan Draft
                 </button>
 
-                <button type="submit" class="btn btn-danger px-5 rounded-pill shadow-sm" id="btnSubmit">
-                    <i class="fas fa-check-circle me-2"></i>Simpan Data Uji Banding
+                <button type="submit" class="btn btn-corporate-blue px-4 shadow-sm" id="btnSubmit">
+                    <i class="fas fa-check-circle me-1"></i>Simpan Data Uji Banding
                 </button>
             </div>
 

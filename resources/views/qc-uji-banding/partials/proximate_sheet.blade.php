@@ -1,19 +1,19 @@
-<div class="p-4">
-    <div class="row g-3 mb-4">
-        <div class="col-md-4">
+<div class="p-3">
+    <div class="row g-2 mb-3">
+        <div class="col-12 col-md-4">
             <label class="form-label fw-bold">ADL (Air Dry Loss) %</label>
             <input type="text" inputmode="decimal" name="proximate_adl" class="form-control form-control-sm" id="proximate-adl" placeholder="Masukkan nilai ADL">
         </div>
-        <div class="col-md-4">
+        <div class="col-12 col-md-4">
             <label class="form-label fw-bold text-primary">Residual Moisture (%)</label>
             <input type="text" class="form-control form-control-sm bg-light text-primary fw-bold" id="proximate-rm" readonly placeholder="Auto from Tab 1 (RM)">
         </div>
     </div>
 
-    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3"><i class="fas fa-table me-2"></i>Parameters</h6>
-    <div class="table-responsive mb-4">
-        <table class="table table-bordered table-sm align-middle text-center" id="proximate-params-table">
-            <thead class="table-light">
+    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3" style="font-size: 0.85rem;"><i class="fas fa-table me-1"></i> Parameters</h6>
+    <div class="table-responsive mb-3">
+        <table class="table table-bordered table-striped table-sm align-middle text-center mb-0 qc-table-min" id="proximate-params-table">
+            <thead>
                 <tr>
                     <th rowspan="2" class="align-middle">Parameters</th>
                     <th rowspan="2" class="align-middle">Unit</th>
@@ -28,7 +28,7 @@
                 </tr>
             </thead>
             <tbody>
-                                <tr data-param="TM">
+                <tr data-param="TM">
                     <td class="text-start fw-bold">Total Moisture</td>
                     <td>%</td>
                     <td class="prox-ar bg-info bg-opacity-10 fw-bold">-</td>
@@ -95,10 +95,10 @@
         </table>
     </div>
 
-    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3"><i class="fas fa-table me-2"></i>Ultimate Analysis</h6>
+    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3" style="font-size: 0.85rem;"><i class="fas fa-table me-1"></i> Ultimate Analysis</h6>
     <div class="table-responsive">
-        <table class="table table-bordered table-sm align-middle text-center" id="proximate-ultimate-table">
-            <thead class="table-light">
+        <table class="table table-bordered table-striped table-sm align-middle text-center mb-0 qc-table-min" id="proximate-ultimate-table">
+            <thead>
                 <tr>
                     <th rowspan="2" class="align-middle">Ultimate Analysis</th>
                     <th rowspan="2" class="align-middle">Unit</th>

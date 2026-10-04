@@ -2,38 +2,25 @@
 @section('title', 'Evaluasi Vendor - ' . $program->nama_program)
 
 @section('content')
+@include('qc-uji-banding.partials._style')
 
-<style>
-    .table-corporate thead th {
-        background-color: #1b3152 !important;
-        color: #ffffff !important;
-        border-bottom: 2px solid #14253e !important;
-        font-size: 0.85rem;
-        letter-spacing: 0.5px;
-        padding-top: 15px;
-        padding-bottom: 15px;
-    }
-</style>
-
-<div class="container-fluid px-4 pb-5">
+<div class="container-fluid qc-page pb-4">
     <x-qc-breadcrumb active="Uji Banding">
         <li class="breadcrumb-item"><a href="{{ route('qc-uji-banding.show', $program->id) }}" class="text-decoration-none">{{ $program->nama_program }}</a></li>
         <li class="breadcrumb-item active" aria-current="page">Input Hasil Evaluasi Vendor</li>
     </x-qc-breadcrumb>
 
-    @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
-
-    <div class="mb-4">
-        <h2 class="fw-bold text-dark mb-1"><i class="fas fa-chart-bar text-primary me-2"></i>Input Hasil Evaluasi Vendor</h2>
-        <p class="text-muted mb-0">Masukkan Assigned Value (Alg. Mean) dan SDPA sesuai laporan uji profisiensi dari vendor. Z-score dan status dihitung otomatis.</p>
+    <div class="mb-3">
+        <h5 class="qc-title"><i class="fas fa-chart-bar text-primary me-1"></i> Input Hasil Evaluasi Vendor</h5>
+        <p class="qc-subtitle">Masukkan Assigned Value (Alg. Mean) dan SDPA sesuai laporan uji profisiensi dari vendor. Z-score dan status dihitung otomatis.</p>
     </div>
 
     <form action="{{ route('qc-uji-banding.evaluasi.store', $program->id) }}" method="POST">
         @csrf
         <div class="card border-0 shadow-sm">
-            <div class="card-body p-0">
+            <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-bordered table-sm align-middle text-center mb-0 table-corporate" id="evalTable">
+                    <table class="table table-bordered table-sm align-middle text-center mb-0 table-corporate qc-table-min" id="evalTable">
                         <thead>
                             <tr>
                                 <th class="text-start">Parameter</th>
@@ -250,8 +237,8 @@
             </div>
         </div>
 
-        <div class="d-flex justify-content-end mt-4">
-            <button type="submit" class="btn btn-primary px-4"><i class="fas fa-save me-1"></i> Simpan & Lihat Ringkasan</button>
+        <div class="d-flex justify-content-end mt-3 qc-stack-sm">
+            <button type="submit" class="btn btn-corporate-blue btn-sm px-3 shadow-sm fw-semibold"><i class="fas fa-save me-1"></i> Simpan & Lihat Ringkasan</button>
         </div>
     </form>
 </div>
