@@ -430,7 +430,7 @@
             <div class="card shadow-sm border-0 mb-2">
                 <div class="card-body">
                     <h5 class="page-title"><i class="fas fa-bullseye icon-corporate me-2"></i>Tahap 4: Penetapan Nilai Target</h5>
-                    <p class="page-subtitle">Sesuai prosedur operasional standar, Nilai Target (Mean) dan Simpangan Baku (Standar Deviasi) diwarisi otomatis secara presisi dari kalkulasi <strong>Global Mean</strong> dan <strong>Global Standard Deviation</strong> dari 20 titik uji Homogenitas (Tahap 3) yang telah lolos validasi statistik.</p>
+                    <p class="page-subtitle">Sesuai prosedur operasional standar, Nilai Target (Mean) dan Simpangan Baku (Standar Deviasi) diwarisi otomatis secara presisi dari kalkulasi <strong>Global Mean</strong> dan <strong>Global Standard Deviation</strong> dari {{ $batch->jumlah_botol * 2 }} titik uji Homogenitas (Tahap 3) yang telah lolos validasi statistik.</p>
 
                     @if($errors->any())
                         <div class="alert alert-danger py-2 px-3 mb-2 rounded-3" style="font-size: 0.75rem;">
@@ -459,13 +459,16 @@
                             @foreach($batch->parameters as $idx => $param)
                                 @php
                                     $pid = $param->id;
-                                    $mean = round($param->mean_target ?? $param->mean_global, 2);
-                                    $sd = round($param->sd_target ?? $param->sd_global, 2);
+                                    $rawMean = (float) ($param->mean_target ?? $param->mean_global);
+                                    $rawSd = (float) ($param->sd_target ?? $param->sd_global);
 
-                                    $ucl = round($mean + (3 * $sd), 2);
-                                    $lcl = round($mean - (3 * $sd), 2);
-                                    $uwl = round($mean + (2 * $sd), 2);
-                                    $lwl = round($mean - (2 * $sd), 2);
+                                    $ucl = round($rawMean + (3 * $rawSd), 2);
+                                    $lcl = round($rawMean - (3 * $rawSd), 2);
+                                    $uwl = round($rawMean + (2 * $rawSd), 2);
+                                    $lwl = round($rawMean - (2 * $rawSd), 2);
+
+                                    $mean = round($rawMean, 2);
+                                    $sd = round($rawSd, 2);
                                 @endphp
                                 <div class="tab-pane fade {{ $idx === 0 ? 'show active' : '' }}" id="pane-{{ $pid }}" role="tabpanel">
                                     <h6 class="section-title border-bottom pb-2 mb-2"><span class="step-badge">{{ $idx + 1 }}</span>Statistika Nilai Target : {{ $param->parameterUji->nama_parameter }}</h6>
@@ -536,8 +539,9 @@
                 </div>
             </div>
         </div>
+=========
             <p class="text-muted">Sesuai prosedur operasional standar, Nilai Target (Mean) dan Simpangan Baku (Standar Deviasi) diwarisi otomatis secara presisi dari kalkulasi <strong>Global Mean</strong> dan <strong>Global Standard Deviation</strong> dari {{ $batch->jumlah_botol * 2 }} titik uji Homogenitas (Tahap 3) yang telah lolos validasi statistik.</p>
-
+>>>>>>>>> Temporary merge branch 2
 
         <div class="col-xl-3 col-lg-4 order-1 order-lg-2">
             <div class="card sop-card shadow-sm mb-2">
@@ -551,9 +555,9 @@
                         <p class="sop-note mb-0"><strong>Note:</strong> Nilai yang disahkan menjadi baseline Uji Stabilitas dan QC harian.</p>
                     </div>
                 </div>
-{{-- <<<<<<< HEAD
+<<<<<<<<< Temporary merge branch 1
             </div>
-======= --}}
+=========
 
                 <ul class="nav nav-pills mt-4 mb-3" id="paramTabs" role="tablist">
                     @foreach($batch->parameters as $idx => $param)
@@ -656,7 +660,7 @@
                     @endif
                 </div>
             </form>
->>>>>>> 6880cbb2a9b38438125999d6ce9de63a20cd9741
+>>>>>>>>> Temporary merge branch 2
         </div>
     </div>
 </div>

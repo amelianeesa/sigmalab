@@ -1774,7 +1774,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else if(code === 'VM') {
                         isOk = diff < 1;
                     } else if(code === 'TS') {
-                        isOk = diff < 0.05;
                         isOk = diff < State[code].limit;
                     }
                     const outTolEl = tr1.querySelector('.out-tol');
@@ -2080,7 +2079,8 @@ document.addEventListener('DOMContentLoaded', function() {
             renderPreview();
 
             const newCode = e.target.dataset.code;
-            processTable(newCode, document.querySelector(`.param-table[data-code="${newCode}"]`));
+            const tbl = document.querySelector(`.param-table[data-code="${newCode}"]`);
+            if (tbl) processTable(newCode, tbl);
         });
     });
 
@@ -2088,13 +2088,13 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', function() {
             const pid = this.dataset.pid;
             const code = this.dataset.code;
-            const table = document.getElementById('table-' + pid);
+            const form = document.getElementById('formHomogenitas');
 
             const originalText = this.innerHTML;
             this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...';
             this.disabled = true;
 
-            const allForm = new FormData(document.getElementById('formHomogenitas'));
+            const allForm = new FormData(form);
             const formData = new FormData();
 
             // formData.append('_token', document.querySelector('input[name="_token"]').value);
@@ -2108,11 +2108,12 @@ document.addEventListener('DOMContentLoaded', function() {
             for (let [k, v] of allForm.entries()) {
                 if (k === '_token' || k.startsWith(`data_${pid}[`) || k.startsWith(`resource_${pid}[`)) {
                     formData.append(k, v);
+
                 }
             }
             formData.append('is_draft', '1');
 
-            fetch(document.getElementById('formHomogenitas').action, {
+            fetch(form.action, {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -2122,7 +2123,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(res => res.json())
             .then(data => {
-                if(data.success) {
+                if (data.success) {
                     Swal.fire({
                         icon: 'success',
                         title: 'Tersimpan!',
@@ -2134,7 +2135,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     Swal.fire('Error', data.message || 'Gagal menyimpan.', 'error');
                 }
             })
-            .catch(err => {
+            .catch(() => {
                 Swal.fire('Error', 'Terjadi kesalahan jaringan.', 'error');
             })
             .finally(() => {

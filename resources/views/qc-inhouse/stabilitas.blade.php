@@ -1537,7 +1537,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 State[code].data[i].simplo_adb = null;
                 State[code].data[i].duplo_adb = null;
                 State[code].data[i].avg_adb = null;
+<<<<<<<<< Temporary merge branch 1
+
+=========
+                State[code].data[i].simplo_db = null;
+                State[code].data[i].duplo_db = null;
                 
+>>>>>>>>> Temporary merge branch 2
                 tr1.querySelector('.out-diff') ? tr1.querySelector('.out-diff').textContent = '-' : null;
                 tr1.querySelector('.out-tol') ? tr1.querySelector('.out-tol').textContent = '-' : null;
                 tr1.querySelector('.out-avg-adb') ? tr1.querySelector('.out-avg-adb').textContent = '-' : null;
@@ -1556,8 +1562,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('#parameterTabs button[data-bs-toggle="tab"]').forEach(btn => {
         btn.addEventListener('shown.bs.tab', function (e) {
             const newCode = e.target.dataset.code;
-
+<<<<<<<<< Temporary merge branch 1
             processTable(newCode, document.querySelector(`.param-table[data-code="${newCode}"]`));
+=========
+            const tbl = document.querySelector(`.param-table[data-code="${newCode}"]`);
+            if (tbl) processTable(newCode, tbl); 
+>>>>>>>>> Temporary merge branch 2
         });
     });
 
@@ -1620,7 +1630,8 @@ document.addEventListener('DOMContentLoaded', function() {
             sGab = Math.sqrt((sumSqX + sumSqY) / df);
             tHitung = Math.abs(meanX - meanY) / sGab;
         }
-        
+<<<<<<<<< Temporary merge branch 1
+
         const tTableMap = {
             20: 2.086, 21: 2.080, 22: 2.074, 23: 2.069, 24: 2.064, 25: 2.060,
             26: 2.056, 27: 2.052, 28: 2.048, 29: 2.045, 30: 2.042, 31: 2.040,
@@ -1628,7 +1639,12 @@ document.addEventListener('DOMContentLoaded', function() {
             38: 2.024, 39: 2.023, 40: 2.021, 60: 2.000, 120: 1.980
         };
         const tTabel = tTableMap[df] || 2.0;
+
+=========
         
+        const tTabel = tTableMap[df] ?? 1.98;
+        
+>>>>>>>>> Temporary merge branch 2
         const isStabil = tHitung < tTabel;
 
         const html = `
@@ -1745,13 +1761,17 @@ document.addEventListener('DOMContentLoaded', function() {
             tHitung = Math.abs(meanX - meanY) / sGab;
         }
 
+<<<<<<<<< Temporary merge branch 1
         const tTableMap = {
             20: 2.086, 21: 2.080, 22: 2.074, 23: 2.069, 24: 2.064, 25: 2.060,
             26: 2.056, 27: 2.052, 28: 2.048, 29: 2.045, 30: 2.042, 31: 2.040,
             32: 2.037, 33: 2.035, 34: 2.032, 35: 2.030, 36: 2.028, 37: 2.026,
             38: 2.024, 39: 2.023, 40: 2.021, 60: 2.000, 120: 1.980
         };
-        const tTabel = tTableMap[df] || 2.0; // fallback
+        const tTabel = tTableMap[df] || 2.0;
+=========
+        const tTabel = tTableMap[df] ?? 1.98;
+>>>>>>>>> Temporary merge branch 2
 
         const paramNames = {
             'IM': 'Moisture in the analysis sample',
