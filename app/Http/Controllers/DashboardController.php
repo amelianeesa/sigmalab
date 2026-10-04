@@ -49,12 +49,14 @@ class DashboardController extends Controller
 
         $statusArsip = ['selesai', 'ditolak', 'ditolak_koordinator', 'ditolak_ga', 'batal'];
 
-        $pengadaanAktif = PermintaanPengadaan::with(['barang', 'pemohon.role', 'penyetuju'])
+        $relasiPengadaan = ['barang', 'pemohon.role', 'penyetuju', 'logs.user'];
+
+        $pengadaanAktif = PermintaanPengadaan::with($relasiPengadaan)
             ->whereNotIn('status', $statusArsip)
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $pengadaanSelesai = PermintaanPengadaan::with(['barang', 'pemohon.role', 'penyetuju'])
+        $pengadaanSelesai = PermintaanPengadaan::with($relasiPengadaan)
             ->whereIn('status', $statusArsip)
             ->orderBy('created_at', 'desc')
             ->limit(100)

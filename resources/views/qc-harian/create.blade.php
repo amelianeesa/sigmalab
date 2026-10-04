@@ -2,40 +2,558 @@
 @section('title', 'Tambah Baru - QC Harian')
 
 @section('content')
-<div class="container-fluid px-4 pb-5">
+<style>
+    .dashboard-container {
+        padding: 0 20px !important;
+        margin-top: -8px !important;
+        padding-bottom: 1.5rem !important;
+        font-size: 0.78rem;
+        color: #000000;
+    }
+
+    .dashboard-container nav[aria-label="breadcrumb"],
+    .dashboard-container > nav {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .dashboard-container .breadcrumb {
+        margin: 0 0 6px 0 !important;
+        padding: 0 !important;
+        font-size: 0.75rem !important;
+        line-height: 1.4;
+        flex-wrap: wrap;
+        align-items: center;
+        background: transparent !important;
+    }
+
+    .dashboard-container .breadcrumb .breadcrumb-item,
+    .dashboard-container .breadcrumb .breadcrumb-item a {
+        font-size: 0.75rem !important;
+        font-weight: 500 !important;
+        color: #0d6efd !important;
+        text-decoration: none;
+    }
+
+    .dashboard-container .breadcrumb .breadcrumb-item a:hover {
+        color: #0a58ca !important;
+        text-decoration: underline;
+    }
+
+    .dashboard-container .breadcrumb .breadcrumb-item.active {
+        color: #000000 !important;
+        font-weight: 700 !important;
+    }
+
+    .dashboard-container .breadcrumb .breadcrumb-item + .breadcrumb-item {
+        padding-left: 0.4rem;
+    }
+
+    .dashboard-container .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+        color: #6c757d !important;
+        padding-right: 0.4rem;
+        font-weight: 400;
+    }
+
+    .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu {
+        min-width: 190px;
+        padding: 4px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    }
+
+    .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item {
+        color: #000000 !important;
+        font-size: 0.78rem !important;
+        font-weight: 500 !important;
+        text-decoration: none !important;
+        background-color: transparent;
+        padding: 7px 12px;
+        border-radius: 5px;
+    }
+
+    .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:hover,
+    .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
+    .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
+    .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
+        background-color: rgba(27, 49, 82, 0.15) !important;
+        color: #000000 !important;
+        text-decoration: none !important;
+    }
+
+    .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
+        font-weight: 700 !important;
+    }
+
+    .dashboard-container .card {
+        border-radius: 0.5rem;
+    }
+
+    .card-body {
+        padding: 12px !important;
+    }
+
+    .card-header-sm {
+        padding: 8px 12px;
+        background-color: #ffffff;
+        border-bottom: 1px solid #e3e8ef;
+        border-radius: 0.5rem 0.5rem 0 0;
+    }
+
+    .page-title {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: #000000;
+    }
+
+    .section-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-bottom: 0;
+        color: #000000;
+    }
+
+    .sub-title {
+        margin-bottom: 8px;
+        padding-bottom: 6px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #1b3152;
+        border-bottom: 1px solid #e3e8ef;
+    }
+
+    .icon-corporate,
+    .dashboard-container .text-primary,
+    .modal .text-primary,
+    .dashboard-container .text-warning:not(input),
+    .modal .text-warning:not(input),
+    .modal .text-success {
+        color: #1b3152 !important;
+    }
+
+    /* ===== Buttons (seragam) ===== */
+    .dashboard-container .btn,
+    .modal .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.78rem;
+        font-weight: 600;
+        line-height: 1.3;
+        padding: 0.38rem 0.85rem;
+        border-radius: 0.375rem;
+        transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .btn-corporate-blue {
+        background-color: #1b3152 !important;
+        border: 1px solid #1b3152 !important;
+        color: #ffffff !important;
+    }
+
+    .btn-corporate-blue:hover,
+    .btn-corporate-blue:focus,
+    .btn-corporate-blue:active {
+        background-color: #14253e !important;
+        border-color: #14253e !important;
+        color: #ffffff !important;
+    }
+
+    .btn-outline-corporate {
+        background-color: #ffffff !important;
+        border: 1px solid #1b3152 !important;
+        color: #1b3152 !important;
+    }
+
+    .btn-outline-corporate:hover,
+    .btn-outline-corporate:focus,
+    .btn-outline-corporate:active {
+        background-color: #1b3152 !important;
+        border-color: #1b3152 !important;
+        color: #ffffff !important;
+    }
+
+    .btn-kembali {
+        background-color: #6c757d !important;
+        border: 1px solid #6c757d !important;
+        color: #ffffff !important;
+    }
+
+    .btn-kembali:hover,
+    .btn-kembali:focus,
+    .btn-kembali:active {
+        background-color: #ffffff !important;
+        border-color: #6c757d !important;
+        color: #6c757d !important;
+    }
+
+    /* ===== Form ===== */
+    .dashboard-container .form-label {
+        margin-bottom: 3px;
+        font-size: 0.74rem;
+        font-weight: 600;
+        color: #000000;
+    }
+
+    .dashboard-container .form-control,
+    .modal .form-control {
+        font-size: 0.78rem;
+        padding-top: 0.28rem;
+        padding-bottom: 0.28rem;
+        color: #000000;
+        border-color: #ced4da;
+    }
+
+    .dashboard-container .form-control:focus,
+    .modal .form-control:focus {
+        border-color: #1b3152;
+        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+    }
+
+    .form-check-input:checked {
+        background-color: #1b3152;
+        border-color: #1b3152;
+    }
+
+    .form-check-input:focus {
+        border-color: #1b3152;
+        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+    }
+
+    .modal .input-group-text {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #1b3152;
+        background-color: #f1f4f8;
+    }
+
+    .dashboard-container .alert-info {
+        margin: 10px 12px !important;
+        padding: 8px 12px !important;
+        font-size: 0.75rem;
+        line-height: 1.5;
+        color: #000000;
+        background-color: rgba(27, 49, 82, 0.08);
+        border: 0;
+        border-left: 4px solid #1b3152 !important;
+        border-radius: 6px !important;
+    }
+
+    .dashboard-container .alert-info i {
+        color: #1b3152;
+    }
+
+    input:invalid { box-shadow: none; }
+
+    /* ===== Accordion ===== */
+    .accordion-flush > .accordion-item {
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .accordion-header .accordion-button {
+        padding: 0.55rem 0.75rem;
+        font-size: 0.8rem;
+        color: #000000;
+        background-color: transparent;
+        box-shadow: none;
+    }
+
+    .accordion-header .accordion-button:not(.collapsed) {
+        color: #1b3152;
+        background-color: rgba(27, 49, 82, 0.08);
+    }
+
+    .accordion-header .accordion-button:focus {
+        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+    }
+
+    .accordion-header .accordion-button:hover {
+        background-color: rgba(27, 49, 82, 0.06);
+    }
+
+    .accordion-header .accordion-button .badge {
+        font-size: 0.64rem;
+        white-space: normal;
+        text-align: left;
+    }
+
+    .param-head-check {
+        padding: 0.55rem 0.75rem;
+    }
+
+    .accordion-body {
+        padding: 10px !important;
+    }
+
+    /* ===== Ringkasan resource ===== */
+    .res-summary {
+        font-size: 0.76rem;
+        line-height: 1.5;
+    }
+
+    .res-summary > div {
+        word-break: break-word;
+    }
+
+    /* ===== Tabel input ===== */
+    .param-table {
+        width: 100%;
+        min-width: 420px;
+        margin-bottom: 0;
+        font-size: 0.75rem;
+        border-color: #cfd6df;
+    }
+
+    .param-table[data-code="IM"] { min-width: 760px; }
+    .param-table[data-code="ASH"] { min-width: 920px; }
+    .param-table[data-code="VM"] { min-width: 1100px; }
+    .param-table[data-code="TS"] { min-width: 560px; }
+    .param-table[data-code="CV"] { min-width: 1240px; }
+
+    .param-table thead th {
+        padding: 0.4rem 0.3rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        line-height: 1.25;
+        color: #ffffff !important;
+        background-color: #1b3152 !important;
+        border-color: rgba(255, 255, 255, 0.25) !important;
+        vertical-align: middle;
+        white-space: normal;
+    }
+
+    .param-table thead th.bg-warning {
+        background-color: #3a5a8c !important;
+    }
+
+    .param-table thead th i {
+        color: #ffffff !important;
+    }
+
+    .param-table td {
+        padding: 0.15rem 0.2rem;
+        font-size: 0.75rem;
+        vertical-align: middle;
+        border-color: #dfe4ea;
+    }
+
+    .param-table td.bg-warning {
+        background-color: rgba(27, 49, 82, 0.07) !important;
+    }
+
+    .param-table td.bg-light {
+        font-size: 0.74rem;
+        white-space: nowrap;
+    }
+
+    .param-table input.form-control-sm {
+        width: 100%;
+        min-width: 0;
+        height: 28px;
+        padding: 0.2rem 0.25rem;
+        font-size: 0.75rem;
+        text-align: center;
+        border-radius: 0.2rem;
+    }
+
+    .param-table input:disabled {
+        background-color: #f1f3f5;
+    }
+
+    .param-table .in-im-1,
+    .param-table .in-im-2 {
+        color: #1b3152 !important;
+    }
+
+    .param-table .badge {
+        font-size: 0.66rem;
+        font-weight: 600;
+        padding: 0.3em 0.6em;
+        border-radius: 4px;
+    }
+
+    /* ===== Modal ===== */
+    .modal-content {
+        border: 0;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+        font-size: 0.8rem;
+        overflow: hidden;
+    }
+
+    .modal-header.modal-corporate {
+        padding: 0.55rem 0.9rem;
+        color: #ffffff;
+        background-color: #1b3152;
+    }
+
+    .modal-header.modal-corporate .modal-title {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #ffffff;
+    }
+
+    .modal-footer {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .modal-resource .nav-tabs .nav-link {
+        padding: 0.55rem 0.5rem;
+        font-size: 0.78rem;
+        color: #1b3152 !important;
+        border-radius: 0;
+    }
+
+    .modal-resource .nav-tabs .nav-link.active {
+        background-color: rgba(27, 49, 82, 0.12);
+        box-shadow: inset 0 -3px 0 #1b3152;
+    }
+
+    .modal-resource .table thead th {
+        font-size: 0.72rem;
+        color: #ffffff !important;
+        background-color: #1b3152 !important;
+        border-color: #ffffff !important;
+    }
+
+    .modal-resource .table td {
+        font-size: 0.75rem;
+        vertical-align: middle;
+    }
+
+    .modal-resource .table-hover > tbody > tr:hover > * {
+        --bs-table-hover-bg: rgba(27, 49, 82, 0.06);
+    }
+
+    .modal-resource .modal-body > .tab-content {
+        padding: 0.75rem !important;
+    }
+
+    .scroll-hint {
+        display: none;
+        margin-bottom: 4px;
+        font-size: 0.68rem;
+        color: #6c757d;
+    }
+
+    /* ===== Tablet ===== */
+    @media (max-width: 991.98px) {
+        .param-table thead th:first-child,
+        .param-table tbody tr td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+        }
+
+        .param-table tbody tr td:first-child {
+            background-color: #f8f9fa !important;
+        }
+    }
+
+    /* ===== Mobile ===== */
+    @media (max-width: 767.98px) {
+        .dashboard-container {
+            padding: 0 10px !important;
+            padding-bottom: 1.25rem !important;
+        }
+
+        .dashboard-container .breadcrumb,
+        .dashboard-container .breadcrumb .breadcrumb-item,
+        .dashboard-container .breadcrumb .breadcrumb-item a {
+            font-size: 0.72rem !important;
+        }
+
+        .dashboard-container .breadcrumb .breadcrumb-item + .breadcrumb-item {
+            padding-left: 0.3rem;
+        }
+
+        .dashboard-container .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+            padding-right: 0.3rem;
+        }
+
+        .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item {
+            font-size: 0.85rem !important;
+            padding: 10px 14px;
+        }
+
+        .card-body {
+            padding: 10px !important;
+        }
+
+        .page-title {
+            font-size: 0.95rem;
+        }
+
+        .dashboard-container .alert-info {
+            margin: 8px !important;
+        }
+
+        .dashboard-container .form-control:not(.param-table .form-control),
+        .modal .form-control:not(.in-peran):not(.in-qty) {
+            font-size: 16px;
+            min-height: 40px;
+        }
+
+        .accordion-body {
+            padding: 8px !important;
+        }
+
+        .scroll-hint {
+            display: block;
+        }
+
+        .form-actions .btn {
+            width: 100%;
+            min-height: 40px;
+            font-size: 0.85rem;
+        }
+
+        .modal-resource .nav-tabs .nav-link {
+            font-size: 0.72rem;
+        }
+
+        .modal-footer .btn {
+            width: 100%;
+            min-height: 40px;
+        }
+    }
+</style>
+
+<div class="container-fluid dashboard-container">
     <x-qc-breadcrumb active="In-House">
         <li class="breadcrumb-item"><a href="{{ route('qc-harian.index') }}" class="text-decoration-none">Pengujian Harian QC I</a></li>
         <li class="breadcrumb-item active">Input Data</li>
     </x-qc-breadcrumb>
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-dark mb-0">
-            <i class="fas fa-plus-circle text-danger me-2"></i>Input Data Harian QC
-        </h2>
-    </div>
+
+    <h5 class="page-title">
+        <i class="fas fa-plus-circle icon-corporate me-2"></i>Input Data Harian QC
+    </h5>
 
     <form action="{{ route('qc-harian.store') }}" method="POST" id="formQc">
         @csrf
         <input type="hidden" name="is_draft" id="is_draft" value="0">
         <input type="hidden" name="old_draft_group_id" value="{{ isset($serverDraft) ? $serverDraft['draft_group_id'] : '' }}">
 
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-header text-white py-3" style="background-color: #1b3152;">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-clipboard-list me-2"></i>Section 1: Data Dasar Pengujian</h5>
+        <div class="card shadow-sm border-0 mb-2">
+            <div class="card-header-sm">
+                <h6 class="section-title"><i class="fas fa-clipboard-list icon-corporate me-2"></i>Section 1: Data Dasar Pengujian</h6>
             </div>
-            <div class="card-body p-4">
+            <div class="card-body">
 
-                <h6 class="mb-3 text-primary border-bottom pb-2"><i class="fas fa-info-circle me-2"></i>Informasi Umum</h6>
-                <div class="row mb-0">
-                    <div class="col-md-4 mb-3 mb-md-0">
-                        <label class="form-label fw-bold">Kode Batch Aktif</label>
+                <h6 class="sub-title"><i class="fas fa-info-circle me-2"></i>Informasi Umum</h6>
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <label class="form-label">Kode Batch Aktif</label>
                         <input type="text" class="form-control bg-light" value="{{ $activeBatch->kode_batch }}" readonly>
                     </div>
-                    <div class="col-md-4 mb-3 mb-md-0">
-                        <label class="form-label fw-bold">Nama Sampel <span class="text-danger">*</span></label>
+                    <div class="col-md-4">
+                        <label class="form-label">Nama Sampel <span class="text-danger">*</span></label>
                         <input type="text" name="nama_sampel_uji" class="form-control" value="{{ $activeBatch->nama_sampel }}" required>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label fw-bold">Tanggal Uji <span class="text-danger">*</span></label>
+                        <label class="form-label">Tanggal Uji <span class="text-danger">*</span></label>
                         <input type="date" name="tanggal_uji" class="form-control" value="{{ date('Y-m-d') }}" required max="{{ date('Y-m-d') }}">
                     </div>
                 </div>
@@ -43,12 +561,12 @@
             </div>
         </div>
 
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-header text-white py-3" style="background-color: #1b3152;">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-table me-2"></i>Section 2: Input Data Pengujian</h5>
+        <div class="card shadow-sm border-0 mb-2">
+            <div class="card-header-sm">
+                <h6 class="section-title"><i class="fas fa-table icon-corporate me-2"></i>Section 2: Input Data Pengujian</h6>
             </div>
             <div class="card-body p-0">
-                <div class="alert alert-info m-3 rounded-0 border-start border-4 border-info">
+                <div class="alert alert-info">
                     <i class="fas fa-info-circle me-2"></i> Centang kotak di samping nama parameter untuk mengaktifkan tabel inputnya.
                 </div>
 
@@ -66,69 +584,69 @@
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="heading-{{ $pid }}">
                             <div class="d-flex align-items-center w-100 bg-light border-bottom">
-                                <div class="p-3">
+                                <div class="param-head-check">
                                     @if($isLocked)
                                         <i class="fas fa-lock text-danger" title="Menunggu investigasi"></i>
                                     @else
-                                        <input class="form-check-input param-enable-check" type="checkbox" name="params[{{ $pid }}][selected]" value="1" data-pid="{{ $pid }}" style="transform: scale(1.5);">
+                                        <input class="form-check-input param-enable-check" type="checkbox" name="params[{{ $pid }}][selected]" value="1" data-pid="{{ $pid }}" style="transform: scale(1.3);">
                                     @endif
                                 </div>
-                                <button class="accordion-button collapsed py-3 {{ $isLocked ? 'text-danger' : 'fw-bold' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $pid }}" aria-expanded="false" aria-controls="collapse-{{ $pid }}">
+                                <button class="accordion-button collapsed {{ $isLocked ? 'text-danger' : 'fw-bold' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $pid }}" aria-expanded="false" aria-controls="collapse-{{ $pid }}">
                                     {{ $code }} - {{ $param->parameterUji->satuan }}
                                     @if($isLocked)
-                                        <span class="badge bg-danger ms-3">OUTLIER - MENUNGGU INVESTIGASI (LOCKED)</span>
+                                        <span class="badge bg-danger ms-2">OUTLIER - MENUNGGU INVESTIGASI (LOCKED)</span>
                                     @endif
                                 </button>
                             </div>
                         </h2>
                         <div id="collapse-{{ $pid }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ $pid }}" data-bs-parent="#parameterAccordion">
-                            <div class="accordion-body p-3">
+                            <div class="accordion-body">
 
-                                <div class="row align-items-center bg-light p-3 rounded mb-3 border mx-0">
-                                    <div class="col-md-8 mb-2 mb-md-0">
-                                        <div class="d-flex flex-column gap-1" style="font-size: 0.85rem;">
-                                            <div><i class="fas fa-users text-primary me-2"></i><strong>Personil:</strong> <span id="sum-personil-{{ $pid }}" class="text-muted fst-italic">Belum diatur</span></div>
-                                            <div><i class="fas fa-tools text-warning me-2"></i><strong>Alat:</strong> <span id="sum-alat-{{ $pid }}" class="text-muted fst-italic">Belum diatur</span></div>
-                                            <div><i class="fas fa-flask text-success me-2"></i><strong>Bahan:</strong> <span id="sum-bahan-{{ $pid }}" class="text-muted fst-italic">Belum diatur</span></div>
+                                <div class="row align-items-center bg-light p-2 rounded mb-2 border mx-0 g-2">
+                                    <div class="col-md-8">
+                                        <div class="d-flex flex-column gap-1 res-summary">
+                                            <div><i class="fas fa-users icon-corporate me-2"></i><strong>Personil:</strong> <span id="sum-personil-{{ $pid }}" class="text-muted fst-italic">Belum diatur</span></div>
+                                            <div><i class="fas fa-tools icon-corporate me-2"></i><strong>Alat:</strong> <span id="sum-alat-{{ $pid }}" class="text-muted fst-italic">Belum diatur</span></div>
+                                            <div><i class="fas fa-flask icon-corporate me-2"></i><strong>Bahan:</strong> <span id="sum-bahan-{{ $pid }}" class="text-muted fst-italic">Belum diatur</span></div>
                                         </div>
                                     </div>
-                                    <div class="col-md-4 text-md-end">
-                                        <button type="button" class="btn btn-sm mb-1 w-100 shadow-sm text-white" style="background-color: #1b3152; border-color: #1b3152;" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}">
+                                    <div class="col-md-4 d-flex flex-column gap-1">
+                                        <button type="button" class="btn btn-sm btn-corporate-blue w-100 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}">
                                             <i class="fas fa-cog me-1"></i> Atur Alat & Bahan
                                         </button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary w-100 shadow-sm btn-copy-resource" data-pid="{{ $pid }}">
+                                        <button type="button" class="btn btn-sm btn-outline-corporate w-100 shadow-sm btn-copy-resource" data-pid="{{ $pid }}">
                                             <i class="fas fa-copy me-1"></i> Salin dari Atas
                                         </button>
                                     </div>
                                 </div>
 
                                 <div class="modal fade modal-resource" id="modalResource-{{ $pid }}" tabindex="-1" aria-labelledby="label-{{ $pid }}" aria-hidden="true" data-bs-backdrop="static">
-                                    <div class="modal-dialog modal-lg">
-                                        <div class="modal-content border-0 shadow-lg">
-                                            <div class="modal-header text-white" style="background-color: #1b3152;">
-                                                <h5 class="modal-title fw-bold" id="label-{{ $pid }}"><i class="fas fa-tasks me-2"></i>Atur Resource Parameter: {{ $code }}</h5>
+                                    <div class="modal-dialog modal-lg modal-dialog-centered modal-fullscreen-md-down">
+                                        <div class="modal-content">
+                                            <div class="modal-header modal-corporate">
+                                                <h5 class="modal-title" id="label-{{ $pid }}"><i class="fas fa-tasks me-2"></i>Atur Resource Parameter: {{ $code }}</h5>
                                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body p-0">
 
                                                 <ul class="nav nav-tabs nav-fill bg-light m-0" id="tab-{{ $pid }}" role="tablist">
                                                     <li class="nav-item" role="presentation">
-                                                        <button class="nav-link active fw-bold text-dark py-3" id="personil-tab-{{ $pid }}" data-bs-toggle="tab" data-bs-target="#tab-personil-{{ $pid }}" type="button" role="tab"><i class="fas fa-users text-primary me-2"></i>Personil</button>
+                                                        <button class="nav-link active fw-bold" id="personil-tab-{{ $pid }}" data-bs-toggle="tab" data-bs-target="#tab-personil-{{ $pid }}" type="button" role="tab"><i class="fas fa-users icon-corporate me-1"></i>Personil</button>
                                                     </li>
                                                     <li class="nav-item" role="presentation">
-                                                        <button class="nav-link fw-bold text-dark py-3" id="alat-tab-{{ $pid }}" data-bs-toggle="tab" data-bs-target="#tab-alat-{{ $pid }}" type="button" role="tab"><i class="fas fa-tools text-warning me-2"></i>Alat</button>
+                                                        <button class="nav-link fw-bold" id="alat-tab-{{ $pid }}" data-bs-toggle="tab" data-bs-target="#tab-alat-{{ $pid }}" type="button" role="tab"><i class="fas fa-tools icon-corporate me-1"></i>Alat</button>
                                                     </li>
                                                     <li class="nav-item" role="presentation">
-                                                        <button class="nav-link fw-bold text-dark py-3" id="bahan-tab-{{ $pid }}" data-bs-toggle="tab" data-bs-target="#tab-bahan-{{ $pid }}" type="button" role="tab"><i class="fas fa-flask text-success me-2"></i>Bahan / Reagen</button>
+                                                        <button class="nav-link fw-bold" id="bahan-tab-{{ $pid }}" data-bs-toggle="tab" data-bs-target="#tab-bahan-{{ $pid }}" type="button" role="tab"><i class="fas fa-flask icon-corporate me-1"></i>Bahan / Reagen</button>
                                                     </li>
                                                 </ul>
 
-                                                <div class="tab-content p-4" id="tabContent-{{ $pid }}">
+                                                <div class="tab-content p-3" id="tabContent-{{ $pid }}">
 
                                                     <div class="tab-pane fade show active" id="tab-personil-{{ $pid }}" role="tabpanel">
                                                         <div class="table-responsive border rounded">
                                                             <table class="table table-hover table-sm mb-0">
-                                                                <thead class="table-light">
+                                                                <thead>
                                                                     <tr><th width="5%" class="text-center">Pilih</th><th>Nama Personil</th><th>Peran / Tugas</th></tr>
                                                                 </thead>
                                                                 <tbody>
@@ -136,7 +654,7 @@
                                                                     <tr>
                                                                         <td class="text-center align-middle">
                                                                             
-                                                                            <input class="form-check-input chk-personil" style="transform: scale(1.3);" type="checkbox" name="params[{{ $pid }}][mentah][personil_ids][]" value="{{ $personil->personil_id }}" id="pers_{{ $pid }}_{{ $personil->personil_id }}" data-nama="{{ $personil->nama }}">
+                                                                            <input class="form-check-input chk-personil" style="transform: scale(1.2);" type="checkbox" name="params[{{ $pid }}][mentah][personil_ids][]" value="{{ $personil->personil_id }}" id="pers_{{ $pid }}_{{ $personil->personil_id }}" data-nama="{{ $personil->nama }}">
                                                                         </td>
                                                                         <td class="align-middle"><label for="pers_{{ $pid }}_{{ $personil->personil_id }}" class="mb-0 cursor-pointer d-block">{{ $personil->nama }}</label></td>
                                                                         <td><input type="text" class="form-control form-control-sm in-peran" name="params[{{ $pid }}][mentah][personil_peran][{{ $personil->personil_id }}]" value="Analis" placeholder="Analis"></td>
@@ -148,12 +666,12 @@
                                                     </div>
 
                                                     <div class="tab-pane fade" id="tab-alat-{{ $pid }}" role="tabpanel">
-                                                        <div class="row">
+                                                        <div class="row g-2">
                                                             @foreach($alatList as $alat)
-                                                            <div class="col-md-6 mb-3">
+                                                            <div class="col-12 col-md-6">
                                                                 <div class="form-check border p-2 rounded bg-light">
-                                                                    <input class="form-check-input chk-alat ms-1" style="transform: scale(1.3);" type="checkbox" name="params[{{ $pid }}][mentah][alat_ids][]" value="{{ $alat->alat_id }}" id="alat_{{ $pid }}_{{ $alat->alat_id }}" data-nama="{{ $alat->nama_alat }}">
-                                                                    <label class="form-check-label ms-2 cursor-pointer w-100" for="alat_{{ $pid }}_{{ $alat->alat_id }}">
+                                                                    <input class="form-check-input chk-alat ms-1" style="transform: scale(1.2);" type="checkbox" name="params[{{ $pid }}][mentah][alat_ids][]" value="{{ $alat->alat_id }}" id="alat_{{ $pid }}_{{ $alat->alat_id }}" data-nama="{{ $alat->nama_alat }}">
+                                                                    <label class="form-check-label ms-2 cursor-pointer w-100" style="font-size: 0.75rem;" for="alat_{{ $pid }}_{{ $alat->alat_id }}">
                                                                         <strong>{{ $alat->nama_alat }}</strong> <br><small class="text-muted">({{ $alat->kode_alat }})</small>
                                                                     </label>
                                                                 </div>
@@ -164,8 +682,8 @@
 
                                                     <div class="tab-pane fade" id="tab-bahan-{{ $pid }}" role="tabpanel">
                                                         <div class="table-responsive border rounded" style="max-height: 350px; overflow-y: auto;">
-                                                            <table class="table table-hover table-sm mb-0">
-                                                                <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                                                            <table class="table table-hover table-sm mb-0 text-nowrap">
+                                                                <thead style="position: sticky; top: 0; z-index: 1;">
                                                                     <tr><th width="5%" class="text-center">Pilih</th><th>Nama Bahan</th><th>Sisa Stok</th><th width="30%">Jumlah Dipakai</th></tr>
                                                                 </thead>
                                                                 <tbody>
@@ -176,12 +694,12 @@
                                                                     @endphp
                                                                     <tr class="{{ $habis ? 'table-danger' : '' }}">
                                                                         <td class="text-center align-middle">
-                                                                            <input class="form-check-input chk-bahan" style="transform: scale(1.3);" type="checkbox" name="params[{{ $pid }}][mentah][barang_ids][]" value="{{ $barang->barang_id }}" id="bh_{{ $pid }}_{{ $barang->barang_id }}"  data-nama="{{ $barang->nama_barang }}">
+                                                                            <input class="form-check-input chk-bahan" style="transform: scale(1.2);" type="checkbox" name="params[{{ $pid }}][mentah][barang_ids][]" value="{{ $barang->barang_id }}" id="bh_{{ $pid }}_{{ $barang->barang_id }}"  data-nama="{{ $barang->nama_barang }}">
                                                                         </td>
                                                                         <td class="align-middle">
                                                                             <label for="bh_{{ $pid }}_{{ $barang->barang_id }}" class="mb-0 cursor-pointer d-block {{ $habis ? 'text-muted' : '' }}">
                                                                                 <strong>{{ $barang->nama_barang }}</strong> 
-                                                                                @if($habis) <span class="badge bg-danger ms-1">Habis</span> @endif
+                                                                                @if($habis) <span class="badge bg-danger ms-1" style="font-size: 0.65rem;">Habis</span> @endif
                                                                             </label>
                                                                         </td>
                                                                         <td class="align-middle text-muted">{{ number_format($saldoAkhir, 0, ',', '.') }} {{ $barang->satuan }}</td>
@@ -203,14 +721,15 @@
                                             </div>
                                             <div class="modal-footer bg-light border-top-0">
                                                 
-                                                <button type="button" class="btn px-4 rounded-pill btn-save-modal text-white" style="background-color: #1b3152; border-color: #1b3152;" data-pid="{{ $pid }}" data-bs-dismiss="modal">
+                                                <button type="button" class="btn btn-sm btn-corporate-blue px-4 btn-save-modal" data-pid="{{ $pid }}" data-bs-dismiss="modal">
                                                     <i class="fas fa-check me-2"></i>Simpan Resource
                                                 </button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                                            
+
+                                <div class="scroll-hint"><i class="fas fa-arrows-alt-h me-1"></i> Geser tabel ke kiri/kanan untuk melihat seluruh kolom.</div>
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-sm align-middle text-center param-table" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
                                         <thead class="table-light">
@@ -439,11 +958,11 @@
             </div>
         </div>
 
-        <div class="row align-items-center mt-4 mb-2">
+        <div class="row align-items-center g-2 mt-2 mb-2 form-actions">
             
-            <div class="col-md-6 order-2 order-md-1 mt-3 mt-md-0">
+            <div class="col-md-6 order-2 order-md-1">
                 <div class="d-grid d-md-block">
-                    <a href="{{ route('qc-harian.index') }}" class="btn btn-light border px-4">
+                    <a href="{{ route('qc-harian.index') }}" class="btn btn-kembali btn-sm px-4 shadow-sm">
                         Batal
                     </a>
                 </div>
@@ -451,10 +970,10 @@
             
             <div class="col-md-6 order-1 order-md-2 text-md-end">
                 <div class="d-grid d-md-flex justify-content-md-end gap-2">
-                    <button type="button" class="btn btn-warning px-4 rounded-pill shadow-sm" id="btnDraft">
+                    <button type="button" class="btn btn-outline-corporate btn-sm px-4 shadow-sm" id="btnDraft">
                         <i class="fas fa-save me-2"></i>Simpan Draft
                     </button>
-                    <button type="submit" class="btn btn-danger px-4 rounded-pill shadow-sm" id="btnSubmit">
+                    <button type="submit" class="btn btn-corporate-blue btn-sm px-4 shadow-sm" id="btnSubmit">
                         <i class="fas fa-check-circle me-2"></i>Simpan & Evaluasi Semua
                     </button>
                 </div>

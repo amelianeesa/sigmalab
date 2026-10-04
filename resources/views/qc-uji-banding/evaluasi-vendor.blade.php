@@ -48,13 +48,12 @@
                         </thead>
                         <tbody>
                             @php
-                                // Lookup parameter TM untuk dipakai oleh baris IM
+
                                 $tmParam = $program->parameters->first(function($x) {
                                     return strtoupper($x->parameterUji->nama_parameter ?? '') === 'TM';
                                 });
                                 $draft = is_array($program->draft_data) ? $program->draft_data : json_decode($program->draft_data ?? '{}', true);
-                                
-                                // Cari parameter_uji_id milik Carbon untuk fallback CHN historis
+
                                 $cParamId = null;
                                 foreach ($program->parameters as $pp) {
                                     if (strtoupper($pp->parameterUji->nama_parameter ?? '') === 'C') {
@@ -84,10 +83,9 @@
                                         $mappedName = 'Total Moisture';
                                         $unit = '%, ar';
                                         if ($labValue == 0) {
-                                            // Coba ambil dari parameter TM
+
                                             $labValue = floatval($tmParam->nilai_akhir ?? 0);
-                                            
-                                            // Jika TM di database juga kosong, fallback ke draft TM
+
                                             if ($labValue == 0) {
                                                 $tmPid = $tmParam->parameter_uji_id ?? $pid;
                                                 $tmInputs = $draft['params'][$tmPid]['inputs'] ?? [];
@@ -120,7 +118,7 @@
                                         $mappedName = 'Total Sulfur';
                                         $unit = '%, db';
                                         if ($labValue == 0) {
-                                            // Prioritas: coba ambil db (dry basis) dulu, fallback ke ad
+
                                             $val1 = $getDraftVal('[db1]');
                                             $val2 = $getDraftVal('[db2]');
                                             if ($val1 === null || $val2 === null) {
@@ -156,14 +154,14 @@
                                         $mappedName = 'Hydrogen';
                                         $unit = '%, db';
                                         if ($labValue == 0) {
-                                            // Coba ambil dari draft milik H sendiri dulu
+
                                             $val1 = $getDraftVal('[d1]');
                                             $val2 = $getDraftVal('[d2]');
                                             if ($val1 === null || $val2 === null) {
                                                 $val1 = $getDraftVal('[hasil_1]');
                                                 $val2 = $getDraftVal('[hasil_2]');
                                             }
-                                            // Fallback ke draft Carbon (data historis di mana H terbungkus di C)
+
                                             if (($val1 === null || $val2 === null) && $cParamId !== null) {
                                                 $cInputs = $draft['params'][$cParamId]['inputs'] ?? [];
                                                 $val1 = isset($cInputs["params[{$pid}][data][0][hasil_1]"]) && is_numeric($cInputs["params[{$pid}][data][0][hasil_1]"]) ? floatval($cInputs["params[{$pid}][data][0][hasil_1]"]) : null;
@@ -182,7 +180,7 @@
                                                 $val1 = $getDraftVal('[hasil_1]');
                                                 $val2 = $getDraftVal('[hasil_2]');
                                             }
-                                            // Fallback ke draft Carbon (data historis)
+
                                             if (($val1 === null || $val2 === null) && $cParamId !== null) {
                                                 $cInputs = $draft['params'][$cParamId]['inputs'] ?? [];
                                                 $val1 = isset($cInputs["params[{$pid}][data][0][hasil_1]"]) && is_numeric($cInputs["params[{$pid}][data][0][hasil_1]"]) ? floatval($cInputs["params[{$pid}][data][0][hasil_1]"]) : null;
@@ -229,7 +227,7 @@
                                 </tr>
                                 @endif
                             @endforeach
-                            <!-- Relative Density Manual Row -->
+                            
                             <tr>
                                 <td class="text-start fw-bold">Relative Density</td>
                                 <td>db</td>

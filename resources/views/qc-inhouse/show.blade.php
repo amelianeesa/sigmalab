@@ -307,6 +307,56 @@
         color: #000000;
     }
 
+    /* ===== Resource Pelaksanaan Pengujian ===== */
+    .res-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 10px;
+    }
+
+    .res-item {
+        padding: 10px 12px;
+        background-color: #f8fafc;
+        border: 1px solid #dfe4ea;
+        border-radius: 6px;
+    }
+
+    .res-param {
+        display: inline-block;
+        margin-bottom: 6px;
+        padding: 2px 8px;
+        font-size: 0.74rem;
+        font-weight: 700;
+        color: #ffffff;
+        background-color: #1b3152;
+        border-radius: 4px;
+    }
+
+    .res-row {
+        display: grid;
+        grid-template-columns: 62px 1fr;
+        gap: 6px;
+        padding: 3px 0;
+        font-size: 0.76rem;
+        line-height: 1.5;
+        color: #000000;
+    }
+
+    .res-label {
+        font-weight: 600;
+        color: #1b3152;
+    }
+
+    .res-value {
+        min-width: 0;
+        word-break: break-word;
+    }
+
+    .res-empty {
+        font-style: italic;
+        color: #6c757d;
+    }
+
     .modal-investigasi .modal-header {
         padding: 10px 14px;
         background-color: #dc3545;
@@ -481,6 +531,15 @@
         .info-row dt {
             flex-basis: 42%;
             max-width: 42%;
+        }
+
+        .res-row {
+            grid-template-columns: 56px 1fr;
+            font-size: 0.78rem;
+        }
+
+        .param-table {
+            min-width: 560px;
         }
     }
 
@@ -744,6 +803,74 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="row g-2">
+        <div class="col-12">
+                <div class="card shadow-sm border-0 mb-2">
+                    <div class="card-header-sm">
+                        <h6 class="section-title"><i class="fas fa-id-card icon-corporate me-2"></i>Resource Pelaksanaan Pengujian</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="res-list">
+                            @foreach($batch->parameters as $p)
+                                @php
+                                    $firstStabilitas = $p->dataStabilitas->first();
+                                    $firstHomogen = $p->dataHomogenitas->first();
+                                    $mentah = $firstStabilitas ? $firstStabilitas->data_mentah : ($firstHomogen ? $firstHomogen->data_mentah : []);
+
+                                    $personilIds = $mentah['personil_ids'] ?? [];
+                                    $alatIds = $mentah['alat_ids'] ?? [];
+                                    $barangIds = $mentah['barang_ids'] ?? [];
+                                    $barangJumlah = $mentah['barang_jumlah'] ?? [];
+                                @endphp
+
+                                <div class="res-item">
+                                    <span class="res-param">{{ $p->parameterUji->nama_parameter }}</span>
+
+                                    <div class="res-row">
+                                        <div class="res-label">Analis</div>
+                                        <div class="res-value">
+                                            @if(count($personilIds) > 0)
+                                                {{ \App\Models\Personil::whereIn('personil_id', $personilIds)->pluck('nama')->join(', ') }}
+                                            @else
+                                                <span class="res-empty">Tidak tercatat</span>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    <div class="res-row">
+                                        <div class="res-label">Alat</div>
+                                        <div class="res-value">
+                                            @if(count($alatIds) > 0)
+                                                {{ \App\Models\Alat::whereIn('alat_id', $alatIds)->pluck('nama_alat')->join(', ') }}
+                                            @else
+                                                <span class="res-empty">Tidak tercatat</span>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    <div class="res-row">
+                                        <div class="res-label">Bahan</div>
+                                        <div class="res-value">
+                                            @if(count($barangIds) > 0)
+                                                @php
+                                                    $listBarang = \App\Models\Barang::whereIn('barang_id', $barangIds)->get();
+                                                @endphp
+                                                @foreach($listBarang as $bhn)
+                                                    {{ $bhn->nama_barang }} ({{ $barangJumlah[$bhn->barang_id] ?? 0 }} {{ $bhn->satuan }}){{ !$loop->last ? ', ' : '' }}
+                                                @endforeach
+                                            @else
+                                                <span class="res-empty">Tidak ada bahan tercatat</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
         </div>
     </div>
 </div>

@@ -12,6 +12,7 @@ use App\Models\Barang;
 use App\Models\AftKalibrasi;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Arr;
 use Barryvdh\DomPDF\Facade\Pdf;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
@@ -42,7 +43,6 @@ class QcUjiBandingController extends Controller
         $personilList = Personil::orderBy('nama')->get();
         $barangList = Barang::where('saldo_akhir', '>', 0)->get();
 
-        
         $draftId = $request->query('draft_id');
         $draftData = null;
         if ($draftId) {
@@ -55,7 +55,6 @@ class QcUjiBandingController extends Controller
         return view('qc-uji-banding.create', compact('allParameters', 'alatList', 'personilList', 'barangList', 'draftId', 'draftData'));
     }
 
-    
     public function storeDraft(Request $request)
     {
         $id = $request->input('draft_id');
@@ -111,34 +110,72 @@ class QcUjiBandingController extends Controller
                 $program = QcUjiBanding::create($dataToSave);
             }
 
-            foreach ($request->params as $paramId => $data) {
-                if (empty($data['selected'])) continue;
-                
-                $nilai_d1 = isset($data['d1']) && $data['d1'] !== '' ? floatval($data['d1']) : null;
-                $nilai_d2 = isset($data['d2']) && $data['d2'] !== '' ? floatval($data['d2']) : null;
-                $nilai_db_1 = isset($data['db1']) && $data['db1'] !== '' ? floatval($data['db1']) : null;
-                $nilai_db_2 = isset($data['db2']) && $data['db2'] !== '' ? floatval($data['db2']) : null;
-                
-                if ($nilai_db_1 !== null && $nilai_db_2 !== null) {
-                    $nilai_akhir = ($nilai_db_1 + $nilai_db_2) / 2;
-                } else if ($nilai_d1 !== null && $nilai_d2 !== null) {
-                    $nilai_akhir = ($nilai_d1 + $nilai_d2) / 2;
-                } else {
-                    $nilai_akhir = 0;
+            $params = $request->input('params');
+
+            if (!empty($params[4]['selected'])) {
+                foreach ([5, 6] as $pid) {
+                    if (!isset($params[$pid])) continue;
+                    $params[$pid]['selected'] = 1;
+                    foreach (['mentah', 'ref_no', 'blnc_id', 'furnace_id', 'std_method'] as $k) {
+                        if (!isset($params[$pid][$k]) && isset($params[4][$k])) {
+                            $params[$pid][$k] = $params[4][$k];
+                        }
+                    }
                 }
+            }
+
+            foreach ($params as $paramId => $data) {
+                if (empty($data['selected'])) continue;
+
+                $rows = $data['data'] ?? [];
+                ksort($rows);
+
+                $nilaiPerPengujian = [];
+                foreach ($rows as $row) {
+                    $d1  = $this->toFloat($row['d1'] ?? null);
+                    $d2  = $this->toFloat($row['d2'] ?? null);
+                    $db1 = $this->toFloat($row['db1'] ?? null);
+                    $db2 = $this->toFloat($row['db2'] ?? null);
+
+                    if ($db1 !== null && $db2 !== null) {
+                        $nilaiPerPengujian[] = ($db1 + $db2) / 2;
+                    } elseif ($d1 !== null && $d2 !== null) {
+                        $nilaiPerPengujian[] = ($d1 + $d2) / 2;
+                    }
+                }
+
+                $sum_d1 = 0;
+                $sum_d2 = 0;
+                $count_rows = count($rows);
+                if ($count_rows > 0) {
+                    foreach($rows as $r) {
+                        $sum_d1 += $this->toFloat($r['d1'] ?? 0);
+                        $sum_d2 += $this->toFloat($r['d2'] ?? 0);
+                    }
+                }
+                $nilai_akhir = count($nilaiPerPengujian)
+                    ? array_sum($nilaiPerPengujian) / count($nilaiPerPengujian)
+                    : 0;
 
                 QcUjiBandingParameter::create([
                     'qc_uji_banding_id' => $program->id,
-                    'parameter_uji_id' => $paramId,
-                    'analis_id' => $data['analis_id'] ?? null,
-                    'alat_id' => $data['alat_id'] ?? null,
-                    'metode_uji' => $data['metode_uji'] ?? null,
+                    'parameter_uji_id'  => $paramId,
+                    'analis_id'  => $data['mentah']['personil_ids'][0] ?? null,
+                    'alat_id'    => $data['mentah']['alat_ids'][0] ?? null,
+                    'metode_uji' => $data['metode_uji'] ?? $data['std_method'] ?? null,
                     'uncertainty_lab' => $data['uncertainty_lab'] ?? null,
 
-                    'nilai_d1' => $nilai_d1,
-                    'nilai_d2' => $nilai_d2,
+                    'nilai_d1'    => $count_rows > 0 ? ($sum_d1 / $count_rows) : null,
+                    'nilai_d2'    => $count_rows > 0 ? ($sum_d2 / $count_rows) : null,
                     'nilai_akhir' => $nilai_akhir,
-                    'data_mentah' => $data['mentah'] ?? null,
+
+                    'data_mentah' => array_merge($data['mentah'] ?? [], [
+                        'rows' => $rows,
+                        'meta' => Arr::only($data, [
+                            'ref_no', 'blnc_id', 'time', 'furnace_id', 'std_method',
+                            'indicate_t', 'calorimeter_id', 'metode_uji', 'uncertainty_lab',
+                        ]),
+                    ]),
                     'status_evaluasi' => 'menunggu',
                 ]);
             }
@@ -157,13 +194,130 @@ class QcUjiBandingController extends Controller
         return view('qc-uji-banding.show', compact('program'));
     }
 
-    
+    public function edit($id)
+    {
+        $qc = QcUjiBanding::with('parameters')->findOrFail($id);
+
+        return view('qc-uji-banding.create', [
+            'is_edit' => true,
+            'qc' => $qc,
+            'barangList' => \App\Models\Barang::all(),
+            'allParameters' => \App\Models\ParameterUji::all(),
+            'personilList' => \App\Models\Personil::all(),
+            'alatList' => \App\Models\Alat::all(),
+        ]);
+    }
+
+        public function update(Request $request, $id)
+    {
+        $request->validate([
+            'nama_program' => 'required|string',
+            'penyelenggara' => 'required|string',
+            'tanggal_terima' => 'required|date',
+            'kode_sampel' => 'required|string',
+            'params' => 'required|array',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $qc = QcUjiBanding::findOrFail($id);
+            $data = $request->all();
+
+            $qc->update([
+                'nama_program' => $data['nama_program'],
+                'penyelenggara' => $data['penyelenggara'],
+                'kode_sampel' => $data['kode_sampel'],
+                'tanggal_terima' => $data['tanggal_terima'],
+                'keterangan' => $data['keterangan'] ?? null,
+            ]);
+
+            $qc->parameters()->delete();
+
+            $params = $request->input('params');
+
+            if (!empty($params[4]['selected'])) {
+                foreach ([5, 6] as $pid) {
+                    if (!isset($params[$pid])) continue;
+                    $params[$pid]['selected'] = 1;
+                    foreach (['mentah', 'ref_no', 'blnc_id', 'furnace_id', 'std_method'] as $k) {
+                        if (!isset($params[$pid][$k]) && isset($params[4][$k])) {
+                            $params[$pid][$k] = $params[4][$k];
+                        }
+                    }
+                }
+            }
+
+            foreach ($params as $paramId => $dataParams) {
+                if (empty($dataParams['selected'])) continue;
+
+                $rows = $dataParams['data'] ?? [];
+                ksort($rows);
+
+                $nilaiPerPengujian = [];
+                foreach ($rows as $row) {
+                    $d1  = $this->toFloat($row['d1'] ?? null);
+                    $d2  = $this->toFloat($row['d2'] ?? null);
+                    $db1 = $this->toFloat($row['db1'] ?? null);
+                    $db2 = $this->toFloat($row['db2'] ?? null);
+
+                    if ($db1 !== null && $db2 !== null) {
+                        $nilaiPerPengujian[] = ($db1 + $db2) / 2;
+                    } elseif ($d1 !== null && $d2 !== null) {
+                        $nilaiPerPengujian[] = ($d1 + $d2) / 2;
+                    }
+                }
+
+                $sum_d1 = 0;
+                $sum_d2 = 0;
+                $count_rows = count($rows);
+                if ($count_rows > 0) {
+                    foreach($rows as $r) {
+                        $sum_d1 += $this->toFloat($r['d1'] ?? 0);
+                        $sum_d2 += $this->toFloat($r['d2'] ?? 0);
+                    }
+                }
+                
+                $nilai_akhir = count($nilaiPerPengujian)
+                    ? array_sum($nilaiPerPengujian) / count($nilaiPerPengujian)
+                    : 0;
+
+                QcUjiBandingParameter::create([
+                    'qc_uji_banding_id' => $qc->id,
+                    'parameter_uji_id'  => $paramId,
+                    'analis_id'  => $dataParams['mentah']['personil_ids'][0] ?? null,
+                    'alat_id'    => $dataParams['mentah']['alat_ids'][0] ?? null,
+                    'metode_uji' => $dataParams['metode_uji'] ?? $dataParams['std_method'] ?? null,
+                    'uncertainty_lab' => $dataParams['uncertainty_lab'] ?? null,
+
+                    'nilai_d1'    => $count_rows > 0 ? ($sum_d1 / $count_rows) : null,
+                    'nilai_d2'    => $count_rows > 0 ? ($sum_d2 / $count_rows) : null,
+                    'nilai_akhir' => $nilai_akhir,
+
+                    'data_mentah' => array_merge($dataParams['mentah'] ?? [], [
+                        'rows' => $rows,
+                        'meta' => Arr::only($dataParams, [
+                            'ref_no', 'blnc_id', 'time', 'furnace_id', 'std_method',
+                            'indicate_t', 'calorimeter_id', 'metode_uji', 'uncertainty_lab',
+                        ]),
+                    ]),
+                    'status_evaluasi' => 'menunggu',
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->route('qc-uji-banding.show', $qc->id)->with('success', 'Data Uji Banding berhasil diupdate.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Terjadi kesalahan saat update: ' . $e->getMessage())->withInput();
+        }
+    }
+
     public function printPdf($id)
     {
         $program = QcUjiBanding::with(['parameters.parameterUji', 'parameters.analis'])->findOrFail($id);
         
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('qc-uji-banding.print.pdf', compact('program'));
-        // Set paper A4 landscape or portrait depending on need. Let's do portrait
+
         $pdf->setPaper('A4', 'landscape'); 
         
         return $pdf->stream('Laporan_Uji_Banding_' . $program->kode_sampel . '.pdf');
@@ -205,8 +359,7 @@ class QcUjiBandingController extends Controller
     {
         $program = QcUjiBanding::findOrFail($id);
         $parameter = QcUjiBandingParameter::with(['parameterUji', 'analis'])->where('qc_uji_banding_id', $id)->findOrFail($param_id);
-        
-        // Buat instance PhpWord
+
         $phpWord = new PhpWord();
         $section = $phpWord->addSection();
 
@@ -254,8 +407,6 @@ class QcUjiBandingController extends Controller
         return $pdf->download($fileName);
     }
 
-    // ========== AFT KALIBRASI ==========
-
     public function aftKalibrasiStore(Request $request)
     {
         $request->validate([
@@ -267,7 +418,6 @@ class QcUjiBandingController extends Controller
             'data_points.*.correction' => 'required|numeric',
         ]);
 
-        // Deactivate all existing
         AftKalibrasi::where('is_active', true)->update(['is_active' => false]);
 
         $kalibrasi = AftKalibrasi::create([
@@ -295,8 +445,7 @@ class QcUjiBandingController extends Controller
     public function evaluasiForm($id)
     {
         $program = QcUjiBanding::with(['parameters.parameterUji'])->findOrFail($id);
-        
-        // Auto-fix missing Hydrogen and Nitrogen (Bug from create form)
+
         $cParam = $program->parameters->where('parameter_uji_id', 4)->first();
         if ($cParam) {
             $hasH = $program->parameters->where('parameter_uji_id', 5)->first();
@@ -384,5 +533,17 @@ class QcUjiBandingController extends Controller
     {
         $program = QcUjiBanding::with(['parameters.parameterUji'])->findOrFail($id);
         return view('qc-uji-banding.ringkasan-unjuk-kerja', compact('program'));
+    }
+
+    private function toFloat($value)
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+        
+        // Ganti koma dengan titik (berjaga-jaga jika terinput format desimal Indonesia)
+        $value = str_replace(',', '.', $value);
+        
+        return floatval($value);
     }
 }

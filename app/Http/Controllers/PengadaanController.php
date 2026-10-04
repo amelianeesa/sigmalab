@@ -137,9 +137,11 @@ class PengadaanController extends Controller
             if ($statusBaru === 'ditolak') {
                 $pengadaan->status = 'ditolak';
                 $pengadaan->disetujui_oleh = Auth::id();
-                $pengadaan->tanggal_keputusan = Carbon::now()->toDateString();
+                $pengadaan->tanggal_keputusan = Carbon::now('Asia/Jakarta');
                 $pengadaan->catatan_approval = $catatanLengkapPenolakan;
                 $pengadaan->save();
+
+                $pengadaan->catatTahap($isKoor ? 2 : 3, 'tolak');
 
                 $this->notifikasiPenolakanKeKoordinator($pengadaan);
                 return;
@@ -147,37 +149,46 @@ class PengadaanController extends Controller
 
             if ($isKoor) {
                 $pengadaan->status = 'menunggu_ga';
+                $pengadaan->disetujui_oleh = Auth::id();
+                $pengadaan->tanggal_keputusan = Carbon::now('Asia/Jakarta');
                 $pengadaan->save();
+
+                $pengadaan->catatTahap(2, 'setuju');
 
                 $this->kirimEmailNotifikasiKeGAAndCC($pengadaan);
                 $this->notifikasiInAppGAAndKabid($pengadaan, 'Pengajuan telah disetujui Koordinator dan menunggu persetujuan GA.');
-
-            } 
+            }
             elseif ($isGaOrAdmin) {
                 $pengadaan->disetujui_oleh = Auth::id();
-                $pengadaan->tanggal_keputusan = Carbon::now()->toDateString();
-                
+                $pengadaan->tanggal_keputusan = Carbon::now('Asia/Jakarta');
+
                 if ($statusBaru === 'diproses') {
-                    $metode = $request->input('metode_proses', 'PO'); 
-                    
+                    $metode = $request->input('metode_proses', 'PO');
+
                     if ($metode === 'Pembelian') {
                         $pengadaan->status = 'pembelian';
                     } else {
                         $pengadaan->status = 'diproses_po';
                     }
-                    
+
                     $pengadaan->catatan_po = $request->input('catatan_po');
                 } else {
                     $pengadaan->status = $statusBaru;
                 }
-            
+
                 if (isset($validated['catatan_approval'])) {
                     $pengadaan->catatan_approval = $validated['catatan_approval'];
                 }
-            
+
                 $pengadaan->save();
+
+                if ($statusBaru === 'diproses') {
+                    $pengadaan->catatTahap(4, 'proses');
+                } elseif ($statusBaru === 'disetujui') {
+                    $pengadaan->catatTahap(3, 'setuju');
+                }
             }
-             else {
+            else {
                 throw new \Exception('Anda tidak memiliki izin untuk memproses persetujuan ini.');
             }
         });
@@ -195,7 +206,7 @@ class PengadaanController extends Controller
 
         $pengadaan = PermintaanPengadaan::findOrFail($id);
 
-        if (!in_array($pengadaan->status, ['disetujui', 'diproses'])) {
+        if (!in_array($pengadaan->status, ['disetujui', 'diproses', 'diproses_po', 'pembelian'])) {
             return back()->with('error', 'Pengadaan harus disetujui atau diproses terlebih dahulu sebelum dikonfirmasi.');
         }
 
@@ -425,8 +436,12 @@ class PengadaanController extends Controller
 
         $pengadaan = PermintaanPengadaan::findOrFail($id);
         $pengadaan->status = 'diproses';
+        $pengadaan->disetujui_oleh = Auth::id();
+        $pengadaan->tanggal_keputusan = Carbon::now('Asia/Jakarta');
         $pengadaan->catatan_po = $request->catatan_po;
         $pengadaan->save();
+
+        $pengadaan->catatTahap(4, 'proses');
 
         return redirect()->back()->with('success', 'Pengadaan berhasil diproses ke tahap PO');
     }
@@ -436,12 +451,12 @@ class PengadaanController extends Controller
         $request->validate([
             'catatan_po' => 'required|string',
         ]);
-    
+
         $pengadaan = PermintaanPengadaan::findOrFail($id);
-        
+
         $pengadaan->catatan_po = $request->catatan_po;
         $pengadaan->save();
-    
+
         return redirect()->back()->with('success', 'Catatan progres berhasil diperbarui!');
     }
 
@@ -450,13 +465,17 @@ class PengadaanController extends Controller
         $request->validate([
             'alasan_batal' => 'required|string|max:255',
         ]);
-    
+
         $pengadaan = PermintaanPengadaan::findOrFail($id);
-        
+
         $pengadaan->status = 'ditolak';
+        $pengadaan->disetujui_oleh = Auth::id();
+        $pengadaan->tanggal_keputusan = Carbon::now('Asia/Jakarta');
         $pengadaan->catatan_approval = 'Dibatalkan oleh: GA. Alasan: ' . $request->alasan_batal;
         $pengadaan->save();
-    
+
+        $pengadaan->catatTahap(4, 'batal');
+
         return redirect()->back()->with('success', 'Proses pengadaan berhasil dibatalkan.');
     }
 }

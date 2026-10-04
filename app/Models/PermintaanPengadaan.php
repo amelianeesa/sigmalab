@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class PermintaanPengadaan extends Model
 {
@@ -51,23 +53,41 @@ class PermintaanPengadaan extends Model
     {
         return $this->belongsTo(User::class, 'disetujui_oleh', 'users_id');
     }
+
+    public function logs()
+    {
+        return $this->hasMany(PengadaanLog::class, 'permintaan_id', 'permintaan_id');
+    }
+
+    public function catatTahap(int $tahap, string $aksi, $userId = null, $waktu = null)
+    {
+        return $this->logs()->updateOrCreate(
+            ['tahap' => $tahap],
+            [
+                'aksi' => $aksi,
+                'users_id' => $userId ?? Auth::id(),
+                'dicatat_pada' => $waktu ?? Carbon::now('Asia/Jakarta'),
+            ]
+        );
+    }
+
     public function getFormatTargetWaktuAttribute()
     {
         $totalHari = $this->target_hari;
         if (!$totalHari || $totalHari <= 0) {
             return '-';
         }
-    
+
         $tahun = floor($totalHari / 365);
         $sisa = $totalHari % 365;
         $bulan = floor($sisa / 30);
         $hari = $sisa % 30;
-    
+
         $str = [];
         if ($tahun > 0) $str[] = "{$tahun} thn";
         if ($bulan > 0) $str[] = "{$bulan} bln";
         if ($hari > 0 || empty($str)) $str[] = "{$hari} hari";
-    
+
         return implode(' ', $str);
     }
 }

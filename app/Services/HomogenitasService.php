@@ -103,7 +103,17 @@ class HomogenitasService
         $msw = $sumSqWithin / (2 * $k);
 
         // F Hitung
-        $fHitung = $msw != 0 ? $msb / $msw : 0;
+        if ($msw == 0) {
+            if ($msb == 0) {
+                $fHitung = 0; // Data kembar identik sempurna di SEMUA botol
+            } else {
+                // Varians di dalam botol 0 (duplo identik), tapi rata-rata antar botol beda. 
+                // Ini anomali (kemungkinan analis copy-paste data atau ada pembulatan berlebih).
+                return ['error' => true, 'message' => 'Terdapat indikasi anomali data: Nilai simplo dan duplo di setiap botol sama persis, tetapi rata-rata antar botol berbeda. Mohon periksa kembali input data Anda.'];
+            }
+        } else {
+            $fHitung = $msb / $msw;
+        }
 
         // F Tabel (v1 = k-1, v2 = k) - lookup dinamis berdasarkan k
         $fTabel = $this->getFTabel($k);

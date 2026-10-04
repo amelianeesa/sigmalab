@@ -536,6 +536,8 @@
                 </div>
             </div>
         </div>
+            <p class="text-muted">Sesuai prosedur operasional standar, Nilai Target (Mean) dan Simpangan Baku (Standar Deviasi) diwarisi otomatis secara presisi dari kalkulasi <strong>Global Mean</strong> dan <strong>Global Standard Deviation</strong> dari {{ $batch->jumlah_botol * 2 }} titik uji Homogenitas (Tahap 3) yang telah lolos validasi statistik.</p>
+
 
         <div class="col-xl-3 col-lg-4 order-1 order-lg-2">
             <div class="card sop-card shadow-sm mb-2">
@@ -549,7 +551,112 @@
                         <p class="sop-note mb-0"><strong>Note:</strong> Nilai yang disahkan menjadi baseline Uji Stabilitas dan QC harian.</p>
                     </div>
                 </div>
+{{-- <<<<<<< HEAD
             </div>
+======= --}}
+
+                <ul class="nav nav-pills mt-4 mb-3" id="paramTabs" role="tablist">
+                    @foreach($batch->parameters as $idx => $param)
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link fw-bold border {{ $idx === 0 ? 'active' : 'text-secondary' }}" id="tab-{{ $param->id }}" data-bs-toggle="pill" data-bs-target="#pane-{{ $param->id }}" type="button" role="tab">
+                                {{ $param->parameterUji->nama_parameter }}
+                            </button>
+                        </li>
+                    @endforeach
+                </ul>
+
+                <div class="tab-content" id="paramTabsContent">
+                    @foreach($batch->parameters as $idx => $param)
+                        @php 
+                            $pid = $param->id; 
+                            $rawMean = (float) ($param->mean_target ?? $param->mean_global);
+                            $rawSd = (float) ($param->sd_target ?? $param->sd_global);
+
+                            $ucl = round($rawMean + (3 * $rawSd), 2);
+                            $lcl = round($rawMean - (3 * $rawSd), 2);
+                            $uwl = round($rawMean + (2 * $rawSd), 2);
+                            $lwl = round($rawMean - (2 * $rawSd), 2);
+
+                            $mean = round($rawMean, 2);
+                            $sd = round($rawSd, 2);
+                        @endphp
+                        <div class="tab-pane fade {{ $idx === 0 ? 'show active' : '' }}" id="pane-{{ $pid }}" role="tabpanel">
+                            <div class="card shadow-sm border-0 mb-4">
+                                <div class="card-body p-5">
+                                    <h4 class="fw-bold mb-4 text-center border-bottom pb-3">Statistika Nilai Target : {{ $param->parameterUji->nama_parameter }}</h4>
+                                    
+                                    <div class="row text-center mb-5 g-4">
+                                        <div class="col-md-6">
+                                            <div class="p-4 bg-light border rounded h-100">
+                                                <div class="text-muted mb-2 text-uppercase fw-bold">Target Mean</div>
+                                                <h1 class="display-5 fw-bold text-success mb-0">{{ number_format($mean, 2) }}</h1>
+                                                <div class="small text-muted mt-2">Ditarik dari Grand Mean Homogenitas</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="p-4 bg-light border rounded h-100">
+                                                <div class="text-muted mb-2 text-uppercase fw-bold">Target Standard Deviation</div>
+                                                <h1 class="display-5 fw-bold text-primary mb-0">{{ number_format($sd, 2) }}</h1>
+                                                <div class="small text-muted mt-2">Ditarik dari Global SD Homogenitas</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <h5 class="fw-bold mb-3"><i class="fas fa-chart-line text-secondary me-2"></i>Rentang Kendali (Control Chart Limits)</h5>
+                                    
+                                    <div class="row mb-3 g-3">
+                                        <div class="col-md-6">
+                                            <div class="card border-danger bg-danger bg-opacity-10 h-100">
+                                                <div class="card-body">
+                                                    <h6 class="card-title text-danger fw-bold border-bottom border-danger pb-2">Control Limit (+/- 3 SD)</h6>
+                                                    <div class="d-flex justify-content-between mt-3">
+                                                        <div>
+                                                            <div class="small text-muted">UCL (+3 SD)</div>
+                                                            <div class="fs-5 fw-bold">{{ number_format($ucl, 2) }}</div>
+                                                        </div>
+                                                        <div class="text-end">
+                                                            <div class="small text-muted">LCL (-3 SD)</div>
+                                                            <div class="fs-5 fw-bold">{{ number_format($lcl, 2) }}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card border-warning bg-warning bg-opacity-10 h-100">
+                                                <div class="card-body">
+                                                    <h6 class="card-title text-dark fw-bold border-bottom border-warning pb-2">Warning Limit (+/- 2 SD)</h6>
+                                                    <div class="d-flex justify-content-between mt-3">
+                                                        <div>
+                                                            <div class="small text-muted">UWL (+2 SD)</div>
+                                                            <div class="fs-5 fw-bold">{{ number_format($uwl, 2) }}</div>
+                                                        </div>
+                                                        <div class="text-end">
+                                                            <div class="small text-muted">LWL (-2 SD)</div>
+                                                            <div class="fs-5 fw-bold">{{ number_format($lwl, 2) }}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <p class="text-muted small fst-italic text-center mt-4">Angka-angka ini akan digunakan sebagai patokan dasar (baseline) untuk Uji Stabilitas bulanan dan Quality Control harian.</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="d-flex justify-content-center mt-2 mb-5">
+                    @if($batch->status === 'penetapan_target')
+                        <button type="submit" class="btn btn-primary px-5 py-3 fs-5 shadow">
+                            <i class="fas fa-check-double me-2"></i> Sahkan Semua Nilai Target & Lanjut
+                        </button>
+                    @endif
+                </div>
+            </form>
+>>>>>>> 6880cbb2a9b38438125999d6ce9de63a20cd9741
         </div>
     </div>
 </div>

@@ -10,7 +10,6 @@
         </div>
     </div>
 
-    {{-- Tabel 1: Parameters --}}
     <h6 class="fw-bold text-primary border-bottom pb-2 mb-3"><i class="fas fa-table me-2"></i>Parameters</h6>
     <div class="table-responsive mb-4">
         <table class="table table-bordered table-sm align-middle text-center" id="proximate-params-table">
@@ -96,7 +95,6 @@
         </table>
     </div>
 
-    {{-- Tabel 2: Ultimate Analysis --}}
     <h6 class="fw-bold text-primary border-bottom pb-2 mb-3"><i class="fas fa-table me-2"></i>Ultimate Analysis</h6>
     <div class="table-responsive">
         <table class="table table-bordered table-sm align-middle text-center" id="proximate-ultimate-table">

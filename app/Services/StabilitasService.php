@@ -4,6 +4,19 @@ namespace App\Services;
 
 class StabilitasService
 {
+    /** T-tabel two-tailed alpha=0.05 */
+    private const T_TABEL = [
+        1 => 12.706, 2 => 4.303, 3 => 3.182, 4 => 2.776, 5 => 2.571,
+        6 => 2.447, 7 => 2.365, 8 => 2.306, 9 => 2.262, 10 => 2.228,
+        11 => 2.201, 12 => 2.179, 13 => 2.160, 14 => 2.145, 15 => 2.131,
+        16 => 2.120, 17 => 2.110, 18 => 2.101, 19 => 2.093, 20 => 2.086,
+        21 => 2.080, 22 => 2.074, 23 => 2.069, 24 => 2.064, 25 => 2.060,
+        26 => 2.056, 27 => 2.052, 28 => 2.048, 29 => 2.045, 30 => 2.042,
+        31 => 2.040, 32 => 2.037, 33 => 2.035, 34 => 2.032, 35 => 2.030,
+        36 => 2.028, 37 => 2.026, 38 => 2.024, 39 => 2.023, 40 => 2.021,
+        60 => 2.000, 120 => 1.980,
+    ];
+
     /**
      * Hitung Uji Stabilitas berdasarkan perbandingan dengan Penetapan Target.
      * Menggunakan Pooled Standard Deviation (S_gab).
@@ -12,6 +25,7 @@ class StabilitasService
      * @param array $targetData Data histori target ['n' => nx, 'sum_sq' => sumSqX, 'mean' => meanX]
      * @return array Results
      */
+
     public function calculateTTest(array $stabilityData, array $targetData): array
     {
         $ny = count($stabilityData);
@@ -57,27 +71,44 @@ class StabilitasService
     }
 
     /**
-     * T-Tabel lookup untuk two-tailed alpha=0.05
+     * Tabel t lengkap df 1..$maxDf (sudah termasuk interpolasi),
+     * dipakai blade supaya preview JS sama persis dengan hasil simpan.
      */
+    public function getTabelT(int $maxDf = 200): array
+    {
+        $hasil = [];
+        for ($df = 1; $df <= $maxDf; $df++) {
+            $hasil[$df] = $this->getTTabel($df);
+        }
+        return $hasil;
+    }
+
     private function getTTabel(int $df): float
     {
-        $tTable = [
-            1 => 12.706, 2 => 4.303, 3 => 3.182, 4 => 2.776, 5 => 2.571,
-            6 => 2.447, 7 => 2.365, 8 => 2.306, 9 => 2.262, 10 => 2.228,
-            11 => 2.201, 12 => 2.179, 13 => 2.160, 14 => 2.145, 15 => 2.131,
-            16 => 2.120, 17 => 2.110, 18 => 2.101, 19 => 2.093, 20 => 2.086,
-            21 => 2.080, 22 => 2.074, 23 => 2.069, 24 => 2.064, 25 => 2.060,
-            26 => 2.056, 27 => 2.052, 28 => 2.048, 29 => 2.045, 30 => 2.042,
-            31 => 2.040, 32 => 2.037, 33 => 2.035, 34 => 2.032, 35 => 2.030,
-            36 => 2.028, 37 => 2.026, 38 => 2.024, 39 => 2.023, 40 => 2.021,
-            60 => 2.000, 120 => 1.980
-        ];
-
-        if (isset($tTable[$df])) {
-            return $tTable[$df];
+        if ($df < 1) {
+            return self::T_TABEL[1];
+        }
+        if (isset(self::T_TABEL[$df])) {
+            return self::T_TABEL[$df];
         }
 
-        // Cari pendekatan terdekat atau fallback
-        return 2.0; 
+        $keys = array_keys(self::T_TABEL);
+        if ($df > max($keys)) {
+            return self::T_TABEL[max($keys)]; // df > 120: pakai nilai terakhir
+        }
+
+        $lower = null;
+        $upper = null;
+        foreach ($keys as $k) {
+            if ($k < $df) $lower = $k;
+            if ($k > $df) { $upper = $k; break; }
+        }
+
+        $ratio = ($df - $lower) / ($upper - $lower);
+        
+        return round(
+            self::T_TABEL[$lower] + (self::T_TABEL[$upper] - self::T_TABEL[$lower]) * $ratio,
+            4
+        );
     }
 }

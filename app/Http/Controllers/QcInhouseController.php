@@ -54,8 +54,10 @@ class QcInhouseController extends Controller
         $query = \App\Models\SampelInhouse::with(['parameters', 'pembuat'])->latest();
 
         $query->when($search, function($q) use ($search) {
-            $q->where('kode_batch', 'like', "%{$search}%")
-              ->orWhere('nama_sampel', 'like', "%{$search}%");
+            $q->where(function($qq) use ($search) {
+                $qq->where('kode_batch', 'like', "%{$search}%")
+                   ->orWhere('nama_sampel', 'like', "%{$search}%");
+            });
         });
 
         $query->when($jenis, function($q) use ($jenis) {
@@ -155,6 +157,10 @@ class QcInhouseController extends Controller
     {
         $batch = SampelInhouse::findOrFail($id);
 
+        if ($batch->status !== 'preparasi') {
+            return redirect()->route('qc-inhouse.show', $id)->with('error', 'Status sampel sudah melewati tahap preparasi.');
+        }
+
         $request->validate([
             'metode_acuan' => 'required|string',
             'jumlah_botol' => 'required|integer|min:10',
@@ -235,6 +241,10 @@ class QcInhouseController extends Controller
     public function storeHomogenitas(Request $request, $id)
     {
         $batch = SampelInhouse::with('parameters')->findOrFail($id);
+
+        if (!in_array($batch->status, ['uji_homogenitas', 'gagal_homogenitas'])) {
+            return redirect()->route('qc-inhouse.show', $id)->with('error', 'Homogenitas tidak dapat diubah karena sampel sudah berada di tahap selanjutnya.');
+        }
         
         DB::beginTransaction();
         try {
@@ -307,7 +317,12 @@ class QcInhouseController extends Controller
                         $dbVal1 = $row['nilai_db_1'] ?? null;
                         $dbVal2 = $row['nilai_db_2'] ?? null;
 
-                        if ($dbVal1 !== null && $dbVal2 !== '') {
+                        $namaParamUp = strtoupper($param->parameterUji->nama_parameter);
+                        if ($namaParamUp !== 'IM' && ($dbVal1 === null || $dbVal1 === '' || $dbVal2 === null || $dbVal2 === '')) {
+                            throw new \Exception("Nilai IM untuk botol {$nomorSampel} belum terisi atau belum tersimpan. Hasil basis kering (db) pada parameter {$namaParamUp} tidak bisa dihitung.");
+                        }
+
+                          if ($dbVal1 !== null && $dbVal1 !== '' && $dbVal2 !== null && $dbVal2 !== '') {
                             $val1 = $dbVal1;
                             $val2 = $dbVal2;
                         }
@@ -320,6 +335,7 @@ class QcInhouseController extends Controller
                 }
 
                 if ($request->input('is_draft')) {
+                    $param->update(['status_parameter' => 'draft']); 
                     continue;
                 }
 
@@ -344,7 +360,7 @@ class QcInhouseController extends Controller
                 $param->update([
                     'mean_global' => $anova['mean_global'],
                     'sd_global' => $anova['sd_global'],
-                    'f_hitung' => $anova['f_hitung'],
+                    'f_hitung' => min($anova['f_hitung'], 999999),
                     'f_tabel' => $anova['f_tabel'],
                     'status_parameter' => $isHomogen ? 'homogen' : 'tidak_homogen',
                     'tanggal_homogenitas' => now(),
@@ -391,6 +407,21 @@ class QcInhouseController extends Controller
                                  ->with('error', 'Homogenitas selesai diproses. Status: ' . ($semuaParameterHomogen ? 'Homogen' : 'Tidak Homogen'));
             }
 
+        } catch (\Illuminate\Database\QueryException $e) {
+            DB::rollBack();
+            \Log::error('storeHomogenitas DB error', [
+                'batch_id' => $id,
+                'message'  => $e->getMessage(),
+            ]);
+
+            $pesan = 'Data tidak dapat disimpan karena ada nilai yang tidak wajar atau di luar batas. '
+                   . 'Silakan periksa kembali data yang diinput. Jika masih gagal, hubungi admin.';
+
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $pesan], 422);
+            }
+            return redirect()->back()->withInput()->with('error', $pesan);
+
         } catch (\Exception $e) {
             DB::rollBack();
             if ($request->ajax()) {
@@ -412,6 +443,10 @@ class QcInhouseController extends Controller
     public function storePenetapanTarget(Request $request, $id)
     {
         $batch = SampelInhouse::with('parameters')->findOrFail($id);
+
+        if ($batch->status !== 'penetapan_target' || $batch->parameters->contains(fn($p) => $p->status_parameter !== 'homogen')) {
+            return redirect()->route('qc-inhouse.show', $id)->with('error', 'Penetapan target hanya bisa dilakukan jika semua parameter telah lulus uji homogenitas.');
+        }
         
         DB::beginTransaction();
         try {
@@ -466,19 +501,25 @@ class QcInhouseController extends Controller
         $personilList = \App\Models\Personil::orderBy('nama')->get();
         $barangList = \App\Models\Barang::orderBy('nama_barang')->get();
 
+        $tTabelLookup = $this->stabilitasService->getTabelT();
+
         return view('qc-inhouse.stabilitas', compact(
             'batch', 'tolerances', 'sisaBotol', 
-            'alatList', 'personilList', 'barangList'
+            'alatList', 'personilList', 'barangList',
+            'tTabelLookup'
         ));
     }
 
     public function storeStabilitas(Request $request, $id)
     {
-        $batch = SampelInhouse::with(['parameters.dataPenetapanTarget', 'parameters.dataHomogenitas'])->findOrFail($id);
+        $batch = SampelInhouse::with(['parameters.parameterUji', 'parameters.dataHomogenitas'])->findOrFail($id);
+
+        if (!in_array($batch->status, ['uji_stabilitas', 'gagal_stabilitas'])) {
+            return redirect()->route('qc-inhouse.show', $id)->with('error', 'Uji Stabilitas tidak valid untuk status sampel saat ini.');
+        }
         
         DB::beginTransaction();
         try {
-            $semuaStabil = true;
             $adaData = false;
 
             foreach ($batch->parameters as $param) {
@@ -505,6 +546,11 @@ class QcInhouseController extends Controller
                         if ($newQty > 0) \App\Models\Barang::where('barang_id', $newBhnId)->increment('pengeluaran', $newQty);
                     }
                 }
+
+                if ($request->input('is_draft')) {
+                    $param->update(['status_parameter' => 'draft']);
+                    continue; 
+                }
                 
                 $stabilityDataY = [];
                 foreach ($inputData as $index => $row) {
@@ -527,7 +573,13 @@ class QcInhouseController extends Controller
                                 'tanggal_uji' => $request->input("kondisi.tanggal"),
                                 'analis' => $request->input("kondisi.analis"),
                             ],
-                            ($index === 0 && $resourceData) ? $resourceData : []
+                            ($index === 0 && $resourceData) ? [
+                                'personil_ids' => $resourceData['personil_ids'] ?? [],
+                                'personil_peran' => $resourceData['personil_peran'] ?? [],
+                                'alat_ids' => $resourceData['alat_ids'] ?? [],
+                                'barang_ids' => $resourceData['barang_ids'] ?? [],
+                                'barang_jumlah' => $resourceData['barang_jumlah'] ?? [],
+                            ] : []
                         ),
                         'nilai_d1' => $val1,
                         'nilai_d2' => $val2,
@@ -535,27 +587,57 @@ class QcInhouseController extends Controller
                     ]);
 
                     if ($lengkap) {
-                        if (isset($row['nilai_db_1']) && $row['nilai_db_1'] !== '') {
-                            $val1 = $row['nilai_db_1'];
-                            $val2 = $row['nilai_db_2'];
+                        $isIM = strtoupper($param->parameterUji->nama_parameter) === 'IM';
+                        $db1 = $row['nilai_db_1'] ?? '';
+                        $db2 = $row['nilai_db_2'] ?? '';
+
+                        if ($isIM) {
+                            $stabilityDataY[] = (float) $val1;
+                            $stabilityDataY[] = (float) $val2;
+                        } elseif ($db1 !== '' && $db2 !== '') {
+                            $stabilityDataY[] = (float) $db1;
+                            $stabilityDataY[] = (float) $db2;
                         }
-                        $stabilityDataY[] = (float)$val1;
-                        $stabilityDataY[] = (float)$val2;
+                        // non-IM tanpa nilai db: dilewati, jangan campur basis
                     }
                 }
 
-                $nx = 0;
-                foreach ($param->dataHomogenitas as $dh) {
-                    if ($dh->nilai_d1 !== null) $nx++;
-                    if ($dh->nilai_d2 !== null) $nx++;
+                $namaParam = strtoupper($param->parameterUji->nama_parameter);
+                $imParam = $batch->parameters->first(fn($p) => strtoupper($p->parameterUji->nama_parameter) === 'IM');
+                $imByNo = [];
+                if ($imParam) {
+                    foreach ($imParam->dataHomogenitas as $h) {
+                        $imByNo[$h->nomor_sampel] = ['d1' => $h->nilai_d1, 'd2' => $h->nilai_d2];
+                    }
                 }
 
-                if ($nx < 2) $nx = 20; 
-                $targetDataset = [
-                    'n' => $nx,
-                    'mean' => (float)$param->mean_target,
-                    'sum_sq' => pow((float)$param->sd_target, 2) * ($nx - 1)
-                ];
+                $xValues = [];
+                foreach ($param->dataHomogenitas as $dh) {
+                    foreach (['d1', 'd2'] as $k) {
+                        $adb = $dh->{'nilai_' . $k};
+                        if ($adb === null) continue;
+                        $v = (float) $adb;
+                        if ($namaParam !== 'IM' && isset($imByNo[$dh->nomor_sampel][$k])) {
+                            $im = (float) $imByNo[$dh->nomor_sampel][$k];
+                            if ($im < 100) $v = (100 / (100 - $im)) * $v;
+                        }
+                        $xValues[] = round($v, 2);
+                    }
+                }
+
+                $nx = count($xValues);
+                if ($nx < 2) throw new \Exception("Data homogenitas {$namaParam} tidak cukup.");
+
+                $meanX = array_sum($xValues) / $nx;
+                $sumSqX = 0;
+                foreach ($xValues as $x) $sumSqX += pow($x - $meanX, 2);
+
+                $targetDataset = ['n' => $nx, 'mean' => $meanX, 'sum_sq' => $sumSqX];
+
+                if (count($stabilityDataY) < 6) {
+                    $param->update(['status_parameter' => 'target_set']);
+                    continue; 
+                }
 
                 $tTest = $this->stabilitasService->calculateTTest($stabilityDataY, $targetDataset);
                 
@@ -564,7 +646,6 @@ class QcInhouseController extends Controller
                 }
 
                 $isStabil = $tTest['lolos'];
-                if (!$isStabil) $semuaStabil = false;
 
                 $param->update([
                     'mean_stabilitas' => $tTest['mean_stabilitas'],
@@ -574,18 +655,6 @@ class QcInhouseController extends Controller
                     'status_parameter' => $isStabil ? 'stabil' : 'tidak_stabil',
                     'tanggal_stabilitas' => now(),
                 ]);
-
-                if ($isStabil) {
-                    $param->parameterUji->update([
-                        'sampel_inhouse_id' => $batch->sampel_inhouse_id,
-                        'mean' => $param->mean_target,
-                        'sd' => $param->sd_target,
-                        'ucl' => $param->mean_target + (3 * $param->sd_target),
-                        'lcl' => $param->mean_target - (3 * $param->sd_target),
-                        'uwl' => $param->mean_target + (2 * $param->sd_target),
-                        'lwl' => $param->mean_target - (2 * $param->sd_target),
-                    ]);
-                }
             }
 
             if (!$adaData) {
@@ -614,6 +683,10 @@ class QcInhouseController extends Controller
 
             DB::commit();
 
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => 'Data berhasil disimpan.']);
+            }
+
             if ($allStabil) {
                 return redirect()->route('qc-inhouse.show', $id)
                                  ->with('success', 'Uji Stabilitas Selesai! Sampel kini SIAP DIGUNAKAN. Silakan aktifkan secara manual saat ingin menjadikannya acuan harian.');
@@ -625,8 +698,28 @@ class QcInhouseController extends Controller
                                  ->with('success', 'Data stabilitas berhasil disimpan sementara.');
             }
 
+        } catch (\Illuminate\Database\QueryException $e) {
+            DB::rollBack();
+            \Log::error('storeStabilitas DB error', [
+                'batch_id' => $id,
+                'message'  => $e->getMessage(),
+            ]);
+
+            $pesan = 'Data tidak dapat disimpan karena ada nilai yang tidak wajar atau di luar batas. '
+                   . 'Silakan periksa kembali data yang diinput. Jika masih gagal, hubungi admin.';
+
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $pesan], 422);
+            }
+            return redirect()->back()->withInput()->with('error', $pesan);
+
         } catch (\Exception $e) {
             DB::rollBack();
+
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            }
+
             return redirect()->back()->withInput()->with('error', 'Gagal menyimpan: ' . $e->getMessage());
         }
     }
@@ -667,6 +760,7 @@ class QcInhouseController extends Controller
                     $sd = (float) $param->sd_target;
 
                     $param->parameterUji->update([
+                        'sampel_inhouse_id' => $batch->sampel_inhouse_id, 
                         'nilai_acuan' => $mean,
                         'mean' => $mean,
                         'sd' => $sd,

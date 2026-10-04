@@ -6,36 +6,28 @@
     .dashboard-container {
         padding: 2px 20px !important;
     }
-
-    .info-card .card-body {
-        padding: 10px !important;
+    .dashboard-title {
+        font-size: 1.35rem;
+    }
+    .dashboard-subtitle {
+        font-size: 0.82rem;
     }
     .select2-container--bootstrap-5 .select2-dropdown {
         top: 100% !important;
         bottom: auto !important;
     }
-
     .tracking-card .card-body {
-        padding: 10px !important;
+        padding: 12px !important;
     }
-
     .border-suco-biru { border-color: #0082c4 !important; }
     .text-suco-biru { color: #0082c4 !important; }
     .border-suco-biru-muda { border-color: #00a3e2 !important; }
     .text-suco-biru-muda { color: #00a3e2 !important; }
     .border-suco-hijau { border-color: #00a39b !important; }
     .text-suco-hijau { color: #00a39b !important; }
-
-    .text-navy {
-        color: #1b3152 !important;
-    }
-    .bg-navy {
-        background-color: #1b3152 !important;
-        color: #ffffff !important;
-    }
-    .border-navy {
-        border-color: #1b3152 !important;
-    }
+    .text-navy { color: #1b3152 !important; }
+    .bg-navy { background-color: #1b3152 !important; color: #ffffff !important; }
+    .border-navy { border-color: #1b3152 !important; }
     .btn-outline-navy {
         color: #1b3152;
         border-color: #1b3152;
@@ -49,7 +41,6 @@
         border-color: #1b3152 !important;
         color: #ffffff !important;
     }
-
     .select2-container--bootstrap-5.select2-container--focus .select2-selection,
     .select2-container--bootstrap-5.select2-container--open .select2-selection {
         border-color: #1b3152 !important;
@@ -83,143 +74,41 @@
         font-size: 0.8rem;
         line-height: 1.4;
     }
-    .select-tracking-dropdown .select2-results__option--highlighted,
-    .select-tracking-dropdown .select2-results__option--highlighted[aria-selected] {
-        background-color: rgba(27, 49, 82, 0.15) !important;
-        color: #1b3152 !important;
-    }
-    .select-tracking-dropdown .select2-results__option--selected,
-    .select-tracking-dropdown .select2-results__option[aria-selected=true] {
-        background-color: #1b3152 !important;
-        color: #ffffff !important;
-    }
 
-    .tracking-steps-scroll {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+    .summary-card {
+        border-radius: 0.6rem;
     }
-    .tracking-steps-inner {
-        display: flex;
-        min-width: 480px;
-    }
-    .tracking-step-icon {
-        width: 30px;
-        height: 30px;
-        font-size: 0.7rem;
-        text-decoration: none;
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-    .tracking-step-icon:hover,
-    .tracking-step-icon:focus-visible {
-        transform: scale(1.15);
-        color: #ffffff;
-        box-shadow: 0 0 0 4px rgba(27, 49, 82, 0.12) !important;
-    }
-
     .summary-card-body {
         display: flex;
         align-items: center;
-        gap: 14px;
-        padding: 14px 16px !important;
+        gap: 10px;
+        padding: 9px 12px !important;
     }
     .summary-card-icon {
-        width: 50px;
-        height: 50px;
+        width: 38px;
+        height: 38px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.2rem;
+        font-size: 0.95rem;
         flex-shrink: 0;
     }
     .summary-card-icon.icon-biru { background-color: rgba(0, 130, 196, 0.12); color: #0082c4; }
     .summary-card-icon.icon-biru-muda { background-color: rgba(0, 163, 226, 0.12); color: #00a3e2; }
     .summary-card-icon.icon-hijau { background-color: rgba(0, 163, 155, 0.12); color: #00a39b; }
-    .summary-card-text {
-        min-width: 0;
-    }
     .summary-card-label {
-        font-size: 0.78rem;
-        letter-spacing: 0.4px;
-        line-height: 1.25;
+        font-size: 0.66rem;
+        letter-spacing: 0.3px;
+        line-height: 1.2;
     }
     .summary-card-value {
-        font-size: 1.9rem;
+        font-size: 1.35rem;
         line-height: 1.1;
-        margin: 2px 0 !important;
+        margin: 1px 0 !important;
     }
     .summary-card-link {
-        font-size: 0.82rem;
-    }
-
-    @media (max-width: 991.98px) {
-        .summary-card-body {
-            gap: 10px;
-            padding: 12px !important;
-        }
-        .summary-card-icon {
-            width: 40px;
-            height: 40px;
-            font-size: 1rem;
-        }
-        .summary-card-label {
-            font-size: 0.68rem;
-            letter-spacing: 0.2px;
-        }
-        .summary-card-value {
-            font-size: 1.6rem;
-        }
-        .summary-card-link {
-            font-size: 0.72rem;
-        }
-    }
-
-    @media (max-width: 575.98px) {
-        .summary-card-body {
-            flex-direction: column;
-            justify-content: flex-start;
-            text-align: center;
-            gap: 6px;
-            padding: 10px 6px !important;
-        }
-        .summary-card-icon {
-            width: 34px;
-            height: 34px;
-            font-size: 0.9rem;
-        }
-        .summary-card-label {
-            font-size: 0.62rem;
-            letter-spacing: 0;
-            line-height: 1.2;
-            min-height: 2.4em;
-        }
-        .summary-card-value {
-            font-size: 1.5rem;
-            margin: 0 !important;
-        }
-        .summary-card-link {
-            display: none !important;
-        }
-        .tracking-card .card-header {
-            flex-direction: column;
-            align-items: stretch !important;
-        }
-        .tracking-select-wrap {
-            max-width: 100%;
-            width: 100%;
-        }
-        .tracking-select-wrap .select2-container {
-            width: 100% !important;
-        }
-    }
-
-    @media (max-width: 360px) {
-        .summary-card-label {
-            font-size: 0.56rem;
-        }
-        .summary-card-value {
-            font-size: 1.3rem;
-        }
+        font-size: 0.72rem;
     }
 
     .info-card-link {
@@ -228,78 +117,209 @@
         display: block;
         height: 100%;
     }
-    .info-card-link:focus-visible {
-        outline: 2px solid #1b3152;
-        outline-offset: 2px;
-        border-radius: 0.375rem;
-    }
     .info-card-clickable {
         transition: transform 0.15s ease, box-shadow 0.15s ease;
         cursor: pointer;
     }
     .info-card-clickable:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 0.4rem 0.9rem rgba(0, 0, 0, 0.12) !important;
+    }
+    .info-card {
+        border-radius: 0.6rem;
+    }
+    .info-card .card-body {
+        padding: 9px 12px !important;
     }
     .info-card-icon {
-        width: 46px;
-        height: 46px;
+        width: 34px;
+        height: 34px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.1rem;
+        font-size: 0.85rem;
         flex-shrink: 0;
     }
     .info-card-icon.bg-danger-soft { background-color: #fdeaea; color: #dc3545; }
     .info-card-icon.bg-warning-soft { background-color: #fff8e6; color: #f0ad4e; }
     .info-card-icon.bg-navy-soft { background-color: rgba(27, 49, 82, 0.1); color: #1b3152; }
-
+    .info-card-title {
+        font-size: 0.82rem;
+    }
+    .info-card-text {
+        font-size: 0.72rem;
+        line-height: 1.3;
+    }
     .info-card-badge {
-        font-size: 0.85rem !important;
-        padding: 0.35rem 0.65rem !important;
-        min-width: 32px;
+        font-size: 0.75rem !important;
+        padding: 0.28rem 0.55rem !important;
+        min-width: 28px;
     }
-    .info-card-badge.pulse-danger { animation: pulseDanger 1.6s infinite; }
-    .info-card-badge.pulse-warning { animation: pulseWarning 1.6s infinite; }
-    .info-card-badge.pulse-navy { animation: pulseNavy 1.6s infinite; }
-    @keyframes pulseDanger {
-        0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.5); }
-        70% { box-shadow: 0 0 0 7px rgba(220, 53, 69, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
-    }
-    @keyframes pulseWarning {
-        0% { box-shadow: 0 0 0 0 rgba(240, 173, 78, 0.5); }
-        70% { box-shadow: 0 0 0 7px rgba(240, 173, 78, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(240, 173, 78, 0); }
-    }
-    @keyframes pulseNavy {
-        0% { box-shadow: 0 0 0 0 rgba(27, 49, 82, 0.5); }
-        70% { box-shadow: 0 0 0 7px rgba(27, 49, 82, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(27, 49, 82, 0); }
-    }
-
     .info-card-alert-btn {
         pointer-events: none;
+        font-size: 0.72rem;
+        padding-top: 0.15rem;
+        padding-bottom: 0.15rem;
+    }
+
+    .tracking-steps-scroll {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .tracking-steps-inner {
+        display: flex;
+        min-width: 560px;
+    }
+    .tracking-step {
+        position: relative;
+        z-index: 2;
+        flex: 1;
+        text-align: center;
+    }
+    .tracking-step-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 0.7rem;
+        text-decoration: none;
+        flex-shrink: 0;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    a.tracking-step-icon:hover {
+        transform: scale(1.14);
+        box-shadow: 0 0.25rem 0.6rem rgba(0, 0, 0, 0.25) !important;
+        color: #ffffff;
+    }
+    .tracking-step-disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+    .tracking-step-label {
+        font-size: 0.7rem;
+    }
+    .tracking-step-meta {
+        font-size: 0.63rem;
+        line-height: 1.35;
+    }
+    .tracking-progress-line {
+        height: 3px;
+        top: 14px;
+        z-index: 1;
+        left: 0;
+    }
+
+    @media (max-width: 767.98px) {
+        .dashboard-container {
+            padding: 2px 10px !important;
+        }
+        .dashboard-title {
+            font-size: 1.15rem;
+        }
+        .dashboard-subtitle {
+            font-size: 0.75rem;
+        }
+
+        .tracking-card .card-body {
+            padding: 12px 14px !important;
+        }
+        .tracking-select-wrap {
+            max-width: 100%;
+        }
+        .tracking-steps-scroll {
+            overflow-x: visible;
+        }
+        .tracking-steps-inner {
+            flex-direction: column;
+            min-width: 0;
+            padding: 0 !important;
+        }
+        .tracking-progress-line {
+            display: none;
+        }
+        .tracking-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            flex: none;
+            text-align: left;
+            padding-bottom: 16px;
+        }
+        .tracking-step:last-child {
+            padding-bottom: 0;
+        }
+        .tracking-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 14px;
+            top: 32px;
+            bottom: 2px;
+            width: 2px;
+            background-color: #dee2e6;
+            z-index: 0;
+        }
+        .tracking-step.is-done:not(:last-child)::after {
+            background-color: #198754;
+        }
+        .tracking-step .tracking-step-icon {
+            margin: 0 !important;
+            position: relative;
+            z-index: 1;
+        }
+        .tracking-step-body {
+            margin-top: 0 !important;
+            text-align: left;
+        }
+        .tracking-step-label {
+            font-size: 0.8rem;
+        }
+        .tracking-step-meta {
+            font-size: 0.72rem;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .summary-card-body {
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            gap: 4px;
+            padding: 8px 4px !important;
+        }
+        .summary-card-icon {
+            width: 30px;
+            height: 30px;
+            font-size: 0.78rem;
+        }
+        .summary-card-label {
+            font-size: 0.56rem;
+            letter-spacing: 0.1px;
+        }
+        .summary-card-value {
+            font-size: 1.15rem;
+        }
+        .summary-card-link {
+            display: none !important;
+        }
+        .summary-card.border-start {
+            border-left-width: 3px !important;
+        }
     }
 </style>
 
 <div class="container-fluid dashboard-container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
         <div>
-            <h2 class="fw-bold text-dark mb-1" style="font-size: 1.5rem;">Monitoring Center</h2>
-            <p class="text-muted mb-0" style="font-size: 0.85rem;">Selamat datang, Anda login sebagai <strong class="text-navy">{{ $role }}</strong></p>
+            <h2 class="fw-bold text-dark mb-0 dashboard-title">Monitoring Center</h2>
+            <p class="text-muted mb-0 dashboard-subtitle">Selamat datang, Anda login sebagai <strong class="text-navy">{{ $role }}</strong></p>
         </div>
     </div>
 
-    <div class="row g-2 g-sm-3 mb-3">
+    <div class="row g-2 mb-2">
         <div class="col-4">
-            <a href="{{ route('kegiatan.index') }}" class="info-card-link" aria-label="Buka modul QC">
-                <div class="card border-0 shadow-sm border-start border-4 border-suco-biru h-100 info-card-clickable">
+            <a href="{{ route('kegiatan.index') }}" class="info-card-link">
+                <div class="card summary-card border-0 shadow-sm border-start border-4 border-suco-biru h-100 info-card-clickable">
                     <div class="card-body summary-card-body">
-                        <span class="summary-card-icon icon-biru">
-                            <i class="fas fa-flask"></i>
-                        </span>
+                        <span class="summary-card-icon icon-biru"><i class="fas fa-flask"></i></span>
                         <div class="summary-card-text">
                             <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">PENGUJIAN AKTIF</p>
                             <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $kegiatanBerjalan }}</h3>
@@ -311,12 +331,10 @@
         </div>
 
         <div class="col-4">
-            <a href="{{ route('alat.index') }}" class="info-card-link" aria-label="Cek alat yang masa kalibrasinya hampir habis">
-                <div class="card border-0 shadow-sm border-start border-4 border-suco-biru-muda h-100 info-card-clickable">
+            <a href="{{ route('alat.index') }}" class="info-card-link">
+                <div class="card summary-card border-0 shadow-sm border-start border-4 border-suco-biru-muda h-100 info-card-clickable">
                     <div class="card-body summary-card-body">
-                        <span class="summary-card-icon icon-biru-muda">
-                            <i class="fas fa-balance-scale"></i>
-                        </span>
+                        <span class="summary-card-icon icon-biru-muda"><i class="fas fa-balance-scale"></i></span>
                         <div class="summary-card-text">
                             <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">KALIBRASI ALAT H-6 BULAN</p>
                             <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $tenggatKalibrasi }}</h3>
@@ -328,12 +346,10 @@
         </div>
 
         <div class="col-4">
-            <a href="{{ route('sdm.index') }}" class="info-card-link" aria-label="Cek sertifikasi personil">
-                <div class="card border-0 shadow-sm border-start border-4 border-suco-hijau h-100 info-card-clickable">
+            <a href="{{ route('sdm.index') }}" class="info-card-link">
+                <div class="card summary-card border-0 shadow-sm border-start border-4 border-suco-hijau h-100 info-card-clickable">
                     <div class="card-body summary-card-body">
-                        <span class="summary-card-icon icon-hijau">
-                            <i class="fas fa-id-badge"></i>
-                        </span>
+                        <span class="summary-card-icon icon-hijau"><i class="fas fa-id-badge"></i></span>
                         <div class="summary-card-text">
                             <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">SERTIFIKASI PERSONIL H-6</p>
                             <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $sertifikasiHampirHabis }}</h3>
@@ -345,26 +361,22 @@
         </div>
     </div>
 
-    <div class="row g-3 mb-3">
+    <div class="row g-2 mb-2">
         <div class="col-12 col-md-4">
             <a href="{{ route('barang.index') }}" class="info-card-link">
                 <div class="card h-100 border-0 shadow-sm info-card info-card-clickable">
-                    <div class="card-body p-3 d-flex flex-column justify-content-between">
-                        <div>
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <span class="info-card-icon bg-danger-soft">
-                                    <i class="fas fa-box-open"></i>
-                                </span>
-                                <div class="flex-grow-1 d-flex align-items-center justify-content-between">
-                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">Stok Kritis</h6>
-                                    <span class="badge bg-danger rounded-pill info-card-badge {{ $stokTipis > 0 ? 'pulse-danger' : '' }}">{{ $stokTipis }}</span>
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="info-card-icon bg-danger-soft"><i class="fas fa-box-open"></i></span>
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <h6 class="fw-bold mb-0 text-dark info-card-title">Stok Kritis</h6>
+                                    <span class="badge bg-danger rounded-pill info-card-badge">{{ $stokTipis }}</span>
                                 </div>
+                                <p class="text-muted mb-0 info-card-text">Terdapat {{ $stokTipis }} item barang di bawah batas minimum.</p>
                             </div>
-                            <p class="text-muted small mb-3" style="font-size: 0.78rem;">Terdapat {{ $stokTipis }} item barang di bawah batas minimum.</p>
                         </div>
-                        <div>
-                            <span class="btn btn-outline-danger btn-sm w-100 py-1 info-card-alert-btn" style="font-size: 0.78rem;">Cek Inventori</span>
-                        </div>
+                        <div class="d-none d-md-block mt-2"><span class="btn btn-outline-danger btn-sm w-100 info-card-alert-btn">Cek Inventori</span></div>
                     </div>
                 </div>
             </a>
@@ -373,22 +385,18 @@
         <div class="col-12 col-md-4">
             <a href="{{ route('barang.index') }}" class="info-card-link">
                 <div class="card h-100 border-0 shadow-sm info-card info-card-clickable">
-                    <div class="card-body p-3 d-flex flex-column justify-content-between">
-                        <div>
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <span class="info-card-icon bg-warning-soft">
-                                    <i class="fas fa-calendar-times"></i>
-                                </span>
-                                <div class="flex-grow-1 d-flex align-items-center justify-content-between">
-                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">Akan Kedaluwarsa</h6>
-                                    <span class="badge bg-warning text-dark rounded-pill info-card-badge {{ $barangExp > 0 ? 'pulse-warning' : '' }}">{{ $barangExp }}</span>
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="info-card-icon bg-warning-soft"><i class="fas fa-calendar-times"></i></span>
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <h6 class="fw-bold mb-0 text-dark info-card-title">Akan Kedaluwarsa</h6>
+                                    <span class="badge bg-warning text-dark rounded-pill info-card-badge">{{ $barangExp }}</span>
                                 </div>
+                                <p class="text-muted mb-0 info-card-text">Terdapat {{ $barangExp }} bahan kedaluwarsa dalam 180 hari.</p>
                             </div>
-                            <p class="text-muted small mb-3" style="font-size: 0.78rem;">Terdapat {{ $barangExp }} bahan kedaluwarsa dalam 180 hari.</p>
                         </div>
-                        <div>
-                            <span class="btn btn-outline-warning btn-sm w-100 py-1 info-card-alert-btn" style="font-size: 0.78rem;">Cek Expired Date</span>
-                        </div>
+                        <div class="d-none d-md-block mt-2"><span class="btn btn-outline-warning btn-sm w-100 info-card-alert-btn">Cek Expired Date</span></div>
                     </div>
                 </div>
             </a>
@@ -397,22 +405,18 @@
         <div class="col-12 col-md-4">
             <a href="{{ route('pengadaan.index') }}" class="info-card-link">
                 <div class="card h-100 border-0 shadow-sm info-card info-card-clickable">
-                    <div class="card-body p-3 d-flex flex-column justify-content-between">
-                        <div>
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <span class="info-card-icon bg-navy-soft">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </span>
-                                <div class="flex-grow-1 d-flex align-items-center justify-content-between">
-                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.9rem;">Approval Pengadaan</h6>
-                                    <span class="badge bg-navy rounded-pill info-card-badge {{ $pengadaanPending > 0 ? 'pulse-navy' : '' }}">{{ $pengadaanPending }}</span>
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="info-card-icon bg-navy-soft"><i class="fas fa-shopping-cart"></i></span>
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <h6 class="fw-bold mb-0 text-dark info-card-title">Approval Pengadaan</h6>
+                                    <span class="badge bg-navy rounded-pill info-card-badge">{{ $pengadaanPending }}</span>
                                 </div>
+                                <p class="text-muted mb-0 info-card-text">Ada {{ $pengadaanPending }} pengajuan yang butuh persetujuan.</p>
                             </div>
-                            <p class="text-muted small mb-3" style="font-size: 0.78rem;">Ada {{ $pengadaanPending }} pengajuan yang butuh persetujuan.</p>
                         </div>
-                        <div>
-                            <span class="btn btn-outline-navy btn-sm w-100 py-1 info-card-alert-btn" style="font-size: 0.78rem;">Proses Pengajuan</span>
-                        </div>
+                        <div class="d-none d-md-block mt-2"><span class="btn btn-outline-navy btn-sm w-100 info-card-alert-btn">Proses Pengajuan</span></div>
                     </div>
                 </div>
             </a>
@@ -445,7 +449,8 @@
                                 @php
                                     $namaBarang = $p->barang->nama_barang ?? 'Barang';
                                     $kodeBarang = $p->barang->kode_barang ?? 'Tanpa Kode';
-                                    $statusLabel = ucwords(str_replace('_', ' ', $p->status));
+                                    $labelStatusMap = ['diproses' => 'PO', 'diproses_po' => 'PO', 'pembelian' => 'Proses'];
+                                    $statusLabel = $labelStatusMap[$p->status] ?? ucwords(str_replace('_', ' ', $p->status));
                                 @endphp
                                 <option value="track-{{ $p->permintaan_id }}" data-arsip="{{ $cekArsip($p) ? 1 : 0 }}" {{ $p->permintaan_id == $idAwal ? 'selected' : '' }}>
                                     {{ $namaBarang }} ({{ $kodeBarang }}) - {{ $statusLabel }}
@@ -455,7 +460,7 @@
                     </div>
                 </div>
 
-                <div class="card-body p-3">
+                <div class="card-body">
                     @forelse($semuaPengadaan as $p)
                         @php
                             $rankMap = [
@@ -473,12 +478,25 @@
                             ];
                             $rank = $rankMap[$p->status] ?? 1;
 
+                            $isDitolak = str_contains(strtolower($p->status), 'ditolak');
+
+                            $namaProses = in_array($p->status, ['diproses', 'diproses_po'])
+                                ? 'PO'
+                                : ($p->status == 'pembelian' ? 'Proses' : 'Diproses');
+
+                            $logs = $p->logs->keyBy('tahap');
+                            $logTolak = $isDitolak
+                                ? $p->logs->whereIn('aksi', ['tolak', 'batal'])->sortByDesc('tahap')->first()
+                                : null;
+
+                            if ($logTolak) {
+                                $rank = max($logTolak->tahap - 1, 1);
+                            }
+
                             $roleAjuan = optional(optional($p->pemohon)->role)->nama_role;
                             $jenisAjuan = $roleAjuan == \App\Enums\PeranPengguna::GA_OFFICER->value
                                 ? 'ga'
                                 : ($roleAjuan == \App\Enums\PeranPengguna::KOORDINATOR_LAB->value ? 'koor' : 'analis');
-
-                            $isDitolak = str_contains(strtolower($p->status), 'ditolak');
 
                             $isTerlambat = false;
                             if ($p->status != 'selesai' && $p->status != 'batal' && !$isDitolak) {
@@ -493,29 +511,50 @@
                                 $redStep = $rank == 4 ? 4 : $rank + 1;
                             }
 
-                            // Perbaikan logika persentase progress bar agar mencapai titik merah/batal
                             $effectiveRank = $redStep ? max($rank, $redStep) : $rank;
                             $progressMap = [0, 10, 30, 50, 70, 100];
                             $progressWidth = $progressMap[$effectiveRank] ?? ($effectiveRank >= 5 ? 100 : $effectiveRank * 25);
 
-                            $namaPemohon = optional($p->pemohon)->username ?? '-';
-                            $namaPenyetuju = optional($p->penyetuju)->username;
+                            $namaUser = fn ($u) => optional($u)->username ?? optional($u)->name ?? '-';
+                            $namaPemohon = $namaUser($p->pemohon);
+                            $namaAkunPenyetuju = optional($p->penyetuju)->username;
 
-                            $tahapPenyetuju = match ($p->status) {
-                                'menunggu_ga', 'ditolak_koordinator', 'ditolak' => 2,
-                                'disetujui', 'ditolak_ga' => 3,
-                                'diproses', 'diproses_po', 'pembelian', 'selesai' => 4,
-                                default => null,
-                            };
+                            $aktor = function ($no) use ($p, $rank, $jenisAjuan, $namaPemohon, $namaAkunPenyetuju, $logs, $namaUser) {
+                                $kosong = ['who' => '-', 'at' => null];
 
-                            $aktor = function ($no) use ($tahapPenyetuju, $namaPenyetuju, $namaPemohon, $jenisAjuan, $p) {
-                                if (($no == 2 && $jenisAjuan == 'koor') || ($no == 3 && $jenisAjuan == 'ga')) {
-                                    return ['who' => $namaPemohon, 'at' => $p->created_at];
+                                $log = $logs->get($no);
+                                if ($log) {
+                                    return ['who' => $namaUser($log->user), 'at' => $log->dicatat_pada];
                                 }
-                                if ($no == $tahapPenyetuju && $namaPenyetuju) {
-                                    return ['who' => $namaPenyetuju, 'at' => $p->tanggal_keputusan];
+
+                                $otomatis = ['who' => $namaPemohon, 'at' => $p->created_at];
+
+                                if ($no == 2 && $jenisAjuan != 'analis') {
+                                    return $otomatis;
                                 }
-                                return ['who' => '-', 'at' => null];
+
+                                if ($no == 3 && $jenisAjuan == 'ga') {
+                                    return $otomatis;
+                                }
+
+                                $waktuKeputusan = ($p->tanggal_keputusan && $p->tanggal_keputusan->format('H:i') != '00:00')
+                                    ? $p->tanggal_keputusan
+                                    : $p->updated_at;
+                                $keputusan = ['who' => $namaAkunPenyetuju ?? '-', 'at' => $waktuKeputusan];
+
+                                if ($no == 2) {
+                                    return in_array($p->status, ['menunggu_ga', 'ditolak_koordinator', 'ditolak']) ? $keputusan : $kosong;
+                                }
+
+                                if ($no == 3) {
+                                    return in_array($p->status, ['disetujui', 'diproses', 'diproses_po', 'pembelian', 'selesai', 'ditolak_ga']) ? $keputusan : $kosong;
+                                }
+
+                                if ($no == 4) {
+                                    return $rank >= 4 ? $keputusan : $kosong;
+                                }
+
+                                return $kosong;
                             };
 
                             $steps = [
@@ -537,7 +576,7 @@
 
                                         @if($isDitolak)
                                             <span class="badge bg-danger" style="font-size: 0.68rem;">
-                                                <i class="fas fa-times-circle me-1"></i> Ditolak
+                                                <i class="fas fa-times-circle me-1"></i> {{ $logTolak && $logTolak->aksi == 'batal' ? 'Dibatalkan' : 'Ditolak' }}
                                             </span>
                                         @elseif($isTerlambat)
                                             <span class="badge bg-danger" style="font-size: 0.68rem;">
@@ -552,11 +591,11 @@
                                 </div>
                             </div>
 
-                            <div class="row align-items-center px-2">
+                            <div class="row align-items-center px-md-2">
                                 <div class="col-12">
                                     <div class="tracking-steps-scroll">
                                         <div class="tracking-steps-inner d-flex justify-content-between text-center position-relative px-3 py-1">
-                                            <div class="progress position-absolute w-100" style="height: 3px; top: 14px; z-index: 1; left: 0;">
+                                            <div class="progress position-absolute w-100 tracking-progress-line">
                                                 <div class="progress-bar bg-success" role="progressbar" style="width: {{ $progressWidth }}%;"></div>
                                             </div>
 
@@ -564,16 +603,21 @@
                                                 @php
                                                     $isRed = $redStep === $no;
                                                     $isDone = $rank >= $no;
+                                                    $bisaKlik = $isDone || ($isRed && $isDitolak);
                                                     $bgClass = $isRed ? 'bg-danger' : ($isDone ? 'bg-success' : 'bg-secondary');
                                                     $textClass = $isRed ? 'text-danger' : ($isDone ? 'text-success' : '');
 
                                                     if ($isRed) {
-                                                        $statusText = $isDitolak ? 'Ditolak' : ($no == 4 ? 'Terlambat / Tertahan' : 'Terlambat / Menunggu');
+                                                        if ($isDitolak) {
+                                                            $statusText = $logTolak && $logTolak->aksi == 'batal' ? 'Dibatalkan' : 'Ditolak';
+                                                        } else {
+                                                            $statusText = $no == 4 ? 'Terlambat / Tertahan' : 'Terlambat / Menunggu';
+                                                        }
                                                     } elseif ($isDone) {
                                                         $doneText = [
                                                             2 => $jenisAjuan == 'koor' ? 'Otomatis Disetujui' : ($jenisAjuan == 'ga' ? 'Mengetahui' : 'Disetujui'),
-                                                            3 => $jenisAjuan == 'ga' ? 'Otomatis Disetujui' : 'Disetujui',
-                                                            4 => $rank == 4 ? 'Sedang Diproses' : 'Selesai Diproses',
+                                                            3 => $jenisAjuan == 'ga' && !$logs->has(3) ? 'Otomatis Disetujui' : 'Disetujui',
+                                                            4 => $rank == 4 ? 'Sedang ' . $namaProses : 'Selesai Diproses',
                                                             5 => 'Selesai',
                                                         ];
                                                         $statusText = $doneText[$no] ?? '';
@@ -586,22 +630,27 @@
                                                     $atText = $atCarbon
                                                         ? $atCarbon->format($atCarbon->format('H:i') == '00:00' ? 'd M Y' : 'd M Y, H:i')
                                                         : '-';
-                                                    $showMeta = $no == 1 || $isDone || ($isRed && $isDitolak);
+                                                    $showMeta = $no == 1 || !empty($s['at']);
                                                 @endphp
-                                                <div class="position-relative text-center" style="z-index: 2; flex: 1;">
-                                                    <a href="{{ route('pengadaan.index') }}" class="tracking-step-icon rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm text-white {{ $bgClass }}" title="Buka halaman pengadaan barang">
-                                                        <i class="fas {{ $s['icon'] }}"></i>
-                                                    </a>
-                                                    <div class="mt-1">
-                                                        <span class="fw-bold d-block {{ $textClass }}" style="font-size: 0.68rem;">{{ $no }}. {{ $s['label'] }}</span>
-                                                        <small class="text-muted d-block" style="font-size: 0.6rem;">
+                                                <div class="tracking-step {{ $isDone && !$isRed ? 'is-done' : '' }}">
+                                                    @if($bisaKlik)
+                                                        <a href="{{ route('pengadaan.index') }}" class="tracking-step-icon rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm text-white {{ $bgClass }}" title="Buka halaman pengadaan barang">
+                                                            <i class="fas {{ $s['icon'] }}"></i>
+                                                        </a>
+                                                    @else
+                                                        <span class="tracking-step-icon tracking-step-disabled rounded-circle d-flex align-items-center justify-content-center mx-auto text-white {{ $bgClass }}" title="Belum sampai tahap ini" aria-disabled="true">
+                                                            <i class="fas {{ $s['icon'] }}"></i>
+                                                        </span>
+                                                    @endif
+                                                    <div class="mt-1 tracking-step-body">
+                                                        <span class="fw-bold d-block tracking-step-label {{ $textClass }}">{{ $no }}. {{ $s['label'] }}</span>
+                                                        <small class="text-muted d-block tracking-step-meta">
                                                             @if($statusText !== '' && $no != 1)
-                                                                <span class="fw-semibold {{ $textClass }}">{{ $statusText }}</span>
-                                                                @if($showMeta)<br>@endif
+                                                                <span class="fw-semibold d-block {{ $textClass }}">{{ $statusText }}</span>
                                                             @endif
                                                             @if($showMeta)
-                                                                Oleh: {{ $s['who'] ?? '-' }}<br>
-                                                                {{ $atText }}
+                                                                <span class="d-block">Oleh: <b>{{ $s['who'] ?? '-' }}</b></span>
+                                                                <span class="d-block">Waktu: {{ $atText }}</span>
                                                             @endif
                                                         </small>
                                                     </div>
