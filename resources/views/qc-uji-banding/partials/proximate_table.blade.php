@@ -142,7 +142,7 @@
                 @endif
             </tr>
         </tbody>
-        <tfoot>
+        <!-- <tfoot>
             <tr>
                 <td colspan="15" class="text-start">
                     <button type="button" class="btn btn-sm btn-outline-primary btn-add-row mt-2 me-2" data-pid="{{ $pid }}" data-code="{{ $code }}" disabled>
@@ -153,6 +153,6 @@
                     </button>
                 </td>
             </tr>
-        </tfoot>
+        </tfoot> -->
     </table>
 </div>

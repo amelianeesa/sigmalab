@@ -16,9 +16,9 @@
             <a href="{{ route('qc-uji-banding.edit', $program->id) }}" class="btn btn-outline-secondary btn-sm py-1 px-3">
                 <i class="fas fa-edit me-1"></i> Edit Data
             </a>
-            <a href="{{ route('qc-uji-banding.evaluasi.form', $program->id) }}" class="btn btn-outline-primary btn-sm py-1 px-3">
+            <button type="button" class="btn btn-outline-primary btn-sm py-1 px-3" data-bs-toggle="modal" data-bs-target="#modalPilihEvaluasi">
                 <i class="fas fa-chart-bar me-1"></i> Input Hasil Evaluasi Vendor
-            </a>
+            </button>
             <a href="{{ route('qc-uji-banding.ringkasan', $program->id) }}" class="btn btn-outline-success btn-sm py-1 px-3">
                 <i class="fas fa-table me-1"></i> Ringkasan Unjuk Kerja
             </a>
@@ -28,9 +28,14 @@
         </div>
     </div>
 
+    @if(session('error'))
+    <div class="alert alert-danger shadow-sm border-0">
+        <i class="fas fa-times-circle me-2"></i> {{ session('error') }}
+    </div>
+    @endif
 
-    <div class="row g-3">
-        <div class="col-12 col-lg-4">
+    <div class="row g-4">
+        <div class="col-md-4">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header text-white" style="background-color: #1b3152;">
                     <h5><i class="fas fa-info-circle me-1"></i> Informasi Program</h5>
@@ -123,6 +128,39 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal Pilih Parameter Evaluasi --}}
+<div class="modal fade" id="modalPilihEvaluasi" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header text-white" style="background-color: #1b3152;">
+                <h5 class="modal-title"><i class="fas fa-list-check me-2"></i>Pilih Parameter Uji</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('qc-uji-banding.evaluasi.form', $program->id) }}" method="GET">
+                <div class="modal-body">
+                    <p class="text-muted small mb-3">Centang parameter apa saja yang diberikan hasil (Alg Mean & SDPA) oleh penyelenggara:</p>
+                    <div class="row g-2">
+                        @foreach($program->parameters as $param)
+                        <div class="col-md-6">
+                            <label class="list-group-item d-flex gap-2 align-items-center cursor-pointer border rounded p-2 h-100">
+                                <input class="form-check-input flex-shrink-0" type="checkbox" name="p[]" value="{{ $param->id }}" style="transform: scale(1.2);" checked>
+                                <span>
+                                    <strong class="d-block text-dark" style="font-size: 0.9rem;">{{ $param->parameterUji->nama_parameter }}</strong>
+                                </span>
+                            </label>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Lanjutkan Pengisian <i class="fas fa-arrow-right ms-1"></i></button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

@@ -15,9 +15,11 @@
             <h5 class="qc-title"><i class="fas fa-chart-bar text-primary me-1"></i> Ringkasan Unjuk Kerja</h5>
             <p class="qc-subtitle">{{ $program->nama_program }} — {{ $program->kode_sampel }}</p>
         </div>
+
         <a href="{{ route('qc-uji-banding.evaluasi.form', $program->id) }}" class="btn btn-outline-secondary btn-sm py-1 px-3">
+
             <i class="fas fa-edit me-1"></i> Edit Hasil Evaluasi
-        </a>
+        </button>
     </div>
 
     @php
@@ -31,21 +33,24 @@
         });
 
         foreach ($program->parameters as $p) {
+            if ($p->target_vendor === null) {
+                continue; 
+            }
             $rawName = strtoupper($p->parameterUji->nama_parameter ?? '');
 
-            if ($rawName === 'IM' || $rawName === 'TM') {
-                if ($rawName === 'TM') continue; // TM tidak ditampilkan sendiri
-                
-                $val = floatval($p->nilai_akhir);
-                if ($val == 0) {
-                    $val = floatval($tmParam->nilai_akhir ?? 0);
-                }
-                
+            if ($rawName === 'TM') {
                 $paramMap[] = [
                     'param' => $p,
                     'name' => 'Total Moisture',
                     'unit' => '%, ar',
-                    'lab_value' => $val,
+                    'lab_value' => floatval($p->nilai_akhir),
+                ];
+            } elseif ($rawName === 'IM') {
+                $paramMap[] = [
+                    'param' => $p,
+                    'name' => 'Inherent Moisture',
+                    'unit' => '%, adb',
+                    'lab_value' => floatval($p->nilai_akhir),
                 ];
             } elseif ($rawName === 'ASH') {
                 $paramMap[] = ['param' => $p, 'name' => 'Ash Content', 'unit' => '%, db', 'lab_value' => floatval($p->nilai_akhir)];
@@ -266,4 +271,38 @@ document.addEventListener('DOMContentLoaded', function() {
     @endforeach
 });
 </script>
+<!-- Modal Pilih Parameter Evaluasi -->
+<div class="modal fade" id="modalPilihEvaluasi" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header text-white" style="background-color: #1b3152;">
+                <h5 class="modal-title"><i class="fas fa-list-check me-2"></i>Pilih Parameter Uji</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('qc-uji-banding.evaluasi.form', $program->id) }}" method="GET">
+                <div class="modal-body">
+                    <p class="text-muted small mb-3">Centang parameter apa saja yang ingin diedit atau dievaluasi ulang:</p>
+                    <div class="row g-2">
+                        @foreach($program->parameters as $param)
+                        <div class="col-md-6">
+                            <label class="list-group-item d-flex gap-2 align-items-center cursor-pointer border rounded p-2 h-100">
+                        
+                                <input class="form-check-input flex-shrink-0" type="checkbox" name="p[]" value="{{ $param->id }}" style="transform: scale(1.2);" 
+                                    {{ $param->z_score !== null ? 'checked' : '' }}>
+                                <span>
+                                    <strong class="d-block text-dark" style="font-size: 0.9rem;">{{ $param->parameterUji->nama_parameter }}</strong>
+                                </span>
+                            </label>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Lanjutkan Pengisian <i class="fas fa-arrow-right ms-1"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
