@@ -5,6 +5,88 @@
 @include('qc-uji-banding.partials._style')
 
 <style>
+    .qc-page {
+        padding-top: 0 !important;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+        margin-top: -8px !important;
+    }
+
+    .qc-page nav[aria-label="breadcrumb"],
+    .qc-page > nav {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .qc-page .breadcrumb {
+        margin: 0 0 6px 0 !important;
+        padding: 0 !important;
+        font-size: 0.75rem !important;
+        line-height: 1.4;
+        flex-wrap: wrap;
+        align-items: center;
+        background: transparent !important;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item,
+    .qc-page .breadcrumb .breadcrumb-item a {
+        font-size: 0.75rem !important;
+        font-weight: 500 !important;
+        color: #0d6efd !important;
+        text-decoration: none;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item a:hover {
+        color: #0a58ca !important;
+        text-decoration: underline;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item.active {
+        color: #000000 !important;
+        font-weight: 700 !important;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item {
+        padding-left: 0.4rem;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+        color: #6c757d !important;
+        padding-right: 0.4rem;
+        font-weight: 400;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu {
+        min-width: 190px;
+        padding: 4px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item {
+        color: #000000 !important;
+        font-size: 0.78rem !important;
+        font-weight: 500 !important;
+        text-decoration: none !important;
+        background-color: transparent;
+        padding: 7px 12px;
+        border-radius: 5px;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:hover,
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
+        background-color: rgba(27, 49, 82, 0.15) !important;
+        color: #000000 !important;
+        text-decoration: none !important;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
+        font-weight: 700 !important;
+    }
+
     .param-form-wrapper .table-responsive {
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch;
@@ -35,6 +117,32 @@
         padding-left: 10px !important;
         padding-right: 10px !important;
     }
+
+    @media (max-width: 767.98px) {
+        .qc-page {
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+        }
+
+        .qc-page .breadcrumb,
+        .qc-page .breadcrumb .breadcrumb-item,
+        .qc-page .breadcrumb .breadcrumb-item a {
+            font-size: 0.72rem !important;
+        }
+
+        .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item {
+            padding-left: 0.3rem;
+        }
+
+        .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+            padding-right: 0.3rem;
+        }
+
+        .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item {
+            font-size: 0.85rem !important;
+            padding: 10px 14px;
+        }
+    }
 </style>
 
 <div class="container-fluid qc-page pb-4">
@@ -48,15 +156,13 @@
     </h5>
 
     @if($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0" role="alert">
-            <i class="fas fa-exclamation-triangle me-1"></i>
-            <strong>Terdapat kesalahan:</strong>
-            <ul class="mb-0 mt-1">
+        <div class="alert alert-danger shadow-sm border-0 py-2">
+            <i class="fas fa-exclamation-triangle me-1"></i> Terdapat kesalahan pada isian form:
+            <ul class="mb-0 mt-1 ps-3">
                 @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="padding: 0.6rem;"></button>
         </div>
     @endif
 
@@ -250,7 +356,7 @@
                                                     $pid_c = $params->where('nama_parameter', 'C')->first()->parameter_uji_id ?? 4;
                                                     $pid_h = $params->where('nama_parameter', 'H')->first()->parameter_uji_id ?? 5;
                                                     $pid_n = $params->where('nama_parameter', 'N')->first()->parameter_uji_id ?? 6;
-                                                    $pid   = $pid_c; // Default ke C
+                                                    $pid   = $pid_c;
                                                 @endphp
 
                                                 <div class="col-12 param-container" data-pid="{{ $pid }}">
@@ -657,7 +763,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (selectEl.value === 'NO') {
             selectEl.className = 'form-select form-select-sm fw-bold bg-danger text-white border-danger';
         } else {
-            selectEl.className = 'form-select form-select-sm fw-bold'; // Kembali normal
+            selectEl.className = 'form-select form-select-sm fw-bold';
         }
     };
 
@@ -694,7 +800,7 @@ document.addEventListener('DOMContentLoaded', function () {
         try { tolData = JSON.parse(tolInput.value); } catch (e) { return; }
 
         let matchedRule = null;
-        let rowType = container.dataset.type; // Untuk CHN ('carbon', 'hydrogen', 'nitrogen')
+        let rowType = container.dataset.type;
 
         for (let rule of tolData) {
             if (code === 'CHN') {
@@ -923,7 +1029,7 @@ document.addEventListener('DOMContentLoaded', function () {
             let outTm = row.querySelector('.out-tm');
             if (outTm) {
                 outTm.textContent = finalResult > 0 ? finalResult.toFixed(2) : '-';
-                outTm.dataset.val = finalResult; // Simpan nilai asli di belakang layar untuk rata-rata
+                outTm.dataset.val = finalResult;
             }
 
             const hidD = row.querySelector(row.dataset.type === 'simplo' ? '.in-d1' : '.in-d2');
@@ -1330,7 +1436,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (tbodies.length > 1) {
                 tbodies[tbodies.length - 1].remove();
             } else {
-                alert('Minimal harus ada 1 pengujian.');
+                Swal.fire('Tidak Bisa Dihapus', 'Minimal harus ada 1 pengujian.', 'warning');
             }
         }
     });
@@ -1508,7 +1614,7 @@ document.addEventListener('DOMContentLoaded', function () {
         formQc.addEventListener('submit', function (e) {
             if (document.querySelectorAll('.param-enable-check:checked').length === 0) {
                 e.preventDefault();
-                alert('Silakan centang minimal 1 parameter yang ingin diuji.');
+                Swal.fire('Belum Ada Parameter', 'Silakan centang minimal 1 parameter yang ingin diuji.', 'warning');
                 return;
             }
 
@@ -1655,9 +1761,9 @@ document.addEventListener('DOMContentLoaded', function () {
                                 if (btnAdd && maxIndex > 0) {
                                     for (let i = 0; i < maxIndex; i++) {
                                         let tempDisabled = btnAdd.disabled;
-                                        btnAdd.disabled = false; // Paksa tombol aktif sebentar
-                                        btnAdd.click();          // Klik otomatis untuk membuat baris
-                                        btnAdd.disabled = tempDisabled; // Kembalikan status tombol
+                                        btnAdd.disabled = false;
+                                        btnAdd.click();
+                                        btnAdd.disabled = tempDisabled;
                                     }
                                 }
 
@@ -1694,8 +1800,8 @@ document.addEventListener('DOMContentLoaded', function () {
         let tmAr = parseFloat(document.querySelector('tr[data-param="TM"] .prox-ar')?.textContent) || 0;
         let imAdb = parseFloat(document.querySelector('tr[data-param="IM"] .prox-adb')?.textContent) || 0;
         let ashAdb = parseFloat(document.querySelector('tr[data-param="ASH"] .prox-adb')?.textContent) || 0;
-        let ashDb = 0; // Needed for VM, FC, TS, GCV, C/H/N, O DAF calculation
-        let vmDb = 0;  // Needed for FC db
+        let ashDb = 0;
+        let vmDb = 0;
 
         const ashRow = document.querySelector('tr[data-param="ASH"]');
         if (ashRow && ashAdb > 0) {
@@ -1705,7 +1811,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             ashRow.querySelector('.prox-ar').textContent = ar.toFixed(2);
             ashRow.querySelector('.prox-db').textContent = db.toFixed(2);
-            ashRow.querySelector('.prox-daf').textContent = '-'; // strip
+            ashRow.querySelector('.prox-daf').textContent = '-';
         }
 
         const vmRow = document.querySelector('tr[data-param="VM"]');
@@ -1801,8 +1907,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         tab2Adl.addEventListener('input', () => {
-            calculateProximateBases(); // Hitung proximate
-            syncAdlToTm();             // Lempar datanya ke modul TM
+            calculateProximateBases();
+            syncAdlToTm();
         });
 
         setTimeout(syncAdlToTm, 800);
@@ -1822,7 +1928,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let updated = false;
 
-        const tmTable = document.querySelector('table[data-code="TM"]'); // Need to find TM code
+        const tmTable = document.querySelector('table[data-code="TM"]');
         if (tmTable) {
             const tbody = tmTable.querySelector('tbody');
             if (tbody) {
@@ -1856,7 +1962,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const duploOut = rmTable.querySelector('.duplo-row .in-hasil-2')?.value;
 
             let rmAverage = rmTable.querySelector('.out-avg-adb')?.textContent;
-            if (rmAverage === '-') rmAverage = ''; // Bersihkan jika belum ada hasil
+            if (rmAverage === '-') rmAverage = '';
 
             const tmTableNode = document.querySelector('table[data-code="TM"]');
             if (tmTableNode) {
@@ -2026,7 +2132,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (aftBody.children.length > 2) {
                 aftBody.lastElementChild.remove();
             } else {
-                alert('Minimal 2 titik kalibrasi diperlukan.');
+                Swal.fire('Tidak Bisa Dihapus', 'Minimal 2 titik kalibrasi diperlukan.', 'warning');
             }
         });
 
@@ -2049,7 +2155,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             if (!isValid || points.length < 2) {
-                alert('Harap isi semua kolom kalibrasi dengan angka valid.');
+                Swal.fire('Data Belum Lengkap', 'Harap isi semua kolom kalibrasi dengan angka valid.', 'warning');
                 return;
             }
 
@@ -2094,10 +2200,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 let p2 = points[i + 1];
                 if (temp >= p1.eq && temp <= p2.eq) {
                     let Y = p1.std + ((temp - p1.eq) * (p2.std - p1.std)) / (p2.eq - p1.eq);
-                    return Y; // return Std Reading
+                    return Y;
                 }
             }
-            return 0; // Out of bounds
+            return 0;
         };
 
         function loadAftHistory() {
@@ -2156,7 +2262,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td><input type="text" class="form-control form-control-sm text-center aft-std" placeholder="e.g. 993.6949"></td>
                     <td><input type="text" class="form-control form-control-sm text-center aft-corr" placeholder="e.g. -6.3"></td>
                 </tr>`;
-                btnAftAdd.click(); // give at least 2 rows
+                btnAftAdd.click();
                 aftInterpContainer.innerHTML = '<div class="text-muted text-center py-4">Isi poin kalibrasi...</div>';
                 setAftViewingBadge(false);
             } else {
@@ -2184,7 +2290,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             if (points.some(p => isNaN(p.eq_sett) || isNaN(p.std_read) || isNaN(p.correction))) {
-                alert('Terdapat data tidak valid.');
+                Swal.fire('Data Tidak Valid', 'Terdapat data kalibrasi yang tidak valid.', 'warning');
                 return;
             }
 
@@ -2320,6 +2426,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }, 1500);
 
-}); // /DOMContentLoaded
+});
 </script>
 @endsection

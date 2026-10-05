@@ -376,7 +376,7 @@
                                 <p class="text-muted mb-0 info-card-text">Terdapat {{ $stokTipis }} item barang di bawah batas minimum.</p>
                             </div>
                         </div>
-                        <div class="d-none d-md-block mt-2"><span class="btn btn-outline-danger btn-sm w-100 info-card-alert-btn">Cek Inventori</span></div>
+                        <div class="mt-2"><span class="btn btn-outline-danger btn-sm w-100 info-card-alert-btn">Cek Inventori</span></div>
                     </div>
                 </div>
             </a>
@@ -396,7 +396,7 @@
                                 <p class="text-muted mb-0 info-card-text">Terdapat {{ $barangExp }} bahan kedaluwarsa dalam 180 hari.</p>
                             </div>
                         </div>
-                        <div class="d-none d-md-block mt-2"><span class="btn btn-outline-warning btn-sm w-100 info-card-alert-btn">Cek Expired Date</span></div>
+                        <div class="mt-2"><span class="btn btn-outline-warning btn-sm w-100 info-card-alert-btn">Cek Expired Date</span></div>
                     </div>
                 </div>
             </a>
@@ -416,7 +416,7 @@
                                 <p class="text-muted mb-0 info-card-text">Ada {{ $pengadaanPending }} pengajuan yang butuh persetujuan.</p>
                             </div>
                         </div>
-                        <div class="d-none d-md-block mt-2"><span class="btn btn-outline-navy btn-sm w-100 info-card-alert-btn">Proses Pengajuan</span></div>
+                        <div class="mt-2"><span class="btn btn-outline-navy btn-sm w-100 info-card-alert-btn">Proses Pengajuan</span></div>
                     </div>
                 </div>
             </a>

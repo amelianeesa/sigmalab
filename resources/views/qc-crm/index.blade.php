@@ -7,8 +7,8 @@
 @php
     $batasHariExpired = 90;
 
-    $expState = [];   
-    $sisaHari = [];   
+    $expState = [];
+    $sisaHari = [];
     $expiredCount = 0;
     $segeraCount = 0;
     $menungguCount = 0;
@@ -46,7 +46,86 @@
 @endphp
 
 <style>
-    .qc-page { padding: 4px 20px !important; font-size: 0.82rem; }
+    .qc-page {
+        padding: 0 20px !important;
+        margin-top: -8px !important;
+        font-size: 0.82rem;
+    }
+
+    .qc-page nav[aria-label="breadcrumb"],
+    .qc-page > nav {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .qc-page .breadcrumb {
+        margin: 0 0 6px 0 !important;
+        padding: 0 !important;
+        font-size: 0.75rem !important;
+        line-height: 1.4;
+        flex-wrap: wrap;
+        align-items: center;
+        background: transparent !important;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item,
+    .qc-page .breadcrumb .breadcrumb-item a {
+        font-size: 0.75rem !important;
+        font-weight: 500 !important;
+        color: #0d6efd !important;
+        text-decoration: none;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item a:hover {
+        color: #0a58ca !important;
+        text-decoration: underline;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item.active {
+        color: #000000 !important;
+        font-weight: 700 !important;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item {
+        padding-left: 0.4rem;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+        color: #6c757d !important;
+        padding-right: 0.4rem;
+        font-weight: 400;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu {
+        min-width: 190px;
+        padding: 4px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item {
+        color: #000000 !important;
+        font-size: 0.78rem !important;
+        font-weight: 500 !important;
+        text-decoration: none !important;
+        background-color: transparent;
+        padding: 7px 12px;
+        border-radius: 5px;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:hover,
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
+        background-color: rgba(27, 49, 82, 0.15) !important;
+        color: #000000 !important;
+        text-decoration: none !important;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
+        font-weight: 700 !important;
+    }
 
     .qc-page .btn-corporate-blue {
         background-color: #1b3152 !important; border-color: #1b3152 !important; color: #fff !important;
@@ -91,7 +170,6 @@
     #harian > .alert-info i { color: #0dcaf0; }
     #harian > .alert-info strong { color: #495057; }
 
-    /* ===== Tabel ===== */
     .qc-page .table-qc th,
     .qc-page .table-qc td {
         padding: 8px 10px !important; vertical-align: middle !important; font-size: 0.75rem !important;
@@ -133,12 +211,12 @@
         min-width: 72px;
         display: inline-block;
         margin: 0 !important;
-        padding: 0.25rem 2rem 0.25rem 0.6rem !important;  
+        padding: 0.25rem 2rem 0.25rem 0.6rem !important;
         font-size: 0.75rem;
         line-height: 1.4;
         height: auto;
         border-radius: 6px;
-        background-position: right 0.6rem center;       
+        background-position: right 0.6rem center;
         background-size: 12px 10px;
         -webkit-appearance: none;
         -moz-appearance: none;
@@ -156,7 +234,27 @@
     @media (prefers-reduced-motion: reduce) { .pulse-button { animation: none; } }
 
     @media (max-width: 767.98px) {
-        .qc-page { padding: 4px 10px !important; }
+        .qc-page { padding: 0 10px !important; }
+
+        .qc-page .breadcrumb,
+        .qc-page .breadcrumb .breadcrumb-item,
+        .qc-page .breadcrumb .breadcrumb-item a {
+            font-size: 0.72rem !important;
+        }
+
+        .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item {
+            padding-left: 0.3rem;
+        }
+
+        .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+            padding-right: 0.3rem;
+        }
+
+        .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item {
+            font-size: 0.85rem !important;
+            padding: 10px 14px;
+        }
+
         .qc-tabs .nav-link { padding: 0.45rem 0.75rem; font-size: 0.78rem; }
         .chart-wrap { height: 320px; }
 
@@ -389,7 +487,6 @@
                 </div>
             </div>
 
-            {{-- MODAL HASIL VERIFIKASI (di luar tabel) --}}
             @foreach($katalogs as $r)
                 @if($r->verifikasiTeknis->count() > 0)
                 <div class="modal fade" id="modalHasilVerif{{ $r->id }}" tabindex="-1" aria-hidden="true">
@@ -420,7 +517,6 @@
 
                                 <div class="tab-content p-2 p-md-3">
 
-                                    {{-- RINGKASAN --}}
                                     <div class="tab-pane fade show active" id="ringkasan-{{ $r->id }}" role="tabpanel">
                                         <div class="table-responsive">
                                             <table class="table table-bordered table-striped mb-0 text-center align-middle table-qc">
@@ -492,7 +588,6 @@
                                                 </thead>
                                                 <tbody>
                                                     @forelse($dataMentahList as $index => $mentah)
-                    
                                                     <tr>
                                                         <td rowspan="2" class="fw-bold bg-light">{{ $index + 1 }}</td>
                                                         <td class="fw-bold text-start ps-3">Simplo</td>
@@ -529,7 +624,6 @@
                                                             <td>{{ $mentah['mentah']['lf_1'] ?? '-' }}</td>
                                                         @endif
                                                     </tr>
-                                                    {{-- DUPLO --}}
                                                     <tr>
                                                         <td class="fw-bold text-start ps-3">Duplo</td>
                                                         @if(in_array($code, ['IM','RM']))
@@ -798,11 +892,11 @@ $(function () {
         if (settings.nTable.id !== 'tableHarianCRM') return true;
 
         const filterParam   = $('#filterParam').val();
-        const filterPeriode = $('#filterPeriode').val(); // "YYYY-MM"
+        const filterPeriode = $('#filterPeriode').val();
 
         const rowNode    = tableHarian.row(dataIndex).node();
         const rowPeriode = $(rowNode).find('td:eq(0)').data('periode');
-        const rowParam   = (data[3] || '').trim(); // kolom ke-4 = Parameter
+        const rowParam   = (data[3] || '').trim();
 
         if (filterParam && rowParam !== filterParam) return false;
         if (filterPeriode && rowPeriode !== filterPeriode) return false;
@@ -896,7 +990,6 @@ $(function () {
             alertEl.classList.add('d-none');
         }
 
-        // Kotak legenda
         document.getElementById('chartLegendBoxes').innerHTML = `
             <div class="col-md-3 col-6"><div class="p-2 border rounded text-center bg-danger bg-opacity-10"><small class="d-block text-muted">Batas Atas (TV + U)</small><strong class="text-danger">${batasAtas.toFixed(4)}</strong></div></div>
             <div class="col-md-3 col-6"><div class="p-2 border rounded text-center bg-success bg-opacity-10"><small class="d-block text-muted">True Value (Sertifikat)</small><strong class="text-success">${certVal.toFixed(4)}</strong></div></div>
@@ -904,7 +997,6 @@ $(function () {
             <div class="col-md-3 col-6"><div class="p-2 border rounded text-center"><small class="d-block text-muted">Jumlah Data</small><strong>${logs.length} Pengujian</strong></div></div>
         `;
 
-        // Data titik
         const labels = [], dataPoints = [], pointColors = [], pointRadii = [];
         logs.forEach((log, idx) => {
             labels.push(log.tanggal_uji);
@@ -981,7 +1073,6 @@ $(function () {
             }
         });
 
-        // Tabel data
         let tbody = '';
         logs.forEach((log, idx) => {
             const isOutlier = log.status_evaluasi === 'outlier';

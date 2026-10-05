@@ -4,6 +4,116 @@
 @section('content')
 @include('qc-uji-banding.partials._style')
 
+<style>
+    .qc-page {
+        padding-top: 0 !important;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+        margin-top: -8px !important;
+    }
+
+    .qc-page nav[aria-label="breadcrumb"],
+    .qc-page > nav {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .qc-page .breadcrumb {
+        margin: 0 0 6px 0 !important;
+        padding: 0 !important;
+        font-size: 0.75rem !important;
+        line-height: 1.4;
+        flex-wrap: wrap;
+        align-items: center;
+        background: transparent !important;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item,
+    .qc-page .breadcrumb .breadcrumb-item a {
+        font-size: 0.75rem !important;
+        font-weight: 500 !important;
+        color: #0d6efd !important;
+        text-decoration: none;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item a:hover {
+        color: #0a58ca !important;
+        text-decoration: underline;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item.active {
+        color: #000000 !important;
+        font-weight: 700 !important;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item {
+        padding-left: 0.4rem;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+        color: #6c757d !important;
+        padding-right: 0.4rem;
+        font-weight: 400;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu {
+        min-width: 190px;
+        padding: 4px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item {
+        color: #000000 !important;
+        font-size: 0.78rem !important;
+        font-weight: 500 !important;
+        text-decoration: none !important;
+        background-color: transparent;
+        padding: 7px 12px;
+        border-radius: 5px;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:hover,
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
+        background-color: rgba(27, 49, 82, 0.15) !important;
+        color: #000000 !important;
+        text-decoration: none !important;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
+        font-weight: 700 !important;
+    }
+
+    @media (max-width: 767.98px) {
+        .qc-page {
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+        }
+
+        .qc-page .breadcrumb,
+        .qc-page .breadcrumb .breadcrumb-item,
+        .qc-page .breadcrumb .breadcrumb-item a {
+            font-size: 0.72rem !important;
+        }
+
+        .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item {
+            padding-left: 0.3rem;
+        }
+
+        .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+            padding-right: 0.3rem;
+        }
+
+        .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item {
+            font-size: 0.85rem !important;
+            padding: 10px 14px;
+        }
+    }
+</style>
+
 <div class="container-fluid qc-page pb-4">
     <x-qc-breadcrumb active="Uji Banding"></x-qc-breadcrumb>
 

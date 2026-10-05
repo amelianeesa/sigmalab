@@ -5,7 +5,6 @@
 @include('qc-crm._qc-compact')
 
 @php
-    // Validitas kalibrasi alat dihitung sekali di sini (dipakai untuk notifikasi & daftar alat)
     $alatValid = [];
     $alatExpiredCount = 0;
     foreach ($alatList as $alat) {
@@ -24,7 +23,6 @@
 <style>
     .qc-page { padding: 4px 20px !important; }
 
-    /* ===== Tombol (sama dengan alat/index) ===== */
     .qc-page .btn-corporate-blue {
         background-color: #1b3152 !important; border-color: #1b3152 !important; color: #fff !important;
     }
