@@ -96,6 +96,14 @@
         font-weight: 400;
     }
 
+    /* Header sticky: tetap di dalam kotak tabel, tidak menembus navbar */
+    .ts-page .table thead.sticky-top,
+    .ts-page .table-responsive .sticky-top {
+        position: sticky;
+        top: 0;
+        z-index: 2 !important;
+    }
+
     /* Warna kelompok kolom (kalem) */
     .ts-page .table thead th.th-manual { background-color: #2f5d9e !important; color: #fff !important; }
     .ts-page .table thead th.th-auto   { background-color: #6b7a90 !important; color: #fff !important; }
