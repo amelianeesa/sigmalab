@@ -15,12 +15,10 @@
         <h1 class="h3 mb-0 text-gray-800">Inhouse Control - {{ $selectedParameter->nama_parameter }}</h1>
     </div>
 
-    <!-- Parameter Filter Form -->
     <div class="card shadow mb-4">
         <div class="card-body">
-            <form action="{{ route('parameter-uji.show', $selectedParameter->
-            <input type="hidden" name="tab" value="{{ $jenisGrafik }}">
-parameter_uji_id) }}" method="GET" class="row align-items-end">
+            <form action="{{ route('parameter-uji.show', $selectedParameter->parameter_uji_id) }}" method="GET" class="row align-items-end">
+                <input type="hidden" name="tab" value="{{ $jenisGrafik }}">
                 <div class="col-md-3">
                     <label class="form-label">Parameter Uji</label>
                     <select name="parameter_uji_id" class="form-select" required>
@@ -43,7 +41,7 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
                 <div class="col-md-3">
                     <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Tampilkan</button>
                     @if(request('parameter_uji_id'))
-                        <a href="{{ route('parameter-uji.cetak-control-chart', ['parameter_uji' => request()->route('parameter_uji') ?? $selectedParameter->parameter_uji_id, 'tanggal_mulai' => request('tanggal_mulai'), 'tanggal_akhir' => request('tanggal_akhir'), 'tab' => request('tab')])->all()) }}" class="btn btn-danger" target="_blank">
+                        <a href="{{ route('parameter-uji.cetak-control-chart', ['parameter_uji' => request()->route('parameter_uji') ?? $selectedParameter->parameter_uji_id, 'tanggal_mulai' => request('tanggal_mulai'), 'tanggal_akhir' => request('tanggal_akhir'), 'tab' => request('tab')]) }}" class="btn btn-danger" target="_blank">
                             <i class="fas fa-file-pdf"></i> Cetak
                         </a>
                     @endif
@@ -53,8 +51,7 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
     </div>
 
     @if(isset($chartData) && $selectedParameter)
-                  <div class="row">
-        <!-- Tabel Data (Raw Data Logger) -->
+    <div class="row">
         <div class="col-12 mb-4">
             <div class="card shadow">
                 <div class="card-header py-3">
@@ -76,13 +73,9 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
                                     <th rowspan="2">Status Duplo</th>
                                 </tr>
                                 <tr>
-                                    <!-- Dish 1 -->
                                     <th>IDT</th> <th>ST</th> <th>HT</th> <th>FT</th>
-                                    <!-- Dish 2 -->
                                     <th>IDT</th> <th>ST</th> <th>HT</th> <th>FT</th>
-                                    <!-- Abs Diff -->
                                     <th>IDT</th> <th>ST</th> <th>HT</th> <th>FT</th>
-                                    <!-- Average -->
                                     <th>IDT</th> <th>ST</th> <th>HT</th> <th>FT</th>
                                 </tr>
                             </thead>
@@ -97,31 +90,27 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
                                         <td>{{ $index + 1 }}</td>
                                         <td>{{ $hasil->kegiatan ? $hasil->kegiatan->kode_sampel : '-' }}</td>
                                         <td>{{ $dm['Atmosphere'] ?? '-' }}</td>
-                                        
-                                        <!-- Dish 1 -->
+
                                         <td>{{ isset($dm['IDT_D1']) ? number_format($dm['IDT_D1'], 1) : '-' }}</td>
                                         <td>{{ isset($dm['ST_D1']) ? number_format($dm['ST_D1'], 1) : '-' }}</td>
                                         <td>{{ isset($dm['HT_D1']) ? number_format($dm['HT_D1'], 1) : '-' }}</td>
                                         <td>{{ isset($dm['FT_D1']) ? number_format($dm['FT_D1'], 1) : '-' }}</td>
-                                        
-                                        <!-- Dish 2 -->
+
                                         <td>{{ isset($dm['IDT_D2']) ? number_format($dm['IDT_D2'], 1) : '-' }}</td>
                                         <td>{{ isset($dm['ST_D2']) ? number_format($dm['ST_D2'], 1) : '-' }}</td>
                                         <td>{{ isset($dm['HT_D2']) ? number_format($dm['HT_D2'], 1) : '-' }}</td>
                                         <td>{{ isset($dm['FT_D2']) ? number_format($dm['FT_D2'], 1) : '-' }}</td>
-                                        
-                                        <!-- Abs Diff -->
+
                                         <td class="{{ isset($dm['Abs_IDT']) && $dm['Abs_IDT'] > $tol ? 'text-danger fw-bold' : '' }}">{{ isset($dm['Abs_IDT']) ? number_format($dm['Abs_IDT'], 1) : '-' }}</td>
                                         <td class="{{ isset($dm['Abs_ST']) && $dm['Abs_ST'] > $tol ? 'text-danger fw-bold' : '' }}">{{ isset($dm['Abs_ST']) ? number_format($dm['Abs_ST'], 1) : '-' }}</td>
                                         <td class="{{ isset($dm['Abs_HT']) && $dm['Abs_HT'] > $tol ? 'text-danger fw-bold' : '' }}">{{ isset($dm['Abs_HT']) ? number_format($dm['Abs_HT'], 1) : '-' }}</td>
                                         <td class="{{ isset($dm['Abs_FT']) && $dm['Abs_FT'] > $tol ? 'text-danger fw-bold' : '' }}">{{ isset($dm['Abs_FT']) ? number_format($dm['Abs_FT'], 1) : '-' }}</td>
-                                        
-                                        <!-- Average -->
+
                                         <td class="fw-bold">{{ isset($dm['Avg_IDT']) ? number_format($dm['Avg_IDT'], 1) : '-' }}</td>
                                         <td class="fw-bold">{{ isset($dm['Avg_ST']) ? number_format($dm['Avg_ST'], 1) : '-' }}</td>
                                         <td class="fw-bold">{{ isset($dm['Avg_HT']) ? number_format($dm['Avg_HT'], 1) : '-' }}</td>
                                         <td class="fw-bold">{{ isset($dm['Avg_FT']) ? number_format($dm['Avg_FT'], 1) : '-' }}</td>
-                                        
+
                                         <td class="fw-bold">
                                             @if($hasil->status_berketerimaan === 'gagal_duplo')
                                                 <span class="badge bg-danger">NO</span>
@@ -145,10 +134,9 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
         @if(isset($chartData['aft']))
         <div class="col-12 mb-4">
             <h5 class="font-weight-bold text-primary border-bottom pb-2 mb-4">Control Charts (IDT, ST, HT, FT)</h5>
-                          <div class="row">
+            <div class="row">
                 @php $subParams = ['IDT', 'ST', 'HT', 'FT']; @endphp
                 @foreach($subParams as $sub)
-                <!-- Card for each sub parameter -->
                 <div class="col-xl-6 col-lg-6 mb-4">
                     <div class="card shadow h-100">
                         <div class="card-header py-3">
@@ -163,8 +151,8 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
                                             <th colspan="6">Evaluasi Aturan Westgard</th>
                                             <th rowspan="2">Terima / Tolak</th>
                                             <th rowspan="2">Alasan</th>
-                                    <th rowspan="2">Aksi</th>
-                                </tr>
+                                            <th rowspan="2">Aksi</th>
+                                        </tr>
                                         <tr>
                                             <th>1(2s)</th>
                                             <th>1(3s)</th>
@@ -195,16 +183,16 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
                                                         {{ $eval['status'] }}
                                                     </td>
                                                     <td class="text-start {{ $eval['status'] == 'Tolak' ? 'text-danger' : '' }}">{{ $eval['alasan'] != '-' ? $eval['alasan'] : '' }}</td>
-                                            <td>
-                                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalOverrideGlobal" 
-                                                    data-id="{{ $eval['hasil_uji_id'] }}"
-                                                    data-status="{{ $eval['status'] }}"
-                                                    data-alasan="{{ $eval['alasan'] }}"
-                                                    title="Edit Evaluasi">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
+                                                    <td>
+                                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalOverrideGlobal"
+                                                            data-id="{{ $eval['hasil_uji_id'] }}"
+                                                            data-status="{{ $eval['status'] }}"
+                                                            data-alasan="{{ $eval['alasan'] }}"
+                                                            title="Edit Evaluasi">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
                                                 @endif
                                             @endif
                                         @endforeach
@@ -224,9 +212,8 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
     </div>
     @endif
 </div>
-    @include('parameter-uji.partials.override-modal')
-</div>
 
+@include('parameter-uji.partials.override-modal')
 
 @if(isset($chartData['aft']))
 @push('scripts')
@@ -236,61 +223,56 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
     document.addEventListener("DOMContentLoaded", function() {
         const labels = @json($chartData['labels']);
         const aftData = @json($chartData['aft']);
-        
+
+        if (typeof ChartDataLabels !== 'undefined') {
+            Chart.register(ChartDataLabels);
+        }
+
         ['IDT', 'ST', 'HT', 'FT'].forEach(function(sub) {
             if(!aftData[sub]) return;
             const ctx = document.getElementById('canvas_' + sub).getContext('2d');
             const d = aftData[sub];
-            
-            const lineMean = Array(labels.length).fill(d.stats.mean);
-            const lineUCL = Array(labels.length).fill(d.stats.plus3sd);
-            const lineLCL = Array(labels.length).fill(d.stats.minus3sd);
-            const lineUWL = Array(labels.length).fill(d.stats.plus2sd);
-            const lineLWL = Array(labels.length).fill(d.stats.minus2sd);
-            
-            if (typeof ChartDataLabels !== 'undefined') {
-                Chart.register(ChartDataLabels);
-            }
+            const values = d.values;
 
             new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [
-                    {
-                        label: 'Control',
-                        data: values,
-                        borderColor: '#000000',
-                        backgroundColor: '#000000',
-                        pointBackgroundColor: '#000000',
-                        pointBorderColor: '#000000',
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        fill: false,
-                        tension: 0.3,
-                        borderWidth: 1.5,
-                        zIndex: 10,
-                        datalabels: {
-                            align: 'top',
-                            anchor: 'end',
-                            offset: 4,
-                            color: '#000',
-                            font: { size: 10, weight: 'bold' },
-                            formatter: function(value) {
-                                return parseFloat(value).toFixed(2);
+                        {
+                            label: 'Control',
+                            data: values,
+                            borderColor: '#000000',
+                            backgroundColor: '#000000',
+                            pointBackgroundColor: '#000000',
+                            pointBorderColor: '#000000',
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            fill: false,
+                            tension: 0.3,
+                            borderWidth: 1.5,
+                            zIndex: 10,
+                            datalabels: {
+                                align: 'top',
+                                anchor: 'end',
+                                offset: 4,
+                                color: '#000',
+                                font: { size: 10, weight: 'bold' },
+                                formatter: function(value) {
+                                    return parseFloat(value).toFixed(2);
+                                }
                             }
-                        }
-                    },
-                    { label: 'UCL (' + ({{ $selectedParameter->ucl ?? 0 }}).toFixed(2) + ')', data: Array(labels.length).fill({{ $selectedParameter->ucl ?? 0 }}), borderColor: '#ff0000', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, datalabels: {display: false} },
-                    { label: 'UWL (' + ({{ $selectedParameter->uwl_atas ?? 0 }}).toFixed(2) + ')', data: Array(labels.length).fill({{ $selectedParameter->uwl_atas ?? 0 }}), borderColor: '#ff9900', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, datalabels: {display: false} },
-                    { label: 'µ+1σ (' + ({{ ($selectedParameter->mean ?? 0) + ($selectedParameter->sd ?? 0) }}).toFixed(2) + ')', data: Array(labels.length).fill({{ ($selectedParameter->mean ?? 0) + ($selectedParameter->sd ?? 0) }}), borderColor: '#facc15', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, datalabels: {display: false} },
-                    { label: 'µ (' + ({{ $selectedParameter->mean ?? 0 }}).toFixed(2) + ')', data: Array(labels.length).fill({{ $selectedParameter->mean ?? 0 }}), borderColor: '#00ff00', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, datalabels: {display: false} },
-                    { label: 'µ-1σ (' + ({{ ($selectedParameter->mean ?? 0) - ($selectedParameter->sd ?? 0) }}).toFixed(2) + ')', data: Array(labels.length).fill({{ ($selectedParameter->mean ?? 0) - ($selectedParameter->sd ?? 0) }}), borderColor: '#facc15', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, datalabels: {display: false} },
-                    { label: 'LWL (' + ({{ $selectedParameter->uwl_bawah ?? 0 }}).toFixed(2) + ')', data: Array(labels.length).fill({{ $selectedParameter->uwl_bawah ?? 0 }}), borderColor: '#ff9900', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, datalabels: {display: false} },
-                    { label: 'LCL (' + ({{ $selectedParameter->lcl ?? 0 }}).toFixed(2) + ')', data: Array(labels.length).fill({{ $selectedParameter->lcl ?? 0 }}), borderColor: '#ff0000', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, datalabels: {display: false} }
-                ]
-            },
-            options: {
+                        },
+                        { label: 'UCL (' + ({{ $selectedParameter->ucl ?? 0 }}).toFixed(2) + ')', data: Array(labels.length).fill({{ $selectedParameter->ucl ?? 0 }}), borderColor: '#ff0000', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, datalabels: {display: false} },
+                        { label: 'UWL (' + ({{ $selectedParameter->uwl_atas ?? 0 }}).toFixed(2) + ')', data: Array(labels.length).fill({{ $selectedParameter->uwl_atas ?? 0 }}), borderColor: '#ff9900', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, datalabels: {display: false} },
+                        { label: 'µ+1σ (' + ({{ ($selectedParameter->mean ?? 0) + ($selectedParameter->sd ?? 0) }}).toFixed(2) + ')', data: Array(labels.length).fill({{ ($selectedParameter->mean ?? 0) + ($selectedParameter->sd ?? 0) }}), borderColor: '#facc15', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, datalabels: {display: false} },
+                        { label: 'µ (' + ({{ $selectedParameter->mean ?? 0 }}).toFixed(2) + ')', data: Array(labels.length).fill({{ $selectedParameter->mean ?? 0 }}), borderColor: '#00ff00', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, datalabels: {display: false} },
+                        { label: 'µ-1σ (' + ({{ ($selectedParameter->mean ?? 0) - ($selectedParameter->sd ?? 0) }}).toFixed(2) + ')', data: Array(labels.length).fill({{ ($selectedParameter->mean ?? 0) - ($selectedParameter->sd ?? 0) }}), borderColor: '#facc15', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, datalabels: {display: false} },
+                        { label: 'LWL (' + ({{ $selectedParameter->uwl_bawah ?? 0 }}).toFixed(2) + ')', data: Array(labels.length).fill({{ $selectedParameter->uwl_bawah ?? 0 }}), borderColor: '#ff9900', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, datalabels: {display: false} },
+                        { label: 'LCL (' + ({{ $selectedParameter->lcl ?? 0 }}).toFixed(2) + ')', data: Array(labels.length).fill({{ $selectedParameter->lcl ?? 0 }}), borderColor: '#ff0000', borderWidth: 1.5, borderDash: [4, 4], pointRadius: 0, fill: false, datalabels: {display: false} }
+                    ]
+                },
+                options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },

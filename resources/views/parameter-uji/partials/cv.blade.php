@@ -15,12 +15,10 @@
         <h1 class="h3 mb-0 text-gray-800">Inhouse Control - {{ $selectedParameter->nama_parameter }}</h1>
     </div>
 
-    <!-- Parameter Filter Form -->
     <div class="card shadow mb-4">
         <div class="card-body">
-            <form action="{{ route('parameter-uji.show', $selectedParameter->
-            <input type="hidden" name="tab" value="{{ $jenisGrafik }}">
-parameter_uji_id) }}" method="GET" class="row align-items-end">
+            <form action="{{ route('parameter-uji.show', $selectedParameter->parameter_uji_id) }}" method="GET" class="row align-items-end">
+                <input type="hidden" name="tab" value="{{ $jenisGrafik }}">
                 <div class="col-md-3">
                     <label class="form-label">Parameter Uji</label>
                     <select name="parameter_uji_id" class="form-select" required>
@@ -43,7 +41,7 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
                 <div class="col-md-3">
                     <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Tampilkan</button>
                     @if(request('parameter_uji_id'))
-                        <a href="{{ route('parameter-uji.cetak-control-chart', ['parameter_uji' => request()->route('parameter_uji') ?? $selectedParameter->parameter_uji_id, 'tanggal_mulai' => request('tanggal_mulai'), 'tanggal_akhir' => request('tanggal_akhir'), 'tab' => request('tab')])->all()) }}" class="btn btn-danger" target="_blank">
+                        <a href="{{ route('parameter-uji.cetak-control-chart', ['parameter_uji' => request()->route('parameter_uji') ?? $selectedParameter->parameter_uji_id, 'tanggal_mulai' => request('tanggal_mulai'), 'tanggal_akhir' => request('tanggal_akhir'), 'tab' => request('tab')]) }}" class="btn btn-danger" target="_blank">
                             <i class="fas fa-file-pdf"></i> Cetak
                         </a>
                     @endif
@@ -53,8 +51,7 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
     </div>
 
     @if(isset($chartData) && $selectedParameter)
-                  <div class="row">
-        <!-- Tabel Data (Raw Data Logger) -->
+    <div class="row">
         <div class="col-12 mb-4">
             <div class="card shadow">
                 <div class="card-header py-3">
@@ -77,7 +74,6 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
                                     <th rowspan="2" class="align-middle bg-primary text-white">Avg (db)</th>
                                 </tr>
                                 <tr>
-                                    <!-- Dish 1 -->
                                     <th>Vessel</th>
                                     <th>Call ID</th>
                                     <th>Massa (g)</th>
@@ -85,7 +81,6 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
                                     <th>Ee</th>
                                     <th>Titrant</th>
                                     <th>Final (adb)</th>
-                                    <!-- Dish 2 -->
                                     <th>Vessel</th>
                                     <th>Call ID</th>
                                     <th>Massa (g)</th>
@@ -104,7 +99,6 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
                                         <td>{{ $hasil->created_at->format('d/m/y') }}</td>
                                         <td>{{ $index + 1 }}</td>
                                         <td>{{ $hasil->kegiatan ? $hasil->kegiatan->kode_sampel : '-' }}</td>
-                                        <!-- Dish 1 -->
                                         <td>{{ $dm['Vessel_D1'] ?? '-' }}</td>
                                         <td>{{ $dm['Call_ID_D1'] ?? '-' }}</td>
                                         <td>{{ isset($dm['Massa_D1']) ? number_format($dm['Massa_D1'], 4) : '-' }}</td>
@@ -112,7 +106,6 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
                                         <td>{{ isset($dm['Ee_D1']) ? number_format($dm['Ee_D1'], 2) : '-' }}</td>
                                         <td>{{ isset($dm['Titrant_D1']) ? number_format($dm['Titrant_D1'], 1) : '-' }}</td>
                                         <td class="fw-bold">{{ isset($dm['Final_adb_D1']) ? number_format($dm['Final_adb_D1'], 2) : '-' }}</td>
-                                        <!-- Dish 2 -->
                                         <td>{{ $dm['Vessel_D2'] ?? '-' }}</td>
                                         <td>{{ $dm['Call_ID_D2'] ?? '-' }}</td>
                                         <td>{{ isset($dm['Massa_D2']) ? number_format($dm['Massa_D2'], 4) : '-' }}</td>
@@ -120,17 +113,15 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
                                         <td>{{ isset($dm['Ee_D2']) ? number_format($dm['Ee_D2'], 2) : '-' }}</td>
                                         <td>{{ isset($dm['Titrant_D2']) ? number_format($dm['Titrant_D2'], 1) : '-' }}</td>
                                         <td class="fw-bold">{{ isset($dm['Final_adb_D2']) ? number_format($dm['Final_adb_D2'], 2) : '-' }}</td>
-                                        
-                                        <!-- Dependencies -->
+
                                         <td>{{ isset($dm['Total Sulfur (TS)']) ? number_format($dm['Total Sulfur (TS)'], 2) : '-' }}</td>
-                                        
-                                        <!-- Calculation Results -->
+
                                         <td class="{{ isset($dm['Absolute_Diff']) && $dm['Absolute_Diff'] > ($selectedParameter->toleransi_duplo ?? 50) ? 'text-danger fw-bold' : '' }}">
                                             {{ isset($dm['Absolute_Diff']) ? number_format($dm['Absolute_Diff'], 2) : '-' }}
                                         </td>
                                         <td>{{ isset($dm['Average_adb']) ? number_format($dm['Average_adb'], 2) : '-' }}</td>
                                         <td>{{ isset($dm['IM']) && is_numeric($dm['IM']) ? number_format($dm['IM'], 2) : '-' }}</td>
-                                        
+
                                         <td class="fw-bold bg-light">
                                             @if($hasil->status_berketerimaan === 'pending')
                                                 <span class="text-warning">PENDING (IM/TS)</span>
@@ -153,7 +144,6 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
             </div>
         </div>
 
-        <!-- Tabel Statistik & Grafik Levy-Jennings -->
         @if(isset($chartData))
         <div class="col-12 mb-4">
             <div class="card shadow">
@@ -202,7 +192,7 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
                                             </td>
                                             <td class="text-start {{ $eval['status'] == 'Tolak' ? 'text-danger' : '' }}">{{ $eval['alasan'] != '-' ? $eval['alasan'] : '' }}</td>
                                             <td>
-                                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalOverrideGlobal" 
+                                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalOverrideGlobal"
                                                     data-id="{{ $eval['hasil_uji_id'] }}"
                                                     data-status="{{ $eval['status'] }}"
                                                     data-alasan="{{ $eval['alasan'] }}"
@@ -229,9 +219,8 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
     </div>
     @endif
 </div>
-    @include('parameter-uji.partials.override-modal')
-</div>
 
+@include('parameter-uji.partials.override-modal')
 
 @if(isset($chartData))
 @push('scripts')
@@ -241,20 +230,9 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
     document.addEventListener("DOMContentLoaded", function() {
         const ctx = document.getElementById('controlChartCanvas').getContext('2d');
         const data = @json($chartData);
-        
-        // Buat array konstan untuk garis batas
-        const lineMean = Array(data.labels.length).fill(data.stats.mean);
-        const lineUCL = Array(data.labels.length).fill(data.stats.plus3sd);
-        const lineLCL = Array(data.labels.length).fill(data.stats.minus3sd);
-        const lineUWL = Array(data.labels.length).fill(data.stats.plus2sd);
-        const lineLWL = Array(data.labels.length).fill(data.stats.minus2sd);
-        
-        // Warna titik berdasarkan status
-        const pointColors = data.statuses.map(status => {
-            if (status === 'merah') return 'red';
-            if (status === 'kuning') return 'orange';
-            return 'green';
-        });
+
+        const labels = data.labels;
+        const values = data.values;
 
         if (typeof ChartDataLabels !== 'undefined') {
             Chart.register(ChartDataLabels);
@@ -263,7 +241,7 @@ parameter_uji_id) }}" method="GET" class="row align-items-end">
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: data.labels,
+                labels: labels,
                 datasets: [
                     {
                         label: 'Control',

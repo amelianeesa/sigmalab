@@ -459,7 +459,7 @@
         <div>
             <h5 class="fw-bold text-dark mb-1" style="font-size: 1.2rem;">Pengadaan Bahan / Barang</h5>
             <ol class="breadcrumb mb-0" style="font-size: 12px;">
-                <li class="breadcrumb-item"><a href="{{ route('barang.index') }}" class="text-decoration-none text-navy">Inventori Barang & Bahan</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('barang.index') }}" class="text-decoration-none text-primary">Inventori Barang & Bahan</a></li>
                 <li class="breadcrumb-item text-muted active">Pengadaan Barang & Bahan</li>
             </ol>
         </div>
