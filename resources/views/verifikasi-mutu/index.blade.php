@@ -5,13 +5,15 @@
 <style>
     .dashboard-container {
         padding: 4px 20px !important;
+        display: flex;
+        flex-direction: column;
+        min-height: calc(100vh - 90px);
     }
 
     .card-body {
         padding: 10px !important;
     }
 
-    /* ===== Tabel (sama dengan alat/index) ===== */
     .table th, .table td {
         padding: 8px 10px !important;
         vertical-align: middle !important;
@@ -28,7 +30,6 @@
         border-color: #dee2e6;
     }
 
-    /* ===== Tombol ===== */
     .btn-corporate-blue {
         background-color: #1b3152 !important;
         border-color: #1b3152 !important;
@@ -42,27 +43,69 @@
         color: #ffffff !important;
     }
 
-    /* ===== Pagination ===== */
     .pagination .page-link {
         font-size: 0.72rem;
         padding: 0.2rem 0.55rem;
     }
 
-    /* ===== Kartu pilar QC ===== */
-    .pillar-card .card-body { padding: 14px !important; }
+    .pillar-wrapper {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-bottom: 40px;
+    }
+    .pillar-wrapper .row {
+        width: 100%;
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .pillar-card .card-body {
+        padding: 36px 28px !important;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
     .pillar-card .pillar-icon {
-        width: 56px; height: 56px;
-        display: inline-flex; align-items: center; justify-content: center;
+        width: 92px;
+        height: 92px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         border-radius: 50%;
         background-color: rgba(27, 49, 82, 0.08);
         color: #1b3152;
-        font-size: 1.4rem;
+        font-size: 2.3rem;
+        margin-bottom: 18px;
+    }
+    .pillar-card .pillar-title {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+    .pillar-card .pillar-desc {
+        font-size: 0.85rem;
+        line-height: 1.55;
+        margin-bottom: 22px;
+    }
+    .pillar-card .pillar-btn {
+        font-size: 0.9rem;
+        padding: 8px 28px;
     }
     .pillar-card .pillar-actions {
-        display: flex; flex-direction: column; align-items: center; gap: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
     }
     .pillar-card .pillar-actions .badge {
-        font-size: 0.65rem; color: #1b3152; background: #fff; border: 1px solid #1b3152 !important;
+        font-size: 0.75rem;
+        padding: 6px 12px;
+        color: #1b3152;
+        background: #fff;
+        border: 1px solid #1b3152 !important;
     }
     .hover-lift {
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
@@ -76,23 +119,45 @@
         .hover-lift:hover { transform: none; }
     }
 
-    /* ===== Mobile ===== */
-    @media (max-width: 767.98px) {
-        .dashboard-container { padding: 4px 10px !important; }
+    @media (max-width: 991.98px) {
+        .pillar-card .card-body { padding: 28px 18px !important; }
+        .pillar-card .pillar-icon { width: 72px; height: 72px; font-size: 1.8rem; }
+        .pillar-card .pillar-title { font-size: 1.05rem; }
+        .pillar-card .pillar-desc { font-size: 0.78rem; }
+    }
 
-        /* Kartu pilar: ikon kiri, teks kanan, tombol + badge satu baris */
+    @media (max-width: 767.98px) {
+        .dashboard-container { padding: 4px 10px !important; min-height: 0; }
+
+        .pillar-wrapper { padding-bottom: 8px; align-items: flex-start; }
+
         .pillar-card .card-body {
-            display: flex; align-items: flex-start; gap: 12px; text-align: left !important;
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: flex-start;
+            gap: 12px;
+            text-align: left !important;
             padding: 12px !important;
         }
-        .pillar-card .pillar-icon { width: 44px; height: 44px; font-size: 1.1rem; flex-shrink: 0; margin: 0 !important; }
-        .pillar-card .pillar-body { flex: 1; min-width: 0; }
-        .pillar-card .pillar-body .card-text { margin-bottom: 8px !important; }
-        .pillar-card .pillar-actions {
-            flex-direction: row; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+        .pillar-card .pillar-icon {
+            width: 44px;
+            height: 44px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            margin: 0 !important;
         }
+        .pillar-card .pillar-body { flex: 1; min-width: 0; }
+        .pillar-card .pillar-title { font-size: 0.9rem; margin-bottom: 4px; }
+        .pillar-card .pillar-desc { font-size: 0.7rem; margin-bottom: 8px; }
+        .pillar-card .pillar-btn { font-size: 0.75rem; padding: 4px 12px; }
+        .pillar-card .pillar-actions {
+            flex-direction: row;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .pillar-card .pillar-actions .badge { font-size: 0.65rem; padding: 4px 8px; }
 
-        /* Tabel jadi kartu */
         .table-stack thead { display: none; }
         .table-stack, .table-stack tbody, .table-stack tr, .table-stack td { display: block; width: 100%; }
         .table-stack tbody tr {
@@ -112,14 +177,12 @@
         .table-stack td.td-aksi::before { display: none; }
         .table-stack td.td-empty { display: block; text-align: center !important; }
 
-        /* Pagination di tengah */
         #table-container nav,
         #table-container .pagination { justify-content: center; flex-wrap: wrap; }
     }
 </style>
 
 @php
-    // Notifikasi ringkas dari data yang tampil di daftar
     $kegiatanItems = $kegiatans->getCollection();
     $draftCount    = $kegiatanItems->where('status_kegiatan', 'draft')->count();
     $berjalanCount = $kegiatanItems->where('status_kegiatan', 'berjalan')->count();
@@ -127,7 +190,6 @@
 
 <div class="container-fluid dashboard-container" style="font-size: 0.82rem;">
 
-    {{-- HEADER --}}
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-2 mb-3 gap-2">
         <div>
             <h5 class="fw-bold mb-0" style="font-size: 1.1rem;">Portal Verifikasi Mutu (QC)</h5>
@@ -140,7 +202,6 @@
         </div>
     </div>
 
-    {{-- NOTIFIKASI --}}
     @if($draftCount > 0 || $berjalanCount > 0)
         <div class="alert alert-warning alert-dismissible fade show shadow-sm py-2 ps-3 pe-5 mb-3" role="alert" style="font-size: 0.8rem;">
             <i class="fas fa-exclamation-triangle me-1"></i> <strong>Perhatian!</strong>
@@ -154,71 +215,70 @@
         </div>
     @endif
 
-    {{-- 3 PILAR QC --}}
-    <div class="row g-2 g-md-3 mb-3">
+    <div class="pillar-wrapper">
+        <div class="row g-3 g-lg-4">
 
-        {{-- Kartu 1: QC In-House --}}
-        <div class="col-12 col-md-4">
-            <div class="card pillar-card h-100 shadow-sm border-0 hover-lift" style="cursor: pointer;" ondblclick="window.location='{{ route('qc-inhouse.index') }}'">
-                <div class="card-body text-center">
-                    <div class="pillar-icon mb-2"><i class="fas fa-vial"></i></div>
-                    <div class="pillar-body">
-                        <h6 class="card-title fw-bold mb-1" style="font-size: 0.9rem;">QC In-House</h6>
-                        <p class="card-text text-muted mb-3" style="font-size: 0.7rem;">Penyiapan Uji Homogenitas, Stabilitas, &amp; Target dari sampel internal.</p>
-                        <div class="pillar-actions">
-                            <a href="{{ route('qc-inhouse.index') }}" class="btn btn-corporate-blue btn-sm px-3 py-1 shadow-sm fw-semibold" style="font-size: 0.75rem;">
-                            Masuk <i class="fas fa-arrow-right ms-1"></i>
-                        </a>
-                            <span class="badge bg-light border" style="font-size: 0.65rem; color: #1b3152; border-color: #1b3152 !important;">{{ $inhouseCount ?? 0 }} Sampel Aktif</span>
+            <div class="col-12 col-md-4">
+                <div class="card pillar-card h-100 shadow-sm border-0 hover-lift" style="cursor: pointer;" ondblclick="window.location='{{ route('qc-inhouse.index') }}'">
+                    <div class="card-body text-center">
+                        <div class="pillar-icon"><i class="fas fa-vial"></i></div>
+                        <div class="pillar-body">
+                            <h6 class="card-title pillar-title fw-bold">QC In-House</h6>
+                            <p class="card-text pillar-desc text-muted">Penyiapan Uji Homogenitas, Stabilitas, &amp; Target dari sampel internal.</p>
+                            <div class="pillar-actions">
+                                <a href="{{ route('qc-inhouse.index') }}" class="btn btn-corporate-blue btn-sm pillar-btn shadow-sm fw-semibold">
+                                    Masuk <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
+                                <span class="badge bg-light border">{{ $inhouseCount ?? 0 }} Sampel Aktif</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        {{-- Kartu 2: QC CRM --}}
-        <div class="col-12 col-md-4">
-            <div class="card pillar-card h-100 shadow-sm border-0 hover-lift" style="cursor: pointer;" ondblclick="window.location='{{ route('qc-crm.index') }}'">
-                <div class="card-body text-center">
-                    <div class="pillar-icon mb-2"><i class="fas fa-certificate"></i></div>
-                    <div class="pillar-body">
-                        <h6 class="card-title fw-bold mb-1" style="font-size: 0.9rem;">QC CRM</h6>
-                        <p class="card-text text-muted mb-3" style="font-size: 0.7rem;">Pengujian berdasarkan sertifikat (True Value) Certified Reference Material.</p>
-                        <div class="pillar-actions">
-                            <a href="{{ route('qc-crm.index') }}" class="btn btn-corporate-blue btn-sm px-3 py-1 shadow-sm fw-semibold" style="font-size: 0.75rem;">
-                            Masuk <i class="fas fa-arrow-right ms-1"></i>
-                        </a>
-                            <span class="badge bg-light border" style="font-size: 0.65rem; color: #1b3152; border-color: #1b3152 !important;">{{ \App\Models\QcCrm::count() ?? 0 }} Kegiatan</span>
+            <div class="col-12 col-md-4">
+                <div class="card pillar-card h-100 shadow-sm border-0 hover-lift" style="cursor: pointer;" ondblclick="window.location='{{ route('qc-crm.index') }}'">
+                    <div class="card-body text-center">
+                        <div class="pillar-icon"><i class="fas fa-certificate"></i></div>
+                        <div class="pillar-body">
+                            <h6 class="card-title pillar-title fw-bold">QC CRM</h6>
+                            <p class="card-text pillar-desc text-muted">Pengujian berdasarkan sertifikat (True Value) Certified Reference Material.</p>
+                            <div class="pillar-actions">
+                                <a href="{{ route('qc-crm.index') }}" class="btn btn-corporate-blue btn-sm pillar-btn shadow-sm fw-semibold">
+                                    Masuk <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
+                                <span class="badge bg-light border">{{ \App\Models\QcCrm::count() ?? 0 }} Kegiatan</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        {{-- Kartu 3: QC Uji Banding --}}
-        <div class="col-12 col-md-4">
-            <div class="card pillar-card h-100 shadow-sm border-0 hover-lift" style="cursor: pointer;" ondblclick="window.location='{{ route('qc-uji-banding.index') }}'">
-                <div class="card-body text-center">
-                    <div class="pillar-icon mb-2"><i class="fas fa-globe"></i></div>
-                    <div class="pillar-body">
-                        <h6 class="card-title fw-bold mb-1" style="font-size: 0.9rem;">QC Uji Banding</h6>
-                        <p class="card-text text-muted mb-3" style="font-size: 0.7rem;">Komparasi hasil uji lab dengan vendor / Interlaboratory.</p>
-                        <div class="pillar-actions">
-                            <a href="{{ route('qc-uji-banding.index') }}" class="btn btn-corporate-blue btn-sm px-3 py-1 shadow-sm fw-semibold" style="font-size: 0.75rem;">
-                            Masuk <i class="fas fa-arrow-right ms-1"></i>
-                        </a>
-                            <span class="badge bg-light border" style="font-size: 0.65rem; color: #1b3152; border-color: #1b3152 !important;">{{ \App\Models\QcUjiBanding::count() ?? 0 }} Program Terdaftar</span>
+            <div class="col-12 col-md-4">
+                <div class="card pillar-card h-100 shadow-sm border-0 hover-lift" style="cursor: pointer;" ondblclick="window.location='{{ route('qc-uji-banding.index') }}'">
+                    <div class="card-body text-center">
+                        <div class="pillar-icon"><i class="fas fa-globe"></i></div>
+                        <div class="pillar-body">
+                            <h6 class="card-title pillar-title fw-bold">QC Uji Banding</h6>
+                            <p class="card-text pillar-desc text-muted">Komparasi hasil uji lab dengan vendor / Interlaboratory.</p>
+                            <div class="pillar-actions">
+                                <a href="{{ route('qc-uji-banding.index') }}" class="btn btn-corporate-blue btn-sm pillar-btn shadow-sm fw-semibold">
+                                    Masuk <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
+                                <span class="badge bg-light border">{{ \App\Models\QcUjiBanding::count() ?? 0 }} Program Terdaftar</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
-
-    <hr class="my-3">
+</div>
+@endsection
 
     {{-- JUDUL DAFTAR KEGIATAN --}}
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+    {{-- <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
         <div>
             <h5 class="fw-bold mb-0" style="font-size: 1.1rem;">Daftar Kegiatan Pengujian (Harian)</h5>
             <p class="text-muted mb-0" style="font-size: 0.72rem;">Lakukan batching pengujian harian untuk sampel reguler, In-House, dan CRM di sini.</p>
@@ -230,10 +290,10 @@
                 </a>
             @endcan
         </div>
-    </div>
+    </div> --}}
 
     {{-- FILTER + TABEL --}}
-    <div class="card mb-4 border-0 shadow-sm">
+    {{-- <div class="card mb-4 border-0 shadow-sm">
         <div class="card-body">
 
             <form action="{{ route('verifikasi-mutu.index') }}" method="GET" class="row g-2 mb-3 align-items-center live-search-form" data-target="#table-container">
@@ -312,6 +372,4 @@
                 </div>
             </div>
         </div>
-    </div>
-</div>
-@endsection
+    </div> --}}
