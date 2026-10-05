@@ -4,16 +4,68 @@
 @section('content')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
 <style>
+    .pu-page { font-size: 0.8rem; }
     .pu-container { padding-top: 2px; }
     .pu-breadcrumb { font-size: 0.72rem; }
-    .pu-title { font-size: 1.1rem; }
+    .pu-title { font-size: 1.05rem; font-weight: 700; color: #1b3152; margin-bottom: 0.6rem; }
 
+    .pu-page .card { border: 0; border-radius: 0.5rem; }
+    .pu-page .card-body { padding: 0.75rem; }
     .card-header-custom {
         background-color: #1b3152 !important;
         color: #ffffff !important;
         font-weight: 600;
         font-size: 0.85rem !important;
+        padding: 0.5rem 0.9rem !important;
     }
+
+    .pu-page .text-primary { color: #1b3152 !important; }
+    .pu-page .text-secondary { color: #1b3152 !important; }
+
+    .pu-page .form-label {
+        font-size: 0.75rem !important;
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+    }
+    .pu-page .form-control,
+    .pu-page .form-select,
+    .pu-page .form-control-sm,
+    .pu-page .form-select-sm {
+        font-size: 0.8rem !important;
+        padding: 0.3rem 0.55rem;
+    }
+    .pu-page .form-control:focus,
+    .pu-page .form-select:focus {
+        border-color: #1b3152;
+        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+    }
+    .pu-page .form-text,
+    .pu-page small.text-muted { font-size: 0.7rem !important; }
+
+    .pu-page .alert {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.7rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .pu-page .btn,
+    .modal .btn {
+        font-size: 0.78rem !important;
+        padding: 0.32rem 0.85rem !important;
+        font-weight: 600;
+        border-radius: 0.375rem;
+        transition: background-color .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease, transform .15s ease;
+    }
+    .pu-page .btn:hover,
+    .modal .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18);
+    }
+    .pu-page .btn:active,
+    .modal .btn:active { transform: none; box-shadow: none; }
+    .pu-page .btn.btn-icon,
+    .modal .btn.btn-icon { padding: 0.2rem 0.5rem !important; }
+
     .btn-corporate-blue {
         background-color: #1b3152 !important;
         border-color: #1b3152 !important;
@@ -26,22 +78,76 @@
         border-color: #14253e !important;
         color: #ffffff !important;
     }
+    .btn-outline-corporate {
+        background-color: transparent !important;
+        border: 1px solid #1b3152 !important;
+        color: #1b3152 !important;
+    }
+    .btn-outline-corporate:hover,
+    .btn-outline-corporate:focus,
+    .btn-outline-corporate:active {
+        background-color: #1b3152 !important;
+        border-color: #1b3152 !important;
+        color: #ffffff !important;
+    }
 
-    .form-label { font-size: 0.75rem !important; font-weight: 600; }
-    .form-control, .form-select,
-    .form-control-sm, .form-select-sm { font-size: 0.8rem !important; }
-    .form-text, small.text-muted { font-size: 0.7rem !important; }
+    .pu-page .nav-tabs { flex-wrap: wrap; margin-bottom: 0; border-bottom: 1px solid #dee2e6; }
+    .pu-page .nav-tabs { border-bottom: 2px solid #1b3152; }
+    .pu-page .nav-tabs .nav-link {
+        font-size: 0.78rem;
+        padding: 0.45rem 0.85rem;
+        color: #1b3152;
+        background-color: #eef2f8;
+        font-weight: 700;
+        border: 1px solid #d5deee;
+        border-bottom: 0;
+        margin-right: 3px;
+        margin-bottom: 0;
+        border-radius: 0.375rem 0.375rem 0 0;
+    }
+    .pu-page .nav-tabs .nav-link:hover {
+        background-color: #dde5f0;
+        color: #14253e;
+    }
+    .pu-page .nav-tabs .nav-link:focus,
+    .pu-page .nav-tabs .nav-link:focus-visible {
+        outline: none;
+        box-shadow: none;
+    }
+    .pu-page .nav-tabs .nav-link.active {
+        background-color: #1b3152;
+        border-color: #1b3152;
+        color: #ffffff;
+    }
+    .pu-tab-content {
+        border: 1px solid #dee2e6;
+        border-top: 0;
+        background: #fff;
+        padding: 0.9rem;
+        margin-bottom: 0.9rem;
+    }
 
-    .nav-tabs { flex-wrap: wrap; }
-    .nav-tabs .nav-link { font-size: 0.8rem; }
+    .pu-table-crm { font-size: 0.78rem; min-width: 640px; }
+    .pu-table-langkah { min-width: 480px; }
+    .pu-page .table th,
+    .pu-page .table td,
+    .modal .table th,
+    .modal .table td { padding: 0.35rem 0.5rem; vertical-align: middle; }
+    .pu-page .table thead th,
+    .modal .table thead th {
+        background-color: #1b3152 !important;
+        color: #fff !important;
+        font-size: 0.75rem;
+        border-color: rgba(255, 255, 255, 0.35) !important;
+    }
 
     .flatpickr-input { font-size: 0.8rem !important; }
     .flatpickr-calendar { font-size: 0.85rem; }
 
     .pu-modal-header { background-color: #1b3152 !important; color: #ffffff !important; padding: 0.5rem 0.9rem; }
     .pu-modal-header .modal-title { font-size: 0.9rem !important; }
-    .modal .modal-body { font-size: 0.8rem; }
-    .modal .modal-footer { padding: 0.5rem 0.9rem; }
+    .modal .modal-body { font-size: 0.8rem; padding: 0.9rem; }
+    .modal .modal-footer { padding: 0.5rem 0.9rem; gap: 0.4rem; }
 
     .filter-select {
         position: relative;
@@ -55,7 +161,7 @@
         background-color: #fff;
         border: 1px solid #ced4da;
         border-radius: 0.375rem;
-        padding: 0.375rem 0.65rem;
+        padding: 0.3rem 0.55rem;
         font-size: 0.8rem;
         cursor: pointer;
         text-align: left;
@@ -71,8 +177,8 @@
         flex-shrink: 0;
     }
     .filter-select.open .filter-select-trigger {
-        border-color: #86b7fe;
-        box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15);
+        border-color: #1b3152;
+        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
     }
     .filter-select-options {
         display: none;
@@ -91,42 +197,41 @@
     }
     .filter-select.open .filter-select-options { display: block; }
     .filter-select-options li { padding: 6px 10px; font-size: 0.8rem; cursor: pointer; }
-    .filter-select-options li:hover { background-color: #f1f3f5; }
+    .filter-select-options li:hover { background-color: #eef2f8; }
     .filter-select-options li.selected { background-color: #1b3152; color: #fff; }
-
-    .pu-form-actions .btn {
-        font-size: 0.8rem !important;
-        padding: 0.4rem 1rem !important;
-    }
-    .input-group .btn {
-        font-size: 0.8rem !important;
-        padding: 0.4rem 0.9rem !important;
-    }
 
     .swal2-popup { font-size: 0.9rem !important; }
     .swal2-title { font-size: 1.1rem !important; }
     .swal2-html-container { font-size: 0.82rem !important; }
 
+    @media (max-width: 767.98px) {
+        .pu-title { font-size: 0.95rem; }
+        .pu-page .card-body { padding: 0.6rem; }
+        .pu-tab-content { padding: 0.65rem; }
+        .pu-page .nav-tabs .nav-link { font-size: 0.72rem; padding: 0.4rem 0.6rem; }
+    }
+
     @media (max-width: 575.98px) {
         .pu-form-actions { flex-direction: column-reverse; }
         .pu-form-actions a, .pu-form-actions button { width: 100%; text-align: center; }
+        .pu-crm-head .btn { width: 100%; }
     }
 </style>
 
-<div class="container-fluid px-4 pu-container">
+<div class="container-fluid px-2 px-md-4 pu-container pu-page">
     <ol class="breadcrumb mb-1 mt-1 pu-breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
         <li class="breadcrumb-item"><a href="{{ route('kegiatan.index') }}" class="text-decoration-none">Verifikasi Mutu</a></li>
         <li class="breadcrumb-item"><a href="{{ route('parameter-uji.index') }}" class="text-decoration-none">Parameter Uji</a></li>
         <li class="breadcrumb-item active">Edit</li>
     </ol>
-    <h4 class="fw-bold text-dark mb-3 pu-title">Edit Parameter Uji</h4>
+    <h4 class="pu-title">Edit Parameter Uji</h4>
 
-    <div class="card mb-4 shadow-sm border-0">
+    <div class="card mb-3 shadow-sm">
         <div class="card-header card-header-custom"><i class="fas fa-edit me-2"></i>Form Edit Parameter Uji</div>
         <div class="card-body">
             @if ($errors->any())
-                <div class="alert alert-danger py-2" style="font-size: 0.8rem;">
+                <div class="alert alert-danger">
                     <ul class="mb-0 ps-3">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -139,178 +244,174 @@
                 @csrf
                 @method('PUT')
 
-                <div class="row mb-3">
-                    <div class="col-md-6 mb-3">
+                <div class="row g-2 mb-2">
+                    <div class="col-12 col-md-6">
                         <label class="form-label fw-bold">Nama Parameter <span class="text-danger">*</span></label>
                         <input type="text" name="nama_parameter" class="form-control" value="{{ old('nama_parameter', $parameterUji->nama_parameter) }}" required maxlength="50">
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-12 col-md-6">
                         <label class="form-label fw-bold">Satuan <span class="text-danger">*</span></label>
                         <input type="text" name="satuan" class="form-control" value="{{ old('satuan', $parameterUji->satuan) }}" required maxlength="20">
                     </div>
                 </div>
 
-                <ul class="nav nav-tabs mb-4" id="configTabs" role="tablist">
+                <ul class="nav nav-tabs" id="configTabs" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link active fw-bold" id="inhouse-tab" data-bs-toggle="tab" href="#inhouse" role="tab">In-House Control & Pengaturan Umum</a>
+                        <a class="nav-link active" id="inhouse-tab" data-bs-toggle="tab" href="#inhouse" role="tab">In-House Control & Pengaturan Umum</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link fw-bold" id="crm-tab" data-bs-toggle="tab" href="#crm" role="tab">Sertifikat Pabrik (CRM)</a>
+                        <a class="nav-link" id="crm-tab" data-bs-toggle="tab" href="#crm" role="tab">Sertifikat Pabrik (CRM)</a>
                     </li>
                 </ul>
-                <div class="tab-content border-start border-end border-bottom p-3 p-md-4 mb-4" id="configTabsContent" style="margin-top: -25px; background: white;">
+                <div class="tab-content pu-tab-content" id="configTabsContent">
                     <div class="tab-pane fade show active" id="inhouse" role="tabpanel">
 
-                <div class="card bg-light mb-3 border-0">
-                    <div class="card-body py-2">
-                        <p class="mb-2 text-muted fw-bold" style="font-size: 0.8rem;"><i class="fas fa-chart-line"></i> Input Data Statistik (In-House)</p>
-                        <div class="alert alert-info py-1 px-2 mb-2" style="font-size: 0.75rem;">
-                            <i class="fas fa-info-circle me-1"></i> Nilai <strong>Mean</strong> dan <strong>SD</strong> didapatkan secara otomatis dari hasil <strong>Uji Homogenitas</strong>. Jika dilakukan uji homogenitas ulang, maka nilai-nilai ini akan ikut berubah secara otomatis.
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold text-primary">Mean (Rata-rata)</label>
-                                <input type="number" step="0.0001" name="mean" id="inputMean" class="form-control" value="{{ old('mean', $parameterUji->mean ? number_format($parameterUji->mean, 4, '.', '') : '') }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold text-primary">SD (Standard Deviation)</label>
-                                <input type="number" step="0.0001" name="sd" id="inputSd" class="form-control" value="{{ old('sd', $parameterUji->sd ? number_format($parameterUji->sd, 4, '.', '') : '') }}">
-                            </div>
-                        </div>
+                        <div class="card bg-light mb-2 border-0">
+                            <div class="card-body">
+                                <p class="mb-2 fw-bold" style="font-size: 0.8rem; color: #1b3152;"><i class="fas fa-chart-line me-1"></i> Input Data Statistik (In-House)</p>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-1"></i> Nilai <strong>Mean</strong> dan <strong>SD</strong> didapatkan secara otomatis dari hasil <strong>Uji Homogenitas</strong>. Jika dilakukan uji homogenitas ulang, maka nilai-nilai ini akan ikut berubah secara otomatis.
+                                </div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label fw-bold text-primary">Mean (Rata-rata)</label>
+                                        <input type="number" step="0.0001" name="mean" id="inputMean" class="form-control" value="{{ old('mean', $parameterUji->mean ? number_format($parameterUji->mean, 4, '.', '') : '') }}">
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label fw-bold text-primary">SD (Standard Deviation)</label>
+                                        <input type="number" step="0.0001" name="sd" id="inputSd" class="form-control" value="{{ old('sd', $parameterUji->sd ? number_format($parameterUji->sd, 4, '.', '') : '') }}">
+                                    </div>
+                                </div>
 
-                        <div class="row g-2">
-                            <div class="col-6 col-md">
-                                <label class="form-label text-muted">LCL (-3 SD)</label>
-                                <input type="text" id="calcLcl" name="lcl" class="form-control form-control-sm bg-white" readonly value="{{ old('lcl', $parameterUji->lcl ? number_format($parameterUji->lcl, 4, '.', '') : '') }}">
-                            </div>
-                            <div class="col-6 col-md">
-                                <label class="form-label text-muted">LWL (-2 SD)</label>
-                                <input type="text" id="calcUwlBawah" name="uwl_bawah" class="form-control form-control-sm bg-white" readonly value="{{ old('uwl_bawah', $parameterUji->uwl_bawah ? number_format($parameterUji->uwl_bawah, 4, '.', '') : '') }}">
-                            </div>
-                            <div class="col-6 col-md">
-                                <label class="form-label text-muted">UWL (+2 SD)</label>
-                                <input type="text" id="calcUwlAtas" name="uwl_atas" class="form-control form-control-sm bg-white" readonly value="{{ old('uwl_atas', $parameterUji->uwl_atas ? number_format($parameterUji->uwl_atas, 4, '.', '') : '') }}">
-                            </div>
-                            <div class="col-6 col-md">
-                                <label class="form-label text-muted">UCL (+3 SD)</label>
-                                <input type="text" id="calcUcl" name="ucl" class="form-control form-control-sm bg-white" readonly value="{{ old('ucl', $parameterUji->ucl ? number_format($parameterUji->ucl, 4, '.', '') : '') }}">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold">Nilai Acuan <span class="text-danger">*</span></label>
-                        <input type="number" step="0.0001" name="nilai_acuan" id="inputAcuan" class="form-control" value="{{ old('nilai_acuan', number_format($parameterUji->nilai_acuan, 4, '.', '')) }}" required>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold">Batas Bawah <span class="text-danger">*</span></label>
-                        <input type="number" step="0.0001" name="batas_bawah" id="inputBatasBawah" class="form-control" value="{{ old('batas_bawah', number_format($parameterUji->batas_bawah, 4, '.', '')) }}" required>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold">Batas Atas <span class="text-danger">*</span></label>
-                        <input type="number" step="0.0001" name="batas_atas" id="inputBatasAtas" class="form-control" value="{{ old('batas_atas', number_format($parameterUji->batas_atas, 4, '.', '')) }}" required>
-                    </div>
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold">Metode / Kriteria</label>
-                        <input type="text" name="metode_kriteria" class="form-control" value="{{ old('metode_kriteria', $parameterUji->metode_kriteria) }}" maxlength="50">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Rumus Kalkulasi Nilai Akhir</label>
-                        <div class="input-group">
-                            <input type="text" name="rumus_kalkulasi" class="form-control" value="{{ old('rumus_kalkulasi', $parameterUji->rumus_kalkulasi) }}" placeholder="Contoh: (M1 - M2) / M3 * 100">
-                            <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#modalLangkahKalkulasi">
-                                <i class="fas fa-list-ol"></i> Detail Rumus
-                            </button>
-                        </div>
-                        <small class="text-muted d-block mt-1">Gunakan nama variabel input (contoh: <code>M1</code>, <code>M2</code>, <code>Avg_C</code>).</small>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold text-danger">Formula Toleransi Duplo</label>
-                        <input type="text" name="toleransi_duplo" class="form-control" value="{{ old('toleransi_duplo', $parameterUji->toleransi_duplo) }}" placeholder="Contoh: 0.09 + (0.1 * Avg_M)">
-                        <small class="text-muted d-block mt-1">Gunakan angka statis (contoh: <code>1.5</code>) atau formula matematika.</small>
-                    </div>
-                </div>
-
-                <!-- Modal Langkah Kalkulasi -->
-                <div class="modal fade" id="modalLangkahKalkulasi" tabindex="-1" aria-labelledby="modalLangkahKalkulasiLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header pu-modal-header">
-                                <h5 class="modal-title" id="modalLangkahKalkulasiLabel"><i class="fas fa-list-ol me-2"></i> Detail Langkah Kalkulasi Per Kolom</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p class="text-muted small">Jika Anda mengisi langkah kalkulasi di bawah ini, mesin akan menghitung variabel secara berurutan sebelum mencapai Nilai Akhir. Sangat berguna untuk perhitungan yang bertahap (multi-step).</p>
-                                <div class="table-responsive mb-2">
-                                    <table class="table table-bordered table-sm" id="langkahTable">
-                                        <thead class="bg-light">
-                                            <tr>
-                                                <th width="35%">Nama Variabel Output</th>
-                                                <th width="55%">Rumus Matematika</th>
-                                                <th width="10%" class="text-center">Aksi</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @php $langkahs = old('langkah_kalkulasi', $parameterUji->langkah_kalkulasi ?? []); @endphp
-                                            @if(is_array($langkahs) && count($langkahs) > 0)
-                                                @foreach($langkahs as $index => $langkah)
-                                                <tr>
-                                                    <td><input type="text" name="langkah_kalkulasi[{{$index}}][var]" class="form-control form-control-sm" value="{{ $langkah['var'] ?? '' }}" placeholder="Contoh: M2_D1"></td>
-                                                    <td><input type="text" name="langkah_kalkulasi[{{$index}}][rumus]" class="form-control form-control-sm" value="{{ $langkah['rumus'] ?? '' }}" placeholder="Contoh: M1_D1 + A_D1"></td>
-                                                    <td class="text-center"><button type="button" class="btn btn-sm btn-danger btn-remove-langkah"><i class="fas fa-trash"></i></button></td>
-                                                </tr>
-                                                @endforeach
-                                            @endif
-                                        </tbody>
-                                    </table>
-                                    <button type="button" class="btn btn-sm btn-success" id="btnAddLangkah"><i class="fas fa-plus"></i> Tambah Baris Rumus</button>
+                                <div class="row g-2">
+                                    <div class="col-6 col-md">
+                                        <label class="form-label text-muted">LCL (-3 SD)</label>
+                                        <input type="text" id="calcLcl" name="lcl" class="form-control form-control-sm bg-white" readonly value="{{ old('lcl', $parameterUji->lcl ? number_format($parameterUji->lcl, 4, '.', '') : '') }}">
+                                    </div>
+                                    <div class="col-6 col-md">
+                                        <label class="form-label text-muted">LWL (-2 SD)</label>
+                                        <input type="text" id="calcUwlBawah" name="uwl_bawah" class="form-control form-control-sm bg-white" readonly value="{{ old('uwl_bawah', $parameterUji->uwl_bawah ? number_format($parameterUji->uwl_bawah, 4, '.', '') : '') }}">
+                                    </div>
+                                    <div class="col-6 col-md">
+                                        <label class="form-label text-muted">UWL (+2 SD)</label>
+                                        <input type="text" id="calcUwlAtas" name="uwl_atas" class="form-control form-control-sm bg-white" readonly value="{{ old('uwl_atas', $parameterUji->uwl_atas ? number_format($parameterUji->uwl_atas, 4, '.', '') : '') }}">
+                                    </div>
+                                    <div class="col-6 col-md">
+                                        <label class="form-label text-muted">UCL (+3 SD)</label>
+                                        <input type="text" id="calcUcl" name="ucl" class="form-control form-control-sm bg-white" readonly value="{{ old('ucl', $parameterUji->ucl ? number_format($parameterUji->ucl, 4, '.', '') : '') }}">
+                                    </div>
                                 </div>
                             </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+                        </div>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-bold">Nilai Acuan <span class="text-danger">*</span></label>
+                                <input type="number" step="0.0001" name="nilai_acuan" id="inputAcuan" class="form-control" value="{{ old('nilai_acuan', number_format($parameterUji->nilai_acuan, 4, '.', '')) }}" required>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-bold">Batas Bawah <span class="text-danger">*</span></label>
+                                <input type="number" step="0.0001" name="batas_bawah" id="inputBatasBawah" class="form-control" value="{{ old('batas_bawah', number_format($parameterUji->batas_bawah, 4, '.', '')) }}" required>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-bold">Batas Atas <span class="text-danger">*</span></label>
+                                <input type="number" step="0.0001" name="batas_atas" id="inputBatasAtas" class="form-control" value="{{ old('batas_atas', number_format($parameterUji->batas_atas, 4, '.', '')) }}" required>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="row mb-4">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label fw-bold">Status Aktif</label>
-                        @php $statusAktifSelected = old('status_aktif', $parameterUji->status_aktif); @endphp
-                        <div class="filter-select" id="selectStatusAktif">
-                            <input type="hidden" name="status_aktif" value="{{ $statusAktifSelected }}">
-                            <button type="button" class="filter-select-trigger">{{ $statusAktifSelected == 1 ? 'Aktif' : 'Nonaktif' }}</button>
-                            <ul class="filter-select-options">
-                                <li data-value="1" class="{{ $statusAktifSelected == 1 ? 'selected' : '' }}">Aktif</li>
-                                <li data-value="0" class="{{ $statusAktifSelected == 0 ? 'selected' : '' }}">Nonaktif</li>
-                            </ul>
+                        <div class="row g-2 mb-2">
+                            <div class="col-12 col-md-4">
+                                <label class="form-label fw-bold">Metode / Kriteria</label>
+                                <input type="text" name="metode_kriteria" class="form-control" value="{{ old('metode_kriteria', $parameterUji->metode_kriteria) }}" maxlength="50">
+                            </div>
+                            <div class="col-12 col-md-8">
+                                <label class="form-label fw-bold">Rumus Kalkulasi Nilai Akhir</label>
+                                <div class="input-group">
+                                    <input type="text" name="rumus_kalkulasi" class="form-control" value="{{ old('rumus_kalkulasi', $parameterUji->rumus_kalkulasi) }}" placeholder="Contoh: (M1 - M2) / M3 * 100">
+                                    <button class="btn btn-outline-corporate" type="button" data-bs-toggle="modal" data-bs-target="#modalLangkahKalkulasi">
+                                        <i class="fas fa-list-ol"></i> Detail Rumus
+                                    </button>
+                                </div>
+                                <small class="text-muted d-block mt-1">Gunakan nama variabel input (contoh: <code>M1</code>, <code>M2</code>, <code>Avg_C</code>).</small>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-bold text-danger">Formula Toleransi Duplo</label>
+                                <input type="text" name="toleransi_duplo" class="form-control" value="{{ old('toleransi_duplo', $parameterUji->toleransi_duplo) }}" placeholder="Contoh: 0.09 + (0.1 * Avg_M)">
+                                <small class="text-muted d-block mt-1">Gunakan angka statis (contoh: <code>1.5</code>) atau formula matematika.</small>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-bold">Status Aktif</label>
+                                @php $statusAktifSelected = old('status_aktif', $parameterUji->status_aktif); @endphp
+                                <div class="filter-select" id="selectStatusAktif">
+                                    <input type="hidden" name="status_aktif" value="{{ $statusAktifSelected }}">
+                                    <button type="button" class="filter-select-trigger">{{ $statusAktifSelected == 1 ? 'Aktif' : 'Nonaktif' }}</button>
+                                    <ul class="filter-select-options">
+                                        <li data-value="1" class="{{ $statusAktifSelected == 1 ? 'selected' : '' }}">Aktif</li>
+                                        <li data-value="0" class="{{ $statusAktifSelected == 0 ? 'selected' : '' }}">Nonaktif</li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
 
-                    </div> <!-- end inhouse tab -->
+                        <div class="modal fade" id="modalLangkahKalkulasi" tabindex="-1" aria-labelledby="modalLangkahKalkulasiLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header pu-modal-header">
+                                        <h5 class="modal-title" id="modalLangkahKalkulasiLabel"><i class="fas fa-list-ol me-2"></i> Detail Langkah Kalkulasi Per Kolom</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p class="text-muted small mb-2">Jika Anda mengisi langkah kalkulasi di bawah ini, mesin akan menghitung variabel secara berurutan sebelum mencapai Nilai Akhir. Sangat berguna untuk perhitungan yang bertahap (multi-step).</p>
+                                        <div class="table-responsive mb-2">
+                                            <table class="table table-bordered table-sm mb-2 pu-table-langkah" id="langkahTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th width="35%">Nama Variabel Output</th>
+                                                        <th width="55%">Rumus Matematika</th>
+                                                        <th width="10%" class="text-center">Aksi</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @php $langkahs = old('langkah_kalkulasi', $parameterUji->langkah_kalkulasi ?? []); @endphp
+                                                    @if(is_array($langkahs) && count($langkahs) > 0)
+                                                        @foreach($langkahs as $index => $langkah)
+                                                        <tr>
+                                                            <td><input type="text" name="langkah_kalkulasi[{{$index}}][var]" class="form-control form-control-sm" value="{{ $langkah['var'] ?? '' }}" placeholder="Contoh: M2_D1"></td>
+                                                            <td><input type="text" name="langkah_kalkulasi[{{$index}}][rumus]" class="form-control form-control-sm" value="{{ $langkah['rumus'] ?? '' }}" placeholder="Contoh: M1_D1 + A_D1"></td>
+                                                            <td class="text-center"><button type="button" class="btn btn-outline-danger btn-icon btn-remove-langkah"><i class="fas fa-trash"></i></button></td>
+                                                        </tr>
+                                                        @endforeach
+                                                    @endif
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <button type="button" class="btn btn-corporate-blue" id="btnAddLangkah"><i class="fas fa-plus"></i> Tambah Baris Rumus</button>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
 
                     <div class="tab-pane fade" id="crm" role="tabpanel">
-                        <p class="mb-3 text-muted fw-bold" style="font-size: 0.8rem;"><i class="fas fa-certificate"></i> Pengaturan Nilai Sertifikat per Lot CRM</p>
-                        <div class="alert alert-warning py-1 px-2 mb-3" style="font-size: 0.75rem;">
+                        <p class="mb-2 fw-bold" style="font-size: 0.8rem; color: #1b3152;"><i class="fas fa-certificate me-1"></i> Pengaturan Nilai Sertifikat per Lot CRM</p>
+                        <div class="alert alert-warning">
                             <span>Anda dapat mengisi nilai Sertifikat (Cert Value) dan Uncertainty (U) untuk masing-masing kode Lot CRM yang saat ini aktif. Nilai ini akan digunakan untuk mengevaluasi akurasi hasil uji.</span>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                            <h6 class="m-0 font-weight-bold text-secondary" style="font-size: 0.85rem;">Daftar Botol / Lot CRM</h6>
-                            <button type="button" class="btn btn-sm btn-corporate-blue shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#modalAddCrm">
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2 pu-crm-head">
+                            <h6 class="m-0 fw-bold" style="font-size: 0.85rem; color: #1b3152;">Daftar Botol / Lot CRM</h6>
+                            <button type="button" class="btn btn-corporate-blue shadow-sm" data-bs-toggle="modal" data-bs-target="#modalAddCrm">
                                 <i class="fas fa-plus"></i> Tambah Lot CRM
                             </button>
                         </div>
 
                         @if(isset($katalogCrmList) && $katalogCrmList->count() > 0)
                             <div class="table-responsive">
-                                <table class="table table-sm table-bordered" style="font-size: 0.8rem;">
-                                    <thead class="table-light">
+                                <table class="table table-sm table-bordered mb-0 pu-table-crm">
+                                    <thead>
                                         <tr>
                                             <th>Kode Lot CRM</th>
                                             <th>Produsen / Jenis</th>
@@ -330,32 +431,30 @@
                                                 </td>
                                                 <td>
                                                     <input type="number" step="0.0001" name="crm_sertifikat[{{ $katalog->id }}][cert_u]" class="form-control form-control-sm" value="{{ $sert && $sert->cert_u ? number_format($sert->cert_u, 4, '.', '') : '' }}" placeholder="Contoh: 0.0500">
-                                                  </td>
-                                                  <td class="text-center align-middle">
-                                                      <button type="button" class="btn btn-sm btn-outline-danger btn-delete-crm" data-id="{{ $katalog->id }}" data-lot="{{ $katalog->nomor_lot }}">
-                                                          <i class="fas fa-trash"></i>
-                                                      </button>
-                                                  </td>
-                                              </tr>
+                                                </td>
+                                                <td class="text-center align-middle">
+                                                    <button type="button" class="btn btn-outline-danger btn-icon btn-delete-crm" data-id="{{ $katalog->id }}" data-lot="{{ $katalog->nomor_lot }}">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
                                         @endforeach
                                     </tbody>
                                 </table>
                             </div>
                         @endif
-                    </div> <!-- end crm tab -->
-                </div> <!-- end tab content -->
+                    </div>
+                </div>
 
                 <div class="d-flex justify-content-end gap-2 pu-form-actions">
-                    <a href="{{ route('parameter-uji.index') }}" class="btn btn-secondary btn-sm px-3 py-2"><i class="fas fa-arrow-left"></i> Kembali</a>
-                    <button type="submit" class="btn btn-corporate-blue btn-sm px-3 py-2"><i class="fas fa-save"></i> Simpan Perubahan</button>
+                    <a href="{{ route('parameter-uji.index') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
+                    <button type="submit" class="btn btn-corporate-blue"><i class="fas fa-save"></i> Simpan Perubahan</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-
-<!-- Modal Tambah CRM -->
 <div class="modal fade" id="modalAddCrm" tabindex="-1" aria-labelledby="modalAddCrmLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow">
@@ -367,17 +466,17 @@
         <form id="formAddCrm">
           <input type="hidden" id="crm_parameter_uji_id" value="{{ $parameterUji->parameter_uji_id }}">
 
-          <div class="mb-3">
+          <div class="mb-2">
             <label class="form-label fw-bold">Nomor Lot / Kode Sampel <span class="text-danger">*</span></label>
             <input type="text" class="form-control" id="crm_nomor_lot" required>
           </div>
 
-          <div class="row">
-              <div class="col-md-6 mb-3">
+          <div class="row g-2 mb-2">
+              <div class="col-12 col-md-6">
                 <label class="form-label fw-bold">Produsen / Brand</label>
                 <input type="text" class="form-control" id="crm_produsen" placeholder="Contoh: Alpha Resources">
               </div>
-              <div class="col-md-6 mb-3">
+              <div class="col-12 col-md-6">
                 <label class="form-label fw-bold">Jenis / Tipe Material <span class="text-danger">*</span></label>
                 @php
                     $tipeMaterialLabels = [
@@ -400,13 +499,13 @@
               </div>
           </div>
 
-          <div class="row">
-              <div class="col-md-6 mb-3">
+          <div class="row g-2 mb-2">
+              <div class="col-12 col-md-6">
                 <label class="form-label fw-bold">Nilai Sertifikat (Cert Value)</label>
                 <input type="number" step="0.0001" class="form-control" id="crm_cert_value" placeholder="Contoh: 9.5000">
                 <small class="text-muted">Untuk parameter ini</small>
               </div>
-              <div class="col-md-6 mb-3">
+              <div class="col-12 col-md-6">
                 <label class="form-label fw-bold">Ketidakpastian (U)</label>
                 <input type="number" step="0.0001" class="form-control" id="crm_cert_u" placeholder="Contoh: 0.0500">
               </div>
@@ -419,8 +518,8 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
-        <button type="button" class="btn btn-corporate-blue btn-sm fw-semibold" id="btnSaveCrm">Simpan CRM</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-corporate-blue" id="btnSaveCrm">Simpan CRM</button>
       </div>
     </div>
   </div>
@@ -438,7 +537,6 @@ document.addEventListener('DOMContentLoaded', function() {
         disableMobile: true
     });
 
-    // Check if there is a hash in the URL and switch tab
     if(window.location.hash) {
         var hash = window.location.hash;
         var tabTrigger = document.querySelector('[data-bs-target="' + hash + '"]') || document.querySelector('[href="' + hash + '"]');
@@ -553,7 +651,6 @@ document.addEventListener('DOMContentLoaded', function() {
     inputMean.addEventListener('input', calculateLimits);
     inputSd.addEventListener('input', calculateLimits);
 
-    // Langkah Kalkulasi Dynamic Form
     const tableBody = document.querySelector('#langkahTable tbody');
     const btnAdd = document.getElementById('btnAddLangkah');
     let stepCount = {{ is_array(old('langkah_kalkulasi', $parameterUji->langkah_kalkulasi ?? [])) ? count(old('langkah_kalkulasi', $parameterUji->langkah_kalkulasi ?? [])) : 0 }};
@@ -563,7 +660,7 @@ document.addEventListener('DOMContentLoaded', function() {
         tr.innerHTML = `
             <td><input type="text" name="langkah_kalkulasi[${stepCount}][var]" class="form-control form-control-sm" placeholder="Contoh: M2_D1"></td>
             <td><input type="text" name="langkah_kalkulasi[${stepCount}][rumus]" class="form-control form-control-sm" placeholder="Contoh: M1_D1 + A_D1"></td>
-            <td class="text-center"><button type="button" class="btn btn-sm btn-danger btn-remove-langkah"><i class="fas fa-trash"></i></button></td>
+            <td class="text-center"><button type="button" class="btn btn-outline-danger btn-icon btn-remove-langkah"><i class="fas fa-trash"></i></button></td>
         `;
         tableBody.appendChild(tr);
         stepCount++;
@@ -662,4 +759,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-@endsection 
+@endsection

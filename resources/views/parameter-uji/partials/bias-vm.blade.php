@@ -1,7 +1,7 @@
 @include('parameter-uji.partials.limit-eval-alert')
 
 <div class="container-fluid">
-    <!-- Breadcrumb -->
+    {{-- <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
@@ -11,7 +11,7 @@
                 <li class="breadcrumb-item active" aria-current="page">{{ $selectedParameter->nama_parameter }}</li>
             @endif
         </ol>
-    </nav>
+    </nav> --}}
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0 text-gray-800">{{ ($jenisGrafik ?? 'in_house') == 'crm' ? 'Sertifikat Pabrik (CRM)' : 'Inhouse Control' }}: Bias Test VM (Pt)</h1>
