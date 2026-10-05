@@ -26,7 +26,6 @@
         color: #ffffff !important;
     }
 
-    /* Tombol di dalam header kartu: dibuat kontras dengan latar biru tua */
     .card-header-custom .btn-corporate-blue {
         background-color: #ffffff !important;
         border-color: #ffffff !important;
@@ -58,6 +57,17 @@
         vertical-align: middle !important;
     }
     .pagination .page-link { font-size: 0.75rem; padding: 0.25rem 0.6rem; }
+
+    .pu-action-btn {
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        padding: 0 !important;
+        border-radius: 6px;
+    }
 
     .filter-select {
         position: relative;
@@ -119,6 +129,19 @@
         font-size: 0.68rem;
         color: #6c757d;
         margin-bottom: 0.4rem;
+    }
+
+    .pu-confirm-modal .modal-content {
+        font-size: 0.82rem;
+        border-radius: 8px;
+    }
+    .pu-confirm-icon {
+        width: 56px;
+        height: 56px;
+        background-color: #fff8e6;
+        color: #f0ad4e;
+        font-size: 24px;
+        border: 2px solid #ffeeba;
     }
 
     @media (max-width: 768px) {
@@ -207,21 +230,19 @@
                                     @endif
                                 </td>
                                 <td class="text-center text-nowrap">
-                                    <a href="{{ route('parameter-uji.show', $item->parameter_uji_id) }}" class="btn btn-corporate-blue btn-sm" title="Detail"><i class="fas fa-eye"></i></a>
+                                    <div class="d-inline-flex align-items-center gap-1">
+                                        <a href="{{ route('parameter-uji.show', $item->parameter_uji_id) }}" class="btn btn-corporate-blue btn-sm pu-action-btn shadow-sm" title="Detail" aria-label="Detail"><i class="fas fa-eye"></i></a>
 
-                                    @can('update', $item)
-                                        <a href="{{ route('parameter-uji.edit', $item->parameter_uji_id) }}" class="btn btn-warning btn-sm" title="Edit"><i class="fas fa-edit"></i></a>
-                                    @endcan
+                                        @can('update', $item)
+                                            <a href="{{ route('parameter-uji.edit', $item->parameter_uji_id) }}" class="btn btn-warning btn-sm pu-action-btn shadow-sm" title="Edit" aria-label="Edit"><i class="fas fa-edit"></i></a>
+                                        @endcan
 
-                                    @can('delete', $item)
-                                        <form action="{{ route('parameter-uji.destroy', $item->parameter_uji_id) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="button" class="btn btn-danger btn-sm" title="Hapus / Nonaktifkan" data-confirm-delete="Jika parameter uji sudah digunakan di Hasil Uji, maka hanya akan di-nonaktifkan. Lanjutkan?">
+                                        @can('delete', $item)
+                                            <button type="button" class="btn btn-danger btn-sm pu-action-btn shadow-sm btn-hapus-pu" title="Hapus / Nonaktifkan" aria-label="Hapus / Nonaktifkan" data-action="{{ route('parameter-uji.destroy', $item->parameter_uji_id) }}" data-nama="{{ $item->nama_parameter }}">
                                                 <i class="fas fa-trash"></i>
                                             </button>
-                                        </form>
-                                    @endcan
+                                        @endcan
+                                    </div>
                                 </td>
                             </tr>
                             @empty
@@ -235,6 +256,31 @@
                 <div class="mt-3">
                     {{ $parameterUji->links('vendor.pagination.custom', ['size' => 'sm']) }}
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade pu-confirm-modal" id="modalHapusPU" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
+        <div class="modal-content border-0 shadow text-center p-3">
+            <div class="pt-2 pb-1">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center pu-confirm-icon">
+                    <i class="fas fa-exclamation"></i>
+                </div>
+            </div>
+            <div class="modal-body px-2 py-2">
+                <h5 class="fw-bold text-dark mb-1" style="font-size: 1rem;">Apakah Anda yakin?</h5>
+                <p class="text-muted mb-1" style="font-size: 0.78rem;">Parameter <strong id="hapusPuNama"></strong></p>
+                <p class="text-muted mb-0" style="font-size: 0.78rem;">Jika parameter uji sudah digunakan di Hasil Uji, maka hanya akan di-nonaktifkan. Lanjutkan?</p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center gap-2 pt-1 pb-2">
+                <form id="formHapusPU" action="" method="POST" class="d-inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger btn-sm py-1 px-3 fw-semibold rounded-2" style="font-size: 0.78rem;">Ya, Hapus!</button>
+                </form>
+                <button type="button" class="btn btn-secondary btn-sm py-1 px-3 fw-semibold rounded-2" data-bs-dismiss="modal" style="font-size: 0.78rem;">Batal</button>
             </div>
         </div>
     </div>
@@ -273,6 +319,20 @@
             document.querySelectorAll('.filter-select.open').forEach(function (wrapper) {
                 wrapper.classList.remove('open');
             });
+        });
+
+        const modalHapusEl = document.getElementById('modalHapusPU');
+        const formHapus = document.getElementById('formHapusPU');
+        const namaHapus = document.getElementById('hapusPuNama');
+        const modalHapus = bootstrap.Modal.getOrCreateInstance(modalHapusEl);
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.btn-hapus-pu');
+            if (!btn) return;
+            e.preventDefault();
+            formHapus.setAttribute('action', btn.dataset.action);
+            namaHapus.textContent = btn.dataset.nama;
+            modalHapus.show();
         });
     });
 </script>
