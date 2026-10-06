@@ -126,22 +126,6 @@
             padding: 2px 1px !important;
             font-size: 0.58rem !important;
         }
-        .table th.waktu-pagi-col,
-        .table th.waktu-sore-col,
-        .table th[style*="width: 90px;"] {
-            width: 58px !important;
-            min-width: 58px !important;
-            max-width: 58px !important;
-            padding: 1px !important;
-        }
-        .table td input[name="waktu_1"],
-        .table td input[name="waktu_2"] {
-            width: 54px !important;
-            min-width: 52px !important;
-            padding: 1px 0 !important;
-            font-size: 0.58rem !important;
-            text-align: center;
-        }
         .header-action-container {
             flex-direction: column !important;
             align-items: stretch !important;
@@ -163,9 +147,6 @@
             overflow-x: auto !important;
             -webkit-overflow-scrolling: touch;
         }
-        .tabel-monitoring {
-            min-width: 860px;
-        }
         .tabel-monitoring td input[inputmode="decimal"],
         .tabel-monitoring td input[type="text"] {
             width: 100% !important;
@@ -186,6 +167,37 @@
         }
         #filterForm .col-md-3, #filterForm .col-md-2 {
             width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container .tabel-monitoring {
+            min-width: 980px;
+            table-layout: auto;
+        }
+
+        .dashboard-container .tabel-monitoring thead th.waktu-pagi-col,
+        .dashboard-container .tabel-monitoring thead th.waktu-sore-col {
+            width: 96px !important;
+            min-width: 96px !important;
+            max-width: none !important;
+            padding: 2px 4px !important;
+        }
+
+        .dashboard-container .tabel-monitoring tbody td:nth-of-type(2),
+        .dashboard-container .tabel-monitoring tbody td:nth-of-type(3) {
+            width: 96px !important;
+            min-width: 96px !important;
+            padding: 2px 4px !important;
+        }
+
+        .dashboard-container .tabel-monitoring tbody td:nth-of-type(2) input,
+        .dashboard-container .tabel-monitoring tbody td:nth-of-type(3) input {
+            width: 100% !important;
+            min-width: 80px !important;
+            padding: 2px 4px !important;
+            font-size: 0.75rem !important;
+            text-align: center;
         }
     }
 </style>
@@ -570,7 +582,12 @@
     <div class="card border-0 shadow-sm">
         <div class="card-body px-0 pt-0">
             <div class="table-responsive">
-                <table class="table table-bordered text-center align-middle small mb-0 tabel-monitoring" style="font-size: 0.68rem;">
+                <table class="table table-bordered text-center align-middle small mb-0 tabel-monitoring" style="font-size: 0.68rem; table-layout: auto;">
+                    <colgroup>
+                        <col style="width: 45px; min-width: 45px;">
+                        <col style="width: 96px; min-width: 96px;">
+                        <col style="width: 96px; min-width: 96px;">
+                    </colgroup>
                     <thead class="table-light align-middle">
                         <tr>
                             <th rowspan="2" style="width: 45px;" class="bg-light">Tanggal</th>
@@ -637,10 +654,10 @@
                                 <td class="fw-bold bg-light">{{ $tgl }}</td>
 
                                 <td class="bg-sesi-pagi">
-                                    <input type="text" name="waktu_1" value="{{ $row?->waktu_1 }}" class="form-control form-control-sm text-center px-1 bg-white py-0" placeholder="08:00" style="font-size: 0.68rem;" {{ !$canManage ? 'readonly' : '' }}>
+                                    <input type="text" name="waktu_1" value="{{ $row?->waktu_1 }}" class="form-control form-control-sm text-center px-1 bg-white py-0" placeholder="08:00" style="font-size: 0.75rem; width: 100% !important; min-width: 80px !important;" {{ !$canManage ? 'readonly' : '' }}>
                                 </td>
                                 <td class="bg-sesi-sore">
-                                    <input type="text" name="waktu_2" value="{{ $row?->waktu_2 }}" class="form-control form-control-sm text-center px-1 bg-white py-0" placeholder="13:00" style="font-size: 0.68rem;" {{ !$canManage ? 'readonly' : '' }}>
+                                    <input type="text" name="waktu_2" value="{{ $row?->waktu_2 }}" class="form-control form-control-sm text-center px-1 bg-white py-0" placeholder="13:00" style="font-size: 0.75rem; width: 100% !important; min-width: 80px !important;" {{ !$canManage ? 'readonly' : '' }}>
                                 </td>
 
                                 <td class="bg-sesi-pagi">
