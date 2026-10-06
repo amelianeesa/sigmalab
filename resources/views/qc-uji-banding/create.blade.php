@@ -118,6 +118,21 @@
         padding-right: 10px !important;
     }
 
+    .qc-page .cat-enable-check,
+    .qc-page .param-enable-check {
+        width: 1.05rem;
+        height: 1.05rem;
+        margin-top: 0;
+        flex-shrink: 0;
+        cursor: pointer;
+    }
+
+    .qc-page .cat-check-wrap {
+        padding: 0.5rem 0.9rem;
+        display: flex;
+        align-items: center;
+    }
+
     @media (max-width: 767.98px) {
         .qc-page {
             padding-left: 10px !important;
@@ -341,10 +356,10 @@
 
                                     <h2 class="accordion-header" id="heading-cat-{{ $catId }}">
                                         <div class="d-flex align-items-center w-100 bg-light">
-                                            <div class="p-3">
-                                                <input class="form-check-input cat-enable-check" type="checkbox" data-cat="{{ $catId }}" style="transform: scale(1.5);">
+                                            <div class="cat-check-wrap">
+                                                <input class="form-check-input cat-enable-check" type="checkbox" data-cat="{{ $catId }}">
                                             </div>
-                                            <button class="accordion-button collapsed py-3 fw-bold bg-transparent text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-cat-{{ $catId }}" aria-expanded="false">
+                                            <button class="accordion-button collapsed py-2 fw-bold bg-transparent text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-cat-{{ $catId }}" aria-expanded="false">
                                                 <i class="fas fa-cubes me-2"></i> Modul: {{ $kategori }}
                                             </button>
                                         </div>
@@ -365,7 +380,7 @@
                                                 <div class="col-12 param-container" data-pid="{{ $pid }}">
 
                                                     <div class="d-flex align-items-center mb-3 border-bottom pb-2">
-                                                        <input class="form-check-input param-enable-check me-2" type="checkbox" name="params[{{ $pid }}][selected]" value="1" data-pid="{{ $pid }}" data-cat="{{ $catId }}" style="transform: scale(1.3);">
+                                                        <input class="form-check-input param-enable-check me-2" type="checkbox" name="params[{{ $pid }}][selected]" value="1" data-pid="{{ $pid }}" data-cat="{{ $catId }}">
                                                         <h5 class="fw-bold text-dark mb-0 ms-2 text-primary">Aktifkan Pengujian CHN</h5>
                                                     </div>
 
@@ -526,7 +541,7 @@
                                                             <div class="col-12 param-container" data-pid="{{ $pid }}">
 
                                                                 <div class="d-flex align-items-center mb-3 border-bottom pb-2">
-                                                                    <input class="form-check-input param-enable-check me-2" type="checkbox" name="params[{{ $pid }}][selected]" value="1" data-pid="{{ $pid }}" data-cat="{{ $catId }}" style="transform: scale(1.3);">
+                                                                    <input class="form-check-input param-enable-check me-2" type="checkbox" name="params[{{ $pid }}][selected]" value="1" data-pid="{{ $pid }}" data-cat="{{ $catId }}">
                                                                     <h5 class="fw-bold text-dark mb-0 ms-2 text-primary">
                                                                         Aktifkan Pengujian {{ $code }}
                                                                         <span class="badge bg-secondary ms-2">{{ $param->satuan }}</span>

@@ -1,22 +1,143 @@
 @extends('layouts.app')
+@section('title', 'Master Batas Toleransi - QC Uji Banding')
 
 @section('content')
 @include('qc-uji-banding.partials._style')
 
+<style>
+    .qc-page {
+        padding-top: 0 !important;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+        margin-top: -8px !important;
+    }
+
+    .qc-page nav[aria-label="breadcrumb"],
+    .qc-page > nav {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .qc-page .breadcrumb {
+        margin: 0 0 6px 0 !important;
+        padding: 0 !important;
+        font-size: 0.75rem !important;
+        line-height: 1.4;
+        flex-wrap: wrap;
+        align-items: center;
+        background: transparent !important;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item,
+    .qc-page .breadcrumb .breadcrumb-item a {
+        font-size: 0.75rem !important;
+        font-weight: 500 !important;
+        color: #0d6efd !important;
+        text-decoration: none;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item a:hover {
+        color: #0a58ca !important;
+        text-decoration: underline;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item.active {
+        color: #000000 !important;
+        font-weight: 700 !important;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item {
+        padding-left: 0.4rem;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+        color: #6c757d !important;
+        padding-right: 0.4rem;
+        font-weight: 400;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu {
+        min-width: 190px;
+        padding: 4px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item {
+        color: #000000 !important;
+        font-size: 0.78rem !important;
+        font-weight: 500 !important;
+        text-decoration: none !important;
+        background-color: transparent;
+        padding: 7px 12px;
+        border-radius: 5px;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:hover,
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
+        background-color: rgba(27, 49, 82, 0.15) !important;
+        color: #000000 !important;
+        text-decoration: none !important;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
+        font-weight: 700 !important;
+    }
+
+    .qc-side-nav .nav-link:not(.active):hover {
+        background-color: #e9ecef !important;
+        color: #1b3152 !important;
+        padding-left: 1.25rem !important;
+    }
+
+    @media (max-width: 767.98px) {
+        .qc-page {
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+        }
+
+        .qc-page .breadcrumb,
+        .qc-page .breadcrumb .breadcrumb-item,
+        .qc-page .breadcrumb .breadcrumb-item a {
+            font-size: 0.72rem !important;
+        }
+
+        .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item {
+            padding-left: 0.3rem;
+        }
+
+        .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+            padding-right: 0.3rem;
+        }
+
+        .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item {
+            font-size: 0.85rem !important;
+            padding: 10px 14px;
+        }
+    }
+</style>
+
 <div class="container-fluid qc-page pb-4">
-    
     <x-qc-breadcrumb active="Uji Banding">
         <li class="breadcrumb-item active" aria-current="page">Master Batas Toleransi</li>
     </x-qc-breadcrumb>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <h5 class="qc-title">
-            <i class="fas fa-balance-scale text-primary me-1"></i> Master Batas Toleransi QC Uji Banding
+            <i class="fas fa-balance-scale me-1" style="color: #1b3152;"></i> Master Batas Toleransi QC Uji Banding
         </h5>
+
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ route('qc-uji-banding.index') }}" class="btn btn-outline-corporate btn-sm py-1 px-3 shadow-sm fw-semibold">
+                <i class="fas fa-arrow-left me-1"></i> Kembali ke Uji Banding
+            </a>
+        </div>
     </div>
 
     @php
-
         $chnParams = $parameters->filter(fn($p) => in_array($p->nama_parameter, ['C', 'H', 'N']));
         $chnIds = $chnParams->pluck('parameter_uji_id')->toArray();
         $chnToleransis = $chnParams->pluck('toleransis')->flatten();
@@ -44,9 +165,9 @@
     <div class="card border-0 shadow-sm">
         <div class="card-body">
             <div class="row">
-                
+
                 <div class="col-12 col-md-3 border-end border-end-md">
-                    <div class="nav flex-column nav-pills qc-side-nav" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                    <div class="nav flex-column nav-pills qc-side-nav gap-1" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                         @foreach($groupedParameters as $kategori => $params)
                             
                             <div class="fw-bold text-uppercase text-secondary small mt-3 mb-1 px-2" style="letter-spacing: 0.5px;">
@@ -54,7 +175,6 @@
                             </div>
                             
                             @foreach($params as $param)
-                                
                                 @if(in_array($param->nama_parameter, ['H', 'N']))
                                     @continue
                                 @endif
@@ -66,12 +186,16 @@
                                     $tabLabel = $isCHN ? 'CHN' : $param->nama_parameter;
                                 @endphp
 
-                                <button class="nav-link text-start ms-2 {{ $isActive ? 'active' : '' }}" 
+                                <button class="nav-link text-start ms-2 px-3 py-2 rounded-2 {{ $isActive ? 'active fw-bold shadow-sm' : 'text-dark bg-light bg-opacity-50' }}" 
                                         id="tab-param-{{ $tabId }}" 
                                         data-bs-toggle="pill" 
                                         data-bs-target="#content-param-{{ $tabId }}" 
-                                        type="button" role="tab">
-                                    {{ $tabLabel }}
+                                        type="button" role="tab"
+                                        style="font-size: 0.9rem; transition: all 0.2s ease-in-out;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span>{{ $tabLabel }}</span>
+                                        <i class="fas fa-chevron-right small opacity-50"></i>
+                                    </div>
                                 </button>
                             @endforeach
 
@@ -202,7 +326,6 @@
                                                                                     </div>
                                                                                     <div class="col-md-6">
                                                                                         <label class="form-label small fw-bold">Element</label>
-                                                                                        
                                                                                         <input type="text" class="form-control form-control-sm bg-light" name="sub_parameter" value="{{ $tol->sub_parameter }}" readonly title="Hapus dan buat aturan baru jika ingin mengganti elemen.">
                                                                                     </div>
                                                                                 @elseif($param->nama_parameter == 'VM')
@@ -314,7 +437,6 @@
                                                         </div>
                                                         <div class="col-md-6">
                                                             <label class="form-label small fw-bold">Element</label>
-                                                            
                                                             <select class="form-select form-select-sm" required
                                                                     onchange="document.getElementById('chn_param_id').value = this.options[this.selectedIndex].getAttribute('data-id'); document.getElementById('chn_sub_param').value = this.value;">
                                                                 <option value="">-- Pilih Element --</option>
