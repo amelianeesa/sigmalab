@@ -132,9 +132,9 @@
         box-shadow: 0 6px 18px rgba(27, 49, 82, 0.12) !important;
     }
 
-    .lks-card-danger { border-left-color: #dc3545 !important; }
-    .lks-card-primary { border-left-color: #0d6efd !important; }
-    .lks-card-success { border-left-color: #198754 !important; }
+    .lks-card {
+        border-left-color: #1b3152 !important;
+    }
 
     .lks-hint {
         font-size: 0.75rem;
@@ -193,7 +193,7 @@
         }
 
         .form-actions .btn {
-            width: 100%;
+            flex: 1 1 0;
         }
     }
 </style>
@@ -207,7 +207,7 @@
 
     <div class="mb-3">
         <h5 class="fw-bold mb-1" style="font-size: 1.1rem;">
-            <i class="fas fa-file-alt text-danger me-2"></i>Lembar Ketidaksesuaian (LKS) / CAPA
+            <i class="fas fa-file-alt me-2" style="color: #1b3152;"></i>Lembar Ketidaksesuaian (LKS) / CAPA
         </h5>
         <p class="text-muted mb-0" style="font-size: 0.78rem;">
             Investigasi untuk parameter <span class="fw-bold text-dark">{{ $parameter->parameterUji->nama_parameter }}</span> pada Uji Banding <span class="fw-bold text-dark">{{ $program->nama_program }}</span>.
@@ -222,7 +222,7 @@
         @csrf
         @method('PUT')
 
-        <div class="card border-0 shadow-sm mb-3 lks-card lks-card-danger">
+        <div class="card border-0 shadow-sm mb-3 lks-card">
             <div class="card-header text-white" style="background-color: #1b3152;">
                 <h5><i class="fas fa-search me-1"></i> Bagian 1: Analisis Akar Masalah</h5>
             </div>
@@ -232,7 +232,7 @@
             </div>
         </div>
 
-        <div class="card border-0 shadow-sm mb-3 lks-card lks-card-primary">
+        <div class="card border-0 shadow-sm mb-3 lks-card">
             <div class="card-header text-white" style="background-color: #1b3152;">
                 <h5><i class="fas fa-tools me-1"></i> Bagian 2: Tindakan Perbaikan</h5>
             </div>
@@ -242,7 +242,7 @@
             </div>
         </div>
 
-        <div class="card border-0 shadow-sm mb-3 lks-card lks-card-success">
+        <div class="card border-0 shadow-sm mb-3 lks-card">
             <div class="card-header text-white" style="background-color: #1b3152;">
                 <h5><i class="fas fa-shield-alt me-1"></i> Bagian 3: Tindakan Pencegahan</h5>
             </div>
@@ -252,7 +252,7 @@
             </div>
         </div>
 
-        <div class="form-actions d-flex flex-column-reverse flex-md-row justify-content-md-between gap-2">
+        <div class="form-actions d-flex flex-row justify-content-end gap-2">
             <a href="{{ route('qc-uji-banding.show', $program->id) }}" class="btn btn-outline-corporate btn-sm py-1.5 px-3 shadow-sm fw-semibold" style="font-size: 0.8rem;">Batal</a>
             <button type="submit" class="btn btn-corporate-blue btn-sm py-1.5 px-3 shadow-sm fw-semibold" style="font-size: 0.8rem;">
                 <i class="fas fa-save me-1"></i> Simpan LKS
