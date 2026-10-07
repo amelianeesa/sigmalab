@@ -103,3 +103,4 @@ Schedule::command('kalibrasi:cek-kadaluwarsa')->dailyAt('08:00');
 Schedule::command('perbaikan:cek-status')->dailyAt('08:05');
 Schedule::command('barang:cek-stok')->dailyAt('08:00');
 Schedule::command('pengadaan:cek-status')->dailyAt('08:00');
+Schedule::command('audit:archive')->weekly();

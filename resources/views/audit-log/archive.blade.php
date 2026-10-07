@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Daftar - Audit Log')
+@section('title', 'Arsip - Audit Log')
 
 @section('content')
 
@@ -148,17 +148,16 @@
 
 <div class="container-fluid px-4">
     <div class="d-flex justify-content-between align-items-center mb-2 mt-2">
-        <h4 class="fw-bold text-dark mb-0" style="font-size: 1rem;"><i class="fas fa-history me-1"></i> Audit Trail (Aktif)</h4>
-        <a href="{{ route('audit-log.archive') }}" class="btn btn-sm btn-custom-outline" style="font-size: 0.75rem;">
-            <i class="fas fa-archive me-1"></i> Arsip Log
+        <h4 class="fw-bold text-dark mb-0" style="font-size: 1rem;"><i class="fas fa-archive me-1"></i> Arsip Audit Trail</h4>
+        <a href="{{ route('audit-log.index') }}" class="btn btn-sm btn-secondary" style="font-size: 0.75rem;">
+            <i class="fas fa-arrow-left me-1"></i> Kembali ke Log Aktif
         </a>
     </div>
-    
+
     <div class="card shadow-sm border-0 mb-3 card-shadow-custom">
         <div class="card-body p-2.5">
-            <form action="{{ route('audit-log.index') }}" method="GET" class="row g-2 align-items-center" id="filter-form">
-                <div class="col-md-4">
-                    @php
+            <form action="{{ route('audit-log.archive') }}" method="GET" class="row g-2 align-items-center" id="filter-form">
+                @php
                     $eventLabels = [
                         '' => '-- Semua Event --',
                         'login' => 'Login',
@@ -167,23 +166,59 @@
                         'updated' => 'Updated',
                         'deleted' => 'Deleted',
                     ];
-                        $selectedEvent = request('event', '');
-                    @endphp
-                    <div class="filter-select" id="selectEvent">
+                    $selectedEvent = (string) request('event', '');
+
+                    $monthLabels = ['' => '-- Semua Bulan --'];
+                    foreach (range(1, 12) as $m) {
+                        $monthLabels[(string) $m] = DateTime::createFromFormat('!m', $m)->format('F');
+                    }
+                    $selectedMonth = (string) request('month', '');
+
+                    $yearLabels = ['' => '-- Semua Tahun --'];
+                    foreach ($years as $y) {
+                        $yearLabels[(string) $y] = $y;
+                    }
+                    $selectedYear = (string) request('year', '');
+                @endphp
+
+                <div class="col-md-2">
+                    <div class="filter-select">
                         <input type="hidden" name="event" value="{{ $selectedEvent }}">
                         <button type="button" class="filter-select-trigger">{{ $eventLabels[$selectedEvent] ?? '-- Semua Event --' }}</button>
                         <ul class="filter-select-options">
                             @foreach($eventLabels as $value => $label)
-                                <li data-value="{{ $value }}" class="{{ $selectedEvent === $value ? 'selected' : '' }}">{{ $label }}</li>
+                                <li data-value="{{ $value }}" class="{{ $selectedEvent === (string) $value ? 'selected' : '' }}">{{ $label }}</li>
                             @endforeach
                         </ul>
                     </div>
                 </div>
-                <div class="col-md-7">
-                    <input type="text" name="subject_type" class="form-control form-control-sm" placeholder="Ketik nama entitas (Contoh: Barang, Kegiatan)..." value="{{ request('subject_type') }}" autocomplete="off">
+                <div class="col-md-3">
+                    <div class="filter-select">
+                        <input type="hidden" name="month" value="{{ $selectedMonth }}">
+                        <button type="button" class="filter-select-trigger">{{ $monthLabels[$selectedMonth] ?? '-- Semua Bulan --' }}</button>
+                        <ul class="filter-select-options">
+                            @foreach($monthLabels as $value => $label)
+                                <li data-value="{{ $value }}" class="{{ $selectedMonth === (string) $value ? 'selected' : '' }}">{{ $label }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="filter-select">
+                        <input type="hidden" name="year" value="{{ $selectedYear }}">
+                        <button type="button" class="filter-select-trigger">{{ $yearLabels[$selectedYear] ?? '-- Semua Tahun --' }}</button>
+                        <ul class="filter-select-options">
+                            @foreach($yearLabels as $value => $label)
+                                <li data-value="{{ $value }}" class="{{ $selectedYear === (string) $value ? 'selected' : '' }}">{{ $label }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari keterangan..." value="{{ request('search') }}" autocomplete="off">
                 </div>
                 <div class="col-md-1">
-                    <a href="{{ route('audit-log.index') }}" class="btn btn-sm btn-outline-secondary w-100 py-1" title="Reset"><i class="fas fa-sync-alt"></i></a>
+                    <a href="{{ route('audit-log.archive') }}" class="btn btn-sm btn-outline-secondary w-100 py-1" title="Reset"><i class="fas fa-sync-alt"></i></a>
                 </div>
             </form>
         </div>
@@ -235,20 +270,20 @@
                                 <td class="text-start">{{ $log->description }}</td>
                                 <td class="text-center">
                                     @php
-                                        $modelPath = explode('\\', $log->subject_type);
-                                        $modelName = end($modelPath);
+                                        $modelPath = $log->subject_type ? explode('\\', $log->subject_type) : [];
+                                        $modelName = count($modelPath) > 0 ? end($modelPath) : '-';
                                     @endphp
                                     <span class="badge bg-light text-dark border badge-custom-size">{{ $modelName ?: '-' }}</span>
                                 </td>
                                 <td class="text-center">
-                                    <a href="{{ route('audit-log.show', $log->id) }}" class="btn btn-sm py-0 px-1 btn-custom-outline" style="font-size: 0.68rem;">
+                                    <a href="{{ route('audit-log.archive.show', $log->id) }}" class="btn btn-sm py-0 px-1 btn-custom-outline" style="font-size: 0.68rem;">
                                         <i class="fas fa-search me-1"></i> Lihat Data
                                     </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-3">Belum ada rekam jejak yang tercatat</td>
+                                <td colspan="6" class="text-center text-muted py-3">Tidak ada data arsip yang ditemukan.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -267,10 +302,10 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const form = document.getElementById('filter-form');
-        const inputSubject = form.querySelector('input[name="subject_type"]');
+        const inputSearch = form.querySelector('input[name="search"]');
 
         let timeout = null;
-        inputSubject.addEventListener('input', function() {
+        inputSearch.addEventListener('input', function() {
             clearTimeout(timeout);
             timeout = setTimeout(function() {
                 form.submit();

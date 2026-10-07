@@ -12,22 +12,21 @@ class AuditLogController extends Controller
         $query = Activity::with('causer')
             ->where(function ($q) {
                 $q->where('log_name', 'default')
+                  ->orWhere('log_name', 'auth')
                   ->orWhere('subject_type', 'like', '%Alat%')
-                  ->orWhere('subject_type', 'like', '%RiwayatPerbaikanAlat%');
+                  ->orWhere('subject_type', 'like', '%RiwayatPerbaikanAlat%')
+                  ->orWhereNull('subject_type');
             })
             ->latest();
 
-        // Filter dropdown Event (created / updated / deleted)
         if ($request->filled('event')) {
             $query->where('event', $request->event);
         }
 
-        // Filter nama entitas (Barang, Kegiatan, dst.)
         if ($request->filled('subject_type')) {
             $query->where('subject_type', 'like', '%' . $request->subject_type . '%');
         }
 
-        // Search umum (kalau masih dipakai)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -50,8 +49,5 @@ class AuditLogController extends Controller
             : collect([$log]);
 
         return view('audit-log.show', compact('log', 'batchLogs'));
-// =======
-//         return view('audit-log.show', compact('log'));
-// >>>>>>> b160c1b1b3071010e910ae8463ddb0d6c0423ff8
     }
 }

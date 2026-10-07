@@ -255,12 +255,22 @@
     @media (max-width: 576px) {
         .header-action-btns {
             width: 100%;
-            flex-direction: column;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            gap: 0.5rem;
         }
         .header-action-btns a,
         .header-action-btns button {
-            width: 100%;
+            flex: 1 1 0;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
+            font-size: 0.72rem;
+            line-height: 1.2;
+            padding: 0.45rem 0.4rem;
+            white-space: normal;
         }
     }
 </style>
@@ -305,7 +315,7 @@
 
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
         <h5 class="fw-bold mb-0">Data Inventory Barang/Bahan</h5>
-        <div>
+        <div class="header-action-btns">
             <button type="button" class="btn btn-success-standard shadow-sm" data-bs-toggle="modal" data-bs-target="#cetakPeriodeModal">
                 <i class="fas fa-print me-1"></i> Cetak Laporan Periode
             </button>
