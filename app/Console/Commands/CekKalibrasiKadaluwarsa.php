@@ -13,18 +13,30 @@ use Carbon\Carbon;
 class CekKalibrasiKadaluwarsa extends Command
 {
     protected $signature = 'kalibrasi:cek-kadaluwarsa';
-    protected $description = 'Kirim pengingat kalibrasi berkala general h-6 bulan dengan format TO (Analis) dan CC (Koordinator)';
+    protected $description = 'Kirim pengingat kalibrasi berkala general h-6 bulan berdasarkan tanggal akhir kalibrasi terakhir';
  
     public function handle()
     {
+        $sekarang = Carbon::now();
         $batasHari = 180;
 
-        $data = RiwayatKalibrasi::with('alat')
-            ->whereDate('tgl_akhir', '<=', now()->addDays($batasHari))
-            ->whereDate('tgl_akhir', '>=', now())
-            ->get();
+        $alatIds = RiwayatKalibrasi::select('alat_id')->distinct()->pluck('alat_id');
+        
+        $data = collect();
+        foreach ($alatIds as $alatId) {
+            $latestRiwayat = RiwayatKalibrasi::where('alat_id', $alatId)
+                ->latest('created_at')
+                ->first();
 
-        $sekarang = Carbon::now();
+            if ($latestRiwayat) {
+                $data->push($latestRiwayat);
+            }
+        }
+
+        if ($data->isEmpty()) {
+            $this->info("Tidak ada alat yang mendekati masa kadaluwarsa kalibrasi (H-6 bulan).");
+            return;
+        }
 
         foreach ($data as $item) {
             if (!$item->alat) {
@@ -32,6 +44,11 @@ class CekKalibrasiKadaluwarsa extends Command
             }
 
             $tglKedaluwarsa = Carbon::parse($item->tgl_akhir);
+
+            if ($tglKedaluwarsa->greaterThan($sekarang->copy()->addDays($batasHari))) {
+                continue;
+            }
+
             $sisaBulan = (int) ceil($sekarang->diffInMonths($tglKedaluwarsa, false));
             if ($sisaBulan < 1) $sisaBulan = 1;
 
@@ -39,7 +56,7 @@ class CekKalibrasiKadaluwarsa extends Command
             $kodeAlat = $item->alat->kode_alat ?? '-';
 
             if ($sisaBulan >= 4) {
-                $pesan = "Pengingat Pemeliharaan Alat: Masa kalibrasi {$namaAlat} ({$kodeAlat}) telah memasuki paruh waktu (Sisa {$sisaBulan} bulan). Harap segera menjadwalkan Kalibrasi Ulang serta Pengecekan Antara (khusus timbangan) untuk memastikan akurasi alat";
+                $pesan = "Pengingat Pemeliharaan Alat: Masa kalibrasi {$namaAlat} ({$kodeAlat}) telah memasuki paruh waktu (Sisa {$sisaBulan} bulan). Harap segera menjadwalkan Kalibrasi Ulang serta Pengecekan Antara untuk memastikan akurasi alat.";
             } else {
                 $pesan = "Peringatan Masa Berlaku Kalibrasi: Masa berlaku kalibrasi alat {$namaAlat} ({$kodeAlat}) akan berakhir dalam {$sisaBulan} bulan lagi. Harap segera menjadwalkan Kalibrasi Ulang.";
             }
@@ -102,6 +119,6 @@ class CekKalibrasiKadaluwarsa extends Command
             }
         }
 
-        $this->info("Pengecekan kalibrasi berkala general H-6 bulan selesai");
+        $this->info("Pengecekan kalibrasi berkala general H-6 bulan selesai.");
     }
 }

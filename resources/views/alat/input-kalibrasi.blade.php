@@ -74,12 +74,12 @@
     <div class="row justify-content-center">
         <div class="col-lg-12">
             
-            @if(session('success'))
+            {{-- @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show shadow-sm py-2 px-3 small" role="alert" style="font-size: 0.78rem;">
                     <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
                     <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-            @endif
+            @endif --}}
 
             <div class="card custom-card mb-3">
                 <div class="card-header text-white d-flex justify-content-between align-items-center py-2 px-3" style="background-color: #1b3152 !important;">
