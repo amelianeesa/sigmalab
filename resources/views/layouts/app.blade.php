@@ -104,15 +104,15 @@
         }
         
         #sidebar ul li a:hover { 
-            color: #2563eb; 
-            background: #eff6ff; 
+            color: var(--sdm-600); 
+            background: rgba(29, 76, 122, 0.08); 
             transform: translateX(4px); 
         }
         
         #sidebar ul li.active > a { 
-            color: #1d4ed8; 
-            background: #eff6ff; 
-            border-left-color: #2563eb; 
+            color: var(--sdm-600); 
+            background: rgba(29, 76, 122, 0.08); 
+            border-left-color: var(--sdm-600); 
             font-weight: 600; 
         }
         
@@ -122,7 +122,9 @@
             width: 20px;
             margin-right: 0px; 
         }
-        #sidebar ul li a:hover i, #sidebar ul li.active > a i { opacity: 1; color: #2563eb; }
+        #sidebar ul li a:hover i, #sidebar ul li.active > a i { opacity: 1; color: var(--sdm-600); }
+
+        #sidebar .text-primary { color: var(--sdm-600) !important; }
 
         @media (min-width: 992px) {
             body.sidebar-toggled #sidebar-overlay { display: none; }
