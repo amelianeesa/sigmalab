@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use App\Models\QcHarian;
+use App\Models\QcCrm;
+use App\Models\QcUjiBandingParameter;
 use App\Models\RiwayatTindakLanjut;
 use App\Models\Alat;
 use App\Models\Barang;
@@ -22,8 +25,6 @@ class DashboardController extends Controller
     public function index()
     {
         $role = Auth::user()->role->nama_role ?? '';
-
-        $outliers = RiwayatTindakLanjut::whereIn('status_tindak_lanjut', ['belum_ditindaklanjuti', 'dalam_investigasi'])->count();
 
         $tenggatKalibrasi = Alat::whereHas('riwayatKalibrasi', function($query) {
             $query->where('tgl_akhir', '<=', Carbon::now()->addDays(180));
@@ -112,16 +113,60 @@ class DashboardController extends Controller
                 }
             }
 
+        $qcInhouseOutliers = QcHarian::with(['parameterUji'])
+            ->where('status_evaluasi', 'outlier')
+            ->where('status_investigasi', 'menunggu_investigasi')
+            ->get()->map(function($item) {
+                return [
+                    'modul' => 'QC In-House',
+                    'parameter' => $item->parameterUji->nama_parameter ?? '-',
+                    'tanggal' => $item->tanggal_uji,
+                    'url' => route('qc-harian.investigasi', $item->id)
+                ];
+            });
+
+      
+        $qcCrmOutliers = QcCrm::with(['parameterUji'])
+            ->where('status_evaluasi', 'outlier')
+            ->where('status_investigasi', 'menunggu_investigasi')
+            ->get()->map(function($item) {
+                return [
+                    'modul' => 'QC CRM',
+                    'parameter' => $item->parameterUji->nama_parameter ?? '-',
+                    'tanggal' => $item->tanggal_uji,
+                    'url' => route('qc-crm.investigasi', $item->id)
+                ];
+            });
+
+        $qcUjiBandingOutliers = QcUjiBandingParameter::with(['parameterUji'])
+            ->where('status_evaluasi', 'outlier')
+            ->where('status_investigasi', 'menunggu_investigasi')
+            ->get()->map(function($item) {
+                return [
+                    'modul' => 'QC Uji Banding',
+                    'parameter' => $item->parameterUji->nama_parameter ?? '-',
+                    'tanggal' => $item->updated_at->format('Y-m-d'),
+                    'url' => route('qc-uji-banding.investigasi', ['id' => $item->qc_uji_banding_id, 'param_id' => $item->id])
+                ];
+            });
+
+        
+        $daftarQcOutlier = $qcInhouseOutliers->concat($qcCrmOutliers)->concat($qcUjiBandingOutliers)
+            ->sortByDesc('tanggal')->take(15)->values();
+        
+        $totalQcOutlier = $qcInhouseOutliers->count() + $qcCrmOutliers->count() + $qcUjiBandingOutliers->count();
+
         return view('dashboard-index', compact(
             'role',
-            'outliers',
             'tenggatKalibrasi',
             'stokTipis',
             'sertifikasiHampirHabis',
             'pengadaanPending',
             'barangExp',
             'kegiatanBerjalan',
-            'pengadaanAktif'
+            'pengadaanAktif',
+            'daftarQcOutlier',
+            'totalQcOutlier'
         ));
     }
 }

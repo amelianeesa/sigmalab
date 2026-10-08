@@ -95,15 +95,13 @@
 
     <!-- 4 KARTU STATISTIK UTAMA -->
     <div class="row g-3 mb-3">
-        <!-- Card 1: Outlier -->
+        <!-- Card 1: QC Outlier (Baru) -->
         <div class="col-12 col-sm-6 col-lg-3">
-            <div class="card border-0 shadow-sm border-start border-4 border-danger">
+            <div class="card border-0 shadow-sm border-start border-4 border-danger" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modalQcOutlier">
                 <div class="card-body p-2 px-3">
-                    <p class="text-muted mb-0 text-uppercase fw-bold" style="font-size: 0.68rem; letter-spacing: 0.5px;">OUTLIER (OPEN)</p>
-                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.4rem; line-height: 1.1;">{{ $outliers }}</h3>
-                    <a href="{{ route('tindak-lanjut.index') }}" class="text-decoration-none text-danger fw-semibold d-inline-block" style="font-size: 0.72rem;">
-                        Lihat Detail <i class="fas fa-arrow-right ms-1"></i>
-                    </a>
+                    <p class="text-danger mb-0 text-uppercase fw-bold" style="font-size: 0.68rem; letter-spacing: 0.5px;">⚠️ QC OUTLIER (OPEN)</p>
+                    <h3 class="fw-bold text-dark mb-0" style="font-size: 1.4rem; line-height: 1.1;">{{ $totalQcOutlier }}</h3>
+                    <span class="text-muted fw-semibold d-inline-block mt-1" style="font-size: 0.72rem;">Klik untuk eksekusi &rarr;</span>
                 </div>
             </div>
         </div>
@@ -590,5 +588,52 @@
     });
 </script>
 @endpush
+</div>
+<!-- Modal Daftar QC Outlier -->
+<div class="modal fade" id="modalQcOutlier" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-triangle me-2"></i>Daftar Kendali Mutu Outlier</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                @if($totalQcOutlier > 0)
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Modul Verifikasi</th>
+                                    <th>Parameter</th>
+                                    <th>Tanggal</th>
+                                    <th class="text-end pe-3">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($daftarQcOutlier as $outlier)
+                                <tr>
+                                    <td class="ps-3"><span class="badge bg-secondary">{{ $outlier['modul'] }}</span></td>
+                                    <td class="fw-bold">{{ $outlier['parameter'] }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($outlier['tanggal'])->format('d M Y') }}</td>
+                                    <td class="text-end pe-3">
+                                        <a href="{{ $outlier['url'] }}" class="btn btn-sm btn-danger fw-bold">
+                                            <i class="fas fa-search me-1"></i>Investigasi
+                                        </a>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="text-center py-5">
+                        <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                        <h5 class="text-muted fw-bold">Semua Aman!</h5>
+                        <p class="text-muted mb-0">Tidak ada data outlier pengujian yang perlu diinvestigasi.</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
