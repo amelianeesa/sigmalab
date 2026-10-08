@@ -39,7 +39,18 @@ class DashboardController extends Controller
                     ->where('tanggal_berakhir', '<=', Carbon::now()->addMonths(6));
             })->count();
 
-        $pengadaanPending = PermintaanPengadaan::where('status', 'diajukan')->count();
+        // Hitung pengajuan pengadaan yang masih menunggu persetujuan, disesuaikan
+        // dengan tahap siapa yang login (Koordinator Lab -> menunggu_koordinator,
+        // GA Officer -> menunggu_ga). Role lain melihat total kedua tahap sebagai gambaran umum.
+        $statusPendingUntukRole = match ($role) {
+            \App\Enums\PeranPengguna::KOORDINATOR_LAB->value => 'menunggu_koordinator',
+            \App\Enums\PeranPengguna::GA_OFFICER->value => 'menunggu_ga',
+            default => null,
+        };
+
+        $pengadaanPending = $statusPendingUntukRole
+            ? PermintaanPengadaan::where('status', $statusPendingUntukRole)->count()
+            : PermintaanPengadaan::whereIn('status', ['menunggu_koordinator', 'menunggu_ga'])->count();
 
         $barangExp = Barang::whereNotNull('tgl_exp')
             ->where('tgl_exp', '<=', Carbon::now()->addDays(180))
