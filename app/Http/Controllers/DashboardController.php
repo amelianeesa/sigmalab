@@ -4,6 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Mail\KeterlambatanPengadaanMail;
 use App\Mail\PengingatSetengahTargetMail;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use App\Models\QcHarian;
+use App\Models\QcCrm;
+use App\Models\QcUjiBandingParameter;
+use App\Models\RiwayatTindakLanjut;
 use App\Models\Alat;
 use App\Models\Barang;
 use App\Models\Kegiatan;
@@ -12,7 +18,6 @@ use App\Models\Personil;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 
 class DashboardController extends Controller
@@ -30,6 +35,9 @@ class DashboardController extends Controller
                     && Carbon::parse($tglAkhirTerbaru)->lte(Carbon::now()->addMonths(6));
             })
             ->count();
+        // $tenggatKalibrasi = Alat::whereHas('riwayatKalibrasi', function($query) {
+        //     $query->where('tgl_akhir', '<=', Carbon::now()->addDays(180));
+        // })->count();
 
         $stokTipis = Barang::whereColumn('saldo_akhir', '<', 'minimal_stok')->count();
 
@@ -147,6 +155,49 @@ class DashboardController extends Controller
             }
         }
 
+        $qcInhouseOutliers = QcHarian::with(['parameterUji'])
+            ->where('status_evaluasi', 'outlier')
+            ->where('status_investigasi', 'menunggu_investigasi')
+            ->get()->map(function($item) {
+                return [
+                    'modul' => 'QC In-House',
+                    'parameter' => $item->parameterUji->nama_parameter ?? '-',
+                    'tanggal' => $item->tanggal_uji,
+                    'url' => route('qc-harian.investigasi', $item->id)
+                ];
+            });
+
+      
+        $qcCrmOutliers = QcCrm::with(['parameterUji'])
+            ->where('status_evaluasi', 'outlier')
+            ->where('status_investigasi', 'menunggu_investigasi')
+            ->get()->map(function($item) {
+                return [
+                    'modul' => 'QC CRM',
+                    'parameter' => $item->parameterUji->nama_parameter ?? '-',
+                    'tanggal' => $item->tanggal_uji,
+                    'url' => route('qc-crm.investigasi', $item->id)
+                ];
+            });
+
+        $qcUjiBandingOutliers = QcUjiBandingParameter::with(['parameterUji'])
+            ->where('status_evaluasi', 'outlier')
+            ->where('status_investigasi', 'menunggu_investigasi')
+            ->get()->map(function($item) {
+                return [
+                    'modul' => 'QC Uji Banding',
+                    'parameter' => $item->parameterUji->nama_parameter ?? '-',
+                    'tanggal' => $item->updated_at->format('Y-m-d'),
+                    'url' => route('qc-uji-banding.investigasi', ['id' => $item->qc_uji_banding_id, 'param_id' => $item->id])
+                ];
+            });
+
+        
+        $daftarQcOutlier = $qcInhouseOutliers->concat($qcCrmOutliers)->concat($qcUjiBandingOutliers)
+            ->sortByDesc('tanggal')->take(15)->values();
+        
+        $totalQcOutlier = $qcInhouseOutliers->count() + $qcCrmOutliers->count() + $qcUjiBandingOutliers->count();
+
         return view('dashboard-index', compact(
             'role',
             'tenggatKalibrasi',
@@ -156,7 +207,9 @@ class DashboardController extends Controller
             'barangExp',
             'kegiatanBerjalan',
             'pengadaanAktif',
-            'pengadaanSelesai'
+            'pengadaanSelesai',
+            'daftarQcOutlier',
+            'totalQcOutlier'
         ));
     }
 }

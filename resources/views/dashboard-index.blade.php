@@ -4,20 +4,20 @@
 @section('content')
 <style>
     .dashboard-container {
-        padding: 2px 20px !important;
+        padding: 2px 16px !important;
     }
     .dashboard-title {
-        font-size: 1.35rem;
+        font-size: 1.2rem;
     }
     .dashboard-subtitle {
-        font-size: 0.82rem;
+        font-size: 0.76rem;
     }
     .select2-container--bootstrap-5 .select2-dropdown {
         top: 100% !important;
         bottom: auto !important;
     }
     .tracking-card .card-body {
-        padding: 12px !important;
+        padding: 10px 12px !important;
     }
     .border-suco-biru { border-color: #0082c4 !important; }
     .text-suco-biru { color: #0082c4 !important; }
@@ -50,7 +50,7 @@
         position: relative;
         display: inline-block;
         width: 100%;
-        max-width: 320px;
+        max-width: 300px;
     }
     .tracking-select-wrap > .select2-container:not(.select2) {
         top: 100% !important;
@@ -70,45 +70,9 @@
         overflow-y: auto;
     }
     .select-tracking-dropdown .select2-results__option {
-        padding: 0.4rem 0.75rem;
-        font-size: 0.8rem;
+        padding: 0.35rem 0.7rem;
+        font-size: 0.76rem;
         line-height: 1.4;
-    }
-
-    .summary-card {
-        border-radius: 0.6rem;
-    }
-    .summary-card-body {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 9px 12px !important;
-    }
-    .summary-card-icon {
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.95rem;
-        flex-shrink: 0;
-    }
-    .summary-card-icon.icon-biru { background-color: rgba(0, 130, 196, 0.12); color: #0082c4; }
-    .summary-card-icon.icon-biru-muda { background-color: rgba(0, 163, 226, 0.12); color: #00a3e2; }
-    .summary-card-icon.icon-hijau { background-color: rgba(0, 163, 155, 0.12); color: #00a39b; }
-    .summary-card-label {
-        font-size: 0.66rem;
-        letter-spacing: 0.3px;
-        line-height: 1.2;
-    }
-    .summary-card-value {
-        font-size: 1.35rem;
-        line-height: 1.1;
-        margin: 1px 0 !important;
-    }
-    .summary-card-link {
-        font-size: 0.72rem;
     }
 
     .info-card-link {
@@ -125,42 +89,84 @@
         transform: translateY(-2px);
         box-shadow: 0 0.4rem 0.9rem rgba(0, 0, 0, 0.12) !important;
     }
-    .info-card {
-        border-radius: 0.6rem;
+
+    .summary-card {
+        border-radius: 0.5rem;
+        height: 100%;
     }
-    .info-card .card-body {
-        padding: 9px 12px !important;
+    .summary-card-body {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 10px !important;
     }
-    .info-card-icon {
-        width: 34px;
-        height: 34px;
+    .summary-card-icon {
+        width: 30px;
+        height: 30px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.85rem;
+        font-size: 0.78rem;
+        flex-shrink: 0;
+    }
+    .summary-card-icon.icon-merah { background-color: rgba(220, 53, 69, 0.12); color: #dc3545; }
+    .summary-card-icon.icon-biru { background-color: rgba(0, 130, 196, 0.12); color: #0082c4; }
+    .summary-card-icon.icon-biru-muda { background-color: rgba(0, 163, 226, 0.12); color: #00a3e2; }
+    .summary-card-icon.icon-hijau { background-color: rgba(0, 163, 155, 0.12); color: #00a39b; }
+    .summary-card-text {
+        min-width: 0;
+    }
+    .summary-card-label {
+        font-size: 0.6rem;
+        letter-spacing: 0.2px;
+        line-height: 1.2;
+    }
+    .summary-card-value {
+        font-size: 1.15rem;
+        line-height: 1.1;
+        margin: 1px 0 !important;
+    }
+    .summary-card-link {
+        font-size: 0.65rem;
+    }
+
+    .info-card {
+        border-radius: 0.5rem;
+    }
+    .info-card .card-body {
+        padding: 7px 10px !important;
+    }
+    .info-card-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.72rem;
         flex-shrink: 0;
     }
     .info-card-icon.bg-danger-soft { background-color: #fdeaea; color: #dc3545; }
     .info-card-icon.bg-warning-soft { background-color: #fff8e6; color: #f0ad4e; }
     .info-card-icon.bg-navy-soft { background-color: rgba(27, 49, 82, 0.1); color: #1b3152; }
     .info-card-title {
-        font-size: 0.82rem;
+        font-size: 0.76rem;
     }
     .info-card-text {
-        font-size: 0.72rem;
-        line-height: 1.3;
+        font-size: 0.66rem;
+        line-height: 1.25;
     }
     .info-card-badge {
-        font-size: 0.75rem !important;
-        padding: 0.28rem 0.55rem !important;
-        min-width: 28px;
+        font-size: 0.68rem !important;
+        padding: 0.22rem 0.5rem !important;
+        min-width: 24px;
     }
     .info-card-alert-btn {
         pointer-events: none;
-        font-size: 0.72rem;
-        padding-top: 0.15rem;
-        padding-bottom: 0.15rem;
+        font-size: 0.66rem;
+        padding-top: 0.1rem;
+        padding-bottom: 0.1rem;
     }
 
     .tracking-steps-scroll {
@@ -169,7 +175,7 @@
     }
     .tracking-steps-inner {
         display: flex;
-        min-width: 560px;
+        min-width: 520px;
     }
     .tracking-step {
         position: relative;
@@ -178,9 +184,9 @@
         text-align: center;
     }
     .tracking-step-icon {
-        width: 30px;
-        height: 30px;
-        font-size: 0.7rem;
+        width: 28px;
+        height: 28px;
+        font-size: 0.66rem;
         text-decoration: none;
         flex-shrink: 0;
         transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -195,32 +201,37 @@
         opacity: 0.6;
     }
     .tracking-step-label {
-        font-size: 0.7rem;
+        font-size: 0.68rem;
     }
     .tracking-step-meta {
-        font-size: 0.63rem;
+        font-size: 0.61rem;
         line-height: 1.35;
     }
     .tracking-progress-line {
         height: 3px;
-        top: 14px;
+        top: 13px;
         z-index: 1;
         left: 0;
     }
 
+    @media (max-width: 991.98px) {
+        .summary-card-label {
+            font-size: 0.58rem;
+        }
+    }
+
     @media (max-width: 767.98px) {
         .dashboard-container {
-            padding: 2px 10px !important;
+            padding: 2px 8px !important;
         }
         .dashboard-title {
-            font-size: 1.15rem;
+            font-size: 1.05rem;
         }
         .dashboard-subtitle {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
         }
-
         .tracking-card .card-body {
-            padding: 12px 14px !important;
+            padding: 10px 12px !important;
         }
         .tracking-select-wrap {
             max-width: 100%;
@@ -239,10 +250,10 @@
         .tracking-step {
             display: flex;
             align-items: flex-start;
-            gap: 12px;
+            gap: 10px;
             flex: none;
             text-align: left;
-            padding-bottom: 16px;
+            padding-bottom: 14px;
         }
         .tracking-step:last-child {
             padding-bottom: 0;
@@ -250,8 +261,8 @@
         .tracking-step:not(:last-child)::after {
             content: '';
             position: absolute;
-            left: 14px;
-            top: 32px;
+            left: 13px;
+            top: 30px;
             bottom: 2px;
             width: 2px;
             background-color: #dee2e6;
@@ -270,10 +281,16 @@
             text-align: left;
         }
         .tracking-step-label {
-            font-size: 0.8rem;
+            font-size: 0.76rem;
         }
         .tracking-step-meta {
-            font-size: 0.72rem;
+            font-size: 0.68rem;
+        }
+        .info-card-text {
+            display: none;
+        }
+        .info-card .card-body {
+            padding: 6px 10px !important;
         }
     }
 
@@ -282,20 +299,20 @@
             flex-direction: column;
             justify-content: center;
             text-align: center;
-            gap: 4px;
-            padding: 8px 4px !important;
+            gap: 3px;
+            padding: 7px 4px !important;
         }
         .summary-card-icon {
-            width: 30px;
-            height: 30px;
-            font-size: 0.78rem;
+            width: 26px;
+            height: 26px;
+            font-size: 0.7rem;
         }
         .summary-card-label {
-            font-size: 0.56rem;
-            letter-spacing: 0.1px;
+            font-size: 0.55rem;
+            letter-spacing: 0;
         }
         .summary-card-value {
-            font-size: 1.15rem;
+            font-size: 1.05rem;
         }
         .summary-card-link {
             display: none !important;
@@ -315,9 +332,22 @@
     </div>
 
     <div class="row g-2 mb-2">
-        <div class="col-4">
+        <div class="col-6 col-lg-3">
+            <div class="card summary-card border-0 shadow-sm border-start border-4 border-danger info-card-clickable" data-bs-toggle="modal" data-bs-target="#modalQcOutlier">
+                <div class="card-body summary-card-body">
+                    <span class="summary-card-icon icon-merah"><i class="fas fa-exclamation-triangle"></i></span>
+                    <div class="summary-card-text">
+                        <p class="text-danger mb-0 text-uppercase fw-bold summary-card-label">QC OUTLIER (OPEN)</p>
+                        <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $totalQcOutlier }}</h3>
+                        <span class="text-danger fw-semibold d-inline-block summary-card-link">Klik untuk eksekusi</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-lg-3">
             <a href="{{ route('kegiatan.index') }}" class="info-card-link">
-                <div class="card summary-card border-0 shadow-sm border-start border-4 border-suco-biru h-100 info-card-clickable">
+                <div class="card summary-card border-0 shadow-sm border-start border-4 border-suco-biru info-card-clickable">
                     <div class="card-body summary-card-body">
                         <span class="summary-card-icon icon-biru"><i class="fas fa-flask"></i></span>
                         <div class="summary-card-text">
@@ -330,9 +360,9 @@
             </a>
         </div>
 
-        <div class="col-4">
+        <div class="col-6 col-lg-3">
             <a href="{{ route('alat.index') }}" class="info-card-link">
-                <div class="card summary-card border-0 shadow-sm border-start border-4 border-suco-biru-muda h-100 info-card-clickable">
+                <div class="card summary-card border-0 shadow-sm border-start border-4 border-suco-biru-muda info-card-clickable">
                     <div class="card-body summary-card-body">
                         <span class="summary-card-icon icon-biru-muda"><i class="fas fa-balance-scale"></i></span>
                         <div class="summary-card-text">
@@ -345,9 +375,9 @@
             </a>
         </div>
 
-        <div class="col-4">
+        <div class="col-6 col-lg-3">
             <a href="{{ route('sdm.index') }}" class="info-card-link">
-                <div class="card summary-card border-0 shadow-sm border-start border-4 border-suco-hijau h-100 info-card-clickable">
+                <div class="card summary-card border-0 shadow-sm border-start border-4 border-suco-hijau info-card-clickable">
                     <div class="card-body summary-card-body">
                         <span class="summary-card-icon icon-hijau"><i class="fas fa-id-badge"></i></span>
                         <div class="summary-card-text">
@@ -427,7 +457,7 @@
         <div class="col-md-12">
             <div class="card shadow-sm border-0 tracking-card">
                 <div class="card-header bg-navy py-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <h5 class="fw-bold mb-0 text-white" style="font-size: 0.95rem;">
+                    <h5 class="fw-bold mb-0 text-white" style="font-size: 0.85rem;">
                         <i class="fas fa-route text-white me-2"></i>Tracking Status Pengadaan Barang
                     </h5>
 
@@ -567,24 +597,24 @@
                         @endphp
 
                         <div id="track-{{ $p->permintaan_id }}" class="tracking-item" style="display: none;">
-                            <div class="row mb-3">
+                            <div class="row mb-2">
                                 <div class="col-md-12 border-bottom pb-2">
                                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
-                                        <h6 class="fw-bold mb-0 text-navy" style="font-size: 0.95rem;">
+                                        <h6 class="fw-bold mb-0 text-navy" style="font-size: 0.85rem;">
                                             {{ $p->barang->nama_barang ?? '-' }} ({{ $p->barang->kode_barang ?? 'Tanpa Kode' }})
                                         </h6>
 
                                         @if($isDitolak)
-                                            <span class="badge bg-danger" style="font-size: 0.68rem;">
+                                            <span class="badge bg-danger" style="font-size: 0.64rem;">
                                                 <i class="fas fa-times-circle me-1"></i> {{ $logTolak && $logTolak->aksi == 'batal' ? 'Dibatalkan' : 'Ditolak' }}
                                             </span>
                                         @elseif($isTerlambat)
-                                            <span class="badge bg-danger" style="font-size: 0.68rem;">
+                                            <span class="badge bg-danger" style="font-size: 0.64rem;">
                                                 <i class="fas fa-exclamation-triangle me-1"></i> Terlambat / Overdue
                                             </span>
                                         @endif
                                     </div>
-                                    <div class="text-muted" style="font-size: 0.81rem;">
+                                    <div class="text-muted" style="font-size: 0.74rem;">
                                         <span>Jumlah: <b class="text-dark">{{ (float) $p->jumlah_diminta }} {{ $p->barang->satuan ?? '' }}</b></span><br>
                                         <span>Target Waktu Pengadaan: <b class="{{ $isTerlambat ? 'text-danger' : 'text-dark' }}">{{ $p->format_target_waktu ?? '-' }}</b></span>
                                     </div>
@@ -741,4 +771,51 @@
     });
 </script>
 @endpush
+
+<div class="modal fade" id="modalQcOutlier" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white py-2">
+                <h5 class="modal-title fw-bold" style="font-size: 1rem;"><i class="fas fa-exclamation-triangle me-2"></i>Daftar Kendali Mutu Outlier</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                @if($totalQcOutlier > 0)
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm align-middle mb-0" style="font-size: 0.82rem;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Modul Verifikasi</th>
+                                    <th>Parameter</th>
+                                    <th>Tanggal</th>
+                                    <th class="text-end pe-3">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($daftarQcOutlier as $outlier)
+                                <tr>
+                                    <td class="ps-3"><span class="badge bg-secondary">{{ $outlier['modul'] }}</span></td>
+                                    <td class="fw-bold">{{ $outlier['parameter'] }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($outlier['tanggal'])->format('d M Y') }}</td>
+                                    <td class="text-end pe-3">
+                                        <a href="{{ $outlier['url'] }}" class="btn btn-sm btn-danger fw-bold">
+                                            <i class="fas fa-search me-1"></i>Investigasi
+                                        </a>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="text-center py-5">
+                        <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                        <h5 class="text-muted fw-bold">Semua Aman!</h5>
+                        <p class="text-muted mb-0">Tidak ada data outlier pengujian yang perlu diinvestigasi.</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
