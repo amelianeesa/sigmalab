@@ -81,7 +81,9 @@ class PengadaanController extends Controller
             $pathFoto = 'uploads/pengadaan/' . $filename;
         }
 
-        if (str_contains($roleName, 'analis')) {
+        $isAdminPengaju = $roleName === strtolower(PeranPengguna::ADMIN_APLIKASI->value);
+
+        if (str_contains($roleName, 'analis') || $isAdminPengaju) {
             $statusAwal = 'menunggu_koordinator';
             $pesanSukses = 'Pengajuan berhasil dibuat dan menunggu persetujuan Koordinator Lab.';
         } else {
@@ -116,6 +118,11 @@ class PengadaanController extends Controller
         $roleName = strtolower(Auth::user()->role->nama_role ?? '');
         $validated = $request->validated();
         $statusBaru = $validated['status'];
+
+        $isAdminAplikasi = $roleName === strtolower(PeranPengguna::ADMIN_APLIKASI->value);
+        if ($pengadaan->status === 'menunggu_ga' && $isAdminAplikasi && $pengadaan->diajukan_oleh == Auth::id()) {
+            return redirect()->back()->with('error', 'Pengajuan milik sendiri harus disetujui oleh GA Officer.');
+        }
 
         $isKoor = str_contains($roleName, 'koor');
         $isGaOrAdmin = str_contains($roleName, 'ga') || str_contains($roleName, 'admin');

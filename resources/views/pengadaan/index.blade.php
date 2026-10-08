@@ -606,7 +606,7 @@
                                             </div>
                                         @endif
 
-                                        @if($isGa && $p->status == 'menunggu_ga')
+                                        @if($isGa && $p->status == 'menunggu_ga' && !($isAdminAplikasi && $p->diajukan_oleh == Auth::id()))
                                             <div class="aksi-pair">
                                                 <form action="{{ route('pengadaan.approve', $p->permintaan_id) }}" method="POST">
                                                     @csrf
@@ -882,13 +882,13 @@
                             <ul class="filter-select-list">
                                 <li data-value="">-- Pilih Barang --</li>
                                 @foreach($barangList as $b)
-                                    @php
-                                        $saldoAkhir = ($b->saldo_awal + $b->penerimaan) - $b->pengeluaran;
-                                    @endphp
-                                    <li data-value="{{ $b->barang_id }}">
-                                        {{ $b->nama_barang }} (Stok saat ini: {{ $saldoAkhir }} {{ $b->satuan }})
-                                    </li>
-                                @endforeach
+                                @php
+                                    $saldoAkhir = ($b->saldo_awal + $b->penerimaan) - $b->pengeluaran;
+                                @endphp
+                                <li data-value="{{ $b->barang_id }}">
+                                    {{ $b->nama_barang }} <small>{{ $b->kode_barang }}</small> (Stok : {{ $saldoAkhir }} {{ $b->satuan }})
+                                </li>
+                            @endforeach
                             </ul>
                         </div>
                     </div>

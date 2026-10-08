@@ -351,7 +351,7 @@
                     <div class="card-body summary-card-body">
                         <span class="summary-card-icon icon-hijau"><i class="fas fa-id-badge"></i></span>
                         <div class="summary-card-text">
-                            <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">SERTIFIKASI PERSONIL H-6</p>
+                            <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">SERTIFIKASI PERSONIL H-6 BULAN</p>
                             <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $sertifikasiHampirHabis }}</h3>
                             <span class="text-suco-hijau fw-semibold d-inline-block summary-card-link">Cek Sertifikasi</span>
                         </div>
