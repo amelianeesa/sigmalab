@@ -1,3 +1,4 @@
+
 @extends('layouts.app')
 @section('title', 'Evaluasi Vendor - ' . $program->nama_program)
 
@@ -226,13 +227,13 @@
                                 <td class="text-start fw-bold">Relative Density</td>
                                 <td>db</td>
                                 <td>
-                                    <input type="text" class="form-control form-control-sm text-center bg-light" value="NA" readonly>
+                                    <input type="text" class="form-control form-control-sm text-center bg-gray" value="NA" readonly>
                                 </td>
                                 <td>
-                                    <input type="text" class="form-control form-control-sm bg-light" disabled>
+                                    <input type="text" class="form-control form-control-sm bg-gray" disabled>
                                 </td>
                                 <td>
-                                    <input type="text" class="form-control form-control-sm bg-light" disabled>
+                                    <input type="text" class="form-control form-control-sm bg-gray" disabled>
                                 </td>
                                 <td class="fw-bold">-</td>
                                 <td><span class="text-muted">-</span></td>

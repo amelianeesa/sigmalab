@@ -208,11 +208,11 @@
                 <a href="{{ route('qc-uji-banding.show', $prog->id) }}" class="btn btn-corporate-blue btn-sm qc-action-btn shadow-sm" title="Detail" aria-label="Detail">
                     <i class="fas fa-eye"></i>
                 </a>
-                @if($menunggu > 0)
+                <!-- @if($menunggu > 0)
                     <a href="{{ route('qc-uji-banding.evaluasi.form', $prog->id) }}" class="btn btn-warning btn-sm qc-action-btn shadow-sm" title="Input Hasil Vendor" aria-label="Input Hasil Vendor">
                         <i class="fas fa-chart-bar"></i>
                     </a>
-                @endif
+                @endif -->
             @endif
         </div>
     </td>
