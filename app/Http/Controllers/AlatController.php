@@ -8,6 +8,7 @@ use App\Models\RiwayatKalibrasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 use App\Models\ItemPemeliharaan;
 use App\Models\LogPemeliharaan;
@@ -76,9 +77,6 @@ class AlatController extends Controller
 
         return view('alat.index', compact('alat', 'search', 'filterStatus', 'filterKondisi', 'alatWarningCount'));
     }
-// =======
-//         $alat = $alatList;
-// >>>>>>> b160c1b1b3071010e910ae8463ddb0d6c0423ff8
 
     private function whereKalibrasiTerakhir($query, \Closure $kondisi)
     {
@@ -179,6 +177,7 @@ class AlatController extends Controller
         $alat = Alat::findOrFail($id);
 
         $request->validate([
+            'kode_alat' => ['required', 'string', 'max:50', Rule::unique('alat', 'kode_alat')->ignore($alat->alat_id, 'alat_id')],
             'no_inventaris' => 'nullable|string|max:255',
             'nama_alat' => 'required|string|max:100',
             'merk_tipe' => 'nullable|string|max:100',
@@ -208,6 +207,7 @@ class AlatController extends Controller
 
         DB::transaction(function () use ($request, $alat, $statusBarang) {
             $alat->update([
+                'kode_alat' => $request->kode_alat,
                 'nama_alat' => $request->nama_alat,
                 'no_inventaris' => $request->no_inventaris,
                 'merk_tipe' => $request->merk_tipe,
@@ -218,8 +218,6 @@ class AlatController extends Controller
                 'status_barang' => $statusBarang,
                 'unit_kerja_pemilik' => $request->unit_kerja_pemilik,
             ]);
-
-            $kalibrasiTerakhir = $alat->riwayatKalibrasi()->latest('tgl_kalibrasi')->first();
 
             $dataKalibrasi = [
                 'jenis_kalibrasi' => $request->jenis_kalibrasi,
@@ -607,23 +605,7 @@ class AlatController extends Controller
                         }
                         
                         $rowNum = 12;
-                        // foreach($this->alat->riwayatKalibrasi as $index => $row) {
-                        //     $data = [
-                        //         'Kalibrasi ke-' . ($index + 1),
-                        //         ucfirst($row->jenis_kalibrasi),
-                        //         \Carbon\Carbon::parse($row->tgl_kalibrasi)->format('d-m-Y') . ' s/d ' . \Carbon\Carbon::parse($row->tgl_akhir)->format('d-m-Y'),
-                        //         "Lembaga: " . $row->lembaga_kalibrasi . "\nSertifikat: " . $row->no_sertifikat,
-                        //         "Range: " . ($row->range_kapasitas ?? '-') . "\nKoreksi: " . ($row->faktor_koreksi ?? '-'),
-                        //         strtoupper($row->signifikan),
-                        //         $row->catatan_evaluasi ?? '-',
-                        //     ];
-                        //     foreach ($data as $col => $value) {
-                        //         $sheet->setCellValue(Coordinate::stringFromColumnIndex($col + 1) . $rowNum, $value);
-                        //     }
-                        //     $rowNum++;
-                        // }
-                        
-                        
+
                         foreach($this->alat->riwayatKalibrasi as $index => $row) {
                             $query = $this->alat->evaluasiKalibrasi()->whereDate('tanggal_evaluasi', '>=', $row->tgl_kalibrasi);
                             if (!empty($row->tgl_akhir)) {
