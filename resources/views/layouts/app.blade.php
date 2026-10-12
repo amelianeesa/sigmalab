@@ -459,7 +459,7 @@
                        role="button" 
                        aria-expanded="{{ $inventoriMenuOpen ? 'true' : 'false' }}" 
                        aria-controls="menuInventoriBarang">
-                        <span><i class="fas fa-boxes me-2"></i> Inventori Bahan/Barang</span>
+                        <span><i class="fas fa-boxes me-2"></i> Inventori Barang/Bahan</span>
                         <i class="fas fa-chevron-down small" style="font-size: 0.7rem;"></i>
                     </a>
 
@@ -701,4 +701,4 @@ $('.select2-alat, #selectAlat, #selectTracking').select2({
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     @stack('scripts')
 </body>
-</html>
+</html> 
