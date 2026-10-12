@@ -37,7 +37,7 @@ class AlatController extends Controller
         $filterStatus = $request->input('filter_status');
         $filterKondisi = $request->input('filter_kondisi');
 
-        $query = Alat::with(['riwayatKalibrasi', 'kegiatanAlat']);
+        $query = Alat::with(['riwayatKalibrasi', 'evaluasiKalibrasi', 'kegiatanAlat']);
 
         if ($search) {
             $query->where(function($q) use ($search) {
@@ -51,40 +51,50 @@ class AlatController extends Controller
             $query->where('kondisi_barang', $filterKondisi);
         }
 
-        $alatList = $query->latest()->get();
-        if ($filterStatus) {
-            $alatList = $alatList->filter(function($item) use ($filterStatus) {
-                $kalibrasiTerakhir = $item->riwayatKalibrasi->sortByDesc('tgl_kalibrasi')->first();
-                if (!$kalibrasiTerakhir || !$kalibrasiTerakhir->tgl_akhir) {
-                    return false;
-                }
-                
-                $tglAkhir = Carbon::parse($kalibrasiTerakhir->tgl_akhir);
-                $sekarang = Carbon::now()->startOfDay();
-                $sisaHari = $sekarang->diffInDays($tglAkhir, false);
+        $hariIni = Carbon::now()->startOfDay();
+        $batas180Hari = $hariIni->copy()->addDays(180);
 
+        $alatWarningCount = $this->whereKalibrasiTerakhir(clone $query, function ($q) use ($batas180Hari) {
+            $q->whereDate('tgl_akhir', '<=', $batas180Hari->toDateString());
+        })->count();
+
+        if ($filterStatus) {
+            $this->whereKalibrasiTerakhir($query, function ($q) use ($filterStatus, $hariIni, $batas180Hari) {
                 if ($filterStatus == 'kedaluarsa') {
-                    return $sisaHari < 0;
+                    $q->whereDate('tgl_akhir', '<', $hariIni->toDateString());
                 } elseif ($filterStatus == 'segera') {
-                    return $sisaHari >= 0 && $sisaHari <= 180;
+                    $q->whereDate('tgl_akhir', '>=', $hariIni->toDateString())
+                      ->whereDate('tgl_akhir', '<=', $batas180Hari->toDateString());
                 } elseif ($filterStatus == 'aktif') {
-                    return $sisaHari > 180;
+                    $q->whereDate('tgl_akhir', '>', $batas180Hari->toDateString());
                 }
-                return true;
             });
         }
 
-        $alat = $alatList;
 
-        return view('alat.index', compact('alat', 'search', 'filterStatus', 'filterKondisi'));
+        $alat = $query->latest()->paginate(10)->withQueryString();
+
+        return view('alat.index', compact('alat', 'search', 'filterStatus', 'filterKondisi', 'alatWarningCount'));
+    }
+// =======
+//         $alat = $alatList;
+// >>>>>>> b160c1b1b3071010e910ae8463ddb0d6c0423ff8
+
+    private function whereKalibrasiTerakhir($query, \Closure $kondisi)
+    {
+        $tabel = (new RiwayatKalibrasi)->getTable();
+
+        return $query->whereHas('riwayatKalibrasi', function ($q) use ($kondisi, $tabel) {
+            $q->whereNotNull('tgl_akhir')
+              ->whereRaw("{$tabel}.tgl_kalibrasi = (select max(rk.tgl_kalibrasi) from {$tabel} as rk where rk.alat_id = {$tabel}.alat_id)");
+            $kondisi($q);
+        });
     }
 
     public function create()
     {
         return view('alat.create');
     }
-
-    // public function store(Request $request)
 
     public function store(\App\Http\Requests\AlatRequest $request)
     {
@@ -100,7 +110,6 @@ class AlatController extends Controller
             'status_barang' => 'required|in:terpakai,idle',
             'unit_kerja_pemilik' => 'nullable|string|max:100',
             
-            // Ubah semua baris validasi kalibrasi di bawah ini menjadi nullable
             'no_sertifikat' => 'nullable|string|max:100',
             'file_sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'interval_kalibrasi' => 'nullable|string|max:50',
@@ -188,7 +197,6 @@ class AlatController extends Controller
             'jenis_kalibrasi' => 'nullable|in:internal,eksternal',
             'range_kapasitas' => 'nullable|string|max:100',
             'faktor_koreksi' => 'nullable|string|max:100',
-            // 'file_faktor_koreksi' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'signifikan' => 'nullable|in:ya,tidak',
             'catatan_evaluasi' => 'nullable|string',
         ]);
@@ -230,11 +238,7 @@ class AlatController extends Controller
                 $path = $request->file('file_sertifikat')->store('sertifikat_kalibrasi', 'public');
                 $dataKalibrasi['file_sertifikat'] = $path;
             }
-            
-            // if ($request->hasFile('file_faktor_koreksi')) {
-            //     $pathFaktor = $request->file('file_faktor_koreksi')->store('faktor_koreksi', 'public');
-            //     $dataKalibrasi['file_faktor_koreksi'] = $pathFaktor;
-            // }
+
             $kalibrasiTerakhir = \App\Models\RiwayatKalibrasi::where('alat_id', $alat->alat_id)->latest('tgl_kalibrasi')->first();
 
             if ($request->filled('tgl_kalibrasi')) {
@@ -322,7 +326,6 @@ class AlatController extends Controller
         ];
         if ($request->hasFile('file_sertifikat')) {
             $path = $request->file('file_sertifikat')->store('sertifikat_kalibrasi', 'public');
-            // dd($path);
             $dataKalibrasi['file_sertifikat'] = $path;
         }
         RiwayatKalibrasi::create($dataKalibrasi);
@@ -510,16 +513,30 @@ class AlatController extends Controller
     public function exportPdf($id)
     {
         $alat = Alat::with('riwayatKalibrasi')->findOrFail($id);
-        $pdf = Pdf::loadView('alat.laporan-template', compact('alat'))->setPaper('a4', 'portrait');
         
-        return $pdf->download('Laporan_' . $alat->nama_alat . '_' . $alat->kode_alat . '.pdf');
+        $user = Auth::user();
+        $namaUser = 'Publik';
+
+        if ($user) {
+            $namaUser = $user->name ?? $user->username ?? $user->nama ?? 'Analis Laboratorium';
+        }
+
+        $pdf = Pdf::loadView('alat.laporan-template', compact('alat', 'namaUser'))
+                  ->setPaper('a4', 'portrait');
         
+        return $pdf->stream('Laporan_' . $alat->nama_alat . '_' . $alat->kode_alat . '.pdf');
     }
            
     public function exportExcel($id)
     {
         $alat = Alat::with('riwayatKalibrasi')->findOrFail($id);
         $fileName = 'Laporan_' . $alat->nama_alat . '_' . $alat->kode_alat . '.xlsx';
+
+        $user = Auth::user();
+        $namaUser = 'Publik';
+        if ($user) {
+            $namaUser = $user->name ?? $user->username ?? $user->nama ?? 'Analis Laboratorium';
+        }
 
         return Excel::download(new class($alat) implements \Maatwebsite\Excel\Concerns\FromArray, WithStyles, WithColumnWidths, WithEvents {
             protected $alat;
@@ -534,13 +551,11 @@ class AlatController extends Controller
                 $startHeaderRow = 11;
                 $endRow = $startHeaderRow + $rowCount;
 
-                // 1. Bersihkan background & border area atas (baris 1-8) agar putih polos
                 $sheet->getStyle('A1:G3')->applyFromArray([
                     'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFFFFFFF']],
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_NONE]],
                 ]);
 
-                // 2. Tambahkan garis pembatas (border bawah) di baris 9 melintang dari kolom A sampai G
                 $sheet->getStyle('A3:G3')->applyFromArray([
                     'borders' => [
                         'bottom' => ['borderStyle' => Border::BORDER_MEDIUM, 
@@ -548,27 +563,24 @@ class AlatController extends Controller
                     ]
                 ]);
 
-                // 3. Styling Header Tabel (Baris 10)
                     $sheet->getStyle('A' . $startHeaderRow . ':G' . $startHeaderRow)->applyFromArray([
                     'font' => ['bold' => true],
                     'alignment' => ['horizontal' => 'center', 'vertical' => 'center'],
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                 ]);
                 
-                // 4. Border & Alignment untuk Isi Data Tabel
                     $sheet->getStyle('A' . ($startHeaderRow + 1) . ':G' . $endRow)->applyFromArray([
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                     'alignment' => ['vertical' => 'center', 'horizontal' => 'center'],
                 ]);
                 
-                // 5. Text Wrapping untuk kolom teks panjang
                 $sheet->getStyle('D' . ($startHeaderRow + 1) . ':G' . $endRow)->getAlignment()->setWrapText(true);
 
                 return [];
             }
 
             public function columnWidths(): array {
-                return ['A' => 15, 'B' => 12, 'C' => 27, 'D' => 30, 'E' => 25, 'F' => 12, 'G' => 25];
+                return ['A' => 15, 'B' => 12, 'C' => 27, 'D' => 30, 'E' => 25, 'F' => 12, 'G' => 32];
             }
 
             public function registerEvents(): array {
@@ -576,31 +588,56 @@ class AlatController extends Controller
                     AfterSheet::class => function(AfterSheet $event) {
                         $sheet = $event->sheet->getDelegate();
                         
-                        // Header Utama
                         $sheet->setCellValue('A1', 'SIGMA-LAB PT SUCOFINDO');
                         $sheet->setCellValue('A2', 'Laporan Kalibrasi Alat');
                         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(22);
                         $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(16);
                         
-                        // Info Detail Alat
                         $sheet->setCellValue('A5', 'Nama Alat'); $sheet->setCellValue('B5', ': ' . $this->alat->nama_alat);
                         $sheet->setCellValue('A6', 'Kode Alat'); $sheet->setCellValue('B6', ': ' . $this->alat->kode_alat);
                         $sheet->setCellValue('A7', 'Merk / Tipe'); $sheet->setCellValue('B7', ': ' . ($this->alat->merk_tipe ?? '-'));
                         $sheet->setCellValue('A8', 'Nomor Seri'); $sheet->setCellValue('B8', ': ' . ($this->alat->no_seri ?? '-'));
                         $sheet->setCellValue('A9', 'Unit Kerja Pemilik'); $sheet->setCellValue('B9', ': ' . ($this->alat->unit_kerja_pemilik ?? '-'));
                         
-                        // Rata kiri untuk teks informasi detail alat di baris 6 sampai 10
                         $sheet->getStyle('A5:B9')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
 
-                        // Tulis Header Tabel Manual di Baris 10
-                        $headers = ['Urutan', 'Jenis', 'Tanggal Kalibrasi s/d Akhir', 'Lembaga & Sertifikat', 'Range & Faktor Koreksi', 'Signifikan', 'Catatan / Evaluasi'];
+                        $headers = ['Urutan', 'Jenis', 'Tanggal Kalibrasi s/d Akhir', 'Lembaga & Sertifikat', 'Range & Faktor Koreksi', 'Signifikan', 'Evaluasi'];
                         foreach ($headers as $col => $value) {
                             $sheet->setCellValue(Coordinate::stringFromColumnIndex($col + 1) . '11', $value);
                         }
                         
-                        // Tulis Data Manual Mulai Baris 13
                         $rowNum = 12;
+                        // foreach($this->alat->riwayatKalibrasi as $index => $row) {
+                        //     $data = [
+                        //         'Kalibrasi ke-' . ($index + 1),
+                        //         ucfirst($row->jenis_kalibrasi),
+                        //         \Carbon\Carbon::parse($row->tgl_kalibrasi)->format('d-m-Y') . ' s/d ' . \Carbon\Carbon::parse($row->tgl_akhir)->format('d-m-Y'),
+                        //         "Lembaga: " . $row->lembaga_kalibrasi . "\nSertifikat: " . $row->no_sertifikat,
+                        //         "Range: " . ($row->range_kapasitas ?? '-') . "\nKoreksi: " . ($row->faktor_koreksi ?? '-'),
+                        //         strtoupper($row->signifikan),
+                        //         $row->catatan_evaluasi ?? '-',
+                        //     ];
+                        //     foreach ($data as $col => $value) {
+                        //         $sheet->setCellValue(Coordinate::stringFromColumnIndex($col + 1) . $rowNum, $value);
+                        //     }
+                        //     $rowNum++;
+                        // }
+                        
+                        
                         foreach($this->alat->riwayatKalibrasi as $index => $row) {
+                            $query = $this->alat->evaluasiKalibrasi()->whereDate('tanggal_evaluasi', '>=', $row->tgl_kalibrasi);
+                            if (!empty($row->tgl_akhir)) {
+                                $query->whereDate('tanggal_evaluasi', '<=', $row->tgl_akhir);
+                            }
+                            $evaluasiItem = $query->latest('tanggal_evaluasi')->first();
+
+                            $teksEvaluasi = "-";
+                            if ($evaluasiItem) {
+                                $keputusan = ucfirst(strtolower($evaluasiItem->keputusan));
+                                $komentar = $evaluasiItem->catatan ?? $evaluasiItem->komentar ?? '-';
+                                $teksEvaluasi = "Keputusan: " . $keputusan . "\nKomentar: " . $komentar;
+                            }
+
                             $data = [
                                 'Kalibrasi ke-' . ($index + 1),
                                 ucfirst($row->jenis_kalibrasi),
@@ -608,30 +645,34 @@ class AlatController extends Controller
                                 "Lembaga: " . $row->lembaga_kalibrasi . "\nSertifikat: " . $row->no_sertifikat,
                                 "Range: " . ($row->range_kapasitas ?? '-') . "\nKoreksi: " . ($row->faktor_koreksi ?? '-'),
                                 strtoupper($row->signifikan),
-                                $row->catatan_evaluasi ?? '-',
+                                $teksEvaluasi,
                             ];
+
                             foreach ($data as $col => $value) {
-                                $sheet->setCellValue(Coordinate::stringFromColumnIndex($col + 1) . $rowNum, $value);
+                                $cellCoordinate = Coordinate::stringFromColumnIndex($col + 1) . $rowNum;
+                                $sheet->setCellValue($cellCoordinate, $value);
+                                
+                                if ($col == 6) {
+                                    $sheet->getStyle($cellCoordinate)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
+                                    $sheet->getStyle($cellCoordinate)->getAlignment()->setWrapText(true);
+                                }
                             }
                             $rowNum++;
                         }
                         
-                        // Logo Perusahaan dipindah ke kolom G
                         $drawing = new Drawing();
                         $drawing->setPath(public_path('images/Logo_Suco_Nobg.png'));
                         $drawing->setHeight(70);
-                        $drawing->setCoordinates('G1'); // Posisikan di kolom G
+                        $drawing->setCoordinates('G1');
                         $drawing->setOffsetX(35);
                         $drawing->setOffsetY(5);
                         $drawing->setWorksheet($sheet);
 
-                        // Pengaturan Page Setup & Print
                         $sheet->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
                         $sheet->getPageSetup()->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4);
                         $sheet->getPageSetup()->setFitToWidth(1);
                         $sheet->getPageSetup()->setFitToHeight(0);
 
-                        // Sembunyikan Gridlines agar tampilan bersih seperti dokumen resmi
                         $sheet->setShowGridlines(false);
                     },
                 ];
@@ -646,7 +687,12 @@ class AlatController extends Controller
         $bulan = $request->get('bulan', date('m'));
         $tahun = $request->get('tahun', date('Y'));
 
-        // Ambil log pemeliharaan sesuai periode
+        $user = Auth::user();
+        $namaUser = 'Petugas Lab';
+        if ($user) {
+            $namaUser = $user->name ?? $user->username ?? $user->nama ?? 'Analis Laboratorium';
+        }
+
         $rawLogs = LogPemeliharaan::where('alat_id', $id)
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
@@ -664,11 +710,11 @@ class AlatController extends Controller
             ];
         }
 
-        $pdf = Pdf::loadView('alat.pemeliharaan-template', compact('alat', 'logs', 'bulan', 'tahun'));
+        $pdf = Pdf::loadView('alat.pemeliharaan-template', compact('alat', 'logs', 'bulan', 'tahun', 'namaUser'));
         $pdf->setPaper('A4', 'portrait');
 
         $namaAlatSafe = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $alat->nama_alat);
-        return $pdf->download('Kartu_Pemeliharaan_' . $namaAlatSafe . '_' . $alat->kode_alat . '_' . $bulan . '_' . $tahun . '.pdf');
+        return $pdf->stream('Kartu_Pemeliharaan_' . $namaAlatSafe . '_' . $alat->kode_alat . '_' . $bulan . '_' . $tahun . '.pdf');
     }
 
     public function exportPemeliharaanExcel(Request $request, $id)
@@ -680,7 +726,7 @@ class AlatController extends Controller
         $namaAlatSafe = str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $alat->nama_alat);
         $fileName = 'Kartu_Pemeliharaan_' . $namaAlatSafe . '_' . $bulan . '_' . $tahun . '_' . time() . '.xlsx';
 
-        return Excel::download(new class($alat, $bulan, $tahun) implements FromArray, WithStyles, WithColumnWidths, WithEvents {
+        return Excel::stream(new class($alat, $bulan, $tahun) implements FromArray, WithStyles, WithColumnWidths, WithEvents {
             protected $alat, $bulan, $tahun;
 
             public function __construct($alat, $bulan, $tahun) {
@@ -731,7 +777,7 @@ class AlatController extends Controller
 
             public function columnWidths(): array {
                 $widths = [
-                    'A' => 11 // Kolom Tanggal
+                    'A' => 11
                 ];
                 
                 foreach($this->alat->itemPemeliharaan as $index => $item) {
@@ -757,20 +803,17 @@ class AlatController extends Controller
                     AfterSheet::class => function(AfterSheet $event) {
                         $sheet = $event->sheet->getDelegate();
                         
-                        // Header Utama
                         $sheet->setCellValue('A1', 'KARTU PEMELIHARAAN PERALATAN');
                         $sheet->setCellValue('A2', 'SIGMA-LAB PT SUCOFINDO');
                         
                         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
                         $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(11);
                         
-                        // Info Detail Alat
                         $sheet->mergeCells('A4:B4'); $sheet->setCellValue('A4', 'Nama / Kode Peralatan'); $sheet->setCellValue('C4', ': ' . $this->alat->nama_alat . ' / ' . $this->alat->kode_alat);
                         $sheet->mergeCells('A5:B5'); $sheet->setCellValue('A5', 'Merk/No. Serial'); $sheet->setCellValue('C5', ': ' . ($this->alat->merk_tipe ?? '-') . ' / ' . ($this->alat->no_seri ?? '-'));
                         $sheet->mergeCells('A6:B6'); $sheet->setCellValue('A6', 'No. Inventaris'); $sheet->setCellValue('C6', ': ' . ($this->alat->no_inventaris ?? '-'));
                         $sheet->mergeCells('A7:B7'); $sheet->setCellValue('A7', 'Unit Kerja Pemilik'); $sheet->setCellValue('C7', ': ' . ($this->alat->lokasi_alat ?? $this->alat->unit_kerja_pemilik ?? '-'));
                         
-                        // Jenis Pemeliharaan
                         $sheet->mergeCells('A8:B8'); $sheet->setCellValue('A8', 'Jenis Pemeliharaan'); 
                         $totalItems = $this->alat->itemPemeliharaan->count();
                         if ($totalItems > 0) {
@@ -791,7 +834,6 @@ class AlatController extends Controller
 
                         $sheet->getStyle('A4:C9')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
 
-                        // header tabel
                         $sheet->mergeCells('A11:A12');
                         $sheet->setCellValue('A11', 'Tanggal');
 
@@ -863,7 +905,6 @@ class AlatController extends Controller
                             $rowNum++;
                         }
 
-                        // Logo
                         if (file_exists(public_path('images/Logo_Suco_Nobg.png'))) {
                             $drawing = new Drawing();
                             $drawing->setPath(public_path('images/Logo_Suco_Nobg.png'));
@@ -879,7 +920,7 @@ class AlatController extends Controller
                         
                         $sheet->getPageSetup()->setFitToPage(true);
                         $sheet->getPageSetup()->setFitToWidth(1);
-                        $sheet->getPageSetup()->setFitToHeight(1); // Memaksa seluruh isi tabel sampai tanggal 31 muat dalam 1 halaman penuh
+                        $sheet->getPageSetup()->setFitToHeight(1);
 
                         $sheet->setShowGridlines(false);
                     },
@@ -887,76 +928,4 @@ class AlatController extends Controller
             }
         }, $fileName);
     }
-
-    // public function storePerbaikan(Request $request, $id)
-    // {
-    //     $request->validate([
-    //         'tanggal_rusak' => 'required|date',
-    //         'deskripsi_kerusakan' => 'required|string',
-    //     ]);
-
-    //     $alat = Alat::findOrFail($id);
-
-    //     RiwayatPerbaikanAlat::create([
-    //         'alat_id' => $alat-> alat_id,
-    //         'tanggal_rusak' => $request->tanggal_rusak,
-    //         'deskripsi_kerusakan' => $request->deskripsi_kerusakan,
-    //         'dilaporkan_oleh' => Auth::id(),
-    //         'status_perbaikan' => 'Belum Diperbaiki'
-    //     ]);
-
-    //     $alat->update([
-    //         'kondisi_barang' => 'perbaikan',
-    //         'status_barang' => 'idle'
-    //     ]);
-
-    //     return redirect()->back()->with('success', 'Laporan kerusakan alat berhasil dicatat');
-    // }
-
-    // public function updatePerbaikan(Request $request, $id, $perbaikan_id)
-    // {
-    //     $perbaikan = RiwayatPerbaikanAlat::findOrFail($perbaikan_id);
-    //     $alat = Alat::findOrFail($id);
-        
-    //     $request->validate([
-    //         'status_perbaikan' => 'required|string|in:Dalam Perbaikan,Selesai,Tidak Bisa Diperbaiki',
-    //         'tindakan_perbaikan' => 'nullable|string',
-    //         'tanggal_selesai' => 'nullable|date',
-    //     ]);
-
-    //     if ($request->status_perbaikan === 'Selesai' || $request->status_perbaikan === 'Tidak Bisa Diperbaiki') {
-    //         if (Auth::user()->role->nama_role !== \App\Enums\PeranPengguna::KOORDINATOR_LAB->value) {
-    //             return redirect()->back()->withErrors(['message' => 'Hanya Koordinator Lab yang dapat memverifikasi penyelesaian perbaikan.']);
-    //         }
-    //         $perbaikan->diverifikasi_oleh = Auth::id();
-    //         if (!$request->tanggal_selesai) {
-    //             $perbaikan->tanggal_selesai = now();
-    //         }
-            
-    //         if ($request->status_perbaikan === 'Selesai') {
-    //             $alat->update([
-    //                 'kondisi_barang' => 'baik',
-    //                 'status_barang' => 'idle' 
-    //         ]);
-    //         }elseif ($request->status_perbaikan === 'Tidak Bisa Diperbaiki') {
-    //             $alat->update([
-    //                 'kondisi_barang' => 'rusak',
-    //                 'status_barang' => 'idle'
-    //         ]);
-    //         }
-    //     }elseif ($request->status_perbaikan === 'Dalam Perbaikan') {
-    //         $alat->update([
-    //             'kondisi_barang' => 'perbaikan',
-    //             'status_barang' => 'idle'
-    //     ]);
-    //     }
-
-    //     $perbaikan->update([
-    //         'status_perbaikan' => $request->status_perbaikan,
-    //         'tindakan_perbaikan' => $request->tindakan_perbaikan,
-    //         'tanggal_selesai' => $request->tanggal_selesai ?? $perbaikan->tanggal_selesai,
-    //     ]);
-
-    //     return redirect()->back()->with('success', 'Status perbaikan berhasil diperbarui');
-    // }
 }

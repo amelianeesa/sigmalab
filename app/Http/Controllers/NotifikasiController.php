@@ -1,9 +1,9 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use App\Models\Notifikasi;
 
 class NotifikasiController extends Controller
@@ -47,6 +47,7 @@ class NotifikasiController extends Controller
             
         return response()->json(['count' => $count]);
     }
+
     public function klikNotifikasi($id)
     {
         $notif = Notifikasi::query()
@@ -58,6 +59,22 @@ class NotifikasiController extends Controller
             $notif->update(['is_read' => true]);
         }
 
-        return redirect($notif->url ?? route('notifikasi.index'));
+        if (!empty($notif->url)) {
+            return redirect($notif->url);
+        }
+
+        $pesan = strtolower($notif->pesan);
+
+        $tujuan = match ($notif->jenis_notifikasi) {
+            'stok' => str_contains($pesan, 'pengajuan') || str_contains($pesan, 'pengadaan')
+                ? route('pengadaan.index')
+                : route('barang.index'),
+            'qc' => route('verifikasi-mutu.index'),
+            'kalibrasi', 'perbaikan' => route('alat.index'),
+            'sertifikasi' => route('sdm.index'),
+            default => route('notifikasi.index'),
+        };
+
+        return redirect($tujuan);
     }
 }

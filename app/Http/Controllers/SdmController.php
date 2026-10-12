@@ -14,9 +14,20 @@ use Illuminate\Support\Str;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AkunLoginMail;
 
 class SdmController extends Controller
 {
+    private function pastikanBisaKelola(): void
+    {
+        abort_unless(
+            Auth::user()->bisaKelolaSdm(),
+            403,
+            'Anda hanya memiliki akses lihat untuk data personil.'
+        );
+    }
+
     public function index()
     {
         $showInactive = request('status') === 'nonaktif';
@@ -64,7 +75,7 @@ class SdmController extends Controller
 
         $selectedPersonil = $personil->getCollection()->firstWhere('personil_id', request('personil_id'));
         $kategoriOptions = KategoriPersonil::options();
-        $roles = Role::all();
+        $roles = Auth::user()->bisaBuatAkun() ? Role::all() : collect();
 
         return view('sdm.index', compact(
             'personil',
@@ -101,6 +112,8 @@ class SdmController extends Controller
 
     public function create()
     {
+        $this->pastikanBisaKelola();
+
         $kategoriOptions = KategoriPersonil::options();
 
         return view('sdm.create', compact('kategoriOptions'));
@@ -108,6 +121,8 @@ class SdmController extends Controller
 
     public function store(Request $request)
     {
+        $this->pastikanBisaKelola();
+
         $request->validate([
             'no_induk' => 'required|unique:personil,no_induk',
             'nama' => 'required|string|max:100',
@@ -138,7 +153,7 @@ class SdmController extends Controller
                 'status_aktif' => true,
             ]);
 
-            if ($request->filled('nama_sertifikasi') && Auth::user()->role->nama_role !== 'Admin Lab') {
+            if ($request->filled('nama_sertifikasi')) {
                 $tanggalTerbit = Carbon::parse($request->input('tanggal_terbit') ?: today()->toDateString());
 
                 KompetensiPersonil::create([
@@ -156,6 +171,8 @@ class SdmController extends Controller
 
     public function edit($id)
     {
+        $this->pastikanBisaKelola();
+
         $personil = Personil::with(['kompetensi' => fn($query) => $query->orderByDesc('tanggal_terbit')])->findOrFail($id);
         $sertifikasi = $personil->kompetensi->first();
         $kategoriOptions = KategoriPersonil::options();
@@ -165,6 +182,8 @@ class SdmController extends Controller
 
     public function update(Request $request, $id)
     {
+        $this->pastikanBisaKelola();
+
         $personil = Personil::findOrFail($id);
 
         $request->validate([
@@ -180,10 +199,7 @@ class SdmController extends Controller
             'tanggal_berakhir' => 'nullable|date|after_or_equal:tanggal_terbit',
         ]);
 
-        $userRole = Auth::user()->role->nama_role;
-
         if ($request->hasFile('file_cv')) {
-            abort_if($userRole === 'Admin Lab', 403, 'Admin Lab tidak diizinkan mengunggah/mengubah file CV.');
             if ($personil->file_cv && Storage::disk('local')->exists('public/uploads/cv/' . $personil->file_cv)) {
                 Storage::disk('local')->delete('public/uploads/cv/' . $personil->file_cv);
             }
@@ -192,7 +208,7 @@ class SdmController extends Controller
             $personil->file_cv = $cvName;
         }
 
-        DB::transaction(function () use ($personil, $request, $userRole) {
+        DB::transaction(function () use ($personil, $request) {
             $personil->update([
                 'no_induk' => $request->no_induk,
                 'nama' => $request->nama,
@@ -201,7 +217,7 @@ class SdmController extends Controller
                 'unit_kerja' => $request->unit_kerja,
             ]);
 
-            if ($request->filled('nama_sertifikasi') && $userRole !== 'Admin Lab') {
+            if ($request->filled('nama_sertifikasi')) {
                 $dataSertifikasi = [
                     'jenis_sertifikasi' => $request->nama_sertifikasi,
                     'no_sertifikasi' => $request->no_sertifikasi,
@@ -227,6 +243,8 @@ class SdmController extends Controller
 
     public function storeKategori(Request $request)
     {
+        $this->pastikanBisaKelola();
+
         $data = $request->validate([
             'nama_kategori' => 'required|string|max:100|unique:kategori_personil,nama_kategori',
             'redirect_to' => 'nullable|string',
@@ -248,6 +266,8 @@ class SdmController extends Controller
 
     public function destroyKategori(Request $request, $kode)
     {
+        $this->pastikanBisaKelola();
+
         $kategori = KategoriPersonil::where('kode', $kode)->firstOrFail();
 
         $dipakai = Personil::where('kategori_personil', $kode)->exists();
@@ -266,7 +286,7 @@ class SdmController extends Controller
 
     public function destroy($id)
     {
-        abort_if(Auth::user()->role->nama_role === 'Admin Lab', 403, 'Admin Lab tidak diizinkan menghapus data personil.');
+        $this->pastikanBisaKelola();
 
         $personil = Personil::findOrFail($id);
 
@@ -280,6 +300,8 @@ class SdmController extends Controller
 
     public function activate($id)
     {
+        $this->pastikanBisaKelola();
+
         $personil = Personil::findOrFail($id);
 
         DB::transaction(function () use ($personil) {
@@ -292,7 +314,7 @@ class SdmController extends Controller
 
     public function storeAkun(Request $request, $id)
     {
-        abort_if(Auth::user()->role->nama_role === 'Admin Lab', 403, 'Admin Lab tidak diizinkan membuat akun pengguna.');
+        abort_unless(Auth::user()->bisaBuatAkun(), 403, 'Anda tidak diizinkan membuat akun pengguna.');
 
         $personil = Personil::findOrFail($id);
 
@@ -301,24 +323,35 @@ class SdmController extends Controller
         $data = $request->validate([
             'username' => 'required|string|max:50|unique:users,username',
             'email' => 'required|email|max:100|unique:users,email',
-            'password' => 'required|string|min:6',
             'role_id' => 'required|exists:roles,roles_id',
         ]);
 
-        User::create([
+        $passwordSementara = Str::password(10, symbols: false);
+
+        $user = User::create([
             'personil_id' => $personil->personil_id,
             'username' => $data['username'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'password' => Hash::make($passwordSementara),
             'role_id' => $data['role_id'],
             'status_aktif' => true,
+            // 'must_change_password' => true,
         ]);
 
-        return redirect()->route('sdm.index')->with('success', 'Akun login untuk ' . $personil->nama . ' berhasil dibuat.');
+        Mail::to($user->email)->send(new AkunLoginMail(
+            $personil->nama,
+            $user->username,
+            $user->email,
+            $passwordSementara
+        ));
+
+        return redirect()->route('sdm.index')->with('success', 'Akun login untuk ' . $personil->nama . ' berhasil dibuat. Password sementara telah dikirim ke email pengguna.');
     }
 
     public function forceDestroy($id)
     {
+        $this->pastikanBisaKelola();
+
         $personil = Personil::where('status_aktif', false)->findOrFail($id);
         $fileCv = $personil->file_cv;
 
@@ -349,6 +382,8 @@ class SdmController extends Controller
 
     public function storeKompetensi(Request $request, $id)
     {
+        $this->pastikanBisaKelola();
+
         $personil = Personil::findOrFail($id);
         $data = $request->validate([
             'jenis_sertifikasi' => 'required|string|max:100',
@@ -372,6 +407,8 @@ class SdmController extends Controller
 
     public function updateKompetensi(Request $request, $id, $kompetensiId)
     {
+        $this->pastikanBisaKelola();
+
         $personil = Personil::findOrFail($id);
         $kompetensi = $personil->kompetensi()->findOrFail($kompetensiId);
         $data = $request->validate([
@@ -404,6 +441,8 @@ class SdmController extends Controller
 
     public function destroyKompetensi($id, $kompetensiId)
     {
+        $this->pastikanBisaKelola();
+
         $personil = Personil::findOrFail($id);
         $personil->kompetensi()->findOrFail($kompetensiId)->delete();
 
@@ -430,6 +469,8 @@ class SdmController extends Controller
 
     public function uploadKompetensiFile(Request $request, $id, $kompetensiId)
     {
+        $this->pastikanBisaKelola();
+
         $personil = Personil::findOrFail($id);
         $kompetensi = $personil->kompetensi()->findOrFail($kompetensiId);
 

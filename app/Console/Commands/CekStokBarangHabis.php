@@ -21,9 +21,6 @@ class CekStokBarangHabis extends Command
         $barangs = Barang::all();
         $enamBulanLagi = Carbon::now()->addMonths(6);
 
-        // Role penerima reminder "tolong ajukan pengadaan" — pakai Enum, BUKAN string manual,
-        // supaya nama role selalu sinkron dengan tabel roles (sebelumnya 'Koordinator Lab' typo,
-        // seharusnya 'Koordinator Laboratorium', jadi Koordinator Lab tidak pernah kebagian notifikasi).
         $rolePenerima = [
             PeranPengguna::ANALIS->value,
             PeranPengguna::KOORDINATOR_LAB->value,
@@ -37,7 +34,6 @@ class CekStokBarangHabis extends Command
             $perluNotif = false;
             $statusPesan = '';
 
-            // Cek kondisi Stok Minim/Habis ATAU Kadaluarsa <= 6 bulan lagi
             if ($sisaStok <= $minStock) {
                 $statusPesan = "Stok Menipis/Habis (Sisa: {$sisaStok}, Min: {$minStock})";
                 $perluNotif = true;
@@ -52,16 +48,6 @@ class CekStokBarangHabis extends Command
 
             $pesan = "Perhatian! Barang \"{$barang->nama_barang}\" (Kode: {$barang->kode_barang}) {$statusPesan}. Silakan ajukan pengadaan.";
 
-            // Reminder berkelanjutan: dikirim ulang tiap 1 bulan (30 hari) selama kondisi
-            // (stok menipis / mendekati exp) masih berlaku. Dicek per-barang, jadi kalau sudah
-            // diajukan & saldo/exp diperbarui, siklus reminder untuk barang itu otomatis berhenti.
-            //
-            // ⬅️ FIX: tambah filter frasa "Silakan ajukan pengadaan" karena jenis_notifikasi 'stok'
-            // juga dipakai oleh notifikasi lain yang menyebut nama barang yang sama, misalnya notif
-            // ke GA/Kabid saat ada pengajuan (lihat PengadaanController::notifikasiInAppGAAndKabid
-            // & notifikasiKeKoordinator). Tanpa filter ini, begitu ada orang mengajukan pengadaan
-            // untuk barang X, sistem salah kira "reminder bulan ini sudah terkirim" untuk barang X,
-            // sehingga siklus reminder 6 bulan bisa berhenti lebih awal dari seharusnya.
             $notifBulanIni = !$this->option('force') && DB::table('notifikasi')
                 ->where('jenis_notifikasi', 'stok')
                 ->where('pesan', 'LIKE', '%Silakan ajukan pengadaan%')
@@ -77,6 +63,8 @@ class CekStokBarangHabis extends Command
                 $q->whereIn('nama_role', $rolePenerima);
             })->whereNotNull('email')->get();
 
+            $url = route('barang.index', ['search' => $barang->kode_barang], false);
+
             foreach ($penerima as $user) {
                 Mail::to($user->email)->send(new BarangStokHabis($barang, $statusPesan));
 
@@ -84,6 +72,7 @@ class CekStokBarangHabis extends Command
                     'users_id'         => $user->users_id,
                     'jenis_notifikasi' => 'stok',
                     'pesan'            => $pesan,
+                    'url'              => $url,
                     'is_read'          => 0,
                     'created_at'       => now(),
                 ]);

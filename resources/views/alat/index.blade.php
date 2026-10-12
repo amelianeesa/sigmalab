@@ -2,7 +2,72 @@
 @section('title', 'Daftar - Alat')
 
 @section('content')
-<div class="container-fluid px-4">
+<style>
+    .dashboard-container {
+        padding: 4px 20px !important;
+    }
+
+    .dashboard-card {
+        padding: 12px !important;
+    }
+
+    .card-body {
+        padding: 10px !important;
+    }
+
+    .table th, .table td {
+        padding: 8px 10px !important;
+        vertical-align: middle !important;
+        font-size: 0.72rem !important;
+    }
+    
+    .table thead th {
+        font-size: 0.75rem !important;
+        background-color: #1b3152 !important;
+        color: #ffffff !important;
+        border-color: #ffffff !important;
+    }
+
+    .table-bordered > :not(caption) > * > * {
+        border-color: #dee2e6;
+    }
+    .table thead.table-dark th, 
+    .table thead th {
+        border-color: #ffffff !important;
+    }
+
+    .btn-corporate-blue {
+        background-color: #1b3152 !important;
+        border-color: #1b3152 !important;
+        color: #ffffff !important;
+    }
+    .btn-corporate-blue:hover, 
+    .btn-corporate-blue:focus, 
+    .btn-corporate-blue:active {
+        background-color: #14253e !important;
+        border-color: #14253e !important;
+        color: #ffffff !important;
+    }
+
+    .alat-action-btn {
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        padding: 0 !important;
+        border-radius: 6px;
+    }
+
+    .pagination .page-link {
+        font-size: 0.72rem;
+        padding: 0.2rem 0.55rem;
+    }
+</style>
+
+<div class="container-fluid dashboard-container" style="font-size: 0.82rem;">
+
     @php
         $alatWarningCount = 0;
         foreach($alat as $item) {
@@ -15,40 +80,46 @@
                 }
             }
         }
+
+        $allowedRoles = ['Admin Aplikasi', 'Analis Lab', 'Koordinator Laboratorium', 'GA'];
+        $userRoleName = Auth::user()->role->nama_role ?? '';
+        $canModify = in_array($userRoleName, $allowedRoles);
     @endphp
 
+
     @if($alatWarningCount > 0)
-        <div class="alert alert-warning alert-dismissible fade show shadow-sm" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i> <strong>Perhatian!</strong> Terdapat <strong>{{ $alatWarningCount }} alat</strong> yang masa kalibrasinya sudah kadaluwarsa atau akan segera berakhir (dalam 180 hari ke depan). Mohon segera jadwalkan kalibrasi ulang
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="alert alert-warning alert-dismissible fade show shadow-sm py-1 px-2.5 mb-2 d-flex align-items-center justify-content-between" role="alert" style="font-size: 0.8rem;">
+            <div class="pe-2">
+                <i class="fas fa-exclamation-triangle me-1"></i> <strong>Perhatian!</strong> Terdapat <strong>{{ $alatWarningCount }} alat</strong> yang masa kalibrasinya sudah kadaluwarsa atau akan segera berakhir (dalam 180 hari ke depan). Mohon segera jadwalkan kalibrasi ulang.
+            </div>
+            <button type="button" class="btn-close m-0 p-2" data-bs-dismiss="alert" aria-label="Close" style="transform: scale(0.75); position: absolute; right: 15px; top: 50%; transform: translateY(-50%) scale(0.8);"></button>
         </div>
     @endif
 
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div><i class="fas fa-tools me-1"></i> Data Master Alat & Informasi Kalibrasi</div>
-            
-            <div class="d-flex align-items-center gap-2">
-                <a href="{{ route('inventori.monitoring.index') }}" class="btn btn-success btn-sm fw-bold">
-                    <i class="fas fa-thermometer-half me-1"></i> Monitoring Ruangan
-                </a>
-
-                @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
-                <a href="{{ route('alat.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Tambah Alat</a>
-                @endif
-            </div>
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h5 class="fw-bold mb-0 text" style="font-size: 1.1rem;">
+             Data Alat & Informasi Kalibrasi
+        </h5>
+        
+        <div class="d-flex align-items-center gap-2">
+            @if($canModify)
+            <a href="{{ route('alat.create') }}" class="btn btn-corporate-blue btn-sm py-1.5 px-3 shadow-sm fw-semibold" style="font-size: 0.8rem;"><i class="fas fa-plus me-1"></i> Tambah Alat</a>
+            @endif
         </div>
+    </div>
+
+    <div class="card mb-4 border-0 shadow-sm">
         <div class="card-body">
 
             <form action="{{ route('alat.index') }}" method="GET" id="filterForm" class="row g-2 mb-3 align-items-center">
                 <div class="col-md-5">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" name="search" id="searchInput" class="form-control" placeholder="Cari Nama Alat, Kode, atau Merk..." value="{{ $search ?? '' }}" autocomplete="off">
+                        <input type="text" name="search" id="searchInput" class="form-control form-control-sm py-1.5" placeholder="Cari Nama Alat, Kode, atau Merk..." value="{{ $search ?? '' }}" autocomplete="off" style="font-size: 0.82rem;">
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <select name="filter_status" id="filterStatus" class="form-select form-select-sm">
+                    <select name="filter_status" id="filterStatus" class="form-select form-select-sm py-1.5">
                         <option value="">-- Filter Status Kalibrasi --</option>
                         <option value="aktif" {{ (isset($filterStatus) && $filterStatus == 'aktif') ? 'selected' : '' }}>Aktif (> 180 Hari)</option>
                         <option value="segera" {{ (isset($filterStatus) && $filterStatus == 'segera') ? 'selected' : '' }}>Segera Berakhir (&le; 180 Hari)</option>
@@ -56,7 +127,7 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <select name="filter_kondisi" id="filterKondisi" class="form-select form-select-sm">
+                    <select name="filter_kondisi" id="filterKondisi" class="form-select form-select-sm py-1.5">
                         <option value="">-- Filter Kondisi Alat --</option>
                         <option value="baik" {{ (isset($filterKondisi) && $filterKondisi == 'baik') ? 'selected' : '' }}>Baik</option>
                         <option value="perbaikan" {{ (isset($filterKondisi) && $filterKondisi == 'perbaikan') ? 'selected' : '' }}>Perbaikan</option>
@@ -64,29 +135,29 @@
                     </select>
                 </div>
                 <div class="col-md-1 d-flex gap-1">
-                    <a href="{{ route('alat.index') }}" class="btn btn-outline-secondary btn-sm w-100" title="Reset"><i class="fas fa-sync-alt"></i></a>
+                    <a href="{{ route('alat.index') }}" class="btn btn-outline-secondary btn-sm w-100 py-1.5" title="Reset"><i class="fas fa-sync-alt"></i></a>
                 </div>
             </form>
 
             <div class="table-responsive" id="table-container">
-                <table class="table table-bordered table-striped align-middle text-center" style="font-size: 0.73rem;">
-                    <thead class="table-dark align-middle">
+                <table class="table table-bordered table-striped align-middle text-center mb-0" style="font-size: 0.78rem;">
+                    <thead class="align-middle">
                         <tr>
-                            <th rowspan="2" style="width: 40px;">No.</th>
-                            <th rowspan="2" style="width: 80px;">QR Code</th>
-                            <th rowspan="2">Nama Alat</th>
-                            <th rowspan="2">CODE</th>
-                            <th rowspan="2" style="min-width: 105px;">No. Inventaris</th>
+                            <th rowspan="2" class="sticky-no" style="width: 45px;">No.</th>
+                            <th rowspan="2" class="sticky-alat" style="width: 200px;">Alat</th>
+                            <th rowspan="2" style="width: 65px;">QR Code</th>
+                            <th rowspan="2" style="min-width: 100px;">No. Inventaris</th>
                             <th colspan="5">Spesifikasi</th>
                             <th rowspan="2">Kondisi Alat</th>
                             <th rowspan="2">Status Alat</th>
-                            <th rowspan="2" style="min-width: 105px;">No. Sertifikat/<br>Perijinan</th>
+                            <th rowspan="2" style="width: 110px; max-width: 110px; background-color: #1b3152;">Keputusan Evaluasi</th>
+                            <th rowspan="2" style="min-width: 100px;">No. Sertifikat/<br>Perijinan</th>
                             <th rowspan="2">Interval Kalibrasi</th>
                             <th colspan="2">Periode Kalibrasi/<br>Perijinan</th>
-                            <th rowspan="2" style="min-width: 105px;">Unit Kerja Pemilik</th>
-                            <th rowspan="2" style="min-width: 105px;">Lembaga Kalibrasi</th>
+                            <th rowspan="2" style="min-width: 100px;">Unit Kerja Pemilik</th>
+                            <th rowspan="2" style="min-width: 100px;">Lembaga Kalibrasi</th>
                             <th colspan="4">Kalibrasi</th>
-                            <th rowspan="2">Aksi</th>
+                            <th rowspan="2" style="min-width: 130px;">Aksi</th>
                         </tr>
                         <tr>
                             <th>Merk / Type</th>
@@ -94,12 +165,12 @@
                             <th>Warna</th>
                             <th>Ukuran</th>
                             <th>Unit Pemilik</th>
-                            <th style="min-width: 100px;">Tgl Kalibrasi</th>
-                            <th style="min-width: 110px;">Masa Berakhir<br>Kalibrasi</th>
-                            <th style="min-width: 100px;">Jenis Kalibrasi</th>
-                            <th style="min-width: 80px;">Range / Kapasitas</th>
-                            <th style="min-width: 95px;">Faktor Koreksi</th>
-                            <th style="min-width: 80px;">Signifikan (Ya/Tidak)</th>
+                            <th style="min-width: 95px;">Tgl Kalibrasi</th>
+                            <th style="min-width: 105px;">Masa Berakhir<br>Kalibrasi</th>
+                            <th style="min-width: 95px;">Jenis Kalibrasi</th>
+                            <th style="min-width: 75px;">Range / Kapasitas</th>
+                            <th style="min-width: 90px;">Faktor Koreksi</th>
+                            <th style="min-width: 75px;">Signifikan (Ya/Tidak)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -109,6 +180,8 @@
                             $jenisKalibrasi = optional($kalibrasiTerakhir)->jenis_kalibrasi;
                             $signifikan = optional($kalibrasiTerakhir)->signifikan;
 
+                            $evaluasiTerakhir = $item->evaluasiKalibrasi->sortByDesc('tanggal_evaluasi')->first();
+
                             $statusKalibrasiBadge = '';
                             if ($kalibrasiTerakhir && $kalibrasiTerakhir->tgl_akhir) {
                                 $tglAkhir = \Carbon\Carbon::parse($kalibrasiTerakhir->tgl_akhir);
@@ -116,19 +189,25 @@
                                 $sisaHari = $sekarang->diffInDays($tglAkhir, false);
 
                                 if ($sisaHari < 0) {
-                                    $statusKalibrasiBadge = '<span class="badge bg-danger mt-1 d-block px-2 py-1" style="font-size: 0.62rem;"><i class="fas fa-times-circle"></i> Kedaluarsa</span>';
+                                    $statusKalibrasiBadge = '<span class="badge bg-danger mt-1 d-block px-2 py-1" style="font-size: 0.65rem;"><i class="fas fa-times-circle"></i> Kedaluarsa</span>';
                                 } elseif ($sisaHari <= 180) {
-                                    $statusKalibrasiBadge = '<span class="badge bg-warning text-dark mt-1 d-block px-2 py-1" style="font-size: 0.62rem;" title="Sisa ' . $sisaHari . ' hari lagi"><i class="fas fa-clock"></i> Segera Berakhir (' . $sisaHari . 'h)</span>';
+                                    $statusKalibrasiBadge = '<span class="badge bg-warning text-dark mt-1 d-block px-2 py-1" style="font-size: 0.65rem;" title="Sisa ' . $sisaHari . ' hari lagi"><i class="fas fa-clock"></i> Segera Berakhir (' . $sisaHari . 'h)</span>';
                                 }
                             }
 
                             $qrData = route('alat.public-scan', $item->kode_alat);
 
                             $qrSvgCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(40)->generate($qrData);
-                            $qrSvgLarge = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(250)->generate($qrData);
+                            $qrSvgLarge = \SimpleSoftwareIO\QrCode\Facades\QrCode::size(160)->generate($qrData);
                         @endphp
                         <tr>
-                            <td>{{ $index + 1 }}</td>
+                            <td class="sticky-no">{{ $alat->firstItem() + $index }}</td>
+                            <td class="sticky-alat text-start fw-bold">
+                                <a href="{{ route('alat.input-kalibrasi', $item->alat_id) }}" class="text-decoration-none text-primary" title="Buka Halaman Kalibrasi">
+                                    {{ $item->nama_alat }} <i class="fas fa-external-link-alt ms-1" style="font-size: 0.6rem;"></i>
+                                </a>
+                                <div class="fw-normal text-muted" style="font-size: 0.7rem;">Code: <code class="text-dark">{{ $item->kode_alat }}</code></div>
+                            </td>
                             <td>
                                 <div class="p-1 bg-white d-inline-block shadow-sm rounded qr-thumbnail"
                                      style="cursor: pointer;"
@@ -141,36 +220,54 @@
                                     {!! $qrSvgCode !!}
                                 </div>
                             </td>
-                            <td class="fw-bold text-start">
-                                <a href="{{ route('alat.input-kalibrasi', $item->alat_id) }}" class="text-decoration-none text-primary" title="Buka Detail & Kalibrasi Alat">
-                                    {{ $item->nama_alat }} <i class="fas fa-external-link-alt ms-1" style="font-size: 0.6rem;"></i>
-                                </a>
-                            </td>
-                            <td><code class="fw-bold">{{ $item->kode_alat }}</code></td>
                             <td>{{ $item->no_inventaris ?? '-' }}</td>
-                            {{-- <td>{{ $kalibrasiTerakhir->interval_kalibrasi ?? '-' }}</td> --}}
                             <td class="text-center">{{ $item->merk_tipe ?? '-' }}</td>
                             <td>{{ $item->no_seri ?? '-' }}</td>
                             <td>{{ $item->warna ?? '-' }}</td>
                             <td>{{ $item->ukuran ?? '-' }}</td>
                             <td>{{ $item->unit_kerja_pemilik ?? '-' }}</td>
                             <td>
-                                <span class="badge bg-{{ $item->kondisi_barang == 'baik' ? 'success' : 'danger' }}">
+                                <span class="badge bg-{{ $item->kondisi_barang == 'baik' ? 'success' : 'danger' }}" style="font-size: 0.7rem;">
                                     {{ ucfirst($item->kondisi_barang) }}
                                 </span>
                             </td>
                             <td>
-                                <span class="badge bg-{{ $item->status_barang == 'terpakai' ? 'primary' : 'secondary' }}">
+                                <span class="badge bg-{{ $item->status_barang == 'terpakai' ? 'primary' : 'secondary' }}" style="font-size: 0.7rem;">
                                     {{ ucfirst($item->status_barang) }}
                                 </span>
                             </td>
                             <td>
+                                @if($evaluasiTerakhir)
+                                    @php
+                                        $keputusanLower = strtolower($evaluasiTerakhir->keputusan);
+                                        $badgeBg = 'secondary';
+                                        
+                                        if (str_contains($keputusanLower, 'layak') && !str_contains($keputusanLower, 'tidak') && !str_contains($keputusanLower, 'faktor') && !str_contains($keputusanLower, 'penambahan')) {
+                                            $badgeBg = 'success';
+                                        } elseif (str_contains($keputusanLower, 'faktor') || str_contains($keputusanLower, 'penambahan')) {
+                                            $badgeBg = 'warning text-dark'; 
+                                        } elseif (str_contains($keputusanLower, 'tidak')) {
+                                            $badgeBg = 'danger';
+                                        }
+                                    @endphp
+                                    <a href="{{ route('evaluasi-kalibrasi.show', $evaluasiTerakhir->evaluasi_id) }}" class="text-decoration-none" title="Klik untuk melihat detail evaluasi">
+                                        <span class="badge bg-{{ $badgeBg }}" style="font-size: 0.55rem; padding: 0.3em 0.4em; white-space: normal; display: inline-block; max-width: 95px; word-break: break-word; line-height: 1.2;">
+                                            {{ strtoupper($evaluasiTerakhir->keputusan) }}
+                                        </span>
+                                    </a>
+                                    <div class="text-muted mt-1" style="font-size: 0.62rem;">
+                                        {{ \Carbon\Carbon::parse($evaluasiTerakhir->tanggal_evaluasi)->format('d/m/Y') }}
+                                    </div>
+                                @else
+                                    <span class="badge bg-light text-muted border" style="font-size: 0.62rem;">Belum Evaluasi</span>
+                                @endif
+                            </td>
+                            <td>
                                 {{ $kalibrasiTerakhir->no_sertifikat ?? '-' }}
-
                                 @if(!empty($kalibrasiTerakhir->file_sertifikat))
                                     <div class="mt-1">
-                                        <a href="{{ asset('storage/' . $kalibrasiTerakhir->file_sertifikat) }}" target="_blank" class="btn btn-outline-primary btn-sm py-0 px-1" style="font-size: 0.65rem;" title="Lihat Sertifikat">
-                                            <i class="fas fa-file-alt"></i> Lihat Sertifikat
+                                        <a href="{{ asset('storage/' . $kalibrasiTerakhir->file_sertifikat) }}" target="_blank" class="btn btn-outline-primary btn-sm py-0.5 px-1.5" style="font-size: 0.65rem;" title="Lihat Sertifikat">
+                                            <i class="fas fa-file-alt"></i> Lihat
                                         </a>
                                     </div>
                                 @endif
@@ -185,65 +282,82 @@
                             <td>{{ $kalibrasiTerakhir->lembaga_kalibrasi ?? '-' }}</td>
                             <td>{{ $jenisKalibrasi ? ucfirst($jenisKalibrasi) : '-' }}</td>
                             <td>{{ $kalibrasiTerakhir->range_kapasitas ?? '-' }}</td>
-                            <td>{{ $kalibrasiTerakhir->faktor_koreksi ?? '-' }}
-                                {{-- @if(!empty($kalibrasiTerakhir->file_faktor_koreksi))
-                                    <div class="mt-1">
-                                        <a href="{{ asset('storage/' . $kalibrasiTerakhir->file_faktor_koreksi) }}" target="_blank" class="btn btn-outline-primary btn-sm py-0 px-1" style="font-size: 0.65rem;" title="Lihat Dokumen Faktor Koreksi">
-                                            <i class="fas fa-file-alt"></i> Lihat Koreksi
-                                        </a>
-                                    </div>
-                                @endif --}}
-                            </td>
-
+                            <td>{{ $kalibrasiTerakhir->faktor_koreksi ?? '-' }}</td>
                             <td>{{ ucfirst($signifikan ?? '-') }}</td>
-
                             <td class="text-nowrap">
-                                <a href="{{ route('alat.show', $item->alat_id) }}" class="btn btn-info btn-sm text-white" title="Detail"><i class="fas fa-eye"></i></a>
-                                @if(Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
-                                    <a href="{{ route('alat.edit', $item->alat_id) }}" class="btn btn-warning btn-sm" title="Edit"><i class="fas fa-edit"></i></a>
+                                <div class="d-inline-flex align-items-center gap-1">
+                                    <a href="{{ route('alat.show', $item->alat_id) }}" class="btn btn-corporate-blue btn-sm alat-action-btn shadow-sm" title="Detail Kerusakan & Perbaikan" aria-label="Detail Kerusakan & Perbaikan"><i class="fas fa-tools"></i></a>
 
-                                    <form action="{{ route('alat.destroy', $item->alat_id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" class="btn btn-danger btn-sm" title="Hapus" data-confirm-delete="Data alat beserta riwayat kalibrasinya akan dihapus permanen!">
+                                    @if($canModify)
+                                        <a href="{{ route('alat.edit', $item->alat_id) }}" class="btn btn-warning btn-sm alat-action-btn shadow-sm" title="Edit" aria-label="Edit"><i class="fas fa-edit"></i></a>
+
+                                        <button type="button" class="btn btn-danger btn-sm alat-action-btn shadow-sm" title="Hapus" aria-label="Hapus" data-bs-toggle="modal" data-bs-target="#modalHapusAlat{{ $item->alat_id }}">
                                             <i class="fas fa-trash"></i>
                                         </button>
-                                    </form>
-                                @else
-                                    -
+                                    @endif
+                                </div>
+
+                                @if($canModify)
+                                    <div class="modal fade" id="modalHapusAlat{{ $item->alat_id }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
+                                            <div class="modal-content border-0 shadow text-center p-3" style="font-size: 0.82rem; border-radius: 8px;">
+                                                <div class="pt-2 pb-1">
+                                                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 56px; height: 56px; background-color: #fff8e6; color: #f0ad4e; font-size: 24px; border: 2px solid #ffeeba;">
+                                                        <i class="fas fa-exclamation"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-body px-2 py-2">
+                                                    <h5 class="fw-bold text-dark mb-1" style="font-size: 1rem;">Apakah Anda yakin?</h5>
+                                                    <p class="text-muted mb-0" style="font-size: 0.78rem;">Data alat beserta riwayat kalibrasinya akan dihapus permanen!</p>
+                                                </div>
+                                                <div class="modal-footer border-0 justify-content-center gap-2 pt-1 pb-2">
+                                                    <form action="{{ route('alat.destroy', $item->alat_id) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger btn-sm py-1.5 px-3.5 fw-semibold rounded-2" style="font-size: 0.78rem;">Ya, Hapus!</button>
+                                                    </form>
+                                                    <button type="button" class="btn btn-secondary btn-sm py-1.5 px-3.5 fw-semibold rounded-2" data-bs-dismiss="modal" style="font-size: 0.78rem;">Batal</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 @endif
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="22" class="text-center text-muted">Tidak ada data alat yang ditemukan</td>
+                            <td colspan="23" class="text-center text-muted py-3">Tidak ada data alat yang ditemukan</td>
                         </tr>
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            <div class="mt-3">
+                {{ $alat->withQueryString()->links('vendor.pagination.custom', ['size' => 'sm']) }}
             </div>
         </div>
     </div>
 </div>
 
 <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 340px;">
         <div class="modal-content text-center">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title fs-6" id="qrModalLabel">QR Code Alat</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header text-white py-2 px-3" style="background-color: #1b3152;">
+                <h5 class="modal-title" id="qrModalLabel" style="font-size: 0.88rem;">QR Code Alat</h5>
+                <button type="button" class="btn-close btn-close-white btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body py-4">
-                <div id="qrCardContainer" class="p-3 bg-white d-inline-block rounded shadow-sm">
-                    <h6 id="modalNamaAlat" class="fw-bold text-primary mb-1"></h6>
-                    <p id="modalKodeAlat" class="text-muted small mb-3"></p>
+            <div class="modal-body py-3 px-2">
+                <div id="qrCardContainer" class="p-2 bg-white d-inline-block rounded shadow-sm">
+                    <h6 id="modalNamaAlat" class="fw-bold text-primary mb-1" style="font-size: 0.9rem;"></h6>
+                    <p id="modalKodeAlat" class="text-muted small mb-2" style="font-size: 0.78rem;"></p>
 
-                    <div id="modalQrContainer" class="p-3 bg-light d-inline-block shadow-sm rounded"></div>
+                    <div id="modalQrContainer" class="p-2 bg-light d-inline-block shadow-sm rounded"></div>
                 </div>   
             </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
-                <button type="button" id="btnDownloadQr" class="btn btn-success btn-sm"><i class="fas fa-download me-1"></i> Unduh QR Code</button>
+            <div class="modal-footer justify-content-center py-2 px-2">
+                <button type="button" class="btn btn-secondary btn-sm py-1.5 px-3.5" data-bs-dismiss="modal" style="font-size: 0.78rem;">Tutup</button>
+                <button type="button" id="btnDownloadQr" class="btn btn-success btn-sm py-1.5 px-3.5" style="font-size: 0.78rem;"><i class="fas fa-download me-1"></i> Unduh</button>
             </div>
         </div>
     </div>
@@ -256,6 +370,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const filterKondisi = document.getElementById('filterKondisi');
     const filterForm = document.getElementById('filterForm');
 
+    $('#filterStatus, #filterKondisi').select2({
+        theme: 'bootstrap-5',
+        width: '100%'
+    });
+
     let timeout = null;
 
     searchInput.addEventListener('input', function() {
@@ -265,11 +384,11 @@ document.addEventListener("DOMContentLoaded", function() {
         }, 500);
     });
 
-    filterStatus.addEventListener('change', function() {
+    $('#filterStatus').on('change', function() {
         filterForm.submit();
     });
 
-    filterKondisi.addEventListener('change', function() {
+    $('#filterKondisi').on('change', function() {
         filterForm.submit();
     });
 });
@@ -290,7 +409,7 @@ qrModal.addEventListener('show.bs.modal', function (event) {
     const btnDownload = document.getElementById('btnDownloadQr');
     btnDownload.onclick = function() {
         const cardElement = document.getElementById('qrCardContainer');
-        const kodeAlatVal = kodeAlat.replace(/[^a-zA-Z0-9]/g, '_');
+        const kodeAlalatVal = kodeAlat.replace(/[^a-zA-Z0-9]/g, '_');
 
         html2canvas(cardElement, {
             scale: 3, 
@@ -299,7 +418,7 @@ qrModal.addEventListener('show.bs.modal', function (event) {
             const pngUrl = canvas.toDataURL('image/png');
             const downloadLink = document.createElement('a');
             downloadLink.href = pngUrl;
-            downloadLink.download = 'QRCode-' + kodeAlatVal + '.png';
+            downloadLink.download = 'QRCode-' + kodeAlalatVal + '.png';
             document.body.appendChild(downloadLink);
             downloadLink.click();
             document.body.removeChild(downloadLink);

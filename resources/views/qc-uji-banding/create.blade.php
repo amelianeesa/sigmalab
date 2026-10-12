@@ -2,7 +2,91 @@
 @section('title', 'Tambah Baru - QC Uji Banding')
 
 @section('content')
+@include('qc-uji-banding.partials._style')
+
 <style>
+    .qc-page {
+        padding-top: 0 !important;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+        margin-top: -8px !important;
+    }
+
+    .qc-page nav[aria-label="breadcrumb"],
+    .qc-page > nav {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .qc-page .breadcrumb {
+        margin: 0 0 6px 0 !important;
+        padding: 0 !important;
+        font-size: 0.75rem !important;
+        line-height: 1.4;
+        flex-wrap: wrap;
+        align-items: center;
+        background: transparent !important;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item,
+    .qc-page .breadcrumb .breadcrumb-item a {
+        font-size: 0.75rem !important;
+        font-weight: 500 !important;
+        color: #0d6efd !important;
+        text-decoration: none;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item a:hover {
+        color: #0a58ca !important;
+        text-decoration: underline;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item.active {
+        color: #000000 !important;
+        font-weight: 700 !important;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item {
+        padding-left: 0.4rem;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+        color: #6c757d !important;
+        padding-right: 0.4rem;
+        font-weight: 400;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu {
+        min-width: 190px;
+        padding: 4px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item {
+        color: #000000 !important;
+        font-size: 0.78rem !important;
+        font-weight: 500 !important;
+        text-decoration: none !important;
+        background-color: transparent;
+        padding: 7px 12px;
+        border-radius: 5px;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:hover,
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
+        background-color: rgba(27, 49, 82, 0.15) !important;
+        color: #000000 !important;
+        text-decoration: none !important;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
+        font-weight: 700 !important;
+    }
+
     .param-form-wrapper .table-responsive {
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch;
@@ -33,29 +117,63 @@
         padding-left: 10px !important;
         padding-right: 10px !important;
     }
+
+    .qc-page .cat-enable-check,
+    .qc-page .param-enable-check {
+        width: 1.05rem;
+        height: 1.05rem;
+        margin-top: 0;
+        flex-shrink: 0;
+        cursor: pointer;
+    }
+
+    .qc-page .cat-check-wrap {
+        padding: 0.5rem 0.9rem;
+        display: flex;
+        align-items: center;
+    }
+
+    @media (max-width: 767.98px) {
+        .qc-page {
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+        }
+
+        .qc-page .breadcrumb,
+        .qc-page .breadcrumb .breadcrumb-item,
+        .qc-page .breadcrumb .breadcrumb-item a {
+            font-size: 0.72rem !important;
+        }
+
+        .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item {
+            padding-left: 0.3rem;
+        }
+
+        .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+            padding-right: 0.3rem;
+        }
+
+        .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item {
+            font-size: 0.85rem !important;
+            padding: 10px 14px;
+        }
+    }
 </style>
 
-<div class="container-fluid px-4 pb-5">
+<div class="container-fluid qc-page pb-4">
 
     <x-qc-breadcrumb active="Uji Banding">
         <li class="breadcrumb-item active">Input Data</li>
     </x-qc-breadcrumb>
 
-    <h2 class="mb-4 fw-bold text-dark">
-        <i class="fas fa-plus-circle text-danger me-2"></i>Input Data Blind Test Uji Banding
-    </h2>
-
-    @if(session('error'))
-        <div class="alert alert-danger shadow-sm border-0">
-            <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') }}
-        </div>
-    @endif
+    <h5 class="qc-title mb-3">
+        <i class="fas fa-plus-circle text-danger me-1"></i> Input Data Blind Test Uji Banding
+    </h5>
 
     @if($errors->any())
-        <div class="alert alert-danger shadow-sm border-0">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            <strong>Terdapat kesalahan:</strong>
-            <ul class="mb-0 mt-1">
+        <div class="alert alert-danger shadow-sm border-0 py-2">
+            <i class="fas fa-exclamation-triangle me-1"></i> Terdapat kesalahan pada isian form:
+            <ul class="mb-0 mt-1 ps-3">
                 @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -69,34 +187,34 @@
             @method('PUT')
         @endif
         <input type="hidden" name="draft_id" id="draft_id_input" value="{{ $draftId ?? '' }}">
-        <div class="card shadow-sm border-0 mb-4">
+        <div class="card shadow-sm border-0 mb-3">
 
-            <div class="card-header text-white py-3" style="background-color: #1b3152;">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-clipboard-list me-2"></i>Section 1: Data Dasar Pengujian</h5>
+            <div class="card-header text-white" style="background-color: #1b3152;">
+                <h5 class="fw-bold"><i class="fas fa-clipboard-list me-1"></i> Section 1: Data Dasar Pengujian</h5>
             </div>
 
-            <div class="card-body p-4">
-                <h6 class="mb-3 text-primary border-bottom pb-2">
-                    <i class="fas fa-info-circle me-2"></i>Informasi Umum Program Uji Banding
+            <div class="card-body">
+                <h6 class="mb-3 text-primary border-bottom pb-2" style="font-size: 0.85rem;">
+                    <i class="fas fa-info-circle me-1"></i> Informasi Umum Program Uji Banding
                 </h6>
 
-                <div class="row mb-4 g-3">
-                    <div class="col-md-6">
+                <div class="row mb-3 g-2">
+                    <div class="col-12 col-md-6">
                         <label class="form-label fw-bold">Nama Program Uji Banding <span class="text-danger">*</span></label>
                         <input type="text" name="nama_program" class="form-control" placeholder="Contoh: Proficiency Testing D-QA 2026" required>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label fw-bold">Penyelenggara (Vendor) <span class="text-danger">*</span></label>
                         <input type="text" name="penyelenggara" class="form-control" placeholder="Contoh: D-QA / FAPAS" required>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label fw-bold">Kode Sampel <span class="text-danger">*</span></label>
                         <input type="text" name="kode_sampel" class="form-control" required>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label fw-bold">Tanggal Terima <span class="text-danger">*</span></label>
                         <input type="date" name="tanggal_terima" class="form-control" required>
                     </div>
@@ -110,10 +228,10 @@
             </div>
         </div>
 
-        <div class="card shadow-sm border-0 mb-4">
+        <div class="card shadow-sm border-0 mb-3">
 
-            <div class="card-header text-white py-3" style="background-color: #1b3152;">
-                <h5 class="mb-0 fw-bold"><i class="fas fa-table me-2"></i>Section 2: Input Data Pengujian</h5>
+            <div class="card-header text-white" style="background-color: #1b3152;">
+                <h5 class="fw-bold"><i class="fas fa-table me-1"></i> Section 2: Input Data Pengujian</h5>
             </div>
 
             <div class="card-body p-0">
@@ -146,7 +264,7 @@
                     <div class="tab-pane fade show active" id="tab-input-data" role="tabpanel">
 
                         <div class="alert alert-info m-3 rounded-0 border-start border-4 border-info">
-                            <i class="fas fa-info-circle me-2"></i> Centang kotak di samping nama parameter untuk mengaktifkan form inputnya.
+                            <i class="fas fa-info-circle me-1"></i> Centang kotak di samping nama parameter untuk mengaktifkan form inputnya.
                         </div>
 
                         @php
@@ -187,10 +305,10 @@
 
                                     <h2 class="accordion-header" id="heading-cat-{{ $catId }}">
                                         <div class="d-flex align-items-center w-100 bg-light">
-                                            <div class="p-3">
-                                                <input class="form-check-input cat-enable-check" type="checkbox" data-cat="{{ $catId }}" style="transform: scale(1.5);">
+                                            <div class="cat-check-wrap">
+                                                <input class="form-check-input cat-enable-check" type="checkbox" data-cat="{{ $catId }}">
                                             </div>
-                                            <button class="accordion-button collapsed py-3 fw-bold bg-transparent text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-cat-{{ $catId }}" aria-expanded="false">
+                                            <button class="accordion-button collapsed py-2 fw-bold bg-transparent text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-cat-{{ $catId }}" aria-expanded="false">
                                                 <i class="fas fa-cubes me-2"></i> Modul: {{ $kategori }}
                                             </button>
                                         </div>
@@ -205,13 +323,13 @@
                                                     $pid_c = $params->where('nama_parameter', 'C')->first()->parameter_uji_id ?? 4;
                                                     $pid_h = $params->where('nama_parameter', 'H')->first()->parameter_uji_id ?? 5;
                                                     $pid_n = $params->where('nama_parameter', 'N')->first()->parameter_uji_id ?? 6;
-                                                    $pid   = $pid_c; // Default ke C
+                                                    $pid   = $pid_c;
                                                 @endphp
 
                                                 <div class="col-12 param-container" data-pid="{{ $pid }}">
 
                                                     <div class="d-flex align-items-center mb-3 border-bottom pb-2">
-                                                        <input class="form-check-input param-enable-check me-2" type="checkbox" name="params[{{ $pid }}][selected]" value="1" data-pid="{{ $pid }}" data-cat="{{ $catId }}" style="transform: scale(1.3);">
+                                                        <input class="form-check-input param-enable-check me-2" type="checkbox" name="params[{{ $pid }}][selected]" value="1" data-pid="{{ $pid }}" data-cat="{{ $catId }}">
                                                         <h5 class="fw-bold text-dark mb-0 ms-2 text-primary">Aktifkan Pengujian CHN</h5>
                                                     </div>
 
@@ -435,7 +553,7 @@
                                                             <div class="col-12 param-container" data-pid="{{ $pid }}">
 
                                                                 <div class="d-flex align-items-center mb-3 border-bottom pb-2">
-                                                                    <input class="form-check-input param-enable-check me-2" type="checkbox" name="params[{{ $pid }}][selected]" value="1" data-pid="{{ $pid }}" data-cat="{{ $catId }}" style="transform: scale(1.3);">
+                                                                    <input class="form-check-input param-enable-check me-2" type="checkbox" name="params[{{ $pid }}][selected]" value="1" data-pid="{{ $pid }}" data-cat="{{ $catId }}">
                                                                     <h5 class="fw-bold text-dark mb-0 ms-2 text-primary">
                                                                         Aktifkan Pengujian {{ $code }}
                                                                         <span class="badge bg-secondary ms-2">{{ $param->satuan }}</span>
@@ -701,19 +819,19 @@
             </div>
         </div>
 
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-3 mt-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2 mt-3">
 
-            <a href="{{ route('qc-uji-banding.index') }}" class="btn btn-light border px-4 rounded-pill order-last order-md-first">
+            <a href="{{ route('qc-uji-banding.index') }}" class="btn btn-light border px-4 order-last order-md-first">
                 Batal
             </a>
 
             <div class="d-flex flex-column flex-md-row gap-2 order-first order-md-last">
-                <button type="button" class="btn btn-warning px-4 rounded-pill shadow-sm" id="btnDraft">
-                    <i class="fas fa-save me-2"></i>Simpan Draft
+                <button type="button" class="btn btn-warning px-4 shadow-sm" id="btnDraft">
+                    <i class="fas fa-save me-1"></i>Simpan Draft
                 </button>
 
-                <button type="submit" class="btn btn-danger px-5 rounded-pill shadow-sm" id="btnSubmit">
-                    <i class="fas fa-check-circle me-2"></i>Simpan Data Uji Banding
+                <button type="submit" class="btn btn-corporate-blue px-4 shadow-sm" id="btnSubmit">
+                    <i class="fas fa-check-circle me-1"></i>Simpan Data Uji Banding
                 </button>
             </div>
 
@@ -737,7 +855,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (selectEl.value === 'NO') {
             selectEl.className = 'form-select form-select-sm fw-bold bg-danger text-white border-danger';
         } else {
-            selectEl.className = 'form-select form-select-sm fw-bold'; // Kembali normal
+            selectEl.className = 'form-select form-select-sm fw-bold';
         }
     };
 
@@ -774,7 +892,7 @@ document.addEventListener('DOMContentLoaded', function () {
         try { tolData = JSON.parse(tolInput.value); } catch (e) { return; }
 
         let matchedRule = null;
-        let rowType = container.dataset.type; // Untuk CHN ('carbon', 'hydrogen', 'nitrogen')
+        let rowType = container.dataset.type;
 
         for (let rule of tolData) {
             if (code === 'CHN') {
@@ -1003,7 +1121,7 @@ document.addEventListener('DOMContentLoaded', function () {
             let outTm = row.querySelector('.out-tm');
             if (outTm) {
                 outTm.textContent = finalResult > 0 ? finalResult.toFixed(2) : '-';
-                outTm.dataset.val = finalResult; // Simpan nilai asli di belakang layar untuk rata-rata
+                outTm.dataset.val = finalResult;
             }
 
             const hidD = row.querySelector(row.dataset.type === 'simplo' ? '.in-d1' : '.in-d2');
@@ -1410,7 +1528,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (tbodies.length > 1) {
                 tbodies[tbodies.length - 1].remove();
             } else {
-                alert('Minimal harus ada 1 pengujian.');
+                Swal.fire('Tidak Bisa Dihapus', 'Minimal harus ada 1 pengujian.', 'warning');
             }
         }
     });
@@ -1595,7 +1713,7 @@ document.addEventListener('DOMContentLoaded', function () {
         formQc.addEventListener('submit', function (e) {
             if (document.querySelectorAll('.param-enable-check:checked').length === 0) {
                 e.preventDefault();
-                alert('Silakan centang minimal 1 parameter yang ingin diuji.');
+                Swal.fire('Belum Ada Parameter', 'Silakan centang minimal 1 parameter yang ingin diuji.', 'warning');
                 return;
             }
 
@@ -1757,9 +1875,9 @@ document.addEventListener('DOMContentLoaded', function () {
                                 if (btnAdd && maxIndex > 0) {
                                     for (let i = 0; i < maxIndex; i++) {
                                         let tempDisabled = btnAdd.disabled;
-                                        btnAdd.disabled = false; // Paksa tombol aktif sebentar
-                                        btnAdd.click();          // Klik otomatis untuk membuat baris
-                                        btnAdd.disabled = tempDisabled; // Kembalikan status tombol
+                                        btnAdd.disabled = false;
+                                        btnAdd.click();
+                                        btnAdd.disabled = tempDisabled;
                                     }
                                 }
 
@@ -1796,8 +1914,8 @@ document.addEventListener('DOMContentLoaded', function () {
         let tmAr = parseFloat(document.querySelector('tr[data-param="TM"] .prox-ar')?.textContent) || 0;
         let imAdb = parseFloat(document.querySelector('tr[data-param="IM"] .prox-adb')?.textContent) || 0;
         let ashAdb = parseFloat(document.querySelector('tr[data-param="ASH"] .prox-adb')?.textContent) || 0;
-        let ashDb = 0; // Needed for VM, FC, TS, GCV, C/H/N, O DAF calculation
-        let vmDb = 0;  // Needed for FC db
+        let ashDb = 0;
+        let vmDb = 0;
 
         const ashRow = document.querySelector('tr[data-param="ASH"]');
         if (ashRow && ashAdb > 0) {
@@ -1807,7 +1925,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             ashRow.querySelector('.prox-ar').textContent = ar.toFixed(2);
             ashRow.querySelector('.prox-db').textContent = db.toFixed(2);
-            ashRow.querySelector('.prox-daf').textContent = '-'; // strip
+            ashRow.querySelector('.prox-daf').textContent = '-';
         }
 
         const vmRow = document.querySelector('tr[data-param="VM"]');
@@ -1903,8 +2021,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         tab2Adl.addEventListener('input', () => {
-            calculateProximateBases(); // Hitung proximate
-            syncAdlToTm();             // Lempar datanya ke modul TM
+            calculateProximateBases();
+            syncAdlToTm();
         });
 
         setTimeout(syncAdlToTm, 800);
@@ -1924,7 +2042,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let updated = false;
 
-        const tmTable = document.querySelector('table[data-code="TM"]'); // Need to find TM code
+        const tmTable = document.querySelector('table[data-code="TM"]');
         if (tmTable) {
             const tbody = tmTable.querySelector('tbody');
             if (tbody) {
@@ -1958,7 +2076,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const duploOut = rmTable.querySelector('.duplo-row .in-hasil-2')?.value;
 
             let rmAverage = rmTable.querySelector('.out-avg-adb')?.textContent;
-            if (rmAverage === '-') rmAverage = ''; // Bersihkan jika belum ada hasil
+            if (rmAverage === '-') rmAverage = '';
 
             const tmTableNode = document.querySelector('table[data-code="TM"]');
             if (tmTableNode) {
@@ -2128,7 +2246,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (aftBody.children.length > 2) {
                 aftBody.lastElementChild.remove();
             } else {
-                alert('Minimal 2 titik kalibrasi diperlukan.');
+                Swal.fire('Tidak Bisa Dihapus', 'Minimal 2 titik kalibrasi diperlukan.', 'warning');
             }
         });
 
@@ -2151,7 +2269,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             if (!isValid || points.length < 2) {
-                alert('Harap isi semua kolom kalibrasi dengan angka valid.');
+                Swal.fire('Data Belum Lengkap', 'Harap isi semua kolom kalibrasi dengan angka valid.', 'warning');
                 return;
             }
 
@@ -2196,10 +2314,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 let p2 = points[i + 1];
                 if (temp >= p1.eq && temp <= p2.eq) {
                     let Y = p1.std + ((temp - p1.eq) * (p2.std - p1.std)) / (p2.eq - p1.eq);
-                    return Y; // return Std Reading
+                    return Y;
                 }
             }
-            return 0; // Out of bounds
+            return 0;
         };
 
         function loadAftHistory() {
@@ -2258,7 +2376,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td><input type="text" class="form-control form-control-sm text-center aft-std" placeholder="e.g. 993.6949"></td>
                     <td><input type="text" class="form-control form-control-sm text-center aft-corr" placeholder="e.g. -6.3"></td>
                 </tr>`;
-                btnAftAdd.click(); // give at least 2 rows
+                btnAftAdd.click();
                 aftInterpContainer.innerHTML = '<div class="text-muted text-center py-4">Isi poin kalibrasi...</div>';
                 setAftViewingBadge(false);
             } else {
@@ -2286,7 +2404,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             if (points.some(p => isNaN(p.eq_sett) || isNaN(p.std_read) || isNaN(p.correction))) {
-                alert('Terdapat data tidak valid.');
+                Swal.fire('Data Tidak Valid', 'Terdapat data kalibrasi yang tidak valid.', 'warning');
                 return;
             }
 
@@ -2445,6 +2563,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }, 1500);
 
-}); // /DOMContentLoaded
+});
 </script>
 @endsection

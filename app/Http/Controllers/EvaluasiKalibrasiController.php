@@ -21,7 +21,20 @@ class EvaluasiKalibrasiController extends Controller
             $query->where('keputusan', $request->keputusan);
         }
 
-        $evaluasi = $query->latest('evaluasi_id')->paginate(15);
+        if ($request->filled('q')) {
+            $kataKunci = trim($request->q);
+
+            $query->whereHas('alat', function ($alat) use ($kataKunci) {
+                $alat->where('nama_alat', 'like', "%{$kataKunci}%")
+                    ->orWhere('kode_alat', 'like', "%{$kataKunci}%");
+            });
+        }
+
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal_evaluasi', $request->tanggal);
+        }
+
+        $evaluasi = $query->latest('evaluasi_id')->paginate(15)->withQueryString();
 
         return view('evaluasi-kalibrasi.index', compact('evaluasi'));
     }
@@ -117,12 +130,12 @@ class EvaluasiKalibrasiController extends Controller
     {
         $evaluasi = EvaluasiKalibrasi::where('evaluasi_id', $id)->firstOrFail();
         $alatList = Alat::orderBy('nama_alat')->get();
+
         return view('evaluasi-kalibrasi.edit', compact('evaluasi', 'alatList'));
     }
 
     public function update(Request $request, $id)
     {
-        // Diubah menggunakan where('evaluasi_id', $id)
         $evaluasi = EvaluasiKalibrasi::where('evaluasi_id', $id)->firstOrFail();
 
         $request->validate([
@@ -135,7 +148,13 @@ class EvaluasiKalibrasiController extends Controller
 
         DB::transaction(function () use ($request, $evaluasi) {
             $alat = Alat::findOrFail($request->alat_id);
-            $data = $request->all();
+
+            $data = [
+                'alat_id' => $request->alat_id,
+                'tanggal_evaluasi' => $request->tanggal_evaluasi,
+                'keputusan' => $request->keputusan,
+                'catatan_spesifikasi' => $request->catatan_spesifikasi,
+            ];
 
             if ($request->hasFile('file_laporan')) {
                 if ($evaluasi->file_laporan && Storage::disk('public')->exists($evaluasi->file_laporan)) {
@@ -144,7 +163,7 @@ class EvaluasiKalibrasiController extends Controller
                 $data['file_laporan'] = $request->file('file_laporan')->store('laporan_evaluasi', 'public');
             }
 
-            $evaluasi->update($data);
+            EvaluasiKalibrasi::where('evaluasi_id', $evaluasi->evaluasi_id)->update($data);
 
             switch ($request->keputusan) {
                 case 'idle':

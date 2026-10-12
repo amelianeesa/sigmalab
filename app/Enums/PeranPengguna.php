@@ -2,10 +2,6 @@
 
 namespace App\Enums;
 
-/**
- * SEMENTARA -- nilai enum ini HARUS disamakan persis dengan isi tabel roles yang dibuat Orang 3.
- * Kalau nanti nilainya beda, ganti di sini saja, satu tempat.
- */
 enum PeranPengguna: string
 {
     case KOORDINATOR_LAB = 'Koordinator Laboratorium';
@@ -15,4 +11,21 @@ enum PeranPengguna: string
     case KABID_INSPEKSI = 'Kabid Inspeksi dan Solusi Perdagangan';
     case KABID_DUKUNGAN_BISNIS = 'Kabid Dukungan Bisnis';
     case ADMIN_APLIKASI = 'Admin Aplikasi';
+
+    public static function pengelolaSdm(): array
+    {
+        return [
+            self::HR_OFFICER->value,
+            self::KOORDINATOR_LAB->value,
+            self::ADMIN_APLIKASI->value,
+        ];
+    }
+
+    public static function pembuatAkun(): array
+    {
+        return [
+            self::HR_OFFICER->value,
+            self::ADMIN_APLIKASI->value,
+        ];
+    }
 }

@@ -2,9 +2,22 @@
 @section('title', 'Tambah Baru - Kegiatan')
 
 @section('content')
-<div class="container-fluid">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
+@include('kegiatan._kegiatan-style')
+
+@php
+    // Cek kalibrasi tiap alat sekali saja (dipakai untuk notifikasi & daftar alat)
+    $alatValid = [];
+    $alatExpiredCount = 0;
+    foreach ($alatList as $a) {
+        $k = $a->riwayatKalibrasi()->whereNull('deleted_at')->latest('tgl_akhir')->first();
+        $valid = $k && !($k->tgl_akhir < now());
+        $alatValid[$a->alat_id] = $valid;
+        if (!$valid) $alatExpiredCount++;
+    }
+@endphp
+
+<div class="container-fluid kg-page pb-4">
+    <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
             <li class="breadcrumb-item"><a href="{{ route('verifikasi-mutu.index') }}" class="text-decoration-none">Verifikasi Mutu</a></li>
@@ -12,50 +25,59 @@
         </ol>
     </nav>
 
-    <div class="row mb-3">
-        <div class="col-12">
-            <h1 class="h3 mb-0 text-gray-800">Tambah Kegiatan</h1>
-        </div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="page-title"><i class="fas fa-plus-circle me-2" style="color: #1b3152;"></i>Tambah Kegiatan</h5>
     </div>
 
-    <div class="card shadow mb-4">
+    {{-- NOTIFIKASI --}}
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm ps-3 pe-5 mb-2" role="alert">
+            <i class="fas fa-times-circle me-1"></i> <strong>Gagal menyimpan!</strong> Periksa kembali isian yang ditandai merah di bawah.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size: 0.65rem; padding: 0.9rem;"></button>
+        </div>
+    @endif
+    @if($alatExpiredCount > 0)
+        <div class="alert alert-warning alert-dismissible fade show shadow-sm ps-3 pe-5 mb-2" role="alert">
+            <i class="fas fa-exclamation-triangle me-1"></i> <strong>Perhatian!</strong>
+            Terdapat <strong>{{ $alatExpiredCount }} alat</strong> yang kalibrasinya kedaluwarsa atau belum ada, sehingga tidak bisa dipilih.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size: 0.65rem; padding: 0.9rem;"></button>
+        </div>
+    @endif
+
+    <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
             <form action="{{ route('kegiatan.store') }}" method="POST">
                 @csrf
-                
-                <h5 class="mb-3 text-primary border-bottom pb-2">Informasi Umum</h5>
-                
+
+                {{-- INFORMASI UMUM --}}
+                <h6 class="section-title">Informasi Umum</h6>
+
                 <div class="mb-3">
                     <label for="nama_kegiatan" class="form-label">Nama / Deskripsi Kegiatan <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control @error('nama_kegiatan') is-invalid @enderror" id="nama_kegiatan" name="nama_kegiatan" value="{{ old('nama_kegiatan') }}" required placeholder="Contoh: Pengujian Kualitas Air Bersih PT. ABC">
+                    <input type="text" class="form-control form-control-sm @error('nama_kegiatan') is-invalid @enderror" id="nama_kegiatan" name="nama_kegiatan" value="{{ old('nama_kegiatan') }}" required placeholder="Contoh: Pengujian Kualitas Air Bersih PT. ABC">
                     @error('nama_kegiatan')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
 
-                <div class="row mb-3">
-                    
-                    <div class="col-md-6">
+                <div class="row g-2 mb-4">
+                    <div class="col-12 col-md-4">
                         <label for="kode_sampel" class="form-label">Kode Sampel</label>
-                        <input type="text" class="form-control bg-light @error('kode_sampel') is-invalid @enderror" id="kode_sampel" name="kode_sampel" value="{{ old('kode_sampel', $nextKodeSampel) }}" readonly>
+                        <input type="text" class="form-control form-control-sm bg-light @error('kode_sampel') is-invalid @enderror" id="kode_sampel" name="kode_sampel" value="{{ old('kode_sampel', $nextKodeSampel) }}" readonly>
                         @error('kode_sampel')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-                </div>
-                
-                <div class="row mb-4">
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-4">
                         <label for="tanggal_kegiatan" class="form-label">Tanggal Kegiatan <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control @error('tanggal_kegiatan') is-invalid @enderror" id="tanggal_kegiatan" name="tanggal_kegiatan" value="{{ old('tanggal_kegiatan', date('Y-m-d')) }}" required>
+                        <input type="date" class="form-control form-control-sm @error('tanggal_kegiatan') is-invalid @enderror" id="tanggal_kegiatan" name="tanggal_kegiatan" value="{{ old('tanggal_kegiatan', date('Y-m-d')) }}" required>
                         @error('tanggal_kegiatan')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
-                    
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-4">
                         <label for="status_kegiatan" class="form-label">Status <span class="text-danger">*</span></label>
-                        <select class="form-select @error('status_kegiatan') is-invalid @enderror" id="status_kegiatan" name="status_kegiatan" required>
+                        <select class="form-select form-select-sm @error('status_kegiatan') is-invalid @enderror" id="status_kegiatan" name="status_kegiatan" required>
                             <option value="draft" {{ old('status_kegiatan') == 'draft' ? 'selected' : '' }}>Draft</option>
                             <option value="berjalan" {{ old('status_kegiatan') == 'berjalan' ? 'selected' : '' }}>Berjalan</option>
                             <option value="selesai" {{ old('status_kegiatan') == 'selesai' ? 'selected' : '' }}>Selesai</option>
@@ -66,41 +88,35 @@
                         @enderror
                     </div>
                 </div>
-                
-                <h5 class="mb-3 text-primary border-bottom pb-2">Alat Digunakan</h5>
-                
+
+                {{-- ALAT --}}
+                <h6 class="section-title">Alat Digunakan</h6>
                 <div class="mb-4">
-                    <div class="row">
+                    <div class="row g-2">
                         @foreach($alatList as $alat)
-                        <div class="col-md-4 mb-2">
-                            @php
-                                $kalibrasiValid = true;
-                                $kalibrasi = $alat->riwayatKalibrasi()->whereNull('deleted_at')->latest('tgl_akhir')->first();
-                                if(!$kalibrasi || $kalibrasi->tgl_akhir < now()) {
-                                    $kalibrasiValid = false;
-                                }
-                            @endphp
-                            <div class="form-check">
-                                <input class="form-check-input alat-checkbox" type="checkbox" name="alat_ids[]" value="{{ $alat->alat_id }}" id="alat_{{ $alat->alat_id }}" {{ in_array($alat->alat_id, old('alat_ids', [])) ? 'checked' : '' }} data-nama="{{ $alat->nama_alat }}" data-valid="{{ $kalibrasiValid ? 'true' : 'false' }}">
-                                <label class="form-check-label {{ !$kalibrasiValid ? 'text-danger' : '' }}" for="alat_{{ $alat->alat_id }}">
-                                    {{ $alat->nama_alat }} ({{ $alat->kode_alat }})
-                                    @if(!$kalibrasiValid) <i class="fas fa-exclamation-triangle ms-1" title="Kedaluwarsa"></i> @endif
-                                </label>
+                            @php $kalibrasiValid = $alatValid[$alat->alat_id]; @endphp
+                            <div class="col-12 col-sm-6 col-xl-4">
+                                <div class="form-check alat-item">
+                                    <input class="form-check-input alat-checkbox" type="checkbox" name="alat_ids[]" value="{{ $alat->alat_id }}" id="alat_{{ $alat->alat_id }}" {{ in_array($alat->alat_id, old('alat_ids', [])) ? 'checked' : '' }} data-nama="{{ $alat->nama_alat }}" data-valid="{{ $kalibrasiValid ? 'true' : 'false' }}">
+                                    <label class="form-check-label {{ !$kalibrasiValid ? 'text-danger' : '' }}" for="alat_{{ $alat->alat_id }}">
+                                        {{ $alat->nama_alat }} ({{ $alat->kode_alat }})
+                                        @if(!$kalibrasiValid) <i class="fas fa-exclamation-triangle ms-1" title="Kedaluwarsa"></i> @endif
+                                    </label>
+                                </div>
                             </div>
-                        </div>
                         @endforeach
                     </div>
                     @error('alat_ids')
                         <div class="text-danger small mt-1">{{ $message }}</div>
                     @enderror
                 </div>
-                
-                <h5 class="mb-3 text-primary border-bottom pb-2">Personil Terlibat</h5>
-                
+
+                {{-- PERSONIL --}}
+                <h6 class="section-title">Personil Terlibat</h6>
                 <div class="mb-4">
                     <div class="table-responsive">
-                        <table class="table table-bordered table-sm">
-                            <thead class="table-light">
+                        <table class="table table-bordered table-striped align-middle mb-0 table-stack">
+                            <thead>
                                 <tr>
                                     <th width="5%" class="text-center">Pilih</th>
                                     <th>Nama Personil</th>
@@ -111,14 +127,14 @@
                             <tbody>
                                 @foreach($personilList as $personil)
                                 <tr>
-                                    <td class="text-center align-middle">
-                                        <input class="form-check-input personil-checkbox" type="checkbox" name="personil_ids[]" value="{{ $personil->personil_id }}" id="personil_{{ $personil->personil_id }}" {{ in_array($personil->personil_id, old('personil_ids', [])) ? 'checked' : '' }}>
+                                    <td data-label="Pilih" class="text-center">
+                                        <input class="form-check-input check-lg personil-checkbox" type="checkbox" name="personil_ids[]" value="{{ $personil->personil_id }}" id="personil_{{ $personil->personil_id }}" {{ in_array($personil->personil_id, old('personil_ids', [])) ? 'checked' : '' }}>
                                     </td>
-                                    <td class="align-middle">
+                                    <td data-label="Nama Personil">
                                         <label for="personil_{{ $personil->personil_id }}" class="mb-0 cursor-pointer">{{ $personil->nama }}</label>
                                     </td>
-                                    <td class="align-middle">{{ $personil->no_induk ?? '-' }}</td>
-                                    <td>
+                                    <td data-label="No Induk">{{ $personil->no_induk ?? '-' }}</td>
+                                    <td data-label="Peran">
                                         <input type="text" class="form-control form-control-sm" name="personil_peran[{{ $personil->personil_id }}]" value="{{ old('personil_peran.'.$personil->personil_id, 'Analis') }}" placeholder="Peran (mis: Analis)">
                                     </td>
                                 </tr>
@@ -130,15 +146,14 @@
                         <div class="text-danger small mt-1">{{ $message }}</div>
                     @enderror
                 </div>
-                
-                <h5 class="mb-3 text-primary border-bottom pb-2 mt-5">Parameter Uji yang Dilakukan</h5>
-                
+
+                {{-- PARAMETER UJI --}}
+                <h6 class="section-title">Parameter Uji yang Dilakukan</h6>
                 <div class="mb-4">
-                    <!-- Matrix Parameters Start -->
                     <div id="parameter-container">
                         <div class="table-responsive">
-                            <table class="table table-bordered table-hover align-middle">
-                                <thead class="table-light">
+                            <table class="table table-bordered table-striped align-middle mb-0 table-stack">
+                                <thead>
                                     <tr>
                                         <th style="width: 30%;">Nama Parameter Uji</th>
                                         <th class="text-center" style="width: 20%;">Sampel Klien (Reguler)</th>
@@ -149,61 +164,60 @@
                                 <tbody>
                                     @forelse($parameterList as $param)
                                     <tr>
-                                        <td>{{ $param->nama_parameter }}</td>
-                                        <td class="text-center">
-                                            <input class="form-check-input param-checkbox param-normal" type="checkbox" name="normal_parameter_uji_ids[]" value="{{ $param->parameter_uji_id }}" id="param_normal_{{ $param->parameter_uji_id }}" {{ in_array($param->parameter_uji_id, old('normal_parameter_uji_ids', $selectedNormal ?? [])) ? 'checked' : '' }} style="transform: scale(1.3);">
+                                        <td data-label="Parameter" class="fw-semibold">{{ $param->nama_parameter }}</td>
+                                        <td data-label="Reguler" class="text-center">
+                                            <input class="form-check-input check-lg param-checkbox param-normal" type="checkbox" name="normal_parameter_uji_ids[]" value="{{ $param->parameter_uji_id }}" id="param_normal_{{ $param->parameter_uji_id }}" {{ in_array($param->parameter_uji_id, old('normal_parameter_uji_ids', $selectedNormal ?? [])) ? 'checked' : '' }}>
                                         </td>
-                                        <td class="text-center">
-                                            <input class="form-check-input param-checkbox param-inhouse" type="checkbox" name="inhouse_parameter_uji_ids[]" value="{{ $param->parameter_uji_id }}" id="param_inhouse_{{ $param->parameter_uji_id }}" {{ in_array($param->parameter_uji_id, old('inhouse_parameter_uji_ids', $selectedInhouse ?? [])) ? 'checked' : '' }} style="transform: scale(1.3);">
+                                        <td data-label="In-House" class="text-center">
+                                            <input class="form-check-input check-lg param-checkbox param-inhouse" type="checkbox" name="inhouse_parameter_uji_ids[]" value="{{ $param->parameter_uji_id }}" id="param_inhouse_{{ $param->parameter_uji_id }}" {{ in_array($param->parameter_uji_id, old('inhouse_parameter_uji_ids', $selectedInhouse ?? [])) ? 'checked' : '' }}>
                                         </td>
-                                                                                  <td class="text-center">
-                                              <div class="d-flex align-items-center justify-content-center">
-                                                  <input class="form-check-input param-checkbox param-crm me-2" type="checkbox" name="crm_parameter_uji_ids[]" value="{{ $param->parameter_uji_id }}" id="param_crm_{{ $param->parameter_uji_id }}" {{ in_array($param->parameter_uji_id, old('crm_parameter_uji_ids', $selectedCrm ?? [])) ? 'checked' : '' }} style="transform: scale(1.3);">
-                                                  
-                                                  <div class="crm-dropdown-wrapper" id="crm_wrapper_{{ $param->parameter_uji_id }}" style="display: none; width: 100%; max-width: 250px;">
-                                                      <select class="form-select form-select-sm" name="crm_katalog_ids[{{ $param->parameter_uji_id }}]" id="crm_select_{{ $param->parameter_uji_id }}">
-                                                          <option value="">-- Pilih Botol CRM --</option>
-                                                          @foreach($crmKatalogList as $katalog)
-                                                              @php
-                                                                  $isExpired = $katalog->tanggal_expired && \Carbon\Carbon::parse($katalog->tanggal_expired)->isPast();
-                                                                  $hasParam = $katalog->sertifikats->contains('parameter_uji_id', $param->parameter_uji_id);
-                                                              @endphp
-                                                              @if($hasParam)
-                                                                  <option value="{{ $katalog->id }}" data-expired="{{ $isExpired ? 'true' : 'false' }}">
-                                                                      {{ $katalog->nomor_lot }} - {{ $katalog->nama_produk }} {{ $isExpired ? '(KADALUARSA)' : '' }}
-                                                                  </option>
-                                                              @endif
-                                                          @endforeach
-                                                      </select>
-                                                  </div>
-                                              </div>
-                                          </td>
+                                        <td data-label="Sertifikat CRM" class="text-center td-crm">
+                                            <div class="crm-cell">
+                                                <input class="form-check-input check-lg param-checkbox param-crm" type="checkbox" name="crm_parameter_uji_ids[]" value="{{ $param->parameter_uji_id }}" id="param_crm_{{ $param->parameter_uji_id }}" {{ in_array($param->parameter_uji_id, old('crm_parameter_uji_ids', $selectedCrm ?? [])) ? 'checked' : '' }}>
+
+                                                <div class="crm-dropdown-wrapper" id="crm_wrapper_{{ $param->parameter_uji_id }}" style="display: none;">
+                                                    <select class="form-select form-select-sm" name="crm_katalog_ids[{{ $param->parameter_uji_id }}]" id="crm_select_{{ $param->parameter_uji_id }}">
+                                                        <option value="">-- Pilih Botol CRM --</option>
+                                                        @foreach($crmKatalogList as $katalog)
+                                                            @php
+                                                                $isExpired = $katalog->tanggal_expired && \Carbon\Carbon::parse($katalog->tanggal_expired)->isPast();
+                                                                $hasParam = $katalog->sertifikats->contains('parameter_uji_id', $param->parameter_uji_id);
+                                                            @endphp
+                                                            @if($hasParam)
+                                                                <option value="{{ $katalog->id }}" data-expired="{{ $isExpired ? 'true' : 'false' }}">
+                                                                    {{ $katalog->nomor_lot }} - {{ $katalog->nama_produk }} {{ $isExpired ? '(KADALUARSA)' : '' }}
+                                                                </option>
+                                                            @endif
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </td>
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="3" class="text-center text-muted">Belum ada parameter uji yang terdaftar di master data.</td>
+                                        <td colspan="4" class="text-center text-muted py-3 td-empty">Belum ada parameter uji yang terdaftar di master data.</td>
                                     </tr>
                                     @endforelse
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    
+
                     @error('inhouse_parameter_uji_ids')
                         <div class="text-danger small mt-1">{{ $message }}</div>
                     @enderror
                     @error('crm_parameter_uji_ids')
                         <div class="text-danger small mt-1">{{ $message }}</div>
                     @enderror
-                    <!-- Matrix Parameters End -->
                 </div>
-                
-                <h5 class="mb-3 text-primary border-bottom pb-2">Bahan Digunakan</h5>
-                
+
+                {{-- BAHAN --}}
+                <h6 class="section-title">Bahan Digunakan</h6>
                 <div class="mb-4">
                     <div class="table-responsive">
-                        <table class="table table-bordered table-sm">
-                            <thead class="table-light">
+                        <table class="table table-bordered table-striped align-middle mb-0 table-stack">
+                            <thead>
                                 <tr>
                                     <th width="5%" class="text-center">Pilih</th>
                                     <th>Nama Barang (Bahan)</th>
@@ -218,21 +232,19 @@
                                     $habis = $saldoAkhir <= 0;
                                 @endphp
                                 <tr class="{{ $habis ? 'table-danger' : '' }}">
-                                    <td class="text-center align-middle">
-                                        <input class="form-check-input" type="checkbox" name="barang_ids[]" value="{{ $barang->barang_id }}" id="barang_{{ $barang->barang_id }}" {{ in_array($barang->barang_id, old('barang_ids', [])) ? 'checked' : '' }} {{ $habis ? 'disabled' : '' }}>
+                                    <td data-label="Pilih" class="text-center">
+                                        <input class="form-check-input check-lg" type="checkbox" name="barang_ids[]" value="{{ $barang->barang_id }}" id="barang_{{ $barang->barang_id }}" {{ in_array($barang->barang_id, old('barang_ids', [])) ? 'checked' : '' }} {{ $habis ? 'disabled' : '' }}>
                                     </td>
-                                    <td class="align-middle">
+                                    <td data-label="Nama Barang">
                                         <label for="barang_{{ $barang->barang_id }}" class="mb-0 cursor-pointer {{ $habis ? 'text-muted' : '' }}">
-                                            {{ $barang->nama_barang }} 
+                                            {{ $barang->nama_barang }}
                                             @if($habis)
                                                 <span class="badge bg-danger ms-1">Habis</span>
                                             @endif
                                         </label>
                                     </td>
-                                    <td class="align-middle">
-                                        {{ number_format($saldoAkhir, 0, ',', '.') }} {{ $barang->satuan }}
-                                    </td>
-                                    <td>
+                                    <td data-label="Sisa Stok">{{ number_format($saldoAkhir, 0, ',', '.') }} {{ $barang->satuan }}</td>
+                                    <td data-label="Jumlah">
                                         <div class="input-group input-group-sm">
                                             <input type="number" step="0.01" min="0" class="form-control barang-input" name="barang_jumlah[{{ $barang->barang_id }}]" value="{{ old('barang_jumlah.'.$barang->barang_id, '') }}" placeholder="0" {{ $habis ? 'disabled' : '' }} data-nama="{{ $barang->nama_barang }}" data-stok="{{ $saldoAkhir }}">
                                             <span class="input-group-text">{{ $barang->satuan }}</span>
@@ -247,10 +259,10 @@
                         <div class="text-danger small mt-1">{{ $message }}</div>
                     @enderror
                 </div>
-                
-                <div class="d-flex justify-content-end gap-2">
-                    <a href="{{ route('verifikasi-mutu.index') }}" class="btn btn-secondary">Kembali</a>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
+
+                <div class="d-flex flex-column-reverse flex-md-row justify-content-md-end gap-2">
+                    <a href="{{ route('verifikasi-mutu.index') }}" class="btn btn-outline-secondary btn-sm py-1.5 px-3 fw-semibold">Kembali</a>
+                    <button type="submit" class="btn btn-corporate-blue btn-sm py-1.5 px-3 shadow-sm fw-semibold"><i class="fas fa-save me-1"></i> Simpan</button>
                 </div>
             </form>
         </div>
@@ -260,11 +272,11 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
+
     // Validasi Live: Alat (Kalibrasi)
-    const alatCheckboxes = document.querySelectorAll('.alat-checkbox');
-    alatCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
+    document.querySelectorAll('.alat-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function () {
             if (this.checked && this.dataset.valid === 'false') {
                 Swal.fire({
                     icon: 'warning',
@@ -278,12 +290,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Validasi Live: Bahan (Stok)
-    const barangInputs = document.querySelectorAll('.barang-input');
-    barangInputs.forEach(input => {
-        input.addEventListener('input', function() {
+    document.querySelectorAll('.barang-input').forEach(input => {
+        input.addEventListener('input', function () {
             const requested = parseFloat(this.value) || 0;
             const maxStok = parseFloat(this.dataset.stok) || 0;
-            
+
             if (requested > maxStok) {
                 Swal.fire({
                     icon: 'warning',
@@ -295,42 +306,45 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-        // Logic Matrix CRM
-    if (crmSelect) {
-        crmSelect.addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            if (selectedOption && selectedOption.dataset.expired === 'true') {
-                alert('⚠ PERINGATAN KRITIS: Botol CRM yang Anda pilih sudah melewati Tanggal Kadaluarsa (Expired)! Sistem sangat tidak menyarankan penggunaan botol ini untuk uji akurasi. Silakan gunakan botol Lot lain yang masih valid atau buat botol baru.');
+
+    // Matriks CRM: tampilkan dropdown botol hanya jika checkbox CRM dicentang
+    const crmCheckboxes = document.querySelectorAll('.param-crm');
+
+    function updateCrmDropdowns() {
+        crmCheckboxes.forEach(cb => {
+            const wrapper = document.getElementById('crm_wrapper_' + cb.value);
+            const select = document.getElementById('crm_select_' + cb.value);
+
+            if (cb.checked) {
+                if (wrapper) wrapper.style.display = 'block';
+                if (select) select.setAttribute('required', 'required');
+            } else {
+                if (wrapper) wrapper.style.display = 'none';
+                if (select) {
+                    select.removeAttribute('required');
+                    select.value = '';
+                }
             }
         });
     }
-});
 
-      // Logic Matrix CRM (NEW PER-ROW)
-      const crmCheckboxes = document.querySelectorAll('.param-crm');
-      
-      function updateCrmDropdowns() {
-          crmCheckboxes.forEach(cb => {
-              const paramId = cb.value;
-              const wrapper = document.getElementById('crm_wrapper_' + paramId);
-              const select = document.getElementById('crm_select_' + paramId);
-              
-              if (cb.checked) {
-                  if (wrapper) wrapper.style.display = 'block';
-                  if (select) select.setAttribute('required', 'required');
-              } else {
-                  if (wrapper) wrapper.style.display = 'none';
-                  if (select) {
-                      select.removeAttribute('required');
-                      select.value = "";
-                  }
-              }
-          });
-      }
-      
-      if(crmCheckboxes.length > 0) {
-          crmCheckboxes.forEach(cb => cb.addEventListener('change', updateCrmDropdowns));
-          updateCrmDropdowns();
-      }
+    crmCheckboxes.forEach(cb => cb.addEventListener('change', updateCrmDropdowns));
+    updateCrmDropdowns();
+
+    // Peringatan bila botol CRM yang dipilih sudah kedaluwarsa
+    document.querySelectorAll('.crm-dropdown-wrapper select').forEach(sel => {
+        sel.addEventListener('change', function () {
+            const opt = this.options[this.selectedIndex];
+            if (opt && opt.dataset.expired === 'true') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Botol CRM Kedaluwarsa',
+                    text: 'Botol CRM yang dipilih sudah melewati tanggal kedaluwarsa. Sistem tidak menyarankan botol ini untuk uji akurasi. Gunakan botol lot lain yang masih valid.',
+                    confirmButtonColor: '#d33'
+                });
+            }
+        });
+    });
+});
 </script>
 @endpush

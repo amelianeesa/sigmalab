@@ -4,37 +4,118 @@
     <meta charset="UTF-8">
     <title>Laporan Inventori Bahan</title>
     <style>
-        body { font-family: sans-serif; font-size: 10pt; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid #333; padding: 5px; text-align: center; }
-        th { background-color: #f2f2f2; }
+        @page {
+            size: A4 portrait;
+            margin: 10mm;
+        }
+
+        body { 
+            font-family: sans-serif; 
+            font-size: 8pt; 
+            color: #333;
+            margin: 0;
+        }
+
+        .header { 
+            width: 100%; 
+            border-bottom: none; 
+            padding-bottom: 4px; 
+            padding-top: 1px;
+            margin-bottom: 8px; 
+        }
+        .header table { 
+            width: 100%; 
+            border-collapse: collapse;
+        }
+        .title { 
+            font-size: 11.5pt; 
+            font-weight: bold; 
+            color: #333; 
+            text-align: left;
+            text-transform: uppercase;
+        }
+        .header-subtitle { 
+            font-size: 9pt; 
+            font-weight: bold;
+            margin-top: 2px;
+            padding-bottom: 2px;
+            color: #333;
+        }
+        .logo { 
+            width: 110px; 
+            padding-bottom: 14px;
+        }
+
+        table.data-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 0; 
+        }
+        table.data-table th, table.data-table td { 
+            border: 1px solid #333; 
+            padding: 4px 3px; 
+            text-align: center; 
+            word-wrap: break-word;
+        }
+        table.data-table th { 
+            background-color: #f2f2f2; 
+            font-size: 7.5pt;
+        }
         .text-start { text-align: left; }
         .fw-bold { font-weight: bold; }
-        .header-title { font-size: 14pt; font-weight: bold; text-align: center; margin-bottom: 5px; }
-        .header-subtitle { font-size: 11pt; text-align: center; margin-bottom: 20px; }
+
+        .footer {
+            width: 100%;
+            position: absolute;
+            bottom: -1mm;
+            left: 0;
+            right: 0;
+            font-size: 7.5pt;
+            border-top: 1px solid #999;
+            padding-top: 4px;
+        }
+        .footer-left { float: left; }
+        .footer-right { float: right; }
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
     </style>
 </head>
 <body>
-    <div class="header-title">LAPORAN INVENTORI BARANG PERSEDIAAN</div>
-    <div class="header-subtitle">
-        Periode: {{ date('F', mktime(0, 0, 0, $bulan, 10)) }} {{ $tahun }}
+
+    <div class="header">
+        <table>
+            <tr>
+                <td style="text-align: left; vertical-align: middle;">
+                    <div class="title">LAPORAN INVENTORI BARANG PERSEDIAAN</div>
+                    <div class="header-subtitle">
+                        Periode: {{ date('F', mktime(0, 0, 0, $bulan, 10)) }} {{ $tahun }}
+                    </div>
+                </td>
+                <td style="text-align: right; vertical-align: middle;">
+                    <img src="{{ public_path('images/Logo_Suco_Nobg.png') }}" alt="SUCOFINDO" class="logo">
+                </td>
+            </tr>
+        </table>
     </div>
 
-    <table>
+    <table class="data-table">
         <thead>
             <tr>
-                <th rowspan="2" style="width: 30px;">No.</th>
-                <th rowspan="2">Nama Barang</th>
-                <th rowspan="2">Satuan</th>
-                <th rowspan="2">Kode Barang</th>
-                <th rowspan="2">Saldo Awal</th>
-                <th colspan="2">Jumlah</th>
-                <th rowspan="2">Saldo Akhir</th>
-                <th rowspan="2">Kondisi</th>
+                <th rowspan="2" style="width: 25px;">No.</th>
+                <th rowspan="2" style="width: 110px;">Nama Barang</th>
+                <th rowspan="2" style="width: 45px;">Satuan</th>
+                <th rowspan="2" style="width: 60px;">Kode</th>
+                <th rowspan="2" style="width: 45px;">Awal</th>
+                <th colspan="2" style="width: 80px;">Jumlah</th>
+                <th rowspan="2" style="width: 45px;">Akhir</th>
+                <th rowspan="2" style="width: 50px;">Kondisi</th>
             </tr>
             <tr>
-                <th>Masuk</th>
-                <th>Keluar</th>
+                <th style="width: 40px;">Masuk</th>
+                <th style="width: 40px;">Keluar</th>
             </tr>
         </thead>
         <tbody>
@@ -63,5 +144,15 @@
             @endforelse
         </tbody>
     </table>
+
+    <div class="footer clearfix">
+        <div class="footer-left">
+            Dicetak oleh: {{ $cetakOleh ?? 'System PT Sucofindo' }}
+        </div>
+        <div class="footer-right">
+            Waktu Cetak: {{ date('d-m-Y H:i:s') }} WIB
+        </div>
+    </div>
+
 </body>
 </html>

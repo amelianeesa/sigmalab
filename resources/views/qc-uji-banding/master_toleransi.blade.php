@@ -1,57 +1,143 @@
 @extends('layouts.app')
+@section('title', 'Master Batas Toleransi - QC Uji Banding')
 
 @section('content')
+@include('qc-uji-banding.partials._style')
 
 <style>
-    .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
-        color: #ffffff !important;
-    }
-    .btn-corporate-blue:hover, .btn-corporate-blue:focus {
-        background-color: #14253e !important;
-        border-color: #14253e !important;
-        color: #ffffff !important;
+    .qc-page {
+        padding-top: 0 !important;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+        margin-top: -8px !important;
     }
 
-    .table-corporate thead th {
-        background-color: #1b3152 !important;
-        color: #ffffff !important;
-        border-bottom: 2px solid #14253e !important;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        padding-top: 12px;
-        padding-bottom: 12px;
-        vertical-align: middle;
+    .qc-page nav[aria-label="breadcrumb"],
+    .qc-page > nav {
+        margin: 0 !important;
+        padding: 0 !important;
     }
-    
-    .nav-pills .nav-link.active {
-        background-color: #1b3152 !important;
-        color: #ffffff !important;
+
+    .qc-page .breadcrumb {
+        margin: 0 0 6px 0 !important;
+        padding: 0 !important;
+        font-size: 0.75rem !important;
+        line-height: 1.4;
+        flex-wrap: wrap;
+        align-items: center;
+        background: transparent !important;
     }
-    .nav-pills .nav-link:not(.active) {
-        color: #1b3152;
+
+    .qc-page .breadcrumb .breadcrumb-item,
+    .qc-page .breadcrumb .breadcrumb-item a {
+        font-size: 0.75rem !important;
+        font-weight: 500 !important;
+        color: #0d6efd !important;
+        text-decoration: none;
     }
-    .nav-pills .nav-link:hover:not(.active) {
-        background-color: #e9ecef;
+
+    .qc-page .breadcrumb .breadcrumb-item a:hover {
+        color: #0a58ca !important;
+        text-decoration: underline;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item.active {
+        color: #000000 !important;
+        font-weight: 700 !important;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item {
+        padding-left: 0.4rem;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+        color: #6c757d !important;
+        padding-right: 0.4rem;
+        font-weight: 400;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu {
+        min-width: 190px;
+        padding: 4px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item {
+        color: #000000 !important;
+        font-size: 0.78rem !important;
+        font-weight: 500 !important;
+        text-decoration: none !important;
+        background-color: transparent;
+        padding: 7px 12px;
+        border-radius: 5px;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:hover,
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
+        background-color: rgba(27, 49, 82, 0.15) !important;
+        color: #000000 !important;
+        text-decoration: none !important;
+    }
+
+    .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
+        font-weight: 700 !important;
+    }
+
+    .qc-side-nav .nav-link:not(.active):hover {
+        background-color: #e9ecef !important;
+        color: #1b3152 !important;
+        padding-left: 1.25rem !important;
+    }
+
+    @media (max-width: 767.98px) {
+        .qc-page {
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+        }
+
+        .qc-page .breadcrumb,
+        .qc-page .breadcrumb .breadcrumb-item,
+        .qc-page .breadcrumb .breadcrumb-item a {
+            font-size: 0.72rem !important;
+        }
+
+        .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item {
+            padding-left: 0.3rem;
+        }
+
+        .qc-page .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+            padding-right: 0.3rem;
+        }
+
+        .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item {
+            font-size: 0.85rem !important;
+            padding: 10px 14px;
+        }
     }
 </style>
 
-<div class="container-fluid px-4 pb-5">
-    
+<div class="container-fluid qc-page pb-4">
     <x-qc-breadcrumb active="Uji Banding">
         <li class="breadcrumb-item active" aria-current="page">Master Batas Toleransi</li>
     </x-qc-breadcrumb>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-dark mb-0">
-            <i class="fas fa-balance-scale text-primary me-2"></i>Master Batas Toleransi QC Uji Banding
-        </h2>
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h5 class="qc-title">
+            <i class="fas fa-balance-scale me-1" style="color: #1b3152;"></i> Master Batas Toleransi QC Uji Banding
+        </h5>
+
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ route('qc-uji-banding.index') }}" class="btn btn-outline-corporate btn-sm py-1 px-3 shadow-sm fw-semibold">
+                <i class="fas fa-arrow-left me-1"></i> Kembali ke Uji Banding
+            </a>
+        </div>
     </div>
 
     @php
-
         $chnParams = $parameters->filter(fn($p) => in_array($p->nama_parameter, ['C', 'H', 'N']));
         $chnIds = $chnParams->pluck('parameter_uji_id')->toArray();
         $chnToleransis = $chnParams->pluck('toleransis')->flatten();
@@ -76,12 +162,12 @@
         $isChnActive = in_array($activeTab, $chnIds);
     @endphp
 
-    <div class="card shadow-sm">
+    <div class="card border-0 shadow-sm">
         <div class="card-body">
             <div class="row">
-                
-                <div class="col-md-3 border-end">
-                    <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+
+                <div class="col-12 col-md-3 border-end border-end-md">
+                    <div class="nav flex-column nav-pills qc-side-nav gap-1" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                         @foreach($groupedParameters as $kategori => $params)
                             
                             <div class="fw-bold text-uppercase text-secondary small mt-3 mb-1 px-2" style="letter-spacing: 0.5px;">
@@ -89,7 +175,6 @@
                             </div>
                             
                             @foreach($params as $param)
-                                
                                 @if(in_array($param->nama_parameter, ['H', 'N']))
                                     @continue
                                 @endif
@@ -101,12 +186,16 @@
                                     $tabLabel = $isCHN ? 'CHN' : $param->nama_parameter;
                                 @endphp
 
-                                <button class="nav-link text-start ms-2 {{ $isActive ? 'active' : '' }}" 
+                                <button class="nav-link text-start ms-2 px-3 py-2 rounded-2 {{ $isActive ? 'active fw-bold shadow-sm' : 'text-dark bg-light bg-opacity-50' }}" 
                                         id="tab-param-{{ $tabId }}" 
                                         data-bs-toggle="pill" 
                                         data-bs-target="#content-param-{{ $tabId }}" 
-                                        type="button" role="tab">
-                                    {{ $tabLabel }}
+                                        type="button" role="tab"
+                                        style="font-size: 0.9rem; transition: all 0.2s ease-in-out;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span>{{ $tabLabel }}</span>
+                                        <i class="fas fa-chevron-right small opacity-50"></i>
+                                    </div>
                                 </button>
                             @endforeach
 
@@ -114,7 +203,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-9">
+                <div class="col-12 col-md-9">
                     <div class="tab-content" id="v-pills-tabContent">
                         
                         @foreach($parameters as $param)
@@ -135,15 +224,15 @@
                             <div class="tab-pane fade {{ $isActive ? 'show active' : '' }}" 
                                  id="content-param-{{ $tabId }}" role="tabpanel">
                                 
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 class="fw-bold" style="color: #1b3152;">Aturan Toleransi: {{ $tabTitle }}</h5>
-                                    <button class="btn btn-sm btn-corporate-blue shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambah-{{ $tabId }}">
+                                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                                    <h5 class="fw-bold mb-0" style="color: #1b3152; font-size: 0.95rem;">Aturan Toleransi: {{ $tabTitle }}</h5>
+                                    <button class="btn btn-sm btn-corporate-blue shadow-sm py-1 px-3 fw-semibold" data-bs-toggle="modal" data-bs-target="#modalTambah-{{ $tabId }}">
                                         <i class="fas fa-plus me-1"></i> Tambah Aturan
                                     </button>
                                 </div>
 
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-sm text-center align-middle table-corporate">
+                                    <table class="table table-bordered table-sm text-center align-middle table-corporate qc-table-min">
                                         <thead>
                                             <tr>
                                                 @if(in_array($param->nama_parameter, ['IM', 'TM', 'RM']))
@@ -196,15 +285,17 @@
                                                     <td class="text-danger fw-bold">{{ $tol->formula_r }}</td>
                                                     <td class="text-success fw-bold">{{ $tol->formula_R_besar }}</td>
                                                     
-                                                    <td class="d-flex justify-content-center gap-1">
-                                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalEdit-{{ $tol->id }}">
-                                                            <i class="fas fa-edit"></i>
-                                                        </button>
-                                                        
-                                                        <form action="{{ route('master.toleransi.destroy', $tol->id) }}" method="POST" onsubmit="return confirm('Hapus aturan ini?');">
-                                                            @csrf @method('DELETE')
-                                                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
-                                                        </form>
+                                                    <td class="text-nowrap">
+                                                        <div class="d-inline-flex align-items-center gap-1">
+                                                            <button type="button" class="btn btn-outline-primary btn-sm qc-action-btn" data-bs-toggle="modal" data-bs-target="#modalEdit-{{ $tol->id }}" title="Edit" aria-label="Edit">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+                                                            
+                                                            <form action="{{ route('master.toleransi.destroy', $tol->id) }}" method="POST" onsubmit="return confirm('Hapus aturan ini?');">
+                                                                @csrf @method('DELETE')
+                                                                <button type="submit" class="btn btn-outline-danger btn-sm qc-action-btn" title="Hapus" aria-label="Hapus"><i class="fas fa-trash"></i></button>
+                                                            </form>
+                                                        </div>
 
                                                         <div class="modal fade" id="modalEdit-{{ $tol->id }}" tabindex="-1" aria-hidden="true">
                                                             <div class="modal-dialog modal-lg text-start">
@@ -217,7 +308,7 @@
                                                                         </div>
                                                                         
                                                                         <div class="modal-body">
-                                                                            <div class="row mb-3">
+                                                                            <div class="row mb-3 g-2">
                                                                                 @if(in_array($param->nama_parameter, ['IM', 'TM', 'RM']))
                                                                                     <div class="col-md-12">
                                                                                         <label class="form-label small fw-bold">Material / Kategori</label>
@@ -235,7 +326,6 @@
                                                                                     </div>
                                                                                     <div class="col-md-6">
                                                                                         <label class="form-label small fw-bold">Element</label>
-                                                                                        
                                                                                         <input type="text" class="form-control form-control-sm bg-light" name="sub_parameter" value="{{ $tol->sub_parameter }}" readonly title="Hapus dan buat aturan baru jika ingin mengganti elemen.">
                                                                                     </div>
                                                                                 @elseif($param->nama_parameter == 'VM')
@@ -260,7 +350,7 @@
                                                                             </div>
 
                                                                             @if($param->nama_parameter !== 'VM')
-                                                                                <div class="row mb-3">
+                                                                                <div class="row mb-3 g-2">
                                                                                     <div class="col-md-4">
                                                                                         <label class="form-label small fw-bold">Label Range (Teks)</label>
                                                                                         <input type="text" class="form-control form-control-sm" name="range_label" value="{{ $tol->range_label }}">
@@ -276,7 +366,7 @@
                                                                                 </div>
                                                                             @endif
 
-                                                                            <div class="row mb-3">
+                                                                            <div class="row mb-3 g-2">
                                                                                 <div class="col-md-6">
                                                                                     <label class="form-label small fw-bold text-danger">Formula Repeatability (r) *</label>
                                                                                     <input type="text" class="form-control form-control-sm" name="formula_r" value="{{ $tol->formula_r }}" required>
@@ -290,7 +380,7 @@
                                                                         
                                                                         <div class="modal-footer bg-light">
                                                                             <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
-                                                                            <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-save me-1"></i> Simpan Perubahan</button>
+                                                                            <button type="submit" class="btn btn-corporate-blue btn-sm"><i class="fas fa-save me-1"></i> Simpan Perubahan</button>
                                                                         </div>
                                                                     </div>
                                                                 </form>
@@ -329,7 +419,7 @@
                                             </div>
                                             
                                             <div class="modal-body">
-                                                <div class="row mb-3">
+                                                <div class="row mb-3 g-2">
                                                     @if(in_array($param->nama_parameter, ['IM', 'TM', 'RM']))
                                                         <div class="col-md-12">
                                                             <label class="form-label small fw-bold">Material / Kategori</label>
@@ -347,7 +437,6 @@
                                                         </div>
                                                         <div class="col-md-6">
                                                             <label class="form-label small fw-bold">Element</label>
-                                                            
                                                             <select class="form-select form-select-sm" required
                                                                     onchange="document.getElementById('chn_param_id').value = this.options[this.selectedIndex].getAttribute('data-id'); document.getElementById('chn_sub_param').value = this.value;">
                                                                 <option value="">-- Pilih Element --</option>
@@ -379,7 +468,7 @@
                                                 </div>
 
                                                 @if($param->nama_parameter !== 'VM')
-                                                    <div class="row mb-3">
+                                                    <div class="row mb-3 g-2">
                                                         <div class="col-md-4">
                                                             <label class="form-label small fw-bold">Label Range (Teks)</label>
                                                             <input type="text" class="form-control form-control-sm" name="range_label" placeholder="Contoh: 1.0 - 21.9%">
@@ -395,7 +484,7 @@
                                                     </div>
                                                 @endif
 
-                                                <div class="row mb-3">
+                                                <div class="row mb-3 g-2">
                                                     <div class="col-md-6">
                                                         <label class="form-label small fw-bold text-danger">Formula Repeatability (r) *</label>
                                                         <input type="text" class="form-control form-control-sm" name="formula_r" placeholder="Contoh: 0.09 + 0.01 * X" required>
@@ -414,7 +503,7 @@
                                             
                                             <div class="modal-footer bg-light">
                                                 <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
-                                                <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-save me-1"></i> Simpan Aturan</button>
+                                                <button type="submit" class="btn btn-corporate-blue btn-sm"><i class="fas fa-save me-1"></i> Simpan Aturan</button>
                                             </div>
                                         </div>
                                     </form>
