@@ -133,9 +133,20 @@
 
     .info-card {
         border-radius: 0.5rem;
+        height: auto !important;
+        min-height: 0 !important;
+    }
+    .info-card-link {
+        height: auto;
     }
     .info-card .card-body {
         padding: 7px 10px !important;
+        min-height: 0 !important;
+        gap: 6px;
+        justify-content: flex-start !important;
+    }
+    .info-card .card-body > .mt-2 {
+        margin-top: 0 !important;
     }
     .info-card-icon {
         width: 28px;
@@ -286,11 +297,32 @@
         .tracking-step-meta {
             font-size: 0.68rem;
         }
-        .info-card-text {
-            display: none;
+
+        /* Info card (Stok Kritis, Akan Kedaluwarsa, Approval Pengadaan) */
+        .info-card-link {
+            height: auto;
+        }
+        .info-card {
+            height: auto !important;
         }
         .info-card .card-body {
-            padding: 6px 10px !important;
+            padding: 8px 10px !important;
+            gap: 6px;
+            justify-content: flex-start !important;
+        }
+        .info-card-title {
+            font-size: 0.8rem;
+        }
+        .info-card-text {
+            display: block;
+            font-size: 0.7rem;
+            line-height: 1.3;
+            margin-top: 2px;
+        }
+        .info-card-alert-btn {
+            font-size: 0.7rem;
+            padding-top: 0.2rem;
+            padding-bottom: 0.2rem;
         }
     }
 
@@ -331,7 +363,7 @@
         </div>
     </div>
 
-    <div class="row g-2 mb-2">
+    <div class="row g-2 mb-3">
         <div class="col-6 col-lg-3">
             <div class="card summary-card border-0 shadow-sm border-start border-4 border-danger info-card-clickable" data-bs-toggle="modal" data-bs-target="#modalQcOutlier">
                 <div class="card-body summary-card-body">

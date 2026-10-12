@@ -24,15 +24,12 @@
         font-weight: 700;
     }
 
-    /* Judul */
     .ts-title {
         font-size: 1.1rem;
         font-weight: 700;
         margin: 0;
         color: #1b3152;
     }
-
-    /* Card */
     .ts-page .card-body { padding: 10px !important; }
     .ts-page .card-header {
         padding: 8px 12px !important;
@@ -96,7 +93,6 @@
         font-weight: 400;
     }
 
-    /* Header sticky: tetap di dalam kotak tabel, tidak menembus navbar */
     .ts-page .table thead.sticky-top,
     .ts-page .table-responsive .sticky-top {
         position: sticky;
@@ -187,8 +183,7 @@
     </div>
 
     @if(isset($chartData) && $selectedParameter)
-
-        <!-- Raw Data Logger -->
+ 
         <div class="card mb-3 border-0 shadow-sm">
             <div class="card-header border-bottom">
                 <h6 class="fw-bold" style="color: #1b3152;"><i class="fas fa-table me-1"></i> Raw Data Logger: {{ $selectedParameter->nama_parameter }}</h6>
