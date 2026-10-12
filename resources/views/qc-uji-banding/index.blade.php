@@ -122,11 +122,6 @@
                                     <a href="{{ route('qc-uji-banding.create', ['draft_id' => $prog->id]) }}" class="btn btn-sm btn-warning"><i class="fas fa-edit me-1"></i>Lanjutkan Draft</a>
                                 @else
                                     <a href="{{ route('qc-uji-banding.show', $prog->id) }}" class="btn btn-sm btn-outline-corporate">Detail</a>
-                                    @if($menunggu > 0)
-                                        <a href="{{ route('qc-uji-banding.evaluasi.form', $prog->id) }}" class="btn btn-sm btn-outline-warning">
-                                            <i class="fas fa-chart-bar me-1"></i>Input Hasil Vendor
-                                        </a>
-                                    @endif
                                 @endif
                             </td>
                         </tr>

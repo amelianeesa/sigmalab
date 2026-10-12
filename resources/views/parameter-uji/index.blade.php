@@ -41,49 +41,48 @@
 
             <div id="table-container">
                 <div class="table-responsive">
-                    <table class="table table-hover table-striped align-middle border" style="font-size: 0.85rem;">
+                                        <table class="table table-hover table-striped align-middle border" style="font-size: 0.9rem;">
                         <thead class="table-dark">
                             <tr>
                                 <th style="width: 50px;" class="text-center">No</th>
+                                <th style="width: 130px;">Kode Parameter</th>
                                 <th>Nama Parameter</th>
-                                <th class="text-center">Satuan</th>
-                                <th class="text-center">Nilai Acuan</th>
-                                <th class="text-center">Range Batas (Min - Max)</th>
-                                <th>Metode/Kriteria</th>
-                                <th class="text-center">Status</th>
-                                <th class="text-center" style="width: 150px;">Aksi</th>
+                                <th class="text-center" style="width: 100px;">Satuan</th>
+                                <th class="text-center" style="width: 120px;">Status</th>
+                                <th class="text-center" style="width: 100px;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($parameterUji as $index => $item)
                             <tr>
                                 <td class="text-center">{{ $parameterUji->firstItem() + $index }}</td>
-                                <td class="fw-bold">
-                                    {{ $item->nama_parameter }}
+                                <td class="fw-bold text-primary fs-6">
+                                    {{ strtoupper($item->nama_parameter) }}
                                 </td>
-                                <td class="text-center">{{ $item->satuan }}</td>
-                                <td class="text-center">{{ number_format($item->nilai_acuan, 2) }}</td>
-                                <td class="text-center">{{ number_format($item->batas_bawah, 2) }} - {{ number_format($item->batas_atas, 2) }}</td>
-                                <td>{{ $item->metode_kriteria ?? '-' }}</td>
+                                <td class="fw-semibold text-dark">
+                                    {{ $item->nama_lengkap }}
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-light text-dark border">{{ $item->satuan ?? '-' }}</span>
+                                </td>
                                 <td class="text-center">
                                     @if($item->status_aktif)
-                                        <span class="badge bg-success">Aktif</span>
+                                        <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Aktif</span>
                                     @else
-                                        <span class="badge bg-danger">Nonaktif</span>
+                                        <span class="badge bg-danger"><i class="fas fa-times-circle me-1"></i>Nonaktif</span>
                                     @endif
                                 </td>
                                 <td class="text-center text-nowrap">
-                                    <a href="{{ route('parameter-uji.show', $item->parameter_uji_id) }}" class="btn btn-info btn-sm text-white" title="Detail"><i class="fas fa-eye"></i></a>
                                     
                                     @can('update', $item)
-                                        <a href="{{ route('parameter-uji.edit', $item->parameter_uji_id) }}" class="btn btn-warning btn-sm" title="Edit"><i class="fas fa-edit"></i></a>
+                                        <a href="{{ route('parameter-uji.edit', $item->parameter_uji_id) }}" class="btn btn-warning btn-sm shadow-sm" title="Edit"><i class="fas fa-edit"></i></a>
                                     @endcan
 
                                     @can('delete', $item)
                                         <form action="{{ route('parameter-uji.destroy', $item->parameter_uji_id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="button" class="btn btn-danger btn-sm" title="Hapus / Nonaktifkan" data-confirm-delete="Jika parameter uji sudah digunakan di Hasil Uji, maka hanya akan di-nonaktifkan. Lanjutkan?">
+                                            <button type="button" class="btn btn-danger btn-sm shadow-sm" title="Hapus / Nonaktifkan" data-confirm-delete="Jika parameter uji sudah digunakan di Hasil Uji, maka hanya akan di-nonaktifkan. Lanjutkan?">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
@@ -92,7 +91,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="8" class="text-center text-muted py-4">Data parameter uji tidak ditemukan.</td>
+                                <td colspan="6" class="text-center text-muted py-4">Data parameter uji tidak ditemukan.</td>
                             </tr>
                             @endforelse
                         </tbody>

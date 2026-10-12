@@ -77,15 +77,15 @@
         </div>
     </div>
 
-    <!-- TABS NAV -->
+        <!-- TABS NAV -->
     <ul class="nav nav-tabs mb-4" id="qcCrmTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active fw-bold px-4" id="katalog-tab" data-bs-toggle="tab" data-bs-target="#katalog" type="button" role="tab" aria-controls="katalog" aria-selected="true">
+            <button class="nav-link {{ request('tab') === 'harian' ? '' : 'active' }} fw-bold px-4" id="katalog-tab" data-bs-toggle="tab" data-bs-target="#katalog" type="button" role="tab">
                 <i class="fas fa-box text-secondary me-2"></i>Master Botol & Verifikasi CRM
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link fw-bold px-4" id="harian-tab" data-bs-toggle="tab" data-bs-target="#harian" type="button" role="tab" aria-controls="harian" aria-selected="false">
+            <button class="nav-link {{ request('tab') === 'harian' ? 'active' : '' }} fw-bold px-4" id="harian-tab" data-bs-toggle="tab" data-bs-target="#harian" type="button" role="tab">
                 <i class="fas fa-vials text-secondary me-2"></i>Riwayat Pengujian Harian CRM
             </button>
         </li>
@@ -100,7 +100,7 @@
     <div class="tab-content" id="qcCrmTabsContent">
         
         <!-- TAB 1: MASTER BOTOL & VERIFIKASI -->
-        <div class="tab-pane fade show active" id="katalog" role="tabpanel" aria-labelledby="katalog-tab">
+        <div class="tab-pane fade {{ request('tab') === 'harian' ? '' : 'show active' }}" id="katalog" role="tabpanel" aria-labelledby="katalog-tab">
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -162,17 +162,26 @@
                                         @elseif($r->status === 'menunggu_verifikasi_teknis')
                                             @php
                                                 $hasDraft = $r->verifikasiTeknis->where('status_evaluasi', 'draft')->isNotEmpty(); 
+                                                $outlierUninvestigated = $r->verifikasiTeknis->where('status_evaluasi', 'outlier')->where('status_investigasi', 'menunggu_investigasi')->first();
                                                 $hasOutlier = $r->verifikasiTeknis->where('status_evaluasi', 'outlier')->isNotEmpty();
                                             @endphp
                                             
-                                            <a href="{{ route('crm-katalog.verifikasi-teknis.form', $r->id) }}" 
-                                            class="btn btn-sm {{ $hasOutlier ? 'btn-danger' : ($hasDraft ? 'btn-warning' : 'btn-primary pulse-button') }} mb-1" 
-                                            title="{{ $hasOutlier ? 'Uji Ulang Parameter Outlier' : ($hasDraft ? 'Lanjutkan Draft Verifikasi' : 'Lakukan Verifikasi Teknis') }}">
-                                                
-                                                <i class="fas {{ $hasOutlier ? 'fa-exclamation-triangle' : ($hasDraft ? 'fa-edit' : 'fa-flask') }}"></i> 
-                                                {{ $hasOutlier ? 'Uji Ulang (Outlier)' : ($hasDraft ? 'Lanjut Draft' : 'Mulai Uji Verifikasi') }}
-                                            
-                                            </a>
+                                            @if($outlierUninvestigated)
+                                                {{-- Jika ada Outlier yang belum diinvestigasi: Paksa isi CAPA dulu --}}
+                                                <a href="{{ route('crm-katalog.verifikasi-teknis.investigasi', [$r->id, $outlierUninvestigated->id]) }}" 
+                                                class="btn btn-sm btn-danger pulse-button mb-1" 
+                                                title="Wajib Mengisi Laporan Investigasi (CAPA) Terlebih Dahulu">
+                                                    <i class="fas fa-exclamation-triangle"></i> Investigasi (CAPA)
+                                                </a>
+                                            @else
+                                                {{-- Jika tidak ada atau sudah diinvestigasi: Boleh lanjut Uji Ulang / Lanjut Draft / Mulai Verifikasi --}}
+                                                <a href="{{ route('crm-katalog.verifikasi-teknis.form', $r->id) }}" 
+                                                class="btn btn-sm {{ $hasOutlier ? 'btn-danger' : ($hasDraft ? 'btn-warning' : 'btn-primary pulse-button') }} mb-1" 
+                                                title="{{ $hasOutlier ? 'Lakukan Uji Ulang (Retest)' : ($hasDraft ? 'Lanjutkan Draft Verifikasi' : 'Lakukan Verifikasi Teknis') }}">
+                                                    <i class="fas {{ $hasOutlier ? 'fa-redo' : ($hasDraft ? 'fa-edit' : 'fa-flask') }}"></i> 
+                                                    {{ $hasOutlier ? 'Uji Ulang (Retest)' : ($hasDraft ? 'Lanjut Draft' : 'Mulai Uji Verifikasi') }}
+                                                </a>
+                                            @endif
                                         @endif
                                     </td>
                                 </tr>
@@ -245,7 +254,13 @@
                                                     @foreach($r->verifikasiTeknis as $verif)
                                                         <tr>
                                                             <td class="fw-bold">{{ strtoupper($verif->parameterUji->nama_parameter ?? '-') }}</td>
-                                                            <td>{{ $verif->analis->nama ?? '-' }}</td>
+                                                            <td class="text-start">
+                                                                @forelse($verif->personils as $p)
+                                                                    <div>{{ $p->nama }}@if($p->pivot->peran) <small class="text-muted">({{ $p->pivot->peran }})</small>@endif</div>
+                                                                @empty
+                                                                    {{ $verif->analis->nama ?? '-' }}
+                                                                @endforelse
+                                                            </td>
                                                             <td>{{ number_format($verif->nilai_d1, 4) }}</td>
                                                             <td>{{ $verif->nilai_d2 ? number_format($verif->nilai_d2, 4) : '-' }}</td>
                                                             <td class="fw-bold text-primary">{{ number_format($verif->nilai_akhir, 4) }}</td>
@@ -395,7 +410,7 @@
         </div>
 
         <!-- TAB 2: PENGUJIAN HARIAN CRM -->
-        <div class="tab-pane fade" id="harian" role="tabpanel" aria-labelledby="harian-tab">
+        <div class="tab-pane fade {{ request('tab') === 'harian' ? 'show active' : '' }}" id="harian" role="tabpanel" aria-labelledby="harian-tab">
             
             <div class="alert alert-info border-0 shadow-sm mb-3">
                 <i class="fas fa-info-circle me-2"></i> Pilihan botol pada menu <strong>Mulai Pengujian CRM</strong> hanya menampilkan botol yang sudah memiliki status <strong>AKTIF</strong> (Lolos uji verifikasi).
@@ -467,7 +482,28 @@
                                         @if($log->status_evaluasi === 'inlier')
                                             <span class="badge bg-success"><i class="fas fa-check-circle"></i> Inlier</span>
                                         @elseif($log->status_evaluasi === 'outlier')
-                                            <span class="badge bg-danger"><i class="fas fa-times-circle"></i> Outlier</span>
+                                            @if($log->status_investigasi === 'menunggu_investigasi')
+                                                <a href="{{ route('qc-crm.investigasi', $log->id) }}" class="btn btn-sm btn-danger pulse-button shadow-sm fw-bold" title="Wajib Mengisi Laporan Investigasi">
+                                                    <i class="fas fa-exclamation-triangle me-1"></i> Investigasi (CAPA)
+                                                </a>
+                                                @else
+                                                    <span class="badge bg-danger"><i class="fas fa-times-circle"></i> Outlier</span>
+                                                    <button type="button" class="btn btn-sm btn-outline-success ms-1 py-0 px-2 fw-bold shadow-sm btn-view-capa-crm"
+                                                        data-tanggal="{{ \Carbon\Carbon::parse($log->tanggal_uji)->format('d M Y') }}"
+                                                        data-lot="{{ $log->crmKatalog->nomor_lot ?? '-' }}"
+                                                        data-produk="{{ $log->crmKatalog->nama_produk ?? '-' }}"
+                                                        data-parameter="{{ strtoupper($log->parameterUji->nama_parameter ?? '-') }}"
+                                                        data-analis="{{ $log->analis->nama ?? '-' }}"
+                                                        data-cert="{{ number_format($log->cert_value, 2) }} &plusmn; {{ number_format($log->cert_u, 4) }}"
+                                                        data-akhir="{{ number_format($log->nilai_akhir, 2) }}"
+                                                        data-akar="{{ $log->akar_masalah ?? '-' }}"
+                                                        data-temuan="{{ $log->catatan_investigasi ?? '-' }}"
+                                                        data-perbaikan="{{ $log->tindakan_perbaikan ?? '-' }}"
+                                                        data-pdf-url="{{ route('qc-crm.investigasi.pdf', $log->id) }}"
+                                                        title="Lihat Laporan CAPA">
+                                                        <i class="fas fa-file-alt me-1"></i> Baca CAPA
+                                                    </button>
+                                                @endif
                                         @elseif($log->status_evaluasi === 'draft')
                                             <a href="{{ route('qc-crm.create', ['resume' => 1, 'crm_id' => $log->crm_katalog_id]) }}" class="btn btn-sm btn-warning fw-bold mt-1 shadow-sm">
                                                 <i class="fas fa-edit me-1"></i> Lanjutkan Draft
@@ -556,6 +592,53 @@
             </div>
         </div>
 
+        {{-- MODAL BACA CAPA QC CRM --}}
+        <div class="modal fade" id="modalViewCapaQcCrm" tabindex="-1" aria-labelledby="modalViewCapaCrmLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title fw-bold" id="modalViewCapaCrmLabel">
+                            <i class="fas fa-file-signature me-2"></i>Laporan CAPA Pengujian CRM
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="card border-0 bg-light p-3 mb-3">
+                            <div class="row g-2 small">
+                                <div class="col-md-6"><strong>Tanggal Uji:</strong> <span id="crmCapaTanggal">-</span></div>
+                                <div class="col-md-6"><strong>Nomor Lot:</strong> <span id="crmCapaLot" class="fw-bold text-primary">-</span></div>
+                                <div class="col-md-6"><strong>Parameter:</strong> <span id="crmCapaParam" class="fw-bold text-danger">-</span></div>
+                                <div class="col-md-6"><strong>Analis:</strong> <span id="crmCapaAnalis">-</span></div>
+                                <div class="col-md-6"><strong>Nilai Sertifikat:</strong> <span id="crmCapaCert">-</span></div>
+                                <div class="col-md-6"><strong>Hasil Lab (Outlier):</strong> <span id="crmCapaAkhir" class="badge bg-danger fs-6">-</span></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-secondary mb-1"><i class="fas fa-tag me-1"></i>Kategori Akar Masalah</label>
+                            <div class="p-2 border rounded bg-white fw-bold text-dark" id="crmCapaAkar">-</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-secondary mb-1"><i class="fas fa-search me-1"></i>Detail Temuan Investigasi</label>
+                            <div class="p-3 border rounded bg-white" style="white-space: pre-wrap;" id="crmCapaTemuan">-</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-secondary mb-1"><i class="fas fa-tools me-1"></i>Tindakan Perbaikan (Corrective Action)</label>
+                            <div class="p-3 border rounded bg-white" style="white-space: pre-wrap;" id="crmCapaPerbaikan">-</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light justify-content-between">
+                        <a href="#" id="btnDownloadCrmCapaPdf" target="_blank" class="btn btn-outline-danger shadow-sm">
+                            <i class="fas fa-file-pdf me-1"></i> Cetak Lembar CAPA (PDF)
+                        </a>
+                        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -639,6 +722,25 @@ $(document).ready(function() {
     });
 
 });
+
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn-view-capa-crm');
+        if (!btn) return;
+
+        document.getElementById('crmCapaTanggal').textContent = btn.dataset.tanggal;
+        document.getElementById('crmCapaLot').textContent = `${btn.dataset.lot} (${btn.dataset.produk})`;
+        document.getElementById('crmCapaParam').textContent = btn.dataset.parameter;
+        document.getElementById('crmCapaAnalis').textContent = btn.dataset.analis;
+        document.getElementById('crmCapaCert').textContent = btn.dataset.cert;
+        document.getElementById('crmCapaAkhir').textContent = btn.dataset.akhir;
+        document.getElementById('crmCapaAkar').textContent = btn.dataset.akar;
+        document.getElementById('crmCapaTemuan').textContent = btn.dataset.temuan;
+        document.getElementById('crmCapaPerbaikan').textContent = btn.dataset.perbaikan;
+        document.getElementById('btnDownloadCrmCapaPdf').href = btn.dataset.pdfUrl;
+
+        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalViewCapaQcCrm'));
+        modal.show();
+    });
 </script>
 
 <style>
@@ -846,8 +948,16 @@ window.addEventListener('pageshow', function(event) {
         const pointColors = [];
         const pointRadii = [];
 
+        // Helper format tanggal DD/MM/YYYY
+        function formatTgl(str) {
+            if (!str) return '-';
+            let d = new Date(str);
+            if (isNaN(d.getTime())) return str.substring(0, 10);
+            return ("0" + d.getDate()).slice(-2) + "/" + ("0" + (d.getMonth() + 1)).slice(-2) + "/" + d.getFullYear();
+        }
+
         logs.forEach((log, idx) => {
-            labels.push(log.tanggal_uji);
+            labels.push(formatTgl(log.tanggal_uji)); // <--- Menggunakan format tanggal rapi
             dataPoints.push(parseFloat(log.nilai_akhir));
 
             let isTrend = result.trend_indices && result.trend_indices.includes(idx);
@@ -931,6 +1041,14 @@ window.addEventListener('pageshow', function(event) {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        top: 20,
+                        right: 20,
+                        left: 10,
+                        bottom: 10
+                    }
+                },
                 plugins: {
                     tooltip: {
                         callbacks: {
@@ -947,9 +1065,22 @@ window.addEventListener('pageshow', function(event) {
                     legend: { position: 'bottom' }
                 },
                 scales: {
+                    x: {
+                        offset: true, // <--- KUNCI: Memberi spasi agar titik pertama tidak menabrak sumbu Y
+                        ticks: {
+                            maxRotation: 0, // Tulisan tanggal tetap horizontal rapi
+                            font: { size: 11 }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
                     y: {
                         suggestedMax: batasAtas + (certU * 0.5),
-                        suggestedMin: batasBawah - (certU * 0.5)
+                        suggestedMin: batasBawah - (certU * 0.5),
+                        ticks: {
+                            font: { size: 11 }
+                        }
                     }
                 }
             }
@@ -965,7 +1096,7 @@ window.addEventListener('pageshow', function(event) {
 
             tbody += '<tr' + (isTrend ? ' class="table-warning"' : '') + '>' +
                 '<td>' + (idx + 1) + '</td>' +
-                '<td>' + log.tanggal_uji + '</td>' +
+                '<td>' + formatTgl(log.tanggal_uji) + '</td>' +
                 '<td>' + (log.analis ? log.analis.nama : '-') + '</td>' +
                 '<td class="' + statusClass + '">' + parseFloat(log.nilai_akhir).toFixed(4) + '</td>' +
                 '<td>' + certVal.toFixed(4) + ' &plusmn; ' + certU.toFixed(4) + '</td>' +

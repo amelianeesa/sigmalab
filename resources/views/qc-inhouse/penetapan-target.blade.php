@@ -11,7 +11,7 @@
     <div class="row mt-3">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-2">
-                <h3 class="fw-bold text-dark mb-0"><i class="fas fa-bullseye text-primary me-2"></i>Penetapan Nilai Target (Tahap 4)</h3>
+                <h3 class="fw-bold text-dark mb-0"><i class="fas fa-bullseye text-primary me-2"></i>Tahap 4: Penetapan Nilai Target</h3>
             </div>
             <p class="text-muted">Sesuai prosedur operasional standar, Nilai Target (Mean) dan Simpangan Baku (Standar Deviasi) diwarisi otomatis secara presisi dari kalkulasi <strong>Global Mean</strong> dan <strong>Global Standard Deviation</strong> dari {{ $batch->jumlah_botol * 2 }} titik uji Homogenitas (Tahap 3) yang telah lolos validasi statistik.</p>
 
@@ -46,13 +46,13 @@
                             $rawMean = (float) ($param->mean_target ?? $param->mean_global);
                             $rawSd = (float) ($param->sd_target ?? $param->sd_global);
 
-                            $ucl = round($rawMean + (3 * $rawSd), 2);
-                            $lcl = round($rawMean - (3 * $rawSd), 2);
-                            $uwl = round($rawMean + (2 * $rawSd), 2);
-                            $lwl = round($rawMean - (2 * $rawSd), 2);
+                            $ucl = round($rawMean + (3 * $rawSd), 4);
+                            $lcl = round($rawMean - (3 * $rawSd), 4);
+                            $uwl = round($rawMean + (2 * $rawSd), 4);
+                            $lwl = round($rawMean - (2 * $rawSd), 4);
 
-                            $mean = round($rawMean, 2);
-                            $sd = round($rawSd, 2);
+                            $mean = round($rawMean, 4);
+                            $sd = round($rawSd, 4);
                         @endphp
                         <div class="tab-pane fade {{ $idx === 0 ? 'show active' : '' }}" id="pane-{{ $pid }}" role="tabpanel">
                             <div class="card shadow-sm border-0 mb-4">
@@ -63,14 +63,14 @@
                                         <div class="col-md-6">
                                             <div class="p-4 bg-light border rounded h-100">
                                                 <div class="text-muted mb-2 text-uppercase fw-bold">Target Mean</div>
-                                                <h1 class="display-5 fw-bold text-success mb-0">{{ number_format($mean, 2) }}</h1>
+                                                <h1 class="display-5 fw-bold text-success mb-0">{{ number_format($mean, 4) }}</h1>
                                                 <div class="small text-muted mt-2">Ditarik dari Grand Mean Homogenitas</div>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="p-4 bg-light border rounded h-100">
                                                 <div class="text-muted mb-2 text-uppercase fw-bold">Target Standard Deviation</div>
-                                                <h1 class="display-5 fw-bold text-primary mb-0">{{ number_format($sd, 2) }}</h1>
+                                                <h1 class="display-5 fw-bold text-primary mb-0">{{ number_format($sd, 4) }}</h1>
                                                 <div class="small text-muted mt-2">Ditarik dari Global SD Homogenitas</div>
                                             </div>
                                         </div>
@@ -86,11 +86,11 @@
                                                     <div class="d-flex justify-content-between mt-3">
                                                         <div>
                                                             <div class="small text-muted">UCL (+3 SD)</div>
-                                                            <div class="fs-5 fw-bold">{{ number_format($ucl, 2) }}</div>
+                                                            <div class="fs-5 fw-bold">{{ number_format($ucl, 4) }}</div>
                                                         </div>
                                                         <div class="text-end">
                                                             <div class="small text-muted">LCL (-3 SD)</div>
-                                                            <div class="fs-5 fw-bold">{{ number_format($lcl, 2) }}</div>
+                                                            <div class="fs-5 fw-bold">{{ number_format($lcl, 4) }}</div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -103,11 +103,11 @@
                                                     <div class="d-flex justify-content-between mt-3">
                                                         <div>
                                                             <div class="small text-muted">UWL (+2 SD)</div>
-                                                            <div class="fs-5 fw-bold">{{ number_format($uwl, 2) }}</div>
+                                                            <div class="fs-5 fw-bold">{{ number_format($uwl, 4) }}</div>
                                                         </div>
                                                         <div class="text-end">
                                                             <div class="small text-muted">LWL (-2 SD)</div>
-                                                            <div class="fs-5 fw-bold">{{ number_format($lwl, 2) }}</div>
+                                                            <div class="fs-5 fw-bold">{{ number_format($lwl, 4) }}</div>
                                                         </div>
                                                     </div>
                                                 </div>

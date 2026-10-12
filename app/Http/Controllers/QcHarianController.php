@@ -8,6 +8,7 @@ use App\Models\ParameterUji;
 use App\Services\WestgardService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class QcHarianController extends Controller
 {
@@ -22,18 +23,26 @@ class QcHarianController extends Controller
     {
         $activeBatch = SampelInhouse::where('status', 'aktif')->latest()->first();
         $parameters = collect();
-        $recentLogs = collect();
+        
+        $groupedLogs = collect();
 
         if ($activeBatch) {
             $parameters = $activeBatch->parameters()->where('status_parameter', 'stabil')->get();
+            
             $recentLogs = QcHarian::where('sampel_inhouse_id', $activeBatch->sampel_inhouse_id)
                 ->with(['parameterUji', 'analis'])
                 ->orderBy('tanggal_uji', 'desc')
                 ->orderBy('created_at', 'desc')
                 ->get();
+            
+            $groupedLogs = $recentLogs->groupBy(function($log) {
+                if ($log->status_pengujian === 'draft' && $log->draft_group_id) {
+                    return 'DRAFT-' . $log->draft_group_id; 
+                }
+                return 'SELESAI-' . $log->created_at->format('Y-m-d-H-i');
+            });
         }
-
-        return view('qc-harian.index', compact('activeBatch', 'parameters', 'recentLogs'));
+        return view('qc-harian.index', compact('activeBatch', 'parameters', 'groupedLogs'));
     }
 
     public function create()
@@ -53,7 +62,7 @@ class QcHarianController extends Controller
         return view('qc-harian.create', compact('activeBatch', 'parameters', 'alatList', 'personilList', 'barangList'));
     }
 
-    public function store(Request $request)
+        public function store(Request $request)
     {
         $request->validate([
             'tanggal_uji' => 'required|date',
@@ -73,15 +82,27 @@ class QcHarianController extends Controller
             QcHarian::where('draft_group_id', $request->old_draft_group_id)->delete();
         }
 
-        $outlierParam = null;
-        $outlierQch = null;
+        $outlierParams = [];
         $savedCount = 0;
         $results = [];
 
-        // Ambil data Section 1 untuk disimpan ke data_mentah
         $section1 = [
             'nama_sampel_uji' => $request->input('nama_sampel_uji'),
         ];
+
+        $globalIm1 = 0;
+        $globalIm2 = 0;
+        if (is_array($request->input('params'))) {
+            foreach ($request->input('params') as $pId => $pData) {
+                if (empty($pData['selected'])) continue;
+                $pUji = ParameterUji::find($pId);
+                if ($pUji && strtoupper($pUji->nama_parameter) === 'IM') {
+                    $globalIm1 = (float)($pData['d1'] ?? 0);
+                    $globalIm2 = (float)($pData['d2'] ?? 0);
+                    break;
+                }
+            }
+        }
 
         foreach ($request->input('params') as $paramUjiId => $data) {
             if (empty($data['selected'])) continue;
@@ -89,15 +110,14 @@ class QcHarianController extends Controller
             $paramUji = ParameterUji::find($paramUjiId);
             if (!$paramUji) continue;
 
-            // Jika bukan draft, pastikan tidak terkunci outlier
-            if (!$isDraft) {
-                $locked = QcHarian::where('sampel_inhouse_id', $activeBatch->sampel_inhouse_id)
-                    ->where('parameter_uji_id', $paramUji->parameter_uji_id)
-                    ->where('status_evaluasi', 'outlier')
-                    ->where('status_investigasi', 'menunggu_investigasi')
-                    ->exists();
-                if ($locked) continue;
-            }
+            // if (!$isDraft) {
+            //     $locked = QcHarian::where('sampel_inhouse_id', $activeBatch->sampel_inhouse_id)
+            //         ->where('parameter_uji_id', $paramUji->parameter_uji_id)
+            //         ->where('status_evaluasi', 'outlier')
+            //         ->where('status_investigasi', 'menunggu_investigasi')
+            //         ->exists();
+            //     if ($locked) continue;
+            // }
 
             $d1 = (float)($data['d1'] ?? 0);
             $d2 = (float)($data['d2'] ?? 0);
@@ -115,15 +135,20 @@ class QcHarianController extends Controller
             $evalNilaiAkhir = null;
 
             if ($needsDb) {
-                $im1 = (float)($data['mentah']['im_d1'] ?? 0);
-                $im2 = (float)($data['mentah']['im_d2'] ?? 0);
+                $im1 = (float)($data['mentah']['im_d1'] ?? $globalIm1);
+                $im2 = (float)($data['mentah']['im_d2'] ?? $globalIm2);
                 $mentah['im_d1'] = $im1;
                 $mentah['im_d2'] = $im2;
 
                 if (!$isDraft) {
                     if ($im1 >= 100 || $im2 >= 100) continue;
-                    $db1 = (100 / (100 - $im1)) * $d1;
-                    $db2 = (100 / (100 - $im2)) * $d2;
+
+                    $frontendDb1 = isset($data['db1']) && $data['db1'] !== '' ? (float)$data['db1'] : null;
+                    $frontendDb2 = isset($data['db2']) && $data['db2'] !== '' ? (float)$data['db2'] : null;
+
+                    $db1 = $frontendDb1 ?? ((100 / (100 - $im1)) * $d1);
+                    $db2 = $frontendDb2 ?? ((100 / (100 - $im2)) * $d2);
+
                     $val1 = $db1;
                     $val2 = $db2;
                 }
@@ -140,7 +165,7 @@ class QcHarianController extends Controller
             if (!$isDraft && $meanAcuan !== null && $sdAcuan !== null) {
                 $history = QcHarian::where('sampel_inhouse_id', $activeBatch->sampel_inhouse_id)
                     ->where('parameter_uji_id', $paramUji->parameter_uji_id)
-                    ->where('status_pengujian', 'selesai') // Hanya historis yang final
+                    ->where('status_pengujian', 'selesai')
                     ->orderBy('tanggal_uji', 'desc')
                     ->orderBy('created_at', 'desc')
                     ->take(9)->get();
@@ -149,6 +174,19 @@ class QcHarianController extends Controller
                 $evalStatus = $eval['status'];
                 $evalRule = $eval['rule'] ? $eval['message'] : null;
                 $evalNilaiAkhir = $eval['nilai_akhir'];
+            }
+
+            $isRetest = false;
+            if (!$isDraft) {
+                $lastRecord = QcHarian::where('sampel_inhouse_id', $activeBatch->sampel_inhouse_id)
+                    ->where('parameter_uji_id', $paramUji->parameter_uji_id)
+                    ->where('status_pengujian', 'selesai')
+                    ->latest('id')
+                    ->first();
+
+                if ($lastRecord && $lastRecord->status_evaluasi === 'outlier' && $lastRecord->status_investigasi === 'selesai_investigasi') {
+                    $isRetest = true;
+                }
             }
 
             $qch = QcHarian::create([
@@ -169,11 +207,11 @@ class QcHarianController extends Controller
                 'pelanggaran_rule' => $evalRule,
                 'status_investigasi' => $evalStatus === 'outlier' ? 'menunggu_investigasi' : 'aman',
                 'data_mentah' => $mentah,
+                'is_retest' => $isRetest,
             ]);
 
             $savedCount++;
 
-            // --- AUTO-DEDUCT STOK BARANG (Hanya Jika Bukan Draft) ---
             if (!$isDraft && isset($mentah['barang_ids']) && is_array($mentah['barang_ids'])) {
                 foreach ($mentah['barang_ids'] as $barangId) {
                     $qtyDipakai = isset($mentah['barang_jumlah'][$barangId]) ? (float) $mentah['barang_jumlah'][$barangId] : 0;
@@ -186,16 +224,14 @@ class QcHarianController extends Controller
                     }
                 }
             }
-            // --------------------------------------------------------
             
             if (!$isDraft) {
                 $results[] = strtoupper($pName) . ': ' . strtoupper($evalStatus);
-                if ($evalStatus === 'outlier' && !$outlierParam) {
-                    $outlierParam = $pName;
-                    $outlierQch = $qch;
+                if ($evalStatus === 'outlier') {
+                    $outlierParams[] = strtoupper($pName);
                 }
             }
-        }
+        } 
 
         if ($savedCount === 0) {
             return back()->with('error', 'Tidak ada parameter yang berhasil disimpan. Pastikan Anda mencentang minimal 1 parameter dan mengisi nilainya.');
@@ -205,9 +241,10 @@ class QcHarianController extends Controller
             return redirect()->route('qc-harian.index')->with('success', "Draft berhasil disimpan ({$savedCount} parameter).");
         }
 
-        if ($outlierQch) {
-            return redirect()->route('qc-harian.investigasi', $outlierQch->id)
-                ->with('error', "Peringatan Outlier pada {$outlierParam}! Anda diwajibkan mengisi form investigasi sebelum dapat melanjutkan.");
+        if (count($outlierParams) > 0) {
+            $paramString = implode(', ', $outlierParams);
+            return redirect()->route('qc-harian.index')
+                ->with('error', "PERINGATAN! Ditemukan Outlier pada pengujian: {$paramString}. Silakan selesaikan investigasi.");
         }
 
         return redirect()->route('qc-harian.index')
@@ -227,7 +264,6 @@ class QcHarianController extends Controller
         $personilList = \App\Models\Personil::all();
         $barangList = \App\Models\Barang::all();
 
-        // Cari semua draft yang satu kelompok (satu kali submit form)
         $draftGroup = QcHarian::where('draft_group_id', $draft->draft_group_id)->get();
         $serverDraft = [
             'draft_group_id' => $draft->draft_group_id,
@@ -270,7 +306,6 @@ class QcHarianController extends Controller
 
         $paramUji = ParameterUji::findOrFail($parameter_uji_id);
         
-        // Ambil 30 data terakhir untuk diplot di grafik
         $logs = QcHarian::where('sampel_inhouse_id', $activeBatch->sampel_inhouse_id)
             ->where('parameter_uji_id', $parameter_uji_id)
             ->orderBy('tanggal_uji', 'asc')
@@ -290,16 +325,20 @@ class QcHarianController extends Controller
     public function storeInvestigasi(Request $request, $id)
     {
         $request->validate([
+            'akar_masalah' => 'required|string',
             'catatan_investigasi' => 'required|string|min:10',
+            'tindakan_perbaikan' => 'required|string|min:10',
         ]);
 
         $qc = QcHarian::findOrFail($id);
         $qc->update([
+            'akar_masalah' => $request->akar_masalah,
             'catatan_investigasi' => $request->catatan_investigasi,
+            'tindakan_perbaikan' => $request->tindakan_perbaikan,
             'status_investigasi' => 'selesai_investigasi'
         ]);
 
-        return redirect()->route('qc-harian.index')->with('success', 'Investigasi berhasil disimpan. Kunci parameter telah dibuka kembali.');
+        return redirect()->route('qc-harian.index')->with('success', 'Investigasi berhasil disimpan. Parameter telah dibuka untuk pengujian RETEST.');
     }
 
     public function printPdf(Request $request)
@@ -318,7 +357,6 @@ class QcHarianController extends Controller
             return redirect()->route('qc-harian.index')->with('error', 'Tidak ada batch QC In-House yang aktif.');
         }
 
-        // Ambil parameter yang akan dicetak
         $queryParam = $activeBatch->parameters()->where('status_parameter', 'stabil')->with('parameterUji');
         if ($paramType === 'specific' && !empty($paramIds)) {
             $queryParam->whereIn('parameter_uji_id', $paramIds);
@@ -329,7 +367,6 @@ class QcHarianController extends Controller
             return redirect()->route('qc-harian.index')->with('error', 'Tidak ada parameter yang dipilih atau tersedia.');
         }
 
-        // Kumpulkan data per parameter
         $reportData = [];
         foreach ($parameters as $param) {
             $paramModel = $param->parameterUji;
@@ -362,7 +399,18 @@ class QcHarianController extends Controller
             'cetakChart'
         ));
     }
+    public function cetakInvestigasiPdf($id)
+    {
+        $qc = QcHarian::with(['parameterUji', 'sampelInhouse', 'analis'])->findOrFail($id);
+
+        if ($qc->status_investigasi !== 'selesai_investigasi') {
+            return back()->with('error', 'Laporan investigasi CAPA untuk data ini belum diselesaikan.');
+        }
+
+        $pdf = Pdf::loadView('qc-harian.pdf_investigasi', compact('qc'));
+        $fileName = 'CAPA_QC_Harian_' . strtoupper($qc->parameterUji->nama_parameter ?? 'PARAM') . '_' . $qc->tanggal_uji->format('Ymd') . '.pdf';
+
+        return $pdf->download($fileName);
+    }
     
 }
-
-

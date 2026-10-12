@@ -9,8 +9,7 @@
     .param-table td input.form-control { min-width: 110px; }
     .param-table td select.form-select { min-width: 130px; }
     .param-table td[class*="out-"] { min-width: 80px; white-space: nowrap; }
-    
-    /* Styling khusus untuk baris Outlier yang terkunci */
+
     .historical-outlier input, .historical-outlier select { background-color: #f8d7da !important; color: #842029; border-color: #f5c2c7; pointer-events: none; }
 </style>
 
@@ -28,24 +27,6 @@
 
     <form action="{{ route('crm-katalog.verifikasi-teknis.store', $katalog->id) }}" method="POST" id="formVerTeknis" autocomplete="off">
         @csrf
-
-        <div class="row g-3 mb-3">
-            <div class="col-md-4">
-                <label class="form-label small fw-bold">Analis</label>
-                @php
-                    $firstData = collect($existingData ?? [])->first();
-                    $savedAnalisId = old('analis_id', $firstData ? $firstData->analis_id : '');
-                @endphp
-                <select name="analis_id" class="form-select" required>
-                    <option value="">-- Pilih Analis --</option>
-                    @foreach(\App\Models\Personil::orderBy('nama')->get() as $p)
-                        <option value="{{ $p->personil_id }}" {{ $p->personil_id == $savedAnalisId ? 'selected' : '' }}>
-                            {{ $p->nama }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
 
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white pt-3 border-bottom-0">
@@ -143,9 +124,161 @@
                                     $draftRows[] = [];
                                 }
                             }
+
+                            $savedPersonils = [];
+                            $savedAlats = [];
+                            $savedBahans = [];
+                            
+                            if ($riwayat) {
+                                foreach ($riwayat->personils as $rp) {
+                                    $savedPersonils[$rp->personil_id] = $rp->pivot->peran;
+                                }
+                                foreach ($riwayat->alats as $ra) {
+                                    $savedAlats[] = $ra->alat_id;
+                                }
+                                foreach ($riwayat->bahans as $rb) {
+                                    $savedBahans[$rb->barang_id] = $rb->pivot->qty;
+                                }
+                            }
                         @endphp
                         
                         <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}" id="pane-{{ $pid }}" role="tabpanel" data-code="{{ $code }}" data-is-lulus="{{ $isLulus ? 'true' : 'false' }}" data-nilai-akhir="{{ $riwayat ? $riwayat->nilai_akhir : 0 }}">
+                            <div class="p-3 bg-light border-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-start mb-3">
+                                <div class="mb-3 mb-md-0">
+                                    <h6 class="mb-2 fw-bold text-dark"><i class="fas fa-microscope text-primary me-2"></i>Parameter: {{ $code }}</h6>
+                                    <div class="small ms-1" id="sum-all-{{ $pid }}">
+                                        <div class="mb-1 d-flex align-items-center">
+                                            <span class="text-muted d-inline-block" style="width: 50px;">Tanggal</span>:
+                                            <input type="date" class="form-control form-control-sm ms-2 w-auto"
+                                                   name="params[{{ $pid }}][tanggal_uji]"
+                                                   value="{{ $riwayat && $riwayat->tanggal_uji ? \Carbon\Carbon::parse($riwayat->tanggal_uji)->format('Y-m-d') : date('Y-m-d') }}">
+                                        </div>
+
+                                        <div class="mb-1"><span class="text-muted d-inline-block" style="width: 50px;">Analis</span>: <span id="sum-personil-{{ $pid }}" class="text-danger fst-italic">Belum diatur</span></div>
+                                        <div class="mb-1"><span class="text-muted d-inline-block" style="width: 50px;">Alat</span>: <span id="sum-alat-{{ $pid }}" class="text-danger fst-italic">Belum diatur</span></div>
+                                        <div><span class="text-muted d-inline-block" style="width: 50px;">Bahan</span>: <span id="sum-bahan-{{ $pid }}" class="text-danger fst-italic">Belum diatur</span></div>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column gap-2 mt-3 mt-md-0 d-print-none">
+                                    <button type="button" class="btn btn-sm text-white shadow-sm" style="background-color: #1b3152;" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}">
+                                        <i class="fas fa-tools me-1"></i> Atur Analis, Alat & Bahan
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-info shadow-sm" data-bs-toggle="modal" data-bs-target="#modalRumus-{{ $pid }}">
+                                        <i class="fas fa-calculator me-1"></i> Panduan Kolom & Rumus ({{ $code }})
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary btn-copy-resource" data-pid="{{ $pid }}">
+                                        <i class="fas fa-copy me-1"></i> Salin Data Sebelumnya
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="modal fade modal-resource" id="modalResource-{{ $pid }}" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                    <div class="modal-content border-0 shadow">
+                                        <div class="modal-header text-white" style="background-color: #1b3152;">
+                                            <h5 class="modal-title fw-bold"><i class="fas fa-cogs me-2"></i>Pengaturan Pengujian: {{ $code }}</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body p-0">
+                                            <ul class="nav nav-tabs nav-fill bg-light m-0" role="tablist">
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link active fw-bold py-3 text-dark" data-bs-toggle="tab" data-bs-target="#tab-personil-{{ $pid }}" type="button" role="tab"><i class="fas fa-users text-primary me-2"></i>Personil</button>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link fw-bold py-3 text-dark" data-bs-toggle="tab" data-bs-target="#tab-alat-{{ $pid }}" type="button" role="tab"><i class="fas fa-tools text-warning me-2"></i>Alat</button>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link fw-bold py-3 text-dark" data-bs-toggle="tab" data-bs-target="#tab-bahan-{{ $pid }}" type="button" role="tab"><i class="fas fa-flask text-success me-2"></i>Bahan</button>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link fw-bold py-3 text-dark" data-bs-toggle="tab" data-bs-target="#tab-catatan-{{ $pid }}" type="button" role="tab"><i class="fas fa-sticky-note text-info me-2"></i>Catatan</button>
+                                                </li>
+                                            </ul>
+
+                                            <div class="tab-content p-4">
+                                                <div class="tab-pane fade show active" id="tab-personil-{{ $pid }}" role="tabpanel">
+                                                    <table class="table table-sm table-hover align-middle">
+                                                        <thead class="table-light"><tr><th width="50">Pilih</th><th>Nama Analis</th><th width="200">Peran</th></tr></thead>
+                                                        <tbody>
+                                                            @foreach($personilList as $p)
+                                                            <tr>
+                                                                <td class="text-center">
+                                                                    <input class="form-check-input chk-personil" type="checkbox" name="params[{{ $pid }}][personil_ids][]" value="{{ $p->personil_id }}" data-nama="{{ $p->nama }}" {{ array_key_exists($p->personil_id, $savedPersonils) ? 'checked' : '' }}>
+                                                                </td>
+                                                                <td>{{ $p->nama }}</td>
+                                                                <td><input type="text" class="form-control form-control-sm in-peran" name="params[{{ $pid }}][personil_peran][{{ $p->personil_id }}]" placeholder="Analis / Pendamping" value="{{ $savedPersonils[$p->personil_id] ?? '' }}"></td>
+                                                            </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <div class="tab-pane fade" id="tab-alat-{{ $pid }}" role="tabpanel">
+                                                    <div class="row">
+                                                        @foreach($alatList as $alat)
+                                                        <div class="col-md-6 mb-2">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input chk-alat" type="checkbox" name="params[{{ $pid }}][alat_ids][]" value="{{ $alat->alat_id }}" data-nama="{{ $alat->nama_alat }}" {{ in_array($alat->alat_id, $savedAlats) ? 'checked' : '' }}>
+                                                                <label class="form-check-label">{{ $alat->nama_alat }} ({{ $alat->kode_alat }})</label>
+                                                            </div>
+                                                        </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+
+                                                <div class="tab-pane fade" id="tab-bahan-{{ $pid }}" role="tabpanel">
+                                                    <div class="table-responsive border rounded" style="max-height: 350px; overflow-y: auto;">
+                                                        <table class="table table-hover table-sm mb-0">
+                                                            <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                                                                <tr><th width="5%" class="text-center">Pilih</th><th>Nama Bahan</th><th>Sisa Stok</th><th width="30%">Jumlah Dipakai</th></tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach($barangList as $b)
+                                                                @php
+                                                                    $stokReal = ($b->saldo_awal + $b->penerimaan) - $b->pengeluaran;
+                                                                    $habis = $stokReal <= 0;
+                                                                @endphp
+                                                                <tr class="{{ $habis ? 'table-danger' : '' }}">
+                                                                    <td class="text-center align-middle">
+                                                                        <input class="form-check-input chk-bahan" style="transform: scale(1.3);" type="checkbox" name="params[{{ $pid }}][barang_ids][]" value="{{ $b->barang_id }}" id="bh_{{ $pid }}_{{ $b->barang_id }}" data-nama="{{ $b->nama_barang }}" {{ array_key_exists($b->barang_id, $savedBahans) ? 'checked' : '' }}>
+                                                                    </td>
+                                                                    <td class="align-middle">
+                                                                        <label for="bh_{{ $pid }}_{{ $b->barang_id }}" class="mb-0 cursor-pointer d-block {{ $habis ? 'text-muted' : '' }}">
+                                                                            <strong>{{ $b->nama_barang }}</strong> 
+                                                                            @if($habis) <span class="badge bg-danger ms-1">Habis</span> @endif
+                                                                        </label>
+                                                                    </td>
+                                                                    <td class="align-middle text-muted">{{ number_format($stokReal, 0, ',', '.') }} {{ $b->satuan }}</td>
+                                                                    <td>
+                                                                        <div class="input-group input-group-sm">
+                                                                            <input type="number" step="0.01" class="form-control bg-white in-qty" name="params[{{ $pid }}][barang_jumlah][{{ $b->barang_id }}]" placeholder="0" value="{{ $savedBahans[$b->barang_id] ?? '' }}">
+                                                                            <span class="input-group-text bg-white text-muted border-start-0">{{ $b->satuan }}</span>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+
+                                               
+                                                <div class="tab-pane fade" id="tab-catatan-{{ $pid }}" role="tabpanel">
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Catatan Pengujian / Kondisi Lingkungan</label>
+                                                        <textarea class="form-control" name="params[{{ $pid }}][catatan]" rows="4" placeholder="Misal: Suhu ruangan 25°C, Kelembaban 60%...">{{ $riwayat ? $riwayat->catatan : '' }}</textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer bg-light">
+                                            <button type="button" class="btn px-4 text-white rounded-pill" style="background-color: #1b3152;" data-bs-dismiss="modal">Simpan & Tutup Tab</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @include('partials.modal-panduan-inhouse', ['pid' => $pid, 'code' => $code])
                             
                             @if($isLulus)
                                 <div class="alert alert-success m-4 py-5 text-center border-0 shadow-sm rounded">
@@ -165,14 +298,13 @@
                                             <tr>
                                                 <th>Pengujian Ke-</th>
                                             @if(in_array($code, ['IM','RM']))
-                                                <th>M1</th><th>M2</th><th>M3</th><th>A</th><th>B</th><th class="bg-warning bg-opacity-25">M%</th>
+                                                <th>DISH NO</th><th>M1</th><th>M2</th><th>M3</th><th>A</th><th>B</th><th class="bg-warning bg-opacity-25">M%</th>
                                             @elseif($code === 'ASH')
-                                                <th>M1</th><th>M2</th><th>M2-M1</th><th>M3</th><th>M3-M1</th><th class="bg-warning bg-opacity-25">ASH%</th>
-                                                <th class="bg-info bg-opacity-10">db (per baris)</th>
+                                                <th>DISH NO</th><th>M1</th><th>M2</th><th>M2-M1</th><th>M3</th><th>M3-M1</th><th class="bg-warning bg-opacity-25">ASH%</th><th class="bg-info bg-opacity-25">db (per baris)</th>
                                             @elseif($code === 'VM')
-                                                <th>M1</th><th>M2-M1</th><th>M2</th><th>M3</th><th>M2-M3</th><th>LOSS%</th><th>IM</th><th class="bg-warning bg-opacity-25">VM (adb)</th><th class="bg-info bg-opacity-25">db (per baris)</th>
+                                                <th>DISH NO</th><th>M1</th><th>M2-M1</th><th>M2</th><th>M3</th><th>M2-M3</th><th>LOSS%</th><th>IM</th><th class="bg-warning bg-opacity-25">VM (adb)</th><th class="bg-info bg-opacity-25">db (per baris)</th>
                                             @elseif(in_array($code, ['TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']))
-                                                <th>Massa Sample</th><th class="bg-warning bg-opacity-25">TS (adb)</th>
+                                                <th>DISH NO</th><th>Massa Sample</th><th class="bg-warning bg-opacity-25">TS (adb)</th> 
                                             @elseif(in_array($code, ['CV','GCV']))
                                                 <th>Vessel No</th><th>Call ID</th><th>Weight of Crucible</th><th>Sample Mass</th><th>Preliminary Result (cal/g)</th><th>Ee (cal/°C)</th><th>t (°C)</th><th>Volume of Titrant (ml)</th><th>Length of Fuse (cm)</th><th>Total Sulfur % adb</th><th class="bg-warning bg-opacity-25">Final Result (cal/g) adb</th>
                                             @elseif($code === 'CHN')
@@ -234,6 +366,9 @@
                                                         <input type="hidden" class="hid-d2" name="params[{{ $pid }}][data][{{ $rIndex }}][nilai_d2]">
                                                     @endif
                                                 </td>
+                                                @if(in_array($code, ['IM','RM', 'ASH', 'VM', 'TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']))
+                                                    <td><input class="form-control form-control-sm" name="params[{{ $pid }}][data][{{ $rIndex }}][mentah][dish_1]" value="{{ $mentah['mentah']['dish_1'] ?? '' }}" placeholder="Dish No" {!! $ro !!}></td>
+                                                @endif
                                                 @if(in_array($code, ['IM','RM']))
                                                     <td><input class="form-control form-control-sm in-m1-1" inputmode="decimal" name="params[{{ $pid }}][data][{{ $rIndex }}][mentah][m1_1]" value="{{ $mentah['mentah']['m1_1'] ?? '' }}" {!! $ro !!}></td>
                                                     <td><input class="form-control form-control-sm in-m2-1 bg-light" readonly></td>
@@ -309,6 +444,9 @@
                                                 @endif
                                             </tr>
                                             <tr class="row-entry duplo-row" data-type="duplo">
+                                                @if(in_array($code, ['IM','RM', 'ASH', 'VM', 'TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']))
+                                                    <td><input class="form-control form-control-sm" name="params[{{ $pid }}][data][{{ $rIndex }}][mentah][dish_2]" value="{{ $mentah['mentah']['dish_2'] ?? '' }}" placeholder="Dish No" {!! $ro !!}></td>
+                                                @endif
                                                 @if(in_array($code, ['IM','RM']))
                                                     <td><input class="form-control form-control-sm in-m1-2" inputmode="decimal" name="params[{{ $pid }}][data][{{ $rIndex }}][mentah][m1_2]" value="{{ $mentah['mentah']['m1_2'] ?? '' }}" {!! $ro !!}></td>
                                                     <td><input class="form-control form-control-sm in-m2-2 bg-light" readonly></td>
@@ -419,6 +557,85 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    function updateResourceSummary(pid) {
+        const modal = document.getElementById('modalResource-' + pid);
+        if(!modal) return;
+        let personils = [];
+        modal.querySelectorAll('.chk-personil:checked').forEach(cb => { personils.push(cb.getAttribute('data-nama')); });
+        document.getElementById('sum-personil-' + pid).innerHTML = personils.length ? `<span class="text-dark fw-bold">${personils.join(', ')}</span>` : '<span class="text-danger fst-italic">Belum diatur</span>';
+        let alats = [];
+        modal.querySelectorAll('.chk-alat:checked').forEach(cb => { alats.push(cb.getAttribute('data-nama')); });
+        document.getElementById('sum-alat-' + pid).innerHTML = alats.length ? `<span class="text-dark fw-bold">${alats.join(', ')}</span>` : '<span class="text-danger fst-italic">Belum diatur</span>';
+        let bahans = [];
+        modal.querySelectorAll('.chk-bahan:checked').forEach(cb => {
+            let qty = cb.closest('tr').querySelector('.in-qty').value;
+            let nama = cb.getAttribute('data-nama');
+            bahans.push(`<span class="text-dark fw-bold">${nama} (${qty || 0})</span>`);
+        });
+        document.getElementById('sum-bahan-' + pid).innerHTML = bahans.length ? bahans.join(', ') : '<span class="text-danger fst-italic">Belum diatur</span>';
+    }
+    // Jalankan summary setiap modal ditutup
+    document.querySelectorAll('.modal-resource').forEach(modal => {
+        modal.addEventListener('hidden.bs.modal', function () {
+            let pid = this.id.replace('modalResource-', '');
+            updateResourceSummary(pid);
+        });
+    });
+
+    // Panggil fungsi summary saat halaman dimuat (untuk data yang tersimpan dari draft)
+    document.querySelectorAll('.tab-pane').forEach(pane => {
+        if(pane.id && pane.id.startsWith('pane-')) {
+            let pid = pane.id.replace('pane-', '');
+            updateResourceSummary(pid);
+        }
+    });
+
+    // Fitur Salin dari parameter sebelumnya
+    document.querySelectorAll('.btn-copy-resource').forEach(btn => {
+        btn.addEventListener('click', function() {
+            let currentPid = this.getAttribute('data-pid');
+            let allPanes = Array.from(document.querySelectorAll('.tab-pane[data-code]'));
+            let currentIndex = allPanes.findIndex(pane => pane.id === 'pane-' + currentPid);
+            if (currentIndex <= 0) {
+                alert('Ini adalah parameter pertama, tidak ada data sebelumnya untuk disalin.');
+                return;
+            }
+            let prevPid = allPanes[currentIndex - 1].id.replace('pane-', '');
+            let prevModal = document.getElementById('modalResource-' + prevPid);
+            let currModal = document.getElementById('modalResource-' + currentPid);
+            
+            if (prevModal && currModal) {
+                currModal.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                currModal.querySelectorAll('.in-peran, .in-qty').forEach(inpt => inpt.value = '');
+                prevModal.querySelectorAll('.chk-personil:checked').forEach(cb => {
+                    let targetCb = currModal.querySelector(`.chk-personil[value="${cb.value}"]`);
+                    if(targetCb) {
+                        targetCb.checked = true;
+                        targetCb.closest('tr').querySelector('.in-peran').value = cb.closest('tr').querySelector('.in-peran').value;
+                    }
+                });
+                prevModal.querySelectorAll('.chk-alat:checked').forEach(cb => {
+                    let targetCb = currModal.querySelector(`.chk-alat[value="${cb.value}"]`);
+                    if(targetCb) targetCb.checked = true;
+                });
+                prevModal.querySelectorAll('.chk-bahan:checked').forEach(cb => {
+                    let targetCb = currModal.querySelector(`.chk-bahan[value="${cb.value}"]`);
+                    if(targetCb) {
+                        targetCb.checked = true;
+                        targetCb.closest('tr').querySelector('.in-qty').value = cb.closest('tr').querySelector('.in-qty').value;
+                    }
+                });
+                let prevCatatan = prevModal.querySelector('textarea[name="params['+prevPid+'][catatan]"]');
+                let currCatatan = currModal.querySelector('textarea[name="params['+currentPid+'][catatan]"]');
+                if (prevCatatan && currCatatan) currCatatan.value = prevCatatan.value;
+                let prevTgl = document.querySelector('input[name="params['+prevPid+'][tanggal_uji]"]');
+                let currTgl = document.querySelector('input[name="params['+currentPid+'][tanggal_uji]"]');
+                if (prevTgl && currTgl) currTgl.value = prevTgl.value;
+                updateResourceSummary(currentPid);
+                alert('Berhasil menyalin Tanggal, Analis, Alat, dan Bahan dari parameter sebelumnya!');
+            }
+        });
+    });
     function num(v) { const n = parseFloat(v); return (v === '' || v === null || isNaN(n)) ? 0 : n; }
     const R2 = n => Math.round(n * 100) / 100;
     const R0 = n => Math.round(n);
@@ -555,21 +772,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     avg.textContent = a.toFixed(2);
                 }
             }
-            
-            let finalD1 = v1;
-            let finalD2 = v2;
-            
-            if (['ASH','VM','TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)', 'CV','GCV'].includes(code)) {
-                const imGlobal = getGlobalImValue();
-                
-                if (imGlobal > 0) {
-                    finalD1 = ['CV','GCV'].includes(code) ? Math.round(v1 * (100 / (100 - imGlobal))) : (v1 * (100 / (100 - imGlobal)));
-                    finalD2 = ['CV','GCV'].includes(code) ? Math.round(v2 * (100 / (100 - imGlobal))) : (v2 * (100 / (100 - imGlobal)));
-                }
-            }
-
-            if (hidD1) hidD1.value = finalD1.toFixed(4);
-            if (hidD2) hidD2.value = finalD2.toFixed(4);
+            if (hidD1) hidD1.value = v1.toFixed(4);
+            if (hidD2) hidD2.value = v2.toFixed(4);
 
             let batas = null;
             if (['IM','RM'].includes(code)) batas = 0.09 + (0.1 * a);
@@ -691,7 +895,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (badge) badge.remove();
 
             newTbody.querySelectorAll('[name]').forEach(inp => {
-                inp.name = inp.name.replace(/[data]\[\d+\]/, `[data][${newIndex}]`);
+                inp.name = inp.name.replace(/\[data\]\[\d+\]/, `[data][${newIndex}]`);
             });
             newTbody.querySelectorAll('input').forEach(inp => {
                 if (!inp.classList.contains('bg-light')) {

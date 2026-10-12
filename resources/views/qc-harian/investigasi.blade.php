@@ -13,12 +13,6 @@
         <i class="fas fa-exclamation-triangle me-2"></i>Tindakan Perbaikan (CAPA) Out of Control
     </h2>
 
-    @if(session('error'))
-    <div class="alert alert-danger shadow-sm border-0">
-        <i class="fas fa-times-circle me-2"></i> {{ session('error') }}
-    </div>
-    @endif
-
     <div class="row">
         <div class="col-md-5">
             <div class="card shadow-sm border-0 border-top border-danger border-4 mb-4">
@@ -75,11 +69,28 @@
                     
                     <form action="{{ route('qc-harian.investigasi.store', $qc->id) }}" method="POST" id="formCapa">
                         @csrf
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Akar Masalah <span class="text-danger">*</span></label>
+                            <select name="akar_masalah" class="form-select" required>
+                                <option value="">-- Pilih Kategori Akar Masalah --</option>
+                                <option value="Kondisi Instrumen">Kondisi Instrumen / Alat</option>
+                                <option value="Human Error">Human Error (Analis)</option>
+                                <option value="Kondisi Reagen / Sampel">Kondisi Reagen / Sampel</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Detail Investigasi (Temuan) <span class="text-danger">*</span></label>
+                            <p class="small text-muted mb-2">Jelaskan temuan spesifik mengapa hasil bisa menyimpang (Contoh: Terjadi kebocoran gas pada bomb calorimeter saat running berlangsung).</p>
+                            <textarea name="catatan_investigasi" id="catatan_investigasi" rows="4" class="form-control" required minlength="10"></textarea>
+                        </div>
+
                         <div class="mb-4">
-                            <label class="form-label fw-bold">Analisis Akar Masalah & Tindakan Perbaikan <span class="text-danger">*</span></label>
-                            <p class="small text-muted mb-2">Jelaskan mengapa hasil pengujian menjadi outlier (misal: kalibrasi alat bergeser, reagen kadaluarsa, kesalahan preparasi) dan apa tindakan perbaikannya (misal: kalibrasi ulang, ganti reagen, re-test).</p>
-                            <textarea name="catatan_investigasi" id="catatan_investigasi" rows="8" class="form-control" required minlength="10" placeholder="Contoh: Terjadi kesalahan penimbangan pada botol reagen A. Tindakan: Larutan dibuang dan dibuat reagen baru, kemudian alat dikalibrasi ulang. Pengujian sampel ditahan menunggu hasil running QC selanjutnya."></textarea>
-                            <div class="form-text text-danger" id="charCount">Minimal 10 karakter.</div>
+                            <label class="form-label fw-bold">Tindakan Perbaikan (Corrective Action) <span class="text-danger">*</span></label>
+                            <p class="small text-muted mb-2">Apa tindakan perbaikan yang dilakukan agar alat/metode kembali terkendali? (Contoh: Mengganti seal O-ring dan melakukan kalibrasi ulang).</p>
+                            <textarea name="tindakan_perbaikan" id="tindakan_perbaikan" rows="4" class="form-control" required minlength="10"></textarea>
                         </div>
 
                         <hr class="my-4">
@@ -87,7 +98,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <a href="{{ route('qc-harian.index') }}" class="btn btn-light border px-4">Kembali ke Dashboard</a>
                             <button type="submit" class="btn btn-danger px-4 shadow-sm" id="btnSubmit">
-                                <i class="fas fa-unlock me-2"></i>Simpan Laporan & Buka Kunci Parameter
+                                <i class="fas fa-unlock me-2"></i>Simpan Laporan & Buka Kunci Retest
                             </button>
                         </div>
                     </form>

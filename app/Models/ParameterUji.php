@@ -89,4 +89,30 @@ class ParameterUji extends BaseModel
     {
         return $this->hasMany(ParameterToleransi::class, 'parameter_uji_id', 'parameter_uji_id');
     }
+
+    public function getNamaLengkapAttribute(): string
+    {
+        $code = strtoupper(trim(str_replace(' - %', '', $this->nama_parameter)));
+        $map = [
+            'IM'      => 'Inherent Moisture',
+            'ASH'     => 'Ash Content (Kadar Abu)',
+            'VM'      => 'Volatile Matter (Zat Terbang)',
+            'FC'      => 'Fixed Carbon (Karbon Tertambat)',
+            'TS'      => 'Total Sulfur',
+            'CV'      => 'Gross Calorific Value (Nilai Kalor)',
+            'GCV'     => 'Gross Calorific Value (Nilai Kalor)',
+            'NCV'     => 'Net Calorific Value',
+            'TM'      => 'Total Moisture (Kadar Air Total)',
+            'RM'      => 'Residual Moisture',
+            'C'       => 'Carbon (C)',
+            'H'       => 'Hydrogen (H)',
+            'N'       => 'Nitrogen (N)',
+            'HGI'     => 'Hardgrove Grindability Index',
+            'AFT-IDT' => 'Ash Fusion Temperature (IDT)',
+            'AFT-ST'  => 'Ash Fusion Temperature (ST)',
+            'AFT-HT'  => 'Ash Fusion Temperature (HT)',
+            'AFT-FT'  => 'Ash Fusion Temperature (FT)',
+        ];
+        return $map[$code] ?? $this->nama_parameter;
+    }
 }

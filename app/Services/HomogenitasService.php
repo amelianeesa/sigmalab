@@ -118,25 +118,18 @@ class HomogenitasService
         // F Tabel (v1 = k-1, v2 = k) - lookup dinamis berdasarkan k
         $fTabel = $this->getFTabel($k);
 
-        // --- SD Global ---
-        // Rumus resmi Excel (FOR/COAL-OPS/214, sel K32): SD = SQRT((MSB - MSW) / 2)
-        // Ini BERBEDA dari rumus lama (simple sample SD dari seluruh nilai mentah)
-        // yang dipakai sebelumnya. Silakan cek catatan di bawah kalau ingin
-        // membandingkan / rollback ke rumus lama.
-        $selisihMsbMsw = $msb - $msw;
-        $sdGlobal = $selisihMsbMsw > 0 ? sqrt($selisihMsbMsw / 2) : 0;
-
-        // --- Rumus lama (simple sample SD), disimpan sebagai referensi/komentar ---
-        // $sumSqTotal = 0;
-        // foreach ($allValues as $v) {
-        //     $sumSqTotal += pow($v - $grandMean, 2);
-        // }
-        // $sdGlobalLama = $N > 1 ? sqrt($sumSqTotal / ($N - 1)) : 0;
+        // Menghitung Standard Deviation (SD) keseluruhan sampel
+        // Menggunakan Total Sample Standard Deviation (rumus yang benar untuk ditarik ke grafik Westgard)
+        $sumSqTotal = 0;
+        foreach ($allValues as $v) {
+            $sumSqTotal += pow($v - $grandMean, 2);
+        }
+        $sdGlobal = $N > 1 ? sqrt($sumSqTotal / ($N - 1)) : 0;
 
         return [
             'n' => $k,
             'mean_global' => $grandMean,
-            'sd_global' => $sdGlobal,
+            'sd_global' => $sdGlobal, // <-- Sekarang menggunakan $sdGlobal yang benar
             'msb' => $msb,
             'msw' => $msw,
             'f_hitung' => $fHitung,

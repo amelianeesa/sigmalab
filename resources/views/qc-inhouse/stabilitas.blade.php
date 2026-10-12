@@ -10,12 +10,12 @@
 
     <div class="row mt-3">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-end mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-end gap-3 mb-4">
                 <div>
-                    <h3 class="fw-bold text-dark mb-1"><i class="fas fa-balance-scale-right text-primary me-2"></i>Uji Stabilitas (Tahap 5)</h3>
+                    <h3 class="fw-bold text-dark mb-1"><i class="fas fa-balance-scale-right text-primary me-2"></i>Tahap 5: Uji Stabilitas</h3>
                     <p class="text-muted mb-0">Masukkan data mentah penimbangan harian untuk dikalkulasi menjadi M% dan divalidasi terhadap <strong>Data Target</strong> (t-Test).</p>
                 </div>
-                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalExport">
+                <button type="button" class="btn btn-outline-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#modalExport">
                     <i class="fas fa-print me-2"></i>Cetak / Export
                 </button>
             </div>
@@ -70,13 +70,29 @@
                                 @endphp
                                 <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}" id="pane-{{ $pid }}" role="tabpanel">
                                     
-                                                                        <!-- Tombol Buka Modal & Summary -->
+                                    <!-- Tombol Buka Modal & Summary -->
                                     <div class="px-3 pt-3">
-                                        <button type="button" class="btn btn-outline-primary btn-sm mb-2" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}">
-                                            <i class="fas fa-users-cog me-1"></i> Pilih Personil & Alat ({{ $code }})
-                                        </button>
+                                        @php
+                                            $isLocked = !in_array($batch->status, ['uji_stabilitas', 'gagal_stabilitas']);
+                                            
+                                            // Ambil row pertama stabilitas untuk resource modal
+                                            $dsFirst = $param->dataStabilitas->where('nomor_pengujian', 1)->first();
+                                            $mentahResource = $dsFirst ? $dsFirst->data_mentah : [];
+                                        @endphp
+
+                                        <div class="d-flex flex-wrap gap-2 mb-2 d-print-none">
+                                            @if(!$isLocked)
+                                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}">
+                                                <i class="fas fa-users-cog me-1"></i> Pilih Personil & Alat ({{ $code }})
+                                            </button>
+                                            @endif
+                                            <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalRumus-{{ $pid }}">
+                                                <i class="fas fa-calculator me-1"></i> Panduan Kolom & Rumus ({{ $code }})
+                                            </button>
+                                        </div>
+                                        
                                         <div id="summary_{{ $pid }}" class="p-2 border rounded bg-light small d-none">
-                                            <div class="fw-bold text-secondary mb-1">Terpilih:</div>
+                                            <div class="fw-bold text-secondary mb-1">Informasi Pelaksanaan Pengujian:</div>
                                             <div class="summary-content text-dark"></div>
                                         </div>
                                     </div>
@@ -101,315 +117,328 @@
                                                             <button class="nav-link fw-bold text-dark py-3" data-bs-toggle="tab" data-bs-target="#tab-bahan-{{ $pid }}" type="button" role="tab"><i class="fas fa-flask text-success me-2"></i>Bahan / Reagen</button>
                                                         </li>
                                                     </ul>
-                                                    
-                                                    <div class="tab-content p-4">
-                                                        <div class="d-flex justify-content-end mb-3">
-                                                            <button type="button" class="btn btn-sm btn-info text-white btn-copy-resource" data-pid="{{ $pid }}">
-                                                                <i class="fas fa-copy me-1"></i> Salin dari Parameter Sebelumnya
-                                                            </button>
-                                                        </div>
 
-                                                        <!-- Tab Personil -->
-                                                        <div class="tab-pane fade show active" id="tab-personil-{{ $pid }}" role="tabpanel">
-                                                            <div class="table-responsive border rounded" style="max-height: 350px; overflow-y: auto;">
-                                                                <table class="table table-hover table-sm mb-0 text-nowrap">
-                                                                    <thead class="table-light sticky-top">
-                                                                        <tr><th width="5%" class="text-center">Pilih</th><th>Nama Personil</th><th>Peran / Tugas</th></tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        @foreach($personilList as $personil)
-                                                                        <tr>
-                                                                            <td class="text-center align-middle">
-                                                                                <input class="form-check-input chk-personil" style="transform: scale(1.3);" type="checkbox" name="resource_{{ $pid }}[personil_ids][]" value="{{ $personil->personil_id }}">
-                                                                            </td>
-                                                                            <td class="align-middle">{{ $personil->nama }}</td>
-                                                                            <td><input type="text" class="form-control form-control-sm in-peran" name="resource_{{ $pid }}[personil_peran][{{ $personil->personil_id }}]" value="Analis" placeholder="Analis"></td>
-                                                                        </tr>
-                                                                        @endforeach
-                                                                    </tbody>
-                                                                </table>
+                                                    <fieldset {{ $isLocked ? 'disabled' : '' }}>                                                    
+                                                        <div class="tab-content p-4">
+                                                            @if(!$isLocked)
+                                                            <div class="d-flex justify-content-end mb-3">
+                                                                <button type="button" class="btn btn-sm btn-info text-white btn-copy-resource" data-pid="{{ $pid }}">
+                                                                    <i class="fas fa-copy me-1"></i> Salin dari Parameter Sebelumnya
+                                                                </button>
                                                             </div>
-                                                        </div>
+                                                            @endif
 
-                                                        <!-- Tab Alat -->
-                                                        <div class="tab-pane fade" id="tab-alat-{{ $pid }}" role="tabpanel">
-                                                            <div class="row">
-                                                                @foreach($alatList as $alat)
-                                                                <div class="col-md-6 mb-3">
-                                                                    <div class="form-check border p-2 rounded bg-light">
-                                                                        <input class="form-check-input chk-alat ms-1" style="transform: scale(1.3);" type="checkbox" name="resource_{{ $pid }}[alat_ids][]" value="{{ $alat->alat_id }}">
-                                                                        <label class="form-check-label ms-2 cursor-pointer w-100">
-                                                                            <strong>{{ $alat->nama_alat }}</strong> <br><small class="text-muted">({{ $alat->kode_alat }})</small>
-                                                                        </label>
-                                                                    </div>
+                                                            <!-- Tab Personil -->
+                                                            <div class="tab-pane fade show active" id="tab-personil-{{ $pid }}" role="tabpanel">
+                                                                <div class="table-responsive border rounded" style="max-height: 350px; overflow-y: auto;">
+                                                                    <table class="table table-hover table-sm mb-0 text-nowrap">
+                                                                        <thead class="table-light sticky-top">
+                                                                            <tr><th width="5%" class="text-center">Pilih</th><th>Nama Personil</th><th>Peran / Tugas</th></tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            @foreach($personilList as $personil)
+                                                                            <tr>
+                                                                                <td class="text-center align-middle">
+                                                                                    <input class="form-check-input chk-personil" style="transform: scale(1.3);" type="checkbox" name="resource_{{ $pid }}[personil_ids][]" value="{{ $personil->personil_id }}" {{ in_array($personil->personil_id, $mentahResource['personil_ids'] ?? []) ? 'checked' : '' }}>
+                                                                                </td>
+                                                                                <td class="align-middle">{{ $personil->nama }}</td>
+                                                                                <td><input type="text" class="form-control form-control-sm in-peran" name="resource_{{ $pid }}[personil_peran][{{ $personil->personil_id }}]" value="{{ $mentahResource['personil_peran'][$personil->personil_id] ?? 'Analis' }}" placeholder="Analis"></td>
+                                                                            </tr>
+                                                                            @endforeach
+                                                                        </tbody>
+                                                                    </table>
                                                                 </div>
-                                                                @endforeach
                                                             </div>
-                                                        </div>
 
-                                                        <!-- Tab Bahan -->
-                                                        <div class="tab-pane fade" id="tab-bahan-{{ $pid }}" role="tabpanel">
-                                                            <div class="table-responsive border rounded" style="max-height: 350px; overflow-y: auto;">
-                                                                <table class="table table-hover table-sm mb-0 text-nowrap">
-                                                                    <thead class="table-light sticky-top">
-                                                                        <tr><th width="5%" class="text-center">Pilih</th><th>Nama Bahan</th><th>Sisa Stok</th><th width="30%">Jumlah Dipakai</th></tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        @foreach($barangList as $barang)
-                                                                        @php
-                                                                            $saldoAkhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
-                                                                            $habis = $saldoAkhir <= 0;
-                                                                        @endphp
-                                                                        <tr class="{{ $habis ? 'table-danger' : '' }}">
-                                                                            <td class="text-center align-middle">
-                                                                                <input class="form-check-input chk-bahan" style="transform: scale(1.3);" type="checkbox" name="resource_{{ $pid }}[barang_ids][]" value="{{ $barang->barang_id }}" data-nama="{{ $barang->nama_barang }}">
-                                                                            </td>
-                                                                            <td class="align-middle">
-                                                                                <strong>{{ $barang->nama_barang }}</strong> 
-                                                                                @if($habis) <span class="badge bg-danger ms-1">Habis</span> @endif
-                                                                            </td>
-                                                                            <td class="align-middle {{ $habis ? 'text-danger fw-bold' : '' }}">{{ $saldoAkhir }} {{ $barang->satuan }}</td>
-                                                                            <td>
-                                                                                <div class="input-group input-group-sm">
-                                                                                    <input type="number" step="0.01" class="form-control in-qty" name="resource_{{ $pid }}[barang_jumlah][{{ $barang->barang_id }}]" placeholder="0">
-                                                                                    <span class="input-group-text">{{ $barang->satuan }}</span>
-                                                                                </div>
-                                                                            </td>
-                                                                        </tr>
-                                                                        @endforeach
-                                                                    </tbody>
-                                                                </table>
+                                                            <!-- Tab Alat -->
+                                                            <div class="tab-pane fade" id="tab-alat-{{ $pid }}" role="tabpanel">
+                                                                <div class="row">
+                                                                    @foreach($alatList as $alat)
+                                                                    <div class="col-md-6 mb-3">
+                                                                        <div class="form-check border p-2 rounded bg-light">
+                                                                            <input class="form-check-input chk-alat ms-1" style="transform: scale(1.3);" type="checkbox" name="resource_{{ $pid }}[alat_ids][]" value="{{ $alat->alat_id }}" {{ in_array($alat->alat_id, $mentahResource['alat_ids'] ?? []) ? 'checked' : '' }}>
+                                                                            <label class="form-check-label ms-2 cursor-pointer w-100">
+                                                                                <strong>{{ $alat->nama_alat }}</strong> <br><small class="text-muted">({{ $alat->kode_alat }})</small>
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                    @endforeach
+                                                                </div>
                                                             </div>
+
+                                                            <!-- Tab Bahan -->
+                                                            <div class="tab-pane fade" id="tab-bahan-{{ $pid }}" role="tabpanel">
+                                                                <div class="table-responsive border rounded" style="max-height: 350px; overflow-y: auto;">
+                                                                    <table class="table table-hover table-sm mb-0 text-nowrap">
+                                                                        <thead class="table-light sticky-top">
+                                                                            <tr><th width="5%" class="text-center">Pilih</th><th>Nama Bahan</th><th>Sisa Stok</th><th width="30%">Jumlah Dipakai</th></tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            @foreach($barangList as $barang)
+                                                                            @php
+                                                                                $saldoAkhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
+                                                                                $habis = $saldoAkhir <= 0;
+                                                                            @endphp
+                                                                            <tr class="{{ $habis ? 'table-danger' : '' }}">
+                                                                                <td class="text-center align-middle">
+                                                                                    <input class="form-check-input chk-bahan" style="transform: scale(1.3);" type="checkbox" name="resource_{{ $pid }}[barang_ids][]" value="{{ $barang->barang_id }}" data-nama="{{ $barang->nama_barang }}" {{ in_array($barang->barang_id, $mentahResource['barang_ids'] ?? []) ? 'checked' : '' }}>
+                                                                                </td>
+                                                                                <td class="align-middle">
+                                                                                    <strong>{{ $barang->nama_barang }}</strong> 
+                                                                                    @if($habis) <span class="badge bg-danger ms-1">Habis</span> @endif
+                                                                                </td>
+                                                                                <td class="align-middle {{ $habis ? 'text-danger fw-bold' : '' }}">{{ $saldoAkhir }} {{ $barang->satuan }}</td>
+                                                                                <td>
+                                                                                    <div class="input-group input-group-sm">
+                                                                                        <input type="number" step="0.01" class="form-control in-qty" name="resource_{{ $pid }}[barang_jumlah][{{ $barang->barang_id }}]" placeholder="0" value="{{ $mentahResource['barang_jumlah'][$barang->barang_id] ?? '' }}">
+                                                                                        <span class="input-group-text">{{ $barang->satuan }}</span>
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                            @endforeach
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+
                                                         </div>
-                                                    </div>
+                                                    </fieldset>
                                                 </div>
                                                 <div class="modal-footer bg-light">
-                                                    <button type="button" class="btn btn-primary px-4 fw-bold" data-bs-dismiss="modal"><i class="fas fa-check me-1"></i> Simpan Pilihan</button>
+                                                    @if($isLocked)
+                                                        <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">Tutup</button>
+                                                    @else
+                                                        <button type="button" class="btn btn-primary px-4 fw-bold" data-bs-dismiss="modal"><i class="fas fa-check me-1"></i> Simpan Pilihan</button>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="table-responsive p-3">
-                                        <table class="table table-bordered table-sm align-middle text-center param-table text-nowrap" style="min-width: {{ in_array($code, ['TS']) ? '100%' : '1500px' }};" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
-                                            <thead class="table-light">
-                                                @if($code === 'IM')
-                                                    <tr>
-                                                        <th width="10%">KODE SAMPEL</th>
-                                                        <th>DISH NO.</th>
-                                                        <th>M1</th>
-                                                        <th>M2</th>
-                                                        <th>M3</th>
-                                                        <th>A</th>
-                                                        <th>B</th>
-                                                        <th class="bg-warning bg-opacity-25">M%</th>
-                                                        <th colspan="2">ABSOLUTE DIFFERENCE</th>
-                                                        <th>AVERAGE %</th>
-                                                    </tr>
-                                                @elseif($code === 'ASH')
-                                                    <tr>
-                                                        <th width="10%">KODE SAMPEL</th>
-                                                        <th>DISH NO.</th>
-                                                        <th>M1</th>
-                                                        <th>M2</th>
-                                                        <th>M2-M1</th>
-                                                        <th>M3</th>
-                                                        <th>M3-M1</th>
-                                                        <th class="bg-warning bg-opacity-25">ASH%</th>
-                                                        <th colspan="2">ABSOLUTE DIFFERENCE</th>
-                                                        <th>AVERAGE %adb</th>
-                                                        <th style="min-width: 80px;">%db</th>
-                                                        <th style="min-width: 80px;">db</th>
-                                                    </tr>
-                                                @elseif($code === 'VM')
-                                                    <tr>
-                                                        <th width="10%">KODE SAMPEL</th>
-                                                        <th>DISH NO.</th>
-                                                        <th>M1</th>
-                                                        <th>M2</th>
-                                                        <th>M2-M1</th>
-                                                        <th>M3</th>
-                                                        <th>M2-M3</th>
-                                                        <th>LOSS%</th>
-                                                        <th>IM</th>
-                                                        <th class="bg-warning bg-opacity-25">VM%</th>
-                                                        <th colspan="2">ABSOLUTE DIFFERENCE</th>
-                                                        <th>AVERAGE %adb</th>
-                                                        <th>AVERAGE %db</th>
-                                                        <th style="min-width: 80px;">%db</th>
-                                                    </tr>
-                                                @elseif($code === 'TS')
-                                                <tr>
-                                                    <th width="10%">KODE SAMPEL</th>
-                                                    <th>DISH NO.</th>
-                                                    <th>Massa sample</th>
-                                                    <th class="bg-warning bg-opacity-25">TS (Adb)</th>
-                                                    <th>Average % (adb)</th>
-                                                    <th class="bg-warning bg-opacity-25">Average % (db)</th>
-                                                </tr>
-                                                @elseif($code === 'CV')
-                                                    <tr>
-                                                        <th width="8%">KODE SAMPEL</th>
-                                                        <th width="8%">VESSEL ID.</th>
-                                                        <th>CALL ID</th>
-                                                        <th>Weight of Crucible</th>
-                                                        <th>Sample Mass</th>
-                                                        <th>Primary Result (cal/g)</th>
-                                                        <th style="min-width: 90px;">Ee</th>
-                                                        <th style="min-width: 90px;">t</th>
-                                                        <th>Volume of Titrant (ml)</th>
-                                                        <th>Length of Fuse (cm)</th>
-                                                        <th>Total TS</th>
-                                                        <th class="bg-warning bg-opacity-25">Final Result (cal/g) adb</th>
-                                                        <th>Average Result (cal/g), adb</th>
-                                                        <th>Average Result (cal/g), db</th>
-                                                        <th>%db</th>
-                                                    </tr>
-                                                @else
-                                                    
-                                                    <tr>
-                                                        <th>KODE SAMPEL</th>
-                                                        <th>DISH NO.</th>
-                                                        <th class="bg-warning bg-opacity-25">Hasil Uji (adb)</th>
-                                                        <th>ABSOLUTE DIFFERENCE</th>
-                                                        <th>AVERAGE % (adb)</th>
-                                                    </tr>
-                                                @endif
-                                            </thead>
-                                            <tbody>
-                                                @php $rowCount = max(3, $param->dataStabilitas->count()); @endphp
-                                                @for($i = 1; $i <= $rowCount; $i++)
-                                                    @php 
-                                                        $dh = $param->dataStabilitas->where('nomor_pengujian', $i)->first();
-                                                        $mentah = $dh ? $dh->data_mentah : [];
-                                                        $botolNomor = $dh ? $dh->nomor_botol_fisik : '';
-                                                    @endphp
-                                                    
-                                                    <tr class="row-simplo">
-                                                        <td rowspan="2" class="fw-bold align-middle bg-light border-end">
-                                                            <select class="form-select form-select-sm text-danger fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][nomor_botol_fisik]" required>
-                                                                <option value="">Botol...</option>
-                                                                @foreach($sisaBotol as $b)
-                                                                    <option value="{{ $b }}" {{ $botolNomor == $b ? 'selected' : '' }}>Botol {{ $b }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                            <input type="hidden" class="in-db-1" name="data_{{ $pid }}[{{ $i-1 }}][nilai_db_1]">
-                                                            <input type="hidden" class="in-db-2" name="data_{{ $pid }}[{{ $i-1 }}][nilai_db_2]">
-                                                        </td>
-                                                        <td class="bg-light p-1 text-center"><input type="text" class="form-control form-control-sm text-center fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][dish_1]" value="{{ $mentah['dish_1'] ?? '' }}" ></td>
-                                                        
-                                                        @if($code === 'IM')
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_1]" value="{{ $mentah['m1_1'] ?? '' }}"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-m2-1 bg-light border-0" readonly tabindex="-1"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m3-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m3_1]" value="{{ $mentah['m3_1'] ?? '' }}"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-a-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][a_1]" value="{{ $mentah['a_1'] ?? '' }}"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-b-1 bg-light border-0" readonly tabindex="-1"></td>
-                                                            <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" readonly tabindex="-1"></td>
-                                                            <td rowspan="2" class="align-middle out-diff">-</td>
-                                                            <td rowspan="2" class="align-middle out-tol fw-bold">-</td>
-                                                            <td rowspan="2" class="align-middle out-avg-adb">-</td>
-                                                        @elseif($code === 'ASH')
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_1]" value="{{ $mentah['m1_1'] ?? '' }}"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-m2-1 bg-light border-0" readonly tabindex="-1"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m2m1-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m2m1_1]" value="{{ $mentah['m2m1_1'] ?? '' }}"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m3-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m3_1]" value="{{ $mentah['m3_1'] ?? '' }}"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-m3m1-1 bg-light border-0" readonly tabindex="-1"></td>
-                                                            <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" readonly tabindex="-1"></td>
-                                                            <td rowspan="2" class="align-middle out-diff">-</td>
-                                                            <td rowspan="2" class="align-middle out-tol fw-bold">-</td>
-                                                            <td rowspan="2" class="align-middle out-avg-adb">-</td>
-                                                            <td rowspan="2" class="align-middle out-avg-db">-</td>
-                                                            <td class="align-middle out-db-1 fw-bold text-success">-</td>
-                                                        @elseif($code === 'VM')
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_1]" value="{{ $mentah['m1_1'] ?? '' }}"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-m2-1 bg-light border-0" readonly tabindex="-1"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m2m1-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m2m1_1]" value="{{ $mentah['m2m1_1'] ?? '' }}"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m3-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m3_1]" value="{{ $mentah['m3_1'] ?? '' }}"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-m2m3-1 bg-light border-0" readonly tabindex="-1"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-loss-1 bg-light border-0" readonly tabindex="-1"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-im-1 bg-light border-0 text-secondary" readonly tabindex="-1"></td>
-                                                            <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" readonly tabindex="-1"></td>
-                                                            <td rowspan="2" class="align-middle out-diff">-</td>
-                                                            <td rowspan="2" class="align-middle out-tol fw-bold">-</td>
-                                                            <td rowspan="2" class="align-middle out-avg-adb">-</td>
-                                                            <td rowspan="2" class="align-middle out-avg-db">-</td>
-                                                            <td class="align-middle out-db-1 fw-bold text-success">-</td>
-                                                        @elseif($code === 'TS')
-                                                        <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_1]" value="{{ $mentah['massa_1'] ?? '' }}"></td>
-                                                        <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" value="{{ $dh->nilai_d1 ?? '' }}"></td>
-                                                        <td rowspan="2" class="align-middle out-avg-adb fw-bold">-</td>
-                                                        <td rowspan="2" class="align-middle out-avg-db fw-bold text-success">-</td>
-                                                        @elseif($code === 'CV')
-                                                            <td><input type="text" class="form-control form-control-sm in-callid-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][callid_1]" value="{{ $mentah['callid_1'] ?? '' }}"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-weight-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][weight_1]" value="{{ $mentah['weight_1'] ?? '' }}"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_1]" value="{{ $mentah['massa_1'] ?? '' }}"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-primary-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][primary_1]" value="{{ $mentah['primary_1'] ?? '' }}"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-ee-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][ee_1]" value="{{ $mentah['ee_1'] ?? '' }}"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-t-1 bg-light border-0" readonly tabindex="-1"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-titrant-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][titrant_1]" value="{{ $mentah['titrant_1'] ?? '' }}"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-length-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][length_1]" value="{{ $mentah['length_1'] ?? '' }}"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-ts-1 bg-light border-0 text-secondary" readonly tabindex="-1"></td>
-                                                            <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" readonly tabindex="-1"></td>
-                                                            <td rowspan="2" class="align-middle out-avg-adb fw-bold">-</td>
-                                                            <td rowspan="2" class="align-middle out-avg-db fw-bold">-</td>
-                                                            <td class="align-middle out-db-1 fw-bold text-success">-</td>
-                                                        @else
-                                                            <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" value="{{ $dh->nilai_d1 ?? '' }}"></td>
-                                                            <td rowspan="2" class="align-middle out-diff">-</td>
-                                                            <td rowspan="2" class="align-middle out-avg-adb">-</td>
-                                                        @endif
-                                                    </tr>
+                                    @include('partials.modal-panduan-inhouse', ['pid' => $pid, 'code' => $code])
 
-                                                    <tr class="row-duplo">
-                                                        <td class="bg-light p-1 text-center"><input type="text" class="form-control form-control-sm text-center fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][dish_2]" value="{{ $mentah['dish_2'] ?? '' }}"></td>
-                                                        
-                                                        @if($code === 'IM')
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_2]" value="{{ $mentah['m1_2'] ?? '' }}"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-m2-2 bg-light border-0" readonly tabindex="-1"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m3-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m3_2]" value="{{ $mentah['m3_2'] ?? '' }}"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-a-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][a_2]" value="{{ $mentah['a_2'] ?? '' }}"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-b-2 bg-light border-0" readonly tabindex="-1"></td>
-                                                            <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" readonly tabindex="-1"></td>
-                                                        @elseif($code === 'ASH')
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_2]" value="{{ $mentah['m1_2'] ?? '' }}"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-m2-2 bg-light border-0" readonly tabindex="-1"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m2m1-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m2m1_2]" value="{{ $mentah['m2m1_2'] ?? '' }}"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m3-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m3_2]" value="{{ $mentah['m3_2'] ?? '' }}"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-m3m1-2 bg-light border-0" readonly tabindex="-1"></td>
-                                                            <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" readonly tabindex="-1"></td>
-                                                            <td class="align-middle out-db-2 fw-bold text-success">-</td>
-                                                        @elseif($code === 'VM')
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_2]" value="{{ $mentah['m1_2'] ?? '' }}"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-m2-2 bg-light border-0" readonly tabindex="-1"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m2m1-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m2m1_2]" value="{{ $mentah['m2m1_2'] ?? '' }}"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m3-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m3_2]" value="{{ $mentah['m3_2'] ?? '' }}"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-m2m3-2 bg-light border-0" readonly tabindex="-1"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-loss-2 bg-light border-0" readonly tabindex="-1"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-im-2 bg-light border-0 text-secondary" readonly tabindex="-1"></td>
-                                                            <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" readonly tabindex="-1"></td>
-                                                            <td class="align-middle out-db-2 fw-bold text-success">-</td>
-                                                        @elseif($code === 'TS')
-                                                        <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_2]" value="{{ $mentah['massa_2'] ?? '' }}"></td>
-                                                        <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" value="{{ $dh->nilai_d2 ?? '' }}"></td>
-                                                        @elseif($code === 'CV')
-                                                            <td><input type="text" class="form-control form-control-sm in-callid-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][callid_2]" value="{{ $mentah['callid_2'] ?? '' }}"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-weight-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][weight_2]" value="{{ $mentah['weight_2'] ?? '' }}"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_2]" value="{{ $mentah['massa_2'] ?? '' }}"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-primary-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][primary_2]" value="{{ $mentah['primary_2'] ?? '' }}"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-ee-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][ee_2]" value="{{ $mentah['ee_2'] ?? '' }}"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-t-2 bg-light border-0" readonly tabindex="-1"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-titrant-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][titrant_2]" value="{{ $mentah['titrant_2'] ?? '' }}"></td>
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-length-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][length_2]" value="{{ $mentah['length_2'] ?? '' }}"></td>
-                                                            <td><input type="text" class="form-control form-control-sm in-ts-2 bg-light border-0 text-secondary" readonly tabindex="-1"></td>
-                                                            <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" readonly tabindex="-1"></td>
-                                                            <td class="align-middle out-db-2 fw-bold text-success">-</td>
-                                                        @else
-                                                            <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" value="{{ $dh->nilai_d2 ?? '' }}"></td>
-                                                        @endif
+                                    <div class="table-responsive p-3">
+                                        <fieldset class="border-0 p-0 m-0" {{ $isLocked ? 'disabled' : '' }}>
+                                            <table class="table table-bordered table-sm align-middle text-center param-table text-nowrap" style="min-width: {{ in_array($code, ['TS']) ? '100%' : '1500px' }};" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
+                                                <thead class="table-light">
+                                                    @if($code === 'IM')
+                                                        <tr>
+                                                            <th width="10%">KODE SAMPEL</th>
+                                                            <th>DISH NO.</th>
+                                                            <th>M1</th>
+                                                            <th>M2</th>
+                                                            <th>M3</th>
+                                                            <th>A</th>
+                                                            <th>B</th>
+                                                            <th class="bg-warning bg-opacity-25">M%</th>
+                                                            <th colspan="2">ABSOLUTE DIFFERENCE</th>
+                                                            <th>AVERAGE %</th>
+                                                        </tr>
+                                                    @elseif($code === 'ASH')
+                                                        <tr>
+                                                            <th width="10%">KODE SAMPEL</th>
+                                                            <th>DISH NO.</th>
+                                                            <th>M1</th>
+                                                            <th>M2</th>
+                                                            <th>M2-M1</th>
+                                                            <th>M3</th>
+                                                            <th>M3-M1</th>
+                                                            <th class="bg-warning bg-opacity-25">ASH%</th>
+                                                            <th colspan="2">ABSOLUTE DIFFERENCE</th>
+                                                            <th>AVERAGE %adb</th>
+                                                            <th style="min-width: 80px;">%db</th>
+                                                            <th style="min-width: 80px;">db</th>
+                                                        </tr>
+                                                    @elseif($code === 'VM')
+                                                        <tr>
+                                                            <th width="10%">KODE SAMPEL</th>
+                                                            <th>DISH NO.</th>
+                                                            <th>M1</th>
+                                                            <th>M2</th>
+                                                            <th>M2-M1</th>
+                                                            <th>M3</th>
+                                                            <th>M2-M3</th>
+                                                            <th>LOSS%</th>
+                                                            <th>IM</th>
+                                                            <th class="bg-warning bg-opacity-25">VM%</th>
+                                                            <th colspan="2">ABSOLUTE DIFFERENCE</th>
+                                                            <th>AVERAGE %adb</th>
+                                                            <th>AVERAGE %db</th>
+                                                            <th style="min-width: 80px;">%db</th>
+                                                        </tr>
+                                                    @elseif($code === 'TS')
+                                                    <tr>
+                                                        <th width="10%">KODE SAMPEL</th>
+                                                        <th>DISH NO.</th>
+                                                        <th>Massa sample</th>
+                                                        <th class="bg-warning bg-opacity-25">TS (Adb)</th>
+                                                        <th>Average % (adb)</th>
+                                                        <th class="bg-warning bg-opacity-25">Average % (db)</th>
                                                     </tr>
-                                                @endfor
-                                            </tbody>
-                                        </table>
+                                                    @elseif($code === 'CV')
+                                                        <tr>
+                                                            <th width="8%">KODE SAMPEL</th>
+                                                            <th width="8%">VESSEL ID.</th>
+                                                            <th>CALL ID</th>
+                                                            <th>Weight of Crucible</th>
+                                                            <th>Sample Mass</th>
+                                                            <th>Primary Result (cal/g)</th>
+                                                            <th style="min-width: 90px;">Ee</th>
+                                                            <th style="min-width: 90px;">t</th>
+                                                            <th>Volume of Titrant (ml)</th>
+                                                            <th>Length of Fuse (cm)</th>
+                                                            <th>Total TS</th>
+                                                            <th class="bg-warning bg-opacity-25">Final Result (cal/g) adb</th>
+                                                            <th>Average Result (cal/g), adb</th>
+                                                            <th>Average Result (cal/g), db</th>
+                                                            <th>%db</th>
+                                                        </tr>
+                                                    @else
+                                                        
+                                                        <tr>
+                                                            <th>KODE SAMPEL</th>
+                                                            <th>DISH NO.</th>
+                                                            <th class="bg-warning bg-opacity-25">Hasil Uji (adb)</th>
+                                                            <th>ABSOLUTE DIFFERENCE</th>
+                                                            <th>AVERAGE % (adb)</th>
+                                                        </tr>
+                                                    @endif
+                                                </thead>
+                                                <tbody>
+                                                    @php $rowCount = max(3, $param->dataStabilitas->count()); @endphp
+                                                    @for($i = 1; $i <= $rowCount; $i++)
+                                                        @php 
+                                                            $dh = $param->dataStabilitas->where('nomor_pengujian', $i)->first();
+                                                            $mentah = $dh ? $dh->data_mentah : [];
+                                                            $botolNomor = $dh ? $dh->nomor_botol_fisik : '';
+                                                        @endphp
+                                                        
+                                                        <tr class="row-simplo">
+                                                            <td rowspan="2" class="fw-bold align-middle bg-light border-end">
+                                                                <select class="form-select form-select-sm text-danger fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][nomor_botol_fisik]" required>
+                                                                    <option value="">Botol...</option>
+                                                                    @foreach($sisaBotol as $b)
+                                                                        <option value="{{ $b }}" {{ $botolNomor == $b ? 'selected' : '' }}>Botol {{ $b }}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                                <input type="hidden" class="in-db-1" name="data_{{ $pid }}[{{ $i-1 }}][nilai_db_1]">
+                                                                <input type="hidden" class="in-db-2" name="data_{{ $pid }}[{{ $i-1 }}][nilai_db_2]">
+                                                            </td>
+                                                            <td class="bg-light p-1 text-center"><input type="text" class="form-control form-control-sm text-center fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][dish_1]" value="{{ $mentah['dish_1'] ?? '' }}" ></td>
+                                                            
+                                                            @if($code === 'IM')
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_1]" value="{{ $mentah['m1_1'] ?? '' }}"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-m2-1 bg-light border-0" readonly tabindex="-1"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m3-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m3_1]" value="{{ $mentah['m3_1'] ?? '' }}"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-a-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][a_1]" value="{{ $mentah['a_1'] ?? '' }}"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-b-1 bg-light border-0" readonly tabindex="-1"></td>
+                                                                <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" readonly tabindex="-1"></td>
+                                                                <td rowspan="2" class="align-middle out-diff">-</td>
+                                                                <td rowspan="2" class="align-middle out-tol fw-bold">-</td>
+                                                                <td rowspan="2" class="align-middle out-avg-adb">-</td>
+                                                            @elseif($code === 'ASH')
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_1]" value="{{ $mentah['m1_1'] ?? '' }}"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-m2-1 bg-light border-0" readonly tabindex="-1"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m2m1-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m2m1_1]" value="{{ $mentah['m2m1_1'] ?? '' }}"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m3-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m3_1]" value="{{ $mentah['m3_1'] ?? '' }}"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-m3m1-1 bg-light border-0" readonly tabindex="-1"></td>
+                                                                <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" readonly tabindex="-1"></td>
+                                                                <td rowspan="2" class="align-middle out-diff">-</td>
+                                                                <td rowspan="2" class="align-middle out-tol fw-bold">-</td>
+                                                                <td rowspan="2" class="align-middle out-avg-adb">-</td>
+                                                                <td rowspan="2" class="align-middle out-avg-db">-</td>
+                                                                <td class="align-middle out-db-1 fw-bold text-success">-</td>
+                                                            @elseif($code === 'VM')
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_1]" value="{{ $mentah['m1_1'] ?? '' }}"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-m2-1 bg-light border-0" readonly tabindex="-1"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m2m1-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m2m1_1]" value="{{ $mentah['m2m1_1'] ?? '' }}"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m3-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m3_1]" value="{{ $mentah['m3_1'] ?? '' }}"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-m2m3-1 bg-light border-0" readonly tabindex="-1"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-loss-1 bg-light border-0" readonly tabindex="-1"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-im-1 bg-light border-0 text-secondary" readonly tabindex="-1"></td>
+                                                                <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" readonly tabindex="-1"></td>
+                                                                <td rowspan="2" class="align-middle out-diff">-</td>
+                                                                <td rowspan="2" class="align-middle out-tol fw-bold">-</td>
+                                                                <td rowspan="2" class="align-middle out-avg-adb">-</td>
+                                                                <td rowspan="2" class="align-middle out-avg-db">-</td>
+                                                                <td class="align-middle out-db-1 fw-bold text-success">-</td>
+                                                            @elseif($code === 'TS')
+                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_1]" value="{{ $mentah['massa_1'] ?? '' }}"></td>
+                                                            <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" value="{{ $dh->nilai_d1 ?? '' }}"></td>
+                                                            <td rowspan="2" class="align-middle out-avg-adb fw-bold">-</td>
+                                                            <td rowspan="2" class="align-middle out-avg-db fw-bold text-success">-</td>
+                                                            @elseif($code === 'CV')
+                                                                <td><input type="text" class="form-control form-control-sm in-callid-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][callid_1]" value="{{ $mentah['callid_1'] ?? '' }}"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-weight-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][weight_1]" value="{{ $mentah['weight_1'] ?? '' }}"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_1]" value="{{ $mentah['massa_1'] ?? '' }}"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-primary-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][primary_1]" value="{{ $mentah['primary_1'] ?? '' }}"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-ee-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][ee_1]" value="{{ $mentah['ee_1'] ?? '' }}"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-t-1 bg-light border-0" readonly tabindex="-1"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-titrant-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][titrant_1]" value="{{ $mentah['titrant_1'] ?? '' }}"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-length-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][length_1]" value="{{ $mentah['length_1'] ?? '' }}"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-ts-1 bg-light border-0 text-secondary" readonly tabindex="-1"></td>
+                                                                <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" readonly tabindex="-1"></td>
+                                                                <td rowspan="2" class="align-middle out-avg-adb fw-bold">-</td>
+                                                                <td rowspan="2" class="align-middle out-avg-db fw-bold">-</td>
+                                                                <td class="align-middle out-db-1 fw-bold text-success">-</td>
+                                                            @else
+                                                                <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" value="{{ $dh->nilai_d1 ?? '' }}"></td>
+                                                                <td rowspan="2" class="align-middle out-diff">-</td>
+                                                                <td rowspan="2" class="align-middle out-avg-adb">-</td>
+                                                            @endif
+                                                        </tr>
+
+                                                        <tr class="row-duplo">
+                                                            <td class="bg-light p-1 text-center"><input type="text" class="form-control form-control-sm text-center fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][dish_2]" value="{{ $mentah['dish_2'] ?? '' }}"></td>
+                                                            
+                                                            @if($code === 'IM')
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_2]" value="{{ $mentah['m1_2'] ?? '' }}"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-m2-2 bg-light border-0" readonly tabindex="-1"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m3-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m3_2]" value="{{ $mentah['m3_2'] ?? '' }}"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-a-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][a_2]" value="{{ $mentah['a_2'] ?? '' }}"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-b-2 bg-light border-0" readonly tabindex="-1"></td>
+                                                                <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" readonly tabindex="-1"></td>
+                                                            @elseif($code === 'ASH')
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_2]" value="{{ $mentah['m1_2'] ?? '' }}"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-m2-2 bg-light border-0" readonly tabindex="-1"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m2m1-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m2m1_2]" value="{{ $mentah['m2m1_2'] ?? '' }}"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m3-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m3_2]" value="{{ $mentah['m3_2'] ?? '' }}"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-m3m1-2 bg-light border-0" readonly tabindex="-1"></td>
+                                                                <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" readonly tabindex="-1"></td>
+                                                                <td class="align-middle out-db-2 fw-bold text-success">-</td>
+                                                            @elseif($code === 'VM')
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_2]" value="{{ $mentah['m1_2'] ?? '' }}"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-m2-2 bg-light border-0" readonly tabindex="-1"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m2m1-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m2m1_2]" value="{{ $mentah['m2m1_2'] ?? '' }}"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m3-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m3_2]" value="{{ $mentah['m3_2'] ?? '' }}"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-m2m3-2 bg-light border-0" readonly tabindex="-1"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-loss-2 bg-light border-0" readonly tabindex="-1"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-im-2 bg-light border-0 text-secondary" readonly tabindex="-1"></td>
+                                                                <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" readonly tabindex="-1"></td>
+                                                                <td class="align-middle out-db-2 fw-bold text-success">-</td>
+                                                            @elseif($code === 'TS')
+                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_2]" value="{{ $mentah['massa_2'] ?? '' }}"></td>
+                                                            <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" value="{{ $dh->nilai_d2 ?? '' }}"></td>
+                                                            @elseif($code === 'CV')
+                                                                <td><input type="text" class="form-control form-control-sm in-callid-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][callid_2]" value="{{ $mentah['callid_2'] ?? '' }}"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-weight-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][weight_2]" value="{{ $mentah['weight_2'] ?? '' }}"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_2]" value="{{ $mentah['massa_2'] ?? '' }}"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-primary-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][primary_2]" value="{{ $mentah['primary_2'] ?? '' }}"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-ee-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][ee_2]" value="{{ $mentah['ee_2'] ?? '' }}"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-t-2 bg-light border-0" readonly tabindex="-1"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-titrant-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][titrant_2]" value="{{ $mentah['titrant_2'] ?? '' }}"></td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-length-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][length_2]" value="{{ $mentah['length_2'] ?? '' }}"></td>
+                                                                <td><input type="text" class="form-control form-control-sm in-ts-2 bg-light border-0 text-secondary" readonly tabindex="-1"></td>
+                                                                <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" readonly tabindex="-1"></td>
+                                                                <td class="align-middle out-db-2 fw-bold text-success">-</td>
+                                                            @else
+                                                                <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" value="{{ $dh->nilai_d2 ?? '' }}"></td>
+                                                            @endif
+                                                        </tr>
+                                                    @endfor
+                                                </tbody>
+                                            </table>
+                                        </fieldset>
                                     </div>
                                     @if(in_array($batch->status, ['uji_stabilitas', 'gagal_stabilitas']))
                                     <div class="px-3 pb-3 d-flex justify-content-between">
@@ -560,7 +589,8 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 
@@ -689,11 +719,16 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        table.addEventListener('blur', function(e) {
+    table.addEventListener('blur', function(e) {
             if(e.target.tagName === 'INPUT' && (e.target.classList.contains('in-hasil-1') || e.target.classList.contains('in-hasil-2'))) {
-                if(e.target.value && !e.target.readOnly) e.target.value = rnd(e.target.value, 2);
+                if(e.target.value && !e.target.readOnly) {
+                    let dec = 2;
+                    if(code === 'CV') dec = 0;
+                    else if(code === 'TS') dec = 4;
+                    e.target.value = rnd(e.target.value, dec);
+                }
             }
-        }, true); // capture phase since blur doesn't bubble
+        }, true); 
     });
 
     document.querySelectorAll('.btn-tambah-kemasan').forEach(btn => {
@@ -1065,21 +1100,25 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             if(val1 !== null && val2 !== null && !isNaN(val1) && !isNaN(val2)) {
-                val1 = parseFloat(rnd(val1, code === 'CV' ? 0 : 2));
-                val2 = parseFloat(rnd(val2, code === 'CV' ? 0 : 2));
+                let dec = 2;
+                if(code === 'CV') dec = 0;
+                else if(code === 'TS') dec = 4;
+
+                val1 = parseFloat(rnd(val1, dec));
+                val2 = parseFloat(rnd(val2, dec));
                 
                 State[code].data[i].simplo_adb = val1;
                 State[code].data[i].duplo_adb = val2;
                 
                 let avg_adb = (val1 + val2) / 2.0;
-                avg_adb = parseFloat(rnd(avg_adb, code === 'CV' ? 0 : 2));
+                avg_adb = parseFloat(rnd(avg_adb, dec));
                 State[code].data[i].avg_adb = avg_adb;
                 
                 if (code === 'ASH' || code === 'VM' || code === 'TS' || code === 'CV') {
                     const im_s = (State['IM'] && State['IM'].data[i]) ? State['IM'].data[i].simplo_adb : null;
-                    State[code].data[i].simplo_db = im_s !== null ? parseFloat(rnd((100 / (100 - im_s)) * val1, code === 'CV' ? 0 : 2)) : null;
+                    State[code].data[i].simplo_db = im_s !== null ? parseFloat(rnd((100 / (100 - im_s)) * val1, dec)) : null;
                     const im_d = (State['IM'] && State['IM'].data[i]) ? State['IM'].data[i].duplo_adb : null;
-                    State[code].data[i].duplo_db = im_d !== null ? parseFloat(rnd((100 / (100 - im_d)) * val2, code === 'CV' ? 0 : 2)) : null;
+                    State[code].data[i].duplo_db = im_d !== null ? parseFloat(rnd((100 / (100 - im_d)) * val2, dec)) : null;
                     
                     if (code === 'TS' || code === 'CV') {
                         tr1.querySelector('.out-db-1') ? tr1.querySelector('.out-db-1').textContent = State[code].data[i].simplo_db ?? '-' : null;
@@ -1090,8 +1129,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 const diff = Math.abs(val1 - val2);
 
-                tr1.querySelector('.out-diff') ? tr1.querySelector('.out-diff').textContent = rnd(diff, (code==='CV'?0:2)) : null;
-                tr1.querySelector('.out-avg-adb') ? tr1.querySelector('.out-avg-adb').textContent = rnd(avg_adb, (code==='CV'?0:2)) : null;
+                tr1.querySelector('.out-diff') ? tr1.querySelector('.out-diff').textContent = rnd(diff, dec) : null;
+                tr1.querySelector('.out-avg-adb') ? tr1.querySelector('.out-avg-adb').textContent = rnd(avg_adb, dec) : null;
 
                 if(code === 'IM' || code === 'ASH' || code === 'VM' || code === 'TS') {
                     let isOk = false;
@@ -1117,9 +1156,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const im_avg = (State['IM'] && State['IM'].data[i]) ? State['IM'].data[i].avg_adb : null;
                     if(im_avg !== null && !isNaN(im_avg)) {
                         const avg_db = (100 / (100 - im_avg)) * avg_adb;
-                        tr1.querySelector('.out-avg-db') ? tr1.querySelector('.out-avg-db').textContent = rnd(avg_db, (code==='CV'?0:2)) : null;
-                    } else {
-                        tr1.querySelector('.out-avg-db') ? tr1.querySelector('.out-avg-db').textContent = '-' : null;
+                        tr1.querySelector('.out-avg-db') ? tr1.querySelector('.out-avg-db').textContent = rnd(avg_db, dec) : null;
                     }
                 }
             } else {
@@ -1616,7 +1653,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 padding: 3px 2px;
                 font-size: 8px;
             }
-            .table-cv th, .table-cv td { font-size: 6.5px; padding: 2px 1px; }
+            .table-cv th, .table-cv td { font-size: 8px; padding: 3px 1px; }
+            .official-table th, .official-table td { font-size: 10px; padding: 4px 2px; }
+            .official-table { border: 2px solid black; }
+            .official-table th { background-color: #e9ecef; }
+
+            .table-t-test { table-layout: fixed !important; width: 100% !important; border-collapse: collapse; }
+            .table-t-test th, .table-t-test td {
+                font-size: 11px !important;
+                padding: 3px 4px !important;
+                line-height: 1.3;
+                white-space: normal !important;
+            }
+            .pdf-section div[style*="font-size: 12px"] { font-size: 12px !important; }
+            .pdf-section table td[style*="padding-top: 15px"] { padding-top: 10px !important; }
+            .pdf-section table[style*="margin-top: 30px"] { margin-top: 20px !important; }
+            .pdf-section table[style*="margin-top: 15px"] { margin-top: 12px !important; }
         </style></head><body>`;
 
         let sectionCount = 0;
@@ -1684,7 +1736,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return html;
     }
 
-    function exportToPdf(params, part) {
+    async function exportToPdf(params, part) {
         const html = buildExportHtml(params, part);
 
         const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -1693,57 +1745,328 @@ document.addEventListener('DOMContentLoaded', function() {
         const sections = Array.from(doc.querySelectorAll('.pdf-section'));
 
         if (sections.length === 0) {
-            return Promise.reject(new Error('Tidak ada data untuk dicetak.'));
+            throw new Error('Tidak ada data untuk dicetak.');
         }
 
-        const pages = sections.map(sec => {
-            sec.classList.remove('pdf-break');
-            sec.style.pageBreakBefore = 'auto';
-            sec.style.breakBefore = 'auto';
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+        const pageW = 210, pageH = 297, margin = 10;
 
-            // buang elemen form yang tidak perlu dicetak
-            sec.querySelectorAll('input[type="hidden"]').forEach(el => el.remove());
-            sec.querySelectorAll('table').forEach(tbl => {
-                tbl.classList.remove('text-nowrap');
-                tbl.style.minWidth = '0';
-                tbl.style.maxWidth = '100%';
-            });
+        const stage = document.createElement('div');
+        stage.style.cssText = 'position:fixed; left:0; top:0; z-index:-1; background:#fff; overflow:visible;';
+        document.body.appendChild(stage);
 
-            const wrap = document.createElement('div');
-            const style = document.createElement('style');
-            style.textContent = css;
-            wrap.appendChild(style);
-            wrap.appendChild(sec);
-            return wrap;
+        try {
+            for (let i = 0; i < sections.length; i++) {
+                const sec = sections[i];
+                const mainTable = sec.querySelector('.official-table');
+                const isCV = !!sec.querySelector('.table-cv');
+
+                // Lebar render: makin banyak kolom, makin lebar
+                let renderW = 720;                       // detail t-test
+                if (mainTable) {
+                    const cols = mainTable.querySelectorAll('thead tr:first-child th').length;
+                    renderW = isCV ? 1000 : Math.max(720, cols * 65);
+                }
+
+                sec.classList.remove('pdf-break');
+                sec.removeAttribute('style');
+                sec.style.cssText = `width:${renderW}px; box-sizing:border-box; padding:8px; background:#fff;`;
+
+                sec.querySelectorAll('input[type="hidden"]').forEach(el => el.remove());
+                sec.querySelectorAll('table').forEach(tbl => {
+                    tbl.classList.remove('text-nowrap');
+                    tbl.style.minWidth = '0';
+                    tbl.style.maxWidth = '100%';
+                    tbl.style.width = '100%';
+                });
+
+                stage.innerHTML = '';
+                const style = document.createElement('style');
+                style.textContent = css;
+                stage.appendChild(style);
+                stage.appendChild(sec);
+
+                const imgs = Array.from(sec.querySelectorAll('img'));
+                await Promise.all(imgs.map(img => img.complete ? Promise.resolve() :
+                    new Promise(res => { img.onload = img.onerror = res; })));
+
+                const canvas = await html2canvas(sec, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    scrollX: 0,
+                    scrollY: 0,
+                    windowWidth: renderW + 40
+                });
+
+                const maxW = pageW - margin * 2;
+                const maxH = pageH - margin * 2;
+                const ratio = Math.min(maxW / canvas.width, maxH / canvas.height);
+                const w = canvas.width * ratio;
+                const h = canvas.height * ratio;
+
+                if (i > 0) pdf.addPage('a4', 'portrait');
+
+                pdf.addImage(canvas.toDataURL('image/jpeg', 0.98), 'JPEG',
+                    (pageW - w) / 2, margin, w, h);
+            }
+
+            pdf.save('Laporan_Stabilitas.pdf');
+        } finally {
+            stage.remove();
+        }
+    }
+
+    function wordifyTable(tbl, fontPt = 9, pad = 3, rowH = 0) {
+        tbl.removeAttribute('class');
+        tbl.removeAttribute('style');
+        tbl.setAttribute('border', '1');
+        tbl.setAttribute('cellspacing', '0');
+        tbl.setAttribute('cellpadding', pad);
+        tbl.setAttribute('width', '100%');
+        tbl.style.cssText = `border-collapse:collapse; border:1px solid #000; font-size:${fontPt}pt; font-family:Arial;`;
+        tbl.querySelectorAll('th, td').forEach(c => {
+            const isHead = c.tagName === 'TH';
+            c.setAttribute('align', 'center');
+            c.setAttribute('valign', 'middle');
+            if (rowH && !isHead) c.setAttribute('height', rowH);
+            c.style.cssText =
+                `border:1px solid #000; padding:${pad}px 3px; text-align:center; vertical-align:middle;` +
+                (isHead ? 'background:#e9ecef; font-weight:bold;' : '');
+            c.removeAttribute('class');
+            c.removeAttribute('width');
         });
+        return tbl;
+    }
 
-        const opt = {
-            margin:       [0.4, 0.4, 0.4, 0.4],
-            filename:     'Laporan_Stabilitas.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['css', 'legacy'], avoid: ['tr'] }
+    function getTTestData(code) {
+        const xData = rawXData[code] || [];
+        const yData = [];
+        if (State[code]) {
+            State[code].data.forEach(d => {
+                const y1 = code === 'IM' ? d.simplo_adb : d.simplo_db;
+                const y2 = code === 'IM' ? d.duplo_adb : d.duplo_db;
+                if (y1 !== null && y1 !== undefined && !isNaN(y1)) yData.push(y1);
+                if (y2 !== null && y2 !== undefined && !isNaN(y2)) yData.push(y2);
+            });
+        }
+        const nX = xData.length, nY = yData.length;
+        const sumX = xData.reduce((a, b) => a + b, 0);
+        const sumY = yData.reduce((a, b) => a + b, 0);
+        const meanX = nX ? sumX / nX : 0;
+        const meanY = nY ? sumY / nY : 0;
+        const sumSqX = xData.reduce((a, v) => a + Math.pow(v - meanX, 2), 0);
+        const sumSqY = yData.reduce((a, v) => a + Math.pow(v - meanY, 2), 0);
+        const df = nX + nY - 2;
+        let sGab = 0, tHitung = 0;
+        if (df > 0 && nX > 0 && nY > 0) {
+            sGab = Math.sqrt((sumSqX + sumSqY) / df);
+            tHitung = Math.abs(meanX - meanY) / sGab;
+        }
+        const tTabel = tTableMap[df] ?? 1.98;
+        return { xData, yData, nX, nY, sumX, sumY, meanX, meanY, sumSqX, sumSqY, sGab, tHitung, tTabel, isStabil: tHitung < tTabel };
+    }
+
+    function buildWordHtml(params, part) {
+        const logoUrl = window.location.origin + '/images/Logo_Suco_Nobg.png';
+        const names = { IM:'Moisture in the analysis sample', ASH:'Ash Content', VM:'Volatile Matter', TS:'Total Sulfur', CV:'Gross Calorific Value' };
+        const kodeSampel = {!! json_encode($batch->nama_sampel) !!};
+        const tanggalRaw = document.querySelector('input[name="kondisi[tanggal]"]').value;
+        let tgl = tanggalRaw;
+        if (tanggalRaw && tanggalRaw.includes('-')) {
+            const p = tanggalRaw.split('-');
+            tgl = `${p[2]}/${p[1]}/${p[0]}`;
+        }
+
+        const f = () => `font-size:10pt; font-family:Arial;`;
+        const sp = (pt) => `<p style="margin:0; font-size:${pt}pt; line-height:${pt}pt; mso-line-height-rule:exactly;">&nbsp;</p>`;
+        const valBox = (v) => `<span style="background:#e9ecef; border:1px solid #999; padding:3px 14px;"><b>${v}</b></span>`;
+        const td = (v, extra = '') => `<td align="center" height="18" style="border:1px solid #000; padding:3px; ${extra}">${v}</td>`;
+
+        let body = '';
+        let first = true;
+        const pageBreak = () => {
+            if (first) { first = false; return ''; }
+            return `<br clear="all" style="page-break-before:always; mso-break-type:page-break">`;
         };
 
-        let worker = html2pdf().set(opt).from(pages[0]).toPdf();
-        for (let i = 1; i < pages.length; i++) {
-            worker = worker
-                .get('pdf')
-                .then(pdf => { pdf.addPage(); })
-                .from(pages[i])
-                .toContainer()
-                .toCanvas()
-                .toPdf();
-        }
-        return worker.save();
+        params.forEach(code => {
+            const paramFull = names[code] || code;
+
+            // ===== DATA UTAMA =====
+            if (part === 'both' || part === 'main') {
+                const orig = document.querySelector(`.param-table[data-code="${code}"]`);
+                if (orig) {
+                    const clone = orig.cloneNode(true);
+                    const origSelects = orig.querySelectorAll('select');
+                    clone.querySelectorAll('select').forEach((sel, idx) => {
+                        const o = origSelects[idx];
+                        const text = o && o.selectedIndex >= 0 ? o.options[o.selectedIndex].text : '';
+                        sel.parentNode.replaceChild(document.createTextNode(text), sel);
+                    });
+                    clone.querySelectorAll('input[type="hidden"]').forEach(el => el.remove());
+                    clone.querySelectorAll('input').forEach(inp => {
+                        inp.parentNode.replaceChild(document.createTextNode(inp.value), inp);
+                    });
+                    wordifyTable(clone, code === 'CV' ? 5.5 : (['VM','ASH'].includes(code) ? 6.5 : 9), 3);
+                    body += pageBreak();
+                    body += `<p style="text-align:center; font-size:14pt; font-weight:bold; font-family:Arial;">DATA UTAMA UJI STABILITAS - ${code}</p>`;
+                    body += clone.outerHTML;
+                }
+            }
+
+            // ===== DETAIL T-TEST =====
+            if (part === 'both' || part === 'ttest') {
+                const t = getTTestData(code);
+                const maxRows = Math.max(t.nX, t.nY);
+                const kesimpulan = t.nY < 6 ? 'Belum Selesai (Input Stabilitas Kosong)' : (t.isStabil ? 'Stabil' : 'Tidak Stabil');
+
+                let rows = '';
+                for (let i = 0; i < maxRows; i++) {
+                    let left = td('') + td('') + td('') + td('');
+                    if (i < t.nX) {
+                        const v = t.xData[i], d = v - t.meanX;
+                        left = td(`${Math.floor(i/2) + 1}.${(i%2) + 1}`) + td(rnd(v, 2)) + td(rnd(d, 2)) + td(rnd(d*d, 6));
+                    }
+                    let right = td('') + td('') + td('') + td('');
+                    if (i < t.nY) {
+                        const v = t.yData[i], d = v - t.meanY;
+                        right = td(i + 1) + td(rnd(v, 2)) + td(rnd(d, 2)) + td(rnd(d*d, 6));
+                    }
+                    rows += `<tr>${left}${right}</tr>`;
+                }
+
+                const th = (v, extra = '') => `<td align="center" style="border:1px solid #000; padding:4px; background:#e9ecef; font-weight:bold; ${extra}">${v}</td>`;
+
+                body += pageBreak();
+                body += `
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td align="left" valign="bottom" style="font-size:14pt; font-weight:bold; font-family:Arial;">
+                    Perhitungan Uji Stabilitas Sampel <i>Inhouse Standard</i>
+                    </td>
+                    <td align="right" valign="bottom" width="150">
+                    <img src="${logoUrl}" width="140" height="48" alt="SUCOFINDO">
+                    </td>
+                </tr>
+                </table>
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr><td style="border-top:3px solid #000; font-size:1pt; line-height:1pt;">&nbsp;</td></tr>
+                </table>
+                ${sp(10)}
+
+                <table border="0" cellspacing="0" cellpadding="6" width="85%" style="${f()}">
+                <tr>
+                    <td width="33%">Parameter Uji</td><td width="4%" align="center">:</td>
+                    <td width="63%" align="center" bgcolor="#e9ecef" style="border:1px solid #999;"><b>${paramFull}</b></td>
+                </tr>
+                <tr><td colspan="3" height="6" style="font-size:1pt;">&nbsp;</td></tr>
+                <tr>
+                    <td>Kode Sampel Inhouse Standard</td><td align="center">:</td>
+                    <td align="center" bgcolor="#e9ecef" style="border:1px solid #999;">${kodeSampel}</td>
+                </tr>
+                </table>
+                ${sp(14)}
+
+                <table width="100%" border="1" cellspacing="0" cellpadding="3" style="border-collapse:collapse; border:1px solid #000; font-size:8pt; font-family:Arial;">
+                <tr>
+                    ${th('Uji Homogenitas').replace('<td ', '<td colspan="4" ')}
+                    ${th('Uji Stabilitas').replace('<td ', '<td colspan="4" ')}
+                </tr>
+                <tr>
+                    ${th('Kode Contoh')}${th(paramFull)}${th('Xi - X&#772;')}${th('(Xi - X&#772;)&sup2;')}
+                    ${th('Kode Contoh')}${th(paramFull)}${th('Yi - Y&#772;')}${th('(Yi - Y&#772;)&sup2;')}
+                </tr>
+                ${rows}
+                <tr>
+                    ${td('<b>Banyaknya Grup (nx) =</b>', 'text-align:left;')}${td(`<b>${t.nX}</b>`)}${td('')}${td('')}
+                    ${td('<b>Banyaknya Grup (ny) =</b>', 'text-align:left;')}${td(`<b>${t.nY}</b>`)}${td('')}${td('')}
+                </tr>
+                <tr>
+                    ${td('<b>Jumlah (&Sigma;) =</b>', 'text-align:left;')}${td(`<b>${rnd(t.sumX, 2)}</b>`)}${td('')}${td(`<b>${rnd(t.sumSqX, 6)}</b>`)}
+                    ${td('<b>Jumlah (&Sigma;) =</b>', 'text-align:left;')}${td(`<b>${rnd(t.sumY, 2)}</b>`)}${td('')}${td(`<b>${rnd(t.sumSqY, 6)}</b>`)}
+                </tr>
+                <tr>
+                    ${td('<b>Rata-rata (X&#772;) =</b>', 'text-align:left;')}${td(`<b>${rnd(t.meanX, 3)}</b>`)}${td('')}${td('')}
+                    ${td('<b>Rata-rata (Y&#772;) =</b>', 'text-align:left;')}${td(`<b>${rnd(t.meanY, 3)}</b>`)}${td('')}${td('')}
+                </tr>
+                </table>
+                ${sp(14)}
+
+                <table width="100%" border="0" cellspacing="0" cellpadding="8" bgcolor="#f0f0f0" style="${f()}">
+                <tr>
+                    <td width="14%" align="right"><b>S<sub>gab</sub> =</b></td>
+                    <td width="20%" align="center">${valBox(rnd(t.sGab, 3))}</td>
+                    <td width="66%">&nbsp;</td>
+                </tr>
+                </table>
+                ${sp(8)}
+                <table width="100%" border="0" cellspacing="0" cellpadding="8" bgcolor="#e9ecef" style="${f()}">
+                <tr>
+                    <td width="14%" align="right"><b>t hitung =</b></td>
+                    <td width="18%" align="center">${valBox(rnd(t.tHitung, 3))}</td>
+                    <td width="6%" align="center"><b>${t.isStabil ? '&lt;' : '&gt;'}</b></td>
+                    <td width="26%" align="right"><b>t tabel 95% db =</b></td>
+                    <td width="18%" align="center">${valBox(rnd(t.tTabel, 3))}</td>
+                    <td width="18%">&nbsp;</td>
+                </tr>
+                </table>
+                ${sp(14)}
+
+                <table width="100%" border="0" cellspacing="0" cellpadding="3" style="${f()}">
+                <tr>
+                    <td width="17%"><b>Kesimpulan</b></td>
+                    <td width="83%"><b>${kesimpulan}</b></td>
+                </tr>
+                </table>
+                ${sp(16)}
+
+                <table width="100%" border="0" cellspacing="0" cellpadding="4" style="${f()}">
+                <tr>
+                    <td width="15%">Disusun oleh</td>
+                    <td width="28%" bgcolor="#e9ecef" style="border:1px solid #999;" height="24">&nbsp;</td>
+                    <td width="10%" align="center">Ttd</td>
+                    <td width="14%" align="right">Tanggal :&nbsp;</td>
+                    <td width="22%" align="center" bgcolor="#e9ecef" style="border:1px solid #999;">${tgl}</td>
+                    <td width="11%">&nbsp;</td>
+                </tr>
+                <tr><td colspan="6" height="10" style="font-size:1pt;">&nbsp;</td></tr>
+                <tr>
+                    <td>Diperiksa oleh</td>
+                    <td bgcolor="#e9ecef" style="border:1px solid #999;" height="24">&nbsp;</td>
+                    <td align="center">Ttd</td>
+                    <td align="right">Tanggal :&nbsp;</td>
+                    <td bgcolor="#e9ecef" style="border:1px solid #999;">&nbsp;</td>
+                    <td>&nbsp;</td>
+                </tr>
+                </table>`;
+            }
+        });
+
+        return `<html xmlns:o="urn:schemas-microsoft-com:office:office"
+                    xmlns:w="urn:schemas-microsoft-com:office:word"
+                    xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+        <meta charset="utf-8">
+        <!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->
+        <style>
+            @page WordSection1 {
+                size: 21cm 29.7cm;
+                mso-page-orientation: portrait;
+                margin: 1.5cm 1.5cm 1.5cm 1.5cm;
+            }
+            div.WordSection1 { page: WordSection1; }
+            body { font-family: Arial, sans-serif; }
+            table { border-collapse: collapse; }
+        </style>
+        </head>
+        <body><div class="WordSection1">${body}</div></body></html>`;
     }
 
     function exportToWord(params, part) {
-        const htmlContent = buildExportHtml(params, part);
-        const blob = new Blob(['\ufeff', htmlContent], {
-            type: 'application/msword'
-        });
+        const htmlContent = buildWordHtml(params, part);
+        const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -1751,6 +2074,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
        
@@ -1794,6 +2118,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.querySelectorAll('.modal-resource').forEach(modal => {
+        let pid = modal.id.replace('modalResource-', '');
+        updateResourceSummary(pid);
         modal.addEventListener('hidden.bs.modal', function () {
             let pid = this.id.replace('modalResource-', '');
             updateResourceSummary(pid);

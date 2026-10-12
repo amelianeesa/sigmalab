@@ -140,11 +140,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('crm-katalog/{id}/verifikasi-administratif', [\App\Http\Controllers\CrmKatalogController::class, 'verifikasiAdministratifStore'])->name('crm-katalog.verifikasi-administratif.store');
     Route::get('crm-katalog/{id}/verifikasi-teknis', [\App\Http\Controllers\CrmKatalogController::class, 'verifikasiTeknisForm'])->name('crm-katalog.verifikasi-teknis.form');
     Route::post('crm-katalog/{id}/verifikasi-teknis', [\App\Http\Controllers\CrmKatalogController::class, 'verifikasiTeknisStore'])->name('crm-katalog.verifikasi-teknis.store');
+    Route::get('crm-katalog/{katalog_id}/investigasi/{verif_id}', [\App\Http\Controllers\CrmKatalogController::class, 'investigasiVerifTeknis'])->name('crm-katalog.verifikasi-teknis.investigasi');
+    Route::post('crm-katalog/{katalog_id}/investigasi/{verif_id}', [\App\Http\Controllers\CrmKatalogController::class, 'storeInvestigasiVerifTeknis'])->name('crm-katalog.verifikasi-teknis.investigasi.store');
 
     // Pengujian Harian QC CRM
     Route::resource('qc-crm', \App\Http\Controllers\QcCrmController::class);
     Route::get('qc-crm/chart/data', [\App\Http\Controllers\QcCrmController::class, 'chartData'])->name('qc-crm.chart.data');
     Route::get('api/crm-katalog/{id}/parameters', [\App\Http\Controllers\QcCrmController::class, 'apiGetParameters'])->name('api.crm-katalog.parameters');
+    Route::get('qc-crm/{id}/investigasi', [\App\Http\Controllers\QcCrmController::class, 'investigasi'])->name('qc-crm.investigasi');
+    Route::post('qc-crm/{id}/investigasi', [\App\Http\Controllers\QcCrmController::class, 'storeInvestigasi'])->name('qc-crm.investigasi.store');
+    Route::get('qc-crm/{id}/investigasi/pdf', [\App\Http\Controllers\QcCrmController::class, 'cetakInvestigasiPdf'])->name('qc-crm.investigasi.pdf');
 
     // QC Uji Banding
 
@@ -277,6 +282,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{parameter_uji_id}/chart', [QcHarianController::class, 'chart'])->name('chart');
         Route::get('/{id}/investigasi', [QcHarianController::class, 'investigasi'])->name('investigasi');
         Route::post('/{id}/investigasi', [QcHarianController::class, 'storeInvestigasi'])->name('investigasi.store');
+        Route::get('/{id}/investigasi/pdf', [QcHarianController::class, 'cetakInvestigasiPdf'])->name('investigasi.pdf');
     });
 
 });

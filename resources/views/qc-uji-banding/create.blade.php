@@ -107,57 +107,6 @@
                     </div>
                 </div>
 
-                <h6 class="mb-3 text-primary border-bottom pb-2">
-                    <i class="fas fa-box-open me-2"></i>Bahan Digunakan
-                </h6>
-
-                <div class="mb-0">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-sm mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th width="5%" class="text-center">Pilih</th>
-                                    <th>Nama Barang (Bahan)</th>
-                                    <th>Sisa Stok (Saldo Akhir)</th>
-                                    <th width="20%">Jumlah Digunakan</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($barangList as $barang)
-                                    @php
-                                        $saldoAkhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
-                                        $habis = $saldoAkhir <= 0;
-                                    @endphp
-
-                                    <tr class="{{ $habis ? 'table-danger' : '' }}">
-                                        <td class="text-center align-middle">
-                                            <input class="form-check-input" type="checkbox" name="barang_ids[]" value="{{ $barang->barang_id }}" id="barang_{{ $barang->barang_id }}">
-                                        </td>
-
-                                        <td class="align-middle">
-                                            <label for="barang_{{ $barang->barang_id }}" class="mb-0 cursor-pointer">
-                                                {{ $barang->nama_barang }}
-                                                @if($habis) <span class="badge bg-danger ms-1">Habis</span> @endif
-                                            </label>
-                                        </td>
-
-                                        <td class="align-middle">
-                                            {{ number_format($saldoAkhir, 0, ',', '.') }} {{ $barang->satuan }}
-                                        </td>
-
-                                        <td>
-                                            <div class="input-group input-group-sm">
-                                                <input type="number" step="0.01" min="0" class="form-control barang-input" name="barang_jumlah[{{ $barang->barang_id }}]" placeholder="0">
-                                                <span class="input-group-text">{{ $barang->satuan }}</span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
             </div>
         </div>
 
@@ -273,11 +222,16 @@
                                                                 <div class="d-flex flex-column gap-1" style="font-size: 0.85rem;">
                                                                     <div><i class="fas fa-user text-primary me-2"></i><strong>Analis:</strong> <span id="sum-personil-{{ $pid }}" class="text-muted fst-italic">Belum dipilih</span></div>
                                                                     <div><i class="fas fa-tools text-warning me-2"></i><strong>Instrumen:</strong> <span id="sum-alat-{{ $pid }}" class="text-muted fst-italic">Belum dipilih</span></div>
+                                                                    
+                                                                    <div><i class="fas fa-box-open text-success me-2"></i><strong>Bahan:</strong> <span id="sum-bahan-{{ $pid }}" class="text-muted fst-italic">Belum dipilih</span></div>
                                                                 </div>
                                                             </div>
-                                                            <div class="col-md-4 text-md-end">
+                                                            <div class="col-md-4 text-md-end d-flex flex-column gap-2 d-print-none">
                                                                 <button type="button" class="btn btn-sm w-100 shadow-sm text-white param-input-ext" style="background-color: #1b3152; border-color: #1b3152;" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}" disabled>
-                                                                    <i class="fas fa-cog me-1"></i> Atur Analis & Alat
+                                                                    <i class="fas fa-cog me-1"></i> Atur Analis, Alat & Bahan
+                                                                </button>
+                                                                <button type="button" class="btn btn-sm w-100 shadow-sm btn-outline-info param-input-ext" data-bs-toggle="modal" data-bs-target="#modalRumus-{{ $pid }}">
+                                                                    <i class="fas fa-file-alt me-1"></i> Panduan LKS ({{ $code }})
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -286,7 +240,7 @@
                                                             <div class="modal-dialog">
                                                                 <div class="modal-content border-0 shadow-lg">
                                                                     <div class="modal-header text-white" style="background-color: #1b3152;">
-                                                                        <h5 class="modal-title fw-bold"><i class="fas fa-tasks me-2"></i>Atur Analis & Alat: {{ $code ?? 'Parameter' }}</h5>
+                                                                        <h5 class="modal-title fw-bold"><i class="fas fa-tasks me-2"></i>Atur Analis, Alat & Bahan: {{ $code ?? 'Parameter' }}</h5>
                                                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                                                     </div>
                                                                     <div class="modal-body p-0">
@@ -296,6 +250,9 @@
                                                                             </li>
                                                                             <li class="nav-item">
                                                                                 <button class="nav-link fw-bold text-dark py-3" data-bs-toggle="tab" data-bs-target="#tab-alat-{{ $pid }}" type="button"><i class="fas fa-tools text-warning me-2"></i>Instrumen</button>
+                                                                            </li>
+                                                                            <li class="nav-item">
+                                                                                <button class="nav-link fw-bold text-dark py-3" data-bs-toggle="tab" data-bs-target="#tab-bahan-{{ $pid }}" type="button"><i class="fas fa-box-open text-success me-2"></i>Bahan</button>
                                                                             </li>
                                                                         </ul>
                                                                         <div class="tab-content p-4">
@@ -338,6 +295,59 @@
                                                                                     @endforeach
                                                                                 </div>
                                                                             </div>
+                                                                            <div class="tab-pane fade" id="tab-bahan-{{ $pid }}" role="tabpanel">
+                                                                                <div class="table-responsive border rounded" style="max-height: 350px; overflow-y: auto;">
+                                                                                    <table class="table table-hover table-sm mb-0">
+                                                                                        <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                                                                                            <tr>
+                                                                                                <th width="8%" class="text-center">Pilih</th>
+                                                                                                <th>Nama Bahan / Reagen</th>
+                                                                                                <th width="25%">Sisa Stok</th>
+                                                                                                <th width="30%">Jumlah Dipakai</th>
+                                                                                            </tr>
+                                                                                        </thead>
+                                                                                        <tbody>
+                                                                                            @foreach($barangList as $barang)
+                                                                                            @php
+                                                                                                $stokReal = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
+                                                                                                $habis = $stokReal <= 0;
+                                                                                            @endphp
+                                                                                            <tr class="{{ $habis ? 'table-danger' : '' }}">
+                                                                                                <td class="text-center align-middle">
+                                                                                                    <input class="form-check-input chk-bahan" style="transform: scale(1.2);" type="checkbox"
+                                                                                                        name="params[{{ $pid }}][mentah][bahan_ids][]"
+                                                                                                        value="{{ $barang->barang_id }}"
+                                                                                                        id="bh_{{ $pid }}_{{ $barang->barang_id }}"
+                                                                                                        data-nama="{{ $barang->nama_barang }}"
+                                                                                                        data-satuan="{{ $barang->satuan }}">
+                                                                                                </td>
+                                                                                                <td class="align-middle">
+                                                                                                    <label for="bh_{{ $pid }}_{{ $barang->barang_id }}" class="mb-0 cursor-pointer d-block {{ $habis ? 'text-muted' : '' }}">
+                                                                                                        <strong>{{ $barang->nama_barang }}</strong>
+                                                                                                        @if($habis)
+                                                                                                            <span class="badge bg-danger ms-1">Habis</span>
+                                                                                                        @endif
+                                                                                                    </label>
+                                                                                                </td>
+                                                                                                <td class="align-middle text-muted">
+                                                                                                    <span class="badge {{ $habis ? 'bg-danger' : 'bg-light text-dark border' }} px-2 py-1">
+                                                                                                        {{ number_format(max(0, $stokReal), 0, ',', '.') }} {{ $barang->satuan }}
+                                                                                                    </span>
+                                                                                                </td>
+                                                                                                <td class="align-middle">
+                                                                                                    <div class="input-group input-group-sm">
+                                                                                                        <input type="number" step="0.01" min="0" class="form-control bg-white in-qty"
+                                                                                                            name="params[{{ $pid }}][mentah][barang_jumlah][{{ $barang->barang_id }}]"
+                                                                                                            placeholder="0">
+                                                                                                        <span class="input-group-text bg-light text-muted">{{ $barang->satuan }}</span>
+                                                                                                    </div>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                            @endforeach
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                </div>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                     <div class="modal-footer bg-light">
@@ -348,6 +358,8 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+
+                                                         @include('partials.modal-panduan-ujibanding', ['pid' => $pid, 'code' => 'CHN'])
 
                                                         @include('qc-uji-banding.partials.chn_table')
 
@@ -437,11 +449,15 @@
                                                                             <div class="d-flex flex-column gap-1" style="font-size: 0.85rem;">
                                                                                 <div><i class="fas fa-user text-primary me-2"></i><strong>Analis:</strong> <span id="sum-personil-{{ $pid }}" class="text-muted fst-italic">Belum dipilih</span></div>
                                                                                 <div><i class="fas fa-tools text-warning me-2"></i><strong>Instrumen:</strong> <span id="sum-alat-{{ $pid }}" class="text-muted fst-italic">Belum dipilih</span></div>
+                                                                                <div><i class="fas fa-box-open text-success me-2"></i><strong>Bahan:</strong> <span id="sum-bahan-{{ $pid }}" class="text-muted fst-italic">Belum dipilih</span></div>
                                                                             </div>
                                                                         </div>
-                                                                        <div class="col-md-4 text-md-end">
+                                                                        <div class="col-md-4 text-md-end d-flex flex-column gap-2 d-print-none">
                                                                             <button type="button" class="btn btn-sm w-100 shadow-sm text-white param-input-ext" style="background-color: #1b3152; border-color: #1b3152;" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}" disabled>
-                                                                                <i class="fas fa-cog me-1"></i> Atur Analis & Alat
+                                                                                <i class="fas fa-cog me-1"></i> Atur Analis, Alat & Bahan
+                                                                            </button>
+                                                                            <button type="button" class="btn btn-sm w-100 shadow-sm btn-outline-info param-input-ext" data-bs-toggle="modal" data-bs-target="#modalRumus-{{ $pid }}">
+                                                                                <i class="fas fa-file-alt me-1"></i> Panduan LKS (CHN)
                                                                             </button>
                                                                         </div>
                                                                     </div>
@@ -450,7 +466,7 @@
                                                                         <div class="modal-dialog">
                                                                             <div class="modal-content border-0 shadow-lg">
                                                                                 <div class="modal-header text-white" style="background-color: #1b3152;">
-                                                                                    <h5 class="modal-title fw-bold"><i class="fas fa-tasks me-2"></i>Atur Analis & Alat: {{ $code ?? 'Parameter' }}</h5>
+                                                                                    <h5 class="modal-title fw-bold"><i class="fas fa-tasks me-2"></i>Atur Analis, Alat & Bahan: {{ $code ?? 'Parameter' }}</h5>
                                                                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                                                                 </div>
                                                                                 <div class="modal-body p-0">
@@ -460,6 +476,9 @@
                                                                                         </li>
                                                                                         <li class="nav-item">
                                                                                             <button class="nav-link fw-bold text-dark py-3" data-bs-toggle="tab" data-bs-target="#tab-alat-{{ $pid }}" type="button"><i class="fas fa-tools text-warning me-2"></i>Instrumen</button>
+                                                                                        </li>
+                                                                                        <li class="nav-item">
+                                                                                            <button class="nav-link fw-bold text-dark py-3" data-bs-toggle="tab" data-bs-target="#tab-bahan-{{ $pid }}" type="button"><i class="fas fa-box-open text-success me-2"></i>Bahan</button>
                                                                                         </li>
                                                                                     </ul>
                                                                                     <div class="tab-content p-4">
@@ -503,6 +522,59 @@
                                                                                                 @endforeach
                                                                                             </div>
                                                                                         </div>
+                                                                                        <div class="tab-pane fade" id="tab-bahan-{{ $pid }}" role="tabpanel">
+                                                                                            <div class="table-responsive border rounded" style="max-height: 350px; overflow-y: auto;">
+                                                                                                <table class="table table-hover table-sm mb-0">
+                                                                                                    <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                                                                                                        <tr>
+                                                                                                            <th width="8%" class="text-center">Pilih</th>
+                                                                                                            <th>Nama Bahan / Reagen</th>
+                                                                                                            <th width="25%">Sisa Stok</th>
+                                                                                                            <th width="30%">Jumlah Dipakai</th>
+                                                                                                        </tr>
+                                                                                                    </thead>
+                                                                                                    <tbody>
+                                                                                                        @foreach($barangList as $barang)
+                                                                                                        @php
+                                                                                                            $stokReal = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
+                                                                                                            $habis = $stokReal <= 0;
+                                                                                                        @endphp
+                                                                                                        <tr class="{{ $habis ? 'table-danger' : '' }}">
+                                                                                                            <td class="text-center align-middle">
+                                                                                                                <input class="form-check-input chk-bahan" style="transform: scale(1.2);" type="checkbox"
+                                                                                                                    name="params[{{ $pid }}][mentah][bahan_ids][]"
+                                                                                                                    value="{{ $barang->barang_id }}"
+                                                                                                                    id="bh_{{ $pid }}_{{ $barang->barang_id }}"
+                                                                                                                    data-nama="{{ $barang->nama_barang }}"
+                                                                                                                    data-satuan="{{ $barang->satuan }}">
+                                                                                                            </td>
+                                                                                                            <td class="align-middle">
+                                                                                                                <label for="bh_{{ $pid }}_{{ $barang->barang_id }}" class="mb-0 cursor-pointer d-block {{ $habis ? 'text-muted' : '' }}">
+                                                                                                                    <strong>{{ $barang->nama_barang }}</strong>
+                                                                                                                    @if($habis)
+                                                                                                                        <span class="badge bg-danger ms-1">Habis</span>
+                                                                                                                    @endif
+                                                                                                                </label>
+                                                                                                            </td>
+                                                                                                            <td class="align-middle text-muted">
+                                                                                                                <span class="badge {{ $habis ? 'bg-danger' : 'bg-light text-dark border' }} px-2 py-1">
+                                                                                                                    {{ number_format(max(0, $stokReal), 0, ',', '.') }} {{ $barang->satuan }}
+                                                                                                                </span>
+                                                                                                            </td>
+                                                                                                            <td class="align-middle">
+                                                                                                                <div class="input-group input-group-sm">
+                                                                                                                    <input type="number" step="0.01" min="0" class="form-control bg-white in-qty"
+                                                                                                                        name="params[{{ $pid }}][mentah][barang_jumlah][{{ $barang->barang_id }}]"
+                                                                                                                        placeholder="0">
+                                                                                                                    <span class="input-group-text bg-light text-muted">{{ $barang->satuan }}</span>
+                                                                                                                </div>
+                                                                                                            </td>
+                                                                                                        </tr>
+                                                                                                        @endforeach
+                                                                                                    </tbody>
+                                                                                                </table>
+                                                                                            </div>
+                                                                                        </div>
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="modal-footer bg-light">
@@ -513,6 +585,8 @@
                                                                             </div>
                                                                         </div>
                                                                     </div>
+
+                                                                    @include('partials.modal-panduan-ujibanding', ['pid' => $pid, 'code' => $code])
 
                                                                     @if(in_array($code, ['IM', 'ASH', 'VM', 'FC', 'RM']))
                                                                         @include('qc-uji-banding.partials.proximate_table')
@@ -1436,12 +1510,19 @@ document.addEventListener('DOMContentLoaded', function () {
                         arrAlat.push(cb.value);
                     });
                 }
+                let arrBahan = [];
+                if (modal) {
+                    modal.querySelectorAll('.chk-bahan:checked').forEach(cb => {
+                        let qty = cb.closest('tr')?.querySelector('.in-qty')?.value || '';
+                        arrBahan.push({ id: cb.value, qty: qty });
+                    });
+                }
 
                 draft.params[pid] = {
                     selected: check.checked,
                     analis_data: arrAnalis, 
                     alat_data: arrAlat,    
-                    
+                    bahan_data: arrBahan,
                     tanggal_uji: document.querySelector(`input[name="params[${pid}][tanggal_uji]"]`)?.value || '',
                     metode_uji: document.querySelector(`input[name="params[${pid}][metode_uji]"]`)?.value || '',
                     uncertainty_lab: document.querySelector(`input[name="params[${pid}][uncertainty_lab]"]`)?.value || '',
@@ -1623,6 +1704,21 @@ document.addEventListener('DOMContentLoaded', function () {
                                     if (cb) cb.checked = true; 
                                 });
                             }
+
+                        if (pData.bahan_data && Array.isArray(pData.bahan_data) && modal) {
+                              pData.bahan_data.forEach(item => {
+                                  let bId = (typeof item === 'object') ? item.id : item;
+                                  let bQty = (typeof item === 'object') ? item.qty : '';
+                                  let cb = modal.querySelector(`.chk-bahan[value="${bId}"]`);
+                                  if (cb) {
+                                      cb.checked = true;
+                                      if (bQty) {
+                                          let qtyInp = cb.closest('tr')?.querySelector('.in-qty');
+                                          if (qtyInp) qtyInp.value = bQty;
+                                      }
+                                  }
+                              });
+                          }
 
                             if (modal) updateResourceSummary(pid);
                             const tglInp = document.querySelector(`input[name="params[${pid}][tanggal_uji]"]`);
@@ -2226,27 +2322,46 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateResourceSummary(pid) {
         const modal = document.getElementById('modalResource-' + pid);
-        if(!modal) return;
+        if (!modal) return;
 
+        const emptyHtml = '<span class="text-danger fst-italic">Belum dipilih</span>';
+
+        // Analis
         let personils = [];
         modal.querySelectorAll('.chk-personil:checked').forEach(cb => {
             let nama = cb.getAttribute('data-nama');
             let peran = cb.closest('tr').querySelector('.in-peran').value || 'Analis';
             personils.push(`${nama} (${peran})`);
         });
+        document.getElementById('sum-personil-' + pid).innerHTML = personils.length
+            ? `<span class="text-dark fw-bold">${personils.join(', ')}</span>` : emptyHtml;
 
-        document.getElementById('sum-personil-' + pid).innerHTML = personils.length 
-            ? `<span class="text-dark fw-bold">${personils.join(', ')}</span>` 
-            : '<span class="text-danger fst-italic">Belum dipilih</span>';
-
+        // Instrumen
         let alats = [];
         modal.querySelectorAll('.chk-alat:checked').forEach(cb => {
             alats.push(cb.getAttribute('data-nama'));
         });
+        document.getElementById('sum-alat-' + pid).innerHTML = alats.length
+            ? `<span class="text-dark fw-bold">${alats.join(', ')}</span>` : emptyHtml;
 
-        document.getElementById('sum-alat-' + pid).innerHTML = alats.length 
-            ? `<span class="text-dark fw-bold">${alats.join(', ')}</span>` 
-            : '<span class="text-danger fst-italic">Belum dipilih</span>';
+                // Bahan (BARU)
+        let bahans = [];
+        modal.querySelectorAll('.chk-bahan:checked').forEach(cb => {
+            let nama = cb.getAttribute('data-nama');
+            let satuan = cb.getAttribute('data-satuan') || '';
+            let qty = cb.closest('tr')?.querySelector('.in-qty')?.value;
+            if (qty && parseFloat(qty) > 0) {
+                bahans.push(`${nama} (${qty} ${satuan})`);
+            } else {
+                bahans.push(nama);
+            }
+        });
+        
+        const sumBahan = document.getElementById('sum-bahan-' + pid);
+        if (sumBahan) {
+            sumBahan.innerHTML = bahans.length
+                ? `<span class="text-dark fw-bold">${bahans.join(', ')}</span>` : emptyHtml;
+        }
     }
 
     document.querySelectorAll('.modal-resource').forEach(modal => {
@@ -2275,6 +2390,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 currModal.querySelectorAll('.chk-personil').forEach(cb => cb.checked = false);
                 currModal.querySelectorAll('.in-peran').forEach(inp => inp.value = 'Analis');
                 currModal.querySelectorAll('.chk-alat').forEach(cb => cb.checked = false);
+                currModal.querySelectorAll('.chk-bahan').forEach(cb => cb.checked = false);
+                currModal.querySelectorAll('.in-qty').forEach(inp => inp.value = '');
 
                 prevModal.querySelectorAll('.chk-personil:checked').forEach(cb => {
                     let targetCb = currModal.querySelector(`.chk-personil[value="${cb.value}"]`);
@@ -2290,15 +2407,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (targetCb) targetCb.checked = true;
                 });
 
+                prevModal.querySelectorAll('.chk-bahan:checked').forEach(cb => {
+                    let targetCb = currModal.querySelector(`.chk-bahan[value="${cb.value}"]`);
+                    if (targetCb) {
+                        targetCb.checked = true;
+                        let prevQty = cb.closest('tr')?.querySelector('.in-qty')?.value || '';
+                        let targetQty = targetCb.closest('tr')?.querySelector('.in-qty');
+                        if (targetQty) targetQty.value = prevQty; 
+                    }
+                });
                 updateResourceSummary(currentPid);
             }
-        });
-    });
-
-    document.querySelectorAll('.modal-resource').forEach(modal => {
-        modal.addEventListener('hidden.bs.modal', function () {
-            let pid = this.id.replace('modalResource-', '');
-            updateResourceSummary(pid);
         });
     });
 

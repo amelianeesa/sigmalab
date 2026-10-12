@@ -17,8 +17,11 @@
         <!-- Informasi Botol -->
         <div class="col-md-4 mb-4">
             <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
-                    <h5 class="fw-bold"><i class="fas fa-info-circle text-primary me-2"></i>Informasi Botol</h5>
+                <div class="card-header bg-white border-bottom-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0"><i class="fas fa-info-circle text-primary me-2"></i>Informasi Botol</h5>
+                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editBotolModal">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
                 </div>
                 <div class="card-body">
                     <table class="table table-borderless table-sm">
@@ -59,6 +62,19 @@
                                     <span class="text-success"><i class="fas fa-check-circle"></i> Aktif</span>
                                 @else
                                     <span class="text-danger"><i class="fas fa-times-circle"></i> Inaktif</span>
+                                @endif
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">File Sertifikat (COA)</td>
+                            <td class="fw-bold">
+                                @if($katalog->coa_file)
+                                    <!-- Ikon diubah ke fa-file-contract dan teks diubah menjadi Lihat Sertifikat -->
+                                    <a href="{{ Storage::url($katalog->coa_file) }}" target="_blank" class="btn btn-sm btn-outline-danger py-0 px-2 shadow-sm">
+                                        <i class="fas fa-file-contract"></i> Lihat Sertifikat
+                                    </a>
+                                @else
+                                    <span class="text-muted">-</span>
                                 @endif
                             </td>
                         </tr>
@@ -114,6 +130,67 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Modal Edit Informasi Botol -->
+<div class="modal fade" id="editBotolModal" tabindex="-1" aria-labelledby="editBotolModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <form action="{{ route('crm-katalog.update', $katalog->id) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Informasi Botol</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nomor Lot <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="nomor_lot" value="{{ $katalog->nomor_lot }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nomor Sertifikat</label>
+                            <input type="text" class="form-control" name="nomor_sertifikat" value="{{ $katalog->nomor_sertifikat }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nama Produk <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="nama_produk" value="{{ $katalog->nama_produk }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Produsen</label>
+                            <input type="text" class="form-control" name="produsen" value="{{ $katalog->produsen }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Expired Date</label>
+                            <input type="date" class="form-control" name="tanggal_expired" value="{{ $katalog->tanggal_expired ? \Carbon\Carbon::parse($katalog->tanggal_expired)->format('Y-m-d') : '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Upload Ulang COA (PDF/Image)</label>
+                            @if($katalog->coa_file)
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge bg-success me-2"><i class="fas fa-check"></i> File Sudah Tersimpan</span>
+                                    <a href="{{ Storage::url($katalog->coa_file) }}" target="_blank" style="font-size: 0.8rem;">(Cek File)</a>
+                                </div>
+                            @endif
+                            <input type="file" class="form-control" name="coa_file" accept=".pdf,.jpg,.jpeg,.png">
+                            <small class="text-muted">Kosongkan jika tidak ingin mengubah file COA.</small>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="isActive" {{ $katalog->is_active ? 'checked' : '' }} value="1">
+                                <label class="form-check-label" for="isActive">Status Aktif (Bisa digunakan untuk QC)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 
