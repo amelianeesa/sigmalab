@@ -217,6 +217,11 @@
         </div>
 
         <div class="header-actions d-grid d-md-flex align-items-center gap-2">
+            @if($program->file_laporan_vendor)
+            <button type="button" class="btn btn-danger btn-sm py-1.5 px-3 shadow-sm fw-semibold" style="font-size: 0.8rem;" data-bs-toggle="modal" data-bs-target="#modalPreviewVendor">
+                <i class="fas fa-file-pdf me-1"></i> Lihat Laporan Vendor
+            </button>
+            @endif
             <a href="{{ route('qc-uji-banding.evaluasi.form', $program->id) }}" class="btn btn-outline-corporate btn-sm py-1.5 px-3 shadow-sm fw-semibold" style="font-size: 0.8rem;">
                 <i class="fas fa-edit me-1"></i> Edit Hasil Evaluasi
             </a>
@@ -502,4 +507,37 @@ document.addEventListener('DOMContentLoaded', function() {
     @endforeach
 });
 </script>
+@if($program->file_laporan_vendor)
+    <!-- Modal Preview Dokumen Vendor -->
+    <div class="modal fade" id="modalPreviewVendor" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-fullscreen-lg-down">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header text-white d-flex justify-content-between align-items-center" style="background-color: #1b3152;">
+                    <h5 class="modal-title" style="font-size: 0.95rem;">
+                        <i class="fas fa-file-contract me-2"></i>Preview Laporan Vendor: {{ $program->nama_file_vendor ?: basename($program->file_laporan_vendor) }}
+                    </h5>
+                    <div class="d-flex gap-2 align-items-center">
+                        <a href="{{ route('qc-uji-banding.download-vendor-file', $program->id) }}" class="btn btn-sm btn-light py-1 px-2 fw-semibold" style="font-size: 0.75rem;">
+                            <i class="fas fa-download me-1"></i> Download
+                        </a>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="modal-body p-0 bg-secondary bg-opacity-10 text-center" style="min-height: 550px;">
+                    @php
+                        $previewExt = strtolower(pathinfo($program->file_laporan_vendor, PATHINFO_EXTENSION));
+                        $previewUrl = asset('storage/' . $program->file_laporan_vendor);
+                    @endphp
+                    @if($previewExt === 'pdf')
+                        <iframe src="{{ $previewUrl }}" width="100%" height="650px" style="border: none;"></iframe>
+                    @else
+                        <div class="p-3 text-center">
+                            <img src="{{ $previewUrl }}" alt="Laporan Vendor" class="img-fluid rounded shadow-sm" style="max-height: 650px;">
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+@endif
 @endsection

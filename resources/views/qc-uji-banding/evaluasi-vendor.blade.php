@@ -16,7 +16,7 @@
         <p class="qc-subtitle">Masukkan Assigned Value (Alg. Mean) dan SDPA sesuai laporan uji profisiensi dari vendor. Z-score dan status dihitung otomatis.</p>
     </div>
 
-    <form action="{{ route('qc-uji-banding.evaluasi.store', $program->id) }}" method="POST">
+    <form action="{{ route('qc-uji-banding.evaluasi.store', $program->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         <div class="card border-0 shadow-sm">
             <div class="card-body">
@@ -241,6 +241,15 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                <div class="p-3 bg-light border rounded mt-3 mb-2">
+                    <label class="form-label fw-bold text-dark mb-1">
+                        <i class="fas fa-paperclip text-primary me-1"></i> Lampirkan File Laporan Resmi Vendor (Opsional)
+                    </label>
+                    <input type="file" name="file_laporan_vendor" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png">
+                    <div class="form-text text-muted" style="font-size: 0.72rem;">
+                        Format: PDF, JPG, JPEG, PNG (Maksimal 15 MB). @if($program->file_laporan_vendor) <span class="text-success fw-semibold"><i class="fas fa-check-circle"></i> Sudah ada file terunggah sebelumnya: {{ $program->nama_file_vendor ?: basename($program->file_laporan_vendor) }}</span> @endif
+                    </div>
                 </div>
             </div>
         </div>

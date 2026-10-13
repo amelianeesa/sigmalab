@@ -883,7 +883,11 @@
                     </div>
                 </div>
 
-                <div class="submit-wrap d-flex justify-content-end mb-4">
+                <div class="submit-wrap d-flex justify-content-between align-items-center mb-4 pt-2 border-top">
+                    <a href="{{ route('qc-inhouse.show', $batch->sampel_inhouse_id) }}" class="btn btn-secondary btn-sm py-2 px-4 shadow-sm fw-semibold">
+                        <i class="fas fa-arrow-left me-1"></i> Kembali ke Detail
+                    </a>
+
                     @if(in_array($batch->status, ['uji_stabilitas', 'gagal_stabilitas']))
                     <button type="submit" class="btn btn-corporate-blue btn-sm py-2 px-4 shadow-sm fw-semibold" id="btnSubmit">
                         <i class="fas fa-check-double me-1"></i> Simpan Data Uji Stabilitas
@@ -2600,6 +2604,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 checkbox.checked = true;
             } else {
                 checkbox.checked = false;
+            }
+        });
+    });
+
+    document.querySelectorAll('.chk-bahan').forEach(cb => {
+        cb.addEventListener('change', function () {
+            if (!this.checked) {
+                let tr = this.closest('tr');
+                let qtyInput = tr.querySelector('.in-qty');
+                if (qtyInput) qtyInput.value = '';
             }
         });
     });

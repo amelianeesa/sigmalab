@@ -171,7 +171,6 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
     Route::delete('qc-uji-banding/master-toleransi/{id}', [ParameterToleransiController::class, 'destroy'])->name('master.toleransi.destroy');
     Route::post('qc-uji-banding/draft', [QcUjiBandingController::class, 'storeDraft'])->name('qc-uji-banding.draft.store');
     Route::resource('qc-uji-banding', QcUjiBandingController::class);
-    Route::get('qc-uji-banding/{id}/print-pdf', [QcUjiBandingController::class, 'printPdf'])->name('qc-uji-banding.printPdf');
     Route::get('qc-uji-banding/{id}/investigasi/{param_id}', [QcUjiBandingController::class, 'investigasi'])->name('qc-uji-banding.investigasi');
     Route::put('qc-uji-banding/{id}/investigasi/{param_id}', [QcUjiBandingController::class, 'storeInvestigasi'])->name('qc-uji-banding.store-investigasi');
     Route::get('qc-uji-banding/{id}/cetak/pdf/{param_id}', [QcUjiBandingController::class, 'cetakLksPdf'])->name('qc-uji-banding.cetak.pdf');
@@ -179,6 +178,9 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
     Route::get('qc-uji-banding/{id}/evaluasi', [QcUjiBandingController::class, 'evaluasiForm'])->name('qc-uji-banding.evaluasi.form');
     Route::post('qc-uji-banding/{id}/evaluasi', [QcUjiBandingController::class, 'evaluasiStore'])->name('qc-uji-banding.evaluasi.store');
     Route::get('qc-uji-banding/{id}/ringkasan', [QcUjiBandingController::class, 'ringkasanUnjukKerja'])->name('qc-uji-banding.ringkasan');
+    Route::post('qc-uji-banding/{id}/upload-vendor-file', [QcUjiBandingController::class, 'uploadVendorFile'])->name('qc-uji-banding.upload-vendor-file');
+    Route::delete('qc-uji-banding/{id}/hapus-vendor-file', [QcUjiBandingController::class, 'hapusVendorFile'])->name('qc-uji-banding.hapus-vendor-file');
+    Route::get('qc-uji-banding/{id}/download-vendor-file', [QcUjiBandingController::class, 'downloadVendorFile'])->name('qc-uji-banding.download-vendor-file');
 
     // AFT Kalibrasi Endpoints
     Route::post('aft-kalibrasi', [QcUjiBandingController::class, 'aftKalibrasiStore'])->name('aft.kalibrasi.store');
@@ -263,6 +265,8 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::get('/create', [QcInhouseController::class, 'create'])->name('create');
         Route::post('/', [QcInhouseController::class, 'store'])->name('store');
         Route::get('/{id}', [QcInhouseController::class, 'show'])->name('show');
+
+        Route::get('/{id}/pemilihan', [QcInhouseController::class, 'showPemilihan'])->name('pemilihan');
 
         Route::get('/{id}/preparasi', [QcInhouseController::class, 'showPreparasi'])->name('preparasi');
         Route::post('/{id}/preparasi', [QcInhouseController::class, 'storePreparasi'])->name('preparasi.store');

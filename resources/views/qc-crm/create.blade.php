@@ -1177,14 +1177,26 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Isi qty otomatis mencentang bahan
-    document.querySelectorAll('.modal-resource .in-qty').forEach(inp => {
-        inp.addEventListener('input', function () {
-            this.closest('tr').querySelector('.chk-bahan').checked = parseFloat(this.value) > 0;
+    document.querySelectorAll('.in-qty').forEach(input => {
+        input.addEventListener('input', function () {
+            let tr = this.closest('tr');
+            let chk = tr.querySelector('.chk-bahan');
+            if (chk) {
+                chk.checked = (this.value && parseFloat(this.value) > 0);
+            }
         });
     });
 
-    // Salin dari parameter sebelumnya (yang terlihat)
+    document.querySelectorAll('.chk-bahan').forEach(cb => {
+        cb.addEventListener('change', function () {
+            if (!this.checked) {
+                let tr = this.closest('tr');
+                let qtyInput = tr.querySelector('.in-qty');
+                if (qtyInput) qtyInput.value = '';
+            }
+        });
+    });
+
     document.querySelectorAll('.btn-copy-resource').forEach(btn => {
         btn.addEventListener('click', function () {
             const cur = this.dataset.pid;

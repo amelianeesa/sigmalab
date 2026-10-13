@@ -209,21 +209,24 @@
             <a href="{{ route('qc-uji-banding.ringkasan', $program->id) }}" class="btn btn-corporate-blue btn-sm py-1.5 px-3 shadow-sm fw-semibold" style="font-size: 0.8rem;">
                 <i class="fas fa-table me-1"></i> Ringkasan Unjuk Kerja
             </a>
-            <a href="{{ route('qc-uji-banding.printPdf', $program->id) }}" class="btn btn-danger btn-sm py-1.5 px-3 shadow-sm fw-semibold" style="font-size: 0.8rem;" target="_blank">
-                <i class="fas fa-file-pdf me-1"></i> Cetak Laporan (PDF)
-            </a>
         </div>
     </div>
 
-    @if(session('error'))
-    <div class="alert alert-danger shadow-sm border-0 py-2" style="font-size: 0.8rem;">
-        <i class="fas fa-times-circle me-2"></i> {{ session('error') }}
-    </div>
+    @if($errors->any())
+        <div class="alert alert-danger shadow-sm border-0 py-2" style="font-size: 0.8rem;">
+            <div class="fw-bold mb-1"><i class="fas fa-exclamation-triangle me-2"></i>Gagal Mengunggah File:</div>
+            <ul class="mb-0 ps-3">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
     @endif
 
     <div class="row g-3 mb-4">
-        <div class="col-12 col-lg-4">
-            <div class="card shadow-sm border-0 h-100">
+        <div class="col-12 col-lg-4 d-flex flex-column gap-3">
+            <!-- Card Informasi Program -->
+            <div class="card shadow-sm border-0">
                 <div class="card-header text-white" style="background-color: #1b3152;">
                     <h5><i class="fas fa-info-circle me-1"></i> Informasi Program</h5>
                 </div>
@@ -243,7 +246,7 @@
                         </tr>
                         <tr>
                             <td class="text-muted">Tanggal Terima</td>
-                            <td class="fw-bold">{{ $program->tanggal_terima->format('d M Y') }}</td>
+                            <td class="fw-bold">{{ $program->tanggal_terima ? $program->tanggal_terima->format('d M Y') : '-' }}</td>
                         </tr>
 
                         @if($program->keterangan)
@@ -253,6 +256,64 @@
                         </tr>
                         @endif
                     </table>
+                </div>
+            </div>
+
+            <!-- Card Dokumen Laporan Vendor -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header text-white d-flex justify-content-between align-items-center" style="background-color: #1b3152;">
+                    <h5><i class="fas fa-file-contract me-1"></i> Laporan Resmi Vendor</h5>
+                    @if($program->file_laporan_vendor)
+                        <span class="badge bg-success" style="font-size: 0.68rem;"><i class="fas fa-check-circle me-1"></i>Tersedia</span>
+                    @else
+                        <span class="badge bg-warning text-dark" style="font-size: 0.68rem;"><i class="fas fa-clock me-1"></i>Belum Ada</span>
+                    @endif
+                </div>
+                <div class="card-body">
+                    @if($program->file_laporan_vendor)
+                        @php
+                            $ext = strtolower(pathinfo($program->file_laporan_vendor, PATHINFO_EXTENSION));
+                            $isPdf = $ext === 'pdf';
+                        @endphp
+                        <div class="p-2 border rounded bg-light mb-2 d-flex align-items-center gap-2">
+                            <i class="{{ $isPdf ? 'fas fa-file-pdf text-danger' : 'fas fa-file-image text-primary' }} fa-2x"></i>
+                            <div class="overflow-hidden flex-grow-1">
+                                <div class="fw-bold text-truncate text-dark" style="font-size: 0.78rem;" title="{{ $program->nama_file_vendor }}">
+                                    {{ $program->nama_file_vendor ?: basename($program->file_laporan_vendor) }}
+                                </div>
+                                <small class="text-muted text-uppercase" style="font-size: 0.68rem;">Format: {{ $ext }}</small>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-1">
+                            <button type="button" class="btn btn-corporate-blue btn-sm py-1 fw-semibold" data-bs-toggle="modal" data-bs-target="#modalPreviewVendor">
+                                <i class="fas fa-eye me-1"></i> Lihat Dokumen
+                            </button>
+                            <div class="d-flex gap-1">
+                                <a href="{{ route('qc-uji-banding.download-vendor-file', $program->id) }}" class="btn btn-outline-secondary btn-sm py-1 flex-grow-1">
+                                    <i class="fas fa-download me-1"></i> Download
+                                </a>
+                                <button type="button" class="btn btn-outline-primary btn-sm py-1" data-bs-toggle="modal" data-bs-target="#modalUploadVendor" title="Ganti File">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <form action="{{ route('qc-uji-banding.hapus-vendor-file', $program->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus file laporan vendor ini?');" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-outline-danger btn-sm py-1" title="Hapus File">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @else
+                        <div class="text-center py-3 text-muted">
+                            <i class="fas fa-file-upload fa-2x mb-2 text-secondary opacity-50"></i>
+                            <p class="mb-2" style="font-size: 0.75rem;">Belum ada laporan resmi yang diunggah.</p>
+                            <button type="button" class="btn btn-outline-corporate btn-sm py-1 px-3 fw-semibold" data-bs-toggle="modal" data-bs-target="#modalUploadVendor">
+                                <i class="fas fa-upload me-1"></i> Upload Laporan Vendor
+                            </button>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -300,7 +361,7 @@
                                         @if($param->status_evaluasi === 'outlier')
                                             @if($param->status_investigasi === 'menunggu_investigasi')
                                                 <a href="{{ route('qc-uji-banding.investigasi', [$program->id, $param->id]) }}" class="btn btn-danger btn-sm py-1 px-2 shadow-sm" style="font-size: 0.75rem;" title="Isi Lembar Ketidaksesuaian (LKS)">
-                                                    <i class="fas fa-file-alt"></i> Isi LKS
+                                                    <i class="fas fa-file-alt me-1"></i> Isi LKS
                                                 </a>
                                             @elseif($param->status_investigasi === 'selesai_investigasi')
                                                 <div class="btn-group btn-group-sm">
@@ -308,6 +369,12 @@
                                                     <a href="{{ route('qc-uji-banding.cetak.word', [$program->id, $param->id]) }}" class="btn btn-outline-corporate" style="font-size: 0.75rem;"><i class="fas fa-file-word"></i> Word</a>
                                                 </div>
                                             @endif
+                                        @elseif($param->status_evaluasi === 'inlier')
+                                            <span class="text-success small fw-semibold">
+                                                <i class="fas fa-check-circle me-1"></i>Tidak Butuh LKS
+                                            </span>
+                                        @else
+                                            <span class="text-muted">-</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -350,4 +417,68 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalUploadVendor" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header text-white" style="background-color: #1b3152;">
+                <h5 class="modal-title" style="font-size: 0.95rem;">
+                    <i class="fas fa-upload me-2"></i>{{ $program->file_laporan_vendor ? 'Ganti Laporan Vendor' : 'Upload Laporan Vendor' }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('qc-uji-banding.upload-vendor-file', $program->id) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body p-3">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Pilih File Laporan Resmi (PDF / Gambar) <span class="text-danger">*</span></label>
+                        <input type="file" name="file_laporan_vendor" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png" required>
+                        <div class="form-text text-muted" style="font-size: 0.72rem;">
+                            <i class="fas fa-info-circle me-1"></i>Format: <strong>PDF, JPG, JPEG, PNG</strong>. Maksimal 15 MB.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light p-2">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-corporate-blue btn-sm fw-semibold">
+                        <i class="fas fa-cloud-upload-alt me-1"></i> Simpan File
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@if($program->file_laporan_vendor)
+<div class="modal fade" id="modalPreviewVendor" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-fullscreen-lg-down">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header text-white d-flex justify-content-between align-items-center" style="background-color: #1b3152;">
+                <h5 class="modal-title" style="font-size: 0.95rem;">
+                    <i class="fas fa-file-contract me-2"></i>Preview Laporan Vendor: {{ $program->nama_file_vendor ?: basename($program->file_laporan_vendor) }}
+                </h5>
+                <div class="d-flex gap-2 align-items-center">
+                    <a href="{{ route('qc-uji-banding.download-vendor-file', $program->id) }}" class="btn btn-sm btn-light py-1 px-2 fw-semibold" style="font-size: 0.75rem;">
+                        <i class="fas fa-download me-1"></i> Download
+                    </a>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+            <div class="modal-body p-0 bg-secondary bg-opacity-10 text-center" style="min-height: 550px;">
+                @php
+                    $previewExt = strtolower(pathinfo($program->file_laporan_vendor, PATHINFO_EXTENSION));
+                    $previewUrl = asset('storage/' . $program->file_laporan_vendor);
+                @endphp
+                @if($previewExt === 'pdf')
+                    <iframe src="{{ $previewUrl }}" width="100%" height="650px" style="border: none;"></iframe>
+                @else
+                    <div class="p-3 text-center">
+                        <img src="{{ $previewUrl }}" alt="Laporan Vendor" class="img-fluid rounded shadow-sm" style="max-height: 650px;">
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 @endsection

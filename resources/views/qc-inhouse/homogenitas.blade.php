@@ -671,6 +671,83 @@
                         </ul>
                     </div>
                     <div class="card-body p-0">
+                        @if(!$batchHasIm && $needsIm)
+                            <div class="card border-warning mx-3 my-3 shadow-sm" style="background-color: #fffdf5;">
+                                <div class="card-header bg-warning bg-opacity-25 py-2 px-3 d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold text-dark">
+                                        <i class="fas fa-sliders-h me-1 text-warning"></i> Referensi Nilai Inherent Moisture (IM)
+                                    </span>
+                                    <span id="imRefBadge" class="badge {{ !empty($savedImReference['data']) ? 'bg-success' : 'bg-warning text-dark' }}">
+                                        {{ !empty($savedImReference['data']) ? 'Referensi IM Aktif' : 'Belum Diterapkan' }}
+                                    </span>
+                                </div>
+                                <div class="card-body py-2 px-3">
+                                    <p class="small text-muted mb-2">
+                                        Batch ini tidak menguji parameter IM. Nilai acuan IM diperlukan untuk mengisi otomatis kolom <strong>IM</strong> &amp; menghitung <strong>VM%</strong> pada Volatile Matter, serta konversi basis kering (<strong>%db</strong>) pada Ash, VM, TS, dan CV.
+                                    </p>
+                                    <div class="row g-2 align-items-center">
+                                        <div class="col-md-auto">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="radio_im_mode" id="radio_im_batch" value="batch" 
+                                                    {{ ($savedImReference['mode'] ?? 'batch') === 'batch' ? 'checked' : '' }}>
+                                                <label class="form-check-label small fw-bold" for="radio_im_batch">Pilih Batch QC Lain</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="radio_im_mode" id="radio_im_manual" value="manual"
+                                                    {{ ($savedImReference['mode'] ?? '') === 'manual' ? 'checked' : '' }}>
+                                                <label class="form-check-label small fw-bold" for="radio_im_manual">Nilai Tetap (Manual)</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-5 {{ ($savedImReference['mode'] ?? 'batch') === 'manual' ? 'd-none' : '' }}" id="col_select_batch">
+                                            <div class="input-group input-group-sm">
+                                                <select class="form-select form-select-sm" id="select_im_batch">
+                                                    <option value="">-- Pilih Batch Acuan IM --</option>
+                                                    @foreach($availableImBatches as $bIm)
+                                                        <option value="{{ $bIm['id'] }}" 
+                                                                {{ ($savedImReference['batch_id'] ?? null) == $bIm['id'] ? 'selected' : '' }}>
+                                                            {{ $bIm['kode_batch'] }} - {{ $bIm['nama_sampel'] }} ({{ $bIm['tanggal'] }})
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <button type="button" class="btn btn-outline-secondary" id="btn_preview_im" title="Lihat detail nilai botol batch ini">
+                                                    <i class="fas fa-eye me-1"></i> Preview
+                                                </button>
+                                            </div>
+                                            <div id="quick_preview_im_text" class="text-primary small mt-1 fw-semibold" style="font-size: 0.72rem;"></div>
+                                        </div>
+
+                                        <div class="col-md-3 {{ ($savedImReference['mode'] ?? 'batch') === 'manual' ? '' : 'd-none' }}" id="col_manual_im">
+                                            <div class="input-group input-group-sm">
+                                                <input type="number" step="0.01" class="form-control" id="input_manual_im_val" 
+                                                    placeholder="Contoh: 14.50" value="{{ $savedImReference['manual_val'] ?? '' }}">
+                                                <span class="input-group-text">% adb</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-auto">
+                                            <button type="button" class="btn btn-primary btn-sm px-3" id="btn_apply_im">
+                                                <i class="fas fa-check-circle me-1"></i> Terapkan ke Pengujian
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div id="imRefSummary" class="small mt-2 {{ !empty($savedImReference['data']) ? 'text-success fw-bold' : 'text-danger' }}">
+                                        @if(!empty($savedImReference['data']))
+                                            ✓ Referensi IM aktif: {{ $savedImReference['mode'] === 'batch' ? 'Menggunakan data dari Batch Terpilih' : 'Nilai tetap '.$savedImReference['manual_val'].'% adb' }}. Kolom IM &amp; %db otomatis terisi.
+                                        @else
+                                            ⚠️ Silakan pilih batch acuan atau masukkan nilai manual lalu klik "Terapkan ke Pengujian" agar perhitungan VM &amp; %db berjalan.
+                                        @endif
+                                    </div>
+
+                                    <!-- Hidden Inputs yang ikut terkirim saat form disimpan -->
+                                    <input type="hidden" name="referensi_im_mode" id="in_ref_im_mode" value="{{ $savedImReference['mode'] ?? '' }}">
+                                    <input type="hidden" name="referensi_im_batch_id" id="in_ref_im_batch_id" value="{{ $savedImReference['batch_id'] ?? '' }}">
+                                    <input type="hidden" name="referensi_im_manual" id="in_ref_im_manual" value="{{ $savedImReference['manual_val'] ?? '' }}">
+                                    <input type="hidden" name="referensi_im_data" id="in_ref_im_data" value="{{ isset($savedImReference['data']) ? json_encode($savedImReference['data']) : '' }}">
+                                </div>
+                            </div>
+                        @endif
                         <div class="alert alert-info m-3 rounded-0 border-start border-4 border-info">
                             <i class="fas fa-info-circle me-2"></i> Ketergantungan Data: Tab <strong>IM</strong> wajib diisi lebih dulu karena parameter lain membutuhkan nilai IM untuk konversi ke basis Dry Basis (db). Tab <strong>CV</strong> juga membutuhkan nilai dari tab <strong>TS</strong>.
                         </div>
@@ -912,8 +989,24 @@
                                                             <th>Average Result (cal/g), db</th>
                                                             <th>%db</th>
                                                         </tr>
+                                                    @elseif($code === 'AFT')
+                                                        <tr>
+                                                            <th width="15%">KODE SAMPEL</th>
+                                                            <th width="15%">ATMOSFER</th>
+                                                            <th class="bg-warning bg-opacity-25">IDT (°C)</th>
+                                                            <th class="bg-warning bg-opacity-25">ST (°C)</th>
+                                                            <th class="bg-warning bg-opacity-25">HT (°C)</th>
+                                                            <th class="bg-warning bg-opacity-25">FT (°C)</th>
+                                                        </tr>
+                                                    @elseif($code === 'CHN')
+                                                        <tr>
+                                                            <th width="15%">KODE SAMPEL</th>
+                                                            <th width="15%">WEIGHT (mg)</th>
+                                                            <th class="bg-warning bg-opacity-25">N % db</th>
+                                                            <th class="bg-warning bg-opacity-25">C % db</th>
+                                                            <th class="bg-warning bg-opacity-25">H % db</th>
+                                                        </tr>
                                                     @else
-                                                        
                                                         <tr>
                                                             <th>KODE SAMPEL</th>
                                                             <th>DISH NO.</th>
@@ -939,7 +1032,9 @@
                                                                 <input type="hidden" class="in-db-1" name="data_{{ $pid }}[{{ $i-1 }}][nilai_db_1]" value="{{ $mentah['nilai_db_1'] ?? '' }}">
                                                                 <input type="hidden" class="in-db-2" name="data_{{ $pid }}[{{ $i-1 }}][nilai_db_2]" value="{{ $mentah['nilai_db_2'] ?? '' }}">
                                                             </td>
-                                                            <td><input type="text" class="form-control form-control-sm text-center fw-bold bg-light" name="data_{{ $pid }}[{{ $i-1 }}][mentah][dish_1]" value="{{ $mentah['dish_1'] ?? '' }}" ></td>
+                                                            @if(!in_array($code, ['AFT', 'CHN']))
+                                                                <td><input type="text" class="form-control form-control-sm text-center fw-bold bg-light" name="data_{{ $pid }}[{{ $i-1 }}][mentah][dish_1]" value="{{ $mentah['dish_1'] ?? '' }}"></td>
+                                                            @endif
                                                             
                                                             @if($code === 'IM')
                                                                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_1]" value="{{ $mentah['m1_1'] ?? '' }}"></td>
@@ -996,6 +1091,22 @@
                                                                 <td rowspan="2" class="align-middle out-avg-adb fw-bold">-</td>
                                                                 <td rowspan="2" class="align-middle out-avg-db fw-bold">-</td>
                                                                 <td class="align-middle out-db-1 fw-bold text-success">-</td>
+                                                            @elseif($code === 'AFT')
+                                                                <td rowspan="2" class="align-middle">
+                                                                    <select class="form-select form-select-sm text-center in-aft-atmosfer" name="data_{{ $pid }}[{{ $i-1 }}][mentah][atmosfer]">
+                                                                        <option value="Reducing" {{ ($mentah['atmosfer'] ?? 'Reducing') === 'Reducing' ? 'selected' : '' }}>Reducing</option>
+                                                                        <option value="Oxidizing" {{ ($mentah['atmosfer'] ?? '') === 'Oxidizing' ? 'selected' : '' }}>Oxidizing</option>
+                                                                    </select>
+                                                                </td>
+                                                                <td><input type="number" step="1" class="form-control form-control-sm text-center in-aft-idt-1 fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][idt_1]" value="{{ $mentah['idt_1'] ?? $mentah['idt'] ?? '' }}"></td>
+                                                                <td><input type="number" step="1" class="form-control form-control-sm text-center in-aft-st-1 fw-bold text-primary" name="data_{{ $pid }}[{{ $i-1 }}][mentah][st_1]" value="{{ $mentah['st_1'] ?? $mentah['st'] ?? '' }}"></td>
+                                                                <td><input type="number" step="1" class="form-control form-control-sm text-center in-aft-ht-1 fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][ht_1]" value="{{ $mentah['ht_1'] ?? $mentah['ht'] ?? '' }}"></td>
+                                                                <td><input type="number" step="1" class="form-control form-control-sm text-center in-aft-ft-1 fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][ft_1]" value="{{ $mentah['ft_1'] ?? $mentah['ft'] ?? '' }}"></td>
+                                                            @elseif($code === 'CHN')
+                                                                <td><input type="number" step="0.0001" class="form-control form-control-sm text-center in-chn-weight-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][weight_1]" value="{{ $mentah['weight_1'] ?? $mentah['weight'] ?? '' }}"></td>
+                                                                <td><input type="number" step="0.01" class="form-control form-control-sm text-center in-chn-n-1 fw-bold text-primary" name="data_{{ $pid }}[{{ $i-1 }}][mentah][n_1]" value="{{ $mentah['n_1'] ?? $mentah['n'] ?? '' }}"></td>
+                                                                <td><input type="number" step="0.01" class="form-control form-control-sm text-center in-chn-c-1 fw-bold text-primary" name="data_{{ $pid }}[{{ $i-1 }}][mentah][c_1]" value="{{ $mentah['c_1'] ?? $mentah['c'] ?? '' }}"></td>
+                                                                <td><input type="number" step="0.01" class="form-control form-control-sm text-center in-chn-h-1 fw-bold text-primary" name="data_{{ $pid }}[{{ $i-1 }}][mentah][h_1]" value="{{ $mentah['h_1'] ?? $mentah['h'] ?? '' }}"></td>
                                                             @else
                                                                 <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" value="{{ $dh->nilai_d1 ?? '' }}"></td>
                                                                 <td rowspan="2" class="align-middle out-diff">-</td>
@@ -1004,7 +1115,9 @@
                                                         </tr>
 
                                                         <tr class="row-duplo">
-                                                            <td><input type="text" class="form-control form-control-sm text-center fw-bold bg-light" name="data_{{ $pid }}[{{ $i-1 }}][mentah][dish_2]" value="{{ $mentah['dish_2'] ?? '' }}" ></td>
+                                                            @if(!in_array($code, ['AFT', 'CHN']))
+                                                                <td><input type="text" class="form-control form-control-sm text-center fw-bold bg-light" name="data_{{ $pid }}[{{ $i-1 }}][mentah][dish_2]" value="{{ $mentah['dish_2'] ?? '' }}"></td>
+                                                            @endif
                                                             
                                                             @if($code === 'IM')
                                                                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_2]" value="{{ $mentah['m1_2'] ?? '' }}"></td>
@@ -1046,12 +1159,55 @@
                                                                 <td><input type="text" class="form-control form-control-sm in-ts-2 bg-light border-0 text-secondary" readonly tabindex="-1"></td>
                                                                 <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" readonly tabindex="-1"></td>
                                                                 <td class="align-middle out-db-2 fw-bold text-success">-</td>
+                                                            @elseif($code === 'AFT')
+                                                                <td><input type="number" step="1" class="form-control form-control-sm text-center in-aft-idt-2 fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][idt_2]" value="{{ $mentah['idt_2'] ?? '' }}"></td>
+                                                                <td><input type="number" step="1" class="form-control form-control-sm text-center in-aft-st-2 fw-bold text-primary" name="data_{{ $pid }}[{{ $i-1 }}][mentah][st_2]" value="{{ $mentah['st_2'] ?? '' }}"></td>
+                                                                <td><input type="number" step="1" class="form-control form-control-sm text-center in-aft-ht-2 fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][ht_2]" value="{{ $mentah['ht_2'] ?? '' }}"></td>
+                                                                <td><input type="number" step="1" class="form-control form-control-sm text-center in-aft-ft-2 fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][ft_2]" value="{{ $mentah['ft_2'] ?? '' }}"></td>
+                                                            @elseif($code === 'CHN')
+                                                                <td><input type="number" step="0.0001" class="form-control form-control-sm text-center in-chn-weight-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][weight_2]" value="{{ $mentah['weight_2'] ?? '' }}"></td>
+                                                                <td><input type="number" step="0.01" class="form-control form-control-sm text-center in-chn-n-2 fw-bold text-primary" name="data_{{ $pid }}[{{ $i-1 }}][mentah][n_2]" value="{{ $mentah['n_2'] ?? '' }}"></td>
+                                                                <td><input type="number" step="0.01" class="form-control form-control-sm text-center in-chn-c-2 fw-bold text-primary" name="data_{{ $pid }}[{{ $i-1 }}][mentah][c_2]" value="{{ $mentah['c_2'] ?? '' }}"></td>
+                                                                <td><input type="number" step="0.01" class="form-control form-control-sm text-center in-chn-h-2 fw-bold text-primary" name="data_{{ $pid }}[{{ $i-1 }}][mentah][h_2]" value="{{ $mentah['h_2'] ?? '' }}"></td>
                                                             @else
                                                                 <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" value="{{ $dh->nilai_d2 ?? '' }}"></td>
                                                             @endif
                                                         </tr>
                                                     @endfor
                                                 </tbody>
+                                                @if(in_array($code, ['AFT', 'CHN']))
+                                                <tfoot class="table-light border-top border-2">
+                                                    @if($code === 'AFT')
+                                                        <tr class="fw-bold bg-light">
+                                                            <td colspan="2" class="text-end">Rata-rata (Mean):</td>
+                                                            <td id="aft_mean_idt_{{ $pid }}">-</td>
+                                                            <td id="aft_mean_st_{{ $pid }}" class="text-primary">-</td>
+                                                            <td id="aft_mean_ht_{{ $pid }}">-</td>
+                                                            <td id="aft_mean_ft_{{ $pid }}">-</td>
+                                                        </tr>
+                                                        <tr class="fw-bold bg-light">
+                                                            <td colspan="2" class="text-end">Standar Deviasi (STDEV):</td>
+                                                            <td id="aft_sd_idt_{{ $pid }}">-</td>
+                                                            <td id="aft_sd_st_{{ $pid }}" class="text-primary">-</td>
+                                                            <td id="aft_sd_ht_{{ $pid }}">-</td>
+                                                            <td id="aft_sd_ft_{{ $pid }}">-</td>
+                                                        </tr>
+                                                    @elseif($code === 'CHN')
+                                                        <tr class="fw-bold bg-light">
+                                                            <td colspan="2" class="text-end">Rata-rata (Mean):</td>
+                                                            <td id="chn_mean_n_{{ $pid }}" class="text-primary">-</td>
+                                                            <td id="chn_mean_c_{{ $pid }}" class="text-primary">-</td>
+                                                            <td id="chn_mean_h_{{ $pid }}" class="text-primary">-</td>
+                                                        </tr>
+                                                        <tr class="fw-bold bg-light">
+                                                            <td colspan="2" class="text-end">Standar Deviasi (STDEV):</td>
+                                                            <td id="chn_sd_n_{{ $pid }}" class="text-primary">-</td>
+                                                            <td id="chn_sd_c_{{ $pid }}" class="text-primary">-</td>
+                                                            <td id="chn_sd_h_{{ $pid }}" class="text-primary">-</td>
+                                                        </tr>
+                                                    @endif
+                                                </tfoot>
+                                                @endif
                                             </table>
                                         </fieldset>
                                     </div>
@@ -1093,12 +1249,95 @@
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-end mb-3">
-                    @if(in_array($batch->status, ['uji_homogenitas', 'gagal_homogenitas']))
-                    <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm" id="btnSubmit">
-                        <i class="fas fa-check-double me-2"></i> Kunci Semua & Lanjut ke Penetapan Target
-                    </button>
-                    @endif
+                <div class="d-flex justify-content-between align-items-center mb-3 pt-2 border-top">
+                    <a href="{{ route('qc-inhouse.show', $batch->sampel_inhouse_id) }}" class="btn btn-secondary px-4 shadow-sm fw-semibold">
+                        <i class="fas fa-arrow-left me-1"></i> Kembali ke Detail
+                    </a>
+
+                    <div class="d-flex align-items-center gap-2">
+                        @if(in_array($batch->status, ['uji_homogenitas', 'gagal_homogenitas']))
+                            <button type="submit" class="btn btn-primary px-4 shadow-sm fw-semibold" id="btnSubmit">
+                                <i class="fas fa-check-double me-2"></i> Kunci Semua & Lanjut ke Penetapan Target
+                            </button>
+                        @elseif(!in_array($batch->status, ['pemilihan_sampel', 'preparasi', 'uji_homogenitas', 'gagal_homogenitas']))
+                            <a href="{{ route('qc-inhouse.penetapan-target', $batch->sampel_inhouse_id) }}" class="btn btn-primary px-4 shadow-sm fw-semibold">
+                                Lihat Tahap 4: Target <i class="fas fa-arrow-right ms-1"></i>
+                            </a>
+                        @endif
+                    </div>
+                </div>
+    
+                <div class="modal fade" id="modalPreviewImBatch" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                        <div class="modal-content shadow border-0">
+                            <div class="modal-header py-2 px-3 border-bottom text-white" style="background-color: #1b3152;">
+                                <h6 class="modal-title fw-bold text-white mb-0">
+                                    <i class="fas fa-table me-2"></i>Preview Data Mentah & Bench Sheet IM (Inherent Moisture)
+                                </h6>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded border">
+                                    <div>
+                                        <div class="fw-bold fs-6 text-primary" id="prev_im_batch_name">-</div>
+                                        <div class="small text-muted" id="prev_im_batch_date">-</div>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-success px-2 py-1" id="prev_im_status">-</span>
+                                    </div>
+                                </div>
+
+                                <div class="row g-2 text-center mb-3">
+                                    <div class="col-4">
+                                        <div class="p-2 border rounded bg-white">
+                                            <div class="small text-muted" style="font-size: 0.7rem;">RATA-RATA (MEAN)</div>
+                                            <div class="fs-6 fw-bold text-primary" id="prev_im_mean">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="p-2 border rounded bg-white">
+                                            <div class="small text-muted" style="font-size: 0.7rem;">STANDAR DEVIASI</div>
+                                            <div class="fs-6 fw-bold text-dark" id="prev_im_sd">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="p-2 border rounded bg-white">
+                                            <div class="small text-muted" style="font-size: 0.7rem;">JUMLAH BOTOL</div>
+                                            <div class="fs-6 fw-bold text-dark" id="prev_im_count">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive border rounded" style="max-height: 420px; overflow-y: auto;">
+                                    <table class="table table-sm table-bordered text-center align-middle mb-0 text-nowrap" style="font-size: 0.75rem;">
+                                        <thead class="table-light sticky-top" style="z-index: 1;">
+                                            <tr style="background-color: #f1f4f9;">
+                                                <th width="12%">KODE SAMPEL</th>
+                                                <th>DISH NO.</th>
+                                                <th>M1 (g)</th>
+                                                <th>M2 (g)</th>
+                                                <th>M3 (g)</th>
+                                                <th>A (g)</th>
+                                                <th>B (g)</th>
+                                                <th class="bg-warning bg-opacity-25">M%</th>
+                                                <th>DIFF</th>
+                                                <th>TOLERANSI</th>
+                                                <th class="bg-light">AVERAGE %</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="prev_im_table_body">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="modal-footer bg-light py-2 px-3 justify-content-between">
+                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+                                <button type="button" class="btn btn-primary btn-sm px-3" id="btn_use_this_im_batch">
+                                    <i class="fas fa-check-circle me-1"></i> Gunakan Batch Ini
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
@@ -1397,6 +1636,14 @@ const State = {};
     };
 @endforeach
 
+@if(!$batchHasIm && !empty($savedImReference['data']))
+    State["IM"] = {
+        ready: true,
+        is_reference: true,
+        data: @json($savedImReference['data'])
+    };
+@endif
+
 document.addEventListener('DOMContentLoaded', function() {
 
     const tablesByCode = {};
@@ -1572,6 +1819,121 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function processTable(code, table) {
+        if(code === 'AFT') {
+            const idtVals = [], stVals = [], htVals = [];
+            const ftVals = [];
+            const simploRows = table.querySelectorAll('.row-simplo');
+            const duploRows = table.querySelectorAll('.row-duplo');
+
+            let filledCount = 0;
+            for(let i = 0; i < simploRows.length; i++) {
+                const tr1 = simploRows[i];
+                const tr2 = duploRows[i];
+
+                const idt1 = getVal(tr1.querySelector('.in-aft-idt-1'));
+                const st1  = getVal(tr1.querySelector('.in-aft-st-1'));
+                const ht1  = getVal(tr1.querySelector('.in-aft-ht-1'));
+                const ft1  = getVal(tr1.querySelector('.in-aft-ft-1'));
+
+                const idt2 = getVal(tr2.querySelector('.in-aft-idt-2'));
+                const st2  = getVal(tr2.querySelector('.in-aft-st-2'));
+                const ht2  = getVal(tr2.querySelector('.in-aft-ht-2'));
+                const ft2  = getVal(tr2.querySelector('.in-aft-ft-2'));
+
+                if(!isNaN(idt1)) idtVals.push(idt1);
+                if(!isNaN(idt2)) idtVals.push(idt2);
+                if(!isNaN(st1)) stVals.push(st1);
+                if(!isNaN(st2)) stVals.push(st2);
+                if(!isNaN(ht1)) htVals.push(ht1);
+                if(!isNaN(ht2)) htVals.push(ht2);
+                if(!isNaN(ft1)) ftVals.push(ft1);
+                if(!isNaN(ft2)) ftVals.push(ft2);
+
+                if(!isNaN(st1) && !isNaN(st2)) {
+                    filledCount++;
+                }
+            }
+
+            const pid = table.dataset.pid;
+            const calcStats = (arr) => {
+                if(arr.length === 0) return { mean: '-', sd: '-' };
+                const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+                if(arr.length < 2) return { mean: mean.toFixed(1), sd: '0.0' };
+                const variance = arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (arr.length - 1);
+                return { mean: mean.toFixed(1), sd: Math.sqrt(variance).toFixed(1) };
+            };
+
+            const sIdt = calcStats(idtVals), sSt = calcStats(stVals), sHt = calcStats(htVals), sFt = calcStats(ftVals);
+
+            document.getElementById(`aft_mean_idt_${pid}`).textContent = sIdt.mean;
+            document.getElementById(`aft_sd_idt_${pid}`).textContent = sIdt.sd;
+            document.getElementById(`aft_mean_st_${pid}`).textContent = sSt.mean;
+            document.getElementById(`aft_sd_st_${pid}`).textContent = sSt.sd;
+            document.getElementById(`aft_mean_ht_${pid}`).textContent = sHt.mean;
+            document.getElementById(`aft_sd_ht_${pid}`).textContent = sHt.sd;
+            document.getElementById(`aft_mean_ft_${pid}`).textContent = sFt.mean;
+            document.getElementById(`aft_sd_ft_${pid}`).textContent = sFt.sd;
+
+            if(State['AFT']) {
+                State['AFT'].ready = (filledCount >= 3);
+            }
+            return;
+        }
+
+        if(code === 'CHN') {
+            const nVals = [], cVals = [], hVals = [];
+            const simploRows = table.querySelectorAll('.row-simplo');
+            const duploRows = table.querySelectorAll('.row-duplo');
+
+            let filledCount = 0;
+            for(let i = 0; i < simploRows.length; i++) {
+                const tr1 = simploRows[i];
+                const tr2 = duploRows[i];
+
+                const n1 = getVal(tr1.querySelector('.in-chn-n-1'));
+                const c1 = getVal(tr1.querySelector('.in-chn-c-1'));
+                const h1 = getVal(tr1.querySelector('.in-chn-h-1'));
+
+                const n2 = getVal(tr2.querySelector('.in-chn-n-2'));
+                const c2 = getVal(tr2.querySelector('.in-chn-c-2'));
+                const h2 = getVal(tr2.querySelector('.in-chn-h-2'));
+
+                if(!isNaN(n1)) nVals.push(n1);
+                if(!isNaN(n2)) nVals.push(n2);
+                if(!isNaN(c1)) cVals.push(c1);
+                if(!isNaN(c2)) cVals.push(c2);
+                if(!isNaN(h1)) hVals.push(h1);
+                if(!isNaN(h2)) hVals.push(h2);
+
+                if(!isNaN(c1) && !isNaN(c2)) {
+                    filledCount++;
+                }
+            }
+
+            const pid = table.dataset.pid;
+            const calcStats = (arr) => {
+                if(arr.length === 0) return { mean: '-', sd: '-' };
+                const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+                if(arr.length < 2) return { mean: mean.toFixed(2), sd: '0.00' };
+                const variance = arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (arr.length - 1);
+                return { mean: mean.toFixed(2), sd: Math.sqrt(variance).toFixed(2) };
+            };
+
+            const sN = calcStats(nVals), sC = calcStats(cVals), sH = calcStats(hVals);
+
+            document.getElementById(`chn_mean_n_${pid}`).textContent = sN.mean;
+            document.getElementById(`chn_sd_n_${pid}`).textContent = sN.sd;
+            document.getElementById(`chn_mean_c_${pid}`).textContent = sC.mean;
+            document.getElementById(`chn_sd_c_${pid}`).textContent = sC.sd;
+            document.getElementById(`chn_mean_h_${pid}`).textContent = sH.mean;
+            document.getElementById(`chn_sd_h_${pid}`).textContent = sH.sd;
+
+            if(State['CHN']) {
+                State['CHN'].ready = (filledCount >= 3);
+            }
+            return;
+        }
+
         let isComplete = true;
         const simploRowsAll = table.querySelectorAll('.row-simplo');
         const duploRowsAll = table.querySelectorAll('.row-duplo');
@@ -1863,7 +2225,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateDependencies() {
-        const isImReady = State['IM'] ? State['IM'].ready : true;
+        const batchHasImTab = {{ $batchHasIm ? 'true' : 'false' }};
+        const isImReady = batchHasImTab ? (State['IM'] ? State['IM'].ready : false) : true;
         const isTsReady = State['TS'] ? State['TS'].ready : true;
 
         if(State['TS']) {
@@ -2982,6 +3345,295 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    document.querySelectorAll('.chk-bahan').forEach(cb => {
+        cb.addEventListener('change', function () {
+            if (!this.checked) {
+                let tr = this.closest('tr');
+                let qtyInput = tr.querySelector('.in-qty');
+                if (qtyInput) qtyInput.value = '';
+            }
+        });
+    });
+
+        const availableImBatches = @json($availableImBatches ?? []);
+
+    // Toggle radio mode
+    document.querySelectorAll('input[name="radio_im_mode"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const isManual = this.value === 'manual';
+            document.getElementById('col_select_batch')?.classList.toggle('d-none', isManual);
+            document.getElementById('col_manual_im')?.classList.toggle('d-none', !isManual);
+        });
+    });
+
+    // Handler klik Terapkan Referensi IM
+    const btnApplyIm = document.getElementById('btn_apply_im');
+    if (btnApplyIm) {
+        btnApplyIm.addEventListener('click', function() {
+            const mode = document.querySelector('input[name="radio_im_mode"]:checked')?.value || 'batch';
+            let imDataArray = [];
+            let summaryText = '';
+
+            const anyTable = Object.values(tablesByCode)[0];
+            const totalRows = anyTable ? anyTable.querySelectorAll('.row-simplo').length : 10;
+
+            if (mode === 'batch') {
+                const batchId = document.getElementById('select_im_batch').value;
+                if (!batchId) {
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Pilih batch acuan IM terlebih dahulu.', showConfirmButton: false, timer: 2500 });
+                    return;
+                }
+                const found = availableImBatches.find(b => String(b.id) === String(batchId));
+                if (!found || !found.data || found.data.length === 0) {
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: 'Batch yang dipilih belum memiliki data IM.', showConfirmButton: false, timer: 2500 });
+                    return;
+                }
+
+                const avgFallback = found.data.reduce((sum, d) => sum + (d.avg_adb || 0), 0) / (found.data.length || 1);
+
+                for (let i = 0; i < totalRows; i++) {
+                    const rowData = found.data[i];
+                    if (rowData && rowData.simplo_adb !== null && rowData.duplo_adb !== null) {
+                        imDataArray.push({
+                            nomor_sampel: i + 1,
+                            simplo_adb: rowData.simplo_adb,
+                            duplo_adb: rowData.duplo_adb,
+                            avg_adb: rowData.avg_adb ?? ((rowData.simplo_adb + rowData.duplo_adb) / 2)
+                        });
+                    } else {
+                        imDataArray.push({
+                            nomor_sampel: i + 1,
+                            simplo_adb: parseFloat(rnd(avgFallback, 2)),
+                            duplo_adb: parseFloat(rnd(avgFallback, 2)),
+                            avg_adb: parseFloat(rnd(avgFallback, 2))
+                        });
+                    }
+                }
+
+                document.getElementById('in_ref_im_mode').value = 'batch';
+                document.getElementById('in_ref_im_batch_id').value = batchId;
+                document.getElementById('in_ref_im_manual').value = '';
+                summaryText = `✓ Menggunakan data IM dari batch ${found.kode_batch} (${found.nama_sampel}).`;
+            } else {
+                const val = parseFloat(document.getElementById('input_manual_im_val').value);
+                if (isNaN(val) || val <= 0 || val >= 100) {
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'warning', title: 'Masukkan nilai IM yang valid (0.01 - 99.99 %).', showConfirmButton: false, timer: 2500 });
+                    return;
+                }
+
+                for (let i = 0; i < totalRows; i++) {
+                    imDataArray.push({
+                        nomor_sampel: i + 1,
+                        simplo_adb: val,
+                        duplo_adb: val,
+                        avg_adb: val
+                    });
+                }
+
+                document.getElementById('in_ref_im_mode').value = 'manual';
+                document.getElementById('in_ref_im_batch_id').value = '';
+                document.getElementById('in_ref_im_manual').value = val;
+                summaryText = `✓ Menggunakan nilai IM tetap: ${val}% adb untuk seluruh botol.`;
+            }
+
+            document.getElementById('in_ref_im_data').value = JSON.stringify(imDataArray);
+
+            State['IM'] = {
+                ready: true,
+                is_reference: true,
+                data: imDataArray
+            };
+
+            const badge = document.getElementById('imRefBadge');
+            if (badge) {
+                badge.className = 'badge bg-success';
+                badge.textContent = 'Referensi IM Aktif';
+            }
+            const summaryEl = document.getElementById('imRefSummary');
+            if (summaryEl) {
+                summaryEl.className = 'small mt-2 text-success fw-bold';
+                summaryEl.textContent = summaryText;
+            }
+
+            // Memicu perhitungan otomatis pada seluruh tabel batubara (ASH, VM, TS, CV)
+            ['ASH', 'VM', 'TS', 'CV'].forEach(code => {
+                if (tablesByCode[code]) processTable(code, tablesByCode[code]);
+            });
+
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Data referensi IM berhasil diterapkan ke seluruh pengujian!',
+                showConfirmButton: false,
+                timer: 2200
+            });
+        });
+    }
+        const selectImBatchEl = document.getElementById('select_im_batch');
+    const quickPreviewEl = document.getElementById('quick_preview_im_text');
+
+    // Fungsi update ringkasan kecil saat dropdown berubah
+    function updateQuickPreview() {
+        if (!selectImBatchEl || !quickPreviewEl) return;
+        const bId = selectImBatchEl.value;
+        if (!bId) {
+            quickPreviewEl.textContent = '';
+            return;
+        }
+        const bData = availableImBatches.find(b => String(b.id) === String(bId));
+        if (bData && bData.data && bData.data.length > 0) {
+            const avgVal = bData.mean_global !== null ? bData.mean_global : (bData.data.reduce((s, d) => s + (d.avg_adb || 0), 0) / bData.data.length);
+            const sdVal = bData.sd_global !== null ? bData.sd_global : '-';
+            quickPreviewEl.innerHTML = `ℹ️ <strong>Rata-rata IM:</strong> ${rnd(avgVal, 2)}% | <strong>SD:</strong> ${rnd(sdVal, 4)} | <strong>Botol:</strong> ${bData.data.length}`;
+        } else {
+            quickPreviewEl.textContent = '';
+        }
+    }
+
+    if (selectImBatchEl) {
+        selectImBatchEl.addEventListener('change', updateQuickPreview);
+        updateQuickPreview(); // Jalankan saat awal jika ada yang terpilih
+    }
+
+    // Handler klik tombol Preview Modal
+    const btnPreviewIm = document.getElementById('btn_preview_im');
+    if (btnPreviewIm) {
+        btnPreviewIm.addEventListener('click', function() {
+            const bId = selectImBatchEl ? selectImBatchEl.value : '';
+            if (!bId) {
+                Swal.fire({
+                    toast: true, position: 'top-end', icon: 'warning',
+                    title: 'Pilih batch acuan terlebih dahulu untuk melihat preview.',
+                    showConfirmButton: false, timer: 2500
+                });
+                return;
+            }
+
+            const bData = availableImBatches.find(b => String(b.id) === String(bId));
+            if (!bData || !bData.data || bData.data.length === 0) {
+                Swal.fire('Data Tidak Ada', 'Batch ini belum memiliki data pengujian IM.', 'info');
+                return;
+            }
+
+            // Isi informasi modal
+            document.getElementById('prev_im_batch_name').textContent = `${bData.kode_batch} - ${bData.nama_sampel}`;
+            document.getElementById('prev_im_batch_date').textContent = `Tanggal: ${bData.tanggal}`;
+            document.getElementById('prev_im_status').textContent = (bData.status_parameter || 'HOMOGEN').toUpperCase();
+
+            const avgVal = bData.mean_global !== null ? bData.mean_global : (bData.data.reduce((s, d) => s + (d.avg_adb || 0), 0) / bData.data.length);
+            document.getElementById('prev_im_mean').textContent = `${rnd(avgVal, 2)} %`;
+            document.getElementById('prev_im_sd').textContent = bData.sd_global !== null ? rnd(bData.sd_global, 4) : '-';
+            document.getElementById('prev_im_count').textContent = `${bData.data.length} Botol`;
+
+            // Buat baris tabel botol (Simplo & Duplo lengkap dengan data penimbangan M1, M2, M3, A, B)
+            let rowsHtml = '';
+            bData.data.forEach((row, idx) => {
+                const bNo = row.nomor_botol_fisik || (idx + 1);
+
+                // --- Simplo ---
+                const dish1 = (row.dish_1 !== undefined && row.dish_1 !== null && row.dish_1 !== '') ? row.dish_1 : '-';
+                const m1_1 = (row.m1_1 !== undefined && row.m1_1 !== null && row.m1_1 !== '') ? row.m1_1 : '-';
+                const a_1 = (row.a_1 !== undefined && row.a_1 !== null && row.a_1 !== '') ? row.a_1 : '-';
+                const m3_1 = (row.m3_1 !== undefined && row.m3_1 !== null && row.m3_1 !== '') ? row.m3_1 : '-';
+
+                let m2_1 = (row.m2_1 !== undefined && row.m2_1 !== null && row.m2_1 !== '') ? row.m2_1 : '';
+                if (!m2_1 && m1_1 !== '-' && a_1 !== '-') {
+                    m2_1 = rnd(parseFloat(m1_1) + parseFloat(a_1), 4);
+                }
+                m2_1 = m2_1 || '-';
+
+                let b_1 = (row.b_1 !== undefined && row.b_1 !== null && row.b_1 !== '') ? row.b_1 : '';
+                if (!b_1 && m3_1 !== '-' && m1_1 !== '-') {
+                    b_1 = rnd(parseFloat(m3_1) - parseFloat(m1_1), 4);
+                }
+                b_1 = b_1 || '-';
+
+                const s = (row.simplo_adb !== null && row.simplo_adb !== undefined) ? rnd(row.simplo_adb, 2) : '-';
+
+                // --- Duplo ---
+                const dish2 = (row.dish_2 !== undefined && row.dish_2 !== null && row.dish_2 !== '') ? row.dish_2 : '-';
+                const m1_2 = (row.m1_2 !== undefined && row.m1_2 !== null && row.m1_2 !== '') ? row.m1_2 : '-';
+                const a_2 = (row.a_2 !== undefined && row.a_2 !== null && row.a_2 !== '') ? row.a_2 : '-';
+                const m3_2 = (row.m3_2 !== undefined && row.m3_2 !== null && row.m3_2 !== '') ? row.m3_2 : '-';
+
+                let m2_2 = (row.m2_2 !== undefined && row.m2_2 !== null && row.m2_2 !== '') ? row.m2_2 : '';
+                if (!m2_2 && m1_2 !== '-' && a_2 !== '-') {
+                    m2_2 = rnd(parseFloat(m1_2) + parseFloat(a_2), 4);
+                }
+                m2_2 = m2_2 || '-';
+
+                let b_2 = (row.b_2 !== undefined && row.b_2 !== null && row.b_2 !== '') ? row.b_2 : '';
+                if (!b_2 && m3_2 !== '-' && m1_2 !== '-') {
+                    b_2 = rnd(parseFloat(m3_2) - parseFloat(m1_2), 4);
+                }
+                b_2 = b_2 || '-';
+
+                const d = (row.duplo_adb !== null && row.duplo_adb !== undefined) ? rnd(row.duplo_adb, 2) : '-';
+
+                // --- Selisih (Diff), Toleransi, Average ---
+                const avg = (row.avg_adb !== null && row.avg_adb !== undefined) ? rnd(row.avg_adb, 2) : '-';
+                let diff = '-';
+                let tolHtml = '-';
+                if (row.simplo_adb !== null && row.duplo_adb !== null && row.simplo_adb !== undefined && row.duplo_adb !== undefined) {
+                    const diffNum = Math.abs(parseFloat(row.simplo_adb) - parseFloat(row.duplo_adb));
+                    diff = rnd(diffNum, 2);
+                    const avgNum = parseFloat(row.avg_adb !== null && row.avg_adb !== undefined ? row.avg_adb : ((parseFloat(row.simplo_adb) + parseFloat(row.duplo_adb)) / 2));
+                    const limit = 0.09 + (0.1 * avgNum);
+                    const isOk = diffNum < limit;
+                    tolHtml = isOk 
+                        ? '<span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">YES</span>' 
+                        : '<span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">NO</span>';
+                }
+
+                rowsHtml += `
+                    <tr>
+                        <td rowspan="2" class="fw-bold bg-light align-middle text-dark">Botol ${bNo}</td>
+                        <td>${dish1}</td>
+                        <td>${m1_1}</td>
+                        <td>${m2_1}</td>
+                        <td>${m3_1}</td>
+                        <td>${a_1}</td>
+                        <td>${b_1}</td>
+                        <td class="fw-bold bg-warning bg-opacity-10 text-primary">${s}</td>
+                        <td rowspan="2" class="align-middle fw-semibold">${diff}</td>
+                        <td rowspan="2" class="align-middle">${tolHtml}</td>
+                        <td rowspan="2" class="align-middle fw-bold text-primary bg-light">${avg}</td>
+                    </tr>
+                    <tr>
+                        <td>${dish2}</td>
+                        <td>${m1_2}</td>
+                        <td>${m2_2}</td>
+                        <td>${m3_2}</td>
+                        <td>${a_2}</td>
+                        <td>${b_2}</td>
+                        <td class="fw-bold bg-warning bg-opacity-10 text-primary">${d}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('prev_im_table_body').innerHTML = rowsHtml;
+
+            // Buka Modal
+            const modalEl = document.getElementById('modalPreviewImBatch');
+            const modalObj = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modalObj.show();
+        });
+    }
+
+    // Handler tombol "Gunakan Batch Ini" di dalam Modal
+    const btnUseThisIm = document.getElementById('btn_use_this_im_batch');
+    if (btnUseThisIm) {
+        btnUseThisIm.addEventListener('click', function() {
+            const modalEl = document.getElementById('modalPreviewImBatch');
+            const modalObj = bootstrap.Modal.getInstance(modalEl);
+            if (modalObj) modalObj.hide();
+
+            // Otomatis terapkan batch ini
+            const btnApply = document.getElementById('btn_apply_im');
+            if (btnApply) btnApply.click();
+        });
+    }
 
 });
 

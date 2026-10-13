@@ -637,6 +637,29 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    document.querySelectorAll('.in-qty').forEach(input => {
+        input.addEventListener('input', function () {
+            let tr = this.closest('tr');
+            let chk = tr.querySelector('.chk-bahan');
+            if (chk) {
+                chk.checked = (this.value && parseFloat(this.value) > 0);
+            }
+        });
+    });
+
+    document.querySelectorAll('.chk-bahan').forEach(cb => {
+        cb.addEventListener('change', function () {
+            if (!this.checked) {
+                let tr = this.closest('tr');
+                let qtyInput = tr.querySelector('.in-qty');
+                if (qtyInput) qtyInput.value = '';
+            }
+        });
+    });
+
+
+
     function num(v) { const n = parseFloat(v); return (v === '' || v === null || isNaN(n)) ? 0 : n; }
     const R2 = n => Math.round(n * 100) / 100;
     const R0 = n => Math.round(n);

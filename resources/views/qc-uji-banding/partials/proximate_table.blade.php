@@ -15,47 +15,47 @@
         white-space: nowrap;
     }
 
-    .param-form-wrapper table.prox-table {
-        width: auto;
-        min-width: 0 !important;
+        .param-form-wrapper table.prox-table {
+        width: 100% !important;
+        min-width: 900px !important;
         margin: 0;
     }
 
     .param-form-wrapper table.prox-table thead th {
-        font-size: 0.7rem;
-        padding: 0.3rem 0.35rem;
+        font-size: 0.72rem;
+        padding: 0.4rem 0.35rem;
         vertical-align: middle;
         white-space: nowrap;
     }
 
     .param-form-wrapper table.prox-table td {
-        padding: 0.22rem 0.28rem;
+        padding: 0.25rem 0.28rem;
         vertical-align: middle;
         font-size: 0.75rem;
     }
 
     .param-form-wrapper .prox-table input.form-control-sm {
-        width: 74px;
-        min-width: 0 !important;
+        width: 100%;
+        min-width: 60px !important;
         padding: 0.2rem 0.3rem;
         font-size: 0.75rem !important;
         text-align: center;
     }
 
-    .param-form-wrapper .prox-table input.prox-no { width: 50px; }
-    .param-form-wrapper .prox-table input.prox-date { width: 112px; padding-left: 0.25rem; padding-right: 0.15rem; }
-    .param-form-wrapper .prox-table input.prox-dish { width: 58px; }
+    .param-form-wrapper .prox-table input.prox-no { width: 100%; min-width: 45px !important; }
+    .param-form-wrapper .prox-table input.prox-date { width: 100%; min-width: 115px !important; padding-left: 0.25rem; padding-right: 0.15rem; }
+    .param-form-wrapper .prox-table input.prox-dish { width: 100%; min-width: 50px !important; }
 
     .param-form-wrapper .prox-table select.form-select-sm {
-        width: 64px;
-        min-width: 0 !important;
+        width: 100%;
+        min-width: 68px !important;
         padding: 0.2rem 1.4rem 0.2rem 0.4rem;
         font-size: 0.75rem !important;
     }
 
     .param-form-wrapper table.prox-table td.out-diff,
     .param-form-wrapper table.prox-table td.out-avg-adb {
-        min-width: 56px !important;
+        min-width: 60px !important;
         padding-left: 0.3rem !important;
         padding-right: 0.3rem !important;
         font-weight: 600;
@@ -86,7 +86,7 @@
 <div class="prox-hint"><i class="fas fa-arrows-alt-h me-1"></i> Geser tabel ke samping untuk melihat kolom lainnya</div>
 
 <div class="table-responsive prox-scroll mb-2">
-    <table class="table table-bordered table-sm align-middle text-center mb-0 param-table prox-table" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
+        <table class="table table-bordered table-sm align-middle text-center mb-0 param-table prox-table w-100" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
         <thead>
             @if($code === 'IM' || $code === 'RM')
                 <tr>

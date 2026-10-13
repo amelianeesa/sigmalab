@@ -209,7 +209,7 @@ class CrmKatalogController extends Controller
 
         public function verifikasiTeknisStore(Request $request, $id)
     {
-        $katalog = CrmKatalog::with('sertifikats')->findOrFail($id);
+        $katalog = CrmKatalog::with('sertifikats.parameterUji')->findOrFail($id);
         $sertifikatMap = $katalog->sertifikats->keyBy('parameter_uji_id');
         $isDraft = $request->input('action') === 'draft';
 
@@ -217,6 +217,7 @@ class CrmKatalogController extends Controller
         try {
             $adaData = false;
             $semuaInlier = true;
+            $outlierVerifParams = [];
 
             foreach ($request->input('params', []) as $paramId => $paramData) {
                 if (!isset($sertifikatMap[$paramId])) continue;
@@ -261,7 +262,12 @@ class CrmKatalogController extends Controller
                     $nilai_akhir = end($meanPerPengujian); 
                     
                     $status = ($nilai_akhir >= $batas_bawah && $nilai_akhir <= $batas_atas) ? 'inlier' : 'outlier';
-                    if ($status === 'outlier') $semuaInlier = false;
+                    if ($status === 'outlier') {
+                        $semuaInlier = false;
+                        if (!$isDraft) {
+                            $outlierVerifParams[] = $sertifikat->parameterUji->nama_parameter ?? ('ID ' . $paramId);
+                        }
+                    }
                 }
 
                 // Ambil data verifikasi sebelum diupdate untuk mengecek status dan qty lama
@@ -371,8 +377,33 @@ class CrmKatalogController extends Controller
             }
 
             if ($jumlahTerisi >= $jumlahParam && !$semuaInlier) {
+                $paramString = !empty($outlierVerifParams) ? implode(', ', array_unique($outlierVerifParams)) : 'Parameter Uji';
+                $pesanNotif = "⚠️ Outlier Verifikasi Teknis CRM: Ditemukan parameter outlier ({$paramString}) pada botol {$katalog->nama_produk} (Lot: {$katalog->nomor_lot}).";
+                $urlNotif = route('qc-crm.index', ['tab' => 'katalog']);
+
+                $targetUsers = \App\Models\User::whereHas('role', function($q) {
+                    $q->where('nama_role', 'LIKE', '%Analis%')
+                      ->orWhere('nama_role', 'LIKE', '%Koordinator%');
+                })->where('status_aktif', true)->get();
+
+                $notifData = [];
+                foreach ($targetUsers as $u) {
+                    $notifData[] = [
+                        'users_id' => $u->users_id,
+                        'jenis_notifikasi' => 'qc',
+                        'pesan' => $pesanNotif,
+                        'url' => $urlNotif,
+                        'is_read' => 0,
+                        'created_at' => now(),
+                    ];
+                }
+
+                if (!empty($notifData)) {
+                    \Illuminate\Support\Facades\DB::table('notifikasi')->insert($notifData);
+                }
+
                 \Illuminate\Support\Facades\DB::commit();
-                return redirect()->route('qc-crm.index')
+                return redirect()->route('qc-crm.index', ['tab' => 'katalog'])
                     ->with('error', 'Verifikasi teknis selesai, namun ada parameter OUTLIER. Silakan lakukan uji ulang.');
             }
 

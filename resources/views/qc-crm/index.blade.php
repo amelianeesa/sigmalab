@@ -42,6 +42,11 @@
         }
     }
 
+    $outlierBelumInvestigasiCount = $kegiatanList->where('status_evaluasi', 'outlier')
+        ->where('status_investigasi', 'menunggu_investigasi')
+        ->count();
+    $draftHarianCount = $kegiatanList->where('status_evaluasi', 'draft')->count();
+
     $statusOptions = $katalogs->groupBy('status')->map(fn ($g) => $g->first()->statusLabel());
 @endphp
 
@@ -301,47 +306,37 @@
         </div>
     </div>
 
-        @if($expiredCount > 0 || $segeraCount > 0)
-        <div class="alert alert-warning alert-dismissible fade show shadow-sm py-2 ps-3 pe-5 mb-2" role="alert" style="font-size: 0.8rem;">
-            <i class="fas fa-exclamation-triangle me-1"></i> <strong>Perhatian!</strong>
-            @if($expiredCount > 0)
-                Terdapat <strong>{{ $expiredCount }} botol CRM</strong> yang sudah kedaluwarsa.
-            @endif
-            @if($segeraCount > 0)
-                Terdapat <strong>{{ $segeraCount }} botol CRM</strong> yang akan kedaluwarsa dalam {{ $batasHariExpired }} hari ke depan.
-            @endif
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size: 0.65rem; padding: 0.9rem;"></button>
-        </div>
-    @endif
-
-    @if($menungguCount > 0 || $outlierCount > 0)
-        <div class="alert alert-info alert-dismissible fade show shadow-sm py-2 ps-3 pe-5 mb-2" role="alert" style="font-size: 0.8rem;">
-            <i class="fas fa-info-circle me-1"></i>
-            @if($menungguCount > 0)
-                <strong>{{ $menungguCount }} botol</strong> menunggu proses verifikasi.
-            @endif
-            @if($outlierCount > 0)
-                <strong>{{ $outlierCount }} botol</strong> memiliki parameter outlier dan perlu uji ulang.
-            @endif
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size: 0.65rem; padding: 0.9rem;"></button>
-        </div>
-    @endif
-
     <ul class="nav nav-tabs qc-tabs mb-3 mt-3" id="qcCrmTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link {{ request('tab') === 'harian' ? '' : 'active' }} fw-bold" id="katalog-tab" data-bs-toggle="tab" data-bs-target="#katalog" type="button" role="tab" aria-controls="katalog" aria-selected="true">
                 <i class="fas fa-box me-1"></i>
                 <span class="d-none d-md-inline">Master Botol & Verifikasi CRM</span>
                 <span class="d-md-none">Master Botol</span>
+                
+                @php
+                    $issueKatalog = $expiredCount + $menungguCount;
+                @endphp
+                @if($issueKatalog > 0)
+                    <span class="badge bg-warning text-dark ms-1 rounded-pill" style="font-size: 0.68rem;">{{ $issueKatalog }}</span>
+                @endif
             </button>
         </li>
+        
         <li class="nav-item" role="presentation">
             <button class="nav-link {{ request('tab') === 'harian' ? 'active' : '' }} fw-bold" id="harian-tab" data-bs-toggle="tab" data-bs-target="#harian" type="button" role="tab" aria-controls="harian" aria-selected="false">
                 <i class="fas fa-vials me-1"></i>
                 <span class="d-none d-md-inline">Riwayat Pengujian Harian CRM</span>
                 <span class="d-md-none">Riwayat Harian</span>
+                
+                {{-- Badge Counter Tab 2: Outlier Belum Investigasi (Merah) atau Draft (Kuning) --}}
+                @if($outlierBelumInvestigasiCount > 0)
+                    <span class="badge bg-danger ms-1 rounded-pill" style="font-size: 0.68rem;">{{ $outlierBelumInvestigasiCount }}</span>
+                @elseif($draftHarianCount > 0)
+                    <span class="badge bg-warning text-dark ms-1 rounded-pill" style="font-size: 0.68rem;">{{ $draftHarianCount }}</span>
+                @endif
             </button>
         </li>
+        
         <li class="nav-item" role="presentation">
             <button class="nav-link fw-bold" id="chart-tab" data-bs-toggle="tab" data-bs-target="#chartCrm" type="button" role="tab" aria-controls="chartCrm" aria-selected="false">
                 <i class="fas fa-chart-area me-1"></i> Control Chart
@@ -353,6 +348,31 @@
         
         <!-- TAB 1: MASTER BOTOL & VERIFIKASI -->
         <div class="tab-pane fade {{ request('tab') === 'harian' ? '' : 'show active' }}" id="katalog" role="tabpanel" aria-labelledby="katalog-tab">
+            @if($expiredCount > 0 || $segeraCount > 0)
+                <div class="alert alert-warning alert-dismissible fade show shadow-sm py-2 ps-3 pe-5 mb-2" role="alert" style="font-size: 0.8rem;">
+                    <i class="fas fa-exclamation-triangle me-1"></i> <strong>Perhatian!</strong>
+                    @if($expiredCount > 0)
+                        Terdapat <strong>{{ $expiredCount }} botol CRM</strong> yang sudah kedaluwarsa.
+                    @endif
+                    @if($segeraCount > 0)
+                        Terdapat <strong>{{ $segeraCount }} botol CRM</strong> yang akan kedaluwarsa dalam {{ $batasHariExpired }} hari ke depan.
+                    @endif
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size: 0.65rem; padding: 0.9rem;"></button>
+                </div>
+            @endif
+
+            @if($menungguCount > 0 || $outlierCount > 0)
+                <div class="alert alert-info alert-dismissible fade show shadow-sm py-2 ps-3 pe-5 mb-2" role="alert" style="font-size: 0.8rem;">
+                    <i class="fas fa-info-circle me-1"></i>
+                    @if($menungguCount > 0)
+                        <strong>{{ $menungguCount }} botol</strong> menunggu proses verifikasi.
+                    @endif
+                    @if($outlierCount > 0)
+                        <strong>{{ $outlierCount }} botol</strong> memiliki parameter outlier pada verifikasi teknis dan perlu uji ulang.
+                    @endif
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size: 0.65rem; padding: 0.9rem;"></button>
+                </div>
+            @endif
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-2 p-md-3">
 
@@ -702,6 +722,21 @@
         </div>
 
         <div class="tab-pane fade {{ request('tab') === 'harian' ? 'show active' : '' }}" id="harian" role="tabpanel" aria-labelledby="harian-tab">
+            @if($outlierBelumInvestigasiCount > 0)
+                <div class="alert alert-danger alert-dismissible fade show shadow-sm py-2 ps-3 pe-5 mb-2" role="alert" style="font-size: 0.8rem;">
+                    <i class="fas fa-exclamation-triangle me-1"></i> <strong>Perhatian!</strong>
+                    Terdapat <strong>{{ $outlierBelumInvestigasiCount }} hasil pengujian CRM</strong> berstatus <strong>Outlier</strong> yang belum diinvestigasi (wajib mengisi laporan CAPA).
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size: 0.65rem; padding: 0.9rem;"></button>
+                </div>
+            @endif
+
+            @if($draftHarianCount > 0)
+                <div class="alert alert-warning alert-dismissible fade show shadow-sm py-2 ps-3 pe-5 mb-2" role="alert" style="font-size: 0.8rem;">
+                    <i class="fas fa-edit me-1"></i>
+                    Terdapat <strong>{{ $draftHarianCount }} pengujian</strong> yang tersimpan sebagai <strong>Draft</strong> dan belum diselesaikan.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size: 0.65rem; padding: 0.9rem;"></button>
+                </div>
+            @endif
             <div class="alert alert-info border-0 shadow-sm py-2 px-3 mb-2" style="font-size: 0.8rem;">
                 <i class="fas fa-info-circle me-1"></i> Pilihan botol pada menu <strong>Mulai Pengujian CRM</strong> hanya menampilkan botol yang berstatus <strong>AKTIF</strong> (lolos uji verifikasi).
             </div>

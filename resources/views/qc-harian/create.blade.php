@@ -96,9 +96,14 @@
 
     .card-header-sm {
         padding: 8px 12px;
-        background-color: #ffffff;
+        background-color: #1b3152;
         border-bottom: 1px solid #e3e8ef;
         border-radius: 0.5rem 0.5rem 0 0;
+    }
+
+    .card-header-sm .section-title,
+    .card-header-sm .section-title i {
+        color: #ffffff !important;
     }
 
     .page-title {
@@ -1400,6 +1405,26 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.addEventListener('hidden.bs.modal', function () {
             let pid = this.id.replace('modalResource-', '');
             updateResourceSummary(pid);
+        });
+    });
+
+    document.querySelectorAll('.in-qty').forEach(input => {
+        input.addEventListener('input', function () {
+            let tr = this.closest('tr');
+            let chk = tr.querySelector('.chk-bahan');
+            if (chk) {
+                chk.checked = (this.value && parseFloat(this.value) > 0);
+            }
+        });
+    });
+
+    document.querySelectorAll('.chk-bahan').forEach(cb => {
+        cb.addEventListener('change', function () {
+            if (!this.checked) {
+                let tr = this.closest('tr');
+                let qtyInput = tr.querySelector('.in-qty');
+                if (qtyInput) qtyInput.value = '';
+            }
         });
     });
 
