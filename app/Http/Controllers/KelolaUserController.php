@@ -112,7 +112,23 @@ class KelolaUserController extends Controller
         $user = User::findOrFail($id);
 
         abort_if($user->users_id === Auth::id(), 403, 'Anda tidak dapat menghapus akun Anda sendiri');
-        $user->forceDelete();
+
+        try {
+            $user->forceDelete();
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Kode 23000 = akun masih dipakai data lain (pengadaan, peminjaman, log, dll).
+            if ($e->getCode() !== '23000') {
+                throw $e;
+            }
+
+            // Jangan hapus riwayatnya; cukup nonaktifkan agar tidak bisa login lagi.
+            $user->update(['status_aktif' => false]);
+
+            return redirect()->route('kelola-user.index')->with(
+                'success',
+                'Akun tidak dapat dihapus permanen karena sudah punya riwayat transaksi, sehingga dinonaktifkan. Akun ini tidak bisa login lagi.'
+            );
+        }
 
         return redirect()->route('kelola-user.index')->with('success', 'Akun berhasil dihapus permanen');
     }

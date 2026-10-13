@@ -19,8 +19,8 @@
         <div class="card-body">
             <div class="row g-2">
                 <div class="col-md-6">
-                    <label class="form-label small fw-bold mb-1">Tujuan Peminjaman</label>
-                    <input type="text" name="tujuan" class="form-control form-control-sm" value="{{ old('tujuan') }}" maxlength="255" required>
+                    <label class="form-label small fw-bold mb-1">Pekerjaan / Keperluan</label>
+                    <input type="text" name="tujuan" class="form-control form-control-sm" value="{{ old('tujuan') }}" maxlength="255" placeholder="Contoh: DS Final Bunn Sagara" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small fw-bold mb-1">Tanggal Pinjam</label>

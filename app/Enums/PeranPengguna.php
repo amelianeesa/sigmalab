@@ -31,6 +31,7 @@ enum PeranPengguna: string
             self::ADMIN_APLIKASI->value,
             self::KABID_INSPEKSI->value,
             self::KABID_DUKUNGAN_BISNIS->value,
+            self::KOORDINATOR_LAB->value, // menyetujui peminjaman Non-Lab, jadi perlu bisa pindah workspace
         ];
     }
 
@@ -38,8 +39,7 @@ enum PeranPengguna: string
     public static function pengelolaPeminjaman(): array
     {
         return [
-            self::GA_OFFICER->value,
-            self::ADMIN_APLIKASI->value,
+            self::KOORDINATOR_LAB->value,
         ];
     }
 

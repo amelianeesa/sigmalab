@@ -316,17 +316,19 @@ Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawa
 
     }); // end workspace:LAB (verifikasi mutu, qc-inhouse, qc-harian)
 
-    // Peminjaman Alat (khusus workspace Non-Lab)
+    // Peminjaman Alat berbentuk logbook per alat (khusus workspace Non-Lab)
     Route::middleware(['workspace:NON_LAB', 'modul:peminjaman,lihat'])->prefix('peminjaman')->name('peminjaman.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\PeminjamanController::class, 'index'])->name('index');
-        Route::get('/create', [\App\Http\Controllers\PeminjamanController::class, 'create'])->name('create');
-        Route::post('/', [\App\Http\Controllers\PeminjamanController::class, 'store'])->name('store');
-        Route::get('/{id}', [\App\Http\Controllers\PeminjamanController::class, 'show'])->name('show');
-        Route::post('/{id}/approve', [\App\Http\Controllers\PeminjamanController::class, 'approve'])->name('approve');
-        Route::post('/{id}/reject', [\App\Http\Controllers\PeminjamanController::class, 'reject'])->name('reject');
-        Route::post('/{id}/serahkan', [\App\Http\Controllers\PeminjamanController::class, 'serahkan'])->name('serahkan');
-        Route::post('/{id}/kembalikan', [\App\Http\Controllers\PeminjamanController::class, 'kembalikan'])->name('kembalikan');
-        Route::post('/{id}/batal', [\App\Http\Controllers\PeminjamanController::class, 'batal'])->name('batal');
+        $c = \App\Http\Controllers\LogbookController::class;
+        Route::get('/', [$c, 'index'])->name('index');
+        Route::get('/pdf', [$c, 'pdfSemua'])->name('pdf-semua');
+        Route::get('/alat/{id}', [$c, 'show'])->name('alat');
+        Route::get('/alat/{id}/pdf', [$c, 'pdf'])->name('alat.pdf');
+        Route::post('/alat/{id}', [$c, 'store'])->name('store');
+        Route::post('/catatan/{id}/approve', [$c, 'approve'])->name('approve');
+        Route::post('/catatan/{id}/reject', [$c, 'reject'])->name('reject');
+        Route::post('/catatan/{id}/batal', [$c, 'batal'])->name('batal');
+        Route::post('/catatan/{id}/hapus', [$c, 'hapus'])->name('hapus');
+        Route::post('/catatan/{id}/kembali', [$c, 'kembali'])->name('kembali');
     });
 
 });

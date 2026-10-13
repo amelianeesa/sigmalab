@@ -160,8 +160,8 @@ class DashboardController extends Controller
         $peminjamanMenunggu = 0;
         $peminjamanAktif = 0;
         if ($isNonLab) {
-            $peminjamanMenunggu = \App\Models\Peminjaman::where('status', 'diajukan')->count();
-            $peminjamanAktif = \App\Models\Peminjaman::where('status', 'dipinjam')->count();
+            $peminjamanMenunggu = \App\Models\LogbookPeminjaman::where('status', 'diajukan')->count();
+            $peminjamanAktif = \App\Models\LogbookPeminjaman::whereYear('tanggal', now()->year)->whereMonth('tanggal', now()->month)->where('status', '!=', 'ditolak')->count();
             $kegiatanBerjalan = 0;
         }
 

@@ -366,7 +366,7 @@
     <div class="row g-2 mb-3">
         @if($isNonLab)
         <div class="col-6 col-lg-3">
-            <a href="{{ route('peminjaman.index', ['status' => 'diajukan']) }}" class="info-card-link">
+            <a href="{{ route('peminjaman.index') }}" class="info-card-link">
                 <div class="card summary-card border-0 shadow-sm border-start border-4 border-warning info-card-clickable">
                     <div class="card-body summary-card-body">
                         <span class="summary-card-icon icon-biru"><i class="fas fa-hand-holding"></i></span>
@@ -380,14 +380,14 @@
             </a>
         </div>
         <div class="col-6 col-lg-3">
-            <a href="{{ route('peminjaman.index', ['status' => 'dipinjam']) }}" class="info-card-link">
+            <a href="{{ route('peminjaman.index') }}" class="info-card-link">
                 <div class="card summary-card border-0 shadow-sm border-start border-4 border-suco-biru info-card-clickable">
                     <div class="card-body summary-card-body">
                         <span class="summary-card-icon icon-biru"><i class="fas fa-tools"></i></span>
                         <div class="summary-card-text">
-                            <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">ALAT SEDANG DIPINJAM</p>
+                            <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">CATATAN PEMINJAMAN BULAN INI</p>
                             <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $peminjamanAktif }}</h3>
-                            <span class="text-suco-biru fw-semibold d-inline-block summary-card-link">Lihat Peminjaman</span>
+                            <span class="text-suco-biru fw-semibold d-inline-block summary-card-link">Buka Logbook</span>
                         </div>
                     </div>
                 </div>

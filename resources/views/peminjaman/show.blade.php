@@ -21,7 +21,7 @@
     <div class="card-body small">
         <div class="row g-2">
             <div class="col-md-4"><div class="text-muted">Peminjam</div><strong>{{ $p->peminjam->personil->nama ?? $p->peminjam->username }}</strong></div>
-            <div class="col-md-4"><div class="text-muted">Tujuan</div><strong>{{ $p->tujuan }}</strong></div>
+            <div class="col-md-4"><div class="text-muted">Pekerjaan</div><strong>{{ $p->tujuan }}</strong></div>
             <div class="col-md-4"><div class="text-muted">Periode</div><strong>{{ $p->tgl_pinjam->format('d M Y') }} – {{ $p->tgl_rencana_kembali->format('d M Y') }}</strong></div>
             @if($p->penyetuju)
                 <div class="col-md-4"><div class="text-muted">Diputuskan oleh</div><strong>{{ $p->penyetuju->personil->nama ?? $p->penyetuju->username }}</strong> ({{ $p->tgl_keputusan?->format('d M Y H:i') }})</div>

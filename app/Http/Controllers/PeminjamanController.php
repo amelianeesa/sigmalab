@@ -8,6 +8,7 @@ use App\Models\Notifikasi;
 use App\Models\Peminjaman;
 use App\Models\PeminjamanItem;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +25,12 @@ class PeminjamanController extends Controller
 
     private function bisaAjukan(): bool
     {
+        // Koordinator (penyetuju), HR, dan GA hanya memantau; yang mengajukan adalah peminjam.
+        $role = Auth::user()->role?->nama_role;
+        if (in_array($role, array_merge(PeranPengguna::pengelolaPeminjaman(), [PeranPengguna::HR_OFFICER->value, PeranPengguna::GA_OFFICER->value]), true)) {
+            return false;
+        }
+
         return Auth::user()->hasModulAccess('peminjaman', 'tambah_ubah');
     }
 
@@ -75,17 +82,29 @@ class PeminjamanController extends Controller
     public function index(Request $request)
     {
         $status = $request->input('status');
+        $search = trim((string) $request->input('search', ''));
         $lihatSemua = $this->pengelola() || !$this->bisaAjukan();
 
         $daftar = Peminjaman::with(['peminjam.personil', 'items.alat'])
             ->when(!$lihatSemua, fn($q) => $q->where('peminjam_id', Auth::id()))
             ->when($status, fn($q) => $q->where('status', $status))
+            ->when($search !== '', function ($q) use ($search) {
+                $like = '%' . addcslashes($search, '%_\\') . '%';
+                $q->where(function ($w) use ($like) {
+                    $w->where('kode', 'like', $like)
+                      ->orWhere('tujuan', 'like', $like)
+                      ->orWhereHas('items.alat', fn($a) => $a->where('nama_alat', 'like', $like)->orWhere('kode_alat', 'like', $like))
+                      ->orWhereHas('peminjam', fn($u) => $u->where('username', 'like', $like)
+                          ->orWhereHas('personil', fn($ps) => $ps->where('nama', 'like', $like)));
+                });
+            })
             ->latest()
             ->paginate(10)->withQueryString();
 
         return view('peminjaman.index', [
             'daftar' => $daftar,
             'status' => $status,
+            'search' => $search,
             'lihatSemua' => $lihatSemua,
             'bisaAjukan' => $this->bisaAjukan(),
         ]);
@@ -286,5 +305,53 @@ class PeminjamanController extends Controller
         $p->update(['status' => 'dibatalkan']);
 
         return back()->with('success', 'Peminjaman dibatalkan.');
+    }
+
+    // ------------------------------------------------------------------ logbook (pengganti buku catatan manual)
+
+    private function dataLogbook(Request $request, $id): array
+    {
+        $alat = Alat::findOrFail($id);
+        $dari = $request->input('dari');
+        $sampai = $request->input('sampai');
+
+        $baris = PeminjamanItem::with(['peminjaman.peminjam.personil'])
+            ->where('alat_id', $alat->alat_id)
+            ->whereHas('peminjaman', function ($q) use ($dari, $sampai) {
+                $q->whereIn('status', ['dipinjam', 'dikembalikan'])
+                  ->when($dari, fn($x) => $x->whereDate('tgl_pinjam', '>=', $dari))
+                  ->when($sampai, fn($x) => $x->whereDate('tgl_pinjam', '<=', $sampai));
+            })
+            ->get()
+            ->sortBy(fn($i) => $i->peminjaman->tgl_pinjam->timestamp . '-' . $i->peminjaman_id)
+            ->values();
+
+        return compact('alat', 'baris', 'dari', 'sampai');
+    }
+
+    public function logbookIndex()
+    {
+        $alatList = Alat::where('dapat_dipinjam', true)->orderBy('nama_alat')->get();
+
+        $jumlah = PeminjamanItem::whereIn('alat_id', $alatList->pluck('alat_id'))
+            ->whereHas('peminjaman', fn($q) => $q->whereIn('status', ['dipinjam', 'dikembalikan']))
+            ->selectRaw('alat_id, count(*) as total')->groupBy('alat_id')->pluck('total', 'alat_id');
+
+        return view('peminjaman.logbook-index', compact('alatList', 'jumlah'));
+    }
+
+    public function logbook(Request $request, $id)
+    {
+        return view('peminjaman.logbook', $this->dataLogbook($request, $id));
+    }
+
+    public function logbookPdf(Request $request, $id)
+    {
+        $data = $this->dataLogbook($request, $id);
+        $data['dicetakOleh'] = Auth::user()->personil->nama ?? Auth::user()->username;
+
+        return Pdf::loadView('peminjaman.logbook-pdf', $data)
+            ->setPaper('a4', 'portrait')
+            ->stream('Logbook_' . $data['alat']->nama_alat . '_' . $data['alat']->kode_alat . '.pdf');
     }
 }
