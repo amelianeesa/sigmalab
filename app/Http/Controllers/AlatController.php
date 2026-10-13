@@ -91,7 +91,9 @@ class AlatController extends Controller
 
     public function create()
     {
-        return view('alat.create');
+        $indukList = Alat::whereNull('parent_id')->orderBy('nama_alat')->get(['alat_id', 'nama_alat', 'kode_alat']);
+
+        return view('alat.create', compact('indukList'));
     }
 
     public function store(\App\Http\Requests\AlatRequest $request)
@@ -107,6 +109,8 @@ class AlatController extends Controller
             'kondisi_barang' => 'required|in:baik,rusak,perbaikan',
             'status_barang' => 'required|in:terpakai,idle',
             'unit_kerja_pemilik' => 'nullable|string|max:100',
+            'parent_id' => 'nullable|integer|exists:alat,alat_id',
+            'dapat_dipinjam' => 'nullable|boolean',
             
             'no_sertifikat' => 'nullable|string|max:100',
             'file_sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
@@ -133,6 +137,8 @@ class AlatController extends Controller
                 'kondisi_barang' => $request->kondisi_barang,
                 'status_barang' => $request->status_barang,
                 'unit_kerja_pemilik' => $request->unit_kerja_pemilik,
+                'parent_id' => $request->input('parent_id') ?: null,
+                'dapat_dipinjam' => $request->boolean('dapat_dipinjam'),
             ]);
 
             if ($request->filled('tgl_kalibrasi')) {
@@ -169,7 +175,10 @@ class AlatController extends Controller
 
         $kalibrasiTerakhir = $alat->riwayatKalibrasi->first();
 
-        return view('alat.edit', compact('alat', 'kalibrasiTerakhir'));
+        $indukList = Alat::whereNull('parent_id')->where('alat_id', '!=', $alat->alat_id)
+            ->orderBy('nama_alat')->get(['alat_id', 'nama_alat', 'kode_alat']);
+
+        return view('alat.edit', compact('alat', 'kalibrasiTerakhir', 'indukList'));
     }
 
     public function update(\App\Http\Requests\AlatRequest $request, $id)
@@ -187,6 +196,8 @@ class AlatController extends Controller
             'kondisi_barang' => 'required|in:baik,rusak,perbaikan',
             'status_barang' => 'required|in:terpakai,idle',
             'unit_kerja_pemilik' => 'nullable|string|max:100',
+            'parent_id' => 'nullable|integer|exists:alat,alat_id',
+            'dapat_dipinjam' => 'nullable|boolean',
             'no_sertifikat' => 'nullable|string|max:100',
             'file_sertifikat' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'interval_kalibrasi' => 'nullable|string|max:50',
@@ -217,6 +228,10 @@ class AlatController extends Controller
                 'kondisi_barang' => $request->kondisi_barang,
                 'status_barang' => $statusBarang,
                 'unit_kerja_pemilik' => $request->unit_kerja_pemilik,
+                'parent_id' => ($request->input('parent_id')
+                    && (int) $request->input('parent_id') !== (int) $alat->alat_id
+                    && !$alat->subAlat()->exists()) ? $request->input('parent_id') : null,
+                'dapat_dipinjam' => $request->boolean('dapat_dipinjam'),
             ]);
 
             $dataKalibrasi = [

@@ -112,6 +112,7 @@
                             <td style="font-size: 0.73rem; padding: 10px 8px; vertical-align: middle;">
                                 <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-1.5 py-1 text-nowrap" style="font-size: 0.65rem;">
                                     {{ $user->role->nama_role ?? '-' }}
+                                    <div><span class="badge bg-light text-dark border" style="font-size: 0.62rem;">{{ \App\Support\Workspace::label($user->workspace ?: 'LAB') }}</span></div>
                                 </span>
                             </td>
                             <td style="font-size: 0.73rem; padding: 10px 8px; vertical-align: middle;">
@@ -192,12 +193,21 @@
                                             </div>
                                             <div class="mb-1">
                                                 <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Hak Akses (Role)</label>
-                                                <select name="role_id" class="form-select form-select-sm py-1" required style="font-size: 0.73rem;">
+                                                <select name="role_id" class="form-select form-select-sm py-1 js-role" required style="font-size: 0.73rem;">
                                                     @foreach($roles as $role)
-                                                        <option value="{{ $role->roles_id }}" {{ $user->role_id == $role->roles_id ? 'selected' : '' }}>{{ $role->nama_role }}</option>
+                                                        <option value="{{ $role->roles_id }}" {{ $user->role_id == $role->roles_id ? 'selected' : '' }} data-lintas="{{ in_array($role->nama_role, \App\Enums\PeranPengguna::lintasWorkspace(), true) ? '1' : '0' }}">{{ $role->nama_role }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
+                                            <div class="mb-1 mt-2 js-ws-wrap">
+                                                <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Workspace</label>
+                                                <select name="workspace" class="form-select form-select-sm py-1" required style="font-size: 0.73rem;">
+                                                    @foreach(['LAB' => 'Lab', 'NON_LAB' => 'Non-Lab'] as $wsKey => $wsLabel)
+                                                        <option value="{{ $wsKey }}" {{ ($user->workspace ?: 'LAB') === $wsKey ? 'selected' : '' }}>{{ $wsLabel }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="form-text js-ws-info" style="font-size: 0.68rem; display:none;">Role ini otomatis bisa berpindah antara Lab dan Non-Lab.</div>
                                         </div>
                                         <div class="modal-footer bg-light py-1.5 px-3">
                                             <button type="button" class="btn btn-secondary btn-sm py-1 px-3" data-bs-dismiss="modal" style="font-size: 0.73rem;">Batal</button>
@@ -245,12 +255,21 @@
                     </div>
                     <div class="mb-1">
                         <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Hak Akses (Role)</label>
-                        <select name="role_id" class="form-select form-select-sm py-1" required style="font-size: 0.73rem;">
+                        <select name="role_id" class="form-select form-select-sm py-1 js-role" required style="font-size: 0.73rem;">
                             <option value="">— Pilih Role —</option>
                             @foreach($roles as $role)
-                                <option value="{{ $role->roles_id }}" {{ old('role_id') == $role->roles_id ? 'selected' : '' }}>{{ $role->nama_role }}</option>
+                                <option value="{{ $role->roles_id }}" {{ old('role_id') == $role->roles_id ? 'selected' : '' }} data-lintas="{{ in_array($role->nama_role, \App\Enums\PeranPengguna::lintasWorkspace(), true) ? '1' : '0' }}">{{ $role->nama_role }}</option>
                             @endforeach
                         </select>
+                        <div class="mb-1 mt-2 js-ws-wrap">
+                            <label class="form-label small fw-semibold mb-1" style="font-size: 0.73rem;">Workspace</label>
+                            <select name="workspace" class="form-select form-select-sm py-1" required style="font-size: 0.73rem;">
+                                @foreach(['LAB' => 'Lab', 'NON_LAB' => 'Non-Lab'] as $wsKey => $wsLabel)
+                                    <option value="{{ $wsKey }}" {{ old('workspace', 'LAB') === $wsKey ? 'selected' : '' }}>{{ $wsLabel }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-text js-ws-info" style="font-size: 0.68rem; display:none;">Role ini otomatis bisa berpindah antara Lab dan Non-Lab.</div>
                         <div class="form-text text-muted mt-0.5" style="font-size: 0.68rem;">
                             Untuk akun non-personil seperti HR, GA, atau Admin Aplikasi. Akun personil lab (analis, chemist, dll) dibuat lewat menu Data Personil.
                         </div>
@@ -265,3 +284,22 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // Workspace hanya perlu dipilih untuk role non-lintas. HR, GA, Admin, Kabid otomatis Lab & Non-Lab.
+    function syncWorkspace(form) {
+        var sel = form.querySelector('select.js-role'), wrap = form.querySelector('.js-ws-wrap');
+        if (!sel || !wrap) return;
+        var opt = sel.options[sel.selectedIndex];
+        var lintas = opt && opt.dataset.lintas === '1';
+        wrap.style.display = lintas ? 'none' : '';
+        var info = form.querySelector('.js-ws-info');
+        if (info) info.style.display = lintas ? '' : 'none';
+    }
+    document.addEventListener('change', function (e) {
+        if (e.target.matches('select.js-role')) syncWorkspace(e.target.closest('form'));
+    });
+    document.querySelectorAll('select.js-role').forEach(function (s) { syncWorkspace(s.closest('form')); });
+</script>
+@endpush

@@ -334,6 +334,7 @@ class SdmController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($passwordSementara),
             'role_id' => $data['role_id'],
+            'workspace' => User::workspaceUntukRole((int) $data['role_id'], $personil->workspace ?? null),
             'status_aktif' => true,
             // 'must_change_password' => true,
         ]);

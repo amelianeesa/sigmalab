@@ -46,15 +46,22 @@ Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'
 
 Route::get('/public/alat/{kode_alat}', [AlatController::class, 'inputKalibrasiByKode'])->where('kode_alat', '.*')->name('alat.public-scan');
 
-Route::get('/alat/{id}/export-pdf', [AlatController::class, 'exportPdf'])->name('alat.export-pdf');
-Route::get('/alat/{id}/export-excel', [AlatController::class, 'exportExcel'])->name('alat.export-excel');
-Route::get('/alat/{id}/export-word', [AlatController::class, 'exportWord'])->name('alat.export-word');
-
 // Authenticated & Force Password Change Routes
-Route::middleware(['auth', 'force.password.change'])->group(function () {
+Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawai.terbatas'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::post('/switch-role', [RoleSwitcherController::class, 'switchRole'])->name('switch-role');
+    // Pindah workspace (hanya akun ber-workspace ALL)
+    Route::post('/workspace/switch', [\App\Http\Controllers\WorkspaceController::class, 'switch'])->name('workspace.switch');
+
+    // Alat export (sebelumnya terbuka tanpa login)
+    Route::get('/alat/{id}/export-pdf', [AlatController::class, 'exportPdf'])->name('alat.export-pdf');
+    Route::get('/alat/{id}/export-excel', [AlatController::class, 'exportExcel'])->name('alat.export-excel');
+    Route::get('/alat/{id}/export-word', [AlatController::class, 'exportWord'])->name('alat.export-word');
+
+    // HANYA UNTUK DEVELOPMENT: login sebagai role lain tanpa password. Jangan aktif di production.
+    if (app()->environment('local')) {
+        Route::post('/switch-role', [RoleSwitcherController::class, 'switchRole'])->name('switch-role');
+    }
 
     Route::resource('evaluasi-kalibrasi', EvaluasiKalibrasiController::class)->parameters([
         'evaluasi-kalibrasi' => 'evaluasi'
@@ -136,6 +143,8 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::delete('/monitoring-ruangan/referensi/{id}', [MonitoringRuanganController::class, 'destroyReferensi'])->name('monitoring.destroyReferensi');
     });
 
+    Route::middleware('workspace:LAB')->group(function () {
+
     // Parameter Uji & CRM
     Route::resource('parameter-uji', ParameterUjiController::class);
     Route::get('/parameter-uji/{parameter_uji}/calculate-stats', [ParameterUjiController::class, 'calculateHistoricalStats'])->name('parameter-uji.calculate-stats');
@@ -185,6 +194,8 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
     Route::get('aft-kalibrasi', [QcUjiBandingController::class, 'aftKalibrasiList'])->name('aft.kalibrasi.list');
     Route::get('aft-kalibrasi/{id}', [QcUjiBandingController::class, 'aftKalibrasiShow'])->name('aft.kalibrasi.show');
 
+    }); // end workspace:LAB (parameter uji, CRM, QC uji banding)
+
     // Library
     Route::middleware('modul:library_manage,tambah_ubah')->group(function () {
         Route::get('/library/create', [LibraryController::class, 'create'])->name('library.create');
@@ -207,6 +218,8 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::get('/library/{id}/preview', [LibraryController::class, 'preview'])->name('library.preview');
     });
 
+    Route::middleware('workspace:LAB')->group(function () {
+
     // Kegiatan & Hasil Uji
     Route::resource('kegiatan', KegiatanController::class);
     Route::post('/kegiatan/{id}/unlock', [KegiatanController::class, 'unlock'])->name('kegiatan.unlock');
@@ -222,6 +235,8 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
     // Reporting
     Route::get('reporting', [ReportingController::class, 'index'])->name('reporting.index');
     Route::get('reporting/pdf', [ReportingController::class, 'exportPdf'])->name('reporting.pdf');
+
+    }); // end workspace:LAB (kegiatan, hasil uji, tindak lanjut, reporting)
 
     // Audit Log & Arsip
     Route::middleware('modul:audit_log,lihat')->group(function () {
@@ -254,6 +269,8 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::post('/read-all', [NotifikasiController::class, 'markAllAsRead'])->name('read-all');
         Route::get('/unread-count', [NotifikasiController::class, 'getUnreadCount'])->name('unread-count');
     });
+
+    Route::middleware('workspace:LAB')->group(function () {
 
     // Verifikasi Mutu & QC
     Route::get('verifikasi-mutu', [VerifikasiMutuController::class, 'index'])->name('verifikasi-mutu.index');
@@ -295,6 +312,21 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::get('/{id}/investigasi', [QcHarianController::class, 'investigasi'])->name('investigasi');
         Route::post('/{id}/investigasi', [QcHarianController::class, 'storeInvestigasi'])->name('investigasi.store');
         Route::get('/{id}/investigasi/pdf', [QcHarianController::class, 'cetakInvestigasiPdf'])->name('investigasi.pdf');
+    });
+
+    }); // end workspace:LAB (verifikasi mutu, qc-inhouse, qc-harian)
+
+    // Peminjaman Alat (khusus workspace Non-Lab)
+    Route::middleware(['workspace:NON_LAB', 'modul:peminjaman,lihat'])->prefix('peminjaman')->name('peminjaman.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\PeminjamanController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\PeminjamanController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\PeminjamanController::class, 'store'])->name('store');
+        Route::get('/{id}', [\App\Http\Controllers\PeminjamanController::class, 'show'])->name('show');
+        Route::post('/{id}/approve', [\App\Http\Controllers\PeminjamanController::class, 'approve'])->name('approve');
+        Route::post('/{id}/reject', [\App\Http\Controllers\PeminjamanController::class, 'reject'])->name('reject');
+        Route::post('/{id}/serahkan', [\App\Http\Controllers\PeminjamanController::class, 'serahkan'])->name('serahkan');
+        Route::post('/{id}/kembalikan', [\App\Http\Controllers\PeminjamanController::class, 'kembalikan'])->name('kembalikan');
+        Route::post('/{id}/batal', [\App\Http\Controllers\PeminjamanController::class, 'batal'])->name('batal');
     });
 
 });

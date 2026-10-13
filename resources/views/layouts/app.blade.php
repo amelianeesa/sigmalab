@@ -132,6 +132,8 @@
 
         .top-navbar .text-secondary { color: rgba(255,255,255,.75) !important; }
         .top-navbar .fw-bold { color: #fff !important; }
+        /* Tombol workspace aktif (Lab / Non-Lab): latar putih, teks harus gelap agar terbaca */
+        .top-navbar .btn-group .btn-light { color: #1b3152 !important; }
         .top-navbar .dropdown .btn {
             background: rgba(255,255,255,.12);
             color: #fff;
@@ -355,6 +357,7 @@
             </div>
 
             <ul class="list-unstyled components" id="sidebar-accordion" style="overflow-y: auto; max-height: calc(100vh - 80px);">
+                @php $wsAktif = session('workspace', 'LAB'); $isLabWs = $wsAktif === 'LAB'; @endphp
                 <li class="{{ request()->is('/') || request()->is('dashboard') ? 'active' : '' }}">
                     <a href="{{ route('dashboard') ?? url('/') }}"><i class="fas fa-home"></i> Dashboard</a>
                 </li>
@@ -485,7 +488,7 @@
                 </li>
                 @endif
 
-                @if(Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
+                @if($isLabWs && Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
 
                 @php
                     $qcIndexPath = trim((string) parse_url(route('kegiatan.index'), PHP_URL_PATH), '/');
@@ -495,6 +498,12 @@
                 @endphp
                 <li class="{{ $qcActive ? 'active' : '' }}">
                     <a href="{{ route('kegiatan.index') }}"><i class="fas fa-flask"></i> Verifikasi Mutu (QC)</a>
+                </li>
+                @endif
+
+                @if(!$isLabWs && Auth::check() && Auth::user()->hasModulAccess('peminjaman'))
+                <li class="{{ request()->is('peminjaman*') ? 'active' : '' }}">
+                    <a href="{{ route('peminjaman.index') }}"><i class="fas fa-hand-holding"></i> Peminjaman Alat</a>
                 </li>
                 @endif
 
@@ -530,6 +539,22 @@
             @auth
             @php
                 $navUser = Auth::user();
+                $navWs = session('workspace', 'LAB');
+            @endphp
+            @if($navUser->workspaceAkun() === 'ALL')
+                <form method="POST" action="{{ route('workspace.switch') }}" class="d-none d-md-block">
+                    @csrf
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Pilih workspace">
+                        <button type="submit" name="workspace" value="LAB"
+                                class="btn {{ $navWs === 'LAB' ? 'btn-light fw-bold' : 'btn-outline-light' }}" style="font-size:0.75rem;">Lab</button>
+                        <button type="submit" name="workspace" value="NON_LAB"
+                                class="btn {{ $navWs === 'NON_LAB' ? 'btn-light fw-bold' : 'btn-outline-light' }}" style="font-size:0.75rem;">Non-Lab</button>
+                    </div>
+                </form>
+            @else
+                <span class="badge bg-light text-dark d-none d-md-inline" style="font-size:0.7rem;">{{ $navWs === 'NON_LAB' ? 'Non-Lab' : 'Lab' }}</span>
+            @endif
+            @php
                 $navName = $navUser->personil->nama ?? $navUser->username ?? 'Pengguna';
                 $navInitial = strtoupper(mb_substr($navName, 0, 1));
             @endphp
@@ -701,4 +726,4 @@ $('.select2-alat, #selectAlat, #selectTracking').select2({
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     @stack('scripts')
 </body>
-</html> 
+</html>

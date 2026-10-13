@@ -37,7 +37,7 @@ class KelolaUserController extends Controller
 
         $roles = Role::orderBy('nama_role')->get();
 
-        $personilTanpaAkun = Personil::whereDoesntHave('user')
+        $personilTanpaAkun = Personil::withoutGlobalScopes()->whereDoesntHave('user')
             ->where('status_aktif', true)
             ->orderBy('nama')
             ->get();
@@ -52,6 +52,7 @@ class KelolaUserController extends Controller
             'username' => 'required|string|max:50|unique:users,username',
             'email' => 'required|email|max:100|unique:users,email',
             'role_id' => 'required|exists:roles,roles_id',
+            'workspace' => 'nullable|in:LAB,NON_LAB',
         ]);
 
         $passwordSementara = Str::password(10, symbols: false);
@@ -62,6 +63,7 @@ class KelolaUserController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($passwordSementara),
             'role_id' => $data['role_id'],
+            'workspace' => User::workspaceUntukRole((int) $data['role_id'], $data['workspace'] ?? null),
             'status_aktif' => true,
         ]);
 
@@ -87,12 +89,14 @@ class KelolaUserController extends Controller
             'email' => 'required|email|max:100|unique:users,email,' . $user->users_id . ',users_id',
             'password' => 'nullable|string|min:6',
             'role_id' => 'required|exists:roles,roles_id',
+            'workspace' => 'nullable|in:LAB,NON_LAB',
         ]);
 
         $user->personil_id = $data['personil_id'] ?? null;
         $user->username = $data['username'];
         $user->email = $data['email'];
         $user->role_id = $data['role_id'];
+        $user->workspace = User::workspaceUntukRole((int) $data['role_id'], $data['workspace'] ?? null);
 
         if (!empty($data['password'])) {
             $user->password = Hash::make($data['password']);

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class PermintaanPengadaan extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, \App\Models\Concerns\BelongsToWorkspace;
 
     protected $table = 'permintaan_pengadaan';
     protected $primaryKey = 'permintaan_id';

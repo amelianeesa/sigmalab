@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'modul' => \App\Http\Middleware\EnsureModuleAccess::class,
             'force.password.change' => \App\Http\Middleware\ForcePasswordChange::class,
+            'workspace.resolve' => \App\Http\Middleware\ResolveWorkspace::class,
+            'workspace' => \App\Http\Middleware\EnsureWorkspace::class,
+            'pegawai.terbatas' => \App\Http\Middleware\EnsurePegawaiTerbatas::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

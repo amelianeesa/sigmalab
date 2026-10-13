@@ -155,48 +155,63 @@ class DashboardController extends Controller
             }
         }
 
-        $qcInhouseOutliers = QcHarian::with(['parameterUji'])
-            ->where('status_evaluasi', 'outlier')
-            ->where('status_investigasi', 'menunggu_investigasi')
-            ->get()->map(function($item) {
-                return [
-                    'modul' => 'QC In-House',
-                    'parameter' => $item->parameterUji->nama_parameter ?? '-',
-                    'tanggal' => $item->tanggal_uji,
-                    'url' => route('qc-harian.investigasi', $item->id)
-                ];
-            });
+        // Workspace Non-Lab tidak memakai QC: lewati query QC & Kegiatan.
+        $isNonLab = \App\Support\Workspace::isNonLab();
+        $peminjamanMenunggu = 0;
+        $peminjamanAktif = 0;
+        if ($isNonLab) {
+            $peminjamanMenunggu = \App\Models\Peminjaman::where('status', 'diajukan')->count();
+            $peminjamanAktif = \App\Models\Peminjaman::where('status', 'dipinjam')->count();
+            $kegiatanBerjalan = 0;
+        }
+
+        if (!$isNonLab) {
+            $qcInhouseOutliers = QcHarian::with(['parameterUji'])
+                ->where('status_evaluasi', 'outlier')
+                ->where('status_investigasi', 'menunggu_investigasi')
+                ->get()->map(function($item) {
+                    return [
+                        'modul' => 'QC In-House',
+                        'parameter' => $item->parameterUji->nama_parameter ?? '-',
+                        'tanggal' => $item->tanggal_uji,
+                        'url' => route('qc-harian.investigasi', $item->id)
+                    ];
+                });
 
       
-        $qcCrmOutliers = QcCrm::with(['parameterUji'])
-            ->where('status_evaluasi', 'outlier')
-            ->where('status_investigasi', 'menunggu_investigasi')
-            ->get()->map(function($item) {
-                return [
-                    'modul' => 'QC CRM',
-                    'parameter' => $item->parameterUji->nama_parameter ?? '-',
-                    'tanggal' => $item->tanggal_uji,
-                    'url' => route('qc-crm.investigasi', $item->id)
-                ];
-            });
+            $qcCrmOutliers = QcCrm::with(['parameterUji'])
+                ->where('status_evaluasi', 'outlier')
+                ->where('status_investigasi', 'menunggu_investigasi')
+                ->get()->map(function($item) {
+                    return [
+                        'modul' => 'QC CRM',
+                        'parameter' => $item->parameterUji->nama_parameter ?? '-',
+                        'tanggal' => $item->tanggal_uji,
+                        'url' => route('qc-crm.investigasi', $item->id)
+                    ];
+                });
 
-        $qcUjiBandingOutliers = QcUjiBandingParameter::with(['parameterUji'])
-            ->where('status_evaluasi', 'outlier')
-            ->where('status_investigasi', 'menunggu_investigasi')
-            ->get()->map(function($item) {
-                return [
-                    'modul' => 'QC Uji Banding',
-                    'parameter' => $item->parameterUji->nama_parameter ?? '-',
-                    'tanggal' => $item->updated_at->format('Y-m-d'),
-                    'url' => route('qc-uji-banding.investigasi', ['id' => $item->qc_uji_banding_id, 'param_id' => $item->id])
-                ];
-            });
+            $qcUjiBandingOutliers = QcUjiBandingParameter::with(['parameterUji'])
+                ->where('status_evaluasi', 'outlier')
+                ->where('status_investigasi', 'menunggu_investigasi')
+                ->get()->map(function($item) {
+                    return [
+                        'modul' => 'QC Uji Banding',
+                        'parameter' => $item->parameterUji->nama_parameter ?? '-',
+                        'tanggal' => $item->updated_at->format('Y-m-d'),
+                        'url' => route('qc-uji-banding.investigasi', ['id' => $item->qc_uji_banding_id, 'param_id' => $item->id])
+                    ];
+                });
 
         
-        $daftarQcOutlier = $qcInhouseOutliers->concat($qcCrmOutliers)->concat($qcUjiBandingOutliers)
-            ->sortByDesc('tanggal')->take(15)->values();
+            $daftarQcOutlier = $qcInhouseOutliers->concat($qcCrmOutliers)->concat($qcUjiBandingOutliers)
+                ->sortByDesc('tanggal')->take(15)->values();
         
-        $totalQcOutlier = $qcInhouseOutliers->count() + $qcCrmOutliers->count() + $qcUjiBandingOutliers->count();
+            $totalQcOutlier = $qcInhouseOutliers->count() + $qcCrmOutliers->count() + $qcUjiBandingOutliers->count();
+        } else {
+            $daftarQcOutlier = collect();
+            $totalQcOutlier = 0;
+        }
 
         return view('dashboard-index', compact(
             'role',
@@ -209,7 +224,10 @@ class DashboardController extends Controller
             'pengadaanAktif',
             'pengadaanSelesai',
             'daftarQcOutlier',
-            'totalQcOutlier'
+            'totalQcOutlier',
+            'isNonLab',
+            'peminjamanMenunggu',
+            'peminjamanAktif'
         ));
     }
 }
