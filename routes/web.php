@@ -96,6 +96,7 @@ Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawa
         Route::get('/{id}/kompetensi/{kompetensiId}/file', [SdmController::class, 'showKompetensiFile'])->name('kompetensi.file');
         Route::post('/{id}/kompetensi/{kompetensiId}/file', [SdmController::class, 'uploadKompetensiFile'])->name('kompetensi.file.upload');
         Route::get('/{id}/cv', [SdmController::class, 'showCv'])->name('cv');
+        Route::post('/{id}/cv', [SdmController::class, 'uploadCv'])->name('cv.upload');
     });
 
     // Alat & Pemeliharaan

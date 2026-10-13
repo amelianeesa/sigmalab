@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
  * Role "Non-Lab" (akun Non-Lab yang dibuatkan HR).
  *
  * - Peminjaman, profil, notifikasi, workspace switch, logout : akses penuh.
+ *   Ditambah aksi sertifikasi & CV di modul Personil (hanya untuk data milik sendiri, dicek di controller).
  * - Dashboard, Personil & Kompetensi, Peralatan, Inventori Barang, Library Digital,
  *   Audit Trail : BACA SAJA (GET/HEAD), tanpa halaman form tambah/ubah.
  * - Selain itu ditolak di server (deny-by-default), karena sebagian controller lama
@@ -21,6 +22,9 @@ class EnsurePegawaiTerbatas
     /** Route yang boleh dipakai penuh (semua method). */
     private const AKSES_PENUH = [
         'peminjaman.*', 'profil.*', 'notifikasi.*', 'workspace.switch', 'logout',
+        // Kelola sertifikasi & CV milik sendiri (kepemilikan dicek di SdmController).
+        'sdm.kompetensi.store', 'sdm.kompetensi.update', 'sdm.kompetensi.destroy',
+        'sdm.kompetensi.file.upload', 'sdm.cv.upload',
     ];
 
     /** Route yang hanya boleh dibaca (GET/HEAD). */
