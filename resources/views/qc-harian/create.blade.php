@@ -523,12 +523,12 @@
 
 <div class="container-fluid dashboard-container">
     <x-qc-breadcrumb active="In-House">
-        <li class="breadcrumb-item"><a href="{{ route('qc-harian.index') }}" class="text-decoration-none">Pengujian Harian QC I</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('qc-harian.index') }}" class="text-decoration-none">Pengujian Harian QC In-House</a></li>
         <li class="breadcrumb-item active">Input Data</li>
     </x-qc-breadcrumb>
 
     <h5 class="page-title">
-        <i class="fas fa-plus-circle icon-corporate me-2"></i>Input Data Harian QC
+        <i class="fas fa-plus-circle icon-corporate me-2"></i>Input Data Harian QC In-House
     </h5>
 
     <form action="{{ route('qc-harian.store') }}" method="POST" id="formQc">
@@ -553,8 +553,8 @@
                         <input type="text" name="nama_sampel_uji" class="form-control" value="{{ $activeBatch->nama_sampel }}" required>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Tanggal Uji <span class="text-danger">*</span></label>
-                        <input type="date" name="tanggal_uji" class="form-control" value="{{ date('Y-m-d') }}" required max="{{ date('Y-m-d') }}">
+                        <label class="form-label fw-bold">Tanggal Uji <span class="text-danger">*</span></label>
+                        <input type="date" name="tanggal_uji" class="form-control" value="{{ isset($serverDraft) ? date('Y-m-d', strtotime($serverDraft['tanggal_uji'])) : date('Y-m-d') }}" required max="{{ date('Y-m-d') }}">
                     </div>
                 </div>
 
@@ -599,8 +599,8 @@
                                 </button>
                             </div>
                         </h2>
-                        <div id="collapse-{{ $pid }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ $pid }}" data-bs-parent="#parameterAccordion">
-                            <div class="accordion-body">
+                        <div id="collapse-{{ $pid }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ $pid }}">
+                            <div class="accordion-body p-3">
 
                                 <div class="row align-items-center bg-light p-2 rounded mb-2 border mx-0 g-2">
                                     <div class="col-md-8">
@@ -613,6 +613,9 @@
                                     <div class="col-md-4 d-flex flex-column gap-1">
                                         <button type="button" class="btn btn-sm btn-corporate-blue w-100 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}">
                                             <i class="fas fa-cog me-1"></i> Atur Alat & Bahan
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-info w-100 shadow-sm" data-bs-toggle="modal" data-bs-target="#modalRumus-{{ $pid }}">
+                                            <i class="fas fa-calculator me-1"></i> Panduan Kolom & Rumus ({{ $code }})
                                         </button>
                                         <button type="button" class="btn btn-sm btn-outline-corporate w-100 shadow-sm btn-copy-resource" data-pid="{{ $pid }}">
                                             <i class="fas fa-copy me-1"></i> Salin dari Atas
@@ -728,14 +731,17 @@
                                         </div>
                                     </div>
                                 </div>
+                                                     
+                                @include('partials.modal-panduan-inhouse', ['pid' => $pid, 'code' => $code])
 
                                 <div class="scroll-hint"><i class="fas fa-arrows-alt-h me-1"></i> Geser tabel ke kiri/kanan untuk melihat seluruh kolom.</div>
+                                
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-sm align-middle text-center param-table" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
-                                        <thead class="table-light">
+                                    <table class="table table-bordered table-sm align-middle text-center param-table text-nowrap" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}" style="min-width: 1500px; border-color: #212529;">
+                                        <thead class="bg-white">
                                             @if($code === 'IM')
                                                 <tr>
-                                                    <th>PENGULANGAN</th>
+                                                    <th>DISH NO.</th>
                                                     <th>M1</th>
                                                     <th>M2</th>
                                                     <th>M3</th>
@@ -750,7 +756,7 @@
                                                 </tr>
                                             @elseif($code === 'ASH')
                                                 <tr>
-                                                    <th>PENGULANGAN</th>
+                                                    <th>DISH NO.</th>
                                                     <th>M1</th>
                                                     <th>M2</th>
                                                     <th>M2-M1</th>
@@ -767,7 +773,7 @@
                                                 </tr>
                                             @elseif($code === 'VM')
                                                 <tr>
-                                                    <th>PENGULANGAN</th>
+                                                    <th>DISH NO.</th>
                                                     <th>M1</th>
                                                     <th>M2</th>
                                                     <th>M2-M1</th>
@@ -795,12 +801,13 @@
                                                 </tr>
                                             @elseif($code === 'CV')
                                                 <tr>
-                                                    <th>PENGULANGAN</th>
+                                                    <th>Vessel</th>
+                                                    <th>CALL ID</th>
                                                     <th>Weight of Crucible</th>
                                                     <th>Sample Mass</th>
                                                     <th>Primary Result (cal/g)</th>
-                                                    <th>Ee</th>
-                                                    <th>t</th>
+                                                    <th style="min-width: 120px;">Ee</th>
+                                                    <th style="min-width: 120px;">t</th>
                                                     <th>Volume of Titrant (ml)</th>
                                                     <th>Length of Fuse (cm)</th>
                                                     <th>Total TS</th>
@@ -824,8 +831,23 @@
                                         <tbody>
                                             
                                             <tr class="row-entry">
-                                                <td class="fw-bold bg-light">
-                                                    Simplo (D1)
+                                                <td class="fw-bold bg-light p-2">
+                                                    @if(in_array($code, ['IM', 'ASH', 'VM']))
+                                                        <div class="d-flex align-items-center">
+                                                            <input type="text" class="form-control form-control-sm"
+                                                                name="params[{{ $pid }}][mentah][dish_1]"
+                                                                placeholder="Dish No"
+                                                                style="width: 80px;"
+                                                                {{ $isLocked ? 'disabled' : '' }}>
+                                                        </div>
+                                                    @elseif($code === 'CV')
+                                                        <input type="text" class="form-control form-control-sm" name="params[{{ $pid }}][mentah][vessel_1]" placeholder="Vessel">
+                                                    @else
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <span class="badge bg-secondary">D1</span>
+                                                            <span>Simplo</span>
+                                                        </div>
+                                                    @endif
                                                     <input type="hidden" class="in-d1" name="params[{{ $pid }}][d1]">
                                                     <input type="hidden" class="in-db-1" name="params[{{ $pid }}][db1]">
                                                 </td>
@@ -870,16 +892,17 @@
                                                     <td class="align-middle out-db-1 fw-bold text-success">-</td>
                                                 @elseif($code === 'TS')
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-mass-1" name="params[{{ $pid }}][mentah][mass_1]" disabled></td>
-                                                    <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" disabled></td>
+                                                    <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold text-center text-primary"></td>
                                                     <td rowspan="2" class="align-middle out-avg-adb fw-bold">-</td>
                                                     <td rowspan="2" class="align-middle out-avg-db fw-bold">-</td>
                                                     <td class="align-middle out-db-1 fw-bold text-success">-</td>
                                                 @elseif($code === 'CV')
+                                                    <td><input type="text" class="form-control form-control-sm" name="params[{{ $pid }}][mentah][callid_1]" placeholder="Call ID" ></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-w-1" name="params[{{ $pid }}][mentah][w_1]" disabled></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-sm-1" name="params[{{ $pid }}][mentah][sm_1]" disabled></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-pr-1" name="params[{{ $pid }}][mentah][pr_1]" disabled></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-ee-1" name="params[{{ $pid }}][mentah][ee_1]" disabled></td>
-                                                    <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-t-1" name="params[{{ $pid }}][mentah][t_1]" disabled></td>
+                                                    <td><input type="text" class="form-control form-control-sm in-t-1 bg-light border-0" name="params[{{ $pid }}][mentah][t_1]" readonly tabindex="-1" placeholder="Auto"></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-vt-1" name="params[{{ $pid }}][mentah][vt_1]" disabled></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-lf-1" name="params[{{ $pid }}][mentah][lf_1]" disabled></td>
                                                     <td><input type="text" class="form-control form-control-sm in-ts-1 bg-light border-0" name="params[{{ $pid }}][mentah][ts_1]" readonly tabindex="-1" placeholder="Auto dari TS"></td>
@@ -895,8 +918,24 @@
                                             </tr>
 
                                             <tr class="row-entry">
-                                                <td class="fw-bold bg-light">
-                                                    Duplo (D2)
+                                                <td class="fw-bold bg-light p-2">
+                                                    @if(in_array($code, ['IM', 'ASH', 'VM']))
+                                                        <div class="d-flex align-items-center">
+                                                            <input type="text" class="form-control form-control-sm"
+                                                                name="params[{{ $pid }}][mentah][dish_2]"
+                                                                placeholder="Dish No"
+                                                                style="width: 80px;"
+                                                                {{ $isLocked ? 'disabled' : '' }}>
+                                                        </div>
+                                                    @elseif($code === 'CV')
+                                                        <input type="text" class="form-control form-control-sm" name="params[{{ $pid }}][mentah][vessel_2]" placeholder="Vessel">
+                                                    @else
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <span class="badge bg-secondary">D2</span>
+                                                            <span>Duplo</span>
+                                                        </div>
+                                                    @endif
+
                                                     <input type="hidden" class="in-d2" name="params[{{ $pid }}][d2]">
                                                     <input type="hidden" class="in-db-2" name="params[{{ $pid }}][db2]">
                                                 </td>
@@ -930,14 +969,15 @@
                                                     <td class="align-middle out-db-2 fw-bold text-success">-</td>
                                                 @elseif($code === 'TS')
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-mass-2" name="params[{{ $pid }}][mentah][mass_2]" disabled></td>
-                                                    <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" disabled></td>
+                                                    <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold text-center text-primary"></td>
                                                     <td class="align-middle out-db-2 fw-bold text-success">-</td>
                                                 @elseif($code === 'CV')
+                                                    <td><input type="text" class="form-control form-control-sm" name="params[{{ $pid }}][mentah][callid_2]" placeholder="Call ID"></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-w-2" name="params[{{ $pid }}][mentah][w_2]" disabled></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-sm-2" name="params[{{ $pid }}][mentah][sm_2]" disabled></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-pr-2" name="params[{{ $pid }}][mentah][pr_2]" disabled></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-ee-2" name="params[{{ $pid }}][mentah][ee_2]" disabled></td>
-                                                    <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-t-2" name="params[{{ $pid }}][mentah][t_2]" disabled></td>
+                                                    <td><input type="text" class="form-control form-control-sm in-t-2 bg-light border-0" name="params[{{ $pid }}][mentah][t_2]" readonly tabindex="-1" placeholder="Auto"></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-vt-2" name="params[{{ $pid }}][mentah][vt_2]" disabled></td>
                                                     <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-lf-2" name="params[{{ $pid }}][mentah][lf_2]" disabled></td>
                                                     <td><input type="text" class="form-control form-control-sm in-ts-2 bg-light border-0" name="params[{{ $pid }}][mentah][ts_2]" readonly tabindex="-1" placeholder="Auto dari TS"></td>
@@ -1012,7 +1052,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return isNaN(n) ? 0 : n;
     }
 
-        const selectCrm = document.getElementById('crm_katalog_id');
+    const selectCrm = document.getElementById('crm_katalog_id');
     if(selectCrm) {
         selectCrm.addEventListener('change', function() {
             const val = this.value;
@@ -1051,6 +1091,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         if(row.closest('table').dataset.code === 'CV') {
+            if (scope['ee'] > 0) {
+                scope['t'] = (scope['pr'] / scope['ee']) * scope['sm'];
+                const inT = row.querySelector(`.in-t-${i}`);
+                if (inT) inT.value = scope['t'].toFixed(4); 
+            }
+
             const tsTable = document.querySelector('table[data-code="TS"]');
             if(tsTable) {
                 const tsInp = tsTable.querySelector(`.in-hasil-${i}`);
@@ -1114,13 +1160,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
+        const codeTable = row.closest('table').dataset.code;
         const inHasil = row.querySelector(`.in-hasil-${i}`);
         const inD = row.querySelector(`.in-d${i}`); 
-        if(inHasil && !inHasil.hasAttribute('disabled')) {
-            const dec = (row.closest('table').dataset.code === 'CV') ? 0 : 2;
+
+        if(inHasil && !inHasil.hasAttribute('disabled') && codeTable !== 'TS') {
+            const dec = (codeTable === 'CV') ? 0 : 2;
             inHasil.value = result.toFixed(dec);
         }
-        if(inD) inD.value = result.toFixed(4);
+        
+        if(inD && codeTable !== 'TS') {
+            inD.value = result.toFixed(4);
+        }
 
         const tbody = row.closest('tbody');
         const d1 = parseNum(tbody.querySelector('.in-d1')?.value || tbody.querySelector('.in-hasil-1')?.value);
@@ -1310,6 +1361,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 }
             }
+
+            // Buka accordion secara otomatis saat dicentang, dan tutup saat centang dilepas
+            const collapseEl = document.getElementById('collapse-' + pid);
+            if (collapseEl) {
+                const bsCollapse = bootstrap.Collapse.getOrCreateInstance(collapseEl, { toggle: false });
+                if (this.checked) {
+                    bsCollapse.show();
+                } else {
+                    bsCollapse.hide();
+                }
+            }
         });
     });
 
@@ -1456,10 +1518,6 @@ document.addEventListener('DOMContentLoaded', function() {
     @if(isset($serverDraft))
         const serverDraft = @json($serverDraft);
 
-        if(serverDraft.tanggal_uji) {
-            const tgl = document.querySelector('input[name="tanggal_uji"]');
-            if(tgl) tgl.value = serverDraft.tanggal_uji;
-        }
         if(serverDraft.nama_sampel) {
             const nm = document.querySelector('input[name="nama_sampel_uji"]');
             if(nm) nm.value = serverDraft.nama_sampel;
@@ -1550,4 +1608,30 @@ document.addEventListener('DOMContentLoaded', function() {
     @endif
 });
 </script>
+@if($errors->any() || session('error'))
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let errorMsg = "";
+            
+            @if($errors->any())
+                @foreach ($errors->all() as $error)
+                    errorMsg += "{!! addslashes($error) !!}\n";
+                @endforeach
+            @endif
+            
+            @if(session('error'))
+                errorMsg += "{!! addslashes(session('error')) !!}\n";
+            @endif
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops! Ada Error',
+                text: errorMsg,
+                confirmButtonColor: '#1b3152',
+                confirmButtonText: 'Tutup'
+            });
+        });
+    </script>
+@endif
 @endsection

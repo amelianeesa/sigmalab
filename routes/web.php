@@ -144,18 +144,25 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
     Route::post('/parameter-uji/store-crm', [ParameterUjiController::class, 'storeCrmKatalog'])->name('parameter-uji.store-crm');
 
     // CRM Katalog CRUD
-    Route::resource('crm-katalog', CrmKatalogController::class);
-    Route::post('crm-katalog/{id}/sertifikat', [CrmKatalogController::class, 'storeSertifikat'])->name('crm-katalog.store-sertifikat');
-    Route::delete('crm-katalog/{id}/sertifikat/{sertifikat_id}', [CrmKatalogController::class, 'destroySertifikat'])->name('crm-katalog.destroy-sertifikat');
-    Route::get('crm-katalog/{id}/verifikasi-administratif', [CrmKatalogController::class, 'verifikasiAdministratifForm'])->name('crm-katalog.verifikasi-administratif.form');
-    Route::post('crm-katalog/{id}/verifikasi-administratif', [CrmKatalogController::class, 'verifikasiAdministratifStore'])->name('crm-katalog.verifikasi-administratif.store');
-    Route::get('crm-katalog/{id}/verifikasi-teknis', [CrmKatalogController::class, 'verifikasiTeknisForm'])->name('crm-katalog.verifikasi-teknis.form');
-    Route::post('crm-katalog/{id}/verifikasi-teknis', [CrmKatalogController::class, 'verifikasiTeknisStore'])->name('crm-katalog.verifikasi-teknis.store');
+    Route::resource('crm-katalog', \App\Http\Controllers\CrmKatalogController::class);
+    Route::post('crm-katalog/{id}/sertifikat', [\App\Http\Controllers\CrmKatalogController::class, 'storeSertifikat'])->name('crm-katalog.store-sertifikat');
+    Route::delete('crm-katalog/{id}/sertifikat/{sertifikat_id}', [\App\Http\Controllers\CrmKatalogController::class, 'destroySertifikat'])->name('crm-katalog.destroy-sertifikat');
+    Route::get('crm-katalog/{id}/verifikasi-administratif', [\App\Http\Controllers\CrmKatalogController::class, 'verifikasiAdministratifForm'])->name('crm-katalog.verifikasi-administratif.form');
+    Route::post('crm-katalog/{id}/verifikasi-administratif', [\App\Http\Controllers\CrmKatalogController::class, 'verifikasiAdministratifStore'])->name('crm-katalog.verifikasi-administratif.store');
+    Route::get('crm-katalog/{id}/verifikasi-teknis', [\App\Http\Controllers\CrmKatalogController::class, 'verifikasiTeknisForm'])->name('crm-katalog.verifikasi-teknis.form');
+    Route::post('crm-katalog/{id}/verifikasi-teknis', [\App\Http\Controllers\CrmKatalogController::class, 'verifikasiTeknisStore'])->name('crm-katalog.verifikasi-teknis.store');
+    Route::get('crm-katalog/{katalog_id}/investigasi/{verif_id}', [\App\Http\Controllers\CrmKatalogController::class, 'investigasiVerifTeknis'])->name('crm-katalog.verifikasi-teknis.investigasi');
+    Route::post('crm-katalog/{katalog_id}/investigasi/{verif_id}', [\App\Http\Controllers\CrmKatalogController::class, 'storeInvestigasiVerifTeknis'])->name('crm-katalog.verifikasi-teknis.investigasi.store');
 
     // Pengujian Harian QC CRM
-    Route::resource('qc-crm', QcCrmController::class);
-    Route::get('qc-crm/chart/data', [QcCrmController::class, 'chartData'])->name('qc-crm.chart.data');
-    Route::get('api/crm-katalog/{id}/parameters', [QcCrmController::class, 'apiGetParameters'])->name('api.crm-katalog.parameters');
+    Route::resource('qc-crm', \App\Http\Controllers\QcCrmController::class);
+    Route::get('qc-crm/chart/data', [\App\Http\Controllers\QcCrmController::class, 'chartData'])->name('qc-crm.chart.data');
+    Route::get('api/crm-katalog/{id}/parameters', [\App\Http\Controllers\QcCrmController::class, 'apiGetParameters'])->name('api.crm-katalog.parameters');
+    Route::get('qc-crm/{id}/investigasi', [\App\Http\Controllers\QcCrmController::class, 'investigasi'])->name('qc-crm.investigasi');
+    Route::post('qc-crm/{id}/investigasi', [\App\Http\Controllers\QcCrmController::class, 'storeInvestigasi'])->name('qc-crm.investigasi.store');
+    Route::get('qc-crm/{id}/investigasi/pdf', [\App\Http\Controllers\QcCrmController::class, 'cetakInvestigasiPdf'])->name('qc-crm.investigasi.pdf');
+
+    // QC Uji Banding
 
     // QC Uji Banding & Toleransi
     Route::get('qc-uji-banding/master-toleransi', [ParameterToleransiController::class, 'index'])->name('master.toleransi.index');
@@ -287,6 +294,7 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::get('/{parameter_uji_id}/chart', [QcHarianController::class, 'chart'])->name('chart');
         Route::get('/{id}/investigasi', [QcHarianController::class, 'investigasi'])->name('investigasi');
         Route::post('/{id}/investigasi', [QcHarianController::class, 'storeInvestigasi'])->name('investigasi.store');
+        Route::get('/{id}/investigasi/pdf', [QcHarianController::class, 'cetakInvestigasiPdf'])->name('investigasi.pdf');
     });
 
 });

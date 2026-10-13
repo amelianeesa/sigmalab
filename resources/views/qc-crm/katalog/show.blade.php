@@ -91,7 +91,7 @@
         </a>
     </div>
 
-    {{-- NOTIFIKASI --}}
+    {{-- NOTIFIKASI KEDALUWARSA --}}
     @if($expState === 'kedaluwarsa')
         <div class="alert alert-danger alert-dismissible fade show shadow-sm py-2 ps-3 pe-5 mb-2" role="alert" style="font-size: 0.8rem;">
             <i class="fas fa-exclamation-triangle me-1"></i> <strong>Perhatian!</strong> Botol CRM ini sudah kedaluwarsa sejak {{ $katalog->tanggal_expired->format('d-m-Y') }}.
@@ -108,8 +108,11 @@
         {{-- Informasi Botol --}}
         <div class="col-12 col-lg-4">
             <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                <div class="card-header bg-white border-bottom-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
                     <h5 class="fw-bold mb-0"><i class="fas fa-info-circle me-2" style="color: #1b3152;"></i>Informasi Botol</h5>
+                    <button class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 0.75rem;" data-bs-toggle="modal" data-bs-target="#editBotolModal">
+                        <i class="fas fa-edit me-1"></i> Edit
+                    </button>
                 </div>
                 <div class="card-body">
                     <table class="table table-borderless table-sm mb-0">
@@ -154,11 +157,24 @@
                                 @endif
                             </td>
                         </tr>
+                        <tr>
+                            <td class="text-muted">File Sertifikat (COA)</td>
+                            <td class="fw-bold">
+                                @if($katalog->coa_file)
+                                    <a href="{{ Storage::url($katalog->coa_file) }}" target="_blank" class="btn btn-sm btn-outline-danger py-0 px-2 shadow-sm">
+                                        <i class="fas fa-file-contract"></i> Lihat Sertifikat
+                                    </a>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                        </tr>
                     </table>
                 </div>
             </div>
         </div>
 
+        {{-- Tabel Parameter Uji --}}
         <div class="col-12 col-lg-8">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-bottom-0 pt-3 pb-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -208,6 +224,68 @@
     </div>
 </div>
 
+<!-- Modal Edit Informasi Botol -->
+<div class="modal fade" id="editBotolModal" tabindex="-1" aria-labelledby="editBotolModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <form action="{{ route('crm-katalog.update', $katalog->id) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Edit Informasi Botol</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nomor Lot <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="nomor_lot" value="{{ $katalog->nomor_lot }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nomor Sertifikat</label>
+                            <input type="text" class="form-control" name="nomor_sertifikat" value="{{ $katalog->nomor_sertifikat }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nama Produk <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="nama_produk" value="{{ $katalog->nama_produk }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Produsen</label>
+                            <input type="text" class="form-control" name="produsen" value="{{ $katalog->produsen }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Expired Date</label>
+                            <input type="date" class="form-control" name="tanggal_expired" value="{{ $katalog->tanggal_expired ? \Carbon\Carbon::parse($katalog->tanggal_expired)->format('Y-m-d') : '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Upload Ulang COA (PDF/Image)</label>
+                            @if($katalog->coa_file)
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge bg-success me-2"><i class="fas fa-check"></i> File Sudah Tersimpan</span>
+                                    <a href="{{ Storage::url($katalog->coa_file) }}" target="_blank" style="font-size: 0.8rem;">(Cek File)</a>
+                                </div>
+                            @endif
+                            <input type="file" class="form-control" name="coa_file" accept=".pdf,.jpg,.jpeg,.png">
+                            <small class="text-muted">Kosongkan jika tidak ingin mengubah file COA.</small>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="isActive" {{ $katalog->is_active ? 'checked' : '' }} value="1">
+                                <label class="form-check-label" for="isActive">Status Aktif (Bisa digunakan untuk QC)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Hapus Parameter -->
 <div id="modalHapusParamWrap">
     @foreach($katalog->sertifikats as $s)
     <div class="modal fade" id="modalHapusParam{{ $s->id }}" tabindex="-1" aria-hidden="true">
@@ -237,6 +315,8 @@
     </div>
     @endforeach
 </div>
+
+<!-- Modal Tambah Parameter -->
 <div class="modal fade" id="addParamModal" tabindex="-1" aria-labelledby="addParamModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <form action="{{ route('crm-katalog.store-sertifikat', $katalog->id) }}" method="POST" class="w-100">

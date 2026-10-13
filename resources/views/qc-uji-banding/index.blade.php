@@ -155,73 +155,73 @@
                         </tr>
                     </thead>
                     <tbody>
-                       @forelse($programs as $prog)
-<tr>
-    <td class="ps-4 fw-bold text-dark">
-        {{ $prog->tanggal_terima ? $prog->tanggal_terima->format('d/m/Y') : '-' }}
-    </td>
+                    @forelse($programs as $prog)
+                        <tr>
+                            <td class="ps-4 fw-bold text-dark">
+                                {{ $prog->tanggal_terima ? $prog->tanggal_terima->format('d/m/Y') : '-' }}
+                            </td>
 
-    <td class="fw-bold">
-        {{ $prog->nama_program }}
-        @if(isset($prog->status) && $prog->status === 'draft')
-            <span class="badge bg-warning text-dark ms-1">DRAFT</span>
-        @endif
-    </td>
+                            <td class="fw-bold">
+                                {{ $prog->nama_program }}
+                                @if(isset($prog->status) && $prog->status === 'draft')
+                                    <span class="badge bg-warning text-dark ms-1">DRAFT</span>
+                                @endif
+                            </td>
 
-    <td>{{ $prog->penyelenggara }}</td>
+                            <td>{{ $prog->penyelenggara }}</td>
 
-    <td class="text-center">
-        <span class="badge bg-secondary">{{ $prog->kode_sampel }}</span>
-    </td>
+                            <td class="text-center">
+                                <span class="badge bg-secondary">{{ $prog->kode_sampel }}</span>
+                            </td>
 
-    <td>
-        @php
-            $menunggu = $prog->parameters->where('status_evaluasi', 'menunggu')->count();
-            $inlier   = $prog->parameters->where('status_evaluasi', 'inlier')->count();
-            $outlier  = $prog->parameters->where('status_evaluasi', 'outlier')->count();
-            $warning  = $prog->parameters->where('status_evaluasi', 'warning')->count();
-        @endphp
+                            <td>
+                                @php
+                                    $menunggu = $prog->parameters->where('status_evaluasi', 'menunggu')->count();
+                                    $inlier   = $prog->parameters->where('status_evaluasi', 'inlier')->count();
+                                    $outlier  = $prog->parameters->where('status_evaluasi', 'outlier')->count();
+                                    $warning  = $prog->parameters->where('status_evaluasi', 'warning')->count();
+                                @endphp
 
-        <div class="d-flex flex-wrap gap-1">
-            @if($menunggu > 0)
-                <span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> {{ $menunggu }} Menunggu Vendor</span>
-            @endif
-            @if($inlier > 0)
-                <span class="badge bg-success"><i class="fas fa-check-circle"></i> {{ $inlier }} Inlier</span>
-            @endif
-            @if($warning > 0)
-                <span class="badge bg-info"><i class="fas fa-exclamation-circle"></i> {{ $warning }} Warning</span>
-            @endif
-            @if($outlier > 0)
-                <span class="badge bg-danger"><i class="fas fa-times-circle"></i> {{ $outlier }} Outlier</span>
-            @endif
-        </div>
-    </td>
+                                <div class="d-flex flex-wrap gap-1">
+                                    @if($menunggu > 0)
+                                        <span class="badge bg-warning text-dark"><i class="fas fa-clock"></i> {{ $menunggu }} Menunggu Vendor</span>
+                                    @endif
+                                    @if($inlier > 0)
+                                        <span class="badge bg-success"><i class="fas fa-check-circle"></i> {{ $inlier }} Inlier</span>
+                                    @endif
+                                    @if($warning > 0)
+                                        <span class="badge bg-info"><i class="fas fa-exclamation-circle"></i> {{ $warning }} Warning</span>
+                                    @endif
+                                    @if($outlier > 0)
+                                        <span class="badge bg-danger"><i class="fas fa-times-circle"></i> {{ $outlier }} Outlier</span>
+                                    @endif
+                                </div>
+                            </td>
 
-    <td class="text-center text-nowrap">
-        <div class="d-inline-flex align-items-center gap-1">
-            @if(isset($prog->status) && $prog->status === 'draft')
-                <a href="{{ route('qc-uji-banding.create', ['draft_id' => $prog->id]) }}" class="btn btn-warning btn-sm qc-action-btn shadow-sm" title="Lanjutkan Draft" aria-label="Lanjutkan Draft">
-                    <i class="fas fa-edit"></i>
-                </a>
-            @else
-                <a href="{{ route('qc-uji-banding.show', $prog->id) }}" class="btn btn-corporate-blue btn-sm qc-action-btn shadow-sm" title="Detail" aria-label="Detail">
-                    <i class="fas fa-eye"></i>
-                </a>
-                @if($menunggu > 0)
-                    <a href="{{ route('qc-uji-banding.evaluasi.form', $prog->id) }}" class="btn btn-warning btn-sm qc-action-btn shadow-sm" title="Input Hasil Vendor" aria-label="Input Hasil Vendor">
-                        <i class="fas fa-chart-bar"></i>
-                    </a>
-                @endif
-            @endif
-        </div>
-    </td>
-</tr>
-@empty
-<tr>
-    <td colspan="6" class="text-center text-muted py-3">Belum ada data QC Uji Banding.</td>
-</tr>
-@endforelse
+                            <td class="text-center text-nowrap">
+                                <div class="d-inline-flex align-items-center gap-1">
+                                    @if(isset($prog->status) && $prog->status === 'draft')
+                                        <a href="{{ route('qc-uji-banding.create', ['draft_id' => $prog->id]) }}" class="btn btn-warning btn-sm qc-action-btn shadow-sm" title="Lanjutkan Draft" aria-label="Lanjutkan Draft">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    @else
+                                        <a href="{{ route('qc-uji-banding.show', $prog->id) }}" class="btn btn-corporate-blue btn-sm qc-action-btn shadow-sm" title="Detail" aria-label="Detail">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <!-- @if($menunggu > 0)
+                                            <a href="{{ route('qc-uji-banding.evaluasi.form', $prog->id) }}" class="btn btn-warning btn-sm qc-action-btn shadow-sm" title="Input Hasil Vendor" aria-label="Input Hasil Vendor">
+                                                <i class="fas fa-chart-bar"></i>
+                                            </a>
+                                        @endif -->
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-3">Belum ada data QC Uji Banding.</td>
+                        </tr>
+                    @endforelse
                     </tbody>
                 </table>
             </div>

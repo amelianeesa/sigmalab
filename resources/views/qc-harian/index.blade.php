@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Pengujian Harian QC')
+@section('title', 'Pengujian Harian QC In-House')
 
 @section('content')
 <style>
@@ -418,12 +418,12 @@
         @if($activeBatch)
             <li class="breadcrumb-item"><a href="{{ route('qc-inhouse.show', $activeBatch->sampel_inhouse_id) }}" class="text-decoration-none">{{ $activeBatch->kode_batch }}</a></li>
         @endif
-        <li class="breadcrumb-item active">Pengujian Harian QC</li>
+        <li class="breadcrumb-item active">Pengujian Harian QC In-House</li>
     </x-qc-breadcrumb>
 
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
         <h5 class="page-title text-dark">
-            <i class="fas fa-chart-line icon-corporate me-2"></i>Pengujian Harian QC
+            <i class="fas fa-chart-line icon-corporate me-2"></i>Pengujian Harian QC In-House
         </h5>
 
         <div class="header-actions d-grid d-md-flex">
@@ -479,7 +479,6 @@
                             <th class="text-center">Satuan</th>
                             <th class="text-center">Nilai Acuan (Mean)</th>
                             <th class="text-center">Batas Peringatan (± 2SD)</th>
-                            <th class="text-center">Metode/Kriteria</th>
                             <th class="text-center">Status Harian</th>
                             <th class="text-center" style="width: 150px;">Aksi</th>
                         </tr>
@@ -487,7 +486,7 @@
                     <tbody>
                         @forelse($parameters as $idx => $param)
                             @php
-                                $isLocked = \App\Models\QcHarian::where('sampel_inhouse_id', $activeBatch->id)
+                                $isLocked = \App\Models\QcHarian::where('sampel_inhouse_id', $activeBatch->sampel_inhouse_id)
                                     ->where('parameter_uji_id', $param->parameter_uji_id)
                                     ->where('status_evaluasi', 'outlier')
                                     ->where('status_investigasi', 'menunggu_investigasi')
@@ -502,7 +501,6 @@
                                     {{ number_format($param->parameterUji->mean - (2 * $param->parameterUji->sd), 4) }} -
                                     {{ number_format($param->parameterUji->mean + (2 * $param->parameterUji->sd), 4) }}
                                 </td>
-                                <td class="text-center">{{ $param->parameterUji->metode_kriteria ?? '-' }}</td>
                                 <td class="text-center">
                                     @if($isLocked)
                                         <span class="badge bg-danger"><i class="fas fa-lock me-1"></i> OOC (LOCKED)</span>
@@ -512,7 +510,16 @@
                                 </td>
                                 <td class="text-center text-nowrap">
                                     @if($isLocked)
-                                        <a href="#riwayat-table" class="btn btn-sm btn-outline-danger aksi-btn shadow-sm" title="Lakukan Investigasi" onclick="Swal.fire({toast: true, position: 'top-end', icon: 'info', title: 'Silakan cek tabel riwayat di bawah untuk mengisi form investigasi.', showConfirmButton: false, timer: 3000})"><i class="fas fa-search me-1"></i> Investigasi</a>
+                                        @php
+                                            $lockedLog = \App\Models\QcHarian::where('sampel_inhouse_id', $activeBatch->sampel_inhouse_id)
+                                                ->where('parameter_uji_id', $param->parameter_uji_id)
+                                                ->where('status_evaluasi', 'outlier')
+                                                ->where('status_investigasi', 'menunggu_investigasi')
+                                                ->latest('id')->first();
+                                        @endphp
+                                        <a href="{{ route('qc-harian.investigasi', $lockedLog->id) }}" class="btn btn-sm btn-outline-danger" title="Lakukan Investigasi">
+                                            <i class="fas fa-search me-1"></i> Investigasi
+                                        </a>
                                     @else
                                         <a href="{{ route('qc-harian.chart', $param->parameter_uji_id) }}" class="btn btn-corporate-blue btn-sm aksi-btn shadow-sm" title="Control Chart"><i class="fas fa-chart-line me-1"></i> Control Chart</a>
                                     @endif
@@ -520,7 +527,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center text-muted py-3">Belum ada parameter yang stabil.</td>
+                                <td colspan="7" class="text-center text-muted py-4">Belum ada parameter yang stabil.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -568,79 +575,145 @@
                 <table class="table table-hover table-corporate align-middle mb-0 tbl-riwayat" id="tableRiwayat">
                     <thead>
                         <tr>
-                            <th class="ps-3">Tanggal</th>
-                            <th>Parameter</th>
-                            <th>Nilai D1</th>
-                            <th>Nilai D2</th>
-                            <th>Nilai Akhir</th>
-                            <th>Status (Westgard)</th>
+                            <th class="ps-4">Tanggal Uji</th>
+                            <th>Nama Sampel</th>
                             <th>Analis</th>
-                            <th class="pe-3 text-center">Aksi</th>
+                            <th>Status / Info</th>
+                            <th class="pe-4 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($recentLogs as $log)
+                        @foreach($groupedLogs as $groupId => $logs)
+                            @php
+                                $first = $logs->first();
+                                $isDraft = $first->status_pengujian === 'draft';
+                                $outlierCount = $logs->where('status_evaluasi', 'outlier')->count();
+                                $htmlId = \Illuminate\Support\Str::slug($groupId);
+                            @endphp
                             <tr>
-                                <td class="ps-3 text-nowrap">{{ \Carbon\Carbon::parse($log->tanggal_uji)->format('d M Y') }}</td>
-                                <td class="fw-bold">
-                                    {{ strtoupper($log->parameterUji->nama_parameter) }}
-                                    @if($log->status_pengujian === 'draft')
-                                        <span class="badge bg-secondary ms-1">DRAFT</span>
-                                    @endif
-                                </td>
-                                <td>{{ number_format($log->nilai_d1, 2) }}</td>
-                                <td>{{ $log->nilai_d2 ? number_format($log->nilai_d2, 2) : '-' }}</td>
-                                <td class="fw-bold">
-                                    {{ $log->status_pengujian === 'draft' ? '-' : number_format($log->nilai_akhir, 2) }}
-                                </td>
+                                <td class="ps-4 fw-bold">{{ \Carbon\Carbon::parse($first->tanggal_uji)->format('d M Y') }}</td>
+                                <td>{{ $first->data_mentah['nama_sampel_uji'] ?? '-' }}</td>
+                                <td>{{ $first->analis ? $first->analis->username : '-' }}</td>
+                                
                                 <td>
-                                    @if($log->status_pengujian === 'draft')
-                                        <span class="badge bg-light text-secondary border"><i class="fas fa-pencil-alt me-1"></i> Belum Selesai</span>
+                                    @if($isDraft)
+                                        <span class="badge bg-secondary"><i class="fas fa-pencil-alt me-1"></i> DRAFT ({{ $logs->count() }} Parameter)</span>
+                                    @elseif($outlierCount > 0)
+                                        <span class="badge bg-danger"><i class="fas fa-exclamation-triangle me-1"></i> Terdapat {{ $outlierCount }} Outlier</span>
                                     @else
-                                        @if($log->status_evaluasi === 'inlier')
-                                            <span class="badge bg-success"><i class="fas fa-check me-1"></i> Inlier</span>
-                                        @elseif($log->status_evaluasi === 'warning')
-                                            <span class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle me-1"></i> Warning</span>
-                                            <small class="d-block text-muted mt-1">{{ $log->pelanggaran_rule }}</small>
-                                        @elseif($log->status_evaluasi === 'outlier')
-                                            <span class="badge bg-danger"><i class="fas fa-times me-1"></i> Outlier</span>
-                                            <small class="d-block text-danger mt-1 fw-bold">{{ $log->pelanggaran_rule }}</small>
-                                        @endif
+                                        <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Selesai ({{ $logs->count() }} Parameter)</span>
                                     @endif
                                 </td>
-                                <td>{{ $log->analis ? $log->analis->username : '-' }}</td>
-                                <td class="pe-3 text-center text-nowrap">
-                                    @if($log->status_pengujian === 'draft')
+                                <td class="pe-4 text-center">
+                                    <button type="button" class="btn btn-sm btn-info text-white shadow-sm btn-expand" data-group="{{ $htmlId }}" title="Lihat Detail Parameter">
+                                        <i class="fas fa-plus"></i> Detail
+                                    </button>
 
-                                        <a href="{{ route('qc-harian.draft.edit', $log->id) }}" class="btn btn-sm btn-warning aksi-btn me-1 shadow-sm" title="Lanjutkan Draft">
-                                            <i class="fas fa-pencil-alt"></i>
+                                    @if($isDraft)
+                                        <a href="{{ route('qc-harian.draft.edit', $first->id) }}" class="btn btn-sm btn-warning text-dark shadow-sm ms-1" title="Lanjutkan Draft">
+                                            <i class="fas fa-edit"></i>
                                         </a>
-
-                                        <form action="{{ route('qc-harian.draft.destroy', $log->id) }}" method="POST" class="d-inline form-delete-draft">
+                                        <form action="{{ route('qc-harian.draft.destroy', $first->id) }}" method="POST" class="d-inline form-delete-draft ms-1">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger aksi-btn shadow-sm" title="Hapus Draft">
+                                            <button type="submit" class="btn btn-sm btn-danger shadow-sm" title="Hapus Draft">
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>
                                         </form>
-                                    @else
-
-                                        <button type="button" class="btn btn-sm btn-corporate-blue aksi-btn shadow-sm btn-detail-qc"
-                                                data-tanggal="{{ \Carbon\Carbon::parse($log->tanggal_uji)->format('d M Y') }}"
-                                                data-parameter="{{ strtoupper($log->parameterUji->nama_parameter) }}"
-                                                data-analis="{{ $log->analis ? $log->analis->username : '-' }}"
-                                                data-d1="{{ number_format($log->nilai_d1, 2) }}"
-                                                data-d2="{{ $log->nilai_d2 ? number_format($log->nilai_d2, 2) : '-' }}"
-                                                data-akhir="{{ number_format($log->nilai_akhir, 2) }}"
-                                                data-db1="{{ $log->nilai_db_1 ? number_format($log->nilai_db_1, 4) : '-' }}"
-                                                data-db2="{{ $log->nilai_db_2 ? number_format($log->nilai_db_2, 4) : '-' }}"
-                                                data-mean="{{ number_format($log->mean_acuan, 4) }}"
-                                                data-sd="{{ number_format($log->sd_acuan, 4) }}"
-                                                data-pelanggaran="{{ $log->pelanggaran_rule }}"
-                                                title="Lihat Detail">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
                                     @endif
+
+                                    <div id="child-{{ $htmlId }}" class="d-none">
+                                        <div class="p-3 bg-light border rounded shadow-sm text-start">
+                                            <h6 class="fw-bold mb-3 text-secondary"><i class="fas fa-list me-2"></i>Rincian Parameter Uji</h6>
+                                            <table class="table table-sm table-bordered bg-white mb-0" style="font-size: 0.85rem;">
+                                                <thead class="table-dark">
+                                                    <tr>
+                                                        <th>Parameter</th>
+                                                        <th>Nilai D1</th>
+                                                        <th>Nilai D2</th>
+                                                        <th>Nilai Akhir</th>
+                                                        <th>Status (Westgard)</th>
+                                                        @if(!$isDraft)
+                                                        <th class="text-center">Aksi Detail</th>
+                                                        @endif
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach($logs as $log)
+                                                        <tr>
+                                                            <td class="fw-bold">{{ strtoupper($log->parameterUji->nama_parameter) }}</td>
+                                                            <td>{{ number_format($log->nilai_d1, 2) }}</td>
+                                                            <td>{{ $log->nilai_d2 ? number_format($log->nilai_d2, 2) : '-' }}</td>
+                                                            <td class="fw-bold text-primary">{{ $log->status_pengujian === 'draft' ? '-' : number_format($log->nilai_akhir, 2) }}</td>
+                                                            <td>
+                                                                @if($log->status_pengujian === 'draft')
+                                                                    <span class="badge bg-secondary">Draft</span>
+                                                                @else
+                                                                    @if($log->status_evaluasi === 'inlier')
+                                                                        <span class="badge bg-success"><i class="fas fa-check"></i> Inlier</span>
+                                                                    @elseif($log->status_evaluasi === 'warning')
+                                                                        <span class="badge bg-warning text-dark"><i class="fas fa-exclamation-triangle"></i> Warning</span>
+                                                                        <small class="d-block text-muted mt-1">{{ $log->pelanggaran_rule }}</small>
+                                                                    @elseif($log->status_evaluasi === 'outlier')
+                                                                        <span class="badge bg-danger"><i class="fas fa-times"></i> Outlier</span>
+                                                                        <small class="d-block text-danger fw-bold mt-1">{{ $log->pelanggaran_rule }}</small>
+                                                                    @endif
+                                                                @endif
+                                                            </td>
+                                                            @if(!$isDraft)
+                                                            <td class="text-center">
+                                                                <button type="button" class="btn btn-sm btn-info text-white btn-detail-qc py-0 px-2 shadow-sm"
+                                                                    data-tanggal="{{ \Carbon\Carbon::parse($log->tanggal_uji)->format('d M Y') }}"
+                                                                    data-parameter="{{ strtoupper($log->parameterUji->nama_parameter) }}"
+                                                                    data-analis="{{ $log->analis ? $log->analis->username : '-' }}"
+                                                                    data-d1="{{ number_format($log->nilai_d1, 2) }}"
+                                                                    data-d2="{{ $log->nilai_d2 ? number_format($log->nilai_d2, 2) : '-' }}"
+                                                                    data-akhir="{{ number_format($log->nilai_akhir, 2) }}"
+                                                                    data-db1="{{ $log->nilai_db_1 ? number_format($log->nilai_db_1, 4) : '-' }}"
+                                                                    data-db2="{{ $log->nilai_db_2 ? number_format($log->nilai_db_2, 4) : '-' }}"
+                                                                    data-mean="{{ number_format($log->mean_acuan, 4) }}"
+                                                                    data-sd="{{ number_format($log->sd_acuan, 4) }}"
+                                                                    data-status="{{ $log->status_evaluasi }}"
+                                                                    data-rule="{{ $log->pelanggaran_rule ?? '-' }}"
+                                                                    data-investigasi="{{ $log->catatan_investigasi ?? '-' }}"
+                                                                    data-mentah="{{ json_encode($log->data_mentah) }}"
+                                                                    title="Lihat Kalkulasi">
+                                                                <i class="fas fa-calculator"></i>
+                                                            </button>
+                                                                    @if($log->status_evaluasi === 'outlier')
+                                                                        @if($log->status_investigasi === 'menunggu_investigasi')
+                                                                            <a href="{{ route('qc-harian.investigasi', $log->id) }}" class="btn btn-sm btn-danger text-white py-0 px-2 shadow-sm ms-1" title="Form Investigasi">
+                                                                                <i class="fas fa-search"></i> Investigasi
+                                                                            </a>
+                                                                        @else
+                                                                            <button type="button" class="btn btn-sm btn-success text-white py-0 px-2 shadow-sm ms-1 btn-view-capa"
+                                                                                data-tanggal="{{ \Carbon\Carbon::parse($log->tanggal_uji)->format('d M Y') }}"
+                                                                                data-sampel="{{ $first->data_mentah['nama_sampel_uji'] ?? ($log->sampelInhouse->kode_sampel ?? '-') }}"
+                                                                                data-parameter="{{ strtoupper($log->parameterUji->nama_parameter) }}"
+                                                                                data-analis="{{ $log->analis ? ($log->analis->name ?? $log->analis->username) : '-' }}"
+                                                                                data-d1="{{ number_format($log->nilai_d1, 2) }}"
+                                                                                data-d2="{{ $log->nilai_d2 ? number_format($log->nilai_d2, 2) : '-' }}"
+                                                                                data-akhir="{{ number_format($log->nilai_akhir, 2) }}"
+                                                                                data-mean="{{ number_format($log->mean_acuan, 2) }}"
+                                                                                data-sd="{{ number_format($log->sd_acuan, 2) }}"
+                                                                                data-rule="{{ $log->pelanggaran_rule ?? '-' }}"
+                                                                                data-akar="{{ $log->akar_masalah ?? '-' }}"
+                                                                                data-temuan="{{ $log->catatan_investigasi ?? '-' }}"
+                                                                                data-perbaikan="{{ $log->tindakan_perbaikan ?? '-' }}"
+                                                                                data-pdf-url="{{ route('qc-harian.investigasi.pdf', $log->id) }}"
+                                                                                title="Lihat Laporan CAPA">
+                                                                                <i class="fas fa-file-alt me-1"></i> Baca CAPA
+                                                                            </button>
+                                                                        @endif
+                                                                    @endif
+                                                            </td>
+                                                            @endif
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -660,57 +733,31 @@
                 <h5 class="modal-title" id="modalDetailQcHarianLabel"><i class="fas fa-info-circle me-2"></i>Detail Pengujian Harian</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-3">
-                <div class="table-responsive">
-                    <table class="table table-bordered mb-0">
-                        <tbody>
-                            <tr>
-                                <th class="bg-light text-dark" style="width: 35%; text-align: left !important;">Tanggal Pengujian</th>
-                                <td id="detTanggal"></td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light text-dark" style="text-align: left !important;">Parameter</th>
-                                <td id="detParameter" class="fw-bold"></td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light text-dark" style="text-align: left !important;">Analis</th>
-                                <td id="detAnalis"></td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light text-dark" style="text-align: left !important;">Nilai D1</th>
-                                <td id="detD1"></td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light text-dark" style="text-align: left !important;">Nilai D2</th>
-                                <td id="detD2"></td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light text-dark" style="text-align: left !important;">Average</th>
-                                <td id="detAkhir" class="fw-bold"></td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light text-dark" style="text-align: left !important;">Mean</th>
-                                <td id="detMean"></td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light text-dark" style="text-align: left !important;">Standar Deviasi</th>
-                                <td id="detSD"></td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light text-dark" style="text-align: left !important;">Status Evaluasi (Westgard)</th>
-                                <td id="detStatus"></td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light text-dark" style="text-align: left !important;">Pelanggaran Rule</th>
-                                <td id="detRule" class="text-danger fw-bold"></td>
-                            </tr>
-                            <tr>
-                                <th class="bg-light text-dark" style="text-align: left !important;">Catatan Investigasi</th>
-                                <td id="detInvestigasi"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <th class="bg-light" width="35%">Tanggal Pengujian</th>
+                            <td id="detTanggal"></td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Parameter</th>
+                            <td id="detParameter" class="fw-bold"></td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Analis</th>
+                            <td id="detAnalis"></td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Status Evaluasi (Westgard)</th>
+                            <td id="detStatus"></td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Pelanggaran Rule</th>
+                            <td id="detRule" class="text-danger fw-bold"></td>
+                        </tr>
+                    </tbody>
+                </table>
 
                 <h6 class="section-title text-dark mt-3 mb-2"><i class="fas fa-calculator icon-corporate me-2"></i>Tabel Kalkulasi Pengujian</h6>
                 <div id="detTableKalkulasi" class="table-responsive"></div>
@@ -806,29 +853,217 @@
     </div>
 </div>
 
-<script>
-function toggleParamCheckboxes(show) {
-    const container = document.getElementById('paramCheckboxes');
-    if (show) {
-        container.classList.remove('d-none');
-        document.querySelectorAll('.cb-param').forEach(cb => cb.required = true);
-    } else {
-        container.classList.add('d-none');
-        document.querySelectorAll('.cb-param').forEach(cb => cb.required = false);
+<div class="modal fade" id="modalViewCapaQcHarian" tabindex="-1" aria-labelledby="modalViewCapaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold" id="modalViewCapaLabel">
+                    <i class="fas fa-file-signature me-2"></i>Laporan Investigasi & Tindakan Perbaikan (CAPA)
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="card border-0 bg-light p-3 mb-3">
+                    <div class="row g-2 small">
+                        <div class="col-md-6"><strong>Tanggal Uji:</strong> <span id="capaTanggal">-</span></div>
+                        <div class="col-md-6"><strong>Kode Sampel:</strong> <span id="capaSampel">-</span></div>
+                        <div class="col-md-6"><strong>Parameter:</strong> <span id="capaParam" class="fw-bold text-danger">-</span></div>
+                        <div class="col-md-6"><strong>Analis:</strong> <span id="capaAnalis">-</span></div>
+                        <div class="col-md-6"><strong>Nilai D1 / D2:</strong> <span id="capaD1D2">-</span></div>
+                        <div class="col-md-6"><strong>Nilai Akhir (Outlier):</strong> <span id="capaAkhir" class="badge bg-danger fs-6">-</span></div>
+                        <div class="col-md-6"><strong>Target Acuan:</strong> <span id="capaAcuan">-</span></div>
+                        <div class="col-md-6"><strong>Rule Westgard:</strong> <span id="capaRule" class="text-danger fw-bold">-</span></div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-secondary mb-1"><i class="fas fa-tag me-1"></i>Kategori Akar Masalah</label>
+                    <div class="p-2 border rounded bg-white fw-bold text-dark" id="capaAkar">-</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-secondary mb-1"><i class="fas fa-search me-1"></i>Detail Temuan Investigasi</label>
+                    <div class="p-3 border rounded bg-white" style="white-space: pre-wrap;" id="capaTemuan">-</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-secondary mb-1"><i class="fas fa-tools me-1"></i>Tindakan Perbaikan (Corrective Action)</label>
+                    <div class="p-3 border rounded bg-white" style="white-space: pre-wrap;" id="capaPerbaikan">-</div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light justify-content-between">
+                <a href="#" id="btnDownloadCapaPdf" target="_blank" class="btn btn-outline-danger shadow-sm">
+                    <i class="fas fa-file-pdf me-1"></i> Cetak Lembar CAPA (PDF)
+                </a>
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .pulse-button {
+        animation: pulse 1.5s infinite;
     }
-}
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.btn-detail-qc').forEach(function(btn) {
-        btn.addEventListener('click', function() {
+    @keyframes pulse {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+        70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    }
+    
+    .dataTables_wrapper .dataTables_paginate {
+        margin-top: 20px !important;
+        float: right;
+    }
+    .dataTables_wrapper .pagination {
+        border: 1px solid #d4d4d4;
+        border-radius: 6px;
+        padding: 0;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        background-color: #fff;
+    }
+    .dataTables_wrapper .page-item .page-link {
+        border: none;
+        color: #555;
+        font-weight: 500;
+        background: transparent;
+        margin: 0;
+        padding: 8px 16px;
+        box-shadow: none !important;
+    }
+    .dataTables_wrapper .page-item .page-link:hover {
+        background-color: #f8f9fa;
+        color: #000;
+    }
+    .dataTables_wrapper .page-item.active .page-link {
+        border-top: 1px solid #000 !important;
+        border-bottom: 1px solid #000 !important;
+        border-left: 1px solid #000 !important;
+        border-right: 1px solid #000 !important;
+        background-color: transparent !important;
+        color: #111 !important;
+        font-weight: bold;
+        border-radius: 0;
+        margin-top: -1px;
+        margin-bottom: -1px;
+        padding: 8px 16px;
+        position: relative;
+        z-index: 2;
+    }
+    .dataTables_wrapper .page-item:last-child .page-link {
+        border-left: 1px solid #e0e0e0;
+        border-radius: 0;
+    }
+    .dataTables_wrapper .page-item:first-child .page-link {
+        border-radius: 0;
+    }
+    .dataTables_wrapper .page-item.disabled .page-link {
+        color: #aaa;
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+    function toggleParamCheckboxes(show) {
+        const container = document.getElementById('paramCheckboxes');
+        if (show) {
+            container.classList.remove('d-none');
+            document.querySelectorAll('.cb-param').forEach(cb => cb.required = true);
+        } else {
+            container.classList.add('d-none');
+            document.querySelectorAll('.cb-param').forEach(cb => cb.required = false);
+        }
+    }
+
+    $(document).ready(function() {
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+            let filterBulan = $('#filterBulan').val();
+            let filterTahun = $('#filterTahun').val();
+            let dateStr = data[0] || ""; 
+            if (filterBulan && !dateStr.includes(filterBulan)) return false;
+            if (filterTahun && !dateStr.includes(filterTahun)) return false;
+            return true;
+        });
+
+        let table = $('#tableRiwayat').DataTable({
+            "order": [], 
+            "pageLength": 10,
+            "language": {
+                "search": "Live Search:",
+                "lengthMenu": "Tampilkan _MENU_ baris",
+                "info": "Menampilkan _START_ s/d _END_ dari total _TOTAL_ riwayat",
+                "infoEmpty": "Tidak ada data riwayat yang tersedia",
+                "infoFiltered": "(disaring dari _MAX_ total data)",
+                "zeroRecords": "Data tidak ditemukan",
+                "paginate": {
+                    "first": "Awal",
+                    "last": "Akhir",
+                    "next": "Next <i class='fas fa-chevron-right' style='font-size:10px; margin-left:4px'></i>",
+                    "previous": "<i class='fas fa-chevron-left' style='font-size:10px; margin-right:4px'></i> Previous"
+                }
+            }
+        });
+
+        $('#filterBulan, #filterTahun').on('change', function() {
+            table.draw();
+        });
+
+        $('#tableRiwayat tbody').on('click', 'button.btn-expand', function () {
+            let tr = $(this).closest('tr');
+            let row = table.row(tr);
+            let groupId = $(this).data('group');
+            let childHtml = $('#child-' + groupId).html();
+            if (row.child.isShown()) {
+                row.child.hide();
+                tr.removeClass('shown');
+                $(this).html('<i class="fas fa-plus"></i> Detail');
+                $(this).removeClass('btn-secondary').addClass('btn-info text-white');
+            } else {
+                row.child(childHtml).show();
+                tr.addClass('shown');
+                $(this).html('<i class="fas fa-minus"></i> Tutup');
+                $(this).removeClass('btn-info text-white').addClass('btn-secondary');
+            }
+        });
+
+        $('.form-delete-draft').on('submit', function(e) {
+            e.preventDefault(); 
+            let form = this;
+            
+            Swal.fire({
+                title: 'Hapus Draft Ini?',
+                text: "Data pengujian yang belum selesai ini akan hilang permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545', 
+                cancelButtonColor: '#1b3152', 
+                confirmButtonText: '<i class="fas fa-trash-alt me-1"></i> Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Menghapus...',
+                        allowOutsideClick: false,
+                        didOpen: () => { Swal.showLoading(); }
+                    });
+                    form.submit(); 
+                }
+            });
+        });
+
+        $('body').on('click', '.btn-detail-qc', function() {
             document.getElementById('detTanggal').innerText = this.getAttribute('data-tanggal');
             document.getElementById('detParameter').innerText = this.getAttribute('data-parameter');
             document.getElementById('detAnalis').innerText = this.getAttribute('data-analis');
-            document.getElementById('detD1').innerText = this.getAttribute('data-d1');
-            document.getElementById('detD2').innerText = this.getAttribute('data-d2');
-            document.getElementById('detAkhir').innerText = this.getAttribute('data-akhir');
-            document.getElementById('detMean').innerText = this.getAttribute('data-mean');
-            document.getElementById('detSD').innerText = this.getAttribute('data-sd');
-
+            
             let status = this.getAttribute('data-status');
             let statusHtml = '';
             if (status === 'inlier') {
@@ -841,8 +1076,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('detStatus').innerHTML = statusHtml;
 
             document.getElementById('detRule').innerText = this.getAttribute('data-rule');
-            document.getElementById('detInvestigasi').innerText = this.getAttribute('data-investigasi');
-
+            
             const code = this.getAttribute('data-parameter').toUpperCase();
             let mentahRaw = this.getAttribute('data-mentah');
             let m = {};
@@ -870,8 +1104,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let db2Str = this.getAttribute('data-db2');
             let hasDb2 = db2Str !== '-';
             let db2 = hasDb2 ? num(db2Str) : 0;
-            let avgDb = (hasDb2 && db1>0) ? (db1 + db2) / 2 : db1;
-
+            
             let thead = '';
             let tbody1 = '';
             let tbody2 = '';
@@ -1012,84 +1245,29 @@ document.addEventListener('DOMContentLoaded', function() {
             </table>`;
 
             document.getElementById('detTableKalkulasi').innerHTML = tableHtml;
-
             new bootstrap.Modal(document.getElementById('modalDetailQcHarian')).show();
         });
     });
-});
-</script>
 
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn-view-capa');
+        if (!btn) return;
 
-<script>
-$(document).ready(function() {
-    $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
-        let filterBulan = $('#filterBulan').val();
-        let filterTahun = $('#filterTahun').val();
+        document.getElementById('capaTanggal').textContent = btn.dataset.tanggal;
+        document.getElementById('capaSampel').textContent = btn.dataset.sampel;
+        document.getElementById('capaParam').textContent = btn.dataset.parameter;
+        document.getElementById('capaAnalis').textContent = btn.dataset.analis;
+        document.getElementById('capaD1D2').textContent = `D1: ${btn.dataset.d1} | D2: ${btn.dataset.d2}`;
+        document.getElementById('capaAkhir').textContent = btn.dataset.akhir;
+        document.getElementById('capaAcuan').textContent = `Mean: ${btn.dataset.mean} | SD: ${btn.dataset.sd}`;
+        document.getElementById('capaRule').textContent = btn.dataset.rule;
+        document.getElementById('capaAkar').textContent = btn.dataset.akar;
+        document.getElementById('capaTemuan').textContent = btn.dataset.temuan;
+        document.getElementById('capaPerbaikan').textContent = btn.dataset.perbaikan;
+        document.getElementById('btnDownloadCapaPdf').href = btn.dataset.pdfUrl;
 
-        let dateStr = data[0] || "";
-
-        if (filterBulan && !dateStr.includes(filterBulan)) {
-            return false;
-        }
-
-        if (filterTahun && !dateStr.includes(filterTahun)) {
-            return false;
-        }
-
-        return true;
-    });
-
-    let table = $('#tableRiwayat').DataTable({
-        "order": [],
-        "pageLength": 10,
-        "language": {
-            "search": "Live Search:",
-            "lengthMenu": "Tampilkan _MENU_ baris",
-            "info": "Menampilkan _START_ s/d _END_ dari total _TOTAL_ riwayat",
-            "infoEmpty": "Tidak ada data riwayat yang tersedia",
-            "infoFiltered": "(disaring dari _MAX_ total data)",
-            "zeroRecords": "Data tidak ditemukan",
-            "paginate": {
-                "first": "Awal",
-                "last": "Akhir",
-                "next": "Next <i class='fas fa-chevron-right' style='font-size:10px; margin-left:4px'></i>",
-                "previous": "<i class='fas fa-chevron-left' style='font-size:10px; margin-right:4px'></i> Previous"
-            }
-        }
-    });
-
-    $('#filterBulan, #filterTahun').on('change', function() {
-        table.draw();
-    });
-});
-
-    $('.form-delete-draft').on('submit', function(e) {
-        e.preventDefault();
-        let form = this;
-
-        Swal.fire({
-            title: 'Hapus Draft Ini?',
-            text: "Data pengujian yang belum selesai ini akan hilang permanen!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: '<i class="fas fa-trash-alt me-1"></i> Ya, Hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire({
-                    title: 'Menghapus...',
-                    allowOutsideClick: false,
-                    didOpen: () => { Swal.showLoading(); }
-                });
-                form.submit();
-            }
-        });
+        const modal = new bootstrap.Modal(document.getElementById('modalViewCapaQcHarian'));
+        modal.show();
     });
 </script>
 

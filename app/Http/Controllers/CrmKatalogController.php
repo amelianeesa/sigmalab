@@ -187,97 +187,171 @@ class CrmKatalogController extends Controller
                 ->with('success', 'Botol ditolak pada tahap verifikasi administratif.');
     }
 
-        public function verifikasiTeknisForm($id)
-        {
-            $katalog = CrmKatalog::with('sertifikats.parameterUji')->findOrFail($id);
+    public function verifikasiTeknisForm($id)
+    {
+        $katalog = CrmKatalog::with('sertifikats.parameterUji')->findOrFail($id);
 
-            if ($katalog->status !== 'menunggu_verifikasi_teknis') {
-                return redirect()->route('crm-katalog.show', $id)->with('error', 'Botol ini belum siap atau sudah melewati tahap verifikasi teknis.');
-            }
-
-            $existingData = \App\Models\CrmVerifikasiTeknis::where('crm_katalog_id', $id)
-                ->get()
-                ->keyBy('parameter_uji_id');
-
-            return view('qc-crm.katalog.verifikasi-teknis', compact('katalog', 'existingData'));
+        if ($katalog->status !== 'menunggu_verifikasi_teknis') {
+            return redirect()->route('crm-katalog.show', $id)->with('error', 'Botol ini belum siap atau sudah melewati tahap verifikasi teknis.');
         }
 
+        $existingData = \App\Models\CrmVerifikasiTeknis::with(['personils', 'alats', 'bahans'])
+            ->where('crm_katalog_id', $id)
+            ->get()
+            ->keyBy('parameter_uji_id');
+
+        $personilList = \App\Models\Personil::orderBy('nama')->get();
+        $alatList = \App\Models\Alat::where('kondisi_barang', 'baik')->orderBy('nama_alat')->get();
+        $barangList = \App\Models\Barang::orderBy('nama_barang')->get();
+
+        return view('qc-crm.katalog.verifikasi-teknis', compact('katalog', 'existingData', 'personilList', 'alatList', 'barangList'));
+    }
+
         public function verifikasiTeknisStore(Request $request, $id)
-        {
-            $katalog = CrmKatalog::with('sertifikats')->findOrFail($id);
-            $sertifikatMap = $katalog->sertifikats->keyBy('parameter_uji_id');
-            $isDraft = $request->input('action') === 'draft';
+    {
+        $katalog = CrmKatalog::with('sertifikats')->findOrFail($id);
+        $sertifikatMap = $katalog->sertifikats->keyBy('parameter_uji_id');
+        $isDraft = $request->input('action') === 'draft';
 
-            \Illuminate\Support\Facades\DB::beginTransaction();
-            try {
-                $adaData = false;
-                $semuaInlier = true;
+        \Illuminate\Support\Facades\DB::beginTransaction();
+        try {
+            $adaData = false;
+            $semuaInlier = true;
 
-                foreach ($request->input('params', []) as $paramId => $paramData) {
-                    if (!isset($sertifikatMap[$paramId])) continue;
-                    $inputRows = $paramData['data'] ?? [];
-                    if (empty($inputRows)) continue;
+            foreach ($request->input('params', []) as $paramId => $paramData) {
+                if (!isset($sertifikatMap[$paramId])) continue;
+                $inputRows = $paramData['data'] ?? [];
+                if (empty($inputRows)) continue;
 
-                    $sertifikat = $sertifikatMap[$paramId];
-                    $meanPerPengujian = [];
-                    $mentahSemua = [];
-                    $terakhirD1 = null;
-                    $terakhirD2 = null;
+                $sertifikat = $sertifikatMap[$paramId];
+                $meanPerPengujian = [];
+                $mentahSemua = [];
+                $terakhirD1 = null;
+                $terakhirD2 = null;
 
-                    $totalRows = count($inputRows);
+                $totalRows = count($inputRows);
 
-                    foreach ($inputRows as $index => $row) {
-                        $val1 = $row['nilai_d1'] ?? null;
-                        $val2 = $row['nilai_d2'] ?? null;
-                        
-                        $isHistorical = $index < ($totalRows - 1);
+                foreach ($inputRows as $index => $row) {
+                    $val1 = $row['nilai_d1'] ?? null;
+                    $val2 = $row['nilai_d2'] ?? null;
+                    
+                    $isHistorical = $index < ($totalRows - 1);
 
-                        if (!$isDraft && !$isHistorical && ($val1 === null || $val1 === '' || $val2 === null || $val2 === '')) {
-                            continue;
-                        }
-
-                        if ($val1 !== null && $val1 !== '' && $val2 !== null && $val2 !== '') {
-                            $meanPerPengujian[] = (floatval($val1) + floatval($val2)) / 2;
-                        }
-
-                        $mentahSemua[] = $row;
-                        $terakhirD1 = $val1;
-                        $terakhirD2 = $val2;
+                    if (!$isDraft && !$isHistorical && ($val1 === null || $val1 === '' || $val2 === null || $val2 === '')) {
+                        continue;
                     }
 
-                    if (empty($meanPerPengujian) && !$isDraft) continue;
-                    $adaData = true;
-                    $nilai_akhir = null;
-                    $batas_bawah = $sertifikat->cert_value - $sertifikat->cert_u;
-                    $batas_atas = $sertifikat->cert_value + $sertifikat->cert_u;
-                    $status = null;
-
-                    if (!empty($meanPerPengujian)) {
-                        $nilai_akhir = end($meanPerPengujian); 
-                        
-                        $status = ($nilai_akhir >= $batas_bawah && $nilai_akhir <= $batas_atas) ? 'inlier' : 'outlier';
-                        if ($status === 'outlier') $semuaInlier = false;
+                    if ($val1 !== null && $val1 !== '' && $val2 !== null && $val2 !== '') {
+                        $meanPerPengujian[] = (floatval($val1) + floatval($val2)) / 2;
                     }
 
-                    \App\Models\CrmVerifikasiTeknis::updateOrCreate(
-                        ['crm_katalog_id' => $katalog->id, 'parameter_uji_id' => $paramId],
-                        [
-                            'analis_id' => $request->input('analis_id'),
-                            'nilai_d1' => $terakhirD1,
-                            'nilai_d2' => $terakhirD2,
-                            'nilai_akhir' => $nilai_akhir,
-                            'cert_value' => $sertifikat->cert_value,
-                            'cert_u' => $sertifikat->cert_u,
-                            'batas_bawah' => $batas_bawah,
-                            'batas_atas' => $batas_atas,
-                            'status_evaluasi' => $isDraft ? 'draft' : $status,
-                            'data_mentah' => $mentahSemua,
-                            'tanggal_uji' => now(),
-                        ]
-                    );
+                    $mentahSemua[] = $row;
+                    $terakhirD1 = $val1;
+                    $terakhirD2 = $val2;
                 }
 
-                            // Mode draft: cukup simpan apa adanya, tanpa cek kelengkapan atau ubah status botol
+                if (empty($meanPerPengujian) && !$isDraft) continue;
+                $adaData = true;
+                $nilai_akhir = null;
+                $batas_bawah = $sertifikat->cert_value - $sertifikat->cert_u;
+                $batas_atas = $sertifikat->cert_value + $sertifikat->cert_u;
+                $status = null;
+
+                if (!empty($meanPerPengujian)) {
+                    $nilai_akhir = end($meanPerPengujian); 
+                    
+                    $status = ($nilai_akhir >= $batas_bawah && $nilai_akhir <= $batas_atas) ? 'inlier' : 'outlier';
+                    if ($status === 'outlier') $semuaInlier = false;
+                }
+
+                // Ambil data verifikasi sebelum diupdate untuk mengecek status dan qty lama
+                $existingVerif = \App\Models\CrmVerifikasiTeknis::where('crm_katalog_id', $katalog->id)
+                                    ->where('parameter_uji_id', $paramId)->first();
+                $wasFinal = $existingVerif && $existingVerif->status_evaluasi !== 'draft';
+                $oldBahans = [];
+                if ($wasFinal) {
+                    // Jika sebelumnya final, berarti stok sudah terpotong
+                    $oldBahans = $existingVerif->bahans()->pluck('crm_verif_teknis_bahan.qty', 'crm_verif_teknis_bahan.barang_id')->toArray();
+                }
+
+                                $verif = \App\Models\CrmVerifikasiTeknis::updateOrCreate(
+                    ['crm_katalog_id' => $katalog->id, 'parameter_uji_id' => $paramId],
+                    [
+                        'analis_id' => $request->input('analis_id'), 
+                        'nilai_d1' => $terakhirD1,
+                        'nilai_d2' => $terakhirD2,
+                        'nilai_akhir' => $nilai_akhir,
+                        'cert_value' => $sertifikat->cert_value,
+                        'cert_u' => $sertifikat->cert_u,
+                        'batas_bawah' => $batas_bawah,
+                        'batas_atas' => $batas_atas,
+                        'data_mentah' => $mentahSemua,
+                        'tanggal_uji' => $paramData['tanggal_uji'] ?? now(),
+                        'catatan' => $paramData['catatan'] ?? null,
+                        'status_evaluasi' => $isDraft ? 'draft' : $status,
+                        'status_investigasi' => (!$isDraft && $status === 'outlier') ? 'menunggu_investigasi' : 'aman',
+                    ]
+                );
+                
+                if (!empty($paramData['personil_ids'])) {
+                    $syncPersonil = [];
+                    foreach ($paramData['personil_ids'] as $pidPersonil) {
+                        $syncPersonil[$pidPersonil] = ['peran' => $paramData['personil_peran'][$pidPersonil] ?? null];
+                    }
+                    $verif->personils()->sync($syncPersonil);
+                } else {
+                    $verif->personils()->detach();
+                }
+
+                if (!empty($paramData['alat_ids'])) {
+                    $verif->alats()->sync($paramData['alat_ids']);
+                } else {
+                    $verif->alats()->detach();
+                }
+
+                if (!empty($paramData['barang_ids'])) {
+                    $syncBahan = [];
+                    foreach ($paramData['barang_ids'] as $bidBarang) {
+                        $syncBahan[$bidBarang] = ['qty' => $paramData['barang_jumlah'][$bidBarang] ?? 1];
+                    }
+                    $verif->bahans()->sync($syncBahan);
+                } else {
+                    $verif->bahans()->detach();
+                }
+
+                // AUTO DEDUCT LOGIC
+                $newDeducted = [];
+                if (!$isDraft && !empty($paramData['barang_ids'])) {
+                    foreach ($paramData['barang_ids'] as $bidBarang) {
+                        $newDeducted[$bidBarang] = $paramData['barang_jumlah'][$bidBarang] ?? 1;
+                    }
+                }
+
+                // 1. Proses penambahan potongan atau pengembalian sebagian
+                foreach ($newDeducted as $bid => $newQty) {
+                    $oldQty = $oldBahans[$bid] ?? 0;
+                    $diff = $newQty - $oldQty;
+                    if ($diff != 0) {
+                        $barang = \App\Models\Barang::find($bid);
+                        if ($barang) {
+                            $barang->pengeluaran += $diff;
+                            $barang->save();
+                        }
+                    }
+                }
+
+                // 2. Proses pengembalian utuh untuk bahan yang dihapus (atau jika kembali jadi draft)
+                foreach ($oldBahans as $oldBid => $oldQty) {
+                    if (!isset($newDeducted[$oldBid])) {
+                        $barang = \App\Models\Barang::find($oldBid);
+                        if ($barang) {
+                            $barang->pengeluaran -= $oldQty;
+                            $barang->save();
+                        }
+                    }
+                }
+            } 
+
             if ($isDraft) {
                 \Illuminate\Support\Facades\DB::commit();
                 return redirect()->route('qc-crm.index')->with('success', 'Draft berhasil disimpan.');
@@ -305,10 +379,42 @@ class CrmKatalogController extends Controller
             \Illuminate\Support\Facades\DB::commit();
             return redirect()->route('crm-katalog.verifikasi-teknis.form', $id)->with('success', 'Sebagian data tersimpan. Lengkapi parameter lain untuk menuntaskan verifikasi.');
 
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\DB::rollBack();
-                return redirect()->back()->withInput()->with('error', 'Gagal menyimpan: ' . $e->getMessage());
-            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan: ' . $e->getMessage());
         }
+    }
+
+        public function investigasiVerifTeknis($katalogId, $verifId)
+    {
+        $katalog = CrmKatalog::findOrFail($katalogId);
+        $verif = \App\Models\CrmVerifikasiTeknis::with(['parameterUji'])->findOrFail($verifId);
+
+        if ($verif->status_evaluasi !== 'outlier') {
+            return redirect()->route('qc-crm.index')->with('error', 'Hanya data outlier yang memerlukan investigasi.');
+        }
+
+        return view('qc-crm.katalog.investigasi', compact('katalog', 'verif'));
+    }
+
+    public function storeInvestigasiVerifTeknis(Request $request, $katalogId, $verifId)
+    {
+        $request->validate([
+            'akar_masalah' => 'required|string',
+            'catatan_investigasi' => 'required|string|min:10',
+            'tindakan_perbaikan' => 'required|string|min:10',
+        ]);
+
+        $verif = \App\Models\CrmVerifikasiTeknis::findOrFail($verifId);
+        $verif->update([
+            'akar_masalah' => $request->akar_masalah,
+            'catatan_investigasi' => $request->catatan_investigasi,
+            'tindakan_perbaikan' => $request->tindakan_perbaikan,
+            'status_investigasi' => 'selesai_investigasi',
+        ]);
+
+        return redirect()->route('qc-crm.index')
+            ->with('success', 'Laporan CAPA berhasil disimpan. Silakan lakukan Uji Ulang (Retest) untuk botol tersebut.');
+    }
 
 }

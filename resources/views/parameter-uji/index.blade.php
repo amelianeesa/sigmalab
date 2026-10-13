@@ -199,40 +199,40 @@
 
             <div id="table-container">
                 <div class="scroll-hint-pu"><i class="fas fa-arrows-alt-h me-1"></i> Geser tabel ke samping untuk melihat kolom lainnya</div>
-                <div class="table-responsive">
+                                <div class="table-responsive">
                     <table class="table table-hover table-striped table-bordered align-middle mb-0 pu-table">
                         <thead class="pu-table-header">
                             <tr>
                                 <th style="width: 50px;" class="text-center">No</th>
+                                <th style="width: 130px;">Kode Parameter</th>
                                 <th>Nama Parameter</th>
-                                <th class="text-center">Satuan</th>
-                                <th class="text-center">Nilai Acuan</th>
-                                <th class="text-center">Range Batas (Min - Max)</th>
-                                <th>Metode/Kriteria</th>
-                                <th class="text-center">Status</th>
-                                <th class="text-center" style="width: 130px;">Aksi</th>
+                                <th class="text-center" style="width: 100px;">Satuan</th>
+                                <th class="text-center" style="width: 120px;">Status</th>
+                                <th class="text-center" style="width: 100px;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($parameterUji as $index => $item)
                             <tr>
                                 <td class="text-center">{{ $parameterUji->firstItem() + $index }}</td>
-                                <td class="fw-bold">{{ $item->nama_parameter }}</td>
-                                <td class="text-center">{{ $item->satuan }}</td>
-                                <td class="text-center">{{ number_format($item->nilai_acuan, 2) }}</td>
-                                <td class="text-center">{{ number_format($item->batas_bawah, 2) }} - {{ number_format($item->batas_atas, 2) }}</td>
-                                <td>{{ $item->metode_kriteria ?? '-' }}</td>
+                                <td class="fw-bold text-primary">
+                                    {{ strtoupper($item->nama_parameter) }}
+                                </td>
+                                <td class="fw-semibold text-dark">
+                                    {{ $item->nama_lengkap }}
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-light text-dark border">{{ $item->satuan ?? '-' }}</span>
+                                </td>
                                 <td class="text-center">
                                     @if($item->status_aktif)
-                                        <span class="badge bg-success" style="font-size: 0.68rem;">Aktif</span>
+                                        <span class="badge bg-success" style="font-size: 0.68rem;"><i class="fas fa-check-circle me-1"></i>Aktif</span>
                                     @else
-                                        <span class="badge bg-danger" style="font-size: 0.68rem;">Nonaktif</span>
+                                        <span class="badge bg-danger" style="font-size: 0.68rem;"><i class="fas fa-times-circle me-1"></i>Nonaktif</span>
                                     @endif
                                 </td>
                                 <td class="text-center text-nowrap">
                                     <div class="d-inline-flex align-items-center gap-1">
-                                        <a href="{{ route('parameter-uji.show', $item->parameter_uji_id) }}" class="btn btn-corporate-blue btn-sm pu-action-btn shadow-sm" title="Detail" aria-label="Detail"><i class="fas fa-eye"></i></a>
-
                                         @can('update', $item)
                                             <a href="{{ route('parameter-uji.edit', $item->parameter_uji_id) }}" class="btn btn-warning btn-sm pu-action-btn shadow-sm" title="Edit" aria-label="Edit"><i class="fas fa-edit"></i></a>
                                         @endcan
@@ -247,7 +247,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="8" class="text-center text-muted py-4">Data parameter uji tidak ditemukan.</td>
+                                <td colspan="6" class="text-center text-muted py-4">Data parameter uji tidak ditemukan.</td>
                             </tr>
                             @endforelse
                         </tbody>
