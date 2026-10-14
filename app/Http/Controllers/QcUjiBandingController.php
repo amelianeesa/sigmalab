@@ -41,7 +41,7 @@ class QcUjiBandingController extends Controller
     
         $alatList = Alat::all();
         $personilList = Personil::orderBy('nama')->get();
-        $barangList = Barang::where('saldo_akhir', '>', 0)->get();
+        $barangList = Barang::orderBy('nama_barang')->get();
 
         $draftId = $request->query('draft_id');
         $draftData = null;
@@ -228,6 +228,13 @@ class QcUjiBandingController extends Controller
             }
 
             $alat_ids = $mentah['alat_ids'] ?? [];
+            $bahan_data = [];
+            if (!empty($mentah['bahan_ids'])) {
+                foreach ((array) $mentah['bahan_ids'] as $b_id) {
+                    $qty = $mentah['barang_jumlah'][$b_id] ?? '';
+                    $bahan_data[] = ['id' => $b_id, 'qty' => $qty];
+                }
+            }
 
             $inputs = [];
             if (!empty($mentah['rows'])) {
@@ -250,7 +257,8 @@ class QcUjiBandingController extends Controller
             $draftData['params'][$pid] = [
                 'selected' => '1',
                 'analis_data' => $analis_data,
-                'alat_data' => $alat_ids, // <--- SUDAH BENAR
+                'alat_data' => $alat_ids, 
+                'bahan_data' => $bahan_data,
                 'inputs' => $inputs,
             ];
             

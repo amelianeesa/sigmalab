@@ -220,6 +220,34 @@ class KegiatanController extends Controller
 
         $validated = $request->validated();
 
+        if (isset($validated['status_kegiatan']) && $validated['status_kegiatan'] === 'selesai') {
+            $parameterIds = \App\Models\HasilUji::where('kegiatan_id', $id)
+                ->pluck('parameter_uji_id')
+                ->unique();
+            
+            $activeBatch = \App\Models\SampelInhouse::where('status', 'aktif')->latest('id')->first();
+            
+            if ($activeBatch) {
+                $outlierParams = [];
+                foreach ($parameterIds as $paramId) {
+                    $isKarantina = \App\Models\QcHarian::where('sampel_inhouse_id', $activeBatch->sampel_inhouse_id)
+                        ->where('parameter_uji_id', $paramId)
+                        ->where('status_evaluasi', 'outlier')
+                        ->where('is_retest', false) // Artinya belum selesai retest
+                        ->exists();
+                    
+                    if ($isKarantina) {
+                        $namaParam = \App\Models\ParameterUji::find($paramId)->nama_parameter ?? '-';
+                        $outlierParams[] = strtoupper($namaParam);
+                    }
+                }
+                
+                if (!empty($outlierParams)) {
+                    return back()->withInput()->with('error', "Validasi Karantina Data: Tidak dapat menyelesaikan kegiatan. Parameter berikut sedang berstatus OUT-OF-CONTROL di QC In-House (Karantina): " . implode(', ', $outlierParams) . ". Selesaikan investigasi & uji ulang (Retest) In-House terlebih dahulu!");
+                }
+            }
+        }
+
         DB::transaction(function () use ($request, $validated, $kegiatan) {
             $kegiatan->update([
                 'nama_kegiatan' => $validated['nama_kegiatan'],
@@ -256,9 +284,7 @@ class KegiatanController extends Controller
                         }
                     }
                 }
-            } // End if barang_ids
-                
-            // Add-Only Sync for Parameter Uji (Penambahan Susulan)
+            } 
             $hasilData = [];
             
             if (!empty($validated['parameter_uji_ids'])) {
@@ -349,7 +375,6 @@ class KegiatanController extends Controller
     {
         $kegiatan = Kegiatan::findOrFail($id);
         
-        // Authorization: only specific roles can unlock
         $allowedRoles = ['koordinator_lab', 'manajer_teknis', 'admin'];
         if (!in_array(auth()->user()->role->nama_role ?? '', $allowedRoles)) {
             abort(403, 'Anda tidak memiliki hak akses untuk membuka kunci kegiatan.');

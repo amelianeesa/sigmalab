@@ -379,11 +379,28 @@
 
                     <form action="{{ route('qc-harian.investigasi.store', $qc->id) }}" method="POST" id="formCapa">
                         @csrf
-                        <div class="mb-2">
-                            <label class="form-label">Analisis Akar Masalah & Tindakan Perbaikan <span class="text-danger">*</span></label>
-                            <p class="form-hint">Jelaskan mengapa hasil pengujian menjadi outlier (misal: kalibrasi alat bergeser, reagen kadaluarsa, kesalahan preparasi) dan apa tindakan perbaikannya (misal: kalibrasi ulang, ganti reagen, re-test).</p>
-                            <textarea name="catatan_investigasi" id="catatan_investigasi" rows="8" class="form-control" required minlength="10" placeholder="Contoh: Terjadi kesalahan penimbangan pada botol reagen A. Tindakan: Larutan dibuang dan dibuat reagen baru, kemudian alat dikalibrasi ulang. Pengujian sampel ditahan menunggu hasil running QC selanjutnya."></textarea>
-                            <div class="form-text text-danger" id="charCount">Minimal 10 karakter.</div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Akar Masalah <span class="text-danger">*</span></label>
+                            <select name="akar_masalah" class="form-select" required>
+                                <option value="">-- Pilih Kategori Akar Masalah --</option>
+                                <option value="Kondisi Instrumen">Kondisi Instrumen / Alat</option>
+                                <option value="Human Error">Human Error (Analis)</option>
+                                <option value="Kondisi Reagen / Sampel">Kondisi Reagen / Sampel</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Detail Investigasi (Temuan) <span class="text-danger">*</span></label>
+                            <p class="small text-muted mb-2">Jelaskan temuan spesifik mengapa hasil bisa menyimpang (Contoh: Terjadi kebocoran gas pada bomb calorimeter saat running berlangsung).</p>
+                            <textarea name="catatan_investigasi" id="catatan_investigasi" rows="4" class="form-control" required minlength="10"></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Tindakan Perbaikan (Corrective Action) <span class="text-danger">*</span></label>
+                            <p class="small text-muted mb-2">Apa tindakan perbaikan yang dilakukan agar alat/metode kembali terkendali? (Contoh: Mengganti seal O-ring dan melakukan kalibrasi ulang).</p>
+                            <textarea name="tindakan_perbaikan" id="tindakan_perbaikan" rows="4" class="form-control" required minlength="10"></textarea>
                         </div>
 
                         <hr class="form-divider">
@@ -403,26 +420,15 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const textarea = document.getElementById('catatan_investigasi');
-        const charCount = document.getElementById('charCount');
+        const form = document.getElementById('formCapa');
+        const catatan = document.getElementById('catatan_investigasi');
+        const tindakan = document.getElementById('tindakan_perbaikan');
         const btnSubmit = document.getElementById('btnSubmit');
-        
-        textarea.addEventListener('input', function() {
-            if(this.value.length < 10) {
-                charCount.classList.add('text-danger');
-                charCount.classList.remove('text-success');
-                charCount.innerHTML = `Minimal 10 karakter. (Saat ini: ${this.value.length})`;
-            } else {
-                charCount.classList.remove('text-danger');
-                charCount.classList.add('text-success');
-                charCount.innerHTML = `Panjang karakter sudah mencukupi.`;
-            }
-        });
 
-        document.getElementById('formCapa').addEventListener('submit', function(e) {
-            if(textarea.value.length < 10) {
+        form.addEventListener('submit', function(e) {
+            if (catatan.value.trim().length < 10 || tindakan.value.trim().length < 10) {
                 e.preventDefault();
-                alert('Teks investigasi terlalu singkat!');
+                alert('Detail Investigasi dan Tindakan Perbaikan masing-masing wajib diisi minimal 10 karakter!');
                 return;
             }
             btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan...';

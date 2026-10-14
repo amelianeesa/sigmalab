@@ -46,15 +46,22 @@ Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'
 
 Route::get('/public/alat/{kode_alat}', [AlatController::class, 'inputKalibrasiByKode'])->where('kode_alat', '.*')->name('alat.public-scan');
 
-Route::get('/alat/{id}/export-pdf', [AlatController::class, 'exportPdf'])->name('alat.export-pdf');
-Route::get('/alat/{id}/export-excel', [AlatController::class, 'exportExcel'])->name('alat.export-excel');
-Route::get('/alat/{id}/export-word', [AlatController::class, 'exportWord'])->name('alat.export-word');
-
 // Authenticated & Force Password Change Routes
-Route::middleware(['auth', 'force.password.change'])->group(function () {
+Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawai.terbatas'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::post('/switch-role', [RoleSwitcherController::class, 'switchRole'])->name('switch-role');
+    // Pindah workspace (hanya akun ber-workspace ALL)
+    Route::post('/workspace/switch', [\App\Http\Controllers\WorkspaceController::class, 'switch'])->name('workspace.switch');
+
+    // Alat export (sebelumnya terbuka tanpa login)
+    Route::get('/alat/{id}/export-pdf', [AlatController::class, 'exportPdf'])->name('alat.export-pdf');
+    Route::get('/alat/{id}/export-excel', [AlatController::class, 'exportExcel'])->name('alat.export-excel');
+    Route::get('/alat/{id}/export-word', [AlatController::class, 'exportWord'])->name('alat.export-word');
+
+    // HANYA UNTUK DEVELOPMENT: login sebagai role lain tanpa password. Jangan aktif di production.
+    if (app()->environment('local')) {
+        Route::post('/switch-role', [RoleSwitcherController::class, 'switchRole'])->name('switch-role');
+    }
 
     // Route::resource('evaluasi-kalibrasi', EvaluasiKalibrasiController::class)->parameters([
     //     'evaluasi-kalibrasi' => 'evaluasi'
@@ -103,6 +110,7 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::get('/{id}/kompetensi/{kompetensiId}/file', [SdmController::class, 'showKompetensiFile'])->name('kompetensi.file');
         Route::post('/{id}/kompetensi/{kompetensiId}/file', [SdmController::class, 'uploadKompetensiFile'])->name('kompetensi.file.upload');
         Route::get('/{id}/cv', [SdmController::class, 'showCv'])->name('cv');
+        Route::post('/{id}/cv', [SdmController::class, 'uploadCv'])->name('cv.upload');
     });
 
     // Alat & Pemeliharaan
@@ -159,6 +167,8 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::delete('/monitoring-ruangan/referensi/{id}', [MonitoringRuanganController::class, 'destroyReferensi'])->name('monitoring.destroyReferensi');
     });
 
+    Route::middleware('workspace:LAB')->group(function () {
+
     // Parameter Uji & CRM
     Route::resource('parameter-uji', ParameterUjiController::class);
     Route::get('/parameter-uji/{parameter_uji}/calculate-stats', [ParameterUjiController::class, 'calculateHistoricalStats'])->name('parameter-uji.calculate-stats');
@@ -167,18 +177,25 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
     Route::post('/parameter-uji/store-crm', [ParameterUjiController::class, 'storeCrmKatalog'])->name('parameter-uji.store-crm');
 
     // CRM Katalog CRUD
-    Route::resource('crm-katalog', CrmKatalogController::class);
-    Route::post('crm-katalog/{id}/sertifikat', [CrmKatalogController::class, 'storeSertifikat'])->name('crm-katalog.store-sertifikat');
-    Route::delete('crm-katalog/{id}/sertifikat/{sertifikat_id}', [CrmKatalogController::class, 'destroySertifikat'])->name('crm-katalog.destroy-sertifikat');
-    Route::get('crm-katalog/{id}/verifikasi-administratif', [CrmKatalogController::class, 'verifikasiAdministratifForm'])->name('crm-katalog.verifikasi-administratif.form');
-    Route::post('crm-katalog/{id}/verifikasi-administratif', [CrmKatalogController::class, 'verifikasiAdministratifStore'])->name('crm-katalog.verifikasi-administratif.store');
-    Route::get('crm-katalog/{id}/verifikasi-teknis', [CrmKatalogController::class, 'verifikasiTeknisForm'])->name('crm-katalog.verifikasi-teknis.form');
-    Route::post('crm-katalog/{id}/verifikasi-teknis', [CrmKatalogController::class, 'verifikasiTeknisStore'])->name('crm-katalog.verifikasi-teknis.store');
+    Route::resource('crm-katalog', \App\Http\Controllers\CrmKatalogController::class);
+    Route::post('crm-katalog/{id}/sertifikat', [\App\Http\Controllers\CrmKatalogController::class, 'storeSertifikat'])->name('crm-katalog.store-sertifikat');
+    Route::delete('crm-katalog/{id}/sertifikat/{sertifikat_id}', [\App\Http\Controllers\CrmKatalogController::class, 'destroySertifikat'])->name('crm-katalog.destroy-sertifikat');
+    Route::get('crm-katalog/{id}/verifikasi-administratif', [\App\Http\Controllers\CrmKatalogController::class, 'verifikasiAdministratifForm'])->name('crm-katalog.verifikasi-administratif.form');
+    Route::post('crm-katalog/{id}/verifikasi-administratif', [\App\Http\Controllers\CrmKatalogController::class, 'verifikasiAdministratifStore'])->name('crm-katalog.verifikasi-administratif.store');
+    Route::get('crm-katalog/{id}/verifikasi-teknis', [\App\Http\Controllers\CrmKatalogController::class, 'verifikasiTeknisForm'])->name('crm-katalog.verifikasi-teknis.form');
+    Route::post('crm-katalog/{id}/verifikasi-teknis', [\App\Http\Controllers\CrmKatalogController::class, 'verifikasiTeknisStore'])->name('crm-katalog.verifikasi-teknis.store');
+    Route::get('crm-katalog/{katalog_id}/investigasi/{verif_id}', [\App\Http\Controllers\CrmKatalogController::class, 'investigasiVerifTeknis'])->name('crm-katalog.verifikasi-teknis.investigasi');
+    Route::post('crm-katalog/{katalog_id}/investigasi/{verif_id}', [\App\Http\Controllers\CrmKatalogController::class, 'storeInvestigasiVerifTeknis'])->name('crm-katalog.verifikasi-teknis.investigasi.store');
 
     // Pengujian Harian QC CRM
-    Route::resource('qc-crm', QcCrmController::class);
-    Route::get('qc-crm/chart/data', [QcCrmController::class, 'chartData'])->name('qc-crm.chart.data');
-    Route::get('api/crm-katalog/{id}/parameters', [QcCrmController::class, 'apiGetParameters'])->name('api.crm-katalog.parameters');
+    Route::resource('qc-crm', \App\Http\Controllers\QcCrmController::class);
+    Route::get('qc-crm/chart/data', [\App\Http\Controllers\QcCrmController::class, 'chartData'])->name('qc-crm.chart.data');
+    Route::get('api/crm-katalog/{id}/parameters', [\App\Http\Controllers\QcCrmController::class, 'apiGetParameters'])->name('api.crm-katalog.parameters');
+    Route::get('qc-crm/{id}/investigasi', [\App\Http\Controllers\QcCrmController::class, 'investigasi'])->name('qc-crm.investigasi');
+    Route::post('qc-crm/{id}/investigasi', [\App\Http\Controllers\QcCrmController::class, 'storeInvestigasi'])->name('qc-crm.investigasi.store');
+    Route::get('qc-crm/{id}/investigasi/pdf', [\App\Http\Controllers\QcCrmController::class, 'cetakInvestigasiPdf'])->name('qc-crm.investigasi.pdf');
+
+    // QC Uji Banding
 
     // QC Uji Banding & Toleransi
     Route::get('qc-uji-banding/master-toleransi', [ParameterToleransiController::class, 'index'])->name('master.toleransi.index');
@@ -200,6 +217,8 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
     Route::post('aft-kalibrasi', [QcUjiBandingController::class, 'aftKalibrasiStore'])->name('aft.kalibrasi.store');
     Route::get('aft-kalibrasi', [QcUjiBandingController::class, 'aftKalibrasiList'])->name('aft.kalibrasi.list');
     Route::get('aft-kalibrasi/{id}', [QcUjiBandingController::class, 'aftKalibrasiShow'])->name('aft.kalibrasi.show');
+
+    }); // end workspace:LAB (parameter uji, CRM, QC uji banding)
 
     // Library
     Route::middleware('modul:library_manage,tambah_ubah')->group(function () {
@@ -226,6 +245,8 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::patch('/library/tampilkan-semua', [LibraryController::class, 'activateAll'])->name('library.activate-all');
     });
 
+    Route::middleware('workspace:LAB')->group(function () {
+
     // Kegiatan & Hasil Uji
     Route::resource('kegiatan', KegiatanController::class);
     Route::post('/kegiatan/{id}/unlock', [KegiatanController::class, 'unlock'])->name('kegiatan.unlock');
@@ -241,6 +262,8 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
     // Reporting
     Route::get('reporting', [ReportingController::class, 'index'])->name('reporting.index');
     Route::get('reporting/pdf', [ReportingController::class, 'exportPdf'])->name('reporting.pdf');
+
+    }); // end workspace:LAB (kegiatan, hasil uji, tindak lanjut, reporting)
 
     // Audit Log & Arsip
     Route::middleware('modul:audit_log,lihat')->group(function () {
@@ -277,6 +300,8 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::post('/read-all', [NotifikasiController::class, 'markAllAsRead'])->name('read-all');
         Route::get('/unread-count', [NotifikasiController::class, 'getUnreadCount'])->name('unread-count');
     });
+
+    Route::middleware('workspace:LAB')->group(function () {
 
     // Verifikasi Mutu & QC
     Route::get('verifikasi-mutu', [VerifikasiMutuController::class, 'index'])->name('verifikasi-mutu.index');
@@ -317,6 +342,24 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::get('/{parameter_uji_id}/chart', [QcHarianController::class, 'chart'])->name('chart');
         Route::get('/{id}/investigasi', [QcHarianController::class, 'investigasi'])->name('investigasi');
         Route::post('/{id}/investigasi', [QcHarianController::class, 'storeInvestigasi'])->name('investigasi.store');
+        Route::get('/{id}/investigasi/pdf', [QcHarianController::class, 'cetakInvestigasiPdf'])->name('investigasi.pdf');
+    });
+
+    }); // end workspace:LAB (verifikasi mutu, qc-inhouse, qc-harian)
+
+    // Peminjaman Alat berbentuk logbook per alat (khusus workspace Non-Lab)
+    Route::middleware(['workspace:NON_LAB', 'modul:peminjaman,lihat'])->prefix('peminjaman')->name('peminjaman.')->group(function () {
+        $c = \App\Http\Controllers\LogbookController::class;
+        Route::get('/', [$c, 'index'])->name('index');
+        Route::get('/pdf', [$c, 'pdfSemua'])->name('pdf-semua');
+        Route::get('/alat/{id}', [$c, 'show'])->name('alat');
+        Route::get('/alat/{id}/pdf', [$c, 'pdf'])->name('alat.pdf');
+        Route::post('/alat/{id}', [$c, 'store'])->name('store');
+        Route::post('/catatan/{id}/approve', [$c, 'approve'])->name('approve');
+        Route::post('/catatan/{id}/reject', [$c, 'reject'])->name('reject');
+        Route::post('/catatan/{id}/batal', [$c, 'batal'])->name('batal');
+        Route::post('/catatan/{id}/hapus', [$c, 'hapus'])->name('hapus');
+        Route::post('/catatan/{id}/kembali', [$c, 'kembali'])->name('kembali');
     });
 
 });

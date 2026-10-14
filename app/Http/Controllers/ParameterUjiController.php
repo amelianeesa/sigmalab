@@ -73,42 +73,9 @@ class ParameterUjiController extends Controller
         return $pdf->stream('Control_Chart_' . $parameterUji->nama_parameter . '.pdf');
     }
 
-    public function show(\Illuminate\Http\Request $request, ParameterUji $parameterUji)
+    public function show(ParameterUji $parameterUji)
     {
-        $this->authorize('view', $parameterUji);
-        
-        $chartService = app(\App\Services\ChartDataService::class);
-        $data = $chartService->prepareInhouseControlData($request, false, $parameterUji);
-        
-        $tab = $request->input('tab', 'in_house');
-        // Fallback backward compatibility, 'jenis_grafik' was used by old inhouse control
-        if ($request->has('jenis_grafik')) {
-            $tab = $request->input('jenis_grafik');
-        }
-
-        $limitDate = $parameterUji->limit_terakhir_dihitung;
-        $newPointsQuery = \App\Models\HasilUji::where('parameter_uji_id', $parameterUji->parameter_uji_id)
-            ->where('jenis_kontrol', 'in_house')
-            ->whereNotNull('nilai_hasil')
-            ->whereIn('status_berketerimaan', ['inlier', 'diterima']);
-        
-        if ($limitDate) {
-            $newPointsQuery->where('created_at', '>', $limitDate);
-        }
-        
-        $newPointsCount = $newPointsQuery->count();
-
-        return view('parameter-uji.show', [
-            'parameterUji' => $parameterUji,
-            'newPointsCount' => $newPointsCount,
-            'tab' => $tab,
-            'parameterList' => \App\Models\ParameterUji::where('status_aktif', true)->orderBy('nama_parameter')->get(),
-            'chartData' => $data['chartData'],
-            'hasilList' => $data['hasilList'],
-            'stats' => $data['stats'],
-            'partialView' => $data['viewName'] ?? 'parameter-uji.partials.im',
-            'jenisGrafik' => $tab
-        ]);
+        return redirect()->route('parameter-uji.index');
     }
 
     public function edit(ParameterUji $parameterUji)

@@ -34,4 +34,24 @@ class CrmVerifikasiTeknis extends Model
     {
         return $this->belongsTo(Personil::class, 'analis_id', 'personil_id');
     }
+
+    public function personils()
+    {
+        return $this->belongsToMany(Personil::class, 'crm_verif_teknis_personil', 'crm_verifikasi_teknis_id', 'personil_id')
+                    ->withPivot('peran')
+                    ->withTimestamps();
+    }
+
+    public function alats()
+    {
+        return $this->belongsToMany(Alat::class, 'crm_verif_teknis_alat', 'crm_verifikasi_teknis_id', 'alat_id')
+                    ->withTimestamps();
+    }
+
+    public function bahans()
+    {
+        return $this->belongsToMany(Barang::class, 'crm_verif_teknis_bahan', 'crm_verifikasi_teknis_id', 'barang_id')
+                    ->withPivot('qty')
+                    ->withTimestamps();
+    }
 }

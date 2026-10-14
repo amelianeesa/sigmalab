@@ -17,6 +17,27 @@
     .flatpickr-input {
         background-color: #fff !important;
     }
+    /* Toggle "Dapat dipinjam": seluruh kotak bisa diklik, tinggi sejajar dengan select di sebelahnya */
+    .alat-pinjam-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 31px;
+        margin: 0;
+        padding: 4px 10px;
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        transition: border-color .15s ease, background-color .15s ease;
+    }
+    .alat-pinjam-box:hover { border-color: #adb5bd; }
+    .alat-pinjam-box:has(input:checked) { border-color: #1b3152; background: #f1f5fb; }
+    .alat-pinjam-box .form-switch { display: flex; align-items: center; margin: 0; padding: 0; min-height: 0; }
+    .alat-pinjam-box .form-check-input { float: none; margin: 0; flex-shrink: 0; cursor: pointer; }
+    .alat-pinjam-text { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+    .alat-pinjam-title { font-size: 11.5px; font-weight: 700; color: #333; }
+    .alat-pinjam-hint { font-size: 10.5px; color: #6c757d; }
 </style>
 <div class="container-fluid pt-0 pb-4 px-4" style="max-width: 1050px;">
     <div class="pt-2 mb-2">
@@ -74,6 +95,30 @@
                     <div class="col-md-4">
                         <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Unit Kerja Pemilik</label>
                         <input type="text" name="unit_kerja_pemilik" class="form-control form-control-sm" value="{{ old('unit_kerja_pemilik', $alat->unit_kerja_pemilik) }}">
+                    </div>
+                </div>
+
+                <div class="row g-2 mb-2">
+                    <div class="col-12 col-md-7">
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Alat Induk <span class="text-muted fw-normal">(isi jika ini adalah sub alat)</span></label>
+                        <select name="parent_id" class="form-select form-select-sm select2-basic">
+                            <option value="">— Bukan sub alat —</option>
+                            @foreach($indukList as $induk)
+                                <option value="{{ $induk->alat_id }}" {{ old('parent_id', $alat->parent_id) == $induk->alat_id ? 'selected' : '' }}>{{ $induk->nama_alat }} ({{ $induk->kode_alat }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-5">
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Peminjaman Alat</label>
+                        <label class="alat-pinjam-box" for="dapatDipinjam">
+                            <span class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" name="dapat_dipinjam" value="1" id="dapatDipinjam" {{ old('dapat_dipinjam', $alat->dapat_dipinjam) ? 'checked' : '' }}>
+                            </span>
+                            <span class="alat-pinjam-text">
+                                <span class="alat-pinjam-title">Dapat dipinjam</span>
+                                <span class="alat-pinjam-hint">Tampil di menu Peminjaman Alat (workspace Non-Lab)</span>
+                            </span>
+                        </label>
                     </div>
                 </div>
 

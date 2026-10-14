@@ -28,6 +28,28 @@ class SdmController extends Controller
         );
     }
 
+    /**
+     * Sertifikasi/pelatihan dan CV boleh dikelola oleh pengelola SDM (HR, Koordinator, Admin)
+     * ATAU oleh pemilik datanya sendiri (akun yang terhubung ke personil tersebut).
+     * Data diri (nama, no. induk, jabatan, unit kerja, kategori) tetap hanya bisa diubah pengelola SDM.
+     */
+    private function bisaKelolaKompetensi(Personil $personil): bool
+    {
+        $user = Auth::user();
+
+        return $user->bisaKelolaSdm()
+            || ($user->personil_id !== null && (int) $user->personil_id === (int) $personil->personil_id);
+    }
+
+    private function pastikanBisaKelolaKompetensi(Personil $personil): void
+    {
+        abort_unless(
+            $this->bisaKelolaKompetensi($personil),
+            403,
+            'Anda hanya dapat mengelola sertifikasi dan CV milik Anda sendiri.'
+        );
+    }
+
     public function index()
     {
         $showInactive = request('status') === 'nonaktif';
@@ -334,6 +356,7 @@ class SdmController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($passwordSementara),
             'role_id' => $data['role_id'],
+            'workspace' => User::workspaceUntukRole((int) $data['role_id'], $personil->workspace ?? null),
             'status_aktif' => true,
             // 'must_change_password' => true,
         ]);
@@ -377,14 +400,15 @@ class SdmController extends Controller
             $komp->status = $this->resolveStatusSertifikasi($komp->tanggal_berakhir);
         });
 
-        return view('sdm.kompetensi_detail', compact('personil'));
+        $bisaKelola = $this->bisaKelolaKompetensi($personil);
+
+        return view('sdm.kompetensi_detail', compact('personil', 'bisaKelola'));
     }
 
     public function storeKompetensi(Request $request, $id)
     {
-        $this->pastikanBisaKelola();
-
         $personil = Personil::findOrFail($id);
+        $this->pastikanBisaKelolaKompetensi($personil);
         $data = $request->validate([
             'jenis_sertifikasi' => 'required|string|max:100',
             'no_sertifikasi' => 'nullable|string|max:100',
@@ -407,9 +431,8 @@ class SdmController extends Controller
 
     public function updateKompetensi(Request $request, $id, $kompetensiId)
     {
-        $this->pastikanBisaKelola();
-
         $personil = Personil::findOrFail($id);
+        $this->pastikanBisaKelolaKompetensi($personil);
         $kompetensi = $personil->kompetensi()->findOrFail($kompetensiId);
         $data = $request->validate([
             'jenis_sertifikasi' => 'required|string|max:100',
@@ -441,9 +464,8 @@ class SdmController extends Controller
 
     public function destroyKompetensi($id, $kompetensiId)
     {
-        $this->pastikanBisaKelola();
-
         $personil = Personil::findOrFail($id);
+        $this->pastikanBisaKelolaKompetensi($personil);
         $personil->kompetensi()->findOrFail($kompetensiId)->delete();
 
         return redirect()->route('sdm.kompetensi.detail', $personil->personil_id)
@@ -469,9 +491,8 @@ class SdmController extends Controller
 
     public function uploadKompetensiFile(Request $request, $id, $kompetensiId)
     {
-        $this->pastikanBisaKelola();
-
         $personil = Personil::findOrFail($id);
+        $this->pastikanBisaKelolaKompetensi($personil);
         $kompetensi = $personil->kompetensi()->findOrFail($kompetensiId);
 
         $request->validate([
@@ -490,6 +511,28 @@ class SdmController extends Controller
 
         return redirect()->route('sdm.kompetensi.detail', $personil->personil_id)
             ->with('success', 'Dokumen sertifikasi berhasil diunggah.');
+    }
+
+    /** Unggah/ganti CV: pengelola SDM atau pemilik datanya sendiri. */
+    public function uploadCv(Request $request, $id)
+    {
+        $personil = Personil::findOrFail($id);
+        $this->pastikanBisaKelolaKompetensi($personil);
+
+        $request->validate([
+            'file_cv' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        ]);
+
+        if ($personil->file_cv && Storage::disk('local')->exists('public/uploads/cv/' . $personil->file_cv)) {
+            Storage::disk('local')->delete('public/uploads/cv/' . $personil->file_cv);
+        }
+
+        $cvName = $request->file('file_cv')->hashName();
+        Storage::disk('local')->putFileAs('public/uploads/cv', $request->file('file_cv'), $cvName);
+        $personil->update(['file_cv' => $cvName]);
+
+        return redirect()->route('sdm.kompetensi.detail', $personil->personil_id)
+            ->with('success', 'CV berhasil diperbarui.');
     }
 
     public function showCv($id)

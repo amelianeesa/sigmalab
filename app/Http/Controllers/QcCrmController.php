@@ -11,6 +11,7 @@ use App\Models\Alat;
 use App\Models\Barang;
 
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class QcCrmController extends Controller
 {
@@ -21,23 +22,27 @@ class QcCrmController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
             
-        $katalogs = CrmKatalog::with(['sertifikats.parameterUji', 'verifikasiTeknis.parameterUji', 'verifikasiTeknis.analis'])->orderBy('created_at', 'desc')->get();
+        $katalogs = CrmKatalog::with(['sertifikats.parameterUji', 'verifikasiTeknis.parameterUji', 'verifikasiTeknis.analis', 'verifikasiTeknis.personils'])->orderBy('created_at', 'desc')->get();
         
         return view('qc-crm.index', compact('kegiatanList', 'katalogs'));
     }
 
     public function create(\Illuminate\Http\Request $request)
     {
-        $activeCrms = CrmKatalog::where('is_active', true)->orderBy('nomor_lot')->get();
+        $activeCrms = CrmKatalog::where('is_active', true)
+            ->where(function($query) {
+                $query->whereNull('tanggal_expired')
+                      ->orWhereDate('tanggal_expired', '>=', now());
+            })
+        ->orderBy('nomor_lot')
+        ->get();
         $personilList = Personil::orderBy('nama')->get();
         $alatList = Alat::where('kondisi_barang', 'baik')->orderBy('nama_alat')->get();
         $barangList = Barang::orderBy('nama_barang')->get();
         $allParameters = \App\Models\ParameterUji::where('status_aktif', true)->orderBy('nama_parameter')->get();
 
-        // LOGIKA DRAFT DARI SERVER ATAU KEMBALIAN VALIDASI (OLD INPUT)
         $serverDraft = null;
         
-        // 1. JIKA TERJADI ERROR VALIDASI (KITA SELAMATKAN DATANYA)
         if (old('params')) {
             $serverDraft = [
                 'crm_katalog_id' => old('crm_katalog_id'),
@@ -47,28 +52,25 @@ class QcCrmController extends Controller
             ];
 
             foreach (old('params', []) as $pid => $data) {
-                if (!isset($data['selected'])) continue; // Abaikan yang tidak dicentang
+                if (!isset($data['selected'])) continue;
 
                 $inputs = [];
-                // Kembalikan field dasar
                 if (isset($data['d1'])) $inputs['in-d1'] = $data['d1'];
                 if (isset($data['d2'])) $inputs['in-d2'] = $data['d2'];
                 if (isset($data['db1'])) $inputs['in-db-1'] = $data['db1'];
                 if (isset($data['db2'])) $inputs['in-db-2'] = $data['db2'];
-                if (isset($data['analis_id'])) $inputs['in-analis-id'] = $data['analis_id'];
                 if (isset($data['catatan'])) $inputs['in-catatan'] = $data['catatan'];
 
-                // Kembalikan field raw/mentah (m1, m2, dll)
                 if (isset($data['mentah']) && is_array($data['mentah'])) {
                     foreach ($data['mentah'] as $key => $val) {
-                        $classKey = 'in-' . str_replace('_', '-', $key);
-                        $inputs[$classKey] = $val;
+                        $inputs['in-' . str_replace('_', '-', $key)] = $val;
                     }
                 }
 
                 $serverDraft['params'][$pid] = [
                     'selected' => true,
-                    'inputs' => $inputs
+                    'inputs' => $inputs,
+                    'resource' => \Illuminate\Support\Arr::only($data, ['personil_ids','personil_peran','alat_ids','barang_ids','barang_jumlah']),
                 ];
             }
         } 
@@ -84,6 +86,7 @@ class QcCrmController extends Controller
                     'crm_katalog_id' => $first->crm_katalog_id,
                     'tanggal_uji' => $first->tanggal_uji ? $first->tanggal_uji->format('Y-m-d') : null,
                     'analis_id' => $first->analis_id,
+                    'no_lembar_kerja' => $first->no_lembar_kerja,
                     'params' => []
                 ];
                 
@@ -107,7 +110,8 @@ class QcCrmController extends Controller
 
                     $serverDraft['params'][$row->parameter_uji_id] = [
                         'selected' => true,
-                        'inputs' => $inputs
+                        'inputs' => $inputs,
+                        'resource' => \Illuminate\Support\Arr::only($mentah, ['personil_ids','personil_peran','alat_ids','barang_ids','barang_jumlah']),
                     ];
                 }
             }
@@ -172,11 +176,21 @@ class QcCrmController extends Controller
                 if (!isset($data['selected'])) continue;
                 if (!isset($sertifikatMap[$paramId])) continue;
                 
-                $analisIdPerParam = $data['analis_id'] ?? null;
-                
+                // Analis utama = personil pertama yang dipilih di modal
+                $personilIds = $data['personil_ids'] ?? [];
+                $analisIdPerParam = $personilIds[0] ?? null;
+
                 if (!$isDraft && empty($analisIdPerParam)) {
-                    throw new \Exception("Nama analis untuk parameter terpilih tidak boleh kosong!");
+                    throw new \Exception("Analis untuk parameter terpilih belum diatur (klik 'Atur Analis, Alat & Bahan')!");
                 }
+
+                // Simpan alat, bahan, dan peran bersama data mentah
+                $mentah = $data['mentah'] ?? [];
+                $mentah['personil_ids']   = $personilIds;
+                $mentah['personil_peran'] = $data['personil_peran'] ?? [];
+                $mentah['alat_ids']       = $data['alat_ids'] ?? [];
+                $mentah['barang_ids']     = $data['barang_ids'] ?? [];
+                $mentah['barang_jumlah']  = $data['barang_jumlah'] ?? [];
                 
                 $sertifikat = $sertifikatMap[$paramId];
                 
@@ -221,7 +235,8 @@ class QcCrmController extends Controller
                     'cert_value' => $sertifikat->cert_value,
                     'cert_u' => $sertifikat->cert_u,
                     'status_evaluasi' => $status,
-                    'data_mentah' => isset($data['mentah']) ? $data['mentah'] : null,
+                    'status_investigasi' => ($status === 'outlier') ? 'menunggu_investigasi' : 'aman',
+                    'data_mentah' => $mentah,
                     'catatan' => $data['catatan'] ?? null,
                 ];
 
@@ -240,10 +255,23 @@ class QcCrmController extends Controller
                                  ->withInput($request->only(['tanggal_uji', 'no_lembar_kerja']))
                                  ->with('success', 'Pengujian botol berhasil disimpan! Silakan lanjut pilih botol berikutnya.');
             }
-            // ----------------------------------------
+            
 
             if ($isDraft) {
                 return redirect()->route('qc-crm.index')->with('success', 'Draft Pengujian Harian berhasil disimpan.');
+            }
+
+            
+            $firstOutlier = QcCrm::where('crm_katalog_id', $katalog->id)
+                ->where('tanggal_uji', $request->tanggal_uji)
+                ->where('status_evaluasi', 'outlier')
+                ->where('status_investigasi', 'menunggu_investigasi')
+                ->latest('id')
+                ->first();
+
+            if ($firstOutlier) {
+                return redirect()->route('qc-crm.index', ['tab' => 'harian'])
+                    ->with('error', 'PERINGATAN! Ditemukan data OUTLIER pada pengujian CRM. Silakan klik tombol Investigasi (CAPA) pada tabel di bawah.');
             }
             
             return redirect()->route('qc-crm.index')->with('success', 'Data pengujian CRM berhasil diselesaikan.');
@@ -329,6 +357,53 @@ class QcCrmController extends Controller
             'tanggal_uji' => $log->tanggal_uji ? $log->tanggal_uji->format('Y-m-d') : null,
             'no_lembar_kerja' => $log->no_lembar_kerja
         ])->with('success', 'Mode Edit diaktifkan. Silakan perbaiki angka pada form di bawah lalu simpan kembali.');
+    }
+
+        public function investigasi($id)
+    {
+        // Ambil data pengujian beserta relasinya
+        $qc = \App\Models\QcCrm::with(['parameterUji', 'crmKatalog'])->findOrFail($id);
+        
+        // Cegah akses jika datanya bukan outlier
+        if ($qc->status_evaluasi !== 'outlier') {
+            return redirect()->route('qc-crm.index')->with('error', 'Hanya data outlier yang memerlukan investigasi.');
+        }
+
+        return view('qc-crm.investigasi', compact('qc'));
+    }
+
+    public function storeInvestigasi(\Illuminate\Http\Request $request, $id)
+    {
+        $request->validate([
+            'akar_masalah' => 'required|string',
+            'catatan_investigasi' => 'required|string|min:10',
+            'tindakan_perbaikan' => 'required|string|min:10',
+        ]);
+
+        $qc = \App\Models\QcCrm::findOrFail($id);
+        $qc->update([
+            'akar_masalah' => $request->akar_masalah,
+            'catatan_investigasi' => $request->catatan_investigasi,
+            'tindakan_perbaikan' => $request->tindakan_perbaikan,
+            'status_investigasi' => 'selesai_investigasi'
+        ]);
+
+        return redirect()->route('qc-crm.index', ['tab' => 'harian'])
+            ->with('success', 'Laporan investigasi & CAPA pengujian CRM berhasil disimpan.');
+    }
+    
+    public function cetakInvestigasiPdf($id)
+    {
+        $qc = \App\Models\QcCrm::with(['parameterUji', 'crmKatalog', 'analis'])->findOrFail($id);
+
+        if ($qc->status_investigasi !== 'selesai_investigasi') {
+            return back()->with('error', 'Laporan investigasi CAPA belum diselesaikan.');
+        }
+
+        $pdf = Pdf::loadView('qc-crm.pdf_investigasi', compact('qc'));
+        $fileName = 'CAPA_CRM_' . ($qc->crmKatalog->nomor_lot ?? 'LOT') . '_' . strtoupper($qc->parameterUji->nama_parameter ?? 'PARAM') . '_' . $qc->tanggal_uji->format('Ymd') . '.pdf';
+
+        return $pdf->download($fileName);
     }
 
 }

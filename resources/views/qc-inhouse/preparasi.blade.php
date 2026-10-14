@@ -412,7 +412,7 @@
 <div class="container-fluid dashboard-container" style="font-size: 0.78rem;">
     <x-qc-breadcrumb active="In-House">
         <li class="breadcrumb-item"><a href="{{ route('qc-inhouse.show', $batch->sampel_inhouse_id) }}">{{ $batch->nama_sampel }}</a></li>
-        <li class="breadcrumb-item active">Tahap 2: Preparasi & Ekuilibrium</li>
+        <li class="breadcrumb-item active">Tahap 2: Preparasi</li>
     </x-qc-breadcrumb>
 
     <div class="row g-2">

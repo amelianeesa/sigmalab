@@ -29,6 +29,8 @@ class AuthController extends Controller
             $user = Auth::user();
             if ($user->status_aktif == 1 && (!$user->personil || $user->personil->status_aktif == 1)) {
                 $request->session()->regenerate();
+                // Workspace awal; ResolveWorkspace menegakkannya lagi di setiap request.
+                session(['workspace' => $user->workspaceAkun() === 'NON_LAB' ? 'NON_LAB' : 'LAB']);
                 
                 activity('auth')
                     ->causedBy($user)

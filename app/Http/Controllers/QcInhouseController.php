@@ -51,7 +51,9 @@ class QcInhouseController extends Controller
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
-        $query = \App\Models\SampelInhouse::with(['parameters', 'pembuat'])->latest();
+        $query = \App\Models\SampelInhouse::with(['parameters', 'pembuat'])
+            ->orderByRaw("CASE WHEN status = 'aktif' THEN 1 ELSE 2 END")
+            ->latest();
 
         $query->when($search, function($q) use ($search) {
             $q->where(function($qq) use ($search) {

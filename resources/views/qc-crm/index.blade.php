@@ -301,7 +301,7 @@
         </div>
     </div>
 
-    @if($expiredCount > 0 || $segeraCount > 0)
+        @if($expiredCount > 0 || $segeraCount > 0)
         <div class="alert alert-warning alert-dismissible fade show shadow-sm py-2 ps-3 pe-5 mb-2" role="alert" style="font-size: 0.8rem;">
             <i class="fas fa-exclamation-triangle me-1"></i> <strong>Perhatian!</strong>
             @if($expiredCount > 0)
@@ -329,14 +329,14 @@
 
     <ul class="nav nav-tabs qc-tabs mb-3 mt-3" id="qcCrmTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active fw-bold" id="katalog-tab" data-bs-toggle="tab" data-bs-target="#katalog" type="button" role="tab" aria-controls="katalog" aria-selected="true">
+            <button class="nav-link {{ request('tab') === 'harian' ? '' : 'active' }} fw-bold" id="katalog-tab" data-bs-toggle="tab" data-bs-target="#katalog" type="button" role="tab" aria-controls="katalog" aria-selected="true">
                 <i class="fas fa-box me-1"></i>
                 <span class="d-none d-md-inline">Master Botol & Verifikasi CRM</span>
                 <span class="d-md-none">Master Botol</span>
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link fw-bold" id="harian-tab" data-bs-toggle="tab" data-bs-target="#harian" type="button" role="tab" aria-controls="harian" aria-selected="false">
+            <button class="nav-link {{ request('tab') === 'harian' ? 'active' : '' }} fw-bold" id="harian-tab" data-bs-toggle="tab" data-bs-target="#harian" type="button" role="tab" aria-controls="harian" aria-selected="false">
                 <i class="fas fa-vials me-1"></i>
                 <span class="d-none d-md-inline">Riwayat Pengujian Harian CRM</span>
                 <span class="d-md-none">Riwayat Harian</span>
@@ -350,8 +350,9 @@
     </ul>
 
     <div class="tab-content" id="qcCrmTabsContent">
-
-        <div class="tab-pane fade show active" id="katalog" role="tabpanel" aria-labelledby="katalog-tab">
+        
+        <!-- TAB 1: MASTER BOTOL & VERIFIKASI -->
+        <div class="tab-pane fade {{ request('tab') === 'harian' ? '' : 'show active' }}" id="katalog" role="tabpanel" aria-labelledby="katalog-tab">
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-2 p-md-3">
 
@@ -452,16 +453,29 @@
                                                 </a>
                                             @elseif($r->status === 'menunggu_verifikasi_teknis')
                                                 @php
-                                                    $hasDraft = $r->verifikasiTeknis->where('status_evaluasi', 'draft')->isNotEmpty();
+                                                    $hasDraft = $r->verifikasiTeknis->where('status_evaluasi', 'draft')->isNotEmpty(); 
+                                                    $outlierUninvestigated = $r->verifikasiTeknis->where('status_evaluasi', 'outlier')->where('status_investigasi', 'menunggu_investigasi')->first();
                                                     $hasOutlier = $r->verifikasiTeknis->where('status_evaluasi', 'outlier')->isNotEmpty();
                                                 @endphp
-                                                <a href="{{ route('crm-katalog.verifikasi-teknis.form', $r->id) }}"
-                                                   class="btn btn-sm shadow-sm {{ $hasOutlier ? 'btn-danger' : ($hasDraft ? 'btn-warning' : 'btn-corporate-blue pulse-button') }}"
-                                                   style="font-size: 0.72rem;"
-                                                   title="{{ $hasOutlier ? 'Uji Ulang Parameter Outlier' : ($hasDraft ? 'Lanjutkan Draft Verifikasi' : 'Lakukan Verifikasi Teknis') }}">
-                                                    <i class="fas {{ $hasOutlier ? 'fa-exclamation-triangle' : ($hasDraft ? 'fa-edit' : 'fa-flask') }}"></i>
-                                                    {{ $hasOutlier ? 'Uji Ulang (Outlier)' : ($hasDraft ? 'Lanjut Draft' : 'Mulai Uji Verifikasi') }}
-                                                </a>
+                                                
+                                                @if($outlierUninvestigated)
+                                                    {{-- Jika ada Outlier yang belum diinvestigasi: Paksa isi CAPA dulu --}}
+                                                    <a href="{{ route('crm-katalog.verifikasi-teknis.investigasi', [$r->id, $outlierUninvestigated->id]) }}" 
+                                                       class="btn btn-sm btn-danger pulse-button mb-1 shadow-sm" 
+                                                       style="font-size: 0.72rem;"
+                                                       title="Wajib Mengisi Laporan Investigasi (CAPA) Terlebih Dahulu">
+                                                        <i class="fas fa-exclamation-triangle"></i> Investigasi (CAPA)
+                                                    </a>
+                                                @else
+                                                    {{-- Jika tidak ada atau sudah diinvestigasi: Boleh lanjut Uji Ulang / Lanjut Draft / Mulai Verifikasi --}}
+                                                    <a href="{{ route('crm-katalog.verifikasi-teknis.form', $r->id) }}" 
+                                                       class="btn btn-sm shadow-sm {{ $hasOutlier ? 'btn-danger' : ($hasDraft ? 'btn-warning' : 'btn-corporate-blue pulse-button') }} mb-1" 
+                                                       style="font-size: 0.72rem;"
+                                                       title="{{ $hasOutlier ? 'Lakukan Uji Ulang (Retest)' : ($hasDraft ? 'Lanjutkan Draft Verifikasi' : 'Lakukan Verifikasi Teknis') }}">
+                                                        <i class="fas {{ $hasOutlier ? 'fa-redo' : ($hasDraft ? 'fa-edit' : 'fa-flask') }}"></i> 
+                                                        {{ $hasOutlier ? 'Uji Ulang (Retest)' : ($hasDraft ? 'Lanjut Draft' : 'Mulai Uji Verifikasi') }}
+                                                    </a>
+                                                @endif
                                             @endif
                                         </div>
                                     </td>
@@ -537,7 +551,13 @@
                                                     @foreach($r->verifikasiTeknis as $verif)
                                                         <tr>
                                                             <td class="fw-bold">{{ strtoupper($verif->parameterUji->nama_parameter ?? '-') }}</td>
-                                                            <td>{{ $verif->analis->nama ?? '-' }}</td>
+                                                            <td class="text-start">
+                                                                @forelse($verif->personils as $p)
+                                                                    <div>{{ $p->nama }}@if($p->pivot->peran) <small class="text-muted">({{ $p->pivot->peran }})</small>@endif</div>
+                                                                @empty
+                                                                    {{ $verif->analis->nama ?? '-' }}
+                                                                @endforelse
+                                                            </td>
                                                             <td>{{ number_format($verif->nilai_d1, 4) }}</td>
                                                             <td>{{ $verif->nilai_d2 ? number_format($verif->nilai_d2, 4) : '-' }}</td>
                                                             <td class="fw-bold text-primary">{{ number_format($verif->nilai_akhir, 4) }}</td>
@@ -680,8 +700,8 @@
                 @endif
             @endforeach
         </div>
-        <div class="tab-pane fade" id="harian" role="tabpanel" aria-labelledby="harian-tab">
 
+        <div class="tab-pane fade {{ request('tab') === 'harian' ? 'show active' : '' }}" id="harian" role="tabpanel" aria-labelledby="harian-tab">
             <div class="alert alert-info border-0 shadow-sm py-2 px-3 mb-2" style="font-size: 0.8rem;">
                 <i class="fas fa-info-circle me-1"></i> Pilihan botol pada menu <strong>Mulai Pengujian CRM</strong> hanya menampilkan botol yang berstatus <strong>AKTIF</strong> (lolos uji verifikasi).
             </div>
@@ -747,7 +767,28 @@
                                         @if($log->status_evaluasi === 'inlier')
                                             <span class="badge bg-success"><i class="fas fa-check-circle"></i> Inlier</span>
                                         @elseif($log->status_evaluasi === 'outlier')
-                                            <span class="badge bg-danger"><i class="fas fa-times-circle"></i> Outlier</span>
+                                            @if($log->status_investigasi === 'menunggu_investigasi')
+                                                <a href="{{ route('qc-crm.investigasi', $log->id) }}" class="btn btn-sm btn-danger pulse-button shadow-sm fw-bold" title="Wajib Mengisi Laporan Investigasi">
+                                                    <i class="fas fa-exclamation-triangle me-1"></i> Investigasi (CAPA)
+                                                </a>
+                                                @else
+                                                    <span class="badge bg-danger"><i class="fas fa-times-circle"></i> Outlier</span>
+                                                    <button type="button" class="btn btn-sm btn-outline-success ms-1 py-0 px-2 fw-bold shadow-sm btn-view-capa-crm"
+                                                        data-tanggal="{{ \Carbon\Carbon::parse($log->tanggal_uji)->format('d M Y') }}"
+                                                        data-lot="{{ $log->crmKatalog->nomor_lot ?? '-' }}"
+                                                        data-produk="{{ $log->crmKatalog->nama_produk ?? '-' }}"
+                                                        data-parameter="{{ strtoupper($log->parameterUji->nama_parameter ?? '-') }}"
+                                                        data-analis="{{ $log->analis->nama ?? '-' }}"
+                                                        data-cert="{{ number_format($log->cert_value, 2) }} &plusmn; {{ number_format($log->cert_u, 4) }}"
+                                                        data-akhir="{{ number_format($log->nilai_akhir, 2) }}"
+                                                        data-akar="{{ $log->akar_masalah ?? '-' }}"
+                                                        data-temuan="{{ $log->catatan_investigasi ?? '-' }}"
+                                                        data-perbaikan="{{ $log->tindakan_perbaikan ?? '-' }}"
+                                                        data-pdf-url="{{ route('qc-crm.investigasi.pdf', $log->id) }}"
+                                                        title="Lihat Laporan CAPA">
+                                                        <i class="fas fa-file-alt me-1"></i> Baca CAPA
+                                                    </button>
+                                                @endif
                                         @elseif($log->status_evaluasi === 'draft')
                                             <a href="{{ route('qc-crm.create', ['resume' => 1, 'crm_id' => $log->crm_katalog_id]) }}" class="btn btn-sm btn-warning fw-bold shadow-sm" style="font-size: 0.72rem;">
                                                 <i class="fas fa-edit me-1"></i> Lanjutkan Draft
@@ -822,6 +863,53 @@
                     <div id="chartEmpty" class="text-center py-4 text-muted">
                         <i class="fas fa-chart-line fa-3x mb-3 opacity-25"></i>
                         <p class="mb-0">Pilih Botol CRM dan Parameter Uji, lalu klik <strong>Tampilkan Chart</strong>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- MODAL BACA CAPA QC CRM --}}
+        <div class="modal fade" id="modalViewCapaQcCrm" tabindex="-1" aria-labelledby="modalViewCapaCrmLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title fw-bold" id="modalViewCapaCrmLabel">
+                            <i class="fas fa-file-signature me-2"></i>Laporan CAPA Pengujian CRM
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="card border-0 bg-light p-3 mb-3">
+                            <div class="row g-2 small">
+                                <div class="col-md-6"><strong>Tanggal Uji:</strong> <span id="crmCapaTanggal">-</span></div>
+                                <div class="col-md-6"><strong>Nomor Lot:</strong> <span id="crmCapaLot" class="fw-bold text-primary">-</span></div>
+                                <div class="col-md-6"><strong>Parameter:</strong> <span id="crmCapaParam" class="fw-bold text-danger">-</span></div>
+                                <div class="col-md-6"><strong>Analis:</strong> <span id="crmCapaAnalis">-</span></div>
+                                <div class="col-md-6"><strong>Nilai Sertifikat:</strong> <span id="crmCapaCert">-</span></div>
+                                <div class="col-md-6"><strong>Hasil Lab (Outlier):</strong> <span id="crmCapaAkhir" class="badge bg-danger fs-6">-</span></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-secondary mb-1"><i class="fas fa-tag me-1"></i>Kategori Akar Masalah</label>
+                            <div class="p-2 border rounded bg-white fw-bold text-dark" id="crmCapaAkar">-</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-secondary mb-1"><i class="fas fa-search me-1"></i>Detail Temuan Investigasi</label>
+                            <div class="p-3 border rounded bg-white" style="white-space: pre-wrap;" id="crmCapaTemuan">-</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-secondary mb-1"><i class="fas fa-tools me-1"></i>Tindakan Perbaikan (Corrective Action)</label>
+                            <div class="p-3 border rounded bg-white" style="white-space: pre-wrap;" id="crmCapaPerbaikan">-</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light justify-content-between">
+                        <a href="#" id="btnDownloadCrmCapaPdf" target="_blank" class="btn btn-outline-danger shadow-sm">
+                            <i class="fas fa-file-pdf me-1"></i> Cetak Lembar CAPA (PDF)
+                        </a>
+                        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Tutup</button>
                     </div>
                 </div>
             </div>
@@ -909,6 +997,135 @@ $(function () {
         $('#filterPeriode').val('');
         tableHarian.draw();
     });
+
+});
+
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn-view-capa-crm');
+        if (!btn) return;
+
+        document.getElementById('crmCapaTanggal').textContent = btn.dataset.tanggal;
+        document.getElementById('crmCapaLot').textContent = `${btn.dataset.lot} (${btn.dataset.produk})`;
+        document.getElementById('crmCapaParam').textContent = btn.dataset.parameter;
+        document.getElementById('crmCapaAnalis').textContent = btn.dataset.analis;
+        document.getElementById('crmCapaCert').textContent = btn.dataset.cert;
+        document.getElementById('crmCapaAkhir').textContent = btn.dataset.akhir;
+        document.getElementById('crmCapaAkar').textContent = btn.dataset.akar;
+        document.getElementById('crmCapaTemuan').textContent = btn.dataset.temuan;
+        document.getElementById('crmCapaPerbaikan').textContent = btn.dataset.perbaikan;
+        document.getElementById('btnDownloadCrmCapaPdf').href = btn.dataset.pdfUrl;
+
+        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalViewCapaQcCrm'));
+        modal.show();
+    });
+</script>
+
+<style>
+    /* Tab Styling Custom */
+    .nav-tabs .nav-link {
+        color: #6c757d;
+        border: none;
+        border-bottom: 3px solid transparent;
+        border-radius: 0;
+        padding-bottom: 12px;
+    }
+    .nav-tabs .nav-link:hover {
+        color: #495057;
+        border-color: transparent;
+    }
+    .nav-tabs .nav-link.active {
+        color: #6f42c1; /* Purple theme for CRM */
+        border-bottom: 3px solid #6f42c1;
+        background-color: transparent;
+    }
+
+    /* Custom DataTables Pagination Style */
+    .dataTables_wrapper .dataTables_paginate {
+        margin-top: 15px !important;
+        float: right;
+    }
+    .dataTables_wrapper .pagination {
+        border: 1px solid #d4d4d4;
+        border-radius: 6px;
+        padding: 0;
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        background-color: #fff;
+    }
+    .dataTables_wrapper .page-item .page-link {
+        border: none;
+        color: #555;
+        font-weight: 500;
+        background: transparent;
+        margin: 0;
+        padding: 8px 16px;
+        box-shadow: none !important;
+    }
+    .dataTables_wrapper .page-item .page-link:hover {
+        background-color: #f8f9fa;
+        color: #000;
+    }
+    .dataTables_wrapper .page-item.active .page-link {
+        border-top: 1px solid #000 !important;
+        border-bottom: 1px solid #000 !important;
+        border-left: 1px solid #000 !important;
+        border-right: 1px solid #000 !important;
+        background-color: transparent !important;
+        color: #111 !important;
+        font-weight: bold;
+        border-radius: 0;
+        margin-top: -1px;
+        margin-bottom: -1px;
+        padding: 8px 16px;
+        position: relative;
+        z-index: 2;
+    }
+    .dataTables_wrapper .page-item:last-child .page-link {
+        border-left: 1px solid #e0e0e0;
+        border-radius: 0;
+    }
+    .dataTables_wrapper .page-item:first-child .page-link {
+        border-radius: 0;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const spinnerButtons = document.querySelectorAll('.btn-spinner');
+    
+    spinnerButtons.forEach(btn => {
+        if (!btn.hasAttribute('data-original-html')) {
+            btn.setAttribute('data-original-html', btn.innerHTML);
+        }
+
+        btn.addEventListener('click', function() {
+            this.style.pointerEvents = 'none';
+            this.classList.add('disabled');
+            this.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Loading...';
+        });
+    });
+});
+
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        const spinnerButtons = document.querySelectorAll('.btn-spinner');
+        spinnerButtons.forEach(btn => {
+            btn.style.pointerEvents = 'auto';
+            btn.classList.remove('disabled');
+            
+            if (btn.hasAttribute('data-original-html')) {
+                btn.innerHTML = btn.getAttribute('data-original-html');
+            }
+        });
+    }
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+<script>
+(function() {
     let crmChart = null;
     if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
 
@@ -997,9 +1214,20 @@ $(function () {
             <div class="col-md-3 col-6"><div class="p-2 border rounded text-center"><small class="d-block text-muted">Jumlah Data</small><strong>${logs.length} Pengujian</strong></div></div>
         `;
 
-        const labels = [], dataPoints = [], pointColors = [], pointRadii = [];
+        const labels = [];
+        const dataPoints = [];
+        const pointColors = [];
+        const pointRadii = [];
+
+        function formatTgl(str) {
+            if (!str) return '-';
+            let d = new Date(str);
+            if (isNaN(d.getTime())) return str.substring(0, 10);
+            return ("0" + d.getDate()).slice(-2) + "/" + ("0" + (d.getMonth() + 1)).slice(-2) + "/" + d.getFullYear();
+        }
+
         logs.forEach((log, idx) => {
-            labels.push(log.tanggal_uji);
+            labels.push(formatTgl(log.tanggal_uji)); // <--- Menggunakan format tanggal rapi
             dataPoints.push(parseFloat(log.nilai_akhir));
 
             const isTrend = result.trend_indices && result.trend_indices.includes(idx);
@@ -1049,6 +1277,14 @@ $(function () {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        top: 20,
+                        right: 20,
+                        left: 10,
+                        bottom: 10
+                    }
+                },
                 plugins: {
                     tooltip: {
                         callbacks: {
@@ -1065,9 +1301,22 @@ $(function () {
                     legend: { position: 'bottom', labels: { boxWidth: 20, font: { size: 11 } } }
                 },
                 scales: {
+                    x: {
+                        offset: true, 
+                        ticks: {
+                            maxRotation: 0, 
+                            font: { size: 11 }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
                     y: {
                         suggestedMax: batasAtas + (certU * 0.5),
-                        suggestedMin: batasBawah - (certU * 0.5)
+                        suggestedMin: batasBawah - (certU * 0.5),
+                        ticks: {
+                            font: { size: 11 }
+                        }
                     }
                 }
             }
@@ -1082,7 +1331,7 @@ $(function () {
 
             tbody += '<tr' + (isTrend ? ' class="table-warning"' : '') + '>' +
                 '<td>' + (idx + 1) + '</td>' +
-                '<td>' + log.tanggal_uji + '</td>' +
+                '<td>' + formatTgl(log.tanggal_uji) + '</td>' +
                 '<td>' + (log.analis ? log.analis.nama : '-') + '</td>' +
                 '<td class="' + (isOutlier ? 'text-danger fw-bold' : 'text-success') + '">' + parseFloat(log.nilai_akhir).toFixed(4) + '</td>' +
                 '<td class="text-nowrap">' + certVal.toFixed(4) + ' &plusmn; ' + certU.toFixed(4) + '</td>' +
