@@ -2,7 +2,7 @@
 <div class="modal fade d-print-none" id="modalRumus-{{ $pid }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow">
-            <div class="modal-header text-white" style="background-color: #1b3152;">
+            <div class="modal-header text-white" style="background-color: var(--sl-primary);">
                 <h5 class="modal-title fw-bold">
                     <i class="fas fa-file-alt me-2"></i>Panduan Lembar Kerja Uji Banding: {{ $code }}
                 </h5>

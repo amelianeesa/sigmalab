@@ -142,13 +142,13 @@
 
         .password-toggle:hover,
         .password-toggle:focus {
-            color: #0c3a68;
+            color: var(--sl-primary);
             outline: none;
         }
 
         .btn-auth {
-            background: #0c3a68;
-            border: 1px solid #0c3a68;
+            background: var(--sl-primary);
+            border: 1px solid var(--sl-primary);
             border-radius: 10px;
             padding: 0.55rem 0.95rem;
             font-size: 0.92rem;
@@ -160,8 +160,8 @@
         .btn-auth:hover, 
         .btn-auth:focus, 
         .btn-auth:active {
-            background: #0a2a4b !important; 
-            border-color: #0a2a4b !important;
+            background: var(--sl-primary-dark) !important; 
+            border-color: var(--sl-primary-dark) !important;
             color: #ffffff !important; 
             box-shadow: none !important;
         }
@@ -263,6 +263,11 @@
             }
         }
     </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    {{-- Tema ceria biru muda: harus tetap paling bawah di <head> --}}
+    <link href="{{ asset('css/sigma-ceria.css') }}?v=1" rel="stylesheet">
 </head>
 <body class="d-flex align-items-center justify-content-center">
     <div class="container py-4">
@@ -271,6 +276,8 @@
                 <div class="auth-side">
                     <h3>Buat Password Baru</h3>
                     <p>Masukkan password baru Anda untuk mengamankan kembali akun SIGMA-LAB.</p>
+                
+                    <img class="auth-mascot" src="{{ asset('images/maskot/sampler.webp') }}" alt="" decoding="async">
                 </div>
                 <div class="auth-form-panel">
                     <div class="auth-logo-box auth-logo-center">

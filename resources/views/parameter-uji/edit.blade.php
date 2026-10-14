@@ -7,20 +7,20 @@
     .pu-page { font-size: 0.8rem; }
     .pu-container { padding-top: 2px; }
     .pu-breadcrumb { font-size: 0.72rem; }
-    .pu-title { font-size: 1.05rem; font-weight: 700; color: #1b3152; margin-bottom: 0.6rem; }
+    .pu-title { font-size: 1.05rem; font-weight: 700; color: var(--sl-primary); margin-bottom: 0.6rem; }
 
     .pu-page .card { border: 0; border-radius: 0.5rem; }
     .pu-page .card-body { padding: 0.75rem; }
     .card-header-custom {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         font-weight: 600;
         font-size: 0.85rem !important;
         padding: 0.5rem 0.9rem !important;
     }
 
-    .pu-page .text-primary { color: #1b3152 !important; }
-    .pu-page .text-secondary { color: #1b3152 !important; }
+    .pu-page .text-primary { color: var(--sl-primary) !important; }
+    .pu-page .text-secondary { color: var(--sl-primary) !important; }
 
     .pu-page .form-label {
         font-size: 0.75rem !important;
@@ -36,8 +36,8 @@
     }
     .pu-page .form-control:focus,
     .pu-page .form-select:focus {
-        border-color: #1b3152;
-        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+        border-color: var(--sl-primary);
+        box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.15);
     }
     .pu-page .form-text,
     .pu-page small.text-muted { font-size: 0.7rem !important; }
@@ -67,8 +67,8 @@
     .modal .btn.btn-icon { padding: 0.2rem 0.5rem !important; }
 
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
     .btn-corporate-blue:hover,
@@ -80,23 +80,23 @@
     }
     .btn-outline-corporate {
         background-color: transparent !important;
-        border: 1px solid #1b3152 !important;
-        color: #1b3152 !important;
+        border: 1px solid var(--sl-primary) !important;
+        color: var(--sl-primary) !important;
     }
     .btn-outline-corporate:hover,
     .btn-outline-corporate:focus,
     .btn-outline-corporate:active {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
 
     .pu-page .nav-tabs { flex-wrap: wrap; margin-bottom: 0; border-bottom: 1px solid #dee2e6; }
-    .pu-page .nav-tabs { border-bottom: 2px solid #1b3152; }
+    .pu-page .nav-tabs { border-bottom: 2px solid var(--sl-primary); }
     .pu-page .nav-tabs .nav-link {
         font-size: 0.78rem;
         padding: 0.45rem 0.85rem;
-        color: #1b3152;
+        color: var(--sl-primary);
         background-color: #eef2f8;
         font-weight: 700;
         border: 1px solid #d5deee;
@@ -115,8 +115,8 @@
         box-shadow: none;
     }
     .pu-page .nav-tabs .nav-link.active {
-        background-color: #1b3152;
-        border-color: #1b3152;
+        background-color: var(--sl-primary);
+        border-color: var(--sl-primary);
         color: #ffffff;
     }
     .pu-tab-content {
@@ -135,7 +135,7 @@
     .modal .table td { padding: 0.35rem 0.5rem; vertical-align: middle; }
     .pu-page .table thead th,
     .modal .table thead th {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #fff !important;
         font-size: 0.75rem;
         border-color: rgba(255, 255, 255, 0.35) !important;
@@ -144,7 +144,7 @@
     .flatpickr-input { font-size: 0.8rem !important; }
     .flatpickr-calendar { font-size: 0.85rem; }
 
-    .pu-modal-header { background-color: #1b3152 !important; color: #ffffff !important; padding: 0.5rem 0.9rem; }
+    .pu-modal-header { background-color: var(--sl-primary) !important; color: #ffffff !important; padding: 0.5rem 0.9rem; }
     .pu-modal-header .modal-title { font-size: 0.9rem !important; }
     .modal .modal-body { font-size: 0.8rem; padding: 0.9rem; }
     .modal .modal-footer { padding: 0.5rem 0.9rem; gap: 0.4rem; }
@@ -177,8 +177,8 @@
         flex-shrink: 0;
     }
     .filter-select.open .filter-select-trigger {
-        border-color: #1b3152;
-        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+        border-color: var(--sl-primary);
+        box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.15);
     }
     .filter-select-options {
         display: none;
@@ -198,7 +198,7 @@
     .filter-select.open .filter-select-options { display: block; }
     .filter-select-options li { padding: 6px 10px; font-size: 0.8rem; cursor: pointer; }
     .filter-select-options li:hover { background-color: #eef2f8; }
-    .filter-select-options li.selected { background-color: #1b3152; color: #fff; }
+    .filter-select-options li.selected { background-color: var(--sl-primary); color: #fff; }
 
     .swal2-popup { font-size: 0.9rem !important; }
     .swal2-title { font-size: 1.1rem !important; }
@@ -268,7 +268,7 @@
 
                         <div class="card bg-light mb-2 border-0">
                             <div class="card-body">
-                                <p class="mb-2 fw-bold" style="font-size: 0.8rem; color: #1b3152;"><i class="fas fa-chart-line me-1"></i> Input Data Statistik (In-House)</p>
+                                <p class="mb-2 fw-bold" style="font-size: 0.8rem; color: var(--sl-primary);"><i class="fas fa-chart-line me-1"></i> Input Data Statistik (In-House)</p>
                                 <div class="alert alert-info">
                                     <i class="fas fa-info-circle me-1"></i> Nilai <strong>Mean</strong> dan <strong>SD</strong> didapatkan secara otomatis dari hasil <strong>Uji Homogenitas</strong>. Jika dilakukan uji homogenitas ulang, maka nilai-nilai ini akan ikut berubah secara otomatis.
                                 </div>
@@ -397,12 +397,12 @@
                     </div>
 
                     <div class="tab-pane fade" id="crm" role="tabpanel">
-                        <p class="mb-2 fw-bold" style="font-size: 0.8rem; color: #1b3152;"><i class="fas fa-certificate me-1"></i> Pengaturan Nilai Sertifikat per Lot CRM</p>
+                        <p class="mb-2 fw-bold" style="font-size: 0.8rem; color: var(--sl-primary);"><i class="fas fa-certificate me-1"></i> Pengaturan Nilai Sertifikat per Lot CRM</p>
                         <div class="alert alert-warning">
                             <span>Anda dapat mengisi nilai Sertifikat (Cert Value) dan Uncertainty (U) untuk masing-masing kode Lot CRM yang saat ini aktif. Nilai ini akan digunakan untuk mengevaluasi akurasi hasil uji.</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2 pu-crm-head">
-                            <h6 class="m-0 fw-bold" style="font-size: 0.85rem; color: #1b3152;">Daftar Botol / Lot CRM</h6>
+                            <h6 class="m-0 fw-bold" style="font-size: 0.85rem; color: var(--sl-primary);">Daftar Botol / Lot CRM</h6>
                             <button type="button" class="btn btn-corporate-blue shadow-sm" data-bs-toggle="modal" data-bs-target="#modalAddCrm">
                                 <i class="fas fa-plus"></i> Tambah Lot CRM
                             </button>
@@ -606,14 +606,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             title: 'Berhasil!',
                             text: 'Botol CRM berhasil dihapus.',
                             icon: 'success',
-                            confirmButtonColor: '#1b3152'
+                            confirmButtonColor: '#1a7fc4'
                         }).then(() => window.location.reload());
                     } else {
                         Swal.fire({
                             title: 'Gagal!',
                             text: data.message || 'Terjadi kesalahan saat menghapus.',
                             icon: 'error',
-                            confirmButtonColor: '#1b3152'
+                            confirmButtonColor: '#1a7fc4'
                         });
                     }
                 });
@@ -689,7 +689,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     title: 'Data Belum Lengkap',
                     text: 'Nomor Lot dan Jenis Material wajib diisi!',
                     icon: 'warning',
-                    confirmButtonColor: '#1b3152'
+                    confirmButtonColor: '#1a7fc4'
                 });
                 return;
             }
@@ -698,7 +698,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     title: 'Belum Bisa Disimpan',
                     text: 'Parameter Uji ID belum tersedia. Harap simpan Parameter Uji terlebih dahulu sebelum menambah Lot CRM.',
                     icon: 'warning',
-                    confirmButtonColor: '#1b3152'
+                    confirmButtonColor: '#1a7fc4'
                 });
                 return;
             }
@@ -732,14 +732,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         title: 'Berhasil!',
                         text: 'CRM Baru berhasil ditambahkan beserta nilai sertifikatnya. Halaman akan dimuat ulang.',
                         icon: 'success',
-                        confirmButtonColor: '#1b3152'
+                        confirmButtonColor: '#1a7fc4'
                     }).then(() => window.location.reload());
                 } else {
                     Swal.fire({
                         title: 'Gagal!',
                         text: res.message || 'Cek kembali isian Anda.',
                         icon: 'error',
-                        confirmButtonColor: '#1b3152'
+                        confirmButtonColor: '#1a7fc4'
                     });
                     btn.innerHTML = originalText;
                     btn.disabled = false;
@@ -750,7 +750,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     title: 'Gagal!',
                     text: 'Terjadi kesalahan sistem.',
                     icon: 'error',
-                    confirmButtonColor: '#1b3152'
+                    confirmButtonColor: '#1a7fc4'
                 });
                 btn.innerHTML = originalText;
                 btn.disabled = false;

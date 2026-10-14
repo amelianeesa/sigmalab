@@ -4,7 +4,7 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <div>
-        <h4 class="fw-bold mb-0 lb-title" style="color:#1b3152;">Log Book Peminjaman {{ $alat->nama_alat }}</h4>
+        <h4 class="fw-bold mb-0 lb-title" style="color:var(--sl-primary);">Log Book Peminjaman {{ $alat->nama_alat }}</h4>
         <small class="text-muted">No. Alat: {{ $alat->kode_alat }}</small>
     </div>
     <div class="d-flex gap-2 flex-wrap lb-actions">
@@ -13,7 +13,7 @@
             <i class="fas fa-file-pdf me-1"></i> Cetak PDF
         </a>
         @if($bisaMengisi)
-            <button type="button" class="btn btn-sm text-white fw-semibold lb-primary-act" style="background:#1b3152;" data-bs-toggle="modal" data-bs-target="#modalTambah">
+            <button type="button" class="btn btn-sm text-white fw-semibold lb-primary-act" style="background:var(--sl-primary);" data-bs-toggle="modal" data-bs-target="#modalTambah">
                 <i class="fas fa-plus me-1"></i> Tambah Peminjaman
             </button>
         @endif
@@ -27,7 +27,7 @@
 <style>
     .lb-btn { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
               padding: 0 !important; border-radius: 6px; font-size: 0.75rem; }
-    .lb-table thead th { background: #1b3152; color: #fff; font-weight: 600; font-size: 0.78rem; vertical-align: middle; border-color: #2a456f; }
+    .lb-table thead th { background: var(--sl-primary); color: #fff; font-weight: 600; font-size: 0.78rem; vertical-align: middle; border-color: #2a456f; }
     .lb-table td { vertical-align: middle; }
     .lb-status { font-size: 0.7rem; font-weight: 600; padding: 3px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; }
     .lb-status.ok { background: #e6f4ea; color: #1e7a3c; border: 1px solid #b7e0c3; }
@@ -37,11 +37,11 @@
     .lb-kembali-form { display: inline-flex; gap: 4px; align-items: center; }
     .lb-kembali-form input[type=date] { width: 122px; font-size: 0.75rem; height: 30px; }
     .lb-kembali-btn { height: 30px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px;
-                      background: #1b3152; border: 1px solid #1b3152; color: #fff; border-radius: 6px;
+                      background: var(--sl-primary); border: 1px solid var(--sl-primary); color: #fff; border-radius: 6px;
                       font-size: 0.75rem; font-weight: 600; white-space: nowrap; transition: background .15s ease; }
     .lb-kembali-btn:hover, .lb-kembali-btn:focus { background: #14253e; color: #fff; }
-    .lb-kembali-btn.koreksi { background: #fff; color: #1b3152; }
-    .lb-kembali-btn.koreksi:hover, .lb-kembali-btn.koreksi:focus { background: #eef2f8; color: #1b3152; }
+    .lb-kembali-btn.koreksi { background: #fff; color: var(--sl-primary); }
+    .lb-kembali-btn.koreksi:hover, .lb-kembali-btn.koreksi:focus { background: #eef2f8; color: var(--sl-primary); }
 
     .pagination .page-link { font-size: 0.72rem; padding: 0.2rem 0.55rem; }
 
@@ -89,7 +89,7 @@
         @if($cari !== '')
             <a href="{{ route('peminjaman.alat', $alat->alat_id) }}" class="btn btn-outline-secondary">Reset</a>
         @endif
-        <button type="submit" class="btn text-white fw-semibold px-4" style="background:#1b3152;">
+        <button type="submit" class="btn text-white fw-semibold px-4" style="background:var(--sl-primary);">
             <i class="fas fa-search me-1"></i> Cari
         </button>
     </div>
@@ -217,7 +217,7 @@
         <div class="modal-content">
             <form method="POST" action="{{ route('peminjaman.store', $alat->alat_id) }}" id="formLogbook">
                 @csrf
-                <div class="modal-header" style="background:#1b3152; color:#fff;">
+                <div class="modal-header" style="background:var(--sl-primary); color:#fff;">
                     <h6 class="modal-title fw-bold mb-0"><i class="fas fa-plus me-1"></i> Tambah Peminjaman: {{ $alat->nama_alat }}</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
@@ -255,7 +255,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-sm text-white fw-semibold px-4" style="background:#1b3152;">Simpan Catatan</button>
+                    <button type="submit" class="btn btn-sm text-white fw-semibold px-4" style="background:var(--sl-primary);">Simpan Catatan</button>
                 </div>
             </form>
         </div>
@@ -268,7 +268,7 @@
         <div class="modal-content">
             <form method="POST" id="formTolak" action="">
                 @csrf
-                <div class="modal-header" style="background:#1b3152; color:#fff;">
+                <div class="modal-header" style="background:var(--sl-primary); color:#fff;">
                     <h6 class="modal-title fw-bold mb-0"><i class="fas fa-times-circle me-1"></i> Tolak Peminjaman</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
@@ -316,7 +316,7 @@
     });
 
     document.getElementById('formLogbook').addEventListener('submit', function (e) {
-        if (!adaIsi) { e.preventDefault(); Swal.fire({ title: 'Paraf Belum Diisi', text: 'Gambar paraf di kotak yang tersedia sebelum menyimpan.', icon: 'warning', confirmButtonColor: '#1b3152', confirmButtonText: 'Mengerti' }); return; }
+        if (!adaIsi) { e.preventDefault(); Swal.fire({ title: 'Paraf Belum Diisi', text: 'Gambar paraf di kotak yang tersedia sebelum menyimpan.', icon: 'warning', confirmButtonColor: '#1a7fc4', confirmButtonText: 'Mengerti' }); return; }
         document.getElementById('inputParaf').value = c.toDataURL('image/png');
     });
 

@@ -25,8 +25,8 @@
         overflow: visible !important;
     }
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
     .btn-corporate-blue:hover, 
@@ -85,12 +85,12 @@
     <div class="row g-3">
         <div class="col-xl-4 col-lg-5">
             <div class="card shadow-sm card-shadow-custom bg-white">
-                <div class="card-header text-white fw-bold py-2 px-3 d-flex align-items-center" style="background-color: #1b3152; font-size: 0.85rem;">
+                <div class="card-header text-white fw-bold py-2 px-3 d-flex align-items-center" style="background-color: var(--sl-primary); font-size: 0.85rem;">
                     <i class="fas fa-info-circle me-2"></i> Informasi Alat
                 </div>
                 <div class="card-body">
                     <div class="text-center mb-3">
-                        <div class="rounded-circle text-white d-inline-flex align-items-center justify-content-center mb-2 shadow-sm" style="width: 55px; height: 55px; font-size: 22px; background-color: #1b3152;">
+                        <div class="rounded-circle text-white d-inline-flex align-items-center justify-content-center mb-2 shadow-sm" style="width: 55px; height: 55px; font-size: 22px; background-color: var(--sl-primary);">
                             <i class="fas fa-microscope"></i>
                         </div>
                         <h6 class="fw-bold mb-1 text-dark" style="font-size: 0.95rem;">{{ $alat->nama_alat }}</h6>
@@ -126,7 +126,7 @@
 
         <div class="col-xl-8 col-lg-7">
             <div class="card shadow-sm card-shadow-custom bg-white">
-                <div class="card-header text-white fw-bold py-2 px-3 d-flex justify-content-between align-items-center" style="background-color: #1b3152; font-size: 0.85rem;">
+                <div class="card-header text-white fw-bold py-2 px-3 d-flex justify-content-between align-items-center" style="background-color: var(--sl-primary); font-size: 0.85rem;">
                     <span><i class="fas fa-tools me-2"></i> Catatan Kerusakan & Perbaikan</span>
                     
                     <div>
@@ -167,7 +167,7 @@
                                         <span class="badge bg-{{ $bg }}" style="font-size: 0.68rem; padding: 0.25rem 0.5rem;">{{ $perbaikan->status_perbaikan }}</span>
                                     </td>
                                     <td class="text-center">
-                                        <button type="button" class="btn btn-sm btn-corporate-blue py-1 px-2 shadow-sm text-white" style="background-color: #1b3152 !important; border-color: #1b3152 !important; color: #ffffff !important; font-size: 11px;" data-bs-toggle="modal" data-bs-target="#detailPerbaikanModal{{ $perbaikan->riwayat_perbaikan_id }}">
+                                        <button type="button" class="btn btn-sm btn-corporate-blue py-1 px-2 shadow-sm text-white" style="background-color: var(--sl-primary) !important; border-color: var(--sl-primary) !important; color: #ffffff !important; font-size: 11px;" data-bs-toggle="modal" data-bs-target="#detailPerbaikanModal{{ $perbaikan->riwayat_perbaikan_id }}">
                                             Detail
                                         </button>
                                     </td>
@@ -192,7 +192,7 @@
 <div class="modal fade" id="laporRusakModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 rounded-3 shadow">
-            <div class="modal-header text-white py-2 px-3" style="background-color: #1b3152;">
+            <div class="modal-header text-white py-2 px-3" style="background-color: var(--sl-primary);">
                 <h6 class="modal-title fw-bold" style="font-size: 0.85rem;"><i class="fas fa-exclamation-triangle me-2"></i>Lapor Kerusakan Alat</h6>
                 <button type="button" class="btn-close btn-close-white btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -211,7 +211,7 @@
                 </div>
                 <div class="modal-footer border-top-0 bg-light py-2 px-3">
                     <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal" style="font-size: 0.75rem;">Batal</button>
-                    <button type="submit" class="btn btn-corporate-blue btn-sm px-3 shadow-sm text-white" style="background-color: #1b3152 !important; border-color: #1b3152 !important; color: #ffffff !important; font-size: 0.75rem;">Laporkan</button>
+                    <button type="submit" class="btn btn-corporate-blue btn-sm px-3 shadow-sm text-white" style="background-color: var(--sl-primary) !important; border-color: var(--sl-primary) !important; color: #ffffff !important; font-size: 0.75rem;">Laporkan</button>
                 </div>
             </form>
         </div>
@@ -222,7 +222,7 @@
 <div class="modal fade" id="detailPerbaikanModal{{ $perbaikan->riwayat_perbaikan_id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 rounded-3 shadow">
-            <div class="modal-header text-white py-2 px-3" style="background-color: #1b3152;">
+            <div class="modal-header text-white py-2 px-3" style="background-color: var(--sl-primary);">
                 <h6 class="modal-title fw-bold" style="font-size: 0.85rem;"><i class="fas fa-tools me-2"></i>Detail Perbaikan Alat</h6>
                 <button type="button" class="btn-close btn-close-white btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -286,7 +286,7 @@
                 <div class="modal-footer border-top-0 bg-light py-2 px-3">
                     <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal" style="font-size: 0.75rem;">Tutup</button>
                     @if($perbaikan->status_perbaikan !== 'Selesai' && $perbaikan->status_perbaikan !== 'Tidak Bisa Diperbaiki')
-                    <button type="submit" class="btn btn-corporate-blue btn-sm px-3 shadow-sm text-white" style="background-color: #1b3152 !important; border-color: #1b3152 !important; color: #ffffff !important; font-size: 0.75rem;">Simpan Update</button>
+                    <button type="submit" class="btn btn-corporate-blue btn-sm px-3 shadow-sm text-white" style="background-color: var(--sl-primary) !important; border-color: var(--sl-primary) !important; color: #ffffff !important; font-size: 0.75rem;">Simpan Update</button>
                     @endif
                 </div>
             </form>

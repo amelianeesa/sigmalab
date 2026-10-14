@@ -14,7 +14,7 @@
     <div class="row g-3 justify-content-center">
         <div class="col-12 col-lg-5">
             <div class="card shadow-sm border-0 h-100">
-                <div class="card-header text-white" style="background-color: #1b3152;">
+                <div class="card-header text-white" style="background-color: var(--sl-primary);">
                     <h5 class="text-center">Data Pengujian (Lab Sucofindo)</h5>
                 </div>
                 <div class="card-body text-center d-flex flex-column justify-content-center align-items-center py-4">
@@ -32,7 +32,7 @@
 
         <div class="col-12 col-lg-7">
             <div class="card shadow-sm border-0 h-100">
-                <div class="card-header text-white" style="background-color: #1b3152;">
+                <div class="card-header text-white" style="background-color: var(--sl-primary);">
                     <h5><i class="fas fa-check-double me-1"></i> Input Keputusan Vendor</h5>
                 </div>
                 <div class="card-body">

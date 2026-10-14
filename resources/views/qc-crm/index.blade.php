@@ -123,7 +123,7 @@
     .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
     .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
     .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
-        background-color: rgba(27, 49, 82, 0.15) !important;
+        background-color: rgba(26, 127, 196, 0.15) !important;
         color: #000000 !important;
         text-decoration: none !important;
     }
@@ -133,7 +133,7 @@
     }
 
     .qc-page .btn-corporate-blue {
-        background-color: #1b3152 !important; border-color: #1b3152 !important; color: #fff !important;
+        background-color: var(--sl-primary) !important; border-color: var(--sl-primary) !important; color: #fff !important;
     }
     .qc-page .btn-corporate-blue:hover,
     .qc-page .btn-corporate-blue:focus,
@@ -141,9 +141,9 @@
         background-color: #14253e !important; border-color: #14253e !important; color: #fff !important;
     }
     .qc-page .btn-outline-corporate {
-        color: #1b3152 !important; border: 1px solid #1b3152 !important; background: #fff !important;
+        color: var(--sl-primary) !important; border: 1px solid var(--sl-primary) !important; background: #fff !important;
     }
-    .qc-page .btn-outline-corporate:hover { background-color: #1b3152 !important; color: #fff !important; }
+    .qc-page .btn-outline-corporate:hover { background-color: var(--sl-primary) !important; color: #fff !important; }
 
     .qc-action-btn {
         width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
@@ -180,7 +180,7 @@
         padding: 8px 10px !important; vertical-align: middle !important; font-size: 0.75rem !important;
     }
     .qc-page .table-qc thead th {
-        background-color: #1b3152 !important; color: #fff !important; border-color: #fff !important;
+        background-color: var(--sl-primary) !important; color: #fff !important; border-color: #fff !important;
         font-size: 0.75rem !important; white-space: nowrap; text-align: center !important;
     }
     .qc-page .table-qc .badge { font-size: 0.68rem; }
@@ -209,13 +209,13 @@
     .qc-tabs { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; white-space: nowrap; scrollbar-width: none; }
     .qc-tabs::-webkit-scrollbar { display: none; }
     .qc-tabs .nav-link { font-size: 0.82rem; padding: 0.5rem 1rem; color: #495057; }
-    .qc-tabs .nav-link.active { color: #1b3152; border-bottom: 2px solid #1b3152; }
+    .qc-tabs .nav-link.active { color: var(--sl-primary); border-bottom: 2px solid var(--sl-primary); }
 
     .dataTables_wrapper .dataTables_info { font-size: 0.72rem; padding: 0 12px; }
     .dataTables_wrapper .dataTables_paginate { float: right; margin: 10px 12px; }
     .dataTables_wrapper .pagination { margin: 0; flex-wrap: wrap; }
-    .dataTables_wrapper .page-link { font-size: 0.72rem; padding: 0.2rem 0.55rem; color: #1b3152; }
-    .dataTables_wrapper .page-item.active .page-link { background-color: #1b3152; border-color: #1b3152; color: #fff; }
+    .dataTables_wrapper .page-link { font-size: 0.72rem; padding: 0.2rem 0.55rem; color: var(--sl-primary); }
+    .dataTables_wrapper .page-item.active .page-link { background-color: var(--sl-primary); border-color: var(--sl-primary); color: #fff; }
 
     .dataTables_wrapper .dataTables_length {
         padding: 0 !important;
@@ -253,9 +253,9 @@
 
     .pulse-button { animation: pulse 1.5s infinite; }
     @keyframes pulse {
-        0%   { box-shadow: 0 0 0 0 rgba(27, 49, 82, 0.6); }
-        70%  { box-shadow: 0 0 0 8px rgba(27, 49, 82, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(27, 49, 82, 0); }
+        0%   { box-shadow: 0 0 0 0 rgba(26, 127, 196, 0.6); }
+        70%  { box-shadow: 0 0 0 8px rgba(26, 127, 196, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(26, 127, 196, 0); }
     }
     @media (prefers-reduced-motion: reduce) { .pulse-button { animation: none; } }
 
@@ -298,7 +298,7 @@
 
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-2 mb-3 gap-2">
         <h5 class="fw-bold mb-0" style="font-size: 1.1rem;">
-            <i class="fas fa-certificate me-2" style="color: #1b3152;"></i>QC CRM Dashboard
+            <i class="fas fa-certificate me-2" style="color: var(--sl-primary);"></i>QC CRM Dashboard
         </h5>
 
         <div class="d-grid d-md-flex gap-2">
@@ -528,7 +528,7 @@
                 <div class="modal fade" id="modalHasilVerif{{ $r->id }}" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-xl modal-dialog-scrollable modal-fullscreen-lg-down">
                         <div class="modal-content border-0 shadow">
-                            <div class="modal-header text-white py-2 px-3" style="background-color: #1b3152;">
+                            <div class="modal-header text-white py-2 px-3" style="background-color: var(--sl-primary);">
                                 <h5 class="modal-title" style="font-size: 0.92rem;"><i class="fas fa-check-double me-2"></i>Hasil Uji Verifikasi - {{ $r->nomor_lot }}</h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
@@ -844,7 +844,7 @@
         <div class="tab-pane fade" id="chartCrm" role="tabpanel" aria-labelledby="chart-tab">
             <div class="card shadow-sm border-0">
                 <div class="card-body p-2 p-md-3">
-                    <h6 class="fw-bold mb-3"><i class="fas fa-chart-area me-2" style="color: #1b3152;"></i>Control Chart CRM</h6>
+                    <h6 class="fw-bold mb-3"><i class="fas fa-chart-area me-2" style="color: var(--sl-primary);"></i>Control Chart CRM</h6>
 
                     <div class="row g-2 mb-3 align-items-end">
                         <div class="col-12 col-md-4">
@@ -879,7 +879,7 @@
                         </div>
 
                         <hr class="my-3">
-                        <h6 class="fw-bold mb-2" style="font-size: 0.85rem;"><i class="fas fa-table me-2" style="color: #1b3152;"></i>Tabel Data Control Chart</h6>
+                        <h6 class="fw-bold mb-2" style="font-size: 0.85rem;"><i class="fas fa-table me-2" style="color: var(--sl-primary);"></i>Tabel Data Control Chart</h6>
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped table-hover text-center align-middle mb-0 table-qc">
                                 <thead>

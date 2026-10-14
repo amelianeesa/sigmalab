@@ -25,7 +25,7 @@
         font-size: 0.72rem !important;
     }
     .library-table thead th {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         border-color: #ffffff !important;
         color: #fff !important;
         font-size: 0.72rem !important;
@@ -42,8 +42,8 @@
         background-color: #f8f9fa;
     }
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
     .btn-corporate-blue:hover, 

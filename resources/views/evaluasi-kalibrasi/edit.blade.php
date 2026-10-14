@@ -31,8 +31,8 @@
         border: 1px solid #e3e6f0;
     }
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
     .btn-corporate-blue:hover, 
@@ -76,7 +76,7 @@
     @endif
 
     <div class="card shadow-sm card-shadow-custom bg-white">
-        <div class="card-header text-white fw-bold py-2 px-3 d-flex align-items-center" style="background-color: #1b3152; font-size: 0.85rem;">
+        <div class="card-header text-white fw-bold py-2 px-3 d-flex align-items-center" style="background-color: var(--sl-primary); font-size: 0.85rem;">
             <i class="fas fa-edit me-2"></i> Form Edit Evaluasi Kalibrasi
         </div>
         <div class="card-body">
@@ -116,7 +116,7 @@
                                         <span class="text-dark fw-semibold text-truncate d-inline-block" style="font-size: 11px; max-width: 220px;">{{ basename($evaluasi->file_laporan) }}</span>
                                     </div>
                                 </div>
-                                <a href="{{ asset('storage/' . $evaluasi->file_laporan) }}" target="_blank" class="btn btn-sm text-nowrap py-1 px-2 shadow-sm d-flex align-items-center text-white" style="background-color: #1b3152 !important; border-color: #1b3152 !important; font-size: 11px; gap: 5px;">
+                                <a href="{{ asset('storage/' . $evaluasi->file_laporan) }}" target="_blank" class="btn btn-sm text-nowrap py-1 px-2 shadow-sm d-flex align-items-center text-white" style="background-color: var(--sl-primary) !important; border-color: var(--sl-primary) !important; font-size: 11px; gap: 5px;">
                                     <i class="fas fa-eye text-white"></i> <span class="text-white">Lihat</span>
                                 </a>
                             </div>
@@ -141,7 +141,7 @@
 
                 <div class="mt-3 text-end pt-2 border-top">
                     <a href="{{ route('evaluasi-kalibrasi.index') }}" class="btn btn-secondary btn-sm me-1 px-3 shadow-sm" style="font-size: 0.75rem;">Batal</a>
-                    <button type="submit" class="btn btn-sm px-3 fw-bold shadow-sm text-white" style="background-color: #1b3152 !important; border-color: #1b3152 !important; font-size: 0.75rem;">
+                    <button type="submit" class="btn btn-sm px-3 fw-bold shadow-sm text-white" style="background-color: var(--sl-primary) !important; border-color: var(--sl-primary) !important; font-size: 0.75rem;">
                         <i class="fas fa-save me-1"></i> Perbarui
                     </button>
                 </div>

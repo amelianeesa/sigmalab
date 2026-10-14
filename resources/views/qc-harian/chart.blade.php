@@ -77,7 +77,7 @@
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
-        background-color: rgba(27, 49, 82, 0.15) !important;
+        background-color: rgba(26, 127, 196, 0.15) !important;
         color: #000000 !important;
         text-decoration: none !important;
     }
@@ -123,7 +123,7 @@
     }
 
     .icon-corporate {
-        color: #1b3152;
+        color: var(--sl-primary);
     }
 
     /* ===== Batch info ===== */
@@ -201,7 +201,7 @@
         margin-bottom: 0;
         font-size: 0.74rem;
         border-color: #cfd6df;
-        --bs-table-hover-bg: rgba(27, 49, 82, 0.06);
+        --bs-table-hover-bg: rgba(26, 127, 196, 0.06);
         --bs-table-striped-bg: #f8fafc;
     }
 
@@ -211,7 +211,7 @@
         font-weight: 600;
         line-height: 1.25;
         color: #ffffff !important;
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         border-color: rgba(255, 255, 255, 0.25) !important;
         white-space: nowrap;
         vertical-align: middle;

@@ -74,7 +74,7 @@
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
-        background-color: rgba(27, 49, 82, 0.15) !important;
+        background-color: rgba(26, 127, 196, 0.15) !important;
         color: #000000 !important;
         text-decoration: none !important;
     }
@@ -98,8 +98,8 @@
     }
 
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
 
@@ -112,13 +112,13 @@
     }
 
     .btn-outline-corporate {
-        color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
     }
 
     .btn-outline-corporate:hover,
     .btn-outline-corporate:focus {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
 
@@ -129,11 +129,11 @@
     }
 
     .lks-card:hover {
-        box-shadow: 0 6px 18px rgba(27, 49, 82, 0.12) !important;
+        box-shadow: 0 6px 18px rgba(26, 127, 196, 0.12) !important;
     }
 
     .lks-card {
-        border-left-color: #1b3152 !important;
+        border-left-color: var(--sl-primary) !important;
     }
 
     .lks-hint {
@@ -148,8 +148,8 @@
     }
 
     .lks-textarea:focus {
-        border-color: #1b3152;
-        box-shadow: 0 0 0 0.2rem rgba(27, 49, 82, 0.15);
+        border-color: var(--sl-primary);
+        box-shadow: 0 0 0 0.2rem rgba(26, 127, 196, 0.15);
     }
 
     .lks-summary {
@@ -161,7 +161,7 @@
 
     .lks-chip {
         background: #eaf0f8;
-        color: #1b3152;
+        color: var(--sl-primary);
         border-radius: 999px;
         padding: 3px 10px;
         font-size: 0.72rem;
@@ -207,7 +207,7 @@
 
     <div class="mb-3">
         <h5 class="fw-bold mb-1" style="font-size: 1.1rem;">
-            <i class="fas fa-file-alt me-2" style="color: #1b3152;"></i>Lembar Ketidaksesuaian (LKS) / CAPA
+            <i class="fas fa-file-alt me-2" style="color: var(--sl-primary);"></i>Lembar Ketidaksesuaian (LKS) / CAPA
         </h5>
         <p class="text-muted mb-0" style="font-size: 0.78rem;">
             Investigasi untuk parameter <span class="fw-bold text-dark">{{ $parameter->parameterUji->nama_parameter }}</span> pada Uji Banding <span class="fw-bold text-dark">{{ $program->nama_program }}</span>.
@@ -223,7 +223,7 @@
         @method('PUT')
 
         <div class="card border-0 shadow-sm mb-3 lks-card">
-            <div class="card-header text-white" style="background-color: #1b3152;">
+            <div class="card-header text-white" style="background-color: var(--sl-primary);">
                 <h5><i class="fas fa-search me-1"></i> Bagian 1: Analisis Akar Masalah</h5>
             </div>
             <div class="card-body">
@@ -233,7 +233,7 @@
         </div>
 
         <div class="card border-0 shadow-sm mb-3 lks-card">
-            <div class="card-header text-white" style="background-color: #1b3152;">
+            <div class="card-header text-white" style="background-color: var(--sl-primary);">
                 <h5><i class="fas fa-tools me-1"></i> Bagian 2: Tindakan Perbaikan</h5>
             </div>
             <div class="card-body">
@@ -243,7 +243,7 @@
         </div>
 
         <div class="card border-0 shadow-sm mb-3 lks-card">
-            <div class="card-header text-white" style="background-color: #1b3152;">
+            <div class="card-header text-white" style="background-color: var(--sl-primary);">
                 <h5><i class="fas fa-shield-alt me-1"></i> Bagian 3: Tindakan Pencegahan</h5>
             </div>
             <div class="card-body">

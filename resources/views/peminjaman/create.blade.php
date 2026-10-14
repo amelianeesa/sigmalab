@@ -3,7 +3,7 @@
 
 @section('content')
 <div class="mb-3">
-    <h4 class="fw-bold mb-0" style="color:#1b3152;">Ajukan Peminjaman Alat</h4>
+    <h4 class="fw-bold mb-0" style="color:var(--sl-primary);">Ajukan Peminjaman Alat</h4>
     <small class="text-muted">Pilih alat induk dan/atau sub alat yang dibutuhkan.</small>
 </div>
 
@@ -75,7 +75,7 @@
         </div>
     </div>
 
-    <button type="submit" class="btn btn-sm text-white fw-semibold px-4" style="background:#1b3152;">Kirim Pengajuan</button>
+    <button type="submit" class="btn btn-sm text-white fw-semibold px-4" style="background:var(--sl-primary);">Kirim Pengajuan</button>
     <a href="{{ route('peminjaman.index') }}" class="btn btn-sm btn-outline-secondary px-3">Batal</a>
 </form>
 @endsection

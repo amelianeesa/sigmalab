@@ -1,0 +1,285 @@
+/* ==========================================================================
+   SIGMA-LAB - Tema "Ceria" (biru muda)
+   Dimuat PALING AKHIR di <head> layouts/app.blade.php dan halaman login,
+   jadi cukup mengubah warna di blok :root di bawah ini untuk ganti tema.
+   ========================================================================== */
+
+:root {
+    --sl-primary:      #1a7fc4;   /* tombol, header tabel, topbar */
+    --sl-primary-dark: #136aa6;   /* hover, aksen gelap */
+    --sl-sky:          #3fb1ee;   /* aksen terang (fokus, dekorasi) */
+    --sl-50:           #f2faff;   /* latar halaman */
+    --sl-100:          #e1f3fd;
+    --sl-200:          #c3e5f8;   /* border lembut */
+    --sl-ink:          #16334f;   /* teks utama */
+    --sl-muted:        #5d7890;   /* teks sekunder */
+
+    /* variabel lama (dipakai layout) diarahkan ke warna baru */
+    --sdm-50:  var(--sl-50);
+    --sdm-500: var(--sl-primary);
+    --sdm-600: var(--sl-primary);
+    --sdm-700: var(--sl-primary-dark);
+
+    /* Bootstrap 5.3 */
+    --bs-primary: #1a7fc4;
+    --bs-primary-rgb: 26, 127, 196;
+    --bs-link-color: #1a7fc4;
+    --bs-link-hover-color: #136aa6;
+    --bs-body-color: #16334f;
+    --bs-secondary-color: #5d7890;
+    --bs-border-color: #d3e8f5;
+    --bs-body-font-family: 'Nunito', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+}
+
+html, body {
+    font-family: var(--bs-body-font-family);
+}
+
+body {
+    color: var(--sl-ink);
+    background-color: var(--sl-50);
+    background-image:
+        radial-gradient(circle at 100% 0, rgba(63, 177, 238, .10) 0, transparent 38%),
+        radial-gradient(circle at 0 100%, rgba(63, 177, 238, .08) 0, transparent 34%);
+    background-attachment: fixed;
+}
+
+/* ---------- Topbar ---------- */
+.top-navbar {
+    background: linear-gradient(100deg, var(--sl-primary-dark) 0%, var(--sl-primary) 55%, #2b97df 100%);
+    border-bottom: 0 !important;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 6px 18px rgba(26, 127, 196, .22);
+}
+.top-navbar::before {            /* gelembung dekoratif tipis */
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 74% 115%, rgba(255, 255, 255, .16) 0 34px, transparent 35px),
+        radial-gradient(circle at 86% -25%, rgba(255, 255, 255, .13) 0 30px, transparent 31px),
+        radial-gradient(circle at 95% 105%, rgba(255, 255, 255, .11) 0 18px, transparent 19px);
+}
+.top-navbar > * { position: relative; }
+
+/* ---------- Sidebar ---------- */
+#sidebar {
+    background: #fff;
+    border-radius: 0 22px 22px 0;
+    box-shadow: 4px 0 26px rgba(26, 127, 196, .12);
+}
+#sidebar .sidebar-header {
+    background: linear-gradient(180deg, var(--sl-100) 0%, #fff 100%);
+    border-bottom: 1px solid var(--sl-100);
+    border-top-right-radius: 22px;
+}
+#sidebar .sidebar-header:hover { background: var(--sl-100); }
+#sidebar ul li a {
+    border-radius: 12px;
+    border-left: 0 !important;
+    margin: 0 10px 3px 10px;
+    color: var(--sl-muted);
+}
+#sidebar ul li a:hover {
+    background: var(--sl-50);
+    color: var(--sl-primary);
+    transform: none;
+}
+#sidebar ul li.active > a,
+#sidebar ul li a.active {
+    background: var(--sl-100);
+    color: var(--sl-primary);
+    font-weight: 700;
+}
+#sidebar ul li a i { color: var(--sl-sky); opacity: 1; }
+#sidebar .text-primary { color: var(--sl-primary) !important; }
+#sidebar .border-start { border-color: var(--sl-200) !important; }
+#sidebar ul.collapse li a { background: transparent; }
+#sidebar-overlay { background: rgba(19, 106, 166, .28); }
+
+/* ---------- Kartu ---------- */
+.card {
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(26, 127, 196, .08);
+}
+.card:not(.border-0) { border-color: var(--sl-200); }
+.card-header { border-top-left-radius: 16px !important; border-top-right-radius: 16px !important; }
+.module-card:hover,
+.info-card-clickable:hover { box-shadow: 0 12px 28px rgba(26, 127, 196, .16) !important; }
+
+/* ---------- Tombol ---------- */
+.btn { border-radius: 10px; font-weight: 700; transition: transform .12s ease, box-shadow .12s ease, background-color .15s ease; }
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: none; }
+.btn-primary {
+    --bs-btn-bg: var(--sl-primary);
+    --bs-btn-border-color: var(--sl-primary);
+    --bs-btn-hover-bg: var(--sl-primary-dark);
+    --bs-btn-hover-border-color: var(--sl-primary-dark);
+    --bs-btn-active-bg: var(--sl-primary-dark);
+    --bs-btn-active-border-color: var(--sl-primary-dark);
+    --bs-btn-disabled-bg: var(--sl-primary);
+    --bs-btn-disabled-border-color: var(--sl-primary);
+    --bs-btn-focus-shadow-rgb: 63, 177, 238;
+}
+.btn-outline-primary {
+    --bs-btn-color: var(--sl-primary);
+    --bs-btn-border-color: var(--sl-primary);
+    --bs-btn-hover-bg: var(--sl-primary);
+    --bs-btn-hover-border-color: var(--sl-primary);
+    --bs-btn-active-bg: var(--sl-primary);
+    --bs-btn-active-border-color: var(--sl-primary);
+}
+.btn-corporate-dark:hover { background-color: var(--sl-primary-dark) !important; border-color: var(--sl-primary-dark) !important; }
+
+/* ---------- Tabel ---------- */
+.table { --bs-table-hover-bg: var(--sl-50); --bs-table-striped-bg: var(--sl-50); }
+.table-responsive { border-radius: 12px; }
+.table thead th { border-color: rgba(255, 255, 255, .35) !important; }
+
+/* ---------- Form ---------- */
+.form-control, .form-select { border-radius: 10px; border-color: #cfe5f4; }
+.form-control:focus, .form-select:focus {
+    border-color: var(--sl-sky);
+    box-shadow: 0 0 0 .2rem rgba(63, 177, 238, .22);
+}
+.form-check-input:checked { background-color: var(--sl-primary); border-color: var(--sl-primary); }
+
+/* ---------- Modal, alert, pagination ---------- */
+.modal-content { border-radius: 20px !important; overflow: hidden; }
+.alert { border-radius: 12px; }
+.page-link { color: var(--sl-primary); border-color: var(--sl-200); }
+.page-item.active .page-link { background: var(--sl-primary); border-color: var(--sl-primary); color: #fff; }
+.dropdown-menu { border-radius: 14px; }
+
+/* ==========================================================================
+   Banner karakter  ->  <x-maskot-banner nama="chemist" judul="..." sub="..." />
+   ========================================================================== */
+.sl-banner {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 112px;
+    margin: 0 0 16px;
+    padding: 14px 18px 0 22px;
+    border-radius: 20px;
+    background: linear-gradient(115deg, var(--sl-100) 0%, var(--sl-200) 100%);
+    overflow: hidden;
+}
+.sl-banner::before,
+.sl-banner::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .55);
+    pointer-events: none;
+}
+.sl-banner::before { width: 120px; height: 120px; right: 90px; top: -50px; }
+.sl-banner::after  { width: 56px;  height: 56px;  right: 22px; bottom: 26px; background: rgba(255, 255, 255, .4); }
+.sl-banner-text { position: relative; z-index: 1; align-self: center; padding-bottom: 14px; min-width: 0; }
+.sl-banner-title { margin: 0; font-size: 1.3rem; font-weight: 800; color: var(--sl-ink); line-height: 1.2; }
+.sl-banner-sub { margin: 3px 0 0; font-size: .85rem; color: var(--sl-muted); max-width: 52ch; }
+.sl-banner-actions { margin-top: 10px; }
+.sl-banner-img {
+    position: relative;
+    z-index: 1;
+    display: block;
+    flex-shrink: 0;
+    height: 130px;
+    width: auto;
+    margin-right: 10px;
+    filter: drop-shadow(0 6px 8px rgba(19, 106, 166, .22));
+    pointer-events: none;
+    user-select: none;
+}
+
+@media (max-width: 575.98px) {
+    .sl-banner { min-height: 92px; padding: 12px 10px 0 14px; border-radius: 16px; margin-bottom: 12px; }
+    .sl-banner-title { font-size: 1.05rem; }
+    .sl-banner-sub { font-size: .76rem; }
+    .sl-banner-img { height: 84px; margin-right: 0; }
+    .sl-banner::before { right: 40px; }
+}
+@media (max-width: 359.98px) {
+    .sl-banner-img { display: none; }
+}
+
+/* Karakter di header modal (Tambah Personil) */
+.sl-modal-hero {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 16px 0 16px;
+    background: linear-gradient(115deg, var(--sl-100) 0%, var(--sl-200) 100%);
+    overflow: hidden;
+    min-height: 108px;
+}
+.sl-modal-hero p { margin: 0 0 12px; font-size: .8rem; color: var(--sl-ink); }
+.sl-modal-hero p strong { display: block; font-size: .95rem; font-weight: 800; }
+.sl-modal-hero img {
+    height: 108px;
+    width: auto;
+    flex-shrink: 0;
+    transition: opacity .2s ease, transform .2s ease;
+    filter: drop-shadow(0 4px 6px rgba(19, 106, 166, .2));
+}
+.sl-modal-hero img.is-swapping { opacity: 0; transform: translateY(6px); }
+@media (max-width: 575.98px) {
+    .sl-modal-hero img { height: 76px; }
+    .sl-modal-hero { min-height: 80px; }
+}
+
+/* Mode sidebar menciut di desktop: logo tidak perlu kena radius */
+@media (min-width: 992px) {
+    body.sidebar-toggled #sidebar { border-radius: 0 18px 18px 0; }
+}
+
+/* ==========================================================================
+   Halaman login / lupa password / reset password
+   ========================================================================== */
+html, body { height: auto !important; min-height: 100%; overflow-y: auto !important; overflow-x: hidden; }
+body.d-flex { min-height: 100vh; }
+
+.auth-card { border-radius: 24px !important; box-shadow: 0 14px 40px rgba(26, 127, 196, .18) !important; max-width: 800px !important; }
+.auth-row { border-radius: 24px !important; }
+.auth-side {
+    background: linear-gradient(160deg, var(--sl-100) 0%, var(--sl-200) 100%) !important;
+    color: var(--sl-ink) !important;
+    align-items: flex-start;
+    justify-content: flex-start !important;
+    padding: 1.8rem 1.6rem 0 !important;
+    gap: .5rem !important;
+    overflow: hidden;
+    min-height: 420px;
+}
+.auth-side::before { background: rgba(255, 255, 255, .55) !important; width: 170px !important; height: 170px !important; right: -50px !important; top: 24% !important; }
+.auth-side::after  { background: rgba(255, 255, 255, .45) !important; width: 64px !important; height: 64px !important; left: 22px !important; bottom: 90px !important; }
+.auth-side h3 { font-size: 1.45rem !important; font-weight: 800 !important; color: var(--sl-ink); position: relative; z-index: 1; }
+.auth-side p  { color: var(--sl-muted); opacity: 1 !important; max-width: 270px !important; font-size: .88rem !important; position: relative; z-index: 1; }
+.auth-mascot {
+    position: relative;
+    z-index: 1;
+    display: block;
+    height: 320px;
+    width: auto;
+    margin: auto auto 0;
+    filter: drop-shadow(0 8px 10px rgba(19, 106, 166, .22));
+    pointer-events: none;
+}
+.auth-form-panel h4 { color: var(--sl-ink); font-weight: 800; }
+.btn-auth { box-shadow: 0 6px 14px rgba(26, 127, 196, .28); }
+.btn-auth:hover { transform: translateY(-1px); }
+
+@media (max-width: 767.98px) {
+    .auth-side { min-height: 0; padding: 1.2rem 1.25rem 0 !important; align-items: center; text-align: center; flex-direction: column; }
+    .auth-side p { max-width: 100% !important; }
+    .auth-mascot { height: 150px; margin-top: .6rem; }
+    .auth-side::before, .auth-side::after { display: block !important; }
+    .auth-side::before { top: -40px !important; right: -30px !important; }
+    .auth-side::after  { bottom: 30px !important; }
+}

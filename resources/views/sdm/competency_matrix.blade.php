@@ -144,9 +144,9 @@
                 <table class="table table-bordered table-striped align-middle mb-0 bg-white shadow-sm rounded-3">
                     <thead>
                         <tr>
-                            <th style="background-color: #1b3152 !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: left; vertical-align: middle; min-width: 200px;">Nama Personil</th>
-                            <th style="background-color: #1b3152 !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle; width: 160px;">Status Sertifikasi</th>
-                            <th style="background-color: #1b3152 !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle; width: 130px;">Berlaku Sampai</th>
+                            <th style="background-color: var(--sl-primary) !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: left; vertical-align: middle; min-width: 200px;">Nama Personil</th>
+                            <th style="background-color: var(--sl-primary) !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle; width: 160px;">Status Sertifikasi</th>
+                            <th style="background-color: var(--sl-primary) !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle; width: 130px;">Berlaku Sampai</th>
                         </tr>
                     </thead>
                     <tbody>

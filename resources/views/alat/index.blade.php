@@ -23,7 +23,7 @@
     
     .table thead th {
         font-size: 0.75rem !important;
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         border-color: #ffffff !important;
     }
@@ -37,8 +37,8 @@
     }
 
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
     .btn-corporate-blue:hover, 
@@ -96,11 +96,10 @@
         </div>
     @endif
 
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <h5 class="fw-bold mb-0 text" style="font-size: 1.1rem;">
-             Data Alat & Informasi Kalibrasi
-        </h5>
-        
+    <x-maskot-banner nama="preparator" judul="Data Alat & Informasi Kalibrasi"
+        sub="Pantau kondisi alat, jadwal kalibrasi, dan riwayat pemeliharaan." />
+
+    <div class="d-flex justify-content-end align-items-center mb-3 flex-wrap gap-2">
         <div class="d-flex align-items-center gap-2">
             @if($canModify)
             <a href="{{ route('alat.create') }}" class="btn btn-corporate-blue btn-sm py-1.5 px-3 shadow-sm fw-semibold" style="font-size: 0.8rem;"><i class="fas fa-plus me-1"></i> Tambah Alat</a>
@@ -150,7 +149,7 @@
                             <th colspan="5">Spesifikasi</th>
                             <th rowspan="2">Kondisi Alat</th>
                             <th rowspan="2">Status Alat</th>
-                            <th rowspan="2" style="width: 110px; max-width: 110px; background-color: #1b3152;">Keputusan Evaluasi</th>
+                            <th rowspan="2" style="width: 110px; max-width: 110px; background-color: var(--sl-primary);">Keputusan Evaluasi</th>
                             <th rowspan="2" style="min-width: 100px;">No. Sertifikat/<br>Perijinan</th>
                             <th rowspan="2">Interval Kalibrasi</th>
                             <th colspan="2">Periode Kalibrasi/<br>Perijinan</th>
@@ -343,7 +342,7 @@
 <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 340px;">
         <div class="modal-content text-center">
-            <div class="modal-header text-white py-2 px-3" style="background-color: #1b3152;">
+            <div class="modal-header text-white py-2 px-3" style="background-color: var(--sl-primary);">
                 <h5 class="modal-title" id="qrModalLabel" style="font-size: 0.88rem;">QR Code Alat</h5>
                 <button type="button" class="btn-close btn-close-white btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>

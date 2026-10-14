@@ -161,7 +161,7 @@
                                     </div>
                                 </div>
                                 <div class="d-flex flex-column gap-2 mt-3 mt-md-0 d-print-none">
-                                    <button type="button" class="btn btn-sm text-white shadow-sm" style="background-color: #1b3152;" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}">
+                                    <button type="button" class="btn btn-sm text-white shadow-sm" style="background-color: var(--sl-primary);" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}">
                                         <i class="fas fa-tools me-1"></i> Atur Analis, Alat & Bahan
                                     </button>
                                     <button type="button" class="btn btn-sm btn-outline-info shadow-sm" data-bs-toggle="modal" data-bs-target="#modalRumus-{{ $pid }}">
@@ -176,7 +176,7 @@
                             <div class="modal fade modal-resource" id="modalResource-{{ $pid }}" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
                                 <div class="modal-dialog modal-dialog-centered modal-lg">
                                     <div class="modal-content border-0 shadow">
-                                        <div class="modal-header text-white" style="background-color: #1b3152;">
+                                        <div class="modal-header text-white" style="background-color: var(--sl-primary);">
                                             <h5 class="modal-title fw-bold"><i class="fas fa-cogs me-2"></i>Pengaturan Pengujian: {{ $code }}</h5>
                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
@@ -273,7 +273,7 @@
                                             </div>
                                         </div>
                                         <div class="modal-footer bg-light">
-                                            <button type="button" class="btn px-4 text-white rounded-pill" style="background-color: #1b3152;" data-bs-dismiss="modal">Simpan & Tutup Tab</button>
+                                            <button type="button" class="btn px-4 text-white rounded-pill" style="background-color: var(--sl-primary);" data-bs-dismiss="modal">Simpan & Tutup Tab</button>
                                         </div>
                                     </div>
                                 </div>

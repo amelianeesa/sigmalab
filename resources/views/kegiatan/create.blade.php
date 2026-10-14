@@ -26,7 +26,7 @@
     </nav>
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="page-title"><i class="fas fa-plus-circle me-2" style="color: #1b3152;"></i>Tambah Kegiatan</h5>
+        <h5 class="page-title"><i class="fas fa-plus-circle me-2" style="color: var(--sl-primary);"></i>Tambah Kegiatan</h5>
     </div>
 
     {{-- NOTIFIKASI --}}

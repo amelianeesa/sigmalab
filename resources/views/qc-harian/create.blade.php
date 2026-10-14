@@ -77,7 +77,7 @@
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
-        background-color: rgba(27, 49, 82, 0.15) !important;
+        background-color: rgba(26, 127, 196, 0.15) !important;
         color: #000000 !important;
         text-decoration: none !important;
     }
@@ -125,7 +125,7 @@
         padding-bottom: 6px;
         font-size: 0.8rem;
         font-weight: 700;
-        color: #1b3152;
+        color: var(--sl-primary);
         border-bottom: 1px solid #e3e8ef;
     }
 
@@ -135,7 +135,7 @@
     .dashboard-container .text-warning:not(input),
     .modal .text-warning:not(input),
     .modal .text-success {
-        color: #1b3152 !important;
+        color: var(--sl-primary) !important;
     }
 
     /* ===== Buttons (seragam) ===== */
@@ -153,8 +153,8 @@
     }
 
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border: 1px solid #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border: 1px solid var(--sl-primary) !important;
         color: #ffffff !important;
     }
 
@@ -168,15 +168,15 @@
 
     .btn-outline-corporate {
         background-color: #ffffff !important;
-        border: 1px solid #1b3152 !important;
-        color: #1b3152 !important;
+        border: 1px solid var(--sl-primary) !important;
+        color: var(--sl-primary) !important;
     }
 
     .btn-outline-corporate:hover,
     .btn-outline-corporate:focus,
     .btn-outline-corporate:active {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
 
@@ -213,24 +213,24 @@
 
     .dashboard-container .form-control:focus,
     .modal .form-control:focus {
-        border-color: #1b3152;
-        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+        border-color: var(--sl-primary);
+        box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.15);
     }
 
     .form-check-input:checked {
-        background-color: #1b3152;
-        border-color: #1b3152;
+        background-color: var(--sl-primary);
+        border-color: var(--sl-primary);
     }
 
     .form-check-input:focus {
-        border-color: #1b3152;
-        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+        border-color: var(--sl-primary);
+        box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.15);
     }
 
     .modal .input-group-text {
         font-size: 0.75rem;
         font-weight: 600;
-        color: #1b3152;
+        color: var(--sl-primary);
         background-color: #f1f4f8;
     }
 
@@ -240,14 +240,14 @@
         font-size: 0.75rem;
         line-height: 1.5;
         color: #000000;
-        background-color: rgba(27, 49, 82, 0.08);
+        background-color: rgba(26, 127, 196, 0.08);
         border: 0;
-        border-left: 4px solid #1b3152 !important;
+        border-left: 4px solid var(--sl-primary) !important;
         border-radius: 6px !important;
     }
 
     .dashboard-container .alert-info i {
-        color: #1b3152;
+        color: var(--sl-primary);
     }
 
     input:invalid { box-shadow: none; }
@@ -266,16 +266,16 @@
     }
 
     .accordion-header .accordion-button:not(.collapsed) {
-        color: #1b3152;
-        background-color: rgba(27, 49, 82, 0.08);
+        color: var(--sl-primary);
+        background-color: rgba(26, 127, 196, 0.08);
     }
 
     .accordion-header .accordion-button:focus {
-        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+        box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.15);
     }
 
     .accordion-header .accordion-button:hover {
-        background-color: rgba(27, 49, 82, 0.06);
+        background-color: rgba(26, 127, 196, 0.06);
     }
 
     .accordion-header .accordion-button .badge {
@@ -323,7 +323,7 @@
         font-weight: 600;
         line-height: 1.25;
         color: #ffffff !important;
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         border-color: rgba(255, 255, 255, 0.25) !important;
         vertical-align: middle;
         white-space: normal;
@@ -345,7 +345,7 @@
     }
 
     .param-table td.bg-warning {
-        background-color: rgba(27, 49, 82, 0.07) !important;
+        background-color: rgba(26, 127, 196, 0.07) !important;
     }
 
     .param-table td.bg-light {
@@ -369,7 +369,7 @@
 
     .param-table .in-im-1,
     .param-table .in-im-2 {
-        color: #1b3152 !important;
+        color: var(--sl-primary) !important;
     }
 
     .param-table .badge {
@@ -391,7 +391,7 @@
     .modal-header.modal-corporate {
         padding: 0.55rem 0.9rem;
         color: #ffffff;
-        background-color: #1b3152;
+        background-color: var(--sl-primary);
     }
 
     .modal-header.modal-corporate .modal-title {
@@ -407,19 +407,19 @@
     .modal-resource .nav-tabs .nav-link {
         padding: 0.55rem 0.5rem;
         font-size: 0.78rem;
-        color: #1b3152 !important;
+        color: var(--sl-primary) !important;
         border-radius: 0;
     }
 
     .modal-resource .nav-tabs .nav-link.active {
-        background-color: rgba(27, 49, 82, 0.12);
-        box-shadow: inset 0 -3px 0 #1b3152;
+        background-color: rgba(26, 127, 196, 0.12);
+        box-shadow: inset 0 -3px 0 var(--sl-primary);
     }
 
     .modal-resource .table thead th {
         font-size: 0.72rem;
         color: #ffffff !important;
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         border-color: #ffffff !important;
     }
 
@@ -429,7 +429,7 @@
     }
 
     .modal-resource .table-hover > tbody > tr:hover > * {
-        --bs-table-hover-bg: rgba(27, 49, 82, 0.06);
+        --bs-table-hover-bg: rgba(26, 127, 196, 0.06);
     }
 
     .modal-resource .modal-body > .tab-content {
@@ -1515,7 +1515,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         icon: 'error',
                         title: 'Data Bahan Tidak Lengkap!',
                         html: errorMsg,
-                        confirmButtonColor: '#1b3152'
+                        confirmButtonColor: '#1a7fc4'
                     });
                     return;
                 }
@@ -1653,7 +1653,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 icon: 'error',
                 title: 'Oops! Ada Error',
                 text: errorMsg,
-                confirmButtonColor: '#1b3152',
+                confirmButtonColor: '#1a7fc4',
                 confirmButtonText: 'Tutup'
             });
         });

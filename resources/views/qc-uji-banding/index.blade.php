@@ -78,7 +78,7 @@
     .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
     .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
     .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
-        background-color: rgba(27, 49, 82, 0.15) !important;
+        background-color: rgba(26, 127, 196, 0.15) !important;
         color: #000000 !important;
         text-decoration: none !important;
     }
@@ -152,7 +152,7 @@
     <x-qc-breadcrumb active="Uji Banding"></x-qc-breadcrumb>
 
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 qc-header">
-        <h5 class="qc-title"><i class="fas fa-balance-scale me-1" style="color: #1b3152;"></i> QC Uji Banding</h5>
+        <h5 class="qc-title"><i class="fas fa-balance-scale me-1" style="color: var(--sl-primary);"></i> QC Uji Banding</h5>
 
         <div class="qc-header-actions">
             <a href="{{ route('master.toleransi.index') }}" class="btn btn-outline-corporate btn-sm py-1 px-3 shadow-sm fw-semibold">
@@ -170,7 +170,7 @@
 
     <div class="card mb-4 border-0 shadow-sm">
         <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <h6 class="m-0 fw-bold" style="color: #1b3152;"><i class="fas fa-list me-1"></i> Data Program Uji Banding</h6>
+            <h6 class="m-0 fw-bold" style="color: var(--sl-primary);"><i class="fas fa-list me-1"></i> Data Program Uji Banding</h6>
             <form action="{{ route('qc-uji-banding.index') }}" method="GET" id="searchForm" class="m-0 qc-search">
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-white text-muted border-end-0"><i class="fas fa-search"></i></span>

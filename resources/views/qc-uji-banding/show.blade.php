@@ -74,7 +74,7 @@
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
-        background-color: rgba(27, 49, 82, 0.15) !important;
+        background-color: rgba(26, 127, 196, 0.15) !important;
         color: #000000 !important;
         text-decoration: none !important;
     }
@@ -105,7 +105,7 @@
 
     .table thead th {
         font-size: 0.75rem !important;
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         border-color: #ffffff !important;
         text-align: center !important;
@@ -116,8 +116,8 @@
     }
 
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
 
@@ -130,13 +130,13 @@
     }
 
     .btn-outline-corporate {
-        color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
     }
 
     .btn-outline-corporate:hover,
     .btn-outline-corporate:focus {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
 
@@ -196,7 +196,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <h5 class="fw-bold mb-0" style="font-size: 1.1rem;">
-            <i class="fas fa-balance-scale me-2" style="color: #1b3152;"></i>Detail Uji Banding
+            <i class="fas fa-balance-scale me-2" style="color: var(--sl-primary);"></i>Detail Uji Banding
         </h5>
 
         <div class="header-actions d-grid d-md-flex flex-wrap align-items-center gap-2">
@@ -224,10 +224,9 @@
     @endif
 
     <div class="row g-3 mb-4">
-        <div class="col-12 col-lg-4 d-flex flex-column gap-3">
-            <!-- Card Informasi Program -->
-            <div class="card shadow-sm border-0">
-                <div class="card-header text-white" style="background-color: #1b3152;">
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header text-white" style="background-color: var(--sl-primary);">
                     <h5><i class="fas fa-info-circle me-1"></i> Informasi Program</h5>
                 </div>
                 <div class="card-body">
@@ -320,7 +319,7 @@
 
         <div class="col-12 col-lg-8">
             <div class="card shadow-sm border-0 h-100">
-                <div class="card-header text-white" style="background-color: #1b3152;">
+                <div class="card-header text-white" style="background-color: var(--sl-primary);">
                     <h5><i class="fas fa-list-check me-1"></i> Parameter Uji & Evaluasi Vendor</h5>
                 </div>
                 <div class="card-body">
@@ -339,7 +338,7 @@
                                 @foreach($program->parameters as $param)
                                 <tr>
                                     <td class="text-start fw-bold">{{ $param->parameterUji->nama_parameter }}</td>
-                                    <td class="fw-bold" style="color: #1b3152;">{{ $param->nilai_akhir }}</td>
+                                    <td class="fw-bold" style="color: var(--sl-primary);">{{ $param->nilai_akhir }}</td>
                                     <td>{{ $param->z_score ?? '-' }}</td>
                                     <td>
                                         @if($param->status_evaluasi === 'menunggu')
@@ -391,7 +390,7 @@
 <div class="modal fade" id="modalPilihEvaluasi" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">
-            <div class="modal-header text-white" style="background-color: #1b3152;">
+            <div class="modal-header text-white" style="background-color: var(--sl-primary);">
                 <h5 class="modal-title" style="font-size: 1rem;"><i class="fas fa-list-check me-2"></i>Pilih Parameter Uji</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>

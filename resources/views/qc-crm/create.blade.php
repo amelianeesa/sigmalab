@@ -24,13 +24,13 @@
     .qc-page { padding: 4px 20px !important; }
 
     .qc-page .btn-corporate-blue {
-        background-color: #1b3152 !important; border-color: #1b3152 !important; color: #fff !important;
+        background-color: var(--sl-primary) !important; border-color: var(--sl-primary) !important; color: #fff !important;
     }
     .qc-page .btn-corporate-blue:hover, .qc-page .btn-corporate-blue:focus, .qc-page .btn-corporate-blue:active {
         background-color: #14253e !important; border-color: #14253e !important; color: #fff !important;
     }
-    .qc-page .btn-outline-corporate { color: #1b3152 !important; border: 1px solid #1b3152 !important; background: #fff !important; }
-    .qc-page .btn-outline-corporate:hover { background-color: #1b3152 !important; color: #fff !important; }
+    .qc-page .btn-outline-corporate { color: var(--sl-primary) !important; border: 1px solid var(--sl-primary) !important; background: #fff !important; }
+    .qc-page .btn-outline-corporate:hover { background-color: var(--sl-primary) !important; color: #fff !important; }
     .qc-action-btn {
         width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
         font-size: 0.75rem; padding: 0 !important; border-radius: 6px;
@@ -40,7 +40,7 @@
         padding: 8px 10px !important; vertical-align: middle !important; font-size: 0.75rem !important;
     }
     .qc-page .table-qc thead th {
-        background-color: #1b3152 !important; color: #fff !important; border-color: #fff !important;
+        background-color: var(--sl-primary) !important; color: #fff !important; border-color: #fff !important;
         font-size: 0.75rem !important; white-space: nowrap;
     }
 
@@ -48,7 +48,7 @@
     .param-table th, .param-table td { white-space: nowrap; padding-left: 10px !important; padding-right: 10px !important; }
     .param-table td input.form-control { min-width: 90px; }
 
-    .qc-section-title { color: #1b3152; font-size: 0.85rem !important; font-weight: 700; border-bottom: 1px solid #dee2e6; padding-bottom: 6px; margin-bottom: 12px; }
+    .qc-section-title { color: var(--sl-primary); font-size: 0.85rem !important; font-weight: 700; border-bottom: 1px solid #dee2e6; padding-bottom: 6px; margin-bottom: 12px; }
 
     .analis-select { width: 200px; }
 
@@ -68,7 +68,7 @@
             text-align: right; border: 0 !important; padding: 5px 0 !important; background: transparent !important;
         }
         .table-stack td[data-label]::before {
-            content: attr(data-label); font-weight: 600; color: #1b3152; text-align: left; flex-shrink: 0; max-width: 45%;
+            content: attr(data-label); font-weight: 600; color: var(--sl-primary); text-align: left; flex-shrink: 0; max-width: 45%;
         }
         .table-stack td.td-detail { flex-direction: column; align-items: stretch; text-align: left; }
         .table-stack td.td-aksi { justify-content: flex-end; border-top: 1px solid #eee !important; margin-top: 4px; padding-top: 8px !important; }
@@ -88,7 +88,7 @@
 
     <div class="mt-2 mb-3">
         <h5 class="fw-bold mb-0" style="font-size: 1.1rem;">
-            <i class="fas fa-plus-circle me-2" style="color: #1b3152;"></i>Input Data Harian QC CRM
+            <i class="fas fa-plus-circle me-2" style="color: var(--sl-primary);"></i>Input Data Harian QC CRM
         </h5>
     </div>
 
@@ -195,7 +195,7 @@
         @csrf
 
         <div class="card shadow-sm border-0 mb-3">
-            <div class="card-header text-white py-2 px-3" style="background-color: #1b3152;">
+            <div class="card-header text-white py-2 px-3" style="background-color: var(--sl-primary);">
                 <h5 class="mb-0 fw-bold"><i class="fas fa-clipboard-list me-2"></i>Section 1: Data Dasar Pengujian</h5>
             </div>
             <div class="card-body p-3">
@@ -232,7 +232,7 @@
         </div>
 
         <div class="card shadow-sm border-0 mb-3" id="section2" style="display: none;">
-            <div class="card-header text-white py-2 px-3" style="background-color: #1b3152;">
+            <div class="card-header text-white py-2 px-3" style="background-color: var(--sl-primary);">
                 <h5 class="mb-0 fw-bold"><i class="fas fa-table me-2"></i>Section 2: Input Data Pengujian</h5>
             </div>
             <div class="card-body p-0">
@@ -271,7 +271,7 @@
                                         <div><span class="text-muted d-inline-block" style="width: 50px;">Bahan</span>: <span id="sum-bahan-{{ $pid }}" class="text-danger fst-italic">Belum diatur</span></div>
                                     </div>
                                     <div class="d-flex flex-column gap-2 mt-3 mt-md-0 d-print-none">
-                                        <button type="button" class="btn btn-sm text-white shadow-sm" style="background-color: #1b3152;" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}">
+                                        <button type="button" class="btn btn-sm text-white shadow-sm" style="background-color: var(--sl-primary);" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}">
                                             <i class="fas fa-tools me-1"></i> Atur Analis, Alat & Bahan
                                         </button>
                                         <button type="button" class="btn btn-sm btn-outline-info shadow-sm" data-bs-toggle="modal" data-bs-target="#modalRumus-{{ $pid }}">
@@ -286,7 +286,7 @@
                                 <div class="modal fade modal-resource" id="modalResource-{{ $pid }}" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
                                     <div class="modal-dialog modal-dialog-centered modal-lg">
                                         <div class="modal-content border-0 shadow">
-                                            <div class="modal-header text-white" style="background-color: #1b3152;">
+                                            <div class="modal-header text-white" style="background-color: var(--sl-primary);">
                                                 <h5 class="modal-title fw-bold"><i class="fas fa-cogs me-2"></i>Pengaturan Pengujian: {{ $code }}</h5>
                                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                             </div>
@@ -351,7 +351,7 @@
                                                 </div>
                                             </div>
                                             <div class="modal-footer bg-light">
-                                                <button type="button" class="btn px-4 text-white rounded-pill" style="background-color: #1b3152;" data-bs-dismiss="modal">Simpan & Tutup</button>
+                                                <button type="button" class="btn px-4 text-white rounded-pill" style="background-color: var(--sl-primary);" data-bs-dismiss="modal">Simpan & Tutup</button>
                                             </div>
                                         </div>
                                     </div>

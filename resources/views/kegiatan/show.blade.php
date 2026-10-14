@@ -359,7 +359,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 confirmButtonText: '<i class="fas fa-flask"></i> Mulai Uji Homogenitas Baru',
                 denyButtonText: '<i class="fas fa-history"></i> Input Nilai Historis',
                 cancelButtonText: 'Batal',
-                confirmButtonColor: '#1b3152',
+                confirmButtonColor: '#1a7fc4',
                 denyButtonColor: '#ffc107',
                 customClass: { denyButton: 'text-dark fw-bold' }
             }).then((result) => {

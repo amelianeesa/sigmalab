@@ -74,7 +74,7 @@
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
-        background-color: rgba(27, 49, 82, 0.15) !important;
+        background-color: rgba(26, 127, 196, 0.15) !important;
         color: #000000 !important;
         text-decoration: none !important;
     }
@@ -111,14 +111,14 @@
     .icon-corporate,
     .dashboard-container .text-primary,
     .modal .text-primary {
-        color: #1b3152 !important;
+        color: var(--sl-primary) !important;
     }
 
-    .modal .icon-corporate { color: #1b3152 !important; }
+    .modal .icon-corporate { color: var(--sl-primary) !important; }
 
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
     .btn-corporate-blue:hover,
@@ -132,14 +132,14 @@
 
     .btn-outline-corporate {
         background-color: #ffffff;
-        border: 1px solid #1b3152;
-        color: #1b3152;
+        border: 1px solid var(--sl-primary);
+        color: var(--sl-primary);
     }
     .btn-outline-corporate:hover,
     .btn-outline-corporate:focus,
     .btn-outline-corporate:active {
-        background-color: #1b3152;
-        border-color: #1b3152;
+        background-color: var(--sl-primary);
+        border-color: var(--sl-primary);
         color: #ffffff;
     }
 
@@ -168,14 +168,14 @@
     .dashboard-container .form-select:focus,
     .modal .form-control:focus,
     .modal .form-select:focus {
-        border-color: #1b3152;
-        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+        border-color: var(--sl-primary);
+        box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.15);
     }
 
     .modal .input-group-text {
         font-size: 0.78rem;
         background-color: #f1f4f8;
-        color: #1b3152;
+        color: var(--sl-primary);
         font-weight: 600;
         padding-top: 0.28rem;
         padding-bottom: 0.28rem;
@@ -184,12 +184,12 @@
     .form-select option { color: #000000; }
 
     .form-check-input:checked {
-        background-color: #1b3152;
-        border-color: #1b3152;
+        background-color: var(--sl-primary);
+        border-color: var(--sl-primary);
     }
     .form-check-input:focus {
-        border-color: #1b3152;
-        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+        border-color: var(--sl-primary);
+        box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.15);
     }
 
     /* Notifikasi Alert Seragam dengan index alat */
@@ -237,13 +237,13 @@
     }
 
     .swal2-styled.swal2-confirm {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         font-size: 0.78rem !important;
         border-radius: 0.375rem !important;
         padding: 0.4rem 1rem !important;
     }
     .swal2-styled.swal2-confirm:focus {
-        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.3) !important;
+        box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.3) !important;
     }
 
     #parameterTabs {
@@ -259,19 +259,19 @@
     #parameterTabs .nav-link {
         font-size: 0.78rem;
         padding: 0.4rem 0.9rem;
-        color: #1b3152;
+        color: var(--sl-primary);
         border-radius: 6px 6px 0 0;
     }
     #parameterTabs .nav-link.active {
-        background-color: #1b3152;
-        border-color: #1b3152;
+        background-color: var(--sl-primary);
+        border-color: var(--sl-primary);
         color: #ffffff;
     }
 
     .param-table th {
         font-size: 0.64rem;
         vertical-align: middle;
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         border-color: #ffffff !important;
         padding: 0.35rem 0.3rem; /* Diperlebar sedikit agar tidak dempet */
@@ -303,7 +303,7 @@
     }
     .param-table select.form-select {
         font-size: 0.74rem;
-        color: #1b3152;
+        color: var(--sl-primary);
         min-width: 125px !important; /* Memperlebar dropdown pilih botol agar tidak terlalu kecil */
         height: 30px;
         min-height: 0;
@@ -311,8 +311,8 @@
     }
     .param-table input:focus,
     .param-table select:focus {
-        border-color: #1b3152;
-        box-shadow: 0 0 0 0.12rem rgba(27, 49, 82, 0.15);
+        border-color: var(--sl-primary);
+        box-shadow: 0 0 0 0.12rem rgba(26, 127, 196, 0.15);
     }
 
     input:invalid { box-shadow: none; }
@@ -325,7 +325,7 @@
         overflow: hidden;
     }
     .modal-header.modal-corporate {
-        background-color: #1b3152;
+        background-color: var(--sl-primary);
         color: #ffffff;
         padding: 0.55rem 0.9rem;
     }
@@ -341,16 +341,16 @@
         font-size: 0.78rem;
         padding: 0.55rem 0.5rem;
         border-radius: 0;
-        color: #1b3152 !important;
+        color: var(--sl-primary) !important;
     }
     .modal-resource .nav-pills .nav-link.active {
-        background-color: rgba(27, 49, 82, 0.12);
-        color: #1b3152 !important;
-        box-shadow: inset 0 -3px 0 #1b3152;
+        background-color: rgba(26, 127, 196, 0.12);
+        color: var(--sl-primary) !important;
+        box-shadow: inset 0 -3px 0 var(--sl-primary);
     }
     .modal-resource .table th {
         font-size: 0.72rem;
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         border-color: #ffffff !important;
     }
@@ -359,7 +359,7 @@
         vertical-align: middle;
     }
 
-    .summary-content strong { color: #1b3152 !important; }
+    .summary-content strong { color: var(--sl-primary) !important; }
 
     #ttestPreviewBoxes .border { border-radius: 8px !important; }
     #ttestPreviewBoxes .fs-5 { font-size: 0.95rem !important; }

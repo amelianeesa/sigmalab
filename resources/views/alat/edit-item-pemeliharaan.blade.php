@@ -14,7 +14,7 @@
     }
     .info-alat {
         font-size: 0.85rem;
-        color: #1b3152;
+        color: var(--sl-primary);
         margin-bottom: 0.75rem;
     }
 
@@ -25,9 +25,9 @@
         padding: 0.4rem 0.5rem;
         font-size: 0.78rem;
         font-weight: 600;
-        color: #1b3152;
+        color: var(--sl-primary);
         background-color: #ffffff;
-        border: 1px dashed #1b3152;
+        border: 1px dashed var(--sl-primary);
         border-radius: 0.25rem;
         transition: all 0.2s ease-in-out;
     }
@@ -48,7 +48,7 @@
         vertical-align: middle;
     }
     .table-item thead th {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         border-right: 1px solid #ffffff !important;
         font-weight: 600;
@@ -76,7 +76,7 @@
     }
 
     .btn-navy {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
     .btn-navy:hover,
@@ -84,7 +84,7 @@
     .btn-navy:active {
         background-color: #3b5f93 !important;
         color: #ffffff !important;
-        box-shadow: 0 4px 8px rgba(27, 49, 82, 0.3) !important;
+        box-shadow: 0 4px 8px rgba(26, 127, 196, 0.3) !important;
     }
 
     .btn-kembali {
@@ -135,9 +135,9 @@
             <table class="table table-bordered text-center align-middle table-item" id="tableItemPemeliharaan">
                 <thead>
                     <tr>
-                        <th style="width: 70px; background-color: #1b3152 !important; border-right: 1px solid #ffffff !important;">No. Urut</th>
-                        <th class="text-start" style="background-color: #1b3152 !important; border-right: 1px solid #ffffff !important;">Nama Jenis Pemeliharaan</th>
-                        <th style="width: 60px; background-color: #1b3152 !important;">Aksi</th>
+                        <th style="width: 70px; background-color: var(--sl-primary) !important; border-right: 1px solid #ffffff !important;">No. Urut</th>
+                        <th class="text-start" style="background-color: var(--sl-primary) !important; border-right: 1px solid #ffffff !important;">Nama Jenis Pemeliharaan</th>
+                        <th style="width: 60px; background-color: var(--sl-primary) !important;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>

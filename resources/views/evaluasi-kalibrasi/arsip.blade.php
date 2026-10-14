@@ -12,7 +12,7 @@
     }
     .table thead th {
         font-size: 0.78rem !important;
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         border-color: #dee2e6 !important;
     }
@@ -20,8 +20,8 @@
         border-color: #dee2e6;
     }
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
     .btn-corporate-blue:hover,
@@ -32,27 +32,27 @@
         color: #ffffff !important;
     }
     .btn-outline-primary-birdong {
-        color: #1b3152 !important;
+        color: var(--sl-primary) !important;
         background-color: transparent !important;
-        border-color: #1b3152 !important;
+        border-color: var(--sl-primary) !important;
     }
     .btn-outline-primary-birdong:hover,
     .btn-outline-primary-birdong:focus,
     .btn-outline-primary-birdong:active {
         color: #ffffff !important;
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
     }
     .btn-tampilkan {
         background-color: #ffffff;
-        border: 1px solid #1b3152;
-        color: #1b3152;
+        border: 1px solid var(--sl-primary);
+        color: var(--sl-primary);
     }
     .btn-tampilkan:hover,
     .btn-tampilkan:focus,
     .btn-tampilkan:active {
-        background-color: #1b3152;
-        border-color: #1b3152;
+        background-color: var(--sl-primary);
+        border-color: var(--sl-primary);
         color: #ffffff;
     }
     .btn-merah-custom {
@@ -112,11 +112,11 @@
     .filter-bar .form-label {
         margin-bottom: 2px;
         font-weight: 600;
-        color: #1b3152;
+        color: var(--sl-primary);
     }
     .filter-bar .form-control:focus {
-        border-color: #1b3152;
-        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+        border-color: var(--sl-primary);
+        box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.15);
     }
 
     .sticky-alat {
@@ -128,7 +128,7 @@
         background-color: #ffffff !important;
     }
     thead th.sticky-alat {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         z-index: 4;
     }
     .sticky-alat::after {
@@ -171,7 +171,7 @@
     }
     .ikon-konfirmasi.ikon-biasa {
         background-color: #eef2f8;
-        color: #1b3152;
+        color: var(--sl-primary);
         border: 2px solid #d5deee;
     }
     @media (max-width: 575.98px) {

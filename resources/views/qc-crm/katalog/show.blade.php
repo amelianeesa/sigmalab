@@ -22,7 +22,7 @@
     /* ===== Tombol ===== */
     .qc-page .btn-corporate-blue,
     #addParamModal .btn-corporate-blue {
-        background-color: #1b3152 !important; border-color: #1b3152 !important; color: #fff !important;
+        background-color: var(--sl-primary) !important; border-color: var(--sl-primary) !important; color: #fff !important;
     }
     .qc-page .btn-corporate-blue:hover,
     #addParamModal .btn-corporate-blue:hover {
@@ -35,7 +35,7 @@
 
     /* ===== Tabel ===== */
     .qc-page .table-qc thead th {
-        background-color: #1b3152 !important; color: #fff !important; border-color: #fff !important;
+        background-color: var(--sl-primary) !important; color: #fff !important; border-color: #fff !important;
         font-size: 0.75rem !important; white-space: nowrap;
     }
 
@@ -64,7 +64,7 @@
             text-align: right; border: 0 !important; padding: 5px 0 !important; background: transparent !important;
         }
         .table-stack td[data-label]::before {
-            content: attr(data-label); font-weight: 600; color: #1b3152; text-align: left; flex-shrink: 0;
+            content: attr(data-label); font-weight: 600; color: var(--sl-primary); text-align: left; flex-shrink: 0;
         }
         .table-stack td.td-aksi { justify-content: flex-end; border-top: 1px solid #eee !important; margin-top: 4px; padding-top: 8px !important; }
         .table-stack td.td-aksi::before { display: none; }
@@ -82,7 +82,7 @@
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-2 mb-3 gap-2">
         <div>
             <h5 class="fw-bold mb-0" style="font-size: 1.1rem;">
-                <i class="fas fa-info-circle me-2" style="color: #1b3152;"></i>Detail Botol CRM
+                <i class="fas fa-info-circle me-2" style="color: var(--sl-primary);"></i>Detail Botol CRM
             </h5>
             <div class="text-muted" style="font-size: 0.78rem;">Kelola nilai sertifikat parameter uji untuk botol ini.</div>
         </div>
@@ -109,7 +109,7 @@
         <div class="col-12 col-lg-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-white border-bottom-0 pt-3 pb-0 d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold mb-0"><i class="fas fa-info-circle me-2" style="color: #1b3152;"></i>Informasi Botol</h5>
+                    <h5 class="fw-bold mb-0"><i class="fas fa-info-circle me-2" style="color: var(--sl-primary);"></i>Informasi Botol</h5>
                     <button class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 0.75rem;" data-bs-toggle="modal" data-bs-target="#editBotolModal">
                         <i class="fas fa-edit me-1"></i> Edit
                     </button>
@@ -178,7 +178,7 @@
         <div class="col-12 col-lg-8">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-bottom-0 pt-3 pb-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
-                    <h5 class="fw-bold mb-0"><i class="fas fa-list me-2" style="color: #1b3152;"></i>Nilai Sertifikat (True Value)</h5>
+                    <h5 class="fw-bold mb-0"><i class="fas fa-list me-2" style="color: var(--sl-primary);"></i>Nilai Sertifikat (True Value)</h5>
                     <button class="btn btn-corporate-blue btn-sm shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#addParamModal">
                         <i class="fas fa-plus me-1"></i> Tambah Parameter
                     </button>
@@ -322,7 +322,7 @@
         <form action="{{ route('crm-katalog.store-sertifikat', $katalog->id) }}" method="POST" class="w-100">
             @csrf
             <div class="modal-content border-0 shadow">
-                <div class="modal-header text-white py-2 px-3" style="background-color: #1b3152;">
+                <div class="modal-header text-white py-2 px-3" style="background-color: var(--sl-primary);">
                     <h5 class="modal-title" id="addParamModalLabel" style="font-size: 0.9rem;">Tambah Parameter ke Botol</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>

@@ -4,7 +4,7 @@
 @section('content')
 <style>
     .table thead th {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         padding: 8px 6px;
         font-size: 0.7rem;
@@ -79,7 +79,7 @@
                 <a href="{{ route('sdm.index') }}" class="btn btn-secondary btn-sm px-3 py-1 fw-semibold rounded-2" style="font-size: 0.73rem;">
                     <i class="fas fa-arrow-left me-1"></i> Kembali
                 </a>
-                <button type="submit" class="btn btn-sm text-white px-3 py-1 fw-semibold rounded-2" style="background-color: #1b3152; font-size: 0.73rem;">
+                <button type="submit" class="btn btn-sm text-white px-3 py-1 fw-semibold rounded-2" style="background-color: var(--sl-primary); font-size: 0.73rem;">
                     <i class="fas fa-save me-1"></i> Simpan
                 </button>
             </div>

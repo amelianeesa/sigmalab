@@ -218,7 +218,7 @@
             </h4>
         </div>
         <div class="header-action-btns d-flex" style="gap: 5px !important;">
-            <a href="{{ route('inventori.monitoring.index') }}" class="btn text-white btn-sm py-1 px-2 shadow-sm" style="font-size: 0.72rem; background-color: #1b3152;"><i class="fas fa-sync-alt me-1"></i> Refresh Data</a>
+            <a href="{{ route('inventori.monitoring.index') }}" class="btn text-white btn-sm py-1 px-2 shadow-sm" style="font-size: 0.72rem; background-color: var(--sl-primary);"><i class="fas fa-sync-alt me-1"></i> Refresh Data</a>
             @if(isset($alatId) && $alatId && isset($ruangan) && $ruangan)
                 <a href="{{ route('inventori.monitoring.exportPdf', ['alat_id' => $alatId, 'nama_ruangan' => $ruangan, 'bulan' => $bulan, 'tahun' => $tahun]) }}" target="_blank" class="btn btn-danger btn-sm py-1 px-2" style="font-size: 0.72rem;"><i class="fas fa-file-pdf me-1"></i> Unduh Rekapan PDF</a>
             @endif
@@ -414,7 +414,7 @@
                                         <label class="form-label fw-bold text-secondary mb-1" style="font-size: 11px;">UNGGAH DOKUMEN BARU</label>
                                         <div class="input-group input-group-sm mb-1">
                                             <input type="file" class="form-control form-control-sm" name="dokumen_referensi" required accept=".pdf,.doc,.docx,.jpg,.png" {{ empty($ruangan) ? 'disabled' : '' }} style="font-size: 0.72rem;">
-                                            <button type="submit" class="btn text-white btn-sm fw-bold px-3 shadow-sm" {{ empty($ruangan) ? 'disabled' : '' }} style="font-size: 0.72rem; background-color: #1b3152;">
+                                            <button type="submit" class="btn text-white btn-sm fw-bold px-3 shadow-sm" {{ empty($ruangan) ? 'disabled' : '' }} style="font-size: 0.72rem; background-color: var(--sl-primary);">
                                                 <i class="fas fa-upload me-1"></i> Unggah
                                             </button>
                                         </div>
@@ -443,7 +443,7 @@
                                                                 <i class="fas fa-file-alt text-secondary me-1"></i> {{ $doc->nama_file_asli ?? basename($doc->file_path) }}
                                                             </td>
                                                             <td class="text-center">
-                                                                <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="btn btn-sm text-white px-1.5 py-0" style="font-size: 10px; background-color: #1b3152;" title="Lihat">
+                                                                <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="btn btn-sm text-white px-1.5 py-0" style="font-size: 10px; background-color: var(--sl-primary);" title="Lihat">
                                                                     <i class="fas fa-eye"></i>
                                                                 </a>
                                                                 @if($canManage)
@@ -483,7 +483,7 @@
                                     <form action="{{ route('inventori.monitoring.updateReferensi', $doc->dokumen_id) }}" method="POST" enctype="multipart/form-data">
                                         @csrf
                                         @method('PUT')
-                                        <div class="modal-header py-1 px-3 text-white" style="background-color: #1b3152;">
+                                        <div class="modal-header py-1 px-3 text-white" style="background-color: var(--sl-primary);">
                                             <h6 class="modal-title fw-bold" style="font-size: 0.85rem;">Edit / Ganti Dokumen Referensi</h6>
                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
@@ -500,7 +500,7 @@
                                         </div>
                                         <div class="modal-footer py-1 px-3">
                                             <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
-                                            <button type="submit" class="btn text-white btn-sm shadow-sm" style="background-color: #1b3152;">Simpan Perubahan</button>
+                                            <button type="submit" class="btn text-white btn-sm shadow-sm" style="background-color: var(--sl-primary);">Simpan Perubahan</button>
                                         </div>
                                     </form>
                                 </div>
@@ -556,7 +556,7 @@
                 </div>
 
                 <div class="col-md-2">
-                    <button type="submit" class="btn text-white btn-sm w-100 py-1 shadow-sm" style="font-size: 0.72rem; background-color: #1b3152;"><i class="fas fa-search me-1"></i> Tampilkan</button>
+                    <button type="submit" class="btn text-white btn-sm w-100 py-1 shadow-sm" style="font-size: 0.72rem; background-color: var(--sl-primary);"><i class="fas fa-search me-1"></i> Tampilkan</button>
                 </div>
 
                 <input type="hidden" name="persyaratan_suhu" id="hiddenPersyaratanSuhu" value="{{ $persyaratanSuhu }}">

@@ -8,14 +8,14 @@
     .pu-title { font-size: 1.1rem; }
 
     .card-header-custom {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         font-weight: 600;
         font-size: 0.85rem !important;
     }
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
     .btn-corporate-blue:hover,
@@ -29,7 +29,7 @@
     .card-header-custom .btn-corporate-blue {
         background-color: #ffffff !important;
         border-color: #ffffff !important;
-        color: #1b3152 !important;
+        color: var(--sl-primary) !important;
         font-weight: 600;
     }
     .card-header-custom .btn-corporate-blue:hover,
@@ -45,7 +45,7 @@
     .form-control-sm, .form-select-sm { font-size: 0.8rem !important; }
 
     .pu-table-header th {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         border-color: #2c4975 !important;
         font-size: 0.72rem !important;

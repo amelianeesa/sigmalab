@@ -4,8 +4,8 @@
 @section('content')
 <style>
     .btn-corporate-dark {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
     .btn-corporate-dark:hover,
@@ -23,7 +23,7 @@
         border-color: #eef0f1;
     }
     .notif-page-item.unread {
-        background: rgba(27, 49, 82, 0.05);
+        background: rgba(26, 127, 196, 0.05);
     }
     .notif-page-link {
         display: flex;
@@ -37,7 +37,7 @@
         transition: background-color 0.15s ease;
     }
     .notif-page-link:hover {
-        background: rgba(27, 49, 82, 0.07);
+        background: rgba(26, 127, 196, 0.07);
         color: inherit;
     }
     .notif-page-icon {

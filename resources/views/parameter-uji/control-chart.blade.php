@@ -7,14 +7,14 @@
     .cc-page .breadcrumb { font-size: 0.78rem; }
 
     .cc-header {
-        background-color: #1b3152 !important; color: #ffffff !important;
+        background-color: var(--sl-primary) !important; color: #ffffff !important;
         font-weight: 600; font-size: 0.85rem !important;
     }
 
     .cc-chart-wrap { position: relative; width: 100%; height: 400px; }
 
     .cc-head th {
-        background-color: #1b3152 !important; color: #ffffff !important; border-color: #ffffff !important;
+        background-color: var(--sl-primary) !important; color: #ffffff !important; border-color: #ffffff !important;
         font-size: 0.72rem !important; vertical-align: middle !important;
     }
     .cc-head th.cc-accent { background-color: #0d6efd !important; }
@@ -38,7 +38,7 @@
         <li class="breadcrumb-item active">Control Chart</li>
     </ol>
     <h5 class="fw-bold mb-3" style="font-size: 1.1rem;">
-        <i class="fas fa-chart-line me-2" style="color: #1b3152;"></i>Control Chart: {{ $parameterUji->nama_parameter }}
+        <i class="fas fa-chart-line me-2" style="color: var(--sl-primary);"></i>Control Chart: {{ $parameterUji->nama_parameter }}
     </h5>
 
     <div class="card shadow-sm border-0 mb-3">

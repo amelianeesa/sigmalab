@@ -4,10 +4,10 @@
 
     /* ===== Breadcrumb & judul ===== */
     .kg-page .breadcrumb { font-size: 0.75rem; margin: 6px 0 10px; padding: 0; flex-wrap: wrap; }
-    .kg-page .breadcrumb-item a { color: #1b3152; }
+    .kg-page .breadcrumb-item a { color: var(--sl-primary); }
     .kg-page .page-title { font-size: 1.1rem; font-weight: 700; margin: 0; }
     .kg-page .section-title {
-        font-size: 0.9rem; font-weight: 700; color: #1b3152;
+        font-size: 0.9rem; font-weight: 700; color: var(--sl-primary);
         border-bottom: 1px solid #dee2e6; padding-bottom: 0.4rem; margin: 0 0 0.75rem;
     }
     .kg-page .cursor-pointer { cursor: pointer; }
@@ -26,10 +26,10 @@
     }
     .kg-page .form-control:focus,
     .kg-page .form-select:focus {
-        border-color: #1b3152; box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+        border-color: var(--sl-primary); box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.15);
     }
     .kg-page .form-check-input.check-lg { width: 1.15rem; height: 1.15rem; margin-top: 0; cursor: pointer; }
-    .kg-page .form-check-input:checked { background-color: #1b3152; border-color: #1b3152; }
+    .kg-page .form-check-input:checked { background-color: var(--sl-primary); border-color: var(--sl-primary); }
     .kg-page .crm-locked { pointer-events: none; opacity: 0.6; }
 
     /* Input di dalam tabel: kompak, sama dengan ukuran teks tabel */
@@ -54,7 +54,7 @@
 
     /* ===== Tombol ===== */
     .kg-page .btn-corporate-blue {
-        background-color: #1b3152 !important; border-color: #1b3152 !important; color: #fff !important;
+        background-color: var(--sl-primary) !important; border-color: var(--sl-primary) !important; color: #fff !important;
     }
     .kg-page .btn-corporate-blue:hover,
     .kg-page .btn-corporate-blue:focus,
@@ -67,7 +67,7 @@
     .kg-page .table th,
     .kg-page .table td { padding: 8px 10px !important; vertical-align: middle !important; font-size: 0.72rem !important; }
     .kg-page .table thead th {
-        font-size: 0.75rem !important; background-color: #1b3152 !important; color: #fff !important;
+        font-size: 0.75rem !important; background-color: var(--sl-primary) !important; color: #fff !important;
         border-color: #fff !important; white-space: nowrap;
     }
     .kg-page .table .badge { font-size: 0.68rem; }
@@ -75,8 +75,8 @@
 
     /* ===== Kartu info (halaman detail) ===== */
     .kg-page .card-header { background: #fff; border-bottom: 1px solid #e9ecef; padding: 10px 12px !important; }
-    .kg-page .card-header .card-title-sm { font-size: 0.88rem; font-weight: 700; color: #1b3152; margin: 0; }
-    .kg-page .card-header.card-header-corp { background: #1b3152; border-bottom: 0; }
+    .kg-page .card-header .card-title-sm { font-size: 0.88rem; font-weight: 700; color: var(--sl-primary); margin: 0; }
+    .kg-page .card-header.card-header-corp { background: var(--sl-primary); border-bottom: 0; }
     .kg-page .card-header.card-header-corp .card-title-sm { color: #fff; }
     .kg-page .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 24px; }
     .kg-page .info-label { display: block; font-size: 0.7rem; font-weight: 600; color: #6c757d; }
@@ -107,7 +107,7 @@
             text-align: right !important; border: 0 !important; padding: 5px 0 !important; background: transparent !important;
         }
         .table-stack td[data-label]::before {
-            content: attr(data-label); font-weight: 600; color: #1b3152; text-align: left; flex-shrink: 0; max-width: 42%;
+            content: attr(data-label); font-weight: 600; color: var(--sl-primary); text-align: left; flex-shrink: 0; max-width: 42%;
         }
         .table-stack td .form-control,
         .table-stack td .input-group { max-width: 58%; }

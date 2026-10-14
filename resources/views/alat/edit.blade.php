@@ -32,7 +32,7 @@
         transition: border-color .15s ease, background-color .15s ease;
     }
     .alat-pinjam-box:hover { border-color: #adb5bd; }
-    .alat-pinjam-box:has(input:checked) { border-color: #1b3152; background: #f1f5fb; }
+    .alat-pinjam-box:has(input:checked) { border-color: var(--sl-primary); background: #f1f5fb; }
     .alat-pinjam-box .form-switch { display: flex; align-items: center; margin: 0; padding: 0; min-height: 0; }
     .alat-pinjam-box .form-check-input { float: none; margin: 0; flex-shrink: 0; cursor: pointer; }
     .alat-pinjam-text { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
@@ -45,7 +45,7 @@
     </div>
 
     <div class="card shadow-sm border-0 mb-4">
-        <div class="card-header text-white py-1.5 px-3" style="background-color: #1b3152;">
+        <div class="card-header text-white py-1.5 px-3" style="background-color: var(--sl-primary);">
             <h6 class="mb-0 fw-semibold" style="font-size: 13px;"> Form Ubah Data Alat & Kalibrasi</h6>
         </div>
         <div class="card-body px-3 py-2.5">
@@ -227,7 +227,7 @@
                 <div class="row g-2 mb-2">
                     <div class="col-md-12">
                         <div class="p-2 bg-light border rounded text-muted" style="font-size: 11.5px;">
-                            <i class="fas fa-info-circle me-1" style="color: #1b3152;"></i> 
+                            <i class="fas fa-info-circle me-1" style="color: var(--sl-primary);"></i> 
                             Evaluasi dan catatan keputusan dikelola sub menu terpusat.
                             <a href="{{ route('evaluasi-kalibrasi.index') }}" class="text-decoration-none fw-semibold text-primary ms-1">
                                 Evaluasi Kalibrasi <i class="fas fa-external-link-alt" style="font-size: 10px;"></i>
@@ -237,7 +237,7 @@
                 </div>
 
                 <div class="mt-3 text-end">
-                    <button type="submit" class="btn btn-sm text-white px-3" style="background-color: #1b3152;"><i class="fas fa-save me-1"></i> Perbarui</button>
+                    <button type="submit" class="btn btn-sm text-white px-3" style="background-color: var(--sl-primary);"><i class="fas fa-save me-1"></i> Perbarui</button>
                     <a href="{{ route('alat.index') }}" class="btn btn-sm btn-secondary px-3">Kembali</a>
                 </div>
             </form>

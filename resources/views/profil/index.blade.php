@@ -3,8 +3,8 @@
 @section('content')
     <style>
         .btn-corporate-dark {
-            background-color: #1b3152 !important;
-            border-color: #1b3152 !important;
+            background-color: var(--sl-primary) !important;
+            border-color: var(--sl-primary) !important;
             color: #ffffff !important;
         }
         .btn-corporate-dark:hover,
@@ -15,26 +15,26 @@
             color: #ffffff !important;
         }
         .btn-corporate-outline {
-            color: #1b3152;
-            border-color: #1b3152;
+            color: var(--sl-primary);
+            border-color: var(--sl-primary);
             background-color: transparent;
         }
         .btn-corporate-outline:hover,
         .btn-corporate-outline:focus,
         .btn-corporate-outline:active {
-            background-color: #1b3152 !important;
-            border-color: #1b3152 !important;
+            background-color: var(--sl-primary) !important;
+            border-color: var(--sl-primary) !important;
             color: #ffffff !important;
         }
         .profil-header {
-            background: linear-gradient(135deg, #1b3152 0%, #14253e 100%);
+            background: linear-gradient(135deg, var(--sl-primary) 0%, #14253e 100%);
             border-radius: 0.375rem 0.375rem 0 0;
         }
         .profil-avatar {
             width: 56px;
             height: 56px;
             font-size: 1.3rem;
-            color: #1b3152;
+            color: var(--sl-primary);
         }
         .profil-info-label {
             font-size: 0.68rem;
@@ -51,8 +51,8 @@
             color: #6c757d;
         }
         .form-control:focus {
-            border-color: #1b3152;
-            box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+            border-color: var(--sl-primary);
+            box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.15);
         }
         .alert-dismissible .btn-close {
             padding: 0;
@@ -186,7 +186,7 @@
 
         <div class="mb-2 mt-1">
             <h4 class="mb-0 fw-bold" style="font-size: 1.1rem;">
-                <i class="fas fa-user-circle me-1" style="color: #1b3152;"></i> Profil Saya
+                <i class="fas fa-user-circle me-1" style="color: var(--sl-primary);"></i> Profil Saya
             </h4>
             <small class="text-muted" style="font-size: 0.72rem;">Kelola informasi akun dan keamanan login Anda.</small>
         </div>
@@ -202,7 +202,7 @@
                             <div class="fw-bold text-white" style="font-size: 0.9rem;">
                                 {{ $user->personil->nama ?? $user->username }}
                             </div>
-                            <span class="badge bg-white mt-1 px-3 py-1 rounded-pill" style="font-size: 0.68rem; color: #1b3152;">
+                            <span class="badge bg-white mt-1 px-3 py-1 rounded-pill" style="font-size: 0.68rem; color: var(--sl-primary);">
                                 {{ $user->role->nama_role ?? '-' }}
                             </span>
                         </div>
@@ -264,7 +264,7 @@
 
             <div class="col-lg-7">
                 <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header text-white d-flex align-items-center py-2 px-3" style="background-color: #1b3152;">
+                    <div class="card-header text-white d-flex align-items-center py-2 px-3" style="background-color: var(--sl-primary);">
                         <i class="fas fa-key me-2" style="font-size: 0.85rem;"></i>
                         <span class="fw-bold" style="font-size: 0.9rem;">Ganti Password</span>
                     </div>
