@@ -57,27 +57,32 @@
             <thead>
                 <tr>
                     <th style="width:24px;">No</th>
-                    <th style="width:62px;">Tanggal</th>
-                    <th style="width:62px;">Tgl Kembali</th>
+                    <th style="width:80px;">Tanggal Dipinjam</th>
+                    <th style="width:80px;">Tanggal Kembali</th>
                     <th>Pekerjaan</th>
                     <th style="width:90px;">Petugas</th>
-                    <th style="width:62px;">Paraf</th>
-                    <th style="width:56px;">Acc</th>
+                    <th style="width:48px;">Paraf</th>
+                    <th style="width:80px;">Disetujui Oleh</th>
                 </tr>
             </thead>
             <tbody>
             @for($n = 0; $n < $total; $n++)
                 @php $r = $baris[$n] ?? null; @endphp
-                <tr style="height:24px;">
+                <tr style="height:26px;">
                     <td class="c">{{ $n + 1 }}</td>
-                    <td class="c">{{ $r ? $r->tanggal->format('d M Y') : '' }}&nbsp;</td>
-                    <td class="c">{{ $r && $r->tanggal_kembali ? $r->tanggal_kembali->format('d M Y') : '' }}&nbsp;</td>
+                    <td class="c" style="white-space:nowrap;">{{ $r ? $r->tanggal->format('d M Y') : '' }}&nbsp;</td>
+                    <td class="c" style="white-space:nowrap;">{{ $r && $r->tanggal_kembali ? $r->tanggal_kembali->format('d M Y') : '' }}&nbsp;</td>
                     <td>{{ $r->pekerjaan ?? '' }}&nbsp;</td>
                     <td>{{ $r->petugas ?? '' }}&nbsp;</td>
-                    <td class="c">@if($r && $r->paraf)<img src="{{ $r->paraf }}" style="height:20px;">@else &nbsp; @endif</td>
+                    <td class="c">
+                        @php $pf = $r->paraf_pdf ?? null; @endphp
+                        @if($pf && $pf['w'])<img src="{{ $pf['src'] }}" style="width:{{ $pf['w'] }}px; height:{{ $pf['h'] }}px;">
+                        @elseif($pf)<img src="{{ $pf['src'] }}" style="height:20px;">
+                        @else &nbsp; @endif
+                    </td>
                     <td class="c" style="font-size:8px;">
                         @if($r)
-                            @if(in_array($r->status, ['disetujui', 'dikembalikan']))&#10003; {{ $r->penyetuju->personil->nama ?? $r->penyetuju->username ?? '' }}@else menunggu @endif
+                            @if(in_array($r->status, ['disetujui', 'dikembalikan'])){{ $r->penyetuju->personil->nama ?? $r->penyetuju->username ?? '' }}@else &nbsp; @endif
                         @else &nbsp; @endif
                     </td>
                 </tr>

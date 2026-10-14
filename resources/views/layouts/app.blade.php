@@ -316,6 +316,14 @@
             .top-navbar .fw-bold.text-uppercase {
                 font-size: 0.95rem !important;
             }
+            /* Tombol Lab/Non-Lab tetap tampil di HP: elemen topbar dirapatkan */
+            .top-navbar .gap-3 {
+                gap: 0.5rem !important;
+            }
+            .top-navbar .btn-group .btn {
+                padding: 0.2rem 0.5rem;
+                font-size: 0.7rem !important;
+            }
             #content {
                 padding: 12px 12px !important;
             }
@@ -328,6 +336,12 @@
             }
             #notifDropdown .notif-list {
                 max-height: 60vh;
+            }
+        }
+        /* Layar HP sangat sempit: sembunyikan tulisan SIGMA-LAB agar topbar tidak meluber */
+        @media (max-width: 379.98px) {
+            .top-navbar .fw-bold.text-uppercase {
+                display: none;
             }
         }
     </style>
@@ -542,7 +556,7 @@
                 $navWs = session('workspace', 'LAB');
             @endphp
             @if($navUser->workspaceAkun() === 'ALL')
-                <form method="POST" action="{{ route('workspace.switch') }}" class="d-none d-md-block">
+                <form method="POST" action="{{ route('workspace.switch') }}" class="m-0">
                     @csrf
                     <div class="btn-group btn-group-sm" role="group" aria-label="Pilih workspace">
                         <button type="submit" name="workspace" value="LAB"

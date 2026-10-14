@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\LogsStandardActivity;
-use App\Models\Concerns\BelongsToWorkspace;
+// use App\Models\Concerns\BelongsToWorkspace; // dilepas: data barang dipakai bersama Lab & Non-Lab
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -19,7 +19,7 @@ use Spatie\Activitylog\Support\LogOptions;
 class Barang extends BaseModel
 {
     use SoftDeletes;
-    use HasFactory, LogsActivity, BelongsToWorkspace;
+    use HasFactory, LogsActivity;
 
     protected $table = 'barang';
     protected $primaryKey = 'barang_id';

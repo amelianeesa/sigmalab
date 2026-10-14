@@ -12,10 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Peminjaman alat berbentuk logbook per alat (pengganti buku catatan manual):
- * Tanggal, Pekerjaan, Petugas, Paraf. Koordinator Lab menyetujui tiap catatan.
- */
+
 class LogbookController extends Controller
 {
     private function pengelola(): bool
@@ -25,7 +22,6 @@ class LogbookController extends Controller
 
     private function bisaMengisi(): bool
     {
-        // Koordinator (penyetuju), HR, dan GA hanya memantau.
         $role = Auth::user()->role?->nama_role;
         $tidakMengisi = array_merge(PeranPengguna::pengelolaPeminjaman(), [PeranPengguna::HR_OFFICER->value, PeranPengguna::GA_OFFICER->value]);
         if (in_array($role, $tidakMengisi, true)) {
@@ -45,8 +41,6 @@ class LogbookController extends Controller
         return Alat::where('dapat_dipinjam', true);
     }
 
-    // ------------------------------------------------------------ halaman
-
     public function index(Request $request)
     {
         $cari = trim((string) $request->input('search', ''));
@@ -56,24 +50,21 @@ class LogbookController extends Controller
                 $like = '%' . addcslashes($cari, '%_\\') . '%';
                 $q->where(fn($w) => $w->where('nama_alat', 'like', $like)->orWhere('kode_alat', 'like', $like));
             })
-            ->orderBy('nama_alat')->get();
+            ->orderBy('nama_alat')->paginate(12)->withQueryString();
 
         $ringkas = LogbookPeminjaman::whereIn('alat_id', $alatList->pluck('alat_id'))
             ->where('status', '!=', 'ditolak')
             ->selectRaw("alat_id, count(*) as total, sum(status = 'diajukan') as menunggu")
             ->groupBy('alat_id')->get()->keyBy('alat_id');
 
-        // Status terkini per alat. Kolom paraf (gambar) sengaja tidak diambil agar ringan.
         $kolom = ['logbook_peminjaman_id', 'alat_id', 'tanggal', 'rencana_kembali', 'pekerjaan', 'petugas', 'status'];
         $idAlat = $alatList->pluck('alat_id');
 
-        // Sedang dipinjam = catatan berstatus "disetujui" (belum dicatat dikembalikan).
         $sedangDipinjam = LogbookPeminjaman::select($kolom)->whereIn('alat_id', $idAlat)
             ->where('status', 'disetujui')
             ->orderByDesc('tanggal')->orderByDesc('logbook_peminjaman_id')
             ->get()->unique('alat_id')->keyBy('alat_id');
 
-        // Peminjaman terakhir (selain yang ditolak).
         $terakhir = LogbookPeminjaman::select($kolom)->whereIn('alat_id', $idAlat)
             ->where('status', '!=', 'ditolak')
             ->orderByDesc('tanggal')->orderByDesc('logbook_peminjaman_id')
@@ -82,25 +73,37 @@ class LogbookController extends Controller
         return view('peminjaman.index', compact('alatList', 'ringkas', 'cari', 'sedangDipinjam', 'terakhir'));
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $alat = $this->alatBisaDipinjam()->findOrFail($id);
+        $cari = trim((string) $request->input('search', ''));
+        $perHalaman = 10;
 
-        $baris = LogbookPeminjaman::with(['pembuat.personil', 'penyetuju.personil'])
+        $query = LogbookPeminjaman::with(['pembuat.personil', 'penyetuju.personil'])
             ->where('alat_id', $alat->alat_id)
-            ->orderBy('tanggal')->orderBy('logbook_peminjaman_id')
-            ->get();
+            ->when($cari !== '', function ($q) use ($cari) {
+                $like = '%' . addcslashes($cari, '%_\\') . '%';
+                $q->where(fn($w) => $w->where('pekerjaan', 'like', $like)->orWhere('petugas', 'like', $like));
+            })
+            ->orderBy('tanggal')->orderBy('logbook_peminjaman_id');
+
+        // Bila halaman tidak ditentukan, buka halaman terakhir agar catatan terbaru langsung terlihat.
+        $halaman = $request->filled('page')
+            ? max(1, (int) $request->input('page'))
+            : max(1, (int) ceil((clone $query)->count() / $perHalaman));
+
+        $baris = $query->paginate($perHalaman, ['*'], 'page', $halaman)->withQueryString();
 
         return view('peminjaman.logbook', [
             'alat' => $alat,
             'baris' => $baris,
+            'cari' => $cari,
             'bisaMengisi' => $this->bisaMengisi(),
             'pengelola' => $this->pengelola(),
             'namaDefault' => $this->namaUser(),
         ]);
     }
 
-    // ------------------------------------------------------------ isi & approval
 
     public function store(Request $request, $id)
     {
@@ -121,7 +124,6 @@ class LogbookController extends Controller
             'paraf.required' => 'Paraf wajib diisi (gambar di kotak paraf).',
         ]);
 
-        // Paraf harus benar-benar gambar PNG.
         $prefix = 'data:image/png;base64,';
         $biner = str_starts_with($data['paraf'], $prefix) ? base64_decode(substr($data['paraf'], strlen($prefix)), true) : false;
         if ($biner === false || !str_starts_with($biner, "\x89PNG")) {
@@ -171,11 +173,6 @@ class LogbookController extends Controller
         return back()->with('success', 'Peminjaman ditolak.');
     }
 
-    /**
-     * Mencatat alat sudah dikembalikan: mengisi tanggal kembali dan mengubah status menjadi "dikembalikan".
-     * - Peminjam (pembuat catatan): sekali, saat status masih "disetujui".
-     * - Koordinator: boleh mencatat, dan mengoreksi tanggalnya SEKALI saja setelah status "dikembalikan".
-     */
     public function kembali(Request $request, $id)
     {
         $c = LogbookPeminjaman::findOrFail($id);
@@ -206,7 +203,6 @@ class LogbookController extends Controller
         return back()->with('success', $koreksi ? 'Tanggal pengembalian dikoreksi.' : 'Alat dicatat sudah dikembalikan.');
     }
 
-    /** Pembuat boleh menarik catatannya selama belum disetujui. */
     public function batal($id)
     {
         $c = LogbookPeminjaman::findOrFail($id);
@@ -217,7 +213,6 @@ class LogbookController extends Controller
         return back()->with('success', 'Catatan dibatalkan.');
     }
 
-    /** Koordinator boleh menghapus catatan yang DITOLAK saja (soft delete, tetap tercatat di Audit Trail). */
     public function hapus($id)
     {
         abort_unless($this->pengelola(), 403);
@@ -229,16 +224,90 @@ class LogbookController extends Controller
         return back()->with('success', 'Catatan yang ditolak dihapus.');
     }
 
-    // ------------------------------------------------------------ PDF
 
     private function bagianPdf(Alat $alat): array
     {
-        return [
-            'alat' => $alat,
-            'baris' => LogbookPeminjaman::with(['penyetuju.personil'])
-                ->where('alat_id', $alat->alat_id)->where('status', '!=', 'ditolak')
-                ->orderBy('tanggal')->orderBy('logbook_peminjaman_id')->get(),
-        ];
+        $baris = LogbookPeminjaman::with(['penyetuju.personil'])
+            ->where('alat_id', $alat->alat_id)->where('status', '!=', 'ditolak')
+            ->orderBy('tanggal')->orderBy('logbook_peminjaman_id')->get();
+
+        foreach ($baris as $r) {
+            $r->paraf_pdf = $this->siapkanParafPdf($r->paraf);
+        }
+
+        return ['alat' => $alat, 'baris' => $baris];
+    }
+
+    private function siapkanParafPdf(?string $dataUri, int $maxW = 44, int $maxH = 23): ?array
+    {
+        if (!$dataUri) {
+            return null;
+        }
+
+        $asli = ['src' => $dataUri, 'w' => null, 'h' => null];
+        $prefix = 'data:image/png;base64,';
+
+        if (!function_exists('imagecreatefromstring') || !str_starts_with($dataUri, $prefix)) {
+            return $asli;
+        }
+
+        try {
+            $biner = base64_decode(substr($dataUri, strlen($prefix)), true);
+            $src = $biner ? @imagecreatefromstring($biner) : false;
+            if (!$src) {
+                return $asli;
+            }
+            if (!imageistruecolor($src)) {
+                imagepalettetotruecolor($src);
+            }
+
+            $w = imagesx($src);
+            $h = imagesy($src);
+            $minX = $w; $minY = $h; $maxX = -1; $maxY = -1;
+
+            // Cari kotak terkecil yang memuat semua piksel yang tidak transparan.
+            for ($y = 0; $y < $h; $y++) {
+                for ($x = 0; $x < $w; $x++) {
+                    $alpha = (imagecolorat($src, $x, $y) >> 24) & 0x7F; // 0 = solid, 127 = transparan
+                    if ($alpha < 127) {
+                        if ($x < $minX) $minX = $x;
+                        if ($x > $maxX) $maxX = $x;
+                        if ($y < $minY) $minY = $y;
+                        if ($y > $maxY) $maxY = $y;
+                    }
+                }
+            }
+
+            if ($maxX < 0) {
+                return $asli; 
+            }
+
+            $pad = 3;
+            $x0 = max(0, $minX - $pad);
+            $y0 = max(0, $minY - $pad);
+            $cw = min($w, $maxX + $pad + 1) - $x0;
+            $ch = min($h, $maxY + $pad + 1) - $y0;
+
+            $dst = imagecreatetruecolor($cw, $ch);
+            imagealphablending($dst, false);
+            imagesavealpha($dst, true);
+            imagefilledrectangle($dst, 0, 0, $cw, $ch, imagecolorallocatealpha($dst, 255, 255, 255, 127));
+            imagecopy($dst, $src, 0, 0, $x0, $y0, $cw, $ch);
+
+            ob_start();
+            imagepng($dst);
+            $png = ob_get_clean();
+
+            $skala = min($maxW / $cw, $maxH / $ch);
+
+            return [
+                'src' => $prefix . base64_encode($png),
+                'w' => max(1, (int) round($cw * $skala)),
+                'h' => max(1, (int) round($ch * $skala)),
+            ];
+        } catch (\Throwable $e) {
+            return $asli;
+        }
     }
 
     public function pdf($id)
@@ -247,7 +316,7 @@ class LogbookController extends Controller
 
         return Pdf::loadView('peminjaman.logbook-pdf', ['bagian' => [$this->bagianPdf($alat)], 'dicetakOleh' => $this->namaUser()])
             ->setPaper('a4', 'portrait')
-            ->stream('Logbook_' . $alat->nama_alat . '_' . $alat->kode_alat . '.pdf');
+            ->stream('Logbook_Peminjaman_' . trim(preg_replace('/[^\w\-]+/u', '_', $alat->nama_alat . '_' . $alat->kode_alat), '_') . '.pdf');
     }
 
     public function pdfSemua()
@@ -256,10 +325,9 @@ class LogbookController extends Controller
 
         return Pdf::loadView('peminjaman.logbook-pdf', ['bagian' => $bagian, 'dicetakOleh' => $this->namaUser()])
             ->setPaper('a4', 'portrait')
-            ->stream('Logbook_Semua_Alat.pdf');
+            ->stream('Logbook_Peminjaman_Semua_Alat.pdf');
     }
 
-    // ------------------------------------------------------------ notifikasi
 
     private function notifKoordinator(string $pesan, string $url): void
     {
