@@ -12,10 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Peminjaman alat berbentuk logbook per alat (pengganti buku catatan manual):
- * Tanggal, Pekerjaan, Petugas, Paraf. Koordinator Lab menyetujui tiap catatan.
- */
+
 class LogbookController extends Controller
 {
     private function pengelola(): bool
@@ -25,7 +22,6 @@ class LogbookController extends Controller
 
     private function bisaMengisi(): bool
     {
-        // Koordinator (penyetuju), HR, dan GA hanya memantau.
         $role = Auth::user()->role?->nama_role;
         $tidakMengisi = array_merge(PeranPengguna::pengelolaPeminjaman(), [PeranPengguna::HR_OFFICER->value, PeranPengguna::GA_OFFICER->value]);
         if (in_array($role, $tidakMengisi, true)) {
@@ -100,7 +96,6 @@ class LogbookController extends Controller
         ]);
     }
 
-    // ------------------------------------------------------------ isi & approval
 
     public function store(Request $request, $id)
     {

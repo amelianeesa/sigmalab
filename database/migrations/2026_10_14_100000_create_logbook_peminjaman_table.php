@@ -12,11 +12,12 @@ return new class extends Migration
             $table->id('logbook_peminjaman_id');
             $table->unsignedBigInteger('alat_id')->index();
             $table->date('tanggal');
+            $table->date('rencana_kembali')->nullable();
             $table->string('pekerjaan', 255);
             $table->string('petugas', 100);
-            $table->longText('paraf')->nullable();            // gambar tanda tangan (PNG data URI)
+            $table->longText('paraf')->nullable();            
             $table->unsignedBigInteger('dibuat_oleh');
-            $table->string('status', 15)->default('diajukan')->index(); // diajukan | disetujui | ditolak
+            $table->string('status', 15)->default('diajukan')->index();
             $table->unsignedBigInteger('disetujui_oleh')->nullable();
             $table->timestamp('tgl_keputusan')->nullable();
             $table->string('catatan_approval', 500)->nullable();

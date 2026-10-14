@@ -216,7 +216,7 @@
             <div class="evaluasi-header-actions-right">
                 @if($adminAplikasi && $evaluasi->total() > 0)
                     <button type="button" id="btnHapusTerpilih" class="btn btn-kuning-custom btn-sm py-1 px-2 shadow-sm" disabled>
-                        <i class="fas fa-trash-alt me-1"></i> Hapus Terpilih
+                        <i class="fas fa-trash-alt me-1"></i> Hapus Terpilih<span id="jumlahTerpilih"></span>
                     </button>
 
                     <button type="button" class="btn btn-merah-custom btn-sm py-1 px-2 shadow-sm btn-konfirmasi-aksi" data-hapus="1" data-pesan="Semua data di dalam arsip akan dihapus secara permanen!" data-tombol="Ya, Hapus Semua!" data-action="{{ route('evaluasi-kalibrasi.hapus-semua') }}" data-method="DELETE">
@@ -365,9 +365,15 @@
         const formAksiMasal = document.getElementById('formAksiMasal');
 
         function toggleButtonHapusTerpilih() {
-            const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+            const jumlah = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const labelJumlah = document.getElementById('jumlahTerpilih');
+
             if (btnHapusTerpilih) {
-                btnHapusTerpilih.disabled = !anyChecked;
+                btnHapusTerpilih.disabled = jumlah === 0;
+            }
+        
+            if (labelJumlah) {
+                labelJumlah.textContent = jumlah > 0 ? ' (' + jumlah + ')' : '';
             }
         }
 
@@ -430,7 +436,9 @@
                 customAction = "{{ route('evaluasi-kalibrasi.hapus-terpilih') }}";
                 customMethod = "DELETE";
 
-                tampilkanModal('Data evaluasi yang dipilih akan dihapus permanen!', 'Ya, Hapus!', true);
+                const jumlah = Array.from(checkboxes).filter(cb => cb.checked).length;
+
+                tampilkanModal(jumlah + ' data evaluasi yang dipilih akan dihapus permanen!', 'Ya, Hapus!', true);
             });
         }
 
