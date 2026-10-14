@@ -22,6 +22,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role_id',
+        'workspace',
         'status_aktif',
         'must_change_password',
     ];
@@ -40,7 +41,7 @@ class User extends Authenticatable
 
     public function personil()
     {
-        return $this->belongsTo(Personil::class, 'personil_id', 'personil_id');
+        return $this->belongsTo(Personil::class, 'personil_id', 'personil_id')->withoutGlobalScopes();
     }
 
     public function role()
@@ -54,6 +55,29 @@ class User extends Authenticatable
             return true;
         }
         return app(\App\Services\PermissionService::class)->userHasAccess($this, $kodeModul, $minLevel);
+    }
+
+    /** Workspace milik akun: LAB | NON_LAB | ALL. Null (kolom belum ada) dianggap LAB. */
+    public function workspaceAkun(): string
+    {
+        return $this->workspace ?: 'LAB';
+    }
+
+    public function bolehWorkspace(string $ws): bool
+    {
+        return in_array($this->workspaceAkun(), ['ALL', $ws], true);
+    }
+
+    /** Workspace akun ditentukan role: role lintas = ALL, selain itu sesuai pilihan (LAB / NON_LAB). */
+    public static function workspaceUntukRole(int $roleId, ?string $pilihan = null): string
+    {
+        $nama = Role::where('roles_id', $roleId)->value('nama_role');
+
+        if (in_array($nama, PeranPengguna::lintasWorkspace(), true)) {
+            return 'ALL';
+        }
+
+        return in_array($pilihan, ['LAB', 'NON_LAB'], true) ? $pilihan : 'LAB';
     }
 
     public function bisaKelolaSdm(): bool

@@ -37,6 +37,7 @@ class PengadaanController extends Controller
         }
 
         $pengadaans = PermintaanPengadaan::with(['barang', 'pemohon', 'penyetuju'])
+            ->where('is_arsip', 0)
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -44,6 +45,23 @@ class PengadaanController extends Controller
         $currentUserRole = strtolower(Auth::user()->role->nama_role ?? '');
 
         return view('pengadaan.index', compact('pengadaans', 'barangList', 'currentUserRole'));
+    }
+
+    public function indexArsip()
+    {
+        if (
+            !$this->permissionService->userHasAccess(Auth::user(), 'pengadaan', 'lihat') &&
+            !$this->permissionService->userHasAccess(Auth::user(), 'pengadaan', 'full')
+        ) {
+            abort(403, 'Anda tidak memiliki akses ke modul ini.');
+        }
+
+        $pengadaans = PermintaanPengadaan::with(['barang', 'pemohon', 'penyetuju'])
+            ->where('is_arsip', 1)
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        return view('pengadaan.arsip', compact('pengadaans'));
     }
 
     public function store(StorePengadaanRequest $request)
@@ -295,6 +313,134 @@ class PengadaanController extends Controller
             return back()->with('error', 'Anda tidak memiliki izin untuk membatalkan pengajuan ini.');
         }
 
+        $this->hapusFilePengadaan($pengadaan);
+
+        $pengadaan->delete();
+
+        $pesan = $isAdminAplikasi ? 'Data pengadaan berhasil dihapus.' : 'Permintaan berhasil dibatalkan.';
+
+        return redirect()->route('pengadaan.index')->with('success', $pesan);
+    }
+
+    public function arsipSemuaSelesai()
+    {
+        $roleName = Auth::user()->role->nama_role ?? '';
+        $isAdminAplikasi = $roleName === PeranPengguna::ADMIN_APLIKASI->value;
+
+        if (!$isAdminAplikasi) {
+            return back()->with('error', 'Anda tidak memiliki izin untuk mengarsipkan data pengadaan.');
+        }
+
+        $updatedCount = PermintaanPengadaan::whereIn('status', ['selesai', 'ditolak', 'batal'])
+            ->where('is_arsip', 0)
+            ->update(['is_arsip' => 1]);
+
+        if ($updatedCount === 0) {
+            return back()->with('error', 'Tidak ada data pengadaan selesai atau ditolak yang dapat diarsipkan.');
+        }
+
+        return redirect()->route('pengadaan.index')->with('success', $updatedCount . ' data pengadaan berhasil diarsipkan.');
+    }
+
+    public function arsipPerBaris($id)
+    {
+        $roleName = Auth::user()->role->nama_role ?? '';
+        $isAdminAplikasi = $roleName === PeranPengguna::ADMIN_APLIKASI->value;
+
+        if (!$isAdminAplikasi) {
+            return back()->with('error', 'Anda tidak memiliki izin untuk mengarsipkan data pengadaan.');
+        }
+
+        $pengadaan = PermintaanPengadaan::findOrFail($id);
+
+        if (!in_array($pengadaan->status, ['selesai', 'ditolak', 'batal'])) {
+            return back()->with('error', 'Hanya pengadaan yang sudah selesai atau ditolak yang dapat diarsipkan.');
+        }
+
+        $pengadaan->is_arsip = 1;
+        $pengadaan->save();
+
+        return back()->with('success', 'Data pengadaan berhasil diarsipkan.');
+    }
+
+    public function restoreArsip($id)
+    {
+        $pengadaan = PermintaanPengadaan::findOrFail($id);
+
+        $pengadaan->is_arsip = 0;
+        $pengadaan->save();
+
+        return back()->with('success', 'Data pengadaan berhasil dikembalikan dari arsip.');
+    }
+
+    public function restoreSemuaArsip()
+    {
+        $roleName = Auth::user()->role->nama_role ?? '';
+        $isAdminAplikasi = $roleName === PeranPengguna::ADMIN_APLIKASI->value;
+
+        if (!$isAdminAplikasi) {
+            return back()->with('error', 'Anda tidak memiliki izin untuk menampilkan kembali data arsip.');
+        }
+
+        $jumlah = PermintaanPengadaan::where('is_arsip', 1)->update(['is_arsip' => 0]);
+
+        if ($jumlah === 0) {
+            return back()->with('error', 'Tidak ada data di dalam arsip.');
+        }
+
+        return redirect()->route('pengadaan.index')->with('success', $jumlah . ' data arsip berhasil ditampilkan kembali.');
+    }
+
+    public function destroyPermanen($id)
+    {
+        $pengadaan = PermintaanPengadaan::findOrFail($id);
+        $roleName = Auth::user()->role->nama_role ?? '';
+        $isAdminAplikasi = $roleName === PeranPengguna::ADMIN_APLIKASI->value;
+
+        if (!$isAdminAplikasi) {
+            return back()->with('error', 'Anda tidak memiliki izin untuk menghapus permanen data.');
+        }
+
+        if (!$pengadaan->is_arsip) {
+            return back()->with('error', 'Data harus diarsipkan terlebih dahulu sebelum dapat dihapus permanen.');
+        }
+
+        $this->hapusFilePengadaan($pengadaan);
+
+        $pengadaan->delete();
+
+        return redirect()->route('pengadaan.arsip')->with('success', 'Data pengadaan berhasil dihapus permanen dari arsip.');
+    }
+
+    public function destroySemuaArsip()
+    {
+        $roleName = Auth::user()->role->nama_role ?? '';
+        $isAdminAplikasi = $roleName === PeranPengguna::ADMIN_APLIKASI->value;
+
+        if (!$isAdminAplikasi) {
+            return back()->with('error', 'Anda tidak memiliki izin untuk menghapus permanen data.');
+        }
+
+        $daftarArsip = PermintaanPengadaan::where('is_arsip', 1)->get();
+
+        if ($daftarArsip->isEmpty()) {
+            return back()->with('error', 'Tidak ada data di dalam arsip.');
+        }
+
+        $jumlah = $daftarArsip->count();
+
+        DB::transaction(function () use ($daftarArsip) {
+            foreach ($daftarArsip as $pengadaan) {
+                $this->hapusFilePengadaan($pengadaan);
+                $pengadaan->delete();
+            }
+        });
+
+        return redirect()->route('pengadaan.arsip')->with('success', $jumlah . ' data arsip berhasil dihapus permanen.');
+    }
+
+    private function hapusFilePengadaan($pengadaan)
+    {
         if ($pengadaan->foto && file_exists(public_path($pengadaan->foto))) {
             @unlink(public_path($pengadaan->foto));
         }
@@ -302,12 +448,6 @@ class PengadaanController extends Controller
         if ($pengadaan->foto_diterima && file_exists(public_path($pengadaan->foto_diterima))) {
             @unlink(public_path($pengadaan->foto_diterima));
         }
-
-        $pengadaan->delete();
-
-        $pesan = $isAdminAplikasi ? 'Data pengadaan berhasil dihapus permanen.' : 'Permintaan berhasil dibatalkan.';
-
-        return redirect()->route('pengadaan.index')->with('success', $pesan);
     }
 
     private function urlPengadaan($pengadaan)

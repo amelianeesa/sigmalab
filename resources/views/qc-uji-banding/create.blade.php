@@ -133,6 +133,59 @@
         align-items: center;
     }
 
+    .flatpickr-calendar {
+        font-family: inherit;
+        font-size: 12px;
+        width: 250px;
+        max-width: calc(100vw - 20px);
+    }
+
+    .flatpickr-calendar .flatpickr-innerContainer,
+    .flatpickr-calendar .flatpickr-rContainer,
+    .flatpickr-calendar .flatpickr-days,
+    .flatpickr-calendar .dayContainer {
+        width: 250px;
+        min-width: 250px;
+        max-width: 250px;
+    }
+
+    .flatpickr-calendar .flatpickr-day {
+        max-width: 35px;
+        height: 32px;
+        line-height: 32px;
+        font-size: 12px;
+    }
+
+    .flatpickr-calendar .flatpickr-months .flatpickr-month {
+        height: 34px;
+    }
+
+    .flatpickr-calendar .flatpickr-current-month {
+        font-size: 100%;
+        height: 34px;
+        padding-top: 5px;
+    }
+
+    .flatpickr-calendar .flatpickr-months .flatpickr-prev-month,
+    .flatpickr-calendar .flatpickr-months .flatpickr-next-month {
+        height: 34px;
+        padding: 8px 10px;
+    }
+
+    .flatpickr-calendar .flatpickr-weekdays {
+        height: 26px;
+    }
+
+    .flatpickr-calendar span.flatpickr-weekday {
+        font-size: 11px;
+    }
+
+    .input-group > .flatpickr-input.form-control,
+    .input-group > input.form-control[readonly] {
+        background-color: #ffffff;
+        cursor: pointer;
+    }
+
     @media (max-width: 767.98px) {
         .qc-page {
             padding-left: 10px !important;
@@ -156,6 +209,19 @@
         .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item {
             font-size: 0.85rem !important;
             padding: 10px 14px;
+        }
+
+        .flatpickr-calendar {
+            width: 260px;
+        }
+
+        .flatpickr-calendar .flatpickr-innerContainer,
+        .flatpickr-calendar .flatpickr-rContainer,
+        .flatpickr-calendar .flatpickr-days,
+        .flatpickr-calendar .dayContainer {
+            width: 260px;
+            min-width: 260px;
+            max-width: 260px;
         }
     }
 </style>
@@ -215,8 +281,11 @@
                     </div>
 
                     <div class="col-12 col-md-6">
-                        <label class="form-label fw-bold">Tanggal Terima <span class="text-danger">*</span></label>
-                        <input type="date" name="tanggal_terima" class="form-control" required>
+                        <label class="form-label fw-bold" for="tanggal_terima">Tanggal Terima <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="fas fa-calendar-alt text-muted"></i></span>
+                            <input type="text" id="tanggal_terima" name="tanggal_terima" class="form-control" placeholder="Pilih tanggal" autocomplete="off" required>
+                        </div>
                     </div>
 
                     <div class="col-md-12">
@@ -2444,7 +2513,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const emptyHtml = '<span class="text-danger fst-italic">Belum dipilih</span>';
 
-        // Analis
         let personils = [];
         modal.querySelectorAll('.chk-personil:checked').forEach(cb => {
             let nama = cb.getAttribute('data-nama');
@@ -2454,7 +2522,6 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('sum-personil-' + pid).innerHTML = personils.length
             ? `<span class="text-dark fw-bold">${personils.join(', ')}</span>` : emptyHtml;
 
-        // Instrumen
         let alats = [];
         modal.querySelectorAll('.chk-alat:checked').forEach(cb => {
             alats.push(cb.getAttribute('data-nama'));
@@ -2462,7 +2529,6 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('sum-alat-' + pid).innerHTML = alats.length
             ? `<span class="text-dark fw-bold">${alats.join(', ')}</span>` : emptyHtml;
 
-                // Bahan (BARU)
         let bahans = [];
         modal.querySelectorAll('.chk-bahan:checked').forEach(cb => {
             let nama = cb.getAttribute('data-nama');
@@ -2582,6 +2648,50 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }, 1500);
+
+    const tanggalTerimaInput = document.getElementById('tanggal_terima');
+
+    function loadStyle(href) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        document.head.appendChild(link);
+    }
+
+    function loadScript(src) {
+        return new Promise(function (resolve, reject) {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+    }
+
+    async function ensureFlatpickr() {
+        if (!window.flatpickr) {
+            loadStyle('https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css');
+            await loadScript('https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js');
+        }
+        if (!window.flatpickr.l10ns || !window.flatpickr.l10ns.id) {
+            await loadScript('https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/id.js');
+        }
+    }
+
+    if (tanggalTerimaInput) {
+        ensureFlatpickr().then(function () {
+            flatpickr(tanggalTerimaInput, {
+                locale: 'id',
+                dateFormat: 'Y-m-d',
+                altInput: true,
+                altFormat: 'j F Y',
+                altInputClass: 'form-control',
+                monthSelectorType: 'dropdown',
+                disableMobile: true,
+                allowInput: false
+            });
+        });
+    }
 
 });
 </script>

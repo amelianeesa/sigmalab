@@ -133,9 +133,20 @@
 
     .info-card {
         border-radius: 0.5rem;
+        height: auto !important;
+        min-height: 0 !important;
+    }
+    .info-card-link {
+        height: auto;
     }
     .info-card .card-body {
         padding: 7px 10px !important;
+        min-height: 0 !important;
+        gap: 6px;
+        justify-content: flex-start !important;
+    }
+    .info-card .card-body > .mt-2 {
+        margin-top: 0 !important;
     }
     .info-card-icon {
         width: 28px;
@@ -286,11 +297,33 @@
         .tracking-step-meta {
             font-size: 0.68rem;
         }
-        .info-card-text {
-            display: none;
+        /* .info-card .card-body {
+            padding: 8px 10px !important; */
+
+        .info-card-link {
+            height: auto;
+        }
+        .info-card {
+            height: auto !important;
         }
         .info-card .card-body {
-            padding: 6px 10px !important;
+            padding: 8px 10px !important;
+            gap: 6px;
+            justify-content: flex-start !important;
+        }
+        .info-card-title {
+            font-size: 0.8rem;
+        }
+        .info-card-text {
+            display: block;
+            font-size: 0.7rem;
+            line-height: 1.3;
+            margin-top: 2px;
+        }
+        .info-card-alert-btn {
+            font-size: 0.7rem;
+            padding-top: 0.2rem;
+            padding-bottom: 0.2rem;
         }
     }
 
@@ -331,7 +364,37 @@
         </div>
     </div>
 
-    <div class="row g-2 mb-2">
+    <div class="row g-2 mb-3">
+        @if($isNonLab)
+        <div class="col-6 col-lg-3">
+            <a href="{{ route('peminjaman.index') }}" class="info-card-link">
+                <div class="card summary-card border-0 shadow-sm border-start border-4 border-warning info-card-clickable">
+                    <div class="card-body summary-card-body">
+                        <span class="summary-card-icon icon-biru"><i class="fas fa-hand-holding"></i></span>
+                        <div class="summary-card-text">
+                            <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">PEMINJAMAN MENUNGGU</p>
+                            <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $peminjamanMenunggu }}</h3>
+                            <span class="text-suco-biru fw-semibold d-inline-block summary-card-link">Proses Persetujuan</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-lg-3">
+            <a href="{{ route('peminjaman.index') }}" class="info-card-link">
+                <div class="card summary-card border-0 shadow-sm border-start border-4 border-suco-biru info-card-clickable">
+                    <div class="card-body summary-card-body">
+                        <span class="summary-card-icon icon-biru"><i class="fas fa-tools"></i></span>
+                        <div class="summary-card-text">
+                            <p class="text-muted mb-0 text-uppercase fw-bold summary-card-label">CATATAN PEMINJAMAN BULAN INI</p>
+                            <h3 class="fw-bold text-dark mb-0 summary-card-value">{{ $peminjamanAktif }}</h3>
+                            <span class="text-suco-biru fw-semibold d-inline-block summary-card-link">Buka Logbook</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        @else
         <div class="col-6 col-lg-3">
             <div class="card summary-card border-0 shadow-sm border-start border-4 border-danger info-card-clickable" data-bs-toggle="modal" data-bs-target="#modalQcOutlier">
                 <div class="card-body summary-card-body">
@@ -359,6 +422,8 @@
                 </div>
             </a>
         </div>
+
+        @endif
 
         <div class="col-6 col-lg-3">
             <a href="{{ route('alat.index') }}" class="info-card-link">

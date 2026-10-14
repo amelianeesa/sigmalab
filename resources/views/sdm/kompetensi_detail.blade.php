@@ -3,7 +3,6 @@
 
 @section('content')
     @php
-        $bisaKelola = Auth::user()->bisaKelolaSdm();
         $jumlahKolom = $bisaKelola ? 7 : 6;
     @endphp
 
@@ -132,9 +131,25 @@
                         <p class="text-muted mb-0" style="font-size: 0.72rem;">{{ $personil->jabatan }} — Unit Kerja: {{ $personil->unit_kerja }} | No. Pegawai: {{ $personil->no_induk }}</p>
                     </div>
                 </div>
-                <a href="{{ route('sdm.index') }}" class="btn btn-outline-secondary btn-sm px-2.5 py-1 fw-semibold rounded-pill profile-back-btn">
-                    <i class="bi bi-arrow-left me-1"></i> Kembali
-                </a>
+                <div class="d-flex align-items-center gap-2 flex-wrap profile-back-btn">
+                    @if($personil->file_cv)
+                        <a href="{{ route('sdm.cv', $personil->personil_id) }}?v={{ $personil->updated_at?->timestamp }}" target="_blank" rel="noopener" class="btn btn-corporate-outline btn-sm px-2.5 py-1 rounded-pill text-nowrap">
+                            <i class="bi bi-file-earmark-text me-1"></i> Lihat CV
+                        </a>
+                    @endif
+                    @if($bisaKelola)
+                        <form action="{{ route('sdm.cv.upload', $personil->personil_id) }}" method="POST" enctype="multipart/form-data" class="m-0">
+                            @csrf
+                            <input type="file" name="file_cv" accept=".pdf,.jpg,.jpeg,.png" class="d-none" onchange="this.form.submit()">
+                            <button type="button" class="btn btn-corporate-outline btn-sm px-2.5 py-1 rounded-pill text-nowrap" title="PDF, JPG, atau PNG (maks. 2MB)" onclick="this.form.file_cv.click()">
+                                <i class="bi bi-upload me-1"></i> {{ $personil->file_cv ? 'Ganti CV' : 'Unggah CV' }}
+                            </button>
+                        </form>
+                    @endif
+                    <a href="{{ route('sdm.index') }}" class="btn btn-outline-secondary btn-sm px-2.5 py-1 fw-semibold rounded-pill">
+                        <i class="bi bi-arrow-left me-1"></i> Kembali
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -395,4 +410,4 @@
             });
         </script>
     @endif
-@endsection
+@endsection 

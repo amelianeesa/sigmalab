@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\KompetensiPersonil;
+use App\Models\Concerns\BelongsToWorkspace;
 
 class Personil extends BaseModel
 {
     use SoftDeletes;
-    use HasFactory;
+    use HasFactory, BelongsToWorkspace;
 
     protected $table = 'personil';
 

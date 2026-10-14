@@ -136,6 +136,54 @@
         margin-bottom: 0.4rem;
     }
 
+    .col-check {
+        width: 32px;
+        text-align: center;
+    }
+    .btn-hapus-terpilih:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .swal2-popup {
+        font-size: 0.85rem !important;
+        padding: 1.5rem 1.25rem 1.75rem !important;
+        border-radius: 1rem !important;
+        width: 30em !important;
+    }
+    .swal2-title {
+        font-size: 1.15rem !important;
+        font-weight: 700 !important;
+        padding: 0 !important;
+        margin-bottom: 0.4rem !important;
+        color: #212529 !important;
+    }
+    .swal2-html-container {
+        font-size: 0.85rem !important;
+        color: #6c757d !important;
+        margin: 0.4rem 0.25rem 0 !important;
+    }
+    .swal2-icon {
+        width: 3.6em !important;
+        height: 3.6em !important;
+        margin: 0.3em auto 0.7em !important;
+    }
+    .swal2-icon .swal2-icon-content {
+        font-size: 2em !important;
+    }
+    .swal2-actions {
+        margin-top: 1.35rem !important;
+        gap: 0.75rem !important;
+    }
+    .swal2-styled {
+        font-size: 0.85rem !important;
+        font-weight: 600 !important;
+        padding: 0.55rem 1.3rem !important;
+        border-radius: 0.4rem !important;
+        white-space: nowrap !important;
+        line-height: 1.3 !important;
+    }
+
     @media (max-width: 768px) {
         .scroll-hint-audit {
             display: block;
@@ -146,13 +194,38 @@
     }
 </style>
 
+@php
+    $canDelete = (Auth::user()->role->nama_role ?? '') === 'Admin Aplikasi';
+@endphp
+
 <div class="container-fluid px-4">
-    <div class="d-flex justify-content-between align-items-center mb-2 mt-2">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 mt-2">
         <h4 class="fw-bold text-dark mb-0" style="font-size: 1rem;"><i class="fas fa-archive me-1"></i> Arsip Audit Trail</h4>
-        <a href="{{ route('audit-log.index') }}" class="btn btn-sm btn-secondary" style="font-size: 0.75rem;">
-            <i class="fas fa-arrow-left me-1"></i> Kembali ke Log Aktif
-        </a>
+        <div class="d-flex gap-2">
+            @if($canDelete)
+                <button type="button" id="btnHapusTerpilih" class="btn btn-sm btn-warning btn-hapus-terpilih" style="font-size: 0.75rem;" disabled>
+                    <i class="fas fa-trash me-1"></i> Hapus Terpilih (<span id="jumlahTerpilih">0</span>)
+                </button>
+                <button type="button" id="btnHapusSemua" class="btn btn-sm btn-danger" style="font-size: 0.75rem;">
+                    <i class="fas fa-trash-alt me-1"></i> Hapus Semua
+                </button>
+            @endif
+            <a href="{{ route('audit-log.index') }}" class="btn btn-sm btn-secondary" style="font-size: 0.75rem;">
+                <i class="fas fa-arrow-left me-1"></i> Kembali ke Log Aktif
+            </a>
+        </div>
     </div>
+
+    @if($canDelete)
+        <form id="formHapusTerpilih" action="{{ route('audit-log.archive.destroy-bulk') }}" method="POST" class="d-none">
+            @csrf
+            @method('DELETE')
+        </form>
+        <form id="formHapusSemua" action="{{ route('audit-log.archive.destroy-all') }}" method="POST" class="d-none">
+            @csrf
+            @method('DELETE')
+        </form>
+    @endif
 
     <div class="card shadow-sm border-0 mb-3 card-shadow-custom">
         <div class="card-body p-2.5">
@@ -231,6 +304,9 @@
                 <table class="table table-bordered table-striped align-middle mb-0">
                     <thead class="table-header-custom">
                         <tr>
+                            @if($canDelete)
+                                <th class="col-check"><input type="checkbox" id="checkAll" title="Pilih semua di halaman ini"></th>
+                            @endif
                             <th style="width: 15%;">Waktu Kejadian</th>
                             <th style="width: 15%;">Aktor (User)</th>
                             <th style="width: 10%;">Event</th>
@@ -242,6 +318,9 @@
                     <tbody>
                         @forelse($logs as $log)
                             <tr>
+                                @if($canDelete)
+                                    <td class="col-check"><input type="checkbox" class="check-item" name="ids[]" value="{{ $log->id }}" form="formHapusTerpilih"></td>
+                                @endif
                                 <td class="text-center">
                                     {{ \Carbon\Carbon::parse($log->created_at)->format('d/m/Y H:i:s') }}
                                     <br><small class="text-muted" style="font-size: 0.6rem;">{{ \Carbon\Carbon::parse($log->created_at)->diffForHumans() }}</small>
@@ -283,7 +362,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-3">Tidak ada data arsip yang ditemukan.</td>
+                                <td colspan="{{ $canDelete ? 7 : 6 }}" class="text-center text-muted py-3">Tidak ada data arsip yang ditemukan.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -343,6 +422,66 @@
                 wrapper.classList.remove('open');
             });
         });
+
+        const checkAll = document.getElementById('checkAll');
+        const btnTerpilih = document.getElementById('btnHapusTerpilih');
+        const btnSemua = document.getElementById('btnHapusSemua');
+        const labelJumlah = document.getElementById('jumlahTerpilih');
+
+        if (btnTerpilih && btnSemua) {
+            const items = document.querySelectorAll('.check-item');
+
+            function refreshTerpilih() {
+                const jumlah = document.querySelectorAll('.check-item:checked').length;
+                labelJumlah.textContent = jumlah;
+                btnTerpilih.disabled = jumlah === 0;
+                checkAll.checked = items.length > 0 && jumlah === items.length;
+            }
+
+            checkAll.addEventListener('change', function () {
+                items.forEach(function (item) { item.checked = checkAll.checked; });
+                refreshTerpilih();
+            });
+
+            items.forEach(function (item) {
+                item.addEventListener('change', refreshTerpilih);
+            });
+
+            btnTerpilih.addEventListener('click', function () {
+                const jumlah = document.querySelectorAll('.check-item:checked').length;
+                Swal.fire({
+                    title: 'Hapus arsip terpilih?',
+                    text: jumlah + ' log arsip akan dihapus permanen.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        document.getElementById('formHapusTerpilih').submit();
+                    }
+                });
+            });
+
+            btnSemua.addEventListener('click', function () {
+                Swal.fire({
+                    title: 'Hapus SEMUA arsip?',
+                    text: 'Seluruh data arsip audit trail akan dihapus permanen dan tidak bisa dikembalikan!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, Hapus Semua!',
+                    cancelButtonText: 'Batal'
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        document.getElementById('formHapusSemua').submit();
+                    }
+                });
+            });
+        }
     });
 </script>
 @endpush

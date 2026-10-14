@@ -14,6 +14,8 @@
         --merah: #dc3545;
         --merah-dark: #bb2d3b;
         --merah-soft: #f8d7da;
+        --abu: #6c757d;
+        --abu-dark: #565e64;
     }
 
     .pengadaan-header-row {
@@ -24,6 +26,10 @@
         display: flex;
         gap: 0.5rem;
         flex-wrap: wrap;
+    }
+    .pengadaan-header-actions form {
+        margin: 0;
+        display: block;
     }
 
     .modal-body {
@@ -191,6 +197,16 @@
         border-color: var(--merah-dark);
         color: #fff;
     }
+    .btn-abu {
+        background-color: var(--abu);
+        border-color: var(--abu);
+        color: #fff;
+    }
+    .btn-abu:hover, .btn-abu:focus, .btn-abu:active {
+        background-color: var(--abu-dark);
+        border-color: var(--abu-dark);
+        color: #fff;
+    }
     .btn-outline-navy {
         background-color: transparent;
         border-color: var(--navy);
@@ -201,14 +217,14 @@
         border-color: var(--navy) !important;
         color: #fff !important;
     }
-    .btn-outline-hijau {
-        background-color: transparent;
-        border-color: var(--hijau);
-        color: var(--hijau);
+    .btn-lihat-arsip {
+        background-color: var(--navy-soft);
+        border-color: #c5d0e3;
+        color: var(--navy);
     }
-    .btn-outline-hijau:hover, .btn-outline-hijau:focus, .btn-outline-hijau:active {
-        background-color: var(--hijau) !important;
-        border-color: var(--hijau) !important;
+    .btn-lihat-arsip:hover, .btn-lihat-arsip:focus, .btn-lihat-arsip:active {
+        background-color: var(--navy) !important;
+        border-color: var(--navy) !important;
         color: #fff !important;
     }
     .btn-outline-merah {
@@ -389,13 +405,10 @@
         font-size: 0.8rem;
     }
 
-    .scroll-hint-pengadaan {
-        display: none;
-        font-size: 0.68rem;
-        color: #6c757d;
-        margin-bottom: 0.4rem;
+    .tabel-wrap-pengadaan {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
-
     .tabel-pengadaan {
         font-size: 0.75rem;
         border-color: #dee2e6;
@@ -410,25 +423,26 @@
     .tabel-pengadaan thead th:last-child {
         border-right: 0 !important;
     }
+    .tabel-pengadaan td.pengadaan-title-cell {
+        min-width: 170px;
+    }
     .kolom-aksi {
         min-width: 150px;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 991.98px) {
         .tabel-pengadaan {
-            min-width: 860px;
+            min-width: 900px;
         }
-        .scroll-hint-pengadaan {
-            display: block;
+    }
+
+    @media (max-width: 767.98px) {
+        .tabel-pengadaan {
+            font-size: 0.72rem;
         }
-        .btn-aksi {
-            min-height: 28px;
-            padding: 0.25rem 0.45rem;
-            font-size: 0.68rem;
-            gap: 0.25rem;
-        }
-        .btn-aksi i {
-            font-size: 0.68rem;
+        .tabel-pengadaan .btn-aksi {
+            min-height: 32px;
+            font-size: 0.72rem;
         }
         .btn-modal-aksi {
             min-width: 80px;
@@ -438,6 +452,17 @@
         .modal-footer {
             flex-wrap: nowrap;
         }
+        .modal-dialog-pengadaan {
+            margin-left: 0.75rem;
+            margin-right: 0.75rem;
+            max-width: none;
+        }
+        .modal-dialog-pengadaan .modal-header,
+        .modal-dialog-pengadaan .modal-body,
+        .modal-dialog-pengadaan .modal-footer {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+        }
     }
 
     @media (max-width: 576px) {
@@ -446,10 +471,19 @@
             align-items: stretch !important;
         }
         .pengadaan-header-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             width: 100%;
         }
-        .pengadaan-header-actions button {
-            flex: 1;
+        .pengadaan-header-actions > * {
+            min-width: 0;
+        }
+        .pengadaan-header-actions > :last-child:nth-child(odd) {
+            grid-column: 1 / -1;
+        }
+        .pengadaan-header-actions .btn-aksi {
+            width: 100%;
+            min-height: 36px;
         }
     }
 </style>
@@ -463,11 +497,29 @@
                 <li class="breadcrumb-item text-muted active">Pengadaan Barang & Bahan</li>
             </ol>
         </div>
-        <div class="d-flex gap-2 pengadaan-header-actions">
+        <div class="pengadaan-header-actions">
             @if(in_array(Auth::user()->role->nama_role ?? '', [\App\Enums\PeranPengguna::GA_OFFICER->value, \App\Enums\PeranPengguna::ADMIN_APLIKASI->value, 'GA', 'GA_OFFICER']))
-                <button class="btn btn-aksi btn-outline-hijau" data-bs-toggle="modal" data-bs-target="#exportPdfModal">
+                <button class="btn btn-aksi btn-outline-merah" data-bs-toggle="modal" data-bs-target="#exportPdfModal">
                     <i class="fas fa-file-pdf"></i> Export PDF
                 </button>
+            @endif
+
+            @php
+                $roleUserAuth = Auth::user()->role->nama_role ?? '';
+                $isAdminApp = $roleUserAuth === \App\Enums\PeranPengguna::ADMIN_APLIKASI->value;
+            @endphp
+
+            @if($isAdminApp)
+                <form action="{{ route('pengadaan.arsipSemuaSelesai') }}" method="POST">
+                    @csrf
+                    <button type="button" class="btn btn-aksi btn-abu btn-konfirmasi-aksi" data-pesan="Semua data pengadaan yang berstatus Selesai atau Ditolak akan dipindahkan ke arsip." data-tombol="Ya, Arsipkan Semua!">
+                        <i class="fas fa-archive"></i> Arsipkan Semua
+                    </button>
+                </form>
+
+                <a href="{{ route('pengadaan.arsip') }}" class="btn btn-aksi btn-lihat-arsip">
+                    <i class="fas fa-folder-open"></i> Lihat Arsip
+                </a>
             @endif
 
             @php
@@ -484,8 +536,7 @@
 
     <div class="card shadow-sm border-0">
         <div class="card-body p-2">
-            <div class="scroll-hint-pengadaan"><i class="fas fa-arrows-alt-h me-1"></i> Geser tabel ke samping untuk melihat kolom lainnya</div>
-            <div class="table-responsive">
+            <div class="table-responsive tabel-wrap-pengadaan">
                 <table class="table table-hover table-bordered align-middle mb-0 tabel-pengadaan">
                     <thead>
                         <tr class="text-center">
@@ -509,6 +560,7 @@
 
                                 $statusProses = ['diproses', 'diproses_po', 'pembelian'];
                                 $statusBelumProses = ['diajukan', 'menunggu_koordinator', 'menunggu_ga', 'disetujui'];
+                                $statusBerhenti = ['selesai', 'ditolak', 'batal'];
 
                                 $catatan = $p->catatan_approval ?? '';
                                 $labelPenolak = null;
@@ -519,9 +571,9 @@
                                 }
                             @endphp
                             <tr id="pengadaan-{{ $p->permintaan_id }}">
-                                <td class="text-center">{{ $loop->iteration }}</td>
+                                <td class="text-center pengadaan-no-cell">{{ $loop->iteration }}</td>
 
-                                <td>
+                                <td class="pengadaan-title-cell">
                                     <span class="fw-semibold">{{ $p->barang ? $p->barang->nama_barang : 'Barang Dihapus' }}</span><br>
                                     <span class="text-muted" style="font-size:0.7rem;">{{ $p->alasan ?? 'Tidak ada catatan khusus' }}</span>
                                     @if($p->foto)
@@ -533,19 +585,19 @@
                                     @endif
                                 </td>
 
-                                <td class="text-nowrap text-center">{{ \Carbon\Carbon::parse($p->tanggal_pengajuan)->format('d M Y') }}</td>
+                                <td class="text-nowrap text-center" data-label="Tanggal"><span>{{ \Carbon\Carbon::parse($p->tanggal_pengajuan)->format('d M Y') }}</span></td>
 
-                                <td class="text-center">
+                                <td class="text-center" data-label="Target Waktu">
                                     <span class="text-dark small fw-medium">{{ $p->format_target_waktu }}</span>
                                 </td>
 
-                                <td class="text-center">{{ $p->pemohon ? $p->pemohon->username : '-' }}</td>
+                                <td class="text-center" data-label="Diajukan Oleh"><span>{{ $p->pemohon ? $p->pemohon->username : '-' }}</span></td>
 
-                                <td class="text-center fw-bold text-navy">
-                                    {{ (float) $p->jumlah_diminta }} <span class="text-muted fw-normal" style="font-size:0.7rem;">{{ $p->barang ? $p->barang->satuan : '' }}</span>
+                                <td class="text-center fw-bold text-navy" data-label="Jumlah">
+                                    <span>{{ (float) $p->jumlah_diminta }} <span class="text-muted fw-normal" style="font-size:0.7rem;">{{ $p->barang ? $p->barang->satuan : '' }}</span></span>
                                 </td>
 
-                                <td class="text-center" style="min-width:170px;">
+                                <td class="text-center pengadaan-block-cell" data-label="Status" style="min-width:170px;">
                                     @if($p->status == 'menunggu_koordinator' || $p->status == 'diajukan')
                                         <span class="status-badge st-tunggu">Menunggu Koordinator</span>
                                     @elseif($p->status == 'menunggu_ga')
@@ -591,7 +643,7 @@
                                     @endif
                                 </td>
 
-                                <td class="kolom-aksi">
+                                <td class="kolom-aksi pengadaan-block-cell" data-label="Aksi">
                                     <div class="d-flex flex-column gap-1">
                                         @if($isKoor && ($p->status == 'menunggu_koordinator' || $p->status == 'diajukan'))
                                             <div class="aksi-pair">
@@ -771,11 +823,10 @@
                                             </form>
                                         @endif
 
-                                        @if($isAdminAplikasi)
-                                            <form action="{{ route('pengadaan.destroy', $p->permintaan_id) }}" method="POST">
+                                        @if($isAdminAplikasi && in_array($p->status, $statusBerhenti))
+                                            <form action="{{ route('pengadaan.arsipPerBaris', $p->permintaan_id) }}" method="POST">
                                                 @csrf
-                                                @method('DELETE')
-                                                <button type="button" class="btn btn-aksi btn-merah w-100 btn-konfirmasi-aksi" data-pesan="Data pengadaan ini akan dihapus permanen!" data-tombol="Ya, Hapus!"><i class="fas fa-trash-alt"></i> Hapus</button>
+                                                <button type="button" class="btn btn-aksi btn-abu w-100 btn-konfirmasi-aksi" data-pesan="Pindahkan data pengadaan ini ke arsip?" data-tombol="Ya, Arsipkan!"><i class="fas fa-archive"></i> Arsip</button>
                                             </form>
                                         @endif
                                     </div>
@@ -783,7 +834,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center py-4 text-muted">Belum ada riwayat pengajuan pengadaan barang.</td>
+                                <td colspan="8" class="text-center py-4 text-muted pengadaan-empty-cell">Belum ada riwayat pengajuan pengadaan barang.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -888,7 +939,7 @@
                                 <li data-value="{{ $b->barang_id }}">
                                     {{ $b->nama_barang }} <small>{{ $b->kode_barang }}</small> (Stok : {{ $saldoAkhir }} {{ $b->satuan }})
                                 </li>
-                            @endforeach
+                                @endforeach
                             </ul>
                         </div>
                     </div>
@@ -982,7 +1033,7 @@
             </div>
             <div class="modal-footer bg-light py-2">
                 <button type="button" class="btn btn-secondary-soft btn-modal-aksi" data-bs-dismiss="modal">Batal</button>
-                <button type="submit" class="btn btn-hijau btn-modal-aksi"><i class="fas fa-download"></i> Download PDF</button>
+                <button type="submit" class="btn btn-merah btn-modal-aksi"><i class="fas fa-download"></i> Download PDF</button>
             </div>
         </form>
     </div>

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\LogsStandardActivity;
+use App\Models\Concerns\BelongsToWorkspace;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,7 +20,7 @@ use Spatie\Activitylog\Support\LogOptions;
 class Alat extends BaseModel
 {
     use SoftDeletes;
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, BelongsToWorkspace;
 
     protected $table = 'alat';
 
@@ -35,7 +36,23 @@ class Alat extends BaseModel
         'status_barang',
         'unit_kerja_pemilik',
         'qr_dicetak_pada',
+        'parent_id',
+        'dapat_dipinjam',
     ];
+
+    protected $casts = [
+        'dapat_dipinjam' => 'boolean',
+    ];
+
+    public function parent()
+    {
+        return $this->belongsTo(Alat::class, 'parent_id', 'alat_id');
+    }
+
+    public function subAlat()
+    {
+        return $this->hasMany(Alat::class, 'parent_id', 'alat_id');
+    }
 
     public function riwayatKalibrasi()
     {

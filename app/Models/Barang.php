@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\LogsStandardActivity;
+// use App\Models\Concerns\BelongsToWorkspace; // dilepas: data barang dipakai bersama Lab & Non-Lab
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -57,4 +58,11 @@ class Barang extends BaseModel
             // ->dontSubmitEmptyLogs()
             ->setDescriptionForEvent(fn(string $eventName) => "Data barang telah di-{$eventName}");
     }
+    public function scopeBelumAdaHarga($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNull('harga_rata')->orWhere('harga_rata', '<=', 0);
+        });
+    }
 }
+

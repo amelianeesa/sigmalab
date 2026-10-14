@@ -132,6 +132,8 @@
 
         .top-navbar .text-secondary { color: rgba(255,255,255,.75) !important; }
         .top-navbar .fw-bold { color: #fff !important; }
+        /* Tombol workspace aktif (Lab / Non-Lab): latar putih, teks harus gelap agar terbaca */
+        .top-navbar .btn-group .btn-light { color: #1b3152 !important; }
         .top-navbar .dropdown .btn {
             background: rgba(255,255,255,.12);
             color: #fff;
@@ -225,6 +227,19 @@
             max-width: 1rem !important; max-height: 1rem !important;
             display: inline-block;
         }
+        .alert-warning {
+            --bs-alert-color: #842029;
+            --bs-alert-bg: #f8d7da;
+            --bs-alert-border-color: #f1aeb5;
+            --bs-alert-link-color: #6a1a21;
+            font-family: inherit;
+            font-size: 0.83rem;
+            font-weight: 400;
+        }
+        .alert-warning strong,
+        .alert-warning b {
+            font-weight: 700;
+        }
 
         #notifDropdown {
             width: 320px;
@@ -240,7 +255,7 @@
             background: #f8fafc;
         }
         #notifDropdown .notif-header .fw-bold {
-            color: #1e293b !important;
+            color: #1d4c7a !important;
         }
         #notifDropdown .notif-list {
             max-height: 340px;
@@ -314,6 +329,14 @@
             .top-navbar .fw-bold.text-uppercase {
                 font-size: 0.95rem !important;
             }
+            /* Tombol Lab/Non-Lab tetap tampil di HP: elemen topbar dirapatkan */
+            .top-navbar .gap-3 {
+                gap: 0.5rem !important;
+            }
+            .top-navbar .btn-group .btn {
+                padding: 0.2rem 0.5rem;
+                font-size: 0.7rem !important;
+            }
             #content {
                 padding: 12px 12px !important;
             }
@@ -326,6 +349,12 @@
             }
             #notifDropdown .notif-list {
                 max-height: 60vh;
+            }
+        }
+        /* Layar HP sangat sempit: sembunyikan tulisan SIGMA-LAB agar topbar tidak meluber */
+        @media (max-width: 379.98px) {
+            .top-navbar .fw-bold.text-uppercase {
+                display: none;
             }
         }
     </style>
@@ -355,6 +384,7 @@
             </div>
 
             <ul class="list-unstyled components" id="sidebar-accordion" style="overflow-y: auto; max-height: calc(100vh - 80px);">
+                @php $wsAktif = session('workspace', 'LAB'); $isLabWs = $wsAktif === 'LAB'; @endphp
                 <li class="{{ request()->is('/') || request()->is('dashboard') ? 'active' : '' }}">
                     <a href="{{ route('dashboard') ?? url('/') }}"><i class="fas fa-home"></i> Dashboard</a>
                 </li>
@@ -459,7 +489,7 @@
                        role="button" 
                        aria-expanded="{{ $inventoriMenuOpen ? 'true' : 'false' }}" 
                        aria-controls="menuInventoriBarang">
-                        <span><i class="fas fa-boxes me-2"></i> Inventori Bahan/Barang</span>
+                        <span><i class="fas fa-boxes me-2"></i> Inventori Barang/Bahan</span>
                         <i class="fas fa-chevron-down small" style="font-size: 0.7rem;"></i>
                     </a>
 
@@ -485,7 +515,7 @@
                 </li>
                 @endif
 
-                @if(Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
+                @if($isLabWs && Auth::check() && (Auth::user()->hasModulAccess('parameter_uji') || Auth::user()->hasModulAccess('proses_hasil') || Auth::user()->hasModulAccess('tindak_lanjut') || Auth::user()->hasModulAccess('reporting')))
 
                 @php
                     $qcIndexPath = trim((string) parse_url(route('kegiatan.index'), PHP_URL_PATH), '/');
@@ -495,6 +525,12 @@
                 @endphp
                 <li class="{{ $qcActive ? 'active' : '' }}">
                     <a href="{{ route('kegiatan.index') }}"><i class="fas fa-flask"></i> Verifikasi Mutu (QC)</a>
+                </li>
+                @endif
+
+                @if(!$isLabWs && Auth::check() && Auth::user()->hasModulAccess('peminjaman'))
+                <li class="{{ request()->is('peminjaman*') ? 'active' : '' }}">
+                    <a href="{{ route('peminjaman.index') }}"><i class="fas fa-hand-holding"></i> Peminjaman Alat</a>
                 </li>
                 @endif
 
@@ -530,6 +566,22 @@
             @auth
             @php
                 $navUser = Auth::user();
+                $navWs = session('workspace', 'LAB');
+            @endphp
+            @if($navUser->workspaceAkun() === 'ALL')
+                <form method="POST" action="{{ route('workspace.switch') }}" class="m-0">
+                    @csrf
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Pilih workspace">
+                        <button type="submit" name="workspace" value="LAB"
+                                class="btn {{ $navWs === 'LAB' ? 'btn-light fw-bold' : 'btn-outline-light' }}" style="font-size:0.75rem;">Lab</button>
+                        <button type="submit" name="workspace" value="NON_LAB"
+                                class="btn {{ $navWs === 'NON_LAB' ? 'btn-light fw-bold' : 'btn-outline-light' }}" style="font-size:0.75rem;">Non-Lab</button>
+                    </div>
+                </form>
+            @else
+                <span class="badge bg-light text-dark d-none d-md-inline" style="font-size:0.7rem;">{{ $navWs === 'NON_LAB' ? 'Non-Lab' : 'Lab' }}</span>
+            @endif
+            @php
                 $navName = $navUser->personil->nama ?? $navUser->username ?? 'Pengguna';
                 $navInitial = strtoupper(mb_substr($navName, 0, 1));
             @endphp

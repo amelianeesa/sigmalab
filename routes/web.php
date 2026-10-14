@@ -46,19 +46,40 @@ Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'
 
 Route::get('/public/alat/{kode_alat}', [AlatController::class, 'inputKalibrasiByKode'])->where('kode_alat', '.*')->name('alat.public-scan');
 
-Route::get('/alat/{id}/export-pdf', [AlatController::class, 'exportPdf'])->name('alat.export-pdf');
-Route::get('/alat/{id}/export-excel', [AlatController::class, 'exportExcel'])->name('alat.export-excel');
-Route::get('/alat/{id}/export-word', [AlatController::class, 'exportWord'])->name('alat.export-word');
-
 // Authenticated & Force Password Change Routes
-Route::middleware(['auth', 'force.password.change'])->group(function () {
+Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawai.terbatas'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::post('/switch-role', [RoleSwitcherController::class, 'switchRole'])->name('switch-role');
+    // Pindah workspace (hanya akun ber-workspace ALL)
+    Route::post('/workspace/switch', [\App\Http\Controllers\WorkspaceController::class, 'switch'])->name('workspace.switch');
 
+    // Alat export (sebelumnya terbuka tanpa login)
+    Route::get('/alat/{id}/export-pdf', [AlatController::class, 'exportPdf'])->name('alat.export-pdf');
+    Route::get('/alat/{id}/export-excel', [AlatController::class, 'exportExcel'])->name('alat.export-excel');
+    Route::get('/alat/{id}/export-word', [AlatController::class, 'exportWord'])->name('alat.export-word');
+
+    // HANYA UNTUK DEVELOPMENT: login sebagai role lain tanpa password. Jangan aktif di production.
+    if (app()->environment('local')) {
+        Route::post('/switch-role', [RoleSwitcherController::class, 'switchRole'])->name('switch-role');
+    }
+
+    // Route::resource('evaluasi-kalibrasi', EvaluasiKalibrasiController::class)->parameters([
+    //     'evaluasi-kalibrasi' => 'evaluasi'
+    // ]);
+    Route::prefix('evaluasi-kalibrasi')->name('evaluasi-kalibrasi.')->group(function () {
+        Route::get('arsip', [EvaluasiKalibrasiController::class, 'arsip'])->name('arsip');
+        Route::patch('arsipkan-semua', [EvaluasiKalibrasiController::class, 'arsipkanSemua'])->name('arsipkan-semua');
+        Route::patch('tampilkan-semua', [EvaluasiKalibrasiController::class, 'tampilkanSemua'])->name('tampilkan-semua');
+        Route::delete('hapus-terpilih', [EvaluasiKalibrasiController::class, 'hapusTerpilih'])->name('hapus-terpilih');
+        Route::delete('hapus-semua', [EvaluasiKalibrasiController::class, 'hapusSemua'])->name('hapus-semua');
+        Route::patch('{evaluasi}/arsipkan', [EvaluasiKalibrasiController::class, 'arsipkan'])->name('arsipkan');
+        Route::patch('{evaluasi}/tampilkan', [EvaluasiKalibrasiController::class, 'tampilkan'])->name('tampilkan');
+    });
+    
     Route::resource('evaluasi-kalibrasi', EvaluasiKalibrasiController::class)->parameters([
         'evaluasi-kalibrasi' => 'evaluasi'
     ]);
+    
 
     Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
     Route::put('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.password.update');
@@ -89,6 +110,7 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::get('/{id}/kompetensi/{kompetensiId}/file', [SdmController::class, 'showKompetensiFile'])->name('kompetensi.file');
         Route::post('/{id}/kompetensi/{kompetensiId}/file', [SdmController::class, 'uploadKompetensiFile'])->name('kompetensi.file.upload');
         Route::get('/{id}/cv', [SdmController::class, 'showCv'])->name('cv');
+        Route::post('/{id}/cv', [SdmController::class, 'uploadCv'])->name('cv.upload');
     });
 
     // Alat & Pemeliharaan
@@ -117,6 +139,15 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
     Route::post('/barang/{id}/pengeluaran', [BarangController::class, 'storePengeluaran'])->name('barang.pengeluaran');
 
     Route::get('/pengadaan/export-pdf', [PengadaanController::class, 'exportPdf'])->name('pengadaan.exportPdf');
+    
+    Route::get('/pengadaan/arsip', [PengadaanController::class, 'indexArsip'])->name('pengadaan.arsip');
+    Route::post('/pengadaan/arsip-semua-selesai', [PengadaanController::class, 'arsipSemuaSelesai'])->name('pengadaan.arsipSemuaSelesai');
+    Route::post('/pengadaan/{id}/arsip', [PengadaanController::class, 'arsipPerBaris'])->name('pengadaan.arsipPerBaris');
+    Route::post('/pengadaan/{id}/restore', [PengadaanController::class, 'restoreArsip'])->name('pengadaan.restoreArsip');
+    Route::delete('/pengadaan/{id}/hapus-permanen', [PengadaanController::class, 'destroyPermanen'])->name('pengadaan.destroyPermanen');
+    Route::post('/pengadaan/arsip/restore-semua', [PengadaanController::class, 'restoreSemuaArsip'])->name('pengadaan.restoreSemuaArsip');
+    Route::delete('/pengadaan/arsip/hapus-semua', [PengadaanController::class, 'destroySemuaArsip'])->name('pengadaan.destroySemuaArsip');
+
     Route::resource('pengadaan', PengadaanController::class);
     Route::post('/pengadaan/{id}/approve', [PengadaanController::class, 'approve'])->name('pengadaan.approve');
     Route::post('/pengadaan/{id}/terima', [PengadaanController::class, 'konfirmasiTerima'])->name('pengadaan.konfirmasiTerima');
@@ -135,6 +166,8 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::put('/monitoring-ruangan/referensi/{id}', [MonitoringRuanganController::class, 'updateReferensi'])->name('monitoring.updateReferensi');
         Route::delete('/monitoring-ruangan/referensi/{id}', [MonitoringRuanganController::class, 'destroyReferensi'])->name('monitoring.destroyReferensi');
     });
+
+    Route::middleware('workspace:LAB')->group(function () {
 
     // Parameter Uji & CRM
     Route::resource('parameter-uji', ParameterUjiController::class);
@@ -187,6 +220,8 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
     Route::get('aft-kalibrasi', [QcUjiBandingController::class, 'aftKalibrasiList'])->name('aft.kalibrasi.list');
     Route::get('aft-kalibrasi/{id}', [QcUjiBandingController::class, 'aftKalibrasiShow'])->name('aft.kalibrasi.show');
 
+    }); // end workspace:LAB (parameter uji, CRM, QC uji banding)
+
     // Library
     Route::middleware('modul:library_manage,tambah_ubah')->group(function () {
         Route::get('/library/create', [LibraryController::class, 'create'])->name('library.create');
@@ -207,7 +242,12 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::get('/library/{id}', [LibraryController::class, 'show'])->name('library.show');
         Route::get('/library/{id}/download', [LibraryController::class, 'download'])->name('library.download');
         Route::get('/library/{id}/preview', [LibraryController::class, 'preview'])->name('library.preview');
+
+        Route::patch('/library/arsipkan-semua', [LibraryController::class, 'archiveAll'])->name('library.archive-all');
+        Route::patch('/library/tampilkan-semua', [LibraryController::class, 'activateAll'])->name('library.activate-all');
     });
+
+    Route::middleware('workspace:LAB')->group(function () {
 
     // Kegiatan & Hasil Uji
     Route::resource('kegiatan', KegiatanController::class);
@@ -225,13 +265,19 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
     Route::get('reporting', [ReportingController::class, 'index'])->name('reporting.index');
     Route::get('reporting/pdf', [ReportingController::class, 'exportPdf'])->name('reporting.pdf');
 
+    }); // end workspace:LAB (kegiatan, hasil uji, tindak lanjut, reporting)
+
     // Audit Log & Arsip
     Route::middleware('modul:audit_log,lihat')->group(function () {
         Route::get('audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
-        
         Route::get('audit-log/archive', [AuditLogArchiveController::class, 'index'])->name('audit-log.archive');
         Route::get('audit-log/archive/{id}', [AuditLogArchiveController::class, 'show'])->name('audit-log.archive.show');
-        
+
+        Route::delete('audit-log/destroy-bulk', [AuditLogController::class, 'destroyBulk'])->name('audit-log.destroy-bulk');
+        Route::delete('audit-log/destroy-all', [AuditLogController::class, 'destroyAll'])->name('audit-log.destroy-all');
+        Route::delete('audit-log/archive/destroy-bulk', [AuditLogArchiveController::class, 'destroyBulk'])->name('audit-log.archive.destroy-bulk');
+        Route::delete('audit-log/archive/destroy-all', [AuditLogArchiveController::class, 'destroyAll'])->name('audit-log.archive.destroy-all');
+
         Route::get('audit-log/{id}', [AuditLogController::class, 'show'])->name('audit-log.show');
     });
 
@@ -256,6 +302,8 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::post('/read-all', [NotifikasiController::class, 'markAllAsRead'])->name('read-all');
         Route::get('/unread-count', [NotifikasiController::class, 'getUnreadCount'])->name('unread-count');
     });
+
+    Route::middleware('workspace:LAB')->group(function () {
 
     // Verifikasi Mutu & QC
     Route::get('verifikasi-mutu', [VerifikasiMutuController::class, 'index'])->name('verifikasi-mutu.index');
@@ -299,6 +347,23 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::get('/{id}/investigasi', [QcHarianController::class, 'investigasi'])->name('investigasi');
         Route::post('/{id}/investigasi', [QcHarianController::class, 'storeInvestigasi'])->name('investigasi.store');
         Route::get('/{id}/investigasi/pdf', [QcHarianController::class, 'cetakInvestigasiPdf'])->name('investigasi.pdf');
+    });
+
+    }); // end workspace:LAB (verifikasi mutu, qc-inhouse, qc-harian)
+
+    // Peminjaman Alat berbentuk logbook per alat (khusus workspace Non-Lab)
+    Route::middleware(['workspace:NON_LAB', 'modul:peminjaman,lihat'])->prefix('peminjaman')->name('peminjaman.')->group(function () {
+        $c = \App\Http\Controllers\LogbookController::class;
+        Route::get('/', [$c, 'index'])->name('index');
+        Route::get('/pdf', [$c, 'pdfSemua'])->name('pdf-semua');
+        Route::get('/alat/{id}', [$c, 'show'])->name('alat');
+        Route::get('/alat/{id}/pdf', [$c, 'pdf'])->name('alat.pdf');
+        Route::post('/alat/{id}', [$c, 'store'])->name('store');
+        Route::post('/catatan/{id}/approve', [$c, 'approve'])->name('approve');
+        Route::post('/catatan/{id}/reject', [$c, 'reject'])->name('reject');
+        Route::post('/catatan/{id}/batal', [$c, 'batal'])->name('batal');
+        Route::post('/catatan/{id}/hapus', [$c, 'hapus'])->name('hapus');
+        Route::post('/catatan/{id}/kembali', [$c, 'kembali'])->name('kembali');
     });
 
 });

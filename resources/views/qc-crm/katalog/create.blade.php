@@ -18,8 +18,74 @@
 
     .qc-page .select2-container--bootstrap-5 .select2-selection { font-size: 0.8rem; min-height: 0; padding: 0.2rem 0.4rem; }
 
+    .flatpickr-calendar {
+        font-family: inherit;
+        font-size: 12px;
+        width: 250px;
+        max-width: calc(100vw - 20px);
+    }
+
+    .flatpickr-calendar .flatpickr-innerContainer,
+    .flatpickr-calendar .flatpickr-rContainer,
+    .flatpickr-calendar .flatpickr-days,
+    .flatpickr-calendar .dayContainer {
+        width: 250px;
+        min-width: 250px;
+        max-width: 250px;
+    }
+
+    .flatpickr-calendar .flatpickr-day {
+        max-width: 35px;
+        height: 32px;
+        line-height: 32px;
+        font-size: 12px;
+    }
+
+    .flatpickr-calendar .flatpickr-months .flatpickr-month {
+        height: 34px;
+    }
+
+    .flatpickr-calendar .flatpickr-current-month {
+        font-size: 100%;
+        height: 34px;
+        padding-top: 5px;
+    }
+
+    .flatpickr-calendar .flatpickr-months .flatpickr-prev-month,
+    .flatpickr-calendar .flatpickr-months .flatpickr-next-month {
+        height: 34px;
+        padding: 8px 10px;
+    }
+
+    .flatpickr-calendar .flatpickr-weekdays {
+        height: 26px;
+    }
+
+    .flatpickr-calendar span.flatpickr-weekday {
+        font-size: 11px;
+    }
+
+    .input-group > .flatpickr-input.form-control,
+    .input-group > input.form-control[readonly] {
+        background-color: #ffffff;
+        cursor: pointer;
+    }
+
     @media (max-width: 767.98px) {
         .qc-page { padding: 4px 10px !important; }
+
+        .flatpickr-calendar {
+            width: 260px;
+        }
+
+        .flatpickr-calendar .flatpickr-innerContainer,
+        .flatpickr-calendar .flatpickr-rContainer,
+        .flatpickr-calendar .flatpickr-days,
+        .flatpickr-calendar .dayContainer {
+            width: 260px;
+            min-width: 260px;
+            max-width: 260px;
+        }
     }
 </style>
 
@@ -50,7 +116,6 @@
     <form action="{{ route('crm-katalog.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <div class="row g-3">
-            {{-- Informasi Botol --}}
             <div class="col-12 col-lg-5">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header bg-white border-0 pt-3 pb-0">
@@ -79,15 +144,17 @@
                             <div class="form-text">Format PDF/JPG/PNG, maksimal 5MB.</div>
                         </div>
                         <div class="mb-0">
-                            <label class="form-label">Tanggal Expired</label>
-                            <input type="date" class="form-control form-control-sm" name="tanggal_expired" value="{{ old('tanggal_expired') }}">
+                            <label class="form-label" for="tanggal_expired">Tanggal Expired</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-white"><i class="fas fa-calendar-alt text-muted"></i></span>
+                                <input type="text" class="form-control form-control-sm" id="tanggal_expired" name="tanggal_expired" value="{{ old('tanggal_expired') }}" placeholder="Pilih tanggal" autocomplete="off">
+                            </div>
                             <div id="expiredHint" class="form-text d-none"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Daftar Parameter --}}
             <div class="col-12 col-lg-7">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header bg-white border-0 pt-3 pb-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -99,15 +166,12 @@
                             <i class="fas fa-info-circle me-1"></i> Jika botol ini (CRM Multi-Parameter) memiliki nilai acuan untuk banyak parameter (IM, ASH, CV, dll), masukkan semuanya di sini. Jika hanya Single Parameter (cth: HGI), cukup masukkan 1 saja.
                         </div>
 
-                        <div id="paramWrapper">
-                            {{-- Baris parameter ditambahkan lewat JavaScript --}}
-                        </div>
+                        <div id="paramWrapper"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- Tombol aksi --}}
         <div class="d-grid d-md-flex justify-content-md-end gap-2 mt-3">
             <a href="{{ route('crm-katalog.index') }}" class="btn btn-light border order-last order-md-first">Batal</a>
             <button type="submit" class="btn btn-corporate-blue shadow-sm fw-semibold px-4"><i class="fas fa-save me-1"></i> Simpan Botol & Nilai Acuan</button>
@@ -115,7 +179,6 @@
     </form>
 </div>
 
-{{-- Template baris parameter --}}
 <template id="paramRowTemplate">
     <div class="row g-2 align-items-end mb-2 param-row p-2 bg-light rounded border">
         <div class="col-12 col-md-4">
@@ -172,13 +235,11 @@
                 }
             }
 
-            // Select2 dipasang setelah nilai awal terisi
             $(row).find('select').select2({ theme: 'bootstrap-5', width: '100%' });
 
             paramIndex++;
         }
 
-        // Kembalikan isian lama jika validasi gagal, kalau tidak: 1 baris kosong
         const oldParams = @json(old('parameters', []));
         const oldParamsArray = Object.values(oldParams || {});
 
@@ -196,7 +257,7 @@
             if (paramWrapper.querySelectorAll('.param-row').length > 1) {
                 btn.closest('.param-row').remove();
             } else if (typeof Swal !== 'undefined') {
-                Swal.fire('Tidak Bisa Dihapus', 'Minimal harus ada 1 parameter uji.', 'warning');
+                qcAlert('Tidak Bisa Dihapus', 'Minimal harus ada 1 parameter uji.');
             } else {
                 alert('Minimal harus ada 1 parameter uji.');
             }
@@ -227,6 +288,46 @@
 
         expInput.addEventListener('change', checkExpired);
         checkExpired();
+
+        function loadStyle(href) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            document.head.appendChild(link);
+        }
+
+        function loadScript(src) {
+            return new Promise(function(resolve, reject) {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        async function ensureFlatpickr() {
+            if (!window.flatpickr) {
+                loadStyle('https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css');
+                await loadScript('https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js');
+            }
+            if (!window.flatpickr.l10ns || !window.flatpickr.l10ns.id) {
+                await loadScript('https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/id.js');
+            }
+        }
+
+        ensureFlatpickr().then(function() {
+            flatpickr(expInput, {
+                locale: 'id',
+                dateFormat: 'Y-m-d',
+                altInput: true,
+                altFormat: 'j F Y',
+                altInputClass: 'form-control form-control-sm',
+                monthSelectorType: 'dropdown',
+                disableMobile: true,
+                allowInput: false
+            });
+        });
     });
 </script>
 @endpush
