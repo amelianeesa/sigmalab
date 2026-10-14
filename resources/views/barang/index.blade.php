@@ -4,32 +4,29 @@
 @section('content')
 
 <style>
-    :root {
-        --brand-navy: #1b3a5c;
-        --brand-navy-light: #2c5282;
+    .dashboard-container {
+        padding: 4px 20px !important;
     }
 
-    .card-header-custom {
-        background-color: #f8f9fa;
-        font-weight: 600;
-        font-size: 0.85rem;
-        padding: 0.5rem 0.9rem;
+    .card-body {
+        padding: 10px !important;
     }
 
     .table-header-custom,
     .table-header-custom tr {
-        background-color: var(--brand-navy) !important;
-        color: #ffffff !important;
-        border-color: var(--brand-navy-light) !important;
-    }
-    .table-header-custom th {
-        background-color: var(--brand-navy) !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         border-color: #ffffff !important;
     }
+    .table-header-custom th {
+        background-color: var(--sl-primary) !important;
+        color: #ffffff !important;
+        border-color: #ffffff !important;
+        font-size: 0.75rem !important;
+    }
 
     .modal-header-brand {
-        background-color: var(--brand-navy) !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
     .modal-header-brand .btn-close {
@@ -37,41 +34,64 @@
     }
 
     .table-responsive-custom {
-        font-size: 0.68rem;
+        font-size: 0.72rem;
     }
     .table-responsive-custom th,
     .table-responsive-custom td {
-        padding: 0.25rem 0.35rem;
-        vertical-align: middle;
+        padding: 8px 10px !important;
+        vertical-align: middle !important;
+    }
+
+    .col-expired {
+        min-width: 125px;
     }
 
     .badge-custom-size {
-        font-size: 0.55rem;
-        padding: 0.2em 0.4em;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem;
+        font-size: 0.68rem;
+        font-weight: 600;
+        padding: 0.4em 0.75em;
+        border-radius: 5px !important;
+        line-height: 1;
+        vertical-align: middle;
     }
 
-    .btn-brand-standard {
-        background-color: var(--brand-navy);
-        border-color: var(--brand-navy);
-        color: #ffffff;
-        font-size: 0.8rem;
-        padding: 0.35rem 1rem;
-        border-radius: 0.375rem; 
-        transition: transform 0.15s, background-color 0.15s;
+    .badge-custom-size.d-block {
+        display: flex !important;
     }
-    .btn-brand-standard:hover {
-        background-color: var(--brand-navy-light);
-        border-color: var(--brand-navy-light);
-        color: #ffffff;
-        transform: translateY(-2px);
+
+    .btn-aksi {
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 !important;
+        font-size: 0.75rem;
+        border-radius: 6px !important;
     }
+
+    .btn-corporate-blue {
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
+        color: #ffffff !important;
+    }
+    .btn-corporate-blue:hover,
+    .btn-corporate-blue:focus,
+    .btn-corporate-blue:active {
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
+        color: #ffffff !important;
+        filter: brightness(0.85);
+    }
+
     .btn-success-standard {
         background-color: #198754;
         border-color: #198754;
         color: #ffffff;
-        font-size: 0.8rem;
-        padding: 0.35rem 1rem;
-        border-radius: 0.375rem;
         transition: transform 0.15s, background-color 0.15s;
     }
     .btn-success-standard:hover {
@@ -149,16 +169,32 @@
         white-space: nowrap !important;
         line-height: 1.3 !important;
     }
-    .custom-dropdown-item:hover, 
+    .custom-dropdown-item:hover,
     .custom-dropdown-item:focus {
-        background-color: rgba(27, 58, 92, 0.15) !important;
-        color: #1b3a5c !important;
+        background-color: color-mix(in srgb, var(--sl-primary) 15%, transparent) !important;
+        color: var(--sl-primary) !important;
     }
 
     .header-action-btns {
         display: flex;
         flex-wrap: wrap;
         gap: 0.5rem;
+    }
+
+    .header-action-btns .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        min-height: 34px;
+        padding: 0.35rem 1rem;
+        font-size: 0.8rem;
+        line-height: 1.2;
+        border-radius: 0.375rem;
+        text-align: center;
+    }
+    .header-action-btns .btn i {
+        margin: 0 !important;
     }
 
     .scroll-hint {
@@ -197,8 +233,8 @@
         flex-shrink: 0;
     }
     .filter-select.open .filter-select-trigger {
-        border-color: #86b7fe;
-        box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15);
+        border-color: var(--sl-primary);
+        box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--sl-primary) 20%, transparent);
     }
     .filter-select-options {
         display: none;
@@ -232,20 +268,23 @@
         background-color: #f1f3f5;
     }
     .filter-select-options li.selected {
-        background-color: #0d6efd;
+        background-color: var(--sl-primary);
         color: #fff;
     }
 
     @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 4px 10px !important;
+        }
         .table-responsive-custom {
-            font-size: 0.62rem;
+            font-size: 0.65rem;
         }
         .table-responsive-custom th,
         .table-responsive-custom td {
-            padding: 0.2rem 0.25rem;
+            padding: 6px 7px !important;
         }
         .badge-custom-size {
-            font-size: 0.5rem;
+            font-size: 0.62rem;
         }
         .scroll-hint {
             display: block;
@@ -259,29 +298,22 @@
             flex-wrap: nowrap;
             gap: 0.5rem;
         }
-        .header-action-btns a,
-        .header-action-btns button {
+        .header-action-btns .btn {
             flex: 1 1 0;
             min-width: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
             font-size: 0.72rem;
-            line-height: 1.2;
             padding: 0.45rem 0.4rem;
             white-space: normal;
         }
     }
 </style>
 
-<div class="container-fluid px-4">
+<div class="container-fluid dashboard-container">
 
     @php
         $allowedManageRoles = ['Koordinator Laboratorium', 'GA', 'Analis Lab', 'Admin Aplikasi'];
         $userRoleName = Auth::user()->role->nama_role ?? '';
         $canManageBarang = in_array($userRoleName, $allowedManageRoles);
-        // Non-Lab boleh menambah barang, tapi belum boleh edit/hapus/pengeluaran.
         $canTambahBarang = $canManageBarang || $userRoleName === \App\Enums\PeranPengguna::PEGAWAI->value;
 
         $barangHabisCount = 0;
@@ -320,19 +352,18 @@
 
     <div class="d-flex justify-content-end align-items-center flex-wrap gap-2 mb-3">
         <div class="header-action-btns">
-            <button type="button" class="btn btn-success-standard shadow-sm" data-bs-toggle="modal" data-bs-target="#cetakPeriodeModal">
-                <i class="fas fa-print me-1"></i> Cetak Laporan Periode
+            <button type="button" class="btn btn-success-standard shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#cetakPeriodeModal">
+                <i class="fas fa-print"></i> <span>Cetak Laporan Periode</span>
             </button>
             @if($canTambahBarang)
-
-            <a href="{{ route('barang.create') }}" class="btn btn-brand-standard shadow-sm">
-                <i class="fas fa-plus me-1"></i> Tambah Barang/Bahan
+            <a href="{{ route('barang.create') }}" class="btn btn-corporate-blue shadow-sm fw-semibold">
+                <i class="fas fa-plus"></i> <span>Tambah Barang/Bahan</span>
             </a>
             @endif
         </div>
     </div>
-    
-    <div class="card mb-4 shadow-sm">
+
+    <div class="card mb-4 border-0 shadow-sm">
         <div class="card-body">
 
             <form action="{{ route('barang.index') }}" method="GET" id="filterForm" class="row g-2 mb-3 align-items-center live-search-form" data-target="#table-container">
@@ -358,7 +389,7 @@
                     </div>
                 </div>
                 <div class="col-md-1 d-flex gap-1">
-                    <a href="{{ route('barang.index') }}" class="btn btn-outline-secondary btn-sm w-100" title="Reset"><i class="fas fa-sync-alt"></i></a>
+                    <a href="{{ route('barang.index') }}" class="btn btn-outline-secondary btn-sm w-100 d-flex align-items-center justify-content-center" title="Reset"><i class="fas fa-sync-alt"></i></a>
                 </div>
             </form>
 
@@ -379,9 +410,9 @@
                             <th rowspan="2" class="text-center align-middle">Harga Rata-rata Tertimbang</th>
                             <th rowspan="2" class="text-center align-middle">Nilai</th>
                             <th rowspan="2" class="text-center align-middle">Kondisi</th>
-                            <th rowspan="2" class="text-center align-middle">Tanggal Expired Date</th>
+                            <th rowspan="2" class="text-center align-middle col-expired">Tanggal Expired Date</th>
                             @if($canManageBarang && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
-                            <th rowspan="2" class="text-center align-middle" style="width: 80px;">Aksi</th>
+                            <th rowspan="2" class="text-center align-middle" style="width: 90px;">Aksi</th>
                             @endif
                         </tr>
                         <tr>
@@ -439,7 +470,7 @@
                                     {{ ucfirst($item->kondisi) }}
                                 </span>
                             </td>
-                            <td>
+                            <td class="col-expired">
                                 @php
                                     $nearestBatch = $item->transaksiBarang()
                                         ->select('tgl_exp', \Illuminate\Support\Facades\DB::raw('SUM(jumlah_penerimaan) - SUM(jumlah_pengeluaran) as sisa_stok'))
@@ -453,7 +484,7 @@
                                 @if($nearestBatch)
                                     {{ \Carbon\Carbon::parse($nearestBatch->tgl_exp)->format('d M Y') }}
                                     <br>
-                                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none mt-1" data-bs-toggle="modal" data-bs-target="#modalBatch{{ $item->barang_id }}" style="font-size: 0.68rem;">
+                                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none mt-1" data-bs-toggle="modal" data-bs-target="#modalBatch{{ $item->barang_id }}" style="font-size: 0.68rem; color: var(--sl-primary);">
                                         <i class="fas fa-history"></i> Detail Stok
                                     </button>
                                 @else
@@ -462,14 +493,16 @@
                             </td>
                             @if($canManageBarang && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_DUKUNGAN_BISNIS->value && Auth::user()->role->nama_role != \App\Enums\PeranPengguna::KABID_INSPEKSI->value)
                             <td class="text-nowrap">
-                                <a href="{{ route('barang.edit', $item->barang_id) }}" class="btn btn-warning btn-sm py-0 px-1" title="Edit"><i class="fas fa-edit"></i></a>
-                                <form action="{{ route('barang.destroy', $item->barang_id) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="button" class="btn btn-danger btn-sm py-0 px-1" title="Hapus" onclick="confirmDelete(this, {{ $saldoAkhir }}, '{{ addslashes($item->nama_barang) }}')">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
+                                <div class="d-inline-flex align-items-center gap-1">
+                                    <a href="{{ route('barang.edit', $item->barang_id) }}" class="btn btn-warning btn-sm btn-aksi shadow-sm" title="Edit" aria-label="Edit"><i class="fas fa-edit"></i></a>
+                                    <form action="{{ route('barang.destroy', $item->barang_id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="button" class="btn btn-danger btn-sm btn-aksi shadow-sm" title="Hapus" aria-label="Hapus" onclick="confirmDelete(this, {{ $saldoAkhir }}, '{{ addslashes($item->nama_barang) }}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                             @endif
                         </tr>
@@ -522,7 +555,7 @@
                                     <td class="text-center">
                                         {{ $batch->created_at ? \Carbon\Carbon::parse($batch->created_at)->timezone('Asia/Jakarta')->format('d/m/Y H:i') : '-' }}
                                     </td>
-                                    <td class="text-center fw-bold" style="color: var(--brand-navy);">{{ (float)$batch->sisa_stok }} {{ $item->satuan }}</td>
+                                    <td class="text-center fw-bold" style="color: var(--sl-primary);">{{ (float)$batch->sisa_stok }} {{ $item->satuan }}</td>
                                     <td class="text-center">
                                         {{ $batch->tgl_exp ? \Carbon\Carbon::parse($batch->tgl_exp)->format('d M Y') : '-' }}
                                     </td>
@@ -551,12 +584,12 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content shadow">
             <form action="{{ route('barang.cetak-periode') }}" method="GET" target="_blank">
-                <div class="modal-header modal-header-brand" style="background-color: var(--brand-navy); color: #ffffff;">
+                <div class="modal-header modal-header-brand">
                     <h5 class="modal-title fs-6 fw-bold" id="cetakPeriodeModalLabel"><i class="fas fa-print me-2"></i>Cetak Laporan Periode</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body py-3" style="overflow: visible;">
-                    
+
                     <div class="mb-3 position-relative">
                         <label class="form-label small fw-bold">Bulan</label>
                         @php
@@ -567,9 +600,9 @@
                             ];
                             $currentMonth = date('n');
                         @endphp
-                        
+
                         <input type="hidden" name="bulan" id="selected_bulan" value="{{ $currentMonth }}">
-                        
+
                         <div class="dropdown">
                             <button class="btn btn-light w-100 text-start d-flex justify-content-between align-items-center border form-control form-control-sm py-2" type="button" id="dropdownBulanBtn" data-bs-toggle="dropdown" aria-expanded="false">
                                 <span id="bulan_label" class="fs-6">{{ $bulans[$currentMonth] }}</span>
@@ -585,12 +618,12 @@
 
                     <div class="mb-3 position-relative">
                         <label class="form-label small fw-bold">Tahun</label>
-                        @php 
-                            $tahunSekarang = date('Y'); 
+                        @php
+                            $tahunSekarang = date('Y');
                         @endphp
-                        
+
                         <input type="hidden" name="tahun" id="selected_tahun" value="{{ $tahunSekarang }}">
-                        
+
                         <div class="dropdown">
                             <button class="btn btn-light w-100 text-start d-flex justify-content-between align-items-center border form-control form-control-sm py-2" type="button" id="dropdownTahunBtn" data-bs-toggle="dropdown" aria-expanded="false">
                                 <span id="tahun_label" class="fs-6">{{ $tahunSekarang }}</span>
@@ -607,8 +640,8 @@
                 </div>
                 <div class="modal-footer py-2 bg-light">
                     <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">Tutup</button>
-                    <button type="submit" class="btn btn-sm px-3 text-white" style="background-color: var(--brand-navy); border-color: var(--brand-navy);">
-                        <i class="fas fa-print me-1"></i> Cetak PDF
+                    <button type="submit" class="btn btn-corporate-blue btn-sm px-3 d-inline-flex align-items-center justify-content-center gap-1">
+                        <i class="fas fa-print"></i> <span>Cetak PDF</span>
                     </button>
                 </div>
             </form>

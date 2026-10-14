@@ -1,6 +1,4 @@
 @extends('layouts.app')
-@section('title', 'Tambah Baru - barang')
-
 @section('title', 'Tambah Barang')
 
 @section('content')
@@ -8,33 +6,49 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
 
 <style>
-    :root {
-        --brand-navy: #1b3a5c;
-        --brand-navy-light: #2c5282;
+    .dashboard-container {
+        padding: 4px 20px !important;
     }
 
     .card-header-custom {
-        background-color: var(--brand-navy) !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         font-weight: 600;
         font-size: 0.82rem;
         padding: 0.4rem 0.8rem;
     }
 
-    .btn-brand-standard {
-        background-color: var(--brand-navy);
-        border-color: var(--brand-navy);
-        color: #ffffff;
+    .btn-corporate-blue {
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
+        color: #ffffff !important;
         font-size: 0.78rem;
         padding: 0.3rem 0.85rem;
-        border-radius: 0.375rem; 
-        transition: transform 0.15s, background-color 0.15s;
+        border-radius: 0.375rem;
     }
-    .btn-brand-standard:hover {
-        background-color: var(--brand-navy-light);
-        border-color: var(--brand-navy-light);
-        color: #ffffff;
-        transform: translateY(-2px);
+    .btn-corporate-blue:hover,
+    .btn-corporate-blue:focus,
+    .btn-corporate-blue:active {
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
+        color: #ffffff !important;
+        filter: brightness(0.85);
+    }
+
+    .btn-outline-corporate {
+        color: var(--sl-primary) !important;
+        border: 1px solid var(--sl-primary) !important;
+        background: #ffffff !important;
+    }
+    .btn-outline-corporate:hover,
+    .btn-outline-corporate:focus {
+        background-color: var(--sl-primary) !important;
+        color: #ffffff !important;
+    }
+
+    .modal-header-brand {
+        background-color: var(--sl-primary) !important;
+        color: #ffffff !important;
     }
 
     .form-control-sm,
@@ -84,8 +98,8 @@
         flex-shrink: 0;
     }
     .filter-select.open .filter-select-trigger {
-        border-color: #86b7fe;
-        box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15);
+        border-color: var(--sl-primary);
+        box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--sl-primary) 20%, transparent);
     }
     .filter-select-options {
         display: none;
@@ -119,8 +133,14 @@
         background-color: #f1f3f5;
     }
     .filter-select-options li.selected {
-        background-color: #0d6efd;
+        background-color: var(--sl-primary);
         color: #fff;
+    }
+
+    @media (max-width: 767.98px) {
+        .dashboard-container {
+            padding: 4px 10px !important;
+        }
     }
 
     @media (max-width: 576px) {
@@ -135,13 +155,13 @@
     }
 </style>
 
-<div class="container-fluid px-4">
+<div class="container-fluid dashboard-container">
     <h5 class="fw-bold mb-2">Inventori Barang/Bahan</h5>
 
-    <div class="card mb-3 shadow-sm">
+    <div class="card border-0 mb-3 shadow-sm">
         <div class="card-header card-header-custom"><i class="fas fa-plus-circle me-1"></i> Form Input Data Barang Persediaan</div>
         <div class="card-body py-3" style="font-size: 0.8rem;">
-            
+
             @if ($errors->any())
                 <div class="alert alert-danger py-1 mb-2" style="font-size: 0.75rem;">
                     <ul class="mb-0">
@@ -154,7 +174,7 @@
 
             <form action="{{ route('barang.store') }}" method="POST">
                 @csrf
-                
+
                 <h6 class="fw-bold mb-2 text-dark" style="font-size: 0.85rem;">Identitas Barang</h6>
                 <div class="row mb-2">
                     <div class="col-md-5">
@@ -169,7 +189,7 @@
                         <label class="form-label fw-bold">Kode Barang / Bahan</label>
                         <div class="input-group input-group-sm">
                             <input type="text" id="kode_barang_input" name="kode_barang" class="form-control form-control-sm" placeholder="mis. 1.23.456" required>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#scannerModal" title="Scan Barcode">
+                            <button type="button" class="btn btn-outline-corporate btn-sm" data-bs-toggle="modal" data-bs-target="#scannerModal" title="Scan Barcode">
                                 <i class="fas fa-qrcode"></i> Scan
                             </button>
                         </div>
@@ -201,7 +221,7 @@
                 <div class="row mb-2">
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Harga Rata-rata Tertimbang (Rp)</label>
-                        
+
                         @if(auth()->check() && (auth()->user()->role === 'Admin Aplikasi' || auth()->user()->role === 'GA'))
                             <input type="number" step="any" name="harga_rata" class="form-control form-control-sm" placeholder="0" value="{{ old('harga_rata') }}">
                         @else
@@ -209,7 +229,7 @@
                             <input type="hidden" name="harga_rata" value="0">
                             <small class="text-danger" style="font-size: 0.7rem;">Hanya GA & Admin Aplikasi yang dapat input harga</small>
                         @endif
-                
+
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Kondisi Barang</label>
@@ -235,7 +255,7 @@
 
                 <div class="mt-2 d-flex justify-content-end gap-2 form-action-row">
                     <a href="{{ route('barang.index') }}" class="btn btn-secondary shadow-sm" style="font-size: 0.78rem; padding: 0.3rem 0.85rem; border-radius: 0.375rem;"><i class="fas fa-arrow-left me-1"></i> Kembali</a>
-                    <button type="submit" class="btn btn-brand-standard shadow-sm"><i class="fas fa-save me-1"></i> Simpan Data</button>
+                    <button type="submit" class="btn btn-corporate-blue shadow-sm"><i class="fas fa-save me-1"></i> Simpan Data</button>
                 </div>
             </form>
         </div>
@@ -245,7 +265,7 @@
 <div class="modal fade" id="scannerModal" tabindex="-1" aria-labelledby="scannerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-dark text-white py-2">
+            <div class="modal-header modal-header-brand text-white py-2">
                 <h5 class="modal-title fs-6" id="scannerModalLabel"><i class="fas fa-qrcode me-2"></i>Scan Barcode / QR Code</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -305,7 +325,7 @@
         let html5QrcodeScanner = null;
 
         scannerModal.addEventListener('shown.bs.modal', function () {
-            html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, /* verbose= */ false);
+            html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
             html5QrcodeScanner.render(onScanSuccess, onScanFailure);
         });
 
@@ -327,7 +347,6 @@
         }
 
         function onScanFailure(error) {
-
         }
     });
 </script>
