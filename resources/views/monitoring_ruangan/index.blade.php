@@ -106,6 +106,23 @@
         align-items: center;
     }
 
+    .dashboard-container .tabel-monitoring thead th,
+    .dashboard-container .tabel-monitoring thead th:first-child {
+        background-color: #1e88d6 !important;
+        color: #ffffff !important;
+        border-color: rgba(255, 255, 255, 0.35) !important;
+        font-weight: 600;
+    }
+
+    .dashboard-container .tabel-monitoring tbody td .btn-success {
+        border-radius: 6px !important;
+        min-width: 30px;
+        min-height: 26px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
     @media (max-width: 768px) {
 
         .btn-toggle-acuan {
@@ -204,6 +221,26 @@
 @endpush
 
 @section('content')
+<style>
+    html body .dashboard-container table.tabel-monitoring thead tr th,
+    html body .dashboard-container table.tabel-monitoring thead tr th:first-child {
+        background: #1e88d6 !important;
+        background-color: #1e88d6 !important;
+        color: #ffffff !important;
+        border-color: rgba(255, 255, 255, 0.35) !important;
+        box-shadow: none !important;
+        font-weight: 600;
+    }
+
+    html body .dashboard-container table.tabel-monitoring tbody tr td button.btn.btn-success {
+        border-radius: 6px !important;
+        min-width: 30px;
+        min-height: 26px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
 <div class="container-fluid dashboard-container">
     @php
         $allowedRoles = ['Koordinator Laboratorium', 'Koordinator Lab', 'Analis Lab', 'Analis', 'Admin Aplikasi'];
