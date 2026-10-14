@@ -77,7 +77,36 @@ class QcInhouseController extends Controller
 
     public function create()
     {
-        $parameters = ParameterUji::where('status_aktif', true)->get();
+        ParameterUji::firstOrCreate(
+            ['nama_parameter' => 'AFT'],
+            [
+                'satuan' => '°C',
+                'kategori_parameter' => 'Ash Behaviour & Physical',
+                'nilai_acuan' => 1200,
+                'batas_bawah' => 0,
+                'batas_atas' => 2000,
+                'status_aktif' => true,
+            ]
+        );
+
+        ParameterUji::firstOrCreate(
+            ['nama_parameter' => 'CHN'],
+            [
+                'satuan' => '%',
+                'kategori_parameter' => 'Ultimate Analysis',
+                'nilai_acuan' => 50,
+                'batas_bawah' => 0,
+                'batas_atas' => 100,
+                'status_aktif' => true,
+            ]
+        );
+
+        $targetParamNames = ['IM', 'ASH', 'VM', 'TS', 'CV', 'AFT', 'CHN'];
+        $parameters = ParameterUji::whereIn('nama_parameter', $targetParamNames)
+            ->where('status_aktif', true)
+            ->orderByRaw("FIELD(nama_parameter, 'IM', 'ASH', 'VM', 'TS', 'CV', 'AFT', 'CHN')")
+            ->get();
+
         $rentangBaku = \App\Services\PemilihanSampelService::RENTANG;
         return view('qc-inhouse.create', compact('parameters', 'rentangBaku'));
     }
@@ -86,20 +115,31 @@ class QcInhouseController extends Controller
     {
         $request->validate([
             'nama_sampel' => 'required|string|max:150',
-            'jenis_batubara' => 'required|string',
-            'tm' => 'required|numeric',
-            'mad' => 'required|numeric',
-            'ash' => 'required|numeric',
-            'vm' => 'required|numeric',
-            'ts' => 'required|numeric',
-            'gcv' => 'required|numeric',
+            'jenis_batubara' => 'nullable|string',
+            'selected_params' => 'required|array|min:1',
+            'tm' => 'nullable|numeric',
+            'mad' => 'nullable|numeric',
+            'ash' => 'nullable|numeric',
+            'vm' => 'nullable|numeric',
+            'ts' => 'nullable|numeric',
+            'gcv' => 'nullable|numeric',
+        ], [
+            'selected_params.required' => 'Pilih minimal satu parameter uji untuk batch ini.',
+            'selected_params.min' => 'Pilih minimal satu parameter uji untuk batch ini.',
         ]);
 
-        $dataScreening = $request->only(['tm', 'mad', 'ash', 'vm', 'ts', 'gcv']);
+        $dataScreening = array_filter(
+            $request->only(['tm', 'mad', 'ash', 'vm', 'ts', 'gcv']),
+            fn($val) => $val !== null && $val !== ''
+        );
         $jenis = $request->jenis_batubara;
 
-        $fc = 100 - ((float)$request->mad + (float)$request->ash + (float)$request->vm);
-        $dataScreening['fc'] = round($fc, 4);
+        if (isset($dataScreening['mad'], $dataScreening['ash'], $dataScreening['vm'])) {
+            $fc = 100 - ((float)$dataScreening['mad'] + (float)$dataScreening['ash'] + (float)$dataScreening['vm']);
+            $dataScreening['fc'] = round($fc, 4);
+        } else {
+            $dataScreening['fc'] = null;
+        }
 
         $crossErrors = $this->pemilihanSampelService->validateCrossField($dataScreening);
         if (!empty($crossErrors)) {
@@ -109,9 +149,11 @@ class QcInhouseController extends Controller
         $dbData = $this->pemilihanSampelService->convertAdbToDb($dataScreening);
         $dataScreening = array_merge($dataScreening, $dbData);
 
-        $rangeErrors = $this->pemilihanSampelService->validateRange($jenis, $dataScreening);
-        if (!empty($rangeErrors)) {
-            return redirect()->back()->withInput()->withErrors($rangeErrors);
+        if (!empty($jenis) && !empty($dataScreening)) {
+            $rangeErrors = $this->pemilihanSampelService->validateRange($jenis, $dataScreening);
+            if (!empty($rangeErrors)) {
+                return redirect()->back()->withInput()->withErrors($rangeErrors);
+            }
         }
 
         DB::beginTransaction();
@@ -125,8 +167,16 @@ class QcInhouseController extends Controller
                 'dibuat_oleh' => Auth::id(),
             ]);
 
-            $namaParamGa = ['IM', 'ASH', 'VM', 'TS', 'CV'];
-            $params = ParameterUji::whereIn('nama_parameter', $namaParamGa)->get();
+            $selectedParamIds = $request->input('selected_params', []);
+            $params = ParameterUji::whereIn('parameter_uji_id', $selectedParamIds)
+                ->orderByRaw("FIELD(nama_parameter, 'IM', 'ASH', 'VM', 'TS', 'CV', 'C', 'H', 'N', 'AFT-IDT', 'AFT-ST', 'AFT-HT', 'AFT-FT', 'HGI')")
+                ->get();
+
+            if ($params->isEmpty()) {
+                $params = ParameterUji::whereIn('nama_parameter', ['IM', 'ASH', 'VM', 'TS', 'CV'])
+                    ->orderByRaw("FIELD(nama_parameter, 'IM', 'ASH', 'VM', 'TS', 'CV')")
+                    ->get();
+            }
 
             foreach ($params as $p) {
                 SampelInhouseParameter::create([
@@ -145,6 +195,14 @@ class QcInhouseController extends Controller
             DB::rollBack();
             return redirect()->back()->withInput()->with('error', 'Gagal menyimpan sampel: ' . $e->getMessage());
         }
+    }
+
+    public function showPemilihan($id)
+    {
+        $batch = SampelInhouse::with(['parameters.parameterUji', 'pembuat'])->findOrFail($id);
+        $screening = $batch->data_screening ?? [];
+
+        return view('qc-inhouse.pemilihan', compact('batch', 'screening'));
     }
 
     public function showPreparasi($id)
@@ -215,6 +273,8 @@ class QcInhouseController extends Controller
     public function showHomogenitas($id)
     {
         $batch = SampelInhouse::with(['parameters.parameterUji', 'parameters.dataHomogenitas'])->findOrFail($id);
+
+        $this->sortBatchParameters($batch);
         
         $tolerances = [];
         foreach ($batch->parameters as $param) {
@@ -227,16 +287,82 @@ class QcInhouseController extends Controller
         }
 
         $tabelAcak = TabelAngkaAcak::orderBy('urutan')->get()->keyBy('urutan');
-
         $fTabelLookup = $this->homogenitasService->getTabelF();
 
         $alatList = \App\Models\Alat::where('kondisi_barang', 'baik')->orderBy('nama_alat')->get();
         $personilList = \App\Models\Personil::orderBy('nama')->get();
         $barangList = \App\Models\Barang::orderBy('nama_barang')->get();
 
+        // Cek apakah batch ini memiliki parameter IM sendiri
+        $batchHasIm = $batch->parameters->contains(function ($p) {
+            return strtoupper($p->parameterUji->nama_parameter ?? '') === 'IM';
+        });
+
+        // Cek apakah batch membutuhkan data IM (memiliki ASH, VM, TS, atau CV)
+        $needsIm = $batch->parameters->contains(function ($p) {
+            return in_array(strtoupper($p->parameterUji->nama_parameter ?? ''), ['ASH', 'VM', 'TS', 'CV']);
+        });
+
+        $availableImBatches = [];
+        $savedImReference = null;
+
+        if (!$batchHasIm && $needsIm) {
+            $savedImReference = $batch->data_pemilihan_sampel['referensi_im'] ?? null;
+
+            // Ambil batch lain yang memiliki data homogenitas parameter IM
+            $availableImBatches = SampelInhouse::where('sampel_inhouse_id', '!=', $id)
+                ->whereHas('parameters', function ($q) {
+                    $q->whereHas('parameterUji', fn($qu) => $qu->where('nama_parameter', 'IM'))
+                      ->whereHas('dataHomogenitas');
+                })
+                ->with(['parameters' => function ($q) {
+                    $q->whereHas('parameterUji', fn($qu) => $qu->where('nama_parameter', 'IM'))
+                      ->with('dataHomogenitas');
+                }])
+                ->orderBy('created_at', 'desc')
+                ->get()
+                                ->map(function ($b) {
+                    $imParam = $b->parameters->first(fn($p) => strtoupper($p->parameterUji->nama_parameter ?? '') === 'IM');
+                    $imData = $imParam ? $imParam->dataHomogenitas->sortBy('nomor_sampel')->values() : collect();
+                    return [
+                        'id' => $b->sampel_inhouse_id,
+                        'kode_batch' => $b->kode_batch ?? ('Batch #' . $b->sampel_inhouse_id),
+                        'nama_sampel' => $b->nama_sampel,
+                        'tanggal' => $b->created_at ? $b->created_at->format('d/m/Y') : '-',
+                        'mean_global' => $imParam->mean_global !== null ? (float) $imParam->mean_global : null,
+                        'sd_global' => $imParam->sd_global !== null ? (float) $imParam->sd_global : null,
+                        'status_parameter' => $imParam->status_parameter ?? '-',
+                        'data' => $imData->map(function ($dh) {
+                            $mentah = $dh->data_mentah ?? [];
+                            return [
+                                'nomor_sampel' => $dh->nomor_sampel,
+                                'nomor_botol_fisik' => $dh->nomor_botol_fisik ?? $dh->nomor_sampel,
+                                'simplo_adb' => $dh->nilai_d1 !== null ? (float) $dh->nilai_d1 : null,
+                                'duplo_adb' => $dh->nilai_d2 !== null ? (float) $dh->nilai_d2 : null,
+                                'avg_adb' => $dh->mean_sampel !== null ? (float) $dh->mean_sampel : null,
+                                // Data mentah penimbangan M1, M2, M3, A, B
+                                'dish_1' => $mentah['dish_1'] ?? '',
+                                'm1_1'   => $mentah['m1_1'] ?? '',
+                                'm2_1'   => $mentah['m2_1'] ?? '',
+                                'm3_1'   => $mentah['m3_1'] ?? '',
+                                'a_1'    => $mentah['a_1'] ?? '',
+                                'b_1'    => $mentah['b_1'] ?? '',
+                                'dish_2' => $mentah['dish_2'] ?? '',
+                                'm1_2'   => $mentah['m1_2'] ?? '',
+                                'm2_2'   => $mentah['m2_2'] ?? '',
+                                'm3_2'   => $mentah['m3_2'] ?? '',
+                                'a_2'    => $mentah['a_2'] ?? '',
+                                'b_2'    => $mentah['b_2'] ?? '',
+                            ];
+                        })->all()
+                    ];
+                })->values();
+        }
+
         return view('qc-inhouse.homogenitas', compact(
             'batch', 'tolerances', 'tabelAcak', 'fTabelLookup', 
-            'alatList', 'personilList', 'barangList'
+            'alatList', 'personilList', 'barangList',
+            'batchHasIm', 'needsIm', 'availableImBatches', 'savedImReference'
         ));
     }
 
@@ -250,6 +376,17 @@ class QcInhouseController extends Controller
         
         DB::beginTransaction();
         try {
+            if ($request->filled('referensi_im_mode')) {
+                $pemilihanData = $batch->data_pemilihan_sampel ?? [];
+                $pemilihanData['referensi_im'] = [
+                    'mode' => $request->input('referensi_im_mode'),
+                    'batch_id' => $request->input('referensi_im_batch_id'),
+                    'manual_val' => $request->input('referensi_im_manual'),
+                    'data' => json_decode($request->input('referensi_im_data', '[]'), true)
+                ];
+                $batch->update(['data_pemilihan_sampel' => $pemilihanData]);
+            }
+
             $semuaHomogen = true;
             $adaData = false;
 
@@ -300,6 +437,35 @@ class QcInhouseController extends Controller
                         $mentahToSave = array_merge($mentahToSave, $resourceData);
                     }
 
+                    if (isset($row['nilai_db_1']) && $row['nilai_db_1'] !== '') $mentahToSave['nilai_db_1'] = $row['nilai_db_1'];
+                    if (isset($row['nilai_db_2']) && $row['nilai_db_2'] !== '') $mentahToSave['nilai_db_2'] = $row['nilai_db_2'];
+
+                    $valUtama1 = null;
+                    $valUtama2 = null;
+                    if (isset($mentahToSave['st_1']) && $mentahToSave['st_1'] !== '') {
+                        $valUtama1 = floatval($mentahToSave['st_1']);
+                    } elseif (isset($mentahToSave['st']) && $mentahToSave['st'] !== '') {
+                        $valUtama1 = floatval($mentahToSave['st']);
+                    }
+                    if (isset($mentahToSave['st_2']) && $mentahToSave['st_2'] !== '') {
+                        $valUtama2 = floatval($mentahToSave['st_2']);
+                    }
+
+                    if (isset($mentahToSave['c_1']) && $mentahToSave['c_1'] !== '') {
+                        $valUtama1 = floatval($mentahToSave['c_1']);
+                    } elseif (isset($mentahToSave['c']) && $mentahToSave['c'] !== '') {
+                        $valUtama1 = floatval($mentahToSave['c']);
+                    }
+                    if (isset($mentahToSave['c_2']) && $mentahToSave['c_2'] !== '') {
+                        $valUtama2 = floatval($mentahToSave['c_2']);
+                    }
+
+                    $finalD1 = $valUtama1 !== null ? $valUtama1 : ($d1_ada ? floatval($row['nilai_d1']) : null);
+                    $finalD2 = $valUtama2 !== null ? $valUtama2 : ($d2_ada ? floatval($row['nilai_d2']) : null);
+                    $meanSampel = ($finalD1 !== null && $finalD2 !== null) 
+                        ? ($finalD1 + $finalD2) / 2 
+                        : ($finalD1 ?? $finalD2);
+
                     $dh = DataHomogenitas::create([
                         'sampel_inhouse_parameter_id' => $paramId,
                         'nomor_sampel' => $nomorSampel,
@@ -307,10 +473,11 @@ class QcInhouseController extends Controller
                         'urutan_instrumen_d1' => $row['urutan_d1'] ?? null,
                         'urutan_instrumen_d2' => $row['urutan_d2'] ?? null,
                         'data_mentah' => $mentahToSave, 
-                        'nilai_d1' => $d1_ada ? $row['nilai_d1'] : null,
-                        'nilai_d2' => $d2_ada ? $row['nilai_d2'] : null,
-                        'mean_sampel' => ($d1_ada && $d2_ada) ? ($row['nilai_d1'] + $row['nilai_d2']) / 2 : null,
+                        'nilai_d1' => $finalD1,
+                        'nilai_d2' => $finalD2,
+                        'mean_sampel' => $meanSampel,
                     ]);
+
 
                     if ($d1_ada && $d2_ada) {
                         $val1 = $row['nilai_d1'];
@@ -319,9 +486,16 @@ class QcInhouseController extends Controller
                         $dbVal1 = $row['nilai_db_1'] ?? null;
                         $dbVal2 = $row['nilai_db_2'] ?? null;
 
-                        $namaParamUp = strtoupper($param->parameterUji->nama_parameter);
-                        if ($namaParamUp !== 'IM' && ($dbVal1 === null || $dbVal1 === '' || $dbVal2 === null || $dbVal2 === '')) {
-                            throw new \Exception("Nilai IM untuk botol {$nomorSampel} belum terisi atau belum tersimpan. Hasil basis kering (db) pada parameter {$namaParamUp} tidak bisa dihitung.");
+                       $namaParamUp = strtoupper($param->parameterUji->nama_parameter);
+                        $batchHasIm = $batch->parameters->contains(function ($p) {
+                            return strtoupper($p->parameterUji->nama_parameter ?? '') === 'IM';
+                        });
+                        $hasImSource = $batchHasIm || !empty($batch->data_pemilihan_sampel['referensi_im']) || $request->filled('referensi_im_mode');
+
+                        if (!in_array($namaParamUp, ['IM', 'AFT', 'CHN']) && $hasImSource) {
+                            if ($dbVal1 === null || $dbVal1 === '' || $dbVal2 === null || $dbVal2 === '') {
+                                throw new \Exception("Nilai IM untuk botol {$nomorSampel} belum terisi atau belum ditentukan. Hasil basis kering (db) pada parameter {$namaParamUp} tidak bisa dihitung.");
+                            }
                         }
 
                           if ($dbVal1 !== null && $dbVal1 !== '' && $dbVal2 !== null && $dbVal2 !== '') {
@@ -338,6 +512,43 @@ class QcInhouseController extends Controller
 
                 if ($request->input('is_draft')) {
                     $param->update(['status_parameter' => 'draft']); 
+                    continue;
+                }
+
+                $namaParamUpper = strtoupper($param->parameterUji->nama_parameter ?? '');
+                if (in_array($namaParamUpper, ['AFT', 'CHN'])) {
+                    $vals = [];
+                    foreach ($inputData as $row) {
+                        $mentah = $row['mentah'] ?? [];
+                        if ($namaParamUpper === 'AFT') {
+                            if (isset($mentah['st_1']) && $mentah['st_1'] !== '') $vals[] = floatval($mentah['st_1']);
+                            if (isset($mentah['st_2']) && $mentah['st_2'] !== '') $vals[] = floatval($mentah['st_2']);
+                            if (empty($mentah['st_1']) && isset($mentah['st']) && $mentah['st'] !== '') $vals[] = floatval($mentah['st']);
+                        } elseif ($namaParamUpper === 'CHN') {
+                            if (isset($mentah['c_1']) && $mentah['c_1'] !== '') $vals[] = floatval($mentah['c_1']);
+                            if (isset($mentah['c_2']) && $mentah['c_2'] !== '') $vals[] = floatval($mentah['c_2']);
+                            if (empty($mentah['c_1']) && isset($mentah['c']) && $mentah['c'] !== '') $vals[] = floatval($mentah['c']);
+                        }
+                    }
+                    $count = count($vals);
+                    $mean = $count > 0 ? array_sum($vals) / $count : 0;
+                    $variance = 0;
+                    if ($count > 1) {
+                        foreach ($vals as $v) {
+                            $variance += pow($v - $mean, 2);
+                        }
+                        $sd = sqrt($variance / ($count - 1));
+                    } else {
+                        $sd = 0;
+                    }
+                    $param->update([
+                        'mean_global' => round($mean, 2),
+                        'sd_global' => round($sd, 2),
+                        'f_hitung' => 1,
+                        'f_tabel' => 3.02,
+                        'status_parameter' => 'homogen',
+                        'tanggal_homogenitas' => now(),
+                    ]);
                     continue;
                 }
 
@@ -375,11 +586,15 @@ class QcInhouseController extends Controller
 
             $semuaParameterLengkap = true;
             $semuaParameterHomogen = true;
+            $gagalHomogenParams = [];
             
             $batch->refresh();
             foreach ($batch->parameters as $p) {
                 if ($p->status_parameter !== 'homogen') {
                     $semuaParameterHomogen = false;
+                    if ($p->status_parameter === 'tidak_homogen') {
+                        $gagalHomogenParams[] = $p->parameterUji->nama_parameter ?? 'Parameter';
+                    }
                 }
                 if (in_array($p->status_parameter, [null, 'pending', 'draft'])) {
                     $semuaParameterLengkap = false;
@@ -390,6 +605,34 @@ class QcInhouseController extends Controller
                 $batch->update([
                     'status' => $semuaParameterHomogen ? 'penetapan_target' : 'gagal_homogenitas',
                 ]);
+
+                // Jika terdeteksi Tidak Homogen, kirim notifikasi lonceng
+                if (!$semuaParameterHomogen) {
+                    $paramString = !empty($gagalHomogenParams) ? implode(', ', $gagalHomogenParams) : '';
+                    $pesanNotif = "⚠️ Gagal Homogenitas: Sampel {$batch->kode_batch} ({$batch->nama_sampel}) dinyatakan TIDAK HOMOGEN" . ($paramString ? " pada parameter {$paramString}." : ".") . " Silakan lakukan investigasi.";
+                    $urlNotif = route('qc-inhouse.show', $id);
+
+                    $targetUsers = \App\Models\User::whereHas('role', function($q) {
+                        $q->where('nama_role', 'LIKE', '%Analis%')
+                          ->orWhere('nama_role', 'LIKE', '%Koordinator%');
+                    })->where('status_aktif', true)->get();
+
+                    $notifData = [];
+                    foreach ($targetUsers as $u) {
+                        $notifData[] = [
+                            'users_id' => $u->users_id,
+                            'jenis_notifikasi' => 'qc',
+                            'pesan' => $pesanNotif,
+                            'url' => $urlNotif,
+                            'is_read' => 0,
+                            'created_at' => now(),
+                        ];
+                    }
+
+                    if (!empty($notifData)) {
+                        \Illuminate\Support\Facades\DB::table('notifikasi')->insert($notifData);
+                    }
+                }
             }
 
             DB::commit();
@@ -433,12 +676,10 @@ class QcInhouseController extends Controller
         }
     }
 
-    // ============================================
-    // TAHAP 4: PENETAPAN NILAI TARGET
-    // ============================================
     public function showPenetapanTarget($id)
     {
         $batch = SampelInhouse::with(['parameters.parameterUji', 'parameters.dataPenetapanTarget'])->findOrFail($id);
+        $this->sortBatchParameters($batch);
         return view('qc-inhouse.penetapan-target', compact('batch'));
     }
 
@@ -474,12 +715,11 @@ class QcInhouseController extends Controller
         }
     }
 
-    // ============================================
-    // TAHAP 5: UJI STABILITAS
-    // ============================================
     public function showStabilitas($id)
     {
         $batch = SampelInhouse::with(['parameters.parameterUji', 'parameters.dataStabilitas', 'parameters.dataHomogenitas'])->findOrFail($id);
+
+        $this->sortBatchParameters($batch);
         
         $tolerances = [];
         foreach ($batch->parameters as $param) {
@@ -665,10 +905,13 @@ class QcInhouseController extends Controller
 
             $allStabil = true;
             $adaGagal = false;
+            $gagalParams = [];
+
             foreach ($batch->parameters as $p) {
                 $p->refresh();
                 if ($p->status_parameter === 'tidak_stabil') {
                     $adaGagal = true;
+                    $gagalParams[] = $p->parameterUji->nama_parameter ?? 'Parameter';
                 }
                 if ($p->status_parameter !== 'stabil') {
                     $allStabil = false;
@@ -677,6 +920,33 @@ class QcInhouseController extends Controller
 
             if ($adaGagal) {
                 $batch->update(['status' => 'gagal_stabilitas']);
+
+                // Kirim notifikasi lonceng untuk Gagal Stabilitas
+                $paramString = !empty($gagalParams) ? implode(', ', $gagalParams) : '';
+                $pesanNotif = "⚠️ Gagal Stabilitas: Sampel {$batch->kode_batch} ({$batch->nama_sampel}) dinyatakan TIDAK STABIL" . ($paramString ? " pada parameter {$paramString}." : ".") . " Silakan lakukan investigasi.";
+                $urlNotif = route('qc-inhouse.show', $id);
+
+                $targetUsers = \App\Models\User::whereHas('role', function($q) {
+                    $q->where('nama_role', 'LIKE', '%Analis%')
+                      ->orWhere('nama_role', 'LIKE', '%Koordinator%');
+                })->where('status_aktif', true)->get();
+
+                $notifData = [];
+                foreach ($targetUsers as $u) {
+                    $notifData[] = [
+                        'users_id' => $u->users_id,
+                        'jenis_notifikasi' => 'qc',
+                        'pesan' => $pesanNotif,
+                        'url' => $urlNotif,
+                        'is_read' => 0,
+                        'created_at' => now(),
+                    ];
+                }
+
+                if (!empty($notifData)) {
+                    \Illuminate\Support\Facades\DB::table('notifikasi')->insert($notifData);
+                }
+
             } elseif ($allStabil) {
                 $batch->update(['status' => 'siap_digunakan']);
             } else {
@@ -737,6 +1007,7 @@ class QcInhouseController extends Controller
             'preparator'
         ])->findOrFail($id);
 
+        $this->sortBatchParameters($batch);
         return view('qc-inhouse.show', compact('batch'));
     }
 
@@ -861,5 +1132,15 @@ class QcInhouseController extends Controller
             \Illuminate\Support\Facades\DB::rollBack();
             return redirect()->back()->with('error', 'Gagal membuat preparasi ulang: ' . $e->getMessage());
         }
+    }
+
+    private function sortBatchParameters($batch)
+    {
+        $order = ['IM' => 1, 'ASH' => 2, 'VM' => 3, 'TS' => 4, 'CV' => 5, 'AFT' => 6, 'CHN' => 7];
+        $sorted = $batch->parameters->sortBy(function ($p) use ($order) {
+            $code = trim(strtoupper($p->parameterUji->nama_parameter ?? ''));
+            return $order[$code] ?? 99;
+        })->values();
+        $batch->setRelation('parameters', $sorted);
     }
 }

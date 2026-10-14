@@ -2555,6 +2555,26 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    document.querySelectorAll('.in-qty').forEach(input => {
+        input.addEventListener('input', function () {
+            let tr = this.closest('tr');
+            let chk = tr.querySelector('.chk-bahan');
+            if (chk) {
+                chk.checked = (this.value && parseFloat(this.value) > 0);
+            }
+        });
+    });
+
+    document.querySelectorAll('.chk-bahan').forEach(cb => {
+        cb.addEventListener('change', function () {
+            if (!this.checked) {
+                let tr = this.closest('tr');
+                let qtyInput = tr.querySelector('.in-qty');
+                if (qtyInput) qtyInput.value = '';
+            }
+        });
+    });
+
     document.querySelectorAll('.btn-copy-resource').forEach(btn => {
         btn.addEventListener('click', function() {
             let currentPid = this.getAttribute('data-pid');

@@ -172,6 +172,7 @@ class QcCrmController extends Controller
 
         DB::beginTransaction();
         try {
+            $outlierParams = [];
             foreach ($request->params as $paramId => $data) {
                 if (!isset($data['selected'])) continue;
                 if (!isset($sertifikatMap[$paramId])) continue;
@@ -214,6 +215,10 @@ class QcCrmController extends Controller
                     $status = 'draft';
                 } else {
                     $status = ($nilai_akhir >= $batas_bawah && $nilai_akhir <= $batas_atas) ? 'inlier' : 'outlier';
+                    if ($status === 'outlier') {
+                        $pName = $sertifikat->parameterUji->nama_parameter ?? ('ID ' . $paramId);
+                        $outlierParams[] = $pName;
+                    }
                 }
                 
                 $draftLama = QcCrm::where('crm_katalog_id', $katalogId)
@@ -248,6 +253,30 @@ class QcCrmController extends Controller
             }
 
             DB::commit();
+
+            if (!$isDraft && count($outlierParams) > 0) {
+                $paramString = implode(', ', array_unique($outlierParams));
+                $pesanNotif = "⚠️ Outlier QC CRM: Ditemukan outlier pada parameter {$paramString} (Produk: {$katalog->nama_produk}, Lot: {$katalog->nomor_lot}). Silakan lakukan investigasi.";
+                $urlNotif = route('qc-crm.index', ['tab' => 'harian']);
+                $targetUsers = \App\Models\User::whereHas('role', function($q) {
+                    $q->where('nama_role', 'LIKE', '%Analis%')
+                      ->orWhere('nama_role', 'LIKE', '%Koordinator%');
+                })->where('status_aktif', true)->get();
+                $notifData = [];
+                foreach ($targetUsers as $u) {
+                    $notifData[] = [
+                        'users_id' => $u->users_id,
+                        'jenis_notifikasi' => 'qc',
+                        'pesan' => $pesanNotif,
+                        'url' => $urlNotif,
+                        'is_read' => 0,
+                        'created_at' => now(),
+                    ];
+                }
+                if (!empty($notifData)) {
+                    \Illuminate\Support\Facades\DB::table('notifikasi')->insert($notifData);
+                }
+            }
 
             // --- INI LOGIKA SMART STICKY FORM-NYA ---
             if ($request->input('action') === 'save_and_add') {

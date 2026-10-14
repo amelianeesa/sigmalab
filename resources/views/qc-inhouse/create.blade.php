@@ -548,9 +548,9 @@
                                 <input type="text" name="nama_sampel" class="form-control" value="{{ old('nama_sampel') }}" placeholder="Contoh: Coal A Agustus" required>
                             </div>
                             <div class="col-12 col-md-6">
-                                <label class="form-label">Jenis Batubara <span class="text-danger">*</span></label>
-                                <select name="jenis_batubara" class="form-select" id="jenis_batubara" required>
-                                    <option value="">-- Pilih Jenis Batubara --</option>
+                                <label class="form-label">Jenis Batubara <small class="text-muted fw-normal">(opsional)</small></label>
+                                <select name="jenis_batubara" class="form-select" id="jenis_batubara">
+                                    <option value="">-- Pilih Jenis Batubara  --</option>
                                     <option value="lignite" {{ old('jenis_batubara') == 'lignite' ? 'selected' : '' }}>Lignite</option>
                                     <option value="sub_bituminous" {{ old('jenis_batubara') == 'sub_bituminous' ? 'selected' : '' }}>Sub Bituminous</option>
                                     <option value="bituminous" {{ old('jenis_batubara') == 'bituminous' ? 'selected' : '' }}>Bituminous</option>
@@ -566,50 +566,50 @@
 
                         <div class="row g-2">
                             <div class="col-12 col-md-6 col-xl-4">
-                                <label class="form-label text-secondary">Total Moisture (TM) <span class="text-danger">*</span></label>
+                                <label class="form-label text-secondary">Total Moisture (TM) <small class="text-muted fw-normal">(opsional)</small></label>
                                 <div class="input-group input-group-sm">
-                                    <input type="number" step="0.01" name="tm" id="tm" class="form-control" value="{{ old('tm') }}" inputmode="decimal" required>
+                                    <input type="number" step="0.01" name="tm" id="tm" class="form-control" value="{{ old('tm') }}" inputmode="decimal">
                                     <span class="input-group-text">% AR</span>
                                 </div>
                                 <div class="limit-hint"><i class="fas fa-info-circle"></i> <span id="limit_tm" class="limit-text">Pilih Jenis Batubara</span></div>
                             </div>
                             <div class="col-12 col-md-6 col-xl-4">
-                                <label class="form-label text-secondary">Moisture in Analysis (MAD) <span class="text-danger">*</span></label>
+                                <label class="form-label text-secondary">Moisture in Analysis (MAD) <small class="text-muted fw-normal">(opsional)</small></label>
                                 <div class="input-group input-group-sm">
-                                    <input type="number" step="0.01" name="mad" id="mad" class="form-control" value="{{ old('mad') }}" inputmode="decimal" required>
+                                    <input type="number" step="0.01" name="mad" id="mad" class="form-control" value="{{ old('mad') }}" inputmode="decimal">
                                     <span class="input-group-text">% ADB</span>
                                 </div>
                                 <div class="limit-hint"><i class="fas fa-info-circle"></i> <span id="limit_mad" class="limit-text">Pilih Jenis Batubara</span></div>
                             </div>
                             <div class="col-12 col-md-6 col-xl-4">
-                                <label class="form-label text-secondary">Ash Content <span class="text-danger">*</span></label>
+                                <label class="form-label text-secondary">Ash Content <small class="text-muted fw-normal">(opsional)</small></label>
                                 <div class="input-group input-group-sm">
-                                    <input type="number" step="0.01" name="ash" id="ash" class="form-control" value="{{ old('ash') }}" inputmode="decimal" required>
+                                    <input type="number" step="0.01" name="ash" id="ash" class="form-control" value="{{ old('ash') }}" inputmode="decimal">
                                     <span class="input-group-text">% ADB</span>
                                 </div>
                                 <div class="limit-hint"><i class="fas fa-info-circle"></i> <span id="limit_ash" class="limit-text">Pilih Jenis Batubara</span></div>
                             </div>
 
                             <div class="col-12 col-md-6 col-xl-4">
-                                <label class="form-label text-secondary">Volatile Matter (VM) <span class="text-danger">*</span></label>
+                                <label class="form-label text-secondary">Volatile Matter (VM) <small class="text-muted fw-normal">(opsional)</small></label>
                                 <div class="input-group input-group-sm">
-                                    <input type="number" step="0.01" name="vm" id="vm" class="form-control" value="{{ old('vm') }}" inputmode="decimal" required>
+                                    <input type="number" step="0.01" name="vm" id="vm" class="form-control" value="{{ old('vm') }}" inputmode="decimal">
                                     <span class="input-group-text">% ADB</span>
                                 </div>
                                 <div class="limit-hint"><i class="fas fa-info-circle"></i> <span id="limit_vm" class="limit-text">Pilih Jenis Batubara</span></div>
                             </div>
                             <div class="col-12 col-md-6 col-xl-4">
-                                <label class="form-label text-secondary">Total Sulfur (TS) <span class="text-danger">*</span></label>
+                                <label class="form-label text-secondary">Total Sulfur (TS) <small class="text-muted fw-normal">(opsional)</small></label>
                                 <div class="input-group input-group-sm">
-                                    <input type="number" step="0.01" name="ts" id="ts" class="form-control" value="{{ old('ts') }}" inputmode="decimal" required>
+                                    <input type="number" step="0.01" name="ts" id="ts" class="form-control" value="{{ old('ts') }}" inputmode="decimal">
                                     <span class="input-group-text">% ADB</span>
                                 </div>
                                 <div class="limit-hint"><i class="fas fa-info-circle"></i> <span id="limit_ts" class="limit-text">Pilih Jenis Batubara</span></div>
                             </div>
                             <div class="col-12 col-md-6 col-xl-4">
-                                <label class="form-label text-secondary">Gross Calorific Value (GCV) <span class="text-danger">*</span></label>
+                                <label class="form-label text-secondary">Gross Calorific Value (GCV) <small class="text-muted fw-normal">(opsional)</small></label>
                                 <div class="input-group input-group-sm">
-                                    <input type="number" step="1" name="gcv" id="gcv" class="form-control" value="{{ old('gcv') }}" inputmode="numeric" required>
+                                    <input type="number" step="1" name="gcv" id="gcv" class="form-control" value="{{ old('gcv') }}" inputmode="numeric">
                                     <span class="input-group-text">Kcal/kg</span>
                                 </div>
                                 <div class="limit-hint"><i class="fas fa-info-circle"></i> <span id="limit_gcv" class="limit-text">Pilih Jenis Batubara</span></div>
@@ -631,6 +631,52 @@
                         <div id="physics_warning" class="warning-box d-none" role="alert">
                             <div class="warning-title"><i class="fas fa-exclamation-triangle me-1"></i> PERINGATAN</div>
                             <ul id="physics_warning_list"></ul>
+                        </div>
+
+                        <div class="card border rounded p-3 mt-3 mb-2 bg-light shadow-sm">
+                            <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                                <div>
+                                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.82rem;">
+                                        <i class="fas fa-tasks icon-corporate me-2"></i>Parameter Uji yang Dibuatkan Standar In-House
+                                    </h6>
+                                    <small class="text-muted" style="font-size: 0.72rem;">Centang parameter yang akan diuji homogenitas & stabilitasnya pada batch ini.</small>
+                                </div>
+                                <div class="d-flex gap-1">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0.5 px-2" id="btnOnlyIm" style="font-size: 0.7rem;">Hanya IM</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm py-0.5 px-2" id="btnSelectProximate" style="font-size: 0.7rem;">Proksimat Standar (5)</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0.5 px-2" id="btnSelectAllParam" style="font-size: 0.7rem;">Pilih Semua</button>
+                                </div>
+                            </div>
+                            <div class="row g-2">
+                                @php
+                                    $defaultChecked = ['IM', 'ASH', 'VM', 'TS', 'CV'];
+                                    $subtitles = [
+                                        'IM'  => 'Inherent Moisture (% adb)',
+                                        'ASH' => 'Ash Content (% adb)',
+                                        'VM'  => 'Volatile Matter (% adb)',
+                                        'TS'  => 'Total Sulfur (% adb)',
+                                        'CV'  => 'Calorific Value (cal/g)',
+                                        'AFT' => 'Titik Leleh Abu: IDT, ST, HT, FT (°C)',
+                                        'CHN' => 'Elemental: Carbon, Hydrogen, Nitrogen (% db)',
+                                    ];
+                                @endphp
+                                @foreach($parameters as $param)
+                                    @php
+                                        $pName = strtoupper($param->nama_parameter);
+                                        $isChecked = in_array($pName, $defaultChecked);
+                                        $subText = $subtitles[$pName] ?? ($param->kategori_parameter ?? 'Parameter Uji');
+                                    @endphp
+                                    <div class="col-12 col-md-6 col-xl-4">
+                                        <div class="form-check p-2.5 bg-white border rounded shadow-sm d-flex align-items-center gap-2 h-100">
+                                            <input class="form-check-input chk-param m-0 ms-1" type="checkbox" name="selected_params[]" value="{{ $param->parameter_uji_id }}" id="param_{{ $param->parameter_uji_id }}" data-code="{{ $pName }}" {{ $isChecked ? 'checked' : '' }} style="transform: scale(1.2);">
+                                            <label class="form-check-label w-100 cursor-pointer text-dark ps-1" for="param_{{ $param->parameter_uji_id }}" style="font-size: 0.78rem;">
+                                                <strong class="text-primary">{{ $param->nama_parameter }}</strong>
+                                                <span class="text-muted d-block mt-0.5" style="font-size: 0.68rem;">{{ $subText }}</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
 
                         <div class="submit-wrap d-flex justify-content-end align-items-center gap-2 mt-3">
@@ -827,6 +873,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     updateLimits();
     checkPhysics();
+
+    document.getElementById('btnOnlyIm')?.addEventListener('click', function() {
+        document.querySelectorAll('.chk-param').forEach(chk => {
+            chk.checked = (chk.dataset.code === 'IM');
+        });
+    });
+
+    document.getElementById('btnSelectProximate')?.addEventListener('click', function() {
+        const prox = ['IM', 'ASH', 'VM', 'TS', 'CV'];
+        document.querySelectorAll('.chk-param').forEach(chk => {
+            chk.checked = prox.includes(chk.dataset.code);
+        });
+    });
+    document.getElementById('btnSelectAllParam')?.addEventListener('click', function() {
+        document.querySelectorAll('.chk-param').forEach(chk => {
+            chk.checked = true;
+        });
+    });
 });
 </script>
 @endsection

@@ -243,6 +243,33 @@ class QcHarianController extends Controller
 
         if (count($outlierParams) > 0) {
             $paramString = implode(', ', $outlierParams);
+            
+            // Kirim notifikasi lonceng (sesuai sistem notifikasi temanmu)
+            $pesanNotif = "⚠️ Outlier QC Harian: Ditemukan outlier pada parameter {$paramString} (Tanggal: " . \Carbon\Carbon::parse($request->tanggal_uji)->format('d/m/Y') . "). Silakan selesaikan investigasi.";
+            $urlNotif = route('qc-harian.index');
+
+            // Ambil semua Analis dan Koordinator Lab yang aktif
+            $targetUsers = \App\Models\User::whereHas('role', function($q) {
+                $q->where('nama_role', 'LIKE', '%Analis%')
+                  ->orWhere('nama_role', 'LIKE', '%Koordinator%');
+            })->where('status_aktif', true)->get();
+
+            $notifData = [];
+            foreach ($targetUsers as $u) {
+                $notifData[] = [
+                    'users_id' => $u->users_id,
+                    'jenis_notifikasi' => 'qc',
+                    'pesan' => $pesanNotif,
+                    'url' => $urlNotif,
+                    'is_read' => 0,
+                    'created_at' => now(),
+                ];
+            }
+
+            if (!empty($notifData)) {
+                \Illuminate\Support\Facades\DB::table('notifikasi')->insert($notifData);
+            }
+
             return redirect()->route('qc-harian.index')
                 ->with('error', "PERINGATAN! Ditemukan Outlier pada pengujian: {$paramString}. Silakan selesaikan investigasi.");
         }

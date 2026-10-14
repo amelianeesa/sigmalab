@@ -13,6 +13,7 @@ use App\Models\AftKalibrasi;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
@@ -401,17 +402,6 @@ class QcUjiBandingController extends Controller
         }
     }
 
-    public function printPdf($id)
-    {
-        $program = QcUjiBanding::with(['parameters.parameterUji', 'parameters.analis'])->findOrFail($id);
-        
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('qc-uji-banding.print.pdf', compact('program'));
-
-        $pdf->setPaper('A4', 'landscape'); 
-        
-        return $pdf->stream('Laporan_Uji_Banding_' . $program->kode_sampel . '.pdf');
-    }
-
     public function investigasi($id, $param_id)
     {
         $program = QcUjiBanding::findOrFail($id);
@@ -555,14 +545,29 @@ class QcUjiBandingController extends Controller
             'params.*.lab_value' => 'nullable|numeric',
             'params.*.target_vendor' => 'nullable|numeric',
             'params.*.sdpa' => 'nullable|numeric',
+            'file_laporan_vendor' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:15360',
         ]);
 
+        if ($request->hasFile('file_laporan_vendor')) {
+            if ($program->file_laporan_vendor && Storage::disk('public')->exists($program->file_laporan_vendor)) {
+                Storage::disk('public')->delete($program->file_laporan_vendor);
+            }
+            $file = $request->file('file_laporan_vendor');
+            $originalName = $file->getClientOriginalName();
+            $path = $file->store('qc-uji-banding/laporan-vendor', 'public');
+            $program->update([
+                'file_laporan_vendor' => $path,
+                'nama_file_vendor' => $originalName,
+            ]);
+        }
+
+        $outlierParams = [];
         foreach ($request->params as $paramId => $data) {
             $labValue = isset($data['lab_value']) && $data['lab_value'] !== '' ? floatval($data['lab_value']) : null;
             $assignedValue = $data['target_vendor'] ?? null;
             $sdpa = $data['sdpa'] ?? null;
 
-            $parameter = QcUjiBandingParameter::where('qc_uji_banding_id', $id)->find($paramId);
+            $parameter = QcUjiBandingParameter::with('parameterUji')->where('qc_uji_banding_id', $id)->find($paramId);
             if (!$parameter) continue;
 
             if ($labValue !== null) {
@@ -582,8 +587,12 @@ class QcUjiBandingController extends Controller
             $status = $absZ <= 2 ? 'inlier' : ($absZ < 3 ? 'warning' : 'outlier');
 
             $statusInvestigasi = $parameter->status_investigasi;
-            if ($status === 'outlier' && $statusInvestigasi === 'aman') {
-                $statusInvestigasi = 'menunggu_investigasi';
+            if ($status === 'outlier') {
+                if ($statusInvestigasi === 'aman' || empty($statusInvestigasi)) {
+                    $statusInvestigasi = 'menunggu_investigasi';
+                }
+                // Catat nama parameter outlier
+                $outlierParams[] = $parameter->parameterUji->nama_parameter ?? ('ID ' . $paramId);
             } elseif ($status !== 'outlier') {
                 $statusInvestigasi = 'aman';
             }
@@ -598,6 +607,31 @@ class QcUjiBandingController extends Controller
             ]);
         }
 
+        if (count($outlierParams) > 0) {
+            $paramString = implode(', ', array_unique($outlierParams));
+            $pesanNotif = "⚠️ Outlier QC Uji Banding: Ditemukan outlier (|Z| ≥ 3) pada parameter {$paramString} (Program: {$program->nama_program}). Silakan isi Lembar Ketidaksesuaian (LKS).";
+            $urlNotif = route('qc-uji-banding.show', $id);
+            $targetUsers = \App\Models\User::whereHas('role', function($q) {
+                $q->where('nama_role', 'LIKE', '%Analis%')
+                  ->orWhere('nama_role', 'LIKE', '%Koordinator%');
+            })->where('status_aktif', true)->get();
+            $notifData = [];
+            foreach ($targetUsers as $u) {
+                $notifData[] = [
+                    'users_id' => $u->users_id,
+                    'jenis_notifikasi' => 'qc',
+                    'pesan' => $pesanNotif,
+                    'url' => $urlNotif,
+                    'is_read' => 0,
+                    'created_at' => now(),
+                ];
+            }
+            if (!empty($notifData)) {
+                \Illuminate\Support\Facades\DB::table('notifikasi')->insert($notifData);
+            }
+            return redirect()->route('qc-uji-banding.ringkasan', $id)
+                ->with('warning', 'Hasil evaluasi disimpan. PERINGATAN: Ditemukan parameter OUTLIER (' . $paramString . '). Silakan lengkapi Lembar Ketidaksesuaian (LKS/CAPA).');
+        }
         return redirect()->route('qc-uji-banding.ringkasan', $id)->with('success', 'Hasil evaluasi vendor berhasil disimpan.');
     }
 
@@ -616,5 +650,73 @@ class QcUjiBandingController extends Controller
         $value = str_replace(',', '.', $value);
         
         return floatval($value);
+    }
+
+    public function uploadVendorFile(Request $request, $id)
+    {
+        $program = QcUjiBanding::findOrFail($id);
+
+        $request->validate([
+            'file_laporan_vendor' => 'required|file|mimes:pdf,jpg,jpeg,png|max:15360',
+        ], [
+            'file_laporan_vendor.required' => 'Pilih file laporan resmi terlebih dahulu.',
+            'file_laporan_vendor.file' => 'File tidak valid atau ukuran file melebihi batas upload server (PHP limit).',
+            'file_laporan_vendor.mimes' => 'Format file harus berupa PDF, JPG, JPEG, atau PNG.',
+            'file_laporan_vendor.max' => 'Ukuran file maksimal 15 MB.',
+        ]);
+
+        try {
+            if ($request->hasFile('file_laporan_vendor')) {
+                // Hapus file lama jika ada
+                if ($program->file_laporan_vendor && Storage::disk('public')->exists($program->file_laporan_vendor)) {
+                    Storage::disk('public')->delete($program->file_laporan_vendor);
+                }
+
+                $file = $request->file('file_laporan_vendor');
+                $originalName = $file->getClientOriginalName();
+                $path = $file->store('qc-uji-banding/laporan-vendor', 'public');
+
+                $program->update([
+                    'file_laporan_vendor' => $path,
+                    'nama_file_vendor' => $originalName,
+                ]);
+
+                return back()->with('success', 'Laporan evaluasi vendor berhasil diunggah.');
+            }
+
+            return back()->with('error', 'Tidak ada file yang terdeteksi untuk diunggah.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menyimpan file: ' . $e->getMessage());
+        }
+    }
+
+    public function hapusVendorFile($id)
+    {
+        $program = QcUjiBanding::findOrFail($id);
+
+        if ($program->file_laporan_vendor && Storage::disk('public')->exists($program->file_laporan_vendor)) {
+            Storage::disk('public')->delete($program->file_laporan_vendor);
+        }
+
+        $program->update([
+            'file_laporan_vendor' => null,
+            'nama_file_vendor' => null,
+        ]);
+
+        return back()->with('success', 'Dokumen laporan vendor berhasil dihapus.');
+    }
+
+    public function downloadVendorFile($id)
+    {
+        $program = QcUjiBanding::findOrFail($id);
+
+        if (!$program->file_laporan_vendor || !Storage::disk('public')->exists($program->file_laporan_vendor)) {
+            return back()->with('error', 'File laporan vendor tidak ditemukan di server.');
+        }
+
+        $filePath = Storage::disk('public')->path($program->file_laporan_vendor);
+        $downloadName = $program->nama_file_vendor ?: basename($program->file_laporan_vendor);
+
+        return response()->download($filePath, $downloadName);
     }
 }
