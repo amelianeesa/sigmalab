@@ -277,7 +277,7 @@
                     <h3>Buat Password Baru</h3>
                     <p>Masukkan password baru Anda untuk mengamankan kembali akun SIGMA-LAB.</p>
                 
-                    <img class="auth-mascot" src="{{ asset('images/maskot/sampler.webp') }}" alt="" decoding="async">
+                    <img class="auth-mascot" src="{{ asset('images/maskot/inspektorwanita.png') }}" alt="" decoding="async">
                 </div>
                 <div class="auth-form-panel">
                     <div class="auth-logo-box auth-logo-center">

@@ -330,7 +330,7 @@
                     <h3>Selamat Datang !</h3>
                     <p>Masuk untuk mengakses Sistem Integrasi Manajemen Laboratorium PT Sucofindo Cilacap.</p>
                 
-                    <img class="auth-mascot" src="{{ asset('images/maskot/chemist.webp') }}" alt="" decoding="async">
+                    <img class="auth-mascot" src="{{ asset('images/maskot/bareng1.png') }}" alt="" decoding="async">
                 </div>
                 <div class="auth-form-panel">
                     <div class="auth-logo-box auth-logo-center">
