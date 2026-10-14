@@ -36,7 +36,6 @@
         font-size: 0.75rem; padding: 0 !important; border-radius: 6px;
     }
 
-    /* ===== Tabel umum ===== */
     .qc-page .table-qc th, .qc-page .table-qc td {
         padding: 8px 10px !important; vertical-align: middle !important; font-size: 0.75rem !important;
     }
@@ -45,22 +44,18 @@
         font-size: 0.75rem !important; white-space: nowrap;
     }
 
-    /* ===== Tabel input parameter ===== */
     .param-table { min-width: max-content; }
     .param-table th, .param-table td { white-space: nowrap; padding-left: 10px !important; padding-right: 10px !important; }
     .param-table td input.form-control { min-width: 90px; }
 
-    /* ===== Judul section ===== */
     .qc-section-title { color: #1b3152; font-size: 0.85rem !important; font-weight: 700; border-bottom: 1px solid #dee2e6; padding-bottom: 6px; margin-bottom: 12px; }
 
     .analis-select { width: 200px; }
 
-    /* ===== Mobile ===== */
     @media (max-width: 767.98px) {
         .qc-page { padding: 4px 10px !important; }
         .analis-select { width: 100%; }
 
-        /* tabel jadi kartu (recent logs & bahan) */
         .table-stack thead { display: none; }
         .table-stack, .table-stack tbody, .table-stack tr, .table-stack td { display: block; width: 100%; }
         .table-stack tbody tr {
@@ -80,10 +75,8 @@
         .table-stack td.td-aksi::before { display: none; }
         .table-stack td .input-group { max-width: 180px; }
 
-        /* tabel input parameter: kolom pertama menempel saat digeser */
         .param-table th:first-child, .param-table td:first-child { position: sticky; left: 0; z-index: 2; background: #f8f9fa; }
 
-        /* live preview: 2 kolom */
         .preview-col.border-start { border-left: 0 !important; }
     }
 </style>
@@ -99,7 +92,6 @@
         </h5>
     </div>
 
-    {{-- ERROR VALIDASI --}}
     @if($errors->any())
     <div class="alert alert-danger shadow-sm border-0 py-2">
         <i class="fas fa-exclamation-triangle me-1"></i> Terdapat kesalahan pada isian form:
@@ -111,7 +103,6 @@
     </div>
     @endif
 
-    {{-- NOTIFIKASI --}}
     @if($alatExpiredCount > 0)
     <div class="alert alert-warning alert-dismissible fade show shadow-sm py-2 ps-3 pe-5 mb-2" role="alert" style="font-size: 0.8rem;">
         <i class="fas fa-exclamation-triangle me-1"></i> <strong>Perhatian!</strong>
@@ -126,7 +117,6 @@
     </div>
     @endif
 
-    {{-- DATA TERSIMPAN (save & add) --}}
     @if(isset($recentLogs) && $recentLogs->isNotEmpty())
     <div class="alert alert-success shadow-sm border-0 border-start border-4 border-success mb-3">
         <h6 class="fw-bold mb-2 text-success">
@@ -204,9 +194,6 @@
     <form action="{{ route('qc-crm.store') }}" method="POST" id="formQc" autocomplete="off">
         @csrf
 
-        {{-- ============================================================ --}}
-        {{-- SECTION 1: DATA DASAR PENGUJIAN --}}
-        {{-- ============================================================ --}}
         <div class="card shadow-sm border-0 mb-3">
             <div class="card-header text-white py-2 px-3" style="background-color: #1b3152;">
                 <h5 class="mb-0 fw-bold"><i class="fas fa-clipboard-list me-2"></i>Section 1: Data Dasar Pengujian</h5>
@@ -241,13 +228,9 @@
                     </div>
                 </div>
 
-                
             </div>
         </div>
 
-        {{-- ============================================================ --}}
-        {{-- SECTION 2: INPUT DATA PENGUJIAN --}}
-        {{-- ============================================================ --}}
         <div class="card shadow-sm border-0 mb-3" id="section2" style="display: none;">
             <div class="card-header text-white py-2 px-3" style="background-color: #1b3152;">
                 <h5 class="mb-0 fw-bold"><i class="fas fa-table me-2"></i>Section 2: Input Data Pengujian</h5>
@@ -281,7 +264,6 @@
                                     <h5 class="fw-bold text-dark mb-0"><i class="fas fa-flask text-primary me-2"></i>Pengujian {{ $code }}</h5>
                                 </div>
 
-                                {{-- RINGKASAN + TOMBOL --}}
                                 <div class="p-3 bg-light border rounded d-flex flex-column flex-md-row justify-content-between align-items-md-start mb-3">
                                     <div class="small">
                                         <div class="mb-1"><span class="text-muted d-inline-block" style="width: 50px;">Analis</span>: <span id="sum-personil-{{ $pid }}" class="text-danger fst-italic">Belum diatur</span></div>
@@ -301,7 +283,6 @@
                                     </div>
                                 </div>
 
-                                {{-- MODAL --}}
                                 <div class="modal fade modal-resource" id="modalResource-{{ $pid }}" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
                                     <div class="modal-dialog modal-dialog-centered modal-lg">
                                         <div class="modal-content border-0 shadow">
@@ -377,7 +358,7 @@
                                 </div>
 
                                 @include('partials.modal-panduan-inhouse', ['pid' => $pid, 'code' => $code])
-                                
+
                                 <div class="table-responsive pb-2">
                                 <table class="table table-bordered table-sm align-middle text-center param-table {{ in_array($code, ['TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)']) ? 'w-auto' : '' }}" id="table-{{ $pid }}" data-pid="{{ $pid }}" data-code="{{ $code }}">
                                         <thead class="table-light">
@@ -428,7 +409,6 @@
                                           </tr>
                                         </thead>
                                         <tbody>
-                                            <!-- SIMPLO -->
                                             <tr class="row-entry">
                                                 <td class="align-middle fw-bold bg-light border-bottom-0" style="width:110px;">
                                                     <input type="text" class="form-control form-control-sm text-center fw-bold in-dish-1" name="params[{{ $pid }}][mentah][dish_1]" placeholder="D1" value="Simplo">
@@ -493,7 +473,6 @@
                                                 @endif
                                             </tr>
 
-                                            <!-- DUPLO -->
                                             <tr class="row-entry">
                                                 <td class="fw-bold text-start border-start-0 bg-light">
                                                     <input type="text" class="form-control form-control-sm text-center fw-bold in-dish-2" name="params[{{ $pid }}][mentah][dish_2]" placeholder="D2" value="Duplo">
@@ -560,7 +539,6 @@
             </div>
         </div>
 
-        {{-- TOMBOL AKSI --}}
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2">
 
             <a href="{{ route('qc-crm.index') }}" class="btn btn-light border order-last order-md-first">
@@ -587,16 +565,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Select2 untuk dropdown botol (sama seperti alat/index)
     const $selectCrm = $('#crmKatalogSelect');
     $selectCrm.select2({ theme: 'bootstrap-5', width: '100%' });
 
-    // Aktifkan tooltip (info rumus)
     if (window.bootstrap) {
         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
     }
 
-    // Inject ParameterUji config
     const paramConfigs = {
         @if(isset($allParameters))
             @foreach($allParameters as $param)
@@ -668,7 +643,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // 3. Tampilkan hanya parameter yang dimiliki botol CRM ini
         data.forEach(item => {
             const pid = String(item.parameter_uji_id);
             const accItem = document.getElementById('accordion-item-' + pid);
@@ -683,7 +657,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Dipasang lewat jQuery supaya ikut terpicu oleh select2
     $selectCrm.on('change', function() {
         const val = this.value;
         window.crmCertificates = {};
@@ -714,7 +687,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     });
 
-    // Kalkulasi per baris
     function calculateRow(row, pid, isSyncing = false) {
         if(!row) return;
 
@@ -974,7 +946,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     if (['ASH', 'VM', 'TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)', 'CV', 'GCV'].includes(code)) {
                         if (['CV', 'GCV'].includes(code)) {
-                            a = Math.round(a); // CV uses rounded adb average
+                            a = Math.round(a);
                             avgDb = Math.round(a * (100 / (100 - imAvg)));
                         } else if (['ASH', 'VM', 'TS', 'TOTAL SULFUR', 'TOTAL SULFUR (%AD/DB)'].includes(code)) {
                             avgDb = Math.round(a * (100 / (100 - imAvg)) * 100) / 100;
@@ -1071,10 +1043,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if(hiddenInp) hiddenInp.value = this.value;
             }
 
-            // Panggil fungsi perhitungan asli
             calculateRow(row, pid, true);
 
-            // Update Live Preview Terbaru
             setTimeout(() => {
                 const table = document.getElementById('table-' + pid);
                 const previewBox = document.querySelector('.preview-box-' + pid);
@@ -1093,7 +1063,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     if(d1 > 0 && d2 > 0 && !isNaN(d1) && !isNaN(d2)) {
                         let diff = Math.abs(d1 - d2);
                         
-                        // Cek Toleransi dari config
                         let config = paramConfigs[pid];
                         if(config && config.toleransi) {
                             let maxDiff = 0;
@@ -1120,7 +1089,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     previewBox.querySelector('.out-mean-adb-' + pid).textContent = valAdb;
                     
-                    // Masukkan nilai DB (hanya jika elemen HTML-nya ada)
                     const dbEl = previewBox.querySelector('.out-mean-db-' + pid);
                     if(dbEl) dbEl.textContent = valDb;
                     
@@ -1177,14 +1145,26 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Isi qty otomatis mencentang bahan
-    document.querySelectorAll('.modal-resource .in-qty').forEach(inp => {
-        inp.addEventListener('input', function () {
-            this.closest('tr').querySelector('.chk-bahan').checked = parseFloat(this.value) > 0;
+    document.querySelectorAll('.in-qty').forEach(input => {
+        input.addEventListener('input', function () {
+            let tr = this.closest('tr');
+            let chk = tr.querySelector('.chk-bahan');
+            if (chk) {
+                chk.checked = (this.value && parseFloat(this.value) > 0);
+            }
         });
     });
 
-    // Salin dari parameter sebelumnya (yang terlihat)
+    document.querySelectorAll('.chk-bahan').forEach(cb => {
+        cb.addEventListener('change', function () {
+            if (!this.checked) {
+                let tr = this.closest('tr');
+                let qtyInput = tr.querySelector('.in-qty');
+                if (qtyInput) qtyInput.value = '';
+            }
+        });
+    });
+
     document.querySelectorAll('.btn-copy-resource').forEach(btn => {
         btn.addEventListener('click', function () {
             const cur = this.dataset.pid;
@@ -1251,12 +1231,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 Swal.fire('Belum Ada Parameter', 'Silakan centang minimal 1 parameter yang ingin diuji.', 'warning');
                 return;
             }
-            // Clear draft on successful submit
             localStorage.removeItem('qc_crm_draft');
         });
     }
 
-    // Terapkan draft (dari server) ke form
     window.applyDraft = function(draft) {
         if(draft.tanggal_uji) {
             const tanggal = document.querySelector('input[name="tanggal_uji"]');
@@ -1275,7 +1253,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if(!check || !table) return;
 
             if(paramDraft.selected) {
-                // Centang otomatis dan aktifkan input
                 check.checked = true;
                 check.dispatchEvent(new Event('change'));
 
@@ -1292,7 +1269,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
 
-                // Isikan nilai-nilai yang sudah pernah diketik
                 if(paramDraft.inputs) {
                     const scopeEl = table.closest('.accordion-body');
                     Object.keys(paramDraft.inputs).forEach(className => {
@@ -1302,7 +1278,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     });
 
-                    // Picu perhitungan otomatis agar angkanya ter-refresh
                     table.querySelectorAll('.row-entry').forEach(row => {
                         calculateRow(row, pid);
                     });
@@ -1311,12 +1286,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 
-    // LOAD DRAFT DARI SERVER
     (function loadDraft() {
         @if(isset($serverDraft) && $serverDraft)
             let draft = {!! json_encode($serverDraft) !!};
             if(draft.crm_katalog_id) {
-                window.pendingDraftToLoad = draft; // diterapkan setelah data parameter botol dimuat
+                window.pendingDraftToLoad = draft;
                 $selectCrm.val(draft.crm_katalog_id).trigger('change');
             }
         @endif

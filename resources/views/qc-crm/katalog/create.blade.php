@@ -196,7 +196,7 @@
             if (paramWrapper.querySelectorAll('.param-row').length > 1) {
                 btn.closest('.param-row').remove();
             } else if (typeof Swal !== 'undefined') {
-                Swal.fire('Tidak Bisa Dihapus', 'Minimal harus ada 1 parameter uji.', 'warning');
+                qcAlert('Tidak Bisa Dihapus', 'Minimal harus ada 1 parameter uji.');
             } else {
                 alert('Minimal harus ada 1 parameter uji.');
             }

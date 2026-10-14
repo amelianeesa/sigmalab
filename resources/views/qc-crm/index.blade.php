@@ -176,9 +176,30 @@
     }
     .qc-page .table-qc thead th {
         background-color: #1b3152 !important; color: #fff !important; border-color: #fff !important;
-        font-size: 0.75rem !important; white-space: nowrap;
+        font-size: 0.75rem !important; white-space: nowrap; text-align: center !important;
     }
     .qc-page .table-qc .badge { font-size: 0.68rem; }
+
+    .qc-page .table-qc th.col-sertifikat,
+    .qc-page .table-qc td.col-sertifikat {
+        min-width: 170px;
+        white-space: nowrap;
+    }
+
+    .qc-page .table-qc th.col-verifikasi,
+    .qc-page .table-qc td.col-verifikasi {
+        min-width: 110px;
+    }
+
+    .qc-compact .btn.btn-lihat-hasil {
+        font-size: 0.66rem;
+        padding: 0.15rem 0.45rem;
+        white-space: nowrap;
+        line-height: 1.3;
+    }
+    .qc-compact .btn.btn-lihat-hasil i {
+        font-size: 0.62rem;
+    }
 
     .qc-tabs { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; white-space: nowrap; scrollbar-width: none; }
     .qc-tabs::-webkit-scrollbar { display: none; }
@@ -258,22 +279,6 @@
         .qc-tabs .nav-link { padding: 0.45rem 0.75rem; font-size: 0.78rem; }
         .chart-wrap { height: 320px; }
 
-        .table-stack thead { display: none; }
-        .table-stack, .table-stack tbody, .table-stack tr, .table-stack td { display: block; width: 100%; }
-        .table-stack tbody tr {
-            border: 1px solid #dee2e6; border-radius: 8px; margin: 0 0 10px; padding: 6px 12px;
-            background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
-        }
-        .table-stack td {
-            display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
-            text-align: right; border: 0 !important; padding: 5px 0 !important; background: transparent !important;
-        }
-        .table-stack td[data-label]::before {
-            content: attr(data-label); font-weight: 600; color: #1b3152; text-align: left; flex-shrink: 0; max-width: 45%;
-        }
-        .table-stack td.td-aksi { justify-content: flex-end; flex-wrap: wrap; border-top: 1px solid #eee !important; margin-top: 4px; padding-top: 8px !important; }
-        .table-stack td.td-aksi::before { display: none; }
-        .table-stack td.td-empty { display: block; text-align: center; }
         .dataTables_wrapper .dataTables_paginate { float: none; display: flex; justify-content: center; }
         .dataTables_wrapper .dataTables_info { text-align: center; }
 
@@ -301,7 +306,7 @@
         </div>
     </div>
 
-        @if($expiredCount > 0 || $segeraCount > 0)
+    @if($expiredCount > 0 || $segeraCount > 0)
         <div class="alert alert-warning alert-dismissible fade show shadow-sm py-2 ps-3 pe-5 mb-2" role="alert" style="font-size: 0.8rem;">
             <i class="fas fa-exclamation-triangle me-1"></i> <strong>Perhatian!</strong>
             @if($expiredCount > 0)
@@ -350,8 +355,7 @@
     </ul>
 
     <div class="tab-content" id="qcCrmTabsContent">
-        
-        <!-- TAB 1: MASTER BOTOL & VERIFIKASI -->
+
         <div class="tab-pane fade {{ request('tab') === 'harian' ? '' : 'show active' }}" id="katalog" role="tabpanel" aria-labelledby="katalog-tab">
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-2 p-md-3">
@@ -390,11 +394,11 @@
                                 <tr>
                                     <th>Nomor Lot / Botol</th>
                                     <th>Nama Produk</th>
-                                    <th>Sertifikat</th>
+                                    <th class="col-sertifikat">Sertifikat</th>
                                     <th>Expired Date</th>
                                     <th>Status Botol</th>
-                                    <th>Data Verifikasi</th>
-                                    <th class="text-center">Aksi / Verifikasi</th>
+                                    <th class="col-verifikasi">Data Verifikasi</th>
+                                    <th>Aksi / Verifikasi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -409,7 +413,7 @@
                                     data-expiry="{{ $state }}">
                                     <td data-label="Nomor Lot"><span class="badge bg-primary">{{ $r->nomor_lot }}</span></td>
                                     <td data-label="Nama Produk" class="fw-bold">{{ $r->nama_produk }}</td>
-                                    <td data-label="Sertifikat">
+                                    <td data-label="Sertifikat" class="col-sertifikat text-center">
                                         <div>
                                             No: <strong>{{ $r->nomor_sertifikat ?? '-' }}</strong><br>
                                             Param: <span class="badge bg-secondary">{{ $r->sertifikats_count ?? $r->sertifikats->count() }}</span>
@@ -429,12 +433,12 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td data-label="Status Botol">
+                                    <td data-label="Status Botol" class="text-center">
                                         <span class="badge {{ $r->statusBadgeClass() }}">{{ $r->statusLabel() }}</span>
                                     </td>
-                                    <td data-label="Data Verifikasi">
+                                    <td data-label="Data Verifikasi" class="col-verifikasi text-center">
                                         @if($r->verifikasiTeknis->count() > 0)
-                                            <button type="button" class="btn btn-sm btn-outline-success py-0.5 px-2" style="font-size: 0.72rem;" data-bs-toggle="modal" data-bs-target="#modalHasilVerif{{ $r->id }}">
+                                            <button type="button" class="btn btn-sm btn-outline-success btn-lihat-hasil" data-bs-toggle="modal" data-bs-target="#modalHasilVerif{{ $r->id }}">
                                                 <i class="fas fa-check-double me-1"></i> Lihat Hasil
                                             </button>
                                         @else
@@ -453,26 +457,24 @@
                                                 </a>
                                             @elseif($r->status === 'menunggu_verifikasi_teknis')
                                                 @php
-                                                    $hasDraft = $r->verifikasiTeknis->where('status_evaluasi', 'draft')->isNotEmpty(); 
+                                                    $hasDraft = $r->verifikasiTeknis->where('status_evaluasi', 'draft')->isNotEmpty();
                                                     $outlierUninvestigated = $r->verifikasiTeknis->where('status_evaluasi', 'outlier')->where('status_investigasi', 'menunggu_investigasi')->first();
                                                     $hasOutlier = $r->verifikasiTeknis->where('status_evaluasi', 'outlier')->isNotEmpty();
                                                 @endphp
-                                                
+
                                                 @if($outlierUninvestigated)
-                                                    {{-- Jika ada Outlier yang belum diinvestigasi: Paksa isi CAPA dulu --}}
-                                                    <a href="{{ route('crm-katalog.verifikasi-teknis.investigasi', [$r->id, $outlierUninvestigated->id]) }}" 
-                                                       class="btn btn-sm btn-danger pulse-button mb-1 shadow-sm" 
+                                                    <a href="{{ route('crm-katalog.verifikasi-teknis.investigasi', [$r->id, $outlierUninvestigated->id]) }}"
+                                                       class="btn btn-sm btn-danger pulse-button mb-1 shadow-sm"
                                                        style="font-size: 0.72rem;"
                                                        title="Wajib Mengisi Laporan Investigasi (CAPA) Terlebih Dahulu">
                                                         <i class="fas fa-exclamation-triangle"></i> Investigasi (CAPA)
                                                     </a>
                                                 @else
-                                                    {{-- Jika tidak ada atau sudah diinvestigasi: Boleh lanjut Uji Ulang / Lanjut Draft / Mulai Verifikasi --}}
-                                                    <a href="{{ route('crm-katalog.verifikasi-teknis.form', $r->id) }}" 
-                                                       class="btn btn-sm shadow-sm {{ $hasOutlier ? 'btn-danger' : ($hasDraft ? 'btn-warning' : 'btn-corporate-blue pulse-button') }} mb-1" 
+                                                    <a href="{{ route('crm-katalog.verifikasi-teknis.form', $r->id) }}"
+                                                       class="btn btn-sm shadow-sm {{ $hasOutlier ? 'btn-danger' : ($hasDraft ? 'btn-warning' : 'btn-corporate-blue pulse-button') }} mb-1"
                                                        style="font-size: 0.72rem;"
                                                        title="{{ $hasOutlier ? 'Lakukan Uji Ulang (Retest)' : ($hasDraft ? 'Lanjutkan Draft Verifikasi' : 'Lakukan Verifikasi Teknis') }}">
-                                                        <i class="fas {{ $hasOutlier ? 'fa-redo' : ($hasDraft ? 'fa-edit' : 'fa-flask') }}"></i> 
+                                                        <i class="fas {{ $hasOutlier ? 'fa-redo' : ($hasDraft ? 'fa-edit' : 'fa-flask') }}"></i>
                                                         {{ $hasOutlier ? 'Uji Ulang (Retest)' : ($hasDraft ? 'Lanjut Draft' : 'Mulai Uji Verifikasi') }}
                                                     </a>
                                                 @endif
@@ -771,24 +773,24 @@
                                                 <a href="{{ route('qc-crm.investigasi', $log->id) }}" class="btn btn-sm btn-danger pulse-button shadow-sm fw-bold" title="Wajib Mengisi Laporan Investigasi">
                                                     <i class="fas fa-exclamation-triangle me-1"></i> Investigasi (CAPA)
                                                 </a>
-                                                @else
-                                                    <span class="badge bg-danger"><i class="fas fa-times-circle"></i> Outlier</span>
-                                                    <button type="button" class="btn btn-sm btn-outline-success ms-1 py-0 px-2 fw-bold shadow-sm btn-view-capa-crm"
-                                                        data-tanggal="{{ \Carbon\Carbon::parse($log->tanggal_uji)->format('d M Y') }}"
-                                                        data-lot="{{ $log->crmKatalog->nomor_lot ?? '-' }}"
-                                                        data-produk="{{ $log->crmKatalog->nama_produk ?? '-' }}"
-                                                        data-parameter="{{ strtoupper($log->parameterUji->nama_parameter ?? '-') }}"
-                                                        data-analis="{{ $log->analis->nama ?? '-' }}"
-                                                        data-cert="{{ number_format($log->cert_value, 2) }} &plusmn; {{ number_format($log->cert_u, 4) }}"
-                                                        data-akhir="{{ number_format($log->nilai_akhir, 2) }}"
-                                                        data-akar="{{ $log->akar_masalah ?? '-' }}"
-                                                        data-temuan="{{ $log->catatan_investigasi ?? '-' }}"
-                                                        data-perbaikan="{{ $log->tindakan_perbaikan ?? '-' }}"
-                                                        data-pdf-url="{{ route('qc-crm.investigasi.pdf', $log->id) }}"
-                                                        title="Lihat Laporan CAPA">
-                                                        <i class="fas fa-file-alt me-1"></i> Baca CAPA
-                                                    </button>
-                                                @endif
+                                            @else
+                                                <span class="badge bg-danger"><i class="fas fa-times-circle"></i> Outlier</span>
+                                                <button type="button" class="btn btn-sm btn-outline-success ms-1 py-0 px-2 fw-bold shadow-sm btn-view-capa-crm"
+                                                    data-tanggal="{{ \Carbon\Carbon::parse($log->tanggal_uji)->format('d M Y') }}"
+                                                    data-lot="{{ $log->crmKatalog->nomor_lot ?? '-' }}"
+                                                    data-produk="{{ $log->crmKatalog->nama_produk ?? '-' }}"
+                                                    data-parameter="{{ strtoupper($log->parameterUji->nama_parameter ?? '-') }}"
+                                                    data-analis="{{ $log->analis->nama ?? '-' }}"
+                                                    data-cert="{{ number_format($log->cert_value, 2) }} &plusmn; {{ number_format($log->cert_u, 4) }}"
+                                                    data-akhir="{{ number_format($log->nilai_akhir, 2) }}"
+                                                    data-akar="{{ $log->akar_masalah ?? '-' }}"
+                                                    data-temuan="{{ $log->catatan_investigasi ?? '-' }}"
+                                                    data-perbaikan="{{ $log->tindakan_perbaikan ?? '-' }}"
+                                                    data-pdf-url="{{ route('qc-crm.investigasi.pdf', $log->id) }}"
+                                                    title="Lihat Laporan CAPA">
+                                                    <i class="fas fa-file-alt me-1"></i> Baca CAPA
+                                                </button>
+                                            @endif
                                         @elseif($log->status_evaluasi === 'draft')
                                             <a href="{{ route('qc-crm.create', ['resume' => 1, 'crm_id' => $log->crm_katalog_id]) }}" class="btn btn-sm btn-warning fw-bold shadow-sm" style="font-size: 0.72rem;">
                                                 <i class="fas fa-edit me-1"></i> Lanjutkan Draft
@@ -868,7 +870,6 @@
             </div>
         </div>
 
-        {{-- MODAL BACA CAPA QC CRM --}}
         <div class="modal fade" id="modalViewCapaQcCrm" tabindex="-1" aria-labelledby="modalViewCapaCrmLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content border-0 shadow-lg">
@@ -1021,7 +1022,6 @@ $(function () {
 </script>
 
 <style>
-    /* Tab Styling Custom */
     .nav-tabs .nav-link {
         color: #6c757d;
         border: none;
@@ -1034,12 +1034,11 @@ $(function () {
         border-color: transparent;
     }
     .nav-tabs .nav-link.active {
-        color: #6f42c1; /* Purple theme for CRM */
+        color: #6f42c1;
         border-bottom: 3px solid #6f42c1;
         background-color: transparent;
     }
 
-    /* Custom DataTables Pagination Style */
     .dataTables_wrapper .dataTables_paginate {
         margin-top: 15px !important;
         float: right;
@@ -1093,7 +1092,7 @@ $(function () {
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const spinnerButtons = document.querySelectorAll('.btn-spinner');
-    
+
     spinnerButtons.forEach(btn => {
         if (!btn.hasAttribute('data-original-html')) {
             btn.setAttribute('data-original-html', btn.innerHTML);
@@ -1113,7 +1112,7 @@ window.addEventListener('pageshow', function(event) {
         spinnerButtons.forEach(btn => {
             btn.style.pointerEvents = 'auto';
             btn.classList.remove('disabled');
-            
+
             if (btn.hasAttribute('data-original-html')) {
                 btn.innerHTML = btn.getAttribute('data-original-html');
             }
@@ -1227,7 +1226,7 @@ window.addEventListener('pageshow', function(event) {
         }
 
         logs.forEach((log, idx) => {
-            labels.push(formatTgl(log.tanggal_uji)); // <--- Menggunakan format tanggal rapi
+            labels.push(formatTgl(log.tanggal_uji));
             dataPoints.push(parseFloat(log.nilai_akhir));
 
             const isTrend = result.trend_indices && result.trend_indices.includes(idx);
@@ -1302,9 +1301,9 @@ window.addEventListener('pageshow', function(event) {
                 },
                 scales: {
                     x: {
-                        offset: true, 
+                        offset: true,
                         ticks: {
-                            maxRotation: 0, 
+                            maxRotation: 0,
                             font: { size: 11 }
                         },
                         grid: {
@@ -1340,6 +1339,6 @@ window.addEventListener('pageshow', function(event) {
         });
         document.getElementById('chartTableBody').innerHTML = tbody;
     }
-});
+})();
 </script>
 @endsection
