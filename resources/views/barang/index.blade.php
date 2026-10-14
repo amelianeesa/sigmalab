@@ -420,7 +420,15 @@
                                     </a>
                                 @endif
                             </td>
-                            <td>Rp {{ number_format($item->harga_rata, 2, ',', '.') }}</td>
+                            <td>
+                                @if(empty($item->harga_rata) || $item->harga_rata == 0)
+                                    <span class="badge bg-danger text-white w-100 py-1" style="font-size: 0.65rem;" title="Harga belum diinput oleh GA/Admin">
+                                        <i class="fas fa-exclamation-circle me-1"></i> Harga Belum Ada
+                                    </span>
+                                @else
+                                    Rp {{ number_format($item->harga_rata, 2, ',', '.') }}
+                                @endif
+                            </td>
                             <td>Rp {{ number_format($nilaiTotal, 2, ',', '.') }}</td>
                             <td>
                                 <span class="badge badge-custom-size bg-{{ $item->kondisi == 'baik' ? 'success' : 'danger' }}">

@@ -56,9 +56,23 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/switch-role', [RoleSwitcherController::class, 'switchRole'])->name('switch-role');
 
+    // Route::resource('evaluasi-kalibrasi', EvaluasiKalibrasiController::class)->parameters([
+    //     'evaluasi-kalibrasi' => 'evaluasi'
+    // ]);
+    Route::prefix('evaluasi-kalibrasi')->name('evaluasi-kalibrasi.')->group(function () {
+        Route::get('arsip', [EvaluasiKalibrasiController::class, 'arsip'])->name('arsip');
+        Route::patch('arsipkan-semua', [EvaluasiKalibrasiController::class, 'arsipkanSemua'])->name('arsipkan-semua');
+        Route::patch('tampilkan-semua', [EvaluasiKalibrasiController::class, 'tampilkanSemua'])->name('tampilkan-semua');
+        Route::delete('hapus-terpilih', [EvaluasiKalibrasiController::class, 'hapusTerpilih'])->name('hapus-terpilih');
+        Route::delete('hapus-semua', [EvaluasiKalibrasiController::class, 'hapusSemua'])->name('hapus-semua');
+        Route::patch('{evaluasi}/arsipkan', [EvaluasiKalibrasiController::class, 'arsipkan'])->name('arsipkan');
+        Route::patch('{evaluasi}/tampilkan', [EvaluasiKalibrasiController::class, 'tampilkan'])->name('tampilkan');
+    });
+    
     Route::resource('evaluasi-kalibrasi', EvaluasiKalibrasiController::class)->parameters([
         'evaluasi-kalibrasi' => 'evaluasi'
     ]);
+    
 
     Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
     Route::put('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.password.update');
@@ -117,6 +131,15 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
     Route::post('/barang/{id}/pengeluaran', [BarangController::class, 'storePengeluaran'])->name('barang.pengeluaran');
 
     Route::get('/pengadaan/export-pdf', [PengadaanController::class, 'exportPdf'])->name('pengadaan.exportPdf');
+    
+    Route::get('/pengadaan/arsip', [PengadaanController::class, 'indexArsip'])->name('pengadaan.arsip');
+    Route::post('/pengadaan/arsip-semua-selesai', [PengadaanController::class, 'arsipSemuaSelesai'])->name('pengadaan.arsipSemuaSelesai');
+    Route::post('/pengadaan/{id}/arsip', [PengadaanController::class, 'arsipPerBaris'])->name('pengadaan.arsipPerBaris');
+    Route::post('/pengadaan/{id}/restore', [PengadaanController::class, 'restoreArsip'])->name('pengadaan.restoreArsip');
+    Route::delete('/pengadaan/{id}/hapus-permanen', [PengadaanController::class, 'destroyPermanen'])->name('pengadaan.destroyPermanen');
+    Route::post('/pengadaan/arsip/restore-semua', [PengadaanController::class, 'restoreSemuaArsip'])->name('pengadaan.restoreSemuaArsip');
+    Route::delete('/pengadaan/arsip/hapus-semua', [PengadaanController::class, 'destroySemuaArsip'])->name('pengadaan.destroySemuaArsip');
+
     Route::resource('pengadaan', PengadaanController::class);
     Route::post('/pengadaan/{id}/approve', [PengadaanController::class, 'approve'])->name('pengadaan.approve');
     Route::post('/pengadaan/{id}/terima', [PengadaanController::class, 'konfirmasiTerima'])->name('pengadaan.konfirmasiTerima');
@@ -198,6 +221,9 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
         Route::get('/library/{id}', [LibraryController::class, 'show'])->name('library.show');
         Route::get('/library/{id}/download', [LibraryController::class, 'download'])->name('library.download');
         Route::get('/library/{id}/preview', [LibraryController::class, 'preview'])->name('library.preview');
+
+        Route::patch('/library/arsipkan-semua', [LibraryController::class, 'archiveAll'])->name('library.archive-all');
+        Route::patch('/library/tampilkan-semua', [LibraryController::class, 'activateAll'])->name('library.activate-all');
     });
 
     // Kegiatan & Hasil Uji
@@ -219,10 +245,14 @@ Route::middleware(['auth', 'force.password.change'])->group(function () {
     // Audit Log & Arsip
     Route::middleware('modul:audit_log,lihat')->group(function () {
         Route::get('audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
-        
         Route::get('audit-log/archive', [AuditLogArchiveController::class, 'index'])->name('audit-log.archive');
         Route::get('audit-log/archive/{id}', [AuditLogArchiveController::class, 'show'])->name('audit-log.archive.show');
-        
+
+        Route::delete('audit-log/destroy-bulk', [AuditLogController::class, 'destroyBulk'])->name('audit-log.destroy-bulk');
+        Route::delete('audit-log/destroy-all', [AuditLogController::class, 'destroyAll'])->name('audit-log.destroy-all');
+        Route::delete('audit-log/archive/destroy-bulk', [AuditLogArchiveController::class, 'destroyBulk'])->name('audit-log.archive.destroy-bulk');
+        Route::delete('audit-log/archive/destroy-all', [AuditLogArchiveController::class, 'destroyAll'])->name('audit-log.archive.destroy-all');
+
         Route::get('audit-log/{id}', [AuditLogController::class, 'show'])->name('audit-log.show');
     });
 

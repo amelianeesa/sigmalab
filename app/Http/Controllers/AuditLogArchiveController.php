@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\AuditlogArchive;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuditLogArchiveController extends Controller
 {
+    private function bolehHapus()
+    {
+        return (Auth::user()->role->nama_role ?? '') === 'Admin Aplikasi';
+    }
+
     public function index(Request $request)
     {
         $query = AuditlogArchive::with('causer')->latest();
@@ -47,5 +53,28 @@ class AuditLogArchiveController extends Controller
         $log = AuditlogArchive::with(['causer.personil', 'causer.role'])->findOrFail($id);
 
         return view('audit-log.archive-show', compact('log'));
+    }
+
+    public function destroyBulk(Request $request)
+    {
+        abort_unless($this->bolehHapus(), 403);
+
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'integer',
+        ]);
+
+        $jumlah = AuditlogArchive::whereIn('id', $request->ids)->delete();
+
+        return redirect()->route('audit-log.archive')->with('success', $jumlah . ' log arsip yang dipilih berhasil dihapus.');
+    }
+
+    public function destroyAll()
+    {
+        abort_unless($this->bolehHapus(), 403);
+
+        $jumlah = AuditlogArchive::query()->delete();
+
+        return redirect()->route('audit-log.archive')->with('success', $jumlah . ' log arsip berhasil dihapus.');
     }
 }

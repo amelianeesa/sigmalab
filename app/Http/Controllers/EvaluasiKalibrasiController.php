@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\PeranPengguna;
 use App\Models\Alat;
 use App\Models\EvaluasiKalibrasi;
 use App\Models\RiwayatKalibrasi;
@@ -13,10 +14,22 @@ use Illuminate\Support\Facades\Storage;
 
 class EvaluasiKalibrasiController extends Controller
 {
-    public function index(Request $request)
+    private function adalahAdminAplikasi(): bool
     {
-        $query = EvaluasiKalibrasi::with(['alat', 'riwayatKalibrasi', 'evaluator']);
+        $role = Auth::user()->role->nama_role ?? '';
 
+        return $role === PeranPengguna::ADMIN_APLIKASI->value;
+    }
+
+    private function pastikanAdminAplikasi(): void
+    {
+        if (!$this->adalahAdminAplikasi()) {
+            abort(403);
+        }
+    }
+
+    private function terapkanFilter($query, Request $request)
+    {
         if ($request->filled('keputusan')) {
             $query->where('keputusan', $request->keputusan);
         }
@@ -34,9 +47,75 @@ class EvaluasiKalibrasiController extends Controller
             $query->whereDate('tanggal_evaluasi', $request->tanggal);
         }
 
-        $evaluasi = $query->latest('evaluasi_id')->paginate(15)->withQueryString();
+        return $query;
+    }
 
-        return view('evaluasi-kalibrasi.index', compact('evaluasi'));
+    public function index(Request $request)
+    {
+        $query = EvaluasiKalibrasi::with(['alat', 'riwayatKalibrasi', 'evaluator'])
+            ->where('diarsipkan', false);
+
+        $this->terapkanFilter($query, $request);
+
+        $evaluasi = $query->latest('evaluasi_id')->paginate(15)->withQueryString();
+        $adminAplikasi = $this->adalahAdminAplikasi();
+
+        return view('evaluasi-kalibrasi.index', compact('evaluasi', 'adminAplikasi'));
+    }
+
+    public function arsip(Request $request)
+    {
+        $query = EvaluasiKalibrasi::with(['alat', 'riwayatKalibrasi', 'evaluator'])
+            ->where('diarsipkan', true);
+
+        $this->terapkanFilter($query, $request);
+
+        $evaluasi = $query->latest('evaluasi_id')->paginate(15)->withQueryString();
+        $adminAplikasi = $this->adalahAdminAplikasi();
+
+        return view('evaluasi-kalibrasi.arsip', compact('evaluasi', 'adminAplikasi'));
+    }
+
+    public function arsipkan($id)
+    {
+        $this->pastikanAdminAplikasi();
+
+        EvaluasiKalibrasi::where('evaluasi_id', $id)->firstOrFail();
+        EvaluasiKalibrasi::where('evaluasi_id', $id)->update(['diarsipkan' => true]);
+
+        return redirect()->route('evaluasi-kalibrasi.index')
+            ->with('success', 'Data evaluasi berhasil dipindahkan ke arsip.');
+    }
+
+    public function arsipkanSemua()
+    {
+        $this->pastikanAdminAplikasi();
+
+        $jumlah = EvaluasiKalibrasi::where('diarsipkan', false)->update(['diarsipkan' => true]);
+
+        return redirect()->route('evaluasi-kalibrasi.index')
+            ->with('success', $jumlah . ' data evaluasi berhasil dipindahkan ke arsip.');
+    }
+
+    public function tampilkan($id)
+    {
+        $this->pastikanAdminAplikasi();
+
+        EvaluasiKalibrasi::where('evaluasi_id', $id)->firstOrFail();
+        EvaluasiKalibrasi::where('evaluasi_id', $id)->update(['diarsipkan' => false]);
+
+        return redirect()->route('evaluasi-kalibrasi.arsip')
+            ->with('success', 'Data evaluasi berhasil ditampilkan kembali.');
+    }
+
+    public function tampilkanSemua()
+    {
+        $this->pastikanAdminAplikasi();
+
+        $jumlah = EvaluasiKalibrasi::where('diarsipkan', true)->update(['diarsipkan' => false]);
+
+        return redirect()->route('evaluasi-kalibrasi.arsip')
+            ->with('success', $jumlah . ' data evaluasi berhasil ditampilkan kembali.');
     }
 
     public function create()
@@ -208,5 +287,47 @@ class EvaluasiKalibrasiController extends Controller
 
         return redirect()->route('evaluasi-kalibrasi.index')
             ->with('success', 'Evaluasi kalibrasi berhasil dihapus.');
+    }
+
+    public function hapusTerpilih(Request $request)
+    {
+        $this->pastikanAdminAplikasi();
+
+        $ids = $request->input('ids', []);
+
+        if (empty($ids) || !is_array($ids)) {
+            return back()->with('error', 'Tidak ada data yang dipilih.');
+        }
+
+        $data = EvaluasiKalibrasi::whereIn('evaluasi_id', $ids)
+            ->where('diarsipkan', true)
+            ->get();
+
+        foreach ($data as $item) {
+            if ($item->file_laporan && Storage::disk('public')->exists($item->file_laporan)) {
+                Storage::disk('public')->delete($item->file_laporan);
+            }
+        }
+
+        $jumlah = EvaluasiKalibrasi::whereIn('evaluasi_id', $data->pluck('evaluasi_id'))->delete();
+
+        return back()->with('success', $jumlah . ' data evaluasi terpilih berhasil dihapus permanen.');
+    }
+
+    public function hapusSemua()
+    {
+        $this->pastikanAdminAplikasi();
+
+        $data = EvaluasiKalibrasi::where('diarsipkan', true)->get();
+
+        foreach ($data as $item) {
+            if ($item->file_laporan && Storage::disk('public')->exists($item->file_laporan)) {
+                Storage::disk('public')->delete($item->file_laporan);
+            }
+        }
+
+        $jumlah = EvaluasiKalibrasi::where('diarsipkan', true)->delete();
+
+        return back()->with('success', $jumlah . ' data arsip evaluasi berhasil dihapus permanen.');
     }
 }

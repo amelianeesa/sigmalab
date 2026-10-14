@@ -5,7 +5,9 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 use App\Models\RiwayatPerbaikanAlat;
 use App\Models\User;
-use App\Mail\LaporanKerusakanMail; 
+use App\Models\Barang;
+use App\Mail\LaporanKerusakanMail;
+use App\Mail\HargaBarangBelumAda; 
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -98,9 +100,34 @@ Artisan::command('perbaikan:cek-status', function () {
     $this->info('Pengecekan rekap perbaikan alat selesai.');
 })->description('Mengecek dan mengirim pengingat berkala untuk alat yang masih dalam status perbaikan');
 
+Artisan::command('barang:ingatkan-harga', function () {
+    $barangBelumAda = Barang::whereNull('harga_rata')->orWhere('harga_rata', 0)->get();
+
+    if ($barangBelumAda->isEmpty()) {
+        $this->info("Semua data barang sudah terisi harganya.");
+        return;
+    }
+
+    $penerimaList = User::whereHas('role', function($q) {
+        $q->whereIn('nama_role', ['GA', 'Admin Aplikasi']);
+    })->pluck('email')->filter()->toArray();
+
+    if (!empty($penerimaList)) {
+        try {
+            Mail::to($penerimaList)->send(new HargaBarangBelumAda($barangBelumAda));
+            $this->info("Email pengingat harga barang berhasil dikirim ke GA dan Admin.");
+        } catch (\Exception $e) {
+            $this->error("Gagal mengirim email: " . $e->getMessage());
+        }
+    } else {
+        $this->info("Tidak ditemukan email dengan role GA atau Admin Aplikasi.");
+    }
+})->description('Mengirim pengingat email jika ada barang yang harga rata-ratanya belum diisi');
+
 Schedule::command('sertifikasi:cek-kadaluwarsa')->dailyAt('08:00');
 Schedule::command('kalibrasi:cek-kadaluwarsa')->dailyAt('08:00');
 Schedule::command('perbaikan:cek-status')->dailyAt('08:05');
 Schedule::command('barang:cek-stok')->dailyAt('08:00');
 Schedule::command('pengadaan:cek-status')->dailyAt('08:00');
+Schedule::command('barang:ingatkan-harga')->dailyAt('08:10');
 Schedule::command('audit:archive')->weekly();

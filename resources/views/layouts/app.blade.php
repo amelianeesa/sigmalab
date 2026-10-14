@@ -225,6 +225,19 @@
             max-width: 1rem !important; max-height: 1rem !important;
             display: inline-block;
         }
+        .alert-warning {
+            --bs-alert-color: #842029;
+            --bs-alert-bg: #f8d7da;
+            --bs-alert-border-color: #f1aeb5;
+            --bs-alert-link-color: #6a1a21;
+            font-family: inherit;
+            font-size: 0.83rem;
+            font-weight: 400;
+        }
+        .alert-warning strong,
+        .alert-warning b {
+            font-weight: 700;
+        }
 
         #notifDropdown {
             width: 320px;
@@ -240,7 +253,7 @@
             background: #f8fafc;
         }
         #notifDropdown .notif-header .fw-bold {
-            color: #1e293b !important;
+            color: #1d4c7a !important;
         }
         #notifDropdown .notif-list {
             max-height: 340px;

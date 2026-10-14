@@ -201,7 +201,15 @@
                 <div class="row mb-2">
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Harga Rata-rata Tertimbang (Rp)</label>
-                        <input type="number" step="any" name="harga_rata" class="form-control form-control-sm" placeholder="0">
+                        
+                        @if(auth()->check() && (auth()->user()->role === 'Admin Aplikasi' || auth()->user()->role === 'GA'))
+                            <input type="number" step="any" name="harga_rata" class="form-control form-control-sm" placeholder="0" value="{{ old('harga_rata') }}">
+                        @else
+                            <input type="number" step="any" class="form-control form-control-sm bg-light" placeholder="0" value="0" disabled>
+                            <input type="hidden" name="harga_rata" value="0">
+                            <small class="text-danger" style="font-size: 0.7rem;">Hanya GA & Admin Aplikasi yang dapat input harga</small>
+                        @endif
+                
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Kondisi Barang</label>

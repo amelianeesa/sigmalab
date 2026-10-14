@@ -57,4 +57,10 @@ class Barang extends BaseModel
             // ->dontSubmitEmptyLogs()
             ->setDescriptionForEvent(fn(string $eventName) => "Data barang telah di-{$eventName}");
     }
+    public function scopeBelumAdaHarga($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNull('harga_rata')->orWhere('harga_rata', '<=', 0);
+        });
+    }
 }

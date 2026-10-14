@@ -214,7 +214,7 @@
                         {{ !$isAuthorizedForPricing ? 'readonly tabindex="-1" aria-disabled="true" style=pointer-events:none;background-color:#e9ecef;' : '' }}>
                     
                         @if(!$isAuthorizedForPricing)
-                            <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">Harga terkunci (Hanya dapat diubah oleh GA & Admin Aplikasi).</small>
+                            <small class="text-danger d-block mt-1" style="font-size: 0.7rem;">Harga terkunci (Hanya dapat diubah oleh GA & Admin Aplikasi).</small>
                         @endif                    
                     </div>
                     <div class="col-md-4">

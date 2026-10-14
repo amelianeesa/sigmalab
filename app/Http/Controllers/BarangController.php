@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Barang;
 use App\Models\TransaksiBarang;
+use App\Mail\HargaBarangBelumAda;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class BarangController extends Controller
 {

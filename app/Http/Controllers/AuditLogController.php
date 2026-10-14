@@ -3,21 +3,30 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Spatie\Activitylog\Models\Activity;
 
 class AuditLogController extends Controller
 {
+    private function logAktif()
+    {
+        return Activity::where(function ($q) {
+            $q->where('log_name', 'default')
+              ->orWhere('log_name', 'auth')
+              ->orWhere('subject_type', 'like', '%Alat%')
+              ->orWhere('subject_type', 'like', '%RiwayatPerbaikanAlat%')
+              ->orWhereNull('subject_type');
+        });
+    }
+
+    private function bolehHapus()
+    {
+        return (Auth::user()->role->nama_role ?? '') === 'Admin Aplikasi';
+    }
+
     public function index(Request $request)
     {
-        $query = Activity::with('causer')
-            ->where(function ($q) {
-                $q->where('log_name', 'default')
-                  ->orWhere('log_name', 'auth')
-                  ->orWhere('subject_type', 'like', '%Alat%')
-                  ->orWhere('subject_type', 'like', '%RiwayatPerbaikanAlat%')
-                  ->orWhereNull('subject_type');
-            })
-            ->latest();
+        $query = $this->logAktif()->with('causer')->latest();
 
         if ($request->filled('event')) {
             $query->where('event', $request->event);
@@ -49,5 +58,28 @@ class AuditLogController extends Controller
             : collect([$log]);
 
         return view('audit-log.show', compact('log', 'batchLogs'));
+    }
+
+    public function destroyBulk(Request $request)
+    {
+        abort_unless($this->bolehHapus(), 403);
+
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'exists:activity_log,id',
+        ]);
+
+        $jumlah = $this->logAktif()->whereIn('id', $request->ids)->delete();
+
+        return redirect()->route('audit-log.index')->with('success', $jumlah . ' log audit yang dipilih berhasil dihapus.');
+    }
+
+    public function destroyAll()
+    {
+        abort_unless($this->bolehHapus(), 403);
+
+        $jumlah = $this->logAktif()->delete();
+
+        return redirect()->route('audit-log.index')->with('success', $jumlah . ' riwayat audit log aktif berhasil dihapus.');
     }
 }

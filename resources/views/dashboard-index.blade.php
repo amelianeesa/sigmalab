@@ -286,11 +286,8 @@
         .tracking-step-meta {
             font-size: 0.68rem;
         }
-        .info-card-text {
-            display: none;
-        }
         .info-card .card-body {
-            padding: 6px 10px !important;
+            padding: 8px 10px !important;
         }
     }
 

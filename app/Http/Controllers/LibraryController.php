@@ -6,6 +6,7 @@ use App\Models\LibraryCategory;
 use App\Models\LibraryDocument;
 use App\Models\LibraryLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class LibraryController extends Controller
@@ -242,6 +243,60 @@ class LibraryController extends Controller
         ]);
 
         return redirect()->route('library.index')->with('success', 'Dokumen berhasil ditampilkan kembali.');
+    }
+
+    public function archiveAll()
+    {
+        abort_unless((auth()->user()->role->nama_role ?? '') === 'Admin Aplikasi', 403);
+
+        $jumlah = 0;
+
+        DB::transaction(function () use (&$jumlah) {
+            foreach (LibraryDocument::where('is_active', true)->get() as $document) {
+                $document->update([
+                    'is_active' => false,
+                    'updated_by' => auth()->id(),
+                ]);
+
+                LibraryLog::create([
+                    'document_id' => $document->id,
+                    'user_id' => auth()->id(),
+                    'action' => 'nonaktifkan',
+                    'keterangan' => 'Dokumen dipindahkan ke arsip melalui Arsipkan Semua.',
+                ]);
+
+                $jumlah++;
+            }
+        });
+
+        return redirect()->route('library.index')->with('success', $jumlah . ' dokumen berhasil dipindahkan ke arsip.');
+    }
+
+    public function activateAll()
+    {
+        abort_unless((auth()->user()->role->nama_role ?? '') === 'Admin Aplikasi', 403);
+
+        $jumlah = 0;
+
+        DB::transaction(function () use (&$jumlah) {
+            foreach (LibraryDocument::where('is_active', false)->get() as $document) {
+                $document->update([
+                    'is_active' => true,
+                    'updated_by' => auth()->id(),
+                ]);
+
+                LibraryLog::create([
+                    'document_id' => $document->id,
+                    'user_id' => auth()->id(),
+                    'action' => 'aktifkan_kembali',
+                    'keterangan' => 'Dokumen ditampilkan kembali melalui Tampilkan Semua.',
+                ]);
+
+                $jumlah++;
+            }
+        });
+
+        return redirect()->route('library.index')->with('success', $jumlah . ' dokumen berhasil ditampilkan kembali.');
     }
 
     public function download($id)

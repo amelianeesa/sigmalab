@@ -43,6 +43,44 @@
         background-color: #1b3152 !important;
         border-color: #1b3152 !important;
     }
+    .btn-lihat-arsip {
+        background-color: #eef2f8;
+        border: 1px solid #c5d0e3;
+        color: #1b3152;
+    }
+    .btn-lihat-arsip:hover,
+    .btn-lihat-arsip:focus,
+    .btn-lihat-arsip:active {
+        background-color: #1b3152;
+        border-color: #1b3152;
+        color: #ffffff;
+    }
+    .btn-abu {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: #ffffff;
+    }
+    .btn-abu:hover,
+    .btn-abu:focus,
+    .btn-abu:active {
+        background-color: #565e64;
+        border-color: #565e64;
+        color: #ffffff;
+    }
+
+    .evaluasi-header-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+    .evaluasi-header-actions form {
+        margin: 0;
+    }
+    .evaluasi-header-actions .btn {
+        font-size: 0.73rem;
+        font-weight: 600;
+    }
 
     .filter-bar .form-control,
     .filter-bar .form-label {
@@ -85,6 +123,43 @@
         width: 4px;
         box-shadow: inset -3px 0 3px -2px rgba(0, 0, 0, 0.15);
     }
+
+    .aksi-evaluasi {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .aksi-evaluasi form {
+        margin: 0;
+    }
+    .aksi-evaluasi .btn {
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    .modal-konfirmasi-evaluasi .modal-content {
+        border: 0;
+        border-radius: 8px;
+        font-size: 0.85rem;
+    }
+
+    @media (max-width: 767.98px) {
+        .dashboard-container {
+            padding: 2px 8px !important;
+        }
+        .evaluasi-header-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+        .evaluasi-header-actions > a,
+        .evaluasi-header-actions > form,
+        .evaluasi-header-actions .btn {
+            width: 100%;
+        }
+        .evaluasi-header-actions > :last-child:nth-child(odd) {
+            grid-column: 1 / -1;
+        }
+    }
 </style>
 
 <div class="container-fluid dashboard-container">
@@ -92,6 +167,7 @@
         $allowedRoles = ['Koordinator Laboratorium', 'Analis Lab', 'Admin Aplikasi'];
         $userRoleName = Auth::user()->role->nama_role ?? '';
         $canInputEvaluasi = in_array($userRoleName, $allowedRoles);
+        $isAdminAplikasi = $userRoleName === 'Admin Aplikasi';
         $adaFilter = request()->filled('q') || request()->filled('tanggal');
     @endphp
 
@@ -99,9 +175,23 @@
         <h4 class="fw-bold mb-0">Evaluasi Kalibrasi</h4>
     </div>
 
-    <div class="d-flex justify-content-end mb-2">
+    <div class="evaluasi-header-actions mb-2">
+        @if($isAdminAplikasi)
+            <form action="{{ route('evaluasi-kalibrasi.arsipkan-semua') }}" method="POST">
+                @csrf
+                @method('PATCH')
+                <button type="button" class="btn btn-abu btn-sm py-1 px-2 shadow-sm btn-konfirmasi-aksi" data-pesan="Semua data evaluasi kalibrasi aktif akan dipindahkan ke arsip." data-tombol="Ya, Arsipkan Semua!">
+                    <i class="fas fa-archive me-1"></i> Arsip Semua
+                </button>
+            </form>
+
+            <a href="{{ route('evaluasi-kalibrasi.arsip') }}" class="btn btn-lihat-arsip btn-sm py-1 px-2 shadow-sm">
+                <i class="fas fa-folder-open me-1"></i> Lihat Arsip
+            </a>
+        @endif
+
         @if($canInputEvaluasi)
-            <a href="{{ route('evaluasi-kalibrasi.create') }}" class="btn btn-corporate-blue btn-sm py-1 px-2.5 shadow-sm fw-semibold" style="font-size: 0.73rem;">
+            <a href="{{ route('evaluasi-kalibrasi.create') }}" class="btn btn-corporate-blue btn-sm py-1 px-2 shadow-sm">
                 <i class="fas fa-plus me-1"></i> Input Evaluasi Baru
             </a>
         @endif
@@ -145,7 +235,7 @@
                     <th style="width: 110px;">Keputusan</th>
                     <th style="width: 150px;">Dievaluasi Oleh</th>
                     <th style="width: 80px;">Laporan</th>
-                    <th style="width: 70px;">Aksi</th>
+                    <th style="width: {{ $isAdminAplikasi ? '140px' : '70px' }};">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -195,9 +285,20 @@
                     </td>
 
                     <td class="text-nowrap">
-                        <a href="{{ route('evaluasi-kalibrasi.show', $item->evaluasi_id) }}" class="btn btn-corporate-blue btn-sm py-1 px-2 shadow-sm fw-semibold" style="font-size: 0.7rem;" title="Detail">
-                            Detail
-                        </a>
+                        <div class="aksi-evaluasi">
+                            <a href="{{ route('evaluasi-kalibrasi.show', $item->evaluasi_id) }}" class="btn btn-corporate-blue btn-sm py-1 px-2 shadow-sm" title="Detail">
+                                Detail
+                            </a>
+                            @if($isAdminAplikasi)
+                                <form action="{{ route('evaluasi-kalibrasi.arsipkan', $item->evaluasi_id) }}" method="POST">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="button" class="btn btn-abu btn-sm py-1 px-2 shadow-sm btn-konfirmasi-aksi" data-pesan="Pindahkan data evaluasi ini ke arsip?" data-tombol="Ya, Arsipkan!" title="Arsipkan">
+                                        <i class="fas fa-archive me-1"></i> Arsip
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
                     </td>
                 </tr>
                 @empty
@@ -215,4 +316,52 @@
         {{ $evaluasi->links() }}
     </div>
 </div>
+
+@if($isAdminAplikasi)
+<div class="modal fade modal-konfirmasi-evaluasi" id="modalKonfirmasiAksi" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+        <div class="modal-content shadow text-center p-3">
+            <div class="pt-2 pb-1">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background-color: #eef2f8; color: #1b3152; font-size: 26px; border: 2px solid #d5deee;">
+                    <i class="fas fa-exclamation"></i>
+                </div>
+            </div>
+            <div class="modal-body px-2 py-2">
+                <h5 class="fw-bold text-dark mb-1" style="font-size: 1.1rem;">Apakah Anda yakin?</h5>
+                <p class="text-muted mb-0" id="konfirmasiAksiPesan" style="font-size: 0.85rem;"></p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center gap-2 pt-1 pb-2">
+                <button type="button" id="btnKonfirmasiAksi" class="btn btn-corporate-blue btn-sm px-3 fw-semibold">Ya</button>
+                <button type="button" class="btn btn-secondary btn-sm px-3 fw-semibold" data-bs-dismiss="modal">Batal</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let formKonfirmasi = null;
+        const modalEl = document.getElementById('modalKonfirmasiAksi');
+        const modal = modalEl ? new bootstrap.Modal(modalEl) : null;
+
+        document.querySelectorAll('.btn-konfirmasi-aksi').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                formKonfirmasi = this.closest('form');
+                document.getElementById('konfirmasiAksiPesan').textContent = this.getAttribute('data-pesan');
+                document.getElementById('btnKonfirmasiAksi').textContent = this.getAttribute('data-tombol');
+                if (modal) modal.show();
+            });
+        });
+
+        const btnKonfirmasi = document.getElementById('btnKonfirmasiAksi');
+        if (btnKonfirmasi) {
+            btnKonfirmasi.addEventListener('click', function () {
+                if (formKonfirmasi) formKonfirmasi.submit();
+            });
+        }
+    });
+</script>
+@endpush
+@endif
 @endsection

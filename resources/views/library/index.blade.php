@@ -8,6 +8,7 @@
     $allowedRoles = ['Admin Aplikasi', 'Koordinator Laboratorium', 'Analis Lab'];
     $userRoleName = Auth::user()->role->nama_role ?? '';
     $canManage = in_array($userRoleName, $allowedRoles);
+    $isAdminAplikasi = $userRoleName === 'Admin Aplikasi';
 @endphp
 <style>
     .dashboard-container {
@@ -102,6 +103,37 @@
         padding: 0.2rem 0.55rem;
     }
 
+    .library-header-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .library-header-actions form {
+        margin: 0;
+    }
+
+    .library-filter-actions {
+        display: flex;
+        gap: 0.35rem;
+        align-items: center;
+        height: 31px;
+    }
+    .library-filter-actions .btn {
+        font-size: 0.72rem !important;
+        height: 31px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .library-filter-actions .btn-main-action {
+        flex: 1 1 auto;
+    }
+
+    .library-preview-body {
+        height: 75vh;
+        overflow: auto;
+    }
+
     .filter-select {
         position: relative;
         font-size: 0.72rem;
@@ -116,6 +148,7 @@
         border-radius: 0.375rem;
         padding: 4px 8px;
         font-size: 0.72rem;
+        height: 31px;
         cursor: pointer;
         text-align: left;
         color: #212529;
@@ -170,10 +203,57 @@
         color: #fff;
     }
 
-    @media (max-width: 576px) {
-        .library-header-row { flex-direction: column; align-items: stretch !important; }
-        .library-header-row .d-flex.gap-2 { width: 100%; }
-        .library-header-row .d-flex.gap-2 a { flex: 1; text-align: center; }
+    .library-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    @media (max-width: 991.98px) {
+        .dashboard-container {
+            padding: 4px 8px !important;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .library-header-row {
+            flex-direction: column;
+            align-items: stretch !important;
+        }
+        .library-header-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            width: 100%;
+        }
+        .library-header-actions > a,
+        .library-header-actions > form {
+            width: 100%;
+            min-width: 0;
+        }
+        .library-header-actions .btn {
+            width: 100%;
+            min-height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+        }
+        .library-header-actions > :last-child:nth-child(odd) {
+            grid-column: 1 / -1;
+        }
+        .library-table {
+            min-width: 780px;
+        }
+        .library-table tbody td.library-title-cell {
+            min-width: 200px;
+        }
+        .library-table tbody td.library-empty-cell {
+            min-width: 0;
+        }
+        .library-pagination {
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+        }
     }
 </style>
 
@@ -185,11 +265,18 @@
         </div>
 
         @if($canManage)
-            <div class="d-flex gap-2">
+            <div class="library-header-actions">
                 @if($showArchived)
                     <a href="{{ route('library.index') }}" class="btn btn-outline-secondary btn-sm py-1" style="font-size: 0.72rem;"><i class="fas fa-arrow-left me-1"></i> Dokumen Aktif</a>
                 @else
                     <a href="{{ route('library.archive') }}" class="btn btn-outline-secondary btn-sm py-1" style="font-size: 0.72rem;"><i class="fas fa-box-archive me-1"></i> Arsip Dokumen</a>
+                    @if($isAdminAplikasi)
+                        <form id="form-archive-all" action="{{ route('library.archive-all') }}" method="POST" class="d-inline">
+                            @csrf
+                            @method('PATCH')
+                            <button type="button" id="btnArsipkanSemua" class="btn btn-danger btn-sm py-1 shadow-sm" style="font-size: 0.72rem;"><i class="fas fa-box-archive me-1"></i> Arsipkan Semua</button>
+                        </form>
+                    @endif
                     <a href="{{ route('library.create') }}" class="btn btn-corporate-blue btn-sm py-1 shadow-sm" style="font-size: 0.72rem;"><i class="fas fa-plus me-1"></i> Upload Dokumen</a>
                 @endif
             </div>
@@ -199,7 +286,7 @@
     <div class="card library-card shadow-sm border-0 mb-3">
         <div class="card-body p-2 px-3">
             <form id="library-filter-form" method="GET" action="{{ $showArchived ? route('library.archive') : route('library.index') }}" class="row g-2 align-items-end">
-                <div class="col-md-5">
+                <div class="col-12 col-md-5">
                     <label for="library-search" class="library-filter-label d-block">Cari Dokumen</label>
                     <div class="input-group input-group-sm">
                         <input id="library-search" type="search" name="search" value="{{ request('search') }}" class="form-control form-control-sm py-1" placeholder="Nama, nomor, penerbit, atau kategori..." autocomplete="off" style="font-size: 0.72rem;">
@@ -208,7 +295,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <label class="library-filter-label d-block">Kategori</label>
                     @php
                         $selectedCategoryFilter = (string) request('category_id', '');
@@ -226,17 +313,21 @@
                         </ul>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <label class="library-filter-label d-block" style="visibility: hidden;">Aksi</label>
-                    <div class="d-flex gap-1">
-                        @if(!$showArchived)
-                            <button type="button" onclick="exportPdf(document.getElementById('library-filter-form'))" class="btn btn-danger btn-sm flex-grow-1 text-nowrap py-1" title="Cetak Rekap Daftar Induk Dokumen sesuai filter saat ini" style="font-size: 0.72rem;">
-                                <i class="fas fa-file-pdf me-1"></i>Cetak PDF
-                            </button>
-                        @endif
-                        <a href="{{ $showArchived ? route('library.archive') : route('library.index') }}" class="btn btn-outline-secondary btn-sm py-1 px-2" title="Reset pencarian dan filter" aria-label="Reset pencarian dan filter" style="font-size: 0.72rem;">
+                <div class="col-12 col-md-3">
+                    <label class="library-filter-label d-block">&nbsp;</label>
+                    <div class="library-filter-actions">
+                        <a href="{{ $showArchived ? route('library.archive') : route('library.index') }}" class="btn btn-outline-secondary btn-sm px-3 py-1" title="Reset pencarian dan filter" aria-label="Reset pencarian dan filter" style="font-size: 0.72rem;">
                             <i class="fas fa-rotate-left"></i>
                         </a>
+                        @if(!$showArchived)
+                            <button type="button" onclick="exportPdf(document.getElementById('library-filter-form'))" class="btn btn-danger btn-sm btn-main-action text-nowrap py-1" title="Cetak Rekap Daftar Induk Dokumen sesuai filter saat ini" style="font-size: 0.72rem;">
+                                <i class="fas fa-file-pdf me-1"></i>Cetak PDF
+                            </button>
+                        @elseif($isAdminAplikasi)
+                            <button type="button" id="btnTampilkanSemua" class="btn btn-success btn-sm btn-main-action text-nowrap py-1" title="Tampilkan semua dokumen arsip ke daftar aktif" style="font-size: 0.72rem;">
+                                <i class="fas fa-rotate-left me-1"></i>Tampilkan Semua
+                            </button>
+                        @endif
                     </div>
                 </div>
             </form>
@@ -245,7 +336,7 @@
 
     <div class="card library-card shadow-sm border-0 mb-4">
         <div class="card-body p-0">
-            <div class="table-responsive">
+            <div class="table-responsive library-table-wrap">
                 <table class="table library-table table-bordered table-striped align-middle text-center mb-0">
                     <thead>
                         <tr>
@@ -265,9 +356,9 @@
                                 $ext = strtolower($document->file_extension ?? '');
                             @endphp
                             <tr>
-                                <td>{{ $documents->firstItem() + $index }}</td>
-                                <td>{{ $document->nomor_dokumen ?? '-' }}</td>
-                                <td class="text-start">
+                                <td data-label="No">{{ $documents->firstItem() + $index }}</td>
+                                <td data-label="Nomor Dokumen">{{ $document->nomor_dokumen ?? '-' }}</td>
+                                <td data-label="Nama Dokumen" class="text-start library-title-cell">
                                     @if($showArchived)
                                         <span class="fw-semibold d-block" style="font-size: 0.72rem;">{{ $document->judul }}</span>
                                     @else
@@ -277,10 +368,10 @@
                                     @endif
                                     <span class="badge rounded-pill library-category mt-1">{{ $document->category->nama_kategori ?? '-' }}</span>
                                 </td>
-                                <td><span class="badge rounded-pill library-revision">Rev. {{ $latestVersion?->version_number ?? '00' }}</span></td>
-                                <td>{{ $latestVersion?$latestVersion->tanggal_berlaku?->format('d/m/Y') : '-' }}</td>
-                                <td>{{ $document->penerbit_dokumen ?? '-' }}</td>
-                                <td class="text-nowrap">
+                                <td data-label="Revisi"><span class="badge rounded-pill library-revision">Rev. {{ $latestVersion?->version_number ?? '00' }}</span></td>
+                                <td data-label="Tanggal Berlaku">{{ $latestVersion?$latestVersion->tanggal_berlaku?->format('d/m/Y') : '-' }}</td>
+                                <td data-label="Penerbit Dokumen">{{ $document->penerbit_dokumen ?? '-' }}</td>
+                                <td data-label="Aksi" class="text-nowrap library-action-cell">
                                     @if($showArchived)
                                         <form id="form-activate-{{ $document->id }}" action="{{ route('library.activate', $document->id) }}" method="POST" class="d-inline">
                                             @csrf
@@ -305,8 +396,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-3" style="font-size: 0.72rem;">
-                                    Belum ada dokumen di library.
+                                <td colspan="7" class="text-center text-muted py-3 library-empty-cell" style="font-size: 0.72rem;">
+                                    {{ $showArchived ? 'Belum ada dokumen di arsip.' : 'Belum ada dokumen di library.' }}
                                 </td>
                             </tr>
                         @endforelse
@@ -314,7 +405,7 @@
                 </table>
             </div>
 
-            <div class="mt-2 px-3 pb-2">
+            <div class="mt-2 px-3 pb-2 library-pagination">
                 {{ $documents->links('vendor.pagination.custom', ['size' => 'sm']) }}
             </div>
         </div>
@@ -322,13 +413,13 @@
 </div>
 
 <div class="modal fade" id="modalPreviewDokumen" tabindex="-1" aria-labelledby="modalPreviewDokumenLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-fullscreen-sm-down">
         <div class="modal-content">
             <div class="modal-header py-2 text-white" style="background-color: #1b3152;">
                 <h5 class="modal-title fs-6" id="modalPreviewDokumenLabel">Pratinjau Dokumen</h5>
                 <button type="button" class="btn-close btn-close-white btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-0" id="modalPreviewBody" style="height: 75vh; overflow: auto;"></div>
+            <div class="modal-body p-0 library-preview-body" id="modalPreviewBody"></div>
         </div>
     </div>
 </div>
@@ -372,6 +463,53 @@
         </div>
     </div>
 </div>
+
+@if($isAdminAplikasi)
+<div class="modal fade" id="modalKonfirmasiArsipkanSemua" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 360px;">
+        <div class="modal-content border-0 shadow text-center p-3" style="font-size: 0.78rem; border-radius: 8px;">
+            <div class="pt-2 pb-1">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background-color: #fdecea; color: #dc3545; font-size: 22px; border: 2px solid #f5c2c7;">
+                    <i class="fas fa-exclamation"></i>
+                </div>
+            </div>
+            <div class="modal-body px-2 py-2">
+                <h5 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Arsipkan semua dokumen?</h5>
+                <p class="text-muted mb-0" style="font-size: 0.72rem;">Seluruh dokumen aktif akan dipindahkan ke Arsip Dokumen.</p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center gap-2 pt-1 pb-2">
+                <button type="button" id="btnConfirmArsipkanSemua" class="btn btn-danger btn-sm py-1 px-3 fw-semibold rounded-2" style="font-size: 0.73rem;">Ya, Arsipkan Semua!</button>
+                <button type="button" class="btn btn-secondary btn-sm py-1 px-3 fw-semibold rounded-2" data-bs-dismiss="modal" style="font-size: 0.73rem;">Batal</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalKonfirmasiTampilkanSemua" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 360px;">
+        <div class="modal-content border-0 shadow text-center p-3" style="font-size: 0.78rem; border-radius: 8px;">
+            <div class="pt-2 pb-1">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background-color: #e8f4fd; color: #0d6efd; font-size: 22px; border: 2px solid #cfe2ff;">
+                    <i class="fas fa-question"></i>
+                </div>
+            </div>
+            <div class="modal-body px-2 py-2">
+                <h5 class="fw-bold text-dark mb-1" style="font-size: 0.95rem;">Tampilkan semua dokumen?</h5>
+                <p class="text-muted mb-0" style="font-size: 0.72rem;">Seluruh dokumen arsip akan ditampilkan kembali pada daftar aktif.</p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center gap-2 pt-1 pb-2">
+                <button type="button" id="btnConfirmTampilkanSemua" class="btn btn-success btn-sm py-1 px-3 fw-semibold rounded-2" style="font-size: 0.73rem;">Ya, Tampilkan Semua!</button>
+                <button type="button" class="btn btn-secondary btn-sm py-1 px-3 fw-semibold rounded-2" data-bs-dismiss="modal" style="font-size: 0.73rem;">Batal</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="form-activate-all" action="{{ route('library.activate-all') }}" method="POST" class="d-none">
+    @csrf
+    @method('PATCH')
+</form>
+@endif
 @endsection
 
 @push('scripts')
@@ -429,6 +567,21 @@
                 }
             });
         }
+
+        [
+            ['btnArsipkanSemua', 'modalKonfirmasiArsipkanSemua', 'btnConfirmArsipkanSemua', 'form-archive-all'],
+            ['btnTampilkanSemua', 'modalKonfirmasiTampilkanSemua', 'btnConfirmTampilkanSemua', 'form-activate-all']
+        ].forEach(function (ids) {
+            const trigger = document.getElementById(ids[0]);
+            const modalEl = document.getElementById(ids[1]);
+            if (!trigger || !modalEl) return;
+
+            const modal = new bootstrap.Modal(modalEl);
+            trigger.addEventListener('click', function () { modal.show(); });
+            document.getElementById(ids[2]).addEventListener('click', function () {
+                document.getElementById(ids[3]).submit();
+            });
+        });
 
         const modalPreview = document.getElementById('modalPreviewDokumen');
         if (modalPreview) {
