@@ -82,7 +82,7 @@
             @endif --}}
 
             <div class="card custom-card mb-3">
-                <div class="card-header text-white d-flex justify-content-between align-items-center py-2 px-3" style="background-color: #1b3152 !important;">
+                <div class="card-header text-white d-flex justify-content-between align-items-center py-2 px-3" style="background-color: var(--sl-primary) !important;">
                     <h6 class="mb-0 fw-bold text-white" style="font-size: 13px;"><i class="fas fa-info-circle me-2"></i> Informasi Alat</h6>
                     
                     <div class="d-flex align-items-center gap-2">
@@ -232,7 +232,7 @@
 
             @if($canInputKalibrasi)
             <div class="card custom-card mb-3">
-                <div class="card-header text-white py-2 px-3" style="background-color: #1b3152 !important;">
+                <div class="card-header text-white py-2 px-3" style="background-color: var(--sl-primary) !important;">
                     <h6 class="mb-0 fw-bold text-white" style="font-size: 13px;"><i class="fas fa-plus-circle me-2"></i> Form Input Pengecekan / Kalibrasi Baru</h6>
                 </div>
                 <div class="card-body px-3 py-2.5">
@@ -292,7 +292,7 @@
                             <div class="row g-2 mb-2">
                                 <div class="col-md-12">
                                     <div class="p-2 bg-light border rounded text-muted" style="font-size: 11.5px;">
-                                        <i class="fas fa-info-circle me-1" style="color: #1b3152;"></i> 
+                                        <i class="fas fa-info-circle me-1" style="color: var(--sl-primary);"></i> 
                                         Evaluasi dan catatan keputusan dikelola sub menu terpusat.
                                         <a href="{{ route('evaluasi-kalibrasi.index') }}" class="text-decoration-none fw-semibold text-primary ms-1">
                                             Evaluasi Kalibrasi <i class="fas fa-external-link-alt" style="font-size: 10px;"></i>
@@ -302,7 +302,7 @@
                             </div>
                         </div>
                         <div class="mt-3 text-end">
-                            <button type="submit" class="btn text-white btn-sm px-3 py-1 shadow-sm fw-bold" style="font-size: 0.72rem; background-color: #1b3152;">
+                            <button type="submit" class="btn text-white btn-sm px-3 py-1 shadow-sm fw-bold" style="font-size: 0.72rem; background-color: var(--sl-primary);">
                                 <i class="fas fa-save me-1"></i> Simpan Kalibrasi Baru
                             </button>
                         </div>
@@ -320,7 +320,7 @@
                     <i class="fas fa-user-lock fa-2x text-muted mb-2"></i>
                     <h6 class="text-dark fw-bold mb-1" style="font-size: 0.9rem;">Akses Terbatas</h6>
                     <p class="text-muted small mb-2" style="font-size: 0.75rem;">Formulir input kalibrasi baru hanya dapat diisi oleh petugas atau admin yang telah masuk ke sistem.</p>
-                    <a href="{{ route('login') }}?redirect={{ url()->current() }}" class="btn text-white btn-sm px-3 py-1 shadow-sm fw-bold" style="font-size: 0.72rem; background-color: #1b3152;">
+                    <a href="{{ route('login') }}?redirect={{ url()->current() }}" class="btn text-white btn-sm px-3 py-1 shadow-sm fw-bold" style="font-size: 0.72rem; background-color: var(--sl-primary);">
                         <i class="fas fa-sign-in-alt me-1"></i> Login untuk Mengisi Form Kalibrasi
                     </a>
                 </div>

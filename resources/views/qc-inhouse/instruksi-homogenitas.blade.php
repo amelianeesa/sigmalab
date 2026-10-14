@@ -79,7 +79,7 @@
     .ins-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
     .ins-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
     .ins-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
-        background-color: rgba(27, 49, 82, 0.15) !important;
+        background-color: rgba(26, 127, 196, 0.15) !important;
         color: #000000 !important;
         text-decoration: none !important;
     }
@@ -112,7 +112,7 @@
     }
 
     .ins-page .icon-corporate {
-        color: #1b3152;
+        color: var(--sl-primary);
     }
 
     .ins-page .card-body {
@@ -148,7 +148,7 @@
     }
 
     .ins-page .step-badge {
-        background-color: #1b3152;
+        background-color: var(--sl-primary);
         color: #ffffff;
         font-size: 0.68rem;
         font-weight: 600;
@@ -165,7 +165,7 @@
     }
 
     .ins-page .ins-table thead th {
-        background-color: #1b3152;
+        background-color: var(--sl-primary);
         color: #ffffff;
         font-size: 0.72rem;
         font-weight: 600;
@@ -187,7 +187,7 @@
     .ins-page .ins-table .nomor-botol {
         font-size: 0.9rem;
         font-weight: 700;
-        color: #1b3152;
+        color: var(--sl-primary);
     }
 
     .ins-page .ins-alert {
@@ -196,14 +196,14 @@
         font-size: 0.75rem;
         line-height: 1.5;
         color: #000;
-        background-color: rgba(27, 49, 82, 0.08);
+        background-color: rgba(26, 127, 196, 0.08);
         border: 0;
-        border-left: 4px solid #1b3152;
+        border-left: 4px solid var(--sl-primary);
         border-radius: 6px;
     }
 
     .ins-page .ins-alert i {
-        color: #1b3152;
+        color: var(--sl-primary);
     }
 
     .ins-page .ins-alert ul {
@@ -211,8 +211,8 @@
     }
 
     .ins-page .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
 
@@ -381,7 +381,7 @@
         }
 
         .ins-page .ins-table thead th {
-            background-color: #1b3152 !important;
+            background-color: var(--sl-primary) !important;
             color: #ffffff !important;
         }
     }

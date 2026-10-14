@@ -78,7 +78,7 @@
     .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
     .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
     .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
-        background-color: rgba(27, 49, 82, 0.15) !important;
+        background-color: rgba(26, 127, 196, 0.15) !important;
         color: #000000 !important;
         text-decoration: none !important;
     }
@@ -255,7 +255,7 @@
         <input type="hidden" name="draft_id" id="draft_id_input" value="{{ $draftId ?? '' }}">
         <div class="card shadow-sm border-0 mb-3">
 
-            <div class="card-header text-white" style="background-color: #1b3152;">
+            <div class="card-header text-white" style="background-color: var(--sl-primary);">
                 <h5 class="fw-bold"><i class="fas fa-clipboard-list me-1"></i> Section 1: Data Dasar Pengujian</h5>
             </div>
 
@@ -299,7 +299,7 @@
 
         <div class="card shadow-sm border-0 mb-3">
 
-            <div class="card-header text-white" style="background-color: #1b3152;">
+            <div class="card-header text-white" style="background-color: var(--sl-primary);">
                 <h5 class="fw-bold"><i class="fas fa-table me-1"></i> Section 2: Input Data Pengujian</h5>
             </div>
 
@@ -414,7 +414,7 @@
                                                                 </div>
                                                             </div>
                                                             <div class="col-md-4 text-md-end d-flex flex-column gap-2 d-print-none">
-                                                                <button type="button" class="btn btn-sm w-100 shadow-sm text-white param-input-ext" style="background-color: #1b3152; border-color: #1b3152;" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}" disabled>
+                                                                <button type="button" class="btn btn-sm w-100 shadow-sm text-white param-input-ext" style="background-color: var(--sl-primary); border-color: var(--sl-primary);" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}" disabled>
                                                                     <i class="fas fa-cog me-1"></i> Atur Analis, Alat & Bahan
                                                                 </button>
                                                                 <button type="button" class="btn btn-sm w-100 shadow-sm btn-outline-info param-input-ext" data-bs-toggle="modal" data-bs-target="#modalRumus-{{ $pid }}">
@@ -426,7 +426,7 @@
                                                         <div class="modal fade modal-resource" id="modalResource-{{ $pid }}" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
                                                             <div class="modal-dialog">
                                                                 <div class="modal-content border-0 shadow-lg">
-                                                                    <div class="modal-header text-white" style="background-color: #1b3152;">
+                                                                    <div class="modal-header text-white" style="background-color: var(--sl-primary);">
                                                                         <h5 class="modal-title fw-bold"><i class="fas fa-tasks me-2"></i>Atur Analis, Alat & Bahan: {{ $code ?? 'Parameter' }}</h5>
                                                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                                                     </div>
@@ -538,7 +538,7 @@
                                                                         </div>
                                                                     </div>
                                                                     <div class="modal-footer bg-light">
-                                                                        <button type="button" class="btn px-4 rounded-pill text-white" style="background-color: #1b3152;" data-bs-dismiss="modal">
+                                                                        <button type="button" class="btn px-4 rounded-pill text-white" style="background-color: var(--sl-primary);" data-bs-dismiss="modal">
                                                                             <i class="fas fa-check me-2"></i>Simpan Pilihan
                                                                         </button>
                                                                     </div>
@@ -640,7 +640,7 @@
                                                                             </div>
                                                                         </div>
                                                                         <div class="col-md-4 text-md-end d-flex flex-column gap-2 d-print-none">
-                                                                            <button type="button" class="btn btn-sm w-100 shadow-sm text-white param-input-ext" style="background-color: #1b3152; border-color: #1b3152;" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}" disabled>
+                                                                            <button type="button" class="btn btn-sm w-100 shadow-sm text-white param-input-ext" style="background-color: var(--sl-primary); border-color: var(--sl-primary);" data-bs-toggle="modal" data-bs-target="#modalResource-{{ $pid }}" disabled>
                                                                                 <i class="fas fa-cog me-1"></i> Atur Analis, Alat & Bahan
                                                                             </button>
                                                                             <button type="button" class="btn btn-sm w-100 shadow-sm btn-outline-info param-input-ext" data-bs-toggle="modal" data-bs-target="#modalRumus-{{ $pid }}">
@@ -652,7 +652,7 @@
                                                                     <div class="modal fade modal-resource" id="modalResource-{{ $pid }}" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
                                                                         <div class="modal-dialog">
                                                                             <div class="modal-content border-0 shadow-lg">
-                                                                                <div class="modal-header text-white" style="background-color: #1b3152;">
+                                                                                <div class="modal-header text-white" style="background-color: var(--sl-primary);">
                                                                                     <h5 class="modal-title fw-bold"><i class="fas fa-tasks me-2"></i>Atur Analis, Alat & Bahan: {{ $code ?? 'Parameter' }}</h5>
                                                                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                                                                 </div>
@@ -765,7 +765,7 @@
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="modal-footer bg-light">
-                                                                                    <button type="button" class="btn px-4 rounded-pill text-white" style="background-color: #1b3152;" data-bs-dismiss="modal">
+                                                                                    <button type="button" class="btn px-4 rounded-pill text-white" style="background-color: var(--sl-primary);" data-bs-dismiss="modal">
                                                                                         <i class="fas fa-check me-2"></i>Simpan Pilihan
                                                                                     </button>
                                                                                 </div>

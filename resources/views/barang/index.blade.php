@@ -315,8 +315,10 @@
         </div>
     @endif
 
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-        <h5 class="fw-bold mb-0">Data Inventory Barang/Bahan</h5>
+    <x-maskot-banner nama="sampler" judul="Data Inventory Barang/Bahan"
+        sub="Cek stok, batch, dan tanggal kedaluwarsa bahan serta perlengkapan laboratorium." />
+
+    <div class="d-flex justify-content-end align-items-center flex-wrap gap-2 mb-3">
         <div class="header-action-btns">
             <button type="button" class="btn btn-success-standard shadow-sm" data-bs-toggle="modal" data-bs-target="#cetakPeriodeModal">
                 <i class="fas fa-print me-1"></i> Cetak Laporan Periode

@@ -78,7 +78,7 @@
     .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
     .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
     .qc-page .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
-        background-color: rgba(27, 49, 82, 0.15) !important;
+        background-color: rgba(26, 127, 196, 0.15) !important;
         color: #000000 !important;
         text-decoration: none !important;
     }
@@ -89,7 +89,7 @@
 
     .qc-side-nav .nav-link:not(.active):hover {
         background-color: #e9ecef !important;
-        color: #1b3152 !important;
+        color: var(--sl-primary) !important;
         padding-left: 1.25rem !important;
     }
 
@@ -127,7 +127,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <h5 class="qc-title">
-            <i class="fas fa-balance-scale me-1" style="color: #1b3152;"></i> Master Batas Toleransi QC Uji Banding
+            <i class="fas fa-balance-scale me-1" style="color: var(--sl-primary);"></i> Master Batas Toleransi QC Uji Banding
         </h5>
 
         <div class="d-flex flex-wrap gap-2">
@@ -225,7 +225,7 @@
                                  id="content-param-{{ $tabId }}" role="tabpanel">
                                 
                                 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                                    <h5 class="fw-bold mb-0" style="color: #1b3152; font-size: 0.95rem;">Aturan Toleransi: {{ $tabTitle }}</h5>
+                                    <h5 class="fw-bold mb-0" style="color: var(--sl-primary); font-size: 0.95rem;">Aturan Toleransi: {{ $tabTitle }}</h5>
                                     <button class="btn btn-sm btn-corporate-blue shadow-sm py-1 px-3 fw-semibold" data-bs-toggle="modal" data-bs-target="#modalTambah-{{ $tabId }}">
                                         <i class="fas fa-plus me-1"></i> Tambah Aturan
                                     </button>

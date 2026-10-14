@@ -3,7 +3,7 @@
 
 @section('content')
 <style>
-    .pj-card:hover { box-shadow: 0 .4rem .9rem rgba(27,49,82,.12) !important; }
+    .pj-card:hover { box-shadow: 0 .4rem .9rem rgba(26, 127, 196,.12) !important; }
     .pj-status { font-size: 0.7rem; font-weight: 600; padding: 3px 8px; border-radius: 999px; display: inline-block; }
     .pj-status.tersedia { background: #e6f4ea; color: #1e7a3c; border: 1px solid #b7e0c3; }
     .pj-status.dipinjam { background: #fff4d6; color: #8a6100; border: 1px solid #f3dd9a; }
@@ -17,7 +17,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <div>
-        <h4 class="fw-bold mb-0" style="color:#1b3152;">Peminjaman Alat</h4>
+        <h4 class="fw-bold mb-0" style="color:var(--sl-primary);">Peminjaman Alat</h4>
         <small class="text-muted">Pilih alat untuk membuka logbook-nya, lalu isi catatan peminjaman.</small>
     </div>
     <a href="{{ route('peminjaman.pdf-semua') }}" target="_blank" class="btn btn-sm btn-outline-secondary fw-semibold pj-head-btn">
@@ -31,7 +31,7 @@
         @if($cari !== '')
             <a href="{{ route('peminjaman.index') }}" class="btn btn-outline-secondary">Reset</a>
         @endif
-        <button type="submit" class="btn text-white fw-semibold px-4" style="background:#1b3152;">
+        <button type="submit" class="btn text-white fw-semibold px-4" style="background:var(--sl-primary);">
             <i class="fas fa-search me-1"></i> Cari
         </button>
     </div>
@@ -49,7 +49,7 @@
             <a href="{{ route('peminjaman.alat', $a->alat_id) }}" class="text-decoration-none d-block h-100">
                 <div class="card border-0 shadow-sm h-100 pj-card">
                     <div class="card-body d-flex flex-column">
-                        <div class="fw-bold" style="color:#1b3152;">{{ $a->nama_alat }}</div>
+                        <div class="fw-bold" style="color:var(--sl-primary);">{{ $a->nama_alat }}</div>
                         <div class="small text-muted mb-2">{{ $a->kode_alat }}</div>
 
                         <div class="pj-info text-dark">
@@ -74,7 +74,7 @@
                                     <span class="badge bg-warning text-dark ms-1">{{ $r->menunggu }} menunggu</span>
                                 @endif
                             </span>
-                            <span class="fw-semibold" style="color:#1b3152;">Buka &rarr;</span>
+                            <span class="fw-semibold" style="color:var(--sl-primary);">Buka &rarr;</span>
                         </div>
                     </div>
                 </div>

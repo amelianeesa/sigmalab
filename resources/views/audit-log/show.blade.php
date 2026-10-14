@@ -9,7 +9,7 @@
         max-width: 1250px;
     }
     .card-header-custom {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: white !important;
         font-weight: bold;
         font-size: 0.85rem !important;
@@ -18,7 +18,7 @@
     .table-header-custom, 
     .table-header-custom th, 
     .table-header-custom tr {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         border-color: #2c4975 !important;
         font-size: 0.7rem !important;

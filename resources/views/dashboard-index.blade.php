@@ -25,26 +25,26 @@
     .text-suco-biru-muda { color: #00a3e2 !important; }
     .border-suco-hijau { border-color: #00a39b !important; }
     .text-suco-hijau { color: #00a39b !important; }
-    .text-navy { color: #1b3152 !important; }
-    .bg-navy { background-color: #1b3152 !important; color: #ffffff !important; }
-    .border-navy { border-color: #1b3152 !important; }
+    .text-navy { color: var(--sl-primary) !important; }
+    .bg-navy { background-color: var(--sl-primary) !important; color: #ffffff !important; }
+    .border-navy { border-color: var(--sl-primary) !important; }
     .btn-outline-navy {
-        color: #1b3152;
-        border-color: #1b3152;
+        color: var(--sl-primary);
+        border-color: var(--sl-primary);
         background-color: transparent;
         transition: all 0.2s ease-in-out;
     }
     .btn-outline-navy:hover,
     .btn-outline-navy:focus,
     .btn-outline-navy:active {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
     .select2-container--bootstrap-5.select2-container--focus .select2-selection,
     .select2-container--bootstrap-5.select2-container--open .select2-selection {
-        border-color: #1b3152 !important;
-        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15) !important;
+        border-color: var(--sl-primary) !important;
+        box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.15) !important;
     }
     .tracking-select-wrap {
         position: relative;
@@ -61,8 +61,8 @@
         width: 100% !important;
     }
     .select-tracking-dropdown .select2-search__field:focus {
-        border-color: #1b3152 !important;
-        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15) !important;
+        border-color: var(--sl-primary) !important;
+        box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.15) !important;
         outline: none;
     }
     .select-tracking-dropdown .select2-results__options {
@@ -160,7 +160,7 @@
     }
     .info-card-icon.bg-danger-soft { background-color: #fdeaea; color: #dc3545; }
     .info-card-icon.bg-warning-soft { background-color: #fff8e6; color: #f0ad4e; }
-    .info-card-icon.bg-navy-soft { background-color: rgba(27, 49, 82, 0.1); color: #1b3152; }
+    .info-card-icon.bg-navy-soft { background-color: rgba(26, 127, 196, 0.1); color: var(--sl-primary); }
     .info-card-title {
         font-size: 0.76rem;
     }
@@ -357,12 +357,8 @@
 </style>
 
 <div class="container-fluid dashboard-container">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <div>
-            <h2 class="fw-bold text-dark mb-0 dashboard-title">Monitoring Center</h2>
-            <p class="text-muted mb-0 dashboard-subtitle">Selamat datang, Anda login sebagai <strong class="text-navy">{{ $role }}</strong></p>
-        </div>
-    </div>
+    <x-maskot-banner nama="laporan" judul="Monitoring Center"
+        :sub="'Halo! Anda masuk sebagai ' . $role . '. Ini ringkasan kerja laboratorium hari ini.'" />
 
     <div class="row g-2 mb-3">
         @if($isNonLab)

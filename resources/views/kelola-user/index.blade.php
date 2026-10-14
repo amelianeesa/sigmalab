@@ -4,16 +4,16 @@
 @section('content')
 <style>
     .btn-corporate-outline {
-        color: #1b3152;
-        border-color: #1b3152;
+        color: var(--sl-primary);
+        border-color: var(--sl-primary);
         background-color: transparent;
         transition: all 0.2s ease-in-out;
     }
     .btn-corporate-outline:hover,
     .btn-corporate-outline:focus,
     .btn-corporate-outline:active {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
     .btn-corporate-outline:hover i,
@@ -93,13 +93,13 @@
             <table class="table table-bordered table-striped align-middle text-center mb-0 bg-white shadow-sm rounded-3">
                 <thead>
                     <tr>
-                        <th style="background-color: #1b3152 !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle; width: 40px;">No.</th>
-                        <th style="background-color: #1b3152 !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle;">Username</th>
-                        <th style="background-color: #1b3152 !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle;">Email</th>
-                        <th style="background-color: #1b3152 !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle;">Personil Terkait</th>
-                        <th style="background-color: #1b3152 !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle;">Role</th>
-                        <th style="background-color: #1b3152 !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle; width: 85px;">Status</th>
-                        <th style="background-color: #1b3152 !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle; width: 85px;">Aksi</th>
+                        <th style="background-color: var(--sl-primary) !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle; width: 40px;">No.</th>
+                        <th style="background-color: var(--sl-primary) !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle;">Username</th>
+                        <th style="background-color: var(--sl-primary) !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle;">Email</th>
+                        <th style="background-color: var(--sl-primary) !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle;">Personil Terkait</th>
+                        <th style="background-color: var(--sl-primary) !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle;">Role</th>
+                        <th style="background-color: var(--sl-primary) !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle; width: 85px;">Status</th>
+                        <th style="background-color: var(--sl-primary) !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle; width: 85px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -162,7 +162,7 @@
                                     <form action="{{ route('kelola-user.update', $user->users_id) }}" method="POST">
                                         @csrf
                                         @method('PUT')
-                                        <div class="modal-header text-white py-1.5 px-3" style="background-color: #1b3152 !important;">
+                                        <div class="modal-header text-white py-1.5 px-3" style="background-color: var(--sl-primary) !important;">
                                             <h5 class="modal-title fw-bold text-white mb-0" id="modalEditUserLabel" style="font-size: 0.9rem;"><i class="fas fa-user-edit me-1"></i>Edit Akun — {{ $user->username }}</h5>
                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
@@ -211,7 +211,7 @@
                                         </div>
                                         <div class="modal-footer bg-light py-1.5 px-3">
                                             <button type="button" class="btn btn-secondary btn-sm py-1 px-3" data-bs-dismiss="modal" style="font-size: 0.73rem;">Batal</button>
-                                            <button type="submit" class="btn btn-sm py-1 px-3 text-white" style="background-color: #1b3152; font-size: 0.73rem;"><i class="fas fa-save me-1"></i> Simpan Perubahan</button>
+                                            <button type="submit" class="btn btn-sm py-1 px-3 text-white" style="background-color: var(--sl-primary); font-size: 0.73rem;"><i class="fas fa-save me-1"></i> Simpan Perubahan</button>
                                         </div>
                                     </form>
                                 </div>
@@ -237,7 +237,7 @@
         <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden" style="font-size: 0.78rem;">
             <form action="{{ route('kelola-user.store') }}" method="POST">
                 @csrf
-                <div class="modal-header text-white py-1.5 px-3" style="background-color: #1b3152 !important;">
+                <div class="modal-header text-white py-1.5 px-3" style="background-color: var(--sl-primary) !important;">
                     <h5 class="modal-title fw-bold text-white mb-0" id="modalTambahUserLabel" style="font-size: 0.9rem;"><i class="fas fa-user-plus me-1"></i>Tambah Akun Baru</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -277,7 +277,7 @@
                 </div>
                 <div class="modal-footer bg-light py-1.5 px-3">
                     <button type="button" class="btn btn-secondary btn-sm py-1 px-3" data-bs-dismiss="modal" style="font-size: 0.73rem;">Batal</button>
-                    <button type="submit" class="btn btn-sm py-1 px-3 text-white" style="background-color: #1b3152; font-size: 0.73rem;"><i class="fas fa-save me-1"></i> Simpan</button>
+                    <button type="submit" class="btn btn-sm py-1 px-3 text-white" style="background-color: var(--sl-primary); font-size: 0.73rem;"><i class="fas fa-save me-1"></i> Simpan</button>
                 </div>
             </form>
         </div>

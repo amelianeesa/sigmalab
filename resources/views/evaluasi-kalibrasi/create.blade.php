@@ -35,7 +35,7 @@
     @endif
 
     <div class="card shadow-sm border-0">
-        <div class="card-header text-white py-2.5" style="background-color: #1b3152;">
+        <div class="card-header text-white py-2.5" style="background-color: var(--sl-primary);">
             <h6 class="mb-0 fw-semibold"><i class="fas fa-edit me-1"></i> Form Input Evaluasi Kalibrasi</h6>
         </div>
         <div class="card-body p-4">
@@ -84,7 +84,7 @@
                 </div>
 
                 <div class="mt-4 text-end">
-                    <button type="submit" class="btn btn-sm text-white px-4" style="background-color: #1b3152;">
+                    <button type="submit" class="btn btn-sm text-white px-4" style="background-color: var(--sl-primary);">
                         <i class="fas fa-save me-1"></i> Simpan Evaluasi
                     </button>
                 </div>

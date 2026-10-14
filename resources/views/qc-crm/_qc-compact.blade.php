@@ -82,7 +82,7 @@
     .qc-compact .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
     .qc-compact .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
     .qc-compact .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
-        background-color: rgba(27, 49, 82, 0.15) !important;
+        background-color: rgba(26, 127, 196, 0.15) !important;
         color: #000000 !important;
         text-decoration: none !important;
     }
@@ -112,20 +112,20 @@
     .qc-compact .rounded-pill.btn { border-radius: 6px !important; }
 
     .btn-corporate-blue {
-        background-color: #1b3152 !important; border-color: #1b3152 !important; color: #fff !important;
+        background-color: var(--sl-primary) !important; border-color: var(--sl-primary) !important; color: #fff !important;
     }
     .btn-corporate-blue:hover, .btn-corporate-blue:focus, .btn-corporate-blue:active {
         background-color: #14253e !important; border-color: #14253e !important; color: #fff !important;
     }
-    .btn-outline-corporate { color: #1b3152 !important; border-color: #1b3152 !important; }
-    .btn-outline-corporate:hover { background-color: #1b3152 !important; color: #fff !important; }
+    .btn-outline-corporate { color: var(--sl-primary) !important; border-color: var(--sl-primary) !important; }
+    .btn-outline-corporate:hover { background-color: var(--sl-primary) !important; color: #fff !important; }
 
-    .qc-compact .btn-primary { background-color: #1b3152; border-color: #1b3152; }
+    .qc-compact .btn-primary { background-color: var(--sl-primary); border-color: var(--sl-primary); }
     .qc-compact .btn-primary:hover, .qc-compact .btn-primary:focus { background-color: #14253e; border-color: #14253e; }
-    .qc-compact .btn-outline-primary { color: #1b3152; border-color: #1b3152; }
-    .qc-compact .btn-outline-primary:hover { background-color: #1b3152; color: #fff; }
-    .qc-compact .text-primary { color: #1b3152 !important; }
-    .qc-compact .badge.bg-primary { background-color: #1b3152 !important; }
+    .qc-compact .btn-outline-primary { color: var(--sl-primary); border-color: var(--sl-primary); }
+    .qc-compact .btn-outline-primary:hover { background-color: var(--sl-primary); color: #fff; }
+    .qc-compact .text-primary { color: var(--sl-primary) !important; }
+    .qc-compact .badge.bg-primary { background-color: var(--sl-primary) !important; }
 
     .qc-compact .badge { font-size: 0.68rem; font-weight: 600; padding: 0.3em 0.55em; }
     .qc-compact .badge.fs-6 { font-size: 0.72rem !important; }
@@ -143,7 +143,7 @@
 
     .qc-compact .table-corporate thead th,
     .qc-compact .table thead.table-corporate th {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #fff !important;
         border-color: #fff !important;
         font-size: 0.72rem !important;
@@ -163,13 +163,13 @@
         font-size: 0.8rem; padding: 0.45rem 0.9rem !important;
         color: #6c757d; border: none; border-bottom: 3px solid transparent; border-radius: 0;
     }
-    .qc-compact .nav-tabs .nav-link:hover { color: #1b3152; border-bottom: 3px solid #dee2e6; }
+    .qc-compact .nav-tabs .nav-link:hover { color: var(--sl-primary); border-bottom: 3px solid #dee2e6; }
     .qc-compact .nav-tabs .nav-link.active {
-        color: #1b3152 !important; background: transparent !important;
-        border: none !important; border-bottom: 3px solid #1b3152 !important;
+        color: var(--sl-primary) !important; background: transparent !important;
+        border: none !important; border-bottom: 3px solid var(--sl-primary) !important;
     }
     .qc-compact .nav-tabs .nav-link i { font-size: 0.75rem; }
-    .qc-compact .nav-tabs .nav-link.active i { color: #1b3152 !important; }
+    .qc-compact .nav-tabs .nav-link.active i { color: var(--sl-primary) !important; }
 
     .qc-compact .accordion-button { font-size: 0.8rem; padding: 0.5rem 0.9rem !important; }
     .qc-compact .accordion-body { padding: 12px !important; }

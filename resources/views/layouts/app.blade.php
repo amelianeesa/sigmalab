@@ -20,9 +20,9 @@
         :root {
             --sidebar-width: {{ auth()->check() ? '220px' : '0' }};
             --sdm-50: #eef0f1;
-            --sdm-500: #1d4c7a;
-            --sdm-600: #1d4c7a;
-            --sdm-700: #163d63;
+            --sdm-500: var(--sl-primary);
+            --sdm-600: var(--sl-primary);
+            --sdm-700: var(--sl-primary-dark);
         }
 
         @php
@@ -105,13 +105,13 @@
         
         #sidebar ul li a:hover { 
             color: var(--sdm-600); 
-            background: rgba(29, 76, 122, 0.08); 
+            background: rgba(26, 127, 196, 0.08); 
             transform: translateX(4px); 
         }
         
         #sidebar ul li.active > a { 
             color: var(--sdm-600); 
-            background: rgba(29, 76, 122, 0.08); 
+            background: rgba(26, 127, 196, 0.08); 
             border-left-color: var(--sdm-600); 
             font-weight: 600; 
         }
@@ -133,7 +133,7 @@
         .top-navbar .text-secondary { color: rgba(255,255,255,.75) !important; }
         .top-navbar .fw-bold { color: #fff !important; }
         /* Tombol workspace aktif (Lab / Non-Lab): latar putih, teks harus gelap agar terbaca */
-        .top-navbar .btn-group .btn-light { color: #1b3152 !important; }
+        .top-navbar .btn-group .btn-light { color: var(--sl-primary) !important; }
         .top-navbar .dropdown .btn {
             background: rgba(255,255,255,.12);
             color: #fff;
@@ -145,7 +145,7 @@
             height: 28px;
             border-radius: 50%;
             background: #ffffff;
-            color: #1d4c7a;
+            color: var(--sl-primary);
             font-weight: 700;
             font-size: 0.8rem;
             display: inline-flex;
@@ -174,7 +174,7 @@
             width: 38px;
             height: 38px;
             font-size: 1rem;
-            background: #1d4c7a;
+            background: var(--sl-primary);
             color: #ffffff;
         }
         #profileDropdown .profile-name {
@@ -195,8 +195,8 @@
             padding: 1px 8px;
             font-size: 0.65rem;
             font-weight: 600;
-            color: #1d4c7a;
-            background: rgba(29, 76, 122, 0.1);
+            color: var(--sl-primary);
+            background: rgba(26, 127, 196, 0.1);
             border-radius: 10px;
         }
         #profileDropdown .dropdown-item {
@@ -212,7 +212,7 @@
         }
         #profileDropdown .dropdown-item:hover {
             background: #eff6ff;
-            color: #1d4c7a;
+            color: var(--sl-primary);
         }
         #profileDropdown .dropdown-item.text-danger:hover {
             background: #fdf2f2;
@@ -255,7 +255,7 @@
             background: #f8fafc;
         }
         #notifDropdown .notif-header .fw-bold {
-            color: #1d4c7a !important;
+            color: var(--sl-primary) !important;
         }
         #notifDropdown .notif-list {
             max-height: 340px;
@@ -358,6 +358,11 @@
             }
         }
     </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    {{-- Tema ceria biru muda: harus tetap paling bawah di <head> --}}
+    <link href="{{ asset('css/sigma-ceria.css') }}?v=1" rel="stylesheet">
 </head>
 
 <body>

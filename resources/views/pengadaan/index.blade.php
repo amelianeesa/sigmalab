@@ -5,7 +5,7 @@
 
 <style>
     :root {
-        --navy: #1b3152;
+        --navy: var(--sl-primary);
         --navy-dark: #14253e;
         --navy-soft: #eef2f8;
         --hijau: #198754;
@@ -69,7 +69,7 @@
     }
     .filter-select.open .filter-select-trigger {
         border-color: var(--navy);
-        box-shadow: 0 0 0 0.2rem rgba(27, 49, 82, 0.15);
+        box-shadow: 0 0 0 0.2rem rgba(26, 127, 196, 0.15);
     }
     .filter-select-options {
         display: none;
@@ -102,7 +102,7 @@
     .filter-select-search-input:focus {
         border-color: var(--navy);
         outline: none;
-        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+        box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.15);
     }
     .filter-select-list {
         list-style: none;
@@ -159,7 +159,7 @@
     .btn-aksi:not(:disabled):hover,
     .btn-modal-aksi:not(:disabled):hover {
         transform: translateY(-1px);
-        box-shadow: 0 4px 10px rgba(27, 49, 82, 0.2);
+        box-shadow: 0 4px 10px rgba(26, 127, 196, 0.2);
     }
     .btn-aksi:not(:disabled):active,
     .btn-modal-aksi:not(:disabled):active {
@@ -703,7 +703,7 @@
                                                         @csrf
                                                         <input type="hidden" name="status" value="diproses">
 
-                                                        <div class="modal-header text-white py-2" style="background-color: #1b3152;">
+                                                        <div class="modal-header text-white py-2" style="background-color: var(--sl-primary);">
                                                             <h6 class="modal-title mb-0 fs-6"><i class="fas fa-shopping-cart me-1"></i>Pilih Metode Pengadaan</h6>
                                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                                         </div>
@@ -782,7 +782,7 @@
                                                 <div class="modal-dialog modal-dialog-centered modal-dialog-pengadaan">
                                                     <form action="{{ route('pengadaan.konfirmasiTerima', $p->permintaan_id) }}" method="POST" enctype="multipart/form-data" class="modal-content text-start">
                                                         @csrf
-                                                        <div class="modal-header text-white py-2" style="background-color: #1b3152;">
+                                                        <div class="modal-header text-white py-2" style="background-color: var(--sl-primary);">
                                                             <h6 class="modal-title mb-0 fs-6"><i class="fas fa-box-open me-1"></i>Konfirmasi Diterima</h6>
                                                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                                         </div>
@@ -851,7 +851,7 @@
         <form action="{{ route('pengadaan.update-progres', $p->permintaan_id) }}" method="POST" class="modal-content text-start">
             @csrf
             @method('PUT')
-            <div class="modal-header text-white py-2" style="background-color: #1b3152;">
+            <div class="modal-header text-white py-2" style="background-color: var(--sl-primary);">
                 <h6 class="modal-title mb-0 fs-6"><i class="fas fa-edit me-1"></i>Update Catatan Progres</h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -896,7 +896,7 @@
     <div class="modal-dialog modal-dialog-centered modal-dialog-pengadaan modal-dialog-konfirmasi">
         <div class="modal-content border-0 shadow text-center p-3" style="font-size: 0.9rem; border-radius: 8px;">
             <div class="pt-2 pb-1">
-                <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 64px; height: 64px; background-color: #eef2f8; color: #1b3152; font-size: 28px; border: 2px solid #d5deee;">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 64px; height: 64px; background-color: #eef2f8; color: var(--sl-primary); font-size: 28px; border: 2px solid #d5deee;">
                     <i class="fas fa-exclamation"></i>
                 </div>
             </div>
@@ -916,7 +916,7 @@
     <div class="modal-dialog modal-dialog-centered modal-dialog-pengadaan">
         <form action="{{ route('pengadaan.store') }}" method="POST" enctype="multipart/form-data" class="modal-content">
             @csrf
-            <div class="modal-header text-white py-2" style="background-color: #1b3152;">
+            <div class="modal-header text-white py-2" style="background-color: var(--sl-primary);">
                 <h6 class="modal-title mb-0 fs-6">Form Pengajuan Pengadaan Bahan</h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -991,7 +991,7 @@
 <div class="modal fade" id="exportPdfModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-dialog-pengadaan">
         <form action="{{ route('pengadaan.exportPdf') }}" method="GET" target="_blank" class="modal-content">
-            <div class="modal-header text-white py-2" style="background-color: #1b3152;">
+            <div class="modal-header text-white py-2" style="background-color: var(--sl-primary);">
                 <h6 class="modal-title mb-0 fs-6">Export Laporan Pengadaan</h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>

@@ -78,7 +78,7 @@
             text: btn.dataset.swalConfirm,
             icon: btn.dataset.swalIcon || (danger ? 'warning' : 'question'),
             showCancelButton: true,
-            confirmButtonColor: danger ? '#d33' : '#1b3152',
+            confirmButtonColor: danger ? '#d33' : '#1a7fc4',
             cancelButtonColor: '#6c757d',
             confirmButtonText: btn.dataset.swalOk || 'Ya, Lanjutkan',
             cancelButtonText: 'Batal',

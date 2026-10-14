@@ -6,7 +6,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <div>
-        <h4 class="fw-bold mb-0" style="color:#1b3152;">{{ $p->kode }}</h4>
+        <h4 class="fw-bold mb-0" style="color:var(--sl-primary);">{{ $p->kode }}</h4>
         <span class="badge bg-{{ $warna }}">{{ $label }}</span>
         @if($p->terlambat)<span class="badge bg-danger">Terlambat</span>@endif
     </div>

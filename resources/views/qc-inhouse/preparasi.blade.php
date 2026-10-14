@@ -74,7 +74,7 @@
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
-        background-color: rgba(27, 49, 82, 0.15) !important;
+        background-color: rgba(26, 127, 196, 0.15) !important;
         color: #000000 !important;
         text-decoration: none !important;
     }
@@ -112,7 +112,7 @@
     }
 
     .step-badge {
-        background-color: #1b3152;
+        background-color: var(--sl-primary);
         color: #ffffff !important;
         font-size: 0.68rem;
         font-weight: 600;
@@ -146,8 +146,8 @@
 
     .form-control:focus,
     .form-select:focus {
-        border-color: #1b3152;
-        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+        border-color: var(--sl-primary);
+        box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.15);
     }
 
     .select2-container--bootstrap-5 .select2-selection {
@@ -182,7 +182,7 @@
 
     .select2-container--bootstrap-5 .select2-dropdown .select2-results__option[aria-selected="true"],
     .select2-container--bootstrap-5 .select2-dropdown .select2-results__option--selected {
-        background-color: rgba(27, 49, 82, 0.18) !important;
+        background-color: rgba(26, 127, 196, 0.18) !important;
         color: #000000 !important;
     }
 
@@ -199,17 +199,17 @@
     .select2-dropdown .select2-results__option:hover,
     .select2-dropdown .select2-results__option--highlighted,
     .select2-dropdown .select2-results__option--highlighted[aria-selected] {
-        background-color: rgba(27, 49, 82, 0.15) !important;
+        background-color: rgba(26, 127, 196, 0.15) !important;
         color: #000000 !important;
     }
 
     .icon-corporate {
-        color: #1b3152;
+        color: var(--sl-primary);
     }
 
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
 
@@ -266,7 +266,7 @@
     }
 
     .sop-card {
-        background-color: #1b3152;
+        background-color: var(--sl-primary);
         color: #ffffff;
         border: 0 !important;
     }

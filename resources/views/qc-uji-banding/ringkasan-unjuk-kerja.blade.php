@@ -74,7 +74,7 @@
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
-        background-color: rgba(27, 49, 82, 0.15) !important;
+        background-color: rgba(26, 127, 196, 0.15) !important;
         color: #000000 !important;
         text-decoration: none !important;
     }
@@ -95,7 +95,7 @@
 
     .table thead th {
         font-size: 0.75rem !important;
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         border-color: #ffffff !important;
         text-align: center !important;
@@ -106,8 +106,8 @@
     }
 
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
 
@@ -120,13 +120,13 @@
     }
 
     .btn-outline-corporate {
-        color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
     }
 
     .btn-outline-corporate:hover,
     .btn-outline-corporate:focus {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
 
@@ -154,7 +154,7 @@
     .detail-heading {
         font-size: 0.9rem;
         font-weight: 700;
-        color: #1b3152;
+        color: var(--sl-primary);
         margin-bottom: 0;
     }
 
@@ -211,7 +211,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div>
             <h5 class="fw-bold mb-0" style="font-size: 1.1rem;">
-                <i class="fas fa-chart-bar me-2" style="color: #1b3152;"></i>Ringkasan Unjuk Kerja
+                <i class="fas fa-chart-bar me-2" style="color: var(--sl-primary);"></i>Ringkasan Unjuk Kerja
             </h5>
             <p class="text-muted mb-0" style="font-size: 0.75rem;">{{ $program->nama_program }} — {{ $program->kode_sampel }}</p>
         </div>
@@ -390,7 +390,7 @@
 <div class="modal fade" id="modalPilihEvaluasi" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow">
-            <div class="modal-header text-white" style="background-color: #1b3152;">
+            <div class="modal-header text-white" style="background-color: var(--sl-primary);">
                 <h5 class="modal-title" style="font-size: 1rem;"><i class="fas fa-list-check me-2"></i>Pilih Parameter Uji</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -439,7 +439,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     datasets: [{
                         label: 'Z Score',
                         data: data.map((v, i) => v !== null ? { x: i, y: v } : null).filter(v => v !== null),
-                        backgroundColor: '#1b3152',
+                        backgroundColor: '#1a7fc4',
                         borderColor: '#ffffff',
                         borderWidth: 2,
                         pointRadius: isMobile ? 5 : 7,

@@ -27,13 +27,13 @@
     .qc-page { padding: 4px 20px !important; }
 
     .qc-page .btn-corporate-blue {
-        background-color: #1b3152 !important; border-color: #1b3152 !important; color: #fff !important;
+        background-color: var(--sl-primary) !important; border-color: var(--sl-primary) !important; color: #fff !important;
     }
     .qc-page .btn-corporate-blue:hover, .qc-page .btn-corporate-blue:focus, .qc-page .btn-corporate-blue:active {
         background-color: #14253e !important; border-color: #14253e !important; color: #fff !important;
     }
-    .qc-page .btn-outline-corporate { color: #1b3152 !important; border: 1px solid #1b3152 !important; background: #fff !important; }
-    .qc-page .btn-outline-corporate:hover { background-color: #1b3152 !important; color: #fff !important; }
+    .qc-page .btn-outline-corporate { color: var(--sl-primary) !important; border: 1px solid var(--sl-primary) !important; background: #fff !important; }
+    .qc-page .btn-outline-corporate:hover { background-color: var(--sl-primary) !important; color: #fff !important; }
 
     .qc-page .select2-container--bootstrap-5 .select2-selection { font-size: 0.8rem; min-height: 0; padding: 0.2rem 0.4rem; }
 
@@ -57,7 +57,7 @@
 
     <div class="mt-2 mb-3">
         <h5 class="fw-bold mb-0" style="font-size: 1.1rem;">
-            <i class="fas fa-clipboard-check me-2" style="color: #1b3152;"></i>Verifikasi Administratif
+            <i class="fas fa-clipboard-check me-2" style="color: var(--sl-primary);"></i>Verifikasi Administratif
         </h5>
         <div class="text-muted" style="font-size: 0.78rem;">Botol: <strong>{{ $katalog->nomor_lot }}</strong> — {{ $katalog->nama_produk }}</div>
     </div>
@@ -81,7 +81,7 @@
         <div class="col-12 col-lg-4">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
-                    <h5 class="fw-bold mb-0"><i class="fas fa-info-circle me-2" style="color: #1b3152;"></i>Informasi Botol</h5>
+                    <h5 class="fw-bold mb-0"><i class="fas fa-info-circle me-2" style="color: var(--sl-primary);"></i>Informasi Botol</h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-borderless table-sm mb-2">
@@ -133,7 +133,7 @@
         <div class="col-12 col-lg-8">
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
-                    <h5 class="fw-bold mb-0"><i class="fas fa-list-check me-2" style="color: #1b3152;"></i>Checklist Verifikasi</h5>
+                    <h5 class="fw-bold mb-0"><i class="fas fa-list-check me-2" style="color: var(--sl-primary);"></i>Checklist Verifikasi</h5>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('crm-katalog.verifikasi-administratif.store', $katalog->id) }}" method="POST">

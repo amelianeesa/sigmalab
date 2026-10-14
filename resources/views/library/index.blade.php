@@ -32,7 +32,7 @@
         font-size: 0.72rem !important;
     }
     .library-table thead th { 
-        background-color: #1b3152 !important; 
+        background-color: var(--sl-primary) !important; 
         border-color: #ffffff !important; 
         color: #fff !important; 
         font-size: 0.72rem !important; 
@@ -87,8 +87,8 @@
         border-radius: 6px;
     }
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
     .btn-corporate-blue:hover, 
@@ -415,7 +415,7 @@
 <div class="modal fade" id="modalPreviewDokumen" tabindex="-1" aria-labelledby="modalPreviewDokumenLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl modal-fullscreen-sm-down">
         <div class="modal-content">
-            <div class="modal-header py-2 text-white" style="background-color: #1b3152;">
+            <div class="modal-header py-2 text-white" style="background-color: var(--sl-primary);">
                 <h5 class="modal-title fs-6" id="modalPreviewDokumenLabel">Pratinjau Dokumen</h5>
                 <button type="button" class="btn-close btn-close-white btn-sm" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>

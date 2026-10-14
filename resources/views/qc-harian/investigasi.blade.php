@@ -79,7 +79,7 @@
     }
 
     .icon-corporate {
-        color: #1b3152;
+        color: var(--sl-primary);
     }
 
     .dashboard-container .alert-danger {
@@ -157,7 +157,7 @@
         margin-bottom: 6px;
         font-size: 0.8rem;
         font-weight: 700;
-        color: #1b3152 !important;
+        color: var(--sl-primary) !important;
     }
 
     .lock-card p {
@@ -192,8 +192,8 @@
     }
 
     .dashboard-container .form-control:focus {
-        border-color: #1b3152;
-        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+        border-color: var(--sl-primary);
+        box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.15);
     }
 
     .dashboard-container .form-text {
@@ -221,8 +221,8 @@
     }
 
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border: 1px solid #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border: 1px solid var(--sl-primary) !important;
         color: #ffffff !important;
     }
 

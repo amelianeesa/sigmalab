@@ -18,8 +18,8 @@
         border: 1px solid #e3e6f0;
     }
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
     .btn-corporate-blue:hover,
@@ -49,7 +49,7 @@
             </a>
 
             @if($canModify)
-                <a href="{{ route('evaluasi-kalibrasi.edit', $evaluasi->evaluasi_id) }}" class="btn btn-sm text-nowrap py-1 px-2 shadow-sm d-flex align-items-center text-white" style="background-color: #1b3152 !important; border-color: #1b3152 !important; font-size: 11px; gap: 5px;">
+                <a href="{{ route('evaluasi-kalibrasi.edit', $evaluasi->evaluasi_id) }}" class="btn btn-sm text-nowrap py-1 px-2 shadow-sm d-flex align-items-center text-white" style="background-color: var(--sl-primary) !important; border-color: var(--sl-primary) !important; font-size: 11px; gap: 5px;">
                     <i class="fas fa-edit text-white"></i> <span class="text-white">Edit</span>
                 </a>
 
@@ -61,7 +61,7 @@
     </div>
 
     <div class="card shadow-sm card-shadow-custom bg-white">
-        <div class="card-header text-white fw-bold py-2 px-3 d-flex align-items-center" style="background-color: #1b3152; font-size: 0.85rem;">
+        <div class="card-header text-white fw-bold py-2 px-3 d-flex align-items-center" style="background-color: var(--sl-primary); font-size: 0.85rem;">
             Informasi Detail Evaluasi Kalibrasi
         </div>
         <div class="card-body">
@@ -91,7 +91,7 @@
                     <td class="fw-bold text-secondary">Laporan Evaluasi</td>
                     <td>:
                         @if($evaluasi->file_laporan)
-                            <a href="{{ asset('storage/' . $evaluasi->file_laporan) }}" target="_blank" class="btn btn-sm text-nowrap py-1 px-2 shadow-sm d-inline-flex align-items-center text-white" style="background-color: #1b3152 !important; border-color: #1b3152 !important; font-size: 11px; gap: 5px;">
+                            <a href="{{ asset('storage/' . $evaluasi->file_laporan) }}" target="_blank" class="btn btn-sm text-nowrap py-1 px-2 shadow-sm d-inline-flex align-items-center text-white" style="background-color: var(--sl-primary) !important; border-color: var(--sl-primary) !important; font-size: 11px; gap: 5px;">
                                 <i class="fas fa-file-pdf text-white"></i> <span class="text-white">Lihat Dokumen</span>
                             </a>
                         @else

@@ -76,7 +76,7 @@
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
-        background-color: rgba(27, 49, 82, 0.15) !important;
+        background-color: rgba(26, 127, 196, 0.15) !important;
         color: #000000 !important;
         text-decoration: none !important;
     }
@@ -115,7 +115,7 @@
     }
 
     .step-badge {
-        background-color: #1b3152;
+        background-color: var(--sl-primary);
         color: #ffffff !important;
         font-size: 0.68rem;
         font-weight: 600;
@@ -125,7 +125,7 @@
     }
 
     .icon-corporate {
-        color: #1b3152;
+        color: var(--sl-primary);
     }
 
     .param-tabs {
@@ -151,13 +151,13 @@
     }
 
     .param-tabs .nav-link:hover {
-        background-color: rgba(27, 49, 82, 0.08);
-        color: #1b3152;
+        background-color: rgba(26, 127, 196, 0.08);
+        color: var(--sl-primary);
     }
 
     .param-tabs .nav-link.active {
-        background-color: #1b3152;
-        border-color: #1b3152;
+        background-color: var(--sl-primary);
+        border-color: var(--sl-primary);
         color: #ffffff;
     }
 
@@ -183,7 +183,7 @@
         font-size: 1.5rem;
         font-weight: 700;
         line-height: 1.2;
-        color: #1b3152;
+        color: var(--sl-primary);
     }
 
     .stat-note {
@@ -248,8 +248,8 @@
     }
 
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
 
@@ -290,7 +290,7 @@
     }
 
     .sop-card {
-        background-color: #1b3152;
+        background-color: var(--sl-primary);
         color: #ffffff;
         border: 0 !important;
     }
@@ -337,7 +337,7 @@
 
     .sop-card .sop-note {
         background-color: #ffffff;
-        color: #1b3152;
+        color: var(--sl-primary);
         border-radius: 6px;
         padding: 8px 10px;
         font-size: 0.76rem;
@@ -347,7 +347,7 @@
     }
 
     .sop-card .sop-note strong {
-        color: #1b3152;
+        color: var(--sl-primary);
     }
 
     @media (min-width: 992px) {

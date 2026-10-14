@@ -9,7 +9,7 @@
         max-width: 1250px;
     }
     .card-header-custom {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: white !important;
         font-weight: bold;
         font-size: 0.9rem !important;
@@ -18,7 +18,7 @@
     .table-header-custom, 
     .table-header-custom th, 
     .table-header-custom tr {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         border-color: #2c4975 !important;
         font-size: 0.7rem !important;
@@ -46,15 +46,15 @@
         padding: 0.2rem 0.4rem !important;
     }
     .btn-custom-outline {
-        color: #1b3152;
-        border-color: #1b3152;
+        color: var(--sl-primary);
+        border-color: var(--sl-primary);
         background-color: transparent;
         transition: all 0.2s ease-in-out;
     }
     .btn-custom-outline:hover {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
-        border-color: #1b3152 !important;
+        border-color: var(--sl-primary) !important;
     }
     .pagination .page-link {
         font-size: 0.72rem;

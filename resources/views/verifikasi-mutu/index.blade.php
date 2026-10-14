@@ -21,7 +21,7 @@
     }
     .table thead th {
         font-size: 0.75rem !important;
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         border-color: #ffffff !important;
         white-space: nowrap;
@@ -31,8 +31,8 @@
     }
 
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
     .btn-corporate-blue:hover,
@@ -76,8 +76,8 @@
         align-items: center;
         justify-content: center;
         border-radius: 50%;
-        background-color: rgba(27, 49, 82, 0.08);
-        color: #1b3152;
+        background-color: rgba(26, 127, 196, 0.08);
+        color: var(--sl-primary);
         font-size: 2.3rem;
         margin-bottom: 18px;
     }
@@ -103,9 +103,9 @@
     .pillar-card .pillar-actions .badge {
         font-size: 0.75rem;
         padding: 6px 12px;
-        color: #1b3152;
+        color: var(--sl-primary);
         background: #fff;
-        border: 1px solid #1b3152 !important;
+        border: 1px solid var(--sl-primary) !important;
     }
     .hover-lift {
         transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
@@ -169,7 +169,7 @@
             text-align: right !important; border: 0 !important; padding: 5px 0 !important; background: transparent !important;
         }
         .table-stack td[data-label]::before {
-            content: attr(data-label); font-weight: 600; color: #1b3152; text-align: left; flex-shrink: 0; max-width: 45%;
+            content: attr(data-label); font-weight: 600; color: var(--sl-primary); text-align: left; flex-shrink: 0; max-width: 45%;
         }
         .table-stack td.td-aksi {
             justify-content: flex-end; border-top: 1px solid #eee !important; margin-top: 4px; padding-top: 8px !important;
@@ -190,11 +190,10 @@
 
 <div class="container-fluid dashboard-container" style="font-size: 0.82rem;">
 
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-2 mb-3 gap-2">
-        <div>
-            <h5 class="fw-bold mb-0" style="font-size: 1.1rem;">Portal Verifikasi Mutu (QC)</h5>
-            <p class="text-muted mb-0" style="font-size: 0.72rem;">Silakan pilih pilar Quality Control yang ingin Anda kelola.</p>
-        </div>
+    <x-maskot-banner nama="chemist" judul="Portal Verifikasi Mutu (QC)"
+        sub="Silakan pilih pilar Quality Control yang ingin Anda kelola." />
+
+    <div class="d-flex flex-column flex-md-row justify-content-md-end align-items-md-center mb-3 gap-2">
         <div class="d-grid d-md-flex">
             <a href="{{ route('parameter-uji.index') }}" class="btn btn-outline-secondary btn-sm py-1.5 px-3 shadow-sm fw-semibold" style="font-size: 0.8rem;">
                 <i class="fas fa-cogs me-1"></i> Master Parameter Uji

@@ -74,7 +74,7 @@
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
-        background-color: rgba(27, 49, 82, 0.15) !important;
+        background-color: rgba(26, 127, 196, 0.15) !important;
         color: #000000 !important;
         text-decoration: none !important;
     }
@@ -95,7 +95,7 @@
 
     .table thead th {
         font-size: 0.75rem !important;
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         border-color: #ffffff !important;
         text-align: center !important;
@@ -110,8 +110,8 @@
     }
 
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
 
@@ -124,13 +124,13 @@
     }
 
     .btn-outline-corporate {
-        color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
     }
 
     .btn-outline-corporate:hover,
     .btn-outline-corporate:focus {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
 
@@ -294,7 +294,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <h5 class="fw-bold mb-0" style="font-size: 1.1rem;">
-            <i class="fas fa-flask me-2" style="color: #1b3152;"></i>QC In-House
+            <i class="fas fa-flask me-2" style="color: var(--sl-primary);"></i>QC In-House
         </h5>
 
         <div class="header-actions d-grid d-md-flex align-items-center gap-2">

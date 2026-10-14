@@ -3,14 +3,15 @@
 
 @section('content')
 <div class="container-fluid px-4">
-    <div class="d-sm-flex align-items-center justify-content-between mb-4 mt-4">
+    <x-maskot-banner nama="laporan" judul="Laporan Quality Control"
+        sub="Ringkasan hasil verifikasi mutu yang bisa diekspor ke PDF." class="mt-3" />
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <div>
             <ol class="breadcrumb mb-1 mt-3">
                 <li class="breadcrumb-item"><a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a></li>
                 <li class="breadcrumb-item"><a href="{{ route('kegiatan.index') }}" class="text-decoration-none">Verifikasi Mutu</a></li>
                 <li class="breadcrumb-item active">Laporan QC</li>
             </ol>
-    <h1 class="h3 mb-0 text-gray-800 fw-bold">Laporan Quality Control</h1>
         </div>
         <a href="{{ route('reporting.pdf') }}" class="d-none d-sm-inline-block btn btn-primary shadow-sm rounded-3 px-3 py-2">
             <i class="fas fa-file-pdf fa-sm text-white-50 me-1"></i> Export Laporan QC (PDF)

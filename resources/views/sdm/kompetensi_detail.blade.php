@@ -25,7 +25,7 @@
         }
 
         .table thead th {
-            background-color: #1b3152 !important;
+            background-color: var(--sl-primary) !important;
             color: #ffffff !important;
             padding: 8px 6px;
             font-size: 0.7rem;
@@ -62,8 +62,8 @@
         }
 
         .btn-corporate-outline {
-            color: #1b3152;
-            border-color: #1b3152;
+            color: var(--sl-primary);
+            border-color: var(--sl-primary);
             background-color: transparent;
             font-size: 0.68rem;
             transition: all 0.2s ease-in-out;
@@ -71,8 +71,8 @@
         .btn-corporate-outline:hover,
         .btn-corporate-outline:focus,
         .btn-corporate-outline:active {
-            background-color: #1b3152 !important;
-            border-color: #1b3152 !important;
+            background-color: var(--sl-primary) !important;
+            border-color: var(--sl-primary) !important;
             color: #ffffff !important;
         }
         .btn-corporate-outline:hover i,
@@ -250,7 +250,7 @@
                 <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden" style="font-size: 0.78rem;">
                     <form action="{{ route('sdm.kompetensi.store', $personil->personil_id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
-                        <div class="modal-header text-white py-1.5 px-3" style="background-color: #1b3152 !important;">
+                        <div class="modal-header text-white py-1.5 px-3" style="background-color: var(--sl-primary) !important;">
                             <h5 class="modal-title fw-bold text-white mb-0" id="modalTambahSertifikasiLabel" style="font-size: 0.9rem;">Tambah Sertifikasi / Pelatihan</h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
@@ -282,7 +282,7 @@
                         </div>
                         <div class="modal-footer bg-light py-1.5 px-3">
                             <button type="button" class="btn btn-secondary btn-sm py-1 px-3" data-bs-dismiss="modal" style="font-size: 0.73rem;">Batal</button>
-                            <button type="submit" class="btn btn-sm py-1 px-3 text-white" style="background-color: #1b3152; font-size: 0.73rem;"><i class="fas fa-save me-1"></i> Simpan</button>
+                            <button type="submit" class="btn btn-sm py-1 px-3 text-white" style="background-color: var(--sl-primary); font-size: 0.73rem;"><i class="fas fa-save me-1"></i> Simpan</button>
                         </div>
                     </form>
                 </div>
@@ -295,7 +295,7 @@
                     <form id="formEditSertifikasi" action="" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
-                        <div class="modal-header text-white py-1.5 px-3" style="background-color: #1b3152 !important;">
+                        <div class="modal-header text-white py-1.5 px-3" style="background-color: var(--sl-primary) !important;">
                             <h5 class="modal-title fw-bold text-white mb-0" id="modalEditSertifikasiLabel" style="font-size: 0.9rem;"><i class="fas fa-edit me-1"></i>Edit Sertifikasi / Pelatihan</h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
@@ -327,7 +327,7 @@
                         </div>
                         <div class="modal-footer bg-light py-1.5 px-3">
                             <button type="button" class="btn btn-secondary btn-sm py-1 px-3" data-bs-dismiss="modal" style="font-size: 0.73rem;">Batal</button>
-                            <button type="submit" class="btn btn-sm py-1 px-3 text-white" style="background-color: #1b3152; font-size: 0.73rem;"><i class="fas fa-save me-1"></i> Perbarui</button>
+                            <button type="submit" class="btn btn-sm py-1 px-3 text-white" style="background-color: var(--sl-primary); font-size: 0.73rem;"><i class="fas fa-save me-1"></i> Perbarui</button>
                         </div>
                     </form>
                 </div>

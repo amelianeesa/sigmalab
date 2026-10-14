@@ -21,8 +21,8 @@
         padding: 12px !important;
     }
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
     .btn-corporate-blue:hover, 

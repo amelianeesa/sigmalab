@@ -12,7 +12,7 @@
     }
     .table thead th {
         font-size: 0.78rem !important;
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         border-color: #dee2e6 !important;
     }
@@ -20,8 +20,8 @@
         border-color: #dee2e6;
     }
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
     .btn-corporate-blue:hover,
@@ -32,27 +32,27 @@
         color: #ffffff !important;
     }
     .btn-outline-primary-birdong {
-        color: #1b3152 !important;
+        color: var(--sl-primary) !important;
         background-color: transparent !important;
-        border-color: #1b3152 !important;
+        border-color: var(--sl-primary) !important;
     }
     .btn-outline-primary-birdong:hover,
     .btn-outline-primary-birdong:focus,
     .btn-outline-primary-birdong:active {
         color: #ffffff !important;
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
     }
     .btn-lihat-arsip {
         background-color: #eef2f8;
         border: 1px solid #c5d0e3;
-        color: #1b3152;
+        color: var(--sl-primary);
     }
     .btn-lihat-arsip:hover,
     .btn-lihat-arsip:focus,
     .btn-lihat-arsip:active {
-        background-color: #1b3152;
-        border-color: #1b3152;
+        background-color: var(--sl-primary);
+        border-color: var(--sl-primary);
         color: #ffffff;
     }
     .btn-abu {
@@ -89,11 +89,11 @@
     .filter-bar .form-label {
         margin-bottom: 2px;
         font-weight: 600;
-        color: #1b3152;
+        color: var(--sl-primary);
     }
     .filter-bar .form-control:focus {
-        border-color: #1b3152;
-        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+        border-color: var(--sl-primary);
+        box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.15);
     }
 
     .table-responsive {
@@ -110,7 +110,7 @@
     }
 
     thead th.sticky-alat {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         z-index: 4;
     }
 
@@ -322,7 +322,7 @@
     <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
         <div class="modal-content shadow text-center p-3">
             <div class="pt-2 pb-1">
-                <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background-color: #eef2f8; color: #1b3152; font-size: 26px; border: 2px solid #d5deee;">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px; background-color: #eef2f8; color: var(--sl-primary); font-size: 26px; border: 2px solid #d5deee;">
                     <i class="fas fa-exclamation"></i>
                 </div>
             </div>

@@ -55,7 +55,7 @@
         vertical-align: middle;
     }
     .table-pemeliharaan thead th {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         border-right: 1px solid #ffffff !important;
     }
@@ -89,7 +89,7 @@
         background-color: #3b5f93 !important;
         color: #ffffff !important;
         transform: translateY(-1px) !important;
-        box-shadow: 0 4px 8px rgba(27, 49, 82, 0.3) !important;
+        box-shadow: 0 4px 8px rgba(26, 127, 196, 0.3) !important;
     }
 
     .btn-action-hover.btn-kembali {
@@ -124,8 +124,8 @@
     .btn-bulan.show {
         background-color: #ffffff !important;
         color: #212529 !important;
-        border-color: #1b3152 !important;
-        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15) !important;
+        border-color: var(--sl-primary) !important;
+        box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.15) !important;
     }
     .dropdown-menu-bulan {
         width: 100%;
@@ -141,12 +141,12 @@
     }
     .dropdown-menu-bulan .dropdown-item:hover,
     .dropdown-menu-bulan .dropdown-item:focus {
-        background-color: rgba(27, 49, 82, 0.1);
-        color: #1b3152;
+        background-color: rgba(26, 127, 196, 0.1);
+        color: var(--sl-primary);
     }
     .dropdown-menu-bulan .dropdown-item.active,
     .dropdown-menu-bulan .dropdown-item.active:hover {
-        background-color: #1b3152;
+        background-color: var(--sl-primary);
         color: #ffffff;
     }
 
@@ -194,7 +194,7 @@
         </div>
         <div class="d-flex gap-2">
             @if($canManagePemeliharaan)
-            <a href="{{ route('alat.item-pemeliharaan.edit', $alat->alat_id) }}" class="btn btn-sm text-white btn-action-hover" style="background-color: #1b3152;">
+            <a href="{{ route('alat.item-pemeliharaan.edit', $alat->alat_id) }}" class="btn btn-sm text-white btn-action-hover" style="background-color: var(--sl-primary);">
                 <i class="fas fa-list-ol me-1"></i> Atur Jenis Pemeliharaan
             </a>
             @endif
@@ -278,7 +278,7 @@
                 </div>
                 <div class="col-md-7 text-end">
                     <div class="dropdown">
-                        <button class="btn btn-sm text-white dropdown-toggle btn-action-hover" type="button" id="dropdownDownload" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: #1b3152;">
+                        <button class="btn btn-sm text-white dropdown-toggle btn-action-hover" type="button" id="dropdownDownload" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: var(--sl-primary);">
                             <i class="fa fa-download me-1"></i> Unduh Laporan Pemeliharaan
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm py-2" aria-labelledby="dropdownDownload">
@@ -305,18 +305,18 @@
                 <table class="table table-bordered text-center align-middle table-pemeliharaan">
                     <thead class="text-white">
                         <tr class="text-center">
-                            <th rowspan="2" class="align-middle text-white" style="width: 45px; background-color: #1b3152 !important; border-right: 1px solid #ffffff !important;">Tanggal</th>
-                            <th colspan="{{ $jumlahKolom }}" class="text-white th-nowrap" style="background-color: #1b3152 !important; border-right: 1px solid #ffffff !important;">Jenis Pemeriksaan / Status</th>
-                            <th rowspan="2" class="align-middle text-white" style="width: 180px; background-color: #1b3152 !important; border-right: 1px solid #ffffff !important;">Tindakan</th>
-                            <th rowspan="2" class="align-middle text-white" style="width: 120px; background-color: #1b3152 !important; border-right: 1px solid #ffffff !important;">Petugas</th>
+                            <th rowspan="2" class="align-middle text-white" style="width: 45px; background-color: var(--sl-primary) !important; border-right: 1px solid #ffffff !important;">Tanggal</th>
+                            <th colspan="{{ $jumlahKolom }}" class="text-white th-nowrap" style="background-color: var(--sl-primary) !important; border-right: 1px solid #ffffff !important;">Jenis Pemeriksaan / Status</th>
+                            <th rowspan="2" class="align-middle text-white" style="width: 180px; background-color: var(--sl-primary) !important; border-right: 1px solid #ffffff !important;">Tindakan</th>
+                            <th rowspan="2" class="align-middle text-white" style="width: 120px; background-color: var(--sl-primary) !important; border-right: 1px solid #ffffff !important;">Petugas</th>
                         </tr>
                         <tr class="text-center">
                             @if($totalItems > 0)
                                 @foreach($alat->itemPemeliharaan as $index => $item)
-                                    <th class="text-white" style="width: 30px; background-color: #1b3152 !important; border-right: 1px solid #ffffff !important;" title="{{ $item->nama_pemeliharaan }}">{{ $item->nomor_urut }}</th>
+                                    <th class="text-white" style="width: 30px; background-color: var(--sl-primary) !important; border-right: 1px solid #ffffff !important;" title="{{ $item->nama_pemeliharaan }}">{{ $item->nomor_urut }}</th>
                                 @endforeach
                             @else
-                                <th class="text-white" style="width: 30px; background-color: #1b3152 !important; border-right: 1px solid #ffffff !important;">-</th>
+                                <th class="text-white" style="width: 30px; background-color: var(--sl-primary) !important; border-right: 1px solid #ffffff !important;">-</th>
                             @endif
                         </tr>
                     </thead>

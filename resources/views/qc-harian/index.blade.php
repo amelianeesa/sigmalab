@@ -74,7 +74,7 @@
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:focus,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item:active,
     .dashboard-container .breadcrumb .breadcrumb-item .dropdown-menu .dropdown-item.active {
-        background-color: rgba(27, 49, 82, 0.15) !important;
+        background-color: rgba(26, 127, 196, 0.15) !important;
         color: #000000 !important;
         text-decoration: none !important;
     }
@@ -96,7 +96,7 @@
     }
 
     .icon-corporate {
-        color: #1b3152 !important;
+        color: var(--sl-primary) !important;
     }
 
     .card-body {
@@ -111,7 +111,7 @@
 
     .table thead th {
         font-size: 0.75rem !important;
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         border-color: #ffffff !important;
         text-align: center !important;
@@ -126,7 +126,7 @@
     }
 
     .table .text-primary {
-        color: #1b3152 !important;
+        color: var(--sl-primary) !important;
     }
 
     .table-bordered > :not(caption) > * > * {
@@ -143,8 +143,8 @@
     }
 
     .btn-corporate-blue {
-        background-color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
 
@@ -157,15 +157,15 @@
     }
 
     .btn-outline-corporate {
-        color: #1b3152 !important;
-        border-color: #1b3152 !important;
+        color: var(--sl-primary) !important;
+        border-color: var(--sl-primary) !important;
         background-color: #ffffff;
     }
 
     .btn-outline-corporate:hover,
     .btn-outline-corporate:focus,
     .btn-outline-corporate:active {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
     }
 
@@ -194,8 +194,8 @@
     .dashboard-container .form-select:focus,
     .modal .form-control:focus,
     .modal .form-select:focus {
-        border-color: #1b3152;
-        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+        border-color: var(--sl-primary);
+        box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.15);
     }
 
     .form-label {
@@ -209,13 +209,13 @@
     }
 
     .form-check-input:checked {
-        background-color: #1b3152;
-        border-color: #1b3152;
+        background-color: var(--sl-primary);
+        border-color: var(--sl-primary);
     }
 
     .form-check-input:focus {
-        border-color: #1b3152;
-        box-shadow: 0 0 0 0.15rem rgba(27, 49, 82, 0.15);
+        border-color: var(--sl-primary);
+        box-shadow: 0 0 0 0.15rem rgba(26, 127, 196, 0.15);
     }
 
     .dashboard-container .alert {
@@ -241,7 +241,7 @@
     }
 
     .modal-header.modal-corporate {
-        background-color: #1b3152;
+        background-color: var(--sl-primary);
         color: #ffffff;
         padding: 0.55rem 0.9rem;
     }
@@ -335,12 +335,12 @@
     }
 
     .dataTables_wrapper .page-item .page-link:hover {
-        background-color: rgba(27, 49, 82, 0.1);
-        color: #1b3152;
+        background-color: rgba(26, 127, 196, 0.1);
+        color: var(--sl-primary);
     }
 
     .dataTables_wrapper .page-item.active .page-link {
-        background-color: #1b3152 !important;
+        background-color: var(--sl-primary) !important;
         color: #ffffff !important;
         font-weight: 700;
         border-radius: 0;
@@ -1044,7 +1044,7 @@
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#dc3545', 
-                cancelButtonColor: '#1b3152', 
+                cancelButtonColor: '#1a7fc4', 
                 confirmButtonText: '<i class="fas fa-trash-alt me-1"></i> Ya, Hapus!',
                 cancelButtonText: 'Batal'
             }).then((result) => {

@@ -12,7 +12,7 @@
         .table thead, 
         .table thead tr, 
         .table thead th {
-            background-color: #1b3152 !important;
+            background-color: var(--sl-primary) !important;
             color: #ffffff !important;
             border-color: #ffffff !important;
             vertical-align: middle !important;
@@ -31,8 +31,8 @@
             border-color: #dee2e6 !important;
         }
         .btn-corporate-dark {
-            background-color: #1b3152 !important;
-            border-color: #1b3152 !important;
+            background-color: var(--sl-primary) !important;
+            border-color: var(--sl-primary) !important;
             color: #ffffff !important;
         }
         .btn-corporate-dark:hover, 
@@ -43,15 +43,15 @@
             color: #ffffff !important;
         }
         .btn-corporate-outline {
-            color: #1b3152;
-            border-color: #1b3152;
+            color: var(--sl-primary);
+            border-color: var(--sl-primary);
             background-color: transparent;
         }
         .btn-corporate-outline:hover,
         .btn-corporate-outline:focus,
         .btn-corporate-outline:active {
-            background-color: #1b3152 !important;
-            border-color: #1b3152 !important;
+            background-color: var(--sl-primary) !important;
+            border-color: var(--sl-primary) !important;
             color: #ffffff !important;
         }
         .sdm-action-btn {
@@ -101,7 +101,7 @@
             border-radius: 6px;
         }
         .sdm-table-wrap::-webkit-scrollbar-thumb {
-            background: #1b3152;
+            background: var(--sl-primary);
             border-radius: 6px;
         }
         .sdm-table-wrap::-webkit-scrollbar-thumb:hover {
@@ -110,7 +110,7 @@
         @supports not selector(::-webkit-scrollbar) {
             .sdm-table-wrap {
                 scrollbar-width: thin;
-                scrollbar-color: #1b3152 #e9ecef;
+                scrollbar-color: var(--sl-primary) #e9ecef;
             }
         }
     </style>
@@ -152,7 +152,8 @@
         @endif
 
         <div class="mb-2">
-            <h4 class="mb-2 fw-bold" style="font-size: 1.1rem;">Data Personil & Sertifikasi</h4>
+            <x-maskot-banner nama="analist" judul="Data Personil & Sertifikasi"
+                sub="Kelola data chemist, analist, preparator, dan sampler beserta masa berlaku sertifikasinya." />
 
             <div class="row g-2 align-items-center">
                 <div class="col-md-3 col-sm-6">
@@ -521,7 +522,7 @@
 
                         @csrf
 
-                        <div class="modal-header text-white py-1.5 px-3" style="background-color: #1b3152 !important; position: relative; z-index: 2;">
+                        <div class="modal-header text-white py-1.5 px-3" style="background-color: var(--sl-primary) !important; position: relative; z-index: 2;">
                             <h5 class="modal-title fw-bold text-white mb-0" id="modalTambahPersonilLabel" style="font-size: 0.95rem;">
                                 <i class="fas fa-user-plus me-1"></i>
                                 Tambah Personil
@@ -532,6 +533,12 @@
                                 data-bs-dismiss="modal"
                                 aria-label="Close">
                             </button>
+                        </div>
+
+                        {{-- Karakter ikut berganti sesuai kategori yang dipilih --}}
+                        <div class="sl-modal-hero">
+                            <p><strong>Halo! Yuk, tambah anggota tim baru</strong>Lengkapi data induk, lalu sertifikasi dan kompetensinya.</p>
+                            <img id="maskotKategoriTambah" src="{{ asset('images/maskot/analist.webp') }}" alt="" decoding="async">
                         </div>
 
                         <div class="modal-body p-3 bg-white">
@@ -713,7 +720,7 @@
 
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg rounded-3 overflow-hidden" style="font-size: 0.8rem;">
-                    <div class="modal-header text-white py-1.5 px-3" style="background-color: #1b3152 !important;">
+                    <div class="modal-header text-white py-1.5 px-3" style="background-color: var(--sl-primary) !important;">
                         <h5 class="modal-title fw-bold text-white mb-0" id="modalTambahKategoriLabel" style="font-size: 0.95rem;">
                             <i class="fas fa-tags me-1"></i>
                             Kelola Kategori Personil
@@ -820,7 +827,7 @@
 
                         @csrf
 
-                        <div class="modal-header text-white py-1.5 px-3" style="background-color: #1b3152 !important;">
+                        <div class="modal-header text-white py-1.5 px-3" style="background-color: var(--sl-primary) !important;">
                             <h5 class="modal-title fw-bold text-white mb-0" id="modalBuatAkunLabel" style="font-size: 0.95rem;">
                                 <i class="fas fa-user-plus me-1"></i>
                                 Buat Akun Login —
@@ -896,6 +903,28 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+
+            // Karakter di modal Tambah Personil berganti sesuai kategori
+            (function () {
+                const maskotMap = {
+                    chemist: 'chemist', analist: 'analist',
+                    preparator: 'preparator', sampler: 'sampler'
+                };
+                const base = @json(asset('images/maskot')) + '/';
+                const img = document.getElementById('maskotKategoriTambah');
+                const sel = $('#kategoriPersonilTambah');
+                if (!img || !sel.length) return;
+                function gantiMaskot() {
+                    const file = maskotMap[String(sel.val() || '').toLowerCase()] || 'analist';
+                    const tujuan = base + file + '.webp';
+                    if (img.src.endsWith(file + '.webp')) return;
+                    img.classList.add('is-swapping');
+                    setTimeout(function () { img.src = tujuan; img.classList.remove('is-swapping'); }, 180);
+                }
+                sel.on('change', gantiMaskot);
+                gantiMaskot();
+            })();
+
             const modalBuatAkun = document.getElementById('modalBuatAkun');
             if (modalBuatAkun) {
                 modalBuatAkun.addEventListener('show.bs.modal', function (event) {
