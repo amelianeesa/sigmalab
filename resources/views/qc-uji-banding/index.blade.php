@@ -87,6 +87,19 @@
         font-weight: 700 !important;
     }
 
+    .qc-page .qc-header-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .qc-page .qc-header-actions .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+    }
+
     @media (max-width: 767.98px) {
         .qc-page {
             padding-left: 10px !important;
@@ -111,21 +124,46 @@
             font-size: 0.85rem !important;
             padding: 10px 14px;
         }
+
+        .qc-page .qc-header {
+            flex-direction: column;
+            align-items: stretch !important;
+        }
+
+        .qc-page .qc-header .qc-title {
+            margin-bottom: 0;
+        }
+
+        .qc-page .qc-header-actions {
+            flex-wrap: nowrap;
+            width: 100%;
+        }
+
+        .qc-page .qc-header-actions .btn {
+            flex: 1 1 0;
+            min-width: 0;
+            font-size: 0.78rem;
+            padding: 0.45rem 0.5rem !important;
+        }
     }
 </style>
 
 <div class="container-fluid qc-page pb-4">
     <x-qc-breadcrumb active="Uji Banding"></x-qc-breadcrumb>
 
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 qc-header">
         <h5 class="qc-title"><i class="fas fa-balance-scale me-1" style="color: #1b3152;"></i> QC Uji Banding</h5>
 
-        <div class="d-flex flex-wrap gap-2">
+        <div class="qc-header-actions">
             <a href="{{ route('master.toleransi.index') }}" class="btn btn-outline-corporate btn-sm py-1 px-3 shadow-sm fw-semibold">
-                <i class="fas fa-cog me-1"></i> Master Batas Toleransi
+                <i class="fas fa-cog me-1"></i>
+                <span class="d-none d-md-inline">Master Batas Toleransi</span>
+                <span class="d-md-none">Master Toleransi</span>
             </a>
             <a href="{{ route('qc-uji-banding.create') }}" class="btn btn-corporate-blue btn-sm py-1 px-3 shadow-sm fw-semibold">
-                <i class="fas fa-plus me-1"></i> Input Uji Banding Baru
+                <i class="fas fa-plus me-1"></i>
+                <span class="d-none d-md-inline">Input Uji Banding Baru</span>
+                <span class="d-md-none">Input Baru</span>
             </a>
         </div>
     </div>
@@ -208,11 +246,6 @@
                                         <a href="{{ route('qc-uji-banding.show', $prog->id) }}" class="btn btn-corporate-blue btn-sm qc-action-btn shadow-sm" title="Detail" aria-label="Detail">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <!-- @if($menunggu > 0)
-                                            <a href="{{ route('qc-uji-banding.evaluasi.form', $prog->id) }}" class="btn btn-warning btn-sm qc-action-btn shadow-sm" title="Input Hasil Vendor" aria-label="Input Hasil Vendor">
-                                                <i class="fas fa-chart-bar"></i>
-                                            </a>
-                                        @endif -->
                                     @endif
                                 </div>
                             </td>
