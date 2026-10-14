@@ -25,6 +25,8 @@ class EnsurePegawaiTerbatas
         // Kelola sertifikasi & CV milik sendiri (kepemilikan dicek di SdmController).
         'sdm.kompetensi.store', 'sdm.kompetensi.update', 'sdm.kompetensi.destroy',
         'sdm.kompetensi.file.upload', 'sdm.cv.upload',
+        // Tambah barang/bahan (sama seperti Analis Lab). Edit, hapus & pengeluaran tetap tertutup.
+        'barang.create', 'barang.store',
     ];
 
     /** Route yang hanya boleh dibaca (GET/HEAD). */

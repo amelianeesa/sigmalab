@@ -281,6 +281,8 @@
         $allowedManageRoles = ['Koordinator Laboratorium', 'GA', 'Analis Lab', 'Admin Aplikasi'];
         $userRoleName = Auth::user()->role->nama_role ?? '';
         $canManageBarang = in_array($userRoleName, $allowedManageRoles);
+        // Non-Lab boleh menambah barang, tapi belum boleh edit/hapus/pengeluaran.
+        $canTambahBarang = $canManageBarang || $userRoleName === \App\Enums\PeranPengguna::PEGAWAI->value;
 
         $barangHabisCount = 0;
         $barangMenipisCount = 0;
@@ -319,7 +321,7 @@
             <button type="button" class="btn btn-success-standard shadow-sm" data-bs-toggle="modal" data-bs-target="#cetakPeriodeModal">
                 <i class="fas fa-print me-1"></i> Cetak Laporan Periode
             </button>
-            @if($canManageBarang)
+            @if($canTambahBarang)
 
             <a href="{{ route('barang.create') }}" class="btn btn-brand-standard shadow-sm">
                 <i class="fas fa-plus me-1"></i> Tambah Barang/Bahan

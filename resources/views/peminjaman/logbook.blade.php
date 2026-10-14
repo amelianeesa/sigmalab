@@ -4,16 +4,16 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <div>
-        <h4 class="fw-bold mb-0" style="color:#1b3152;">Log Book Peminjaman {{ $alat->nama_alat }}</h4>
+        <h4 class="fw-bold mb-0 lb-title" style="color:#1b3152;">Log Book Peminjaman {{ $alat->nama_alat }}</h4>
         <small class="text-muted">No. Alat: {{ $alat->kode_alat }}</small>
     </div>
-    <div class="d-flex gap-2 flex-wrap">
+    <div class="d-flex gap-2 flex-wrap lb-actions">
         <a href="{{ route('peminjaman.index') }}" class="btn btn-sm btn-outline-secondary">&larr; Daftar Alat</a>
         <a href="{{ route('peminjaman.alat.pdf', $alat->alat_id) }}" target="_blank" class="btn btn-sm btn-outline-secondary fw-semibold">
             <i class="fas fa-file-pdf me-1"></i> Cetak PDF
         </a>
         @if($bisaMengisi)
-            <button type="button" class="btn btn-sm text-white fw-semibold" style="background:#1b3152;" data-bs-toggle="modal" data-bs-target="#modalTambah">
+            <button type="button" class="btn btn-sm text-white fw-semibold lb-primary-act" style="background:#1b3152;" data-bs-toggle="modal" data-bs-target="#modalTambah">
                 <i class="fas fa-plus me-1"></i> Tambah Peminjaman
             </button>
         @endif
@@ -42,29 +42,80 @@
     .lb-kembali-btn:hover, .lb-kembali-btn:focus { background: #14253e; color: #fff; }
     .lb-kembali-btn.koreksi { background: #fff; color: #1b3152; }
     .lb-kembali-btn.koreksi:hover, .lb-kembali-btn.koreksi:focus { background: #eef2f8; color: #1b3152; }
+
+    .pagination .page-link { font-size: 0.72rem; padding: 0.2rem 0.55rem; }
+
+    /* Desktop/tablet: lebar kolom dikunci supaya kolom Pekerjaan (tanpa lebar tetap) mendapat sisa ruang terbesar.
+       Jika layar lebih sempit dari min-width, tabel bisa digeser kiri-kanan, bukan menghimpit Pekerjaan. */
+    @media (min-width: 768px) {
+        .lb-table { table-layout: fixed; min-width: 1045px; }
+        .lb-table td { overflow-wrap: anywhere; }
+    }
+
+    /* HP / layar kecil: tiap baris tabel jadi satu kartu (label di kiri, isi di kanan), tanpa geser kiri-kanan */
+    @media (max-width: 767.98px) {
+        .lb-title { font-size: 1.15rem; }
+        .lb-actions { width: 100%; }
+        .lb-actions .btn { flex: 1 1 auto; }
+        .lb-actions .lb-primary-act { flex: 1 1 100%; }
+
+        .lb-card-wrap { background: transparent !important; box-shadow: none !important; }
+        .lb-card-wrap > .border-top { background: #fff; border-radius: 10px; margin-top: .75rem; border: 0 !important; box-shadow: 0 .125rem .25rem rgba(0,0,0,.075); }
+
+        .lb-table thead { display: none; }
+        .lb-table, .lb-table tbody, .lb-table tr, .lb-table td { display: block; width: 100%; }
+        .lb-table tr { background: #fff; border: 1px solid #dee2e6; border-radius: 10px; margin: 0 0 .75rem; overflow: hidden; box-shadow: 0 .125rem .25rem rgba(0,0,0,.05); }
+        .lb-table tr.table-danger { background: #f8d7da; }
+        .lb-table td { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+                       text-align: right !important; border: 0 !important; border-bottom: 1px solid #eef1f5 !important; padding: .45rem .75rem; background: transparent; }
+        .lb-table td:last-child { border-bottom: 0 !important; }
+        .lb-table td::before { content: attr(data-label); flex: 0 0 34%; max-width: 34%; text-align: left; font-size: .68rem; font-weight: 700;
+                               text-transform: uppercase; letter-spacing: .03em; color: #6c757d; padding-top: 2px; }
+        .lb-table .lb-cell { flex: 1 1 auto; min-width: 0; }
+        .lb-table td[data-label="No"] { background: #f4f6fa; }
+        .lb-table td[data-label="Aksi"] .lb-cell > * { margin-left: auto; }
+        .lb-table td.lb-empty { display: block; text-align: center !important; border: 0 !important; }
+        .lb-table td.lb-empty::before { display: none; }
+        .lb-kembali-form { display: flex; width: 100%; justify-content: flex-end; }
+        .lb-kembali-form input[type=date] { width: auto; flex: 1 1 auto; min-width: 0; height: 36px; font-size: .85rem; }
+        .lb-kembali-btn { height: 36px; }
+        .lb-btn { width: 36px; height: 36px; }
+    }
 </style>
 
-<div class="card border-0 shadow-sm mb-3">
+<form method="GET" class="mb-3">
+    <div class="input-group input-group-sm">
+        <input type="text" name="search" value="{{ $cari }}" class="form-control" placeholder="Cari pekerjaan / petugas...">
+        @if($cari !== '')
+            <a href="{{ route('peminjaman.alat', $alat->alat_id) }}" class="btn btn-outline-secondary">Reset</a>
+        @endif
+        <button type="submit" class="btn text-white fw-semibold px-4" style="background:#1b3152;">
+            <i class="fas fa-search me-1"></i> Cari
+        </button>
+    </div>
+</form>
+
+<div class="card border-0 shadow-sm mb-3 lb-card-wrap">
     <div class="table-responsive">
         <table class="table table-bordered table-sm align-middle mb-0 lb-table" style="font-size:0.85rem;">
             <thead class="text-center">
                 <tr>
-                    <th style="width:50px;">No</th>
-                    <th style="width:115px;">Tanggal</th>
-                    <th style="width:250px;">Dikembalikan</th>
+                    <th style="width:45px;">No</th>
+                    <th style="width:105px;">Tanggal</th>
+                    <th style="width:235px;">Dikembalikan</th>
                     <th>Pekerjaan</th>
-                    <th style="width:150px;">Petugas</th>
-                    <th style="width:100px;">Paraf</th>
-                    <th style="width:150px;">Status</th>
-                    <th style="width:100px;">Aksi</th>
+                    <th style="width:140px;">Petugas</th>
+                    <th style="width:90px;">Paraf</th>
+                    <th style="width:140px;">Status</th>
+                    <th style="width:90px;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
             @forelse($baris as $i => $b)
                 <tr class="{{ $b->status === 'ditolak' ? 'table-danger' : '' }}">
-                    <td class="text-center">{{ $i + 1 }}</td>
-                    <td class="text-center">{{ $b->tanggal->format('d M Y') }}</td>
-                    <td class="text-center">
+                    <td class="text-center" data-label="No"><div class="lb-cell">{{ $baris->firstItem() + $i }}</div></td>
+                    <td class="text-center" data-label="Tanggal"><div class="lb-cell">{{ $b->tanggal->format('d M Y') }}</div></td>
+                    <td class="text-center" data-label="Dikembalikan"><div class="lb-cell">
                         @php
                             $punyaAkses = $pengelola || $b->dibuat_oleh === auth()->id();
                             $bisaCatat = $b->status === 'disetujui' && $punyaAkses;
@@ -82,7 +133,9 @@
                                        class="form-control form-control-sm" required>
                                 <button type="submit" class="lb-kembali-btn {{ $bisaKoreksi ? 'koreksi' : '' }} shadow-sm"
                                         title="{{ $bisaKoreksi ? 'Koreksi tanggal dikembalikan' : 'Catat alat sudah dikembalikan' }}"
-                                        onclick="return confirm('{{ $bisaKoreksi ? 'Simpan koreksi tanggal dikembalikan?' : 'Catat alat ini sudah dikembalikan?' }}')">
+                                        data-swal-confirm="{{ $bisaKoreksi ? 'Simpan koreksi tanggal dikembalikan?' : 'Catat alat ini sudah dikembalikan?' }}"
+                                        data-swal-title="{{ $bisaKoreksi ? 'Koreksi Tanggal?' : 'Alat Sudah Dikembalikan?' }}"
+                                        data-swal-ok="{{ $bisaKoreksi ? 'Ya, Simpan' : 'Ya, Catat' }}">
                                     <i class="fas {{ $bisaKoreksi ? 'fa-pen' : 'fa-check' }}"></i>{{ $bisaKoreksi ? 'Koreksi' : 'Kembali' }}
                                 </button>
                             </form>
@@ -94,14 +147,14 @@
                         @else
                             <span class="text-muted">&ndash;</span>
                         @endif
-                    </td>
-                    <td>{{ $b->pekerjaan }}</td>
-                    <td>{{ $b->petugas }}</td>
-                    <td class="text-center">@if($b->paraf)<img src="{{ $b->paraf }}" alt="paraf" style="max-height:40px; max-width:90px;">@endif</td>
-                    <td class="text-center">
+                    </div></td>
+                    <td data-label="Pekerjaan"><div class="lb-cell">{{ $b->pekerjaan }}</div></td>
+                    <td data-label="Petugas"><div class="lb-cell">{{ $b->petugas }}</div></td>
+                    <td class="text-center" data-label="Paraf"><div class="lb-cell">@if($b->paraf)<img src="{{ $b->paraf }}" alt="paraf" style="max-height:40px; max-width:100%;">@else<span class="text-muted">&ndash;</span>@endif</div></td>
+                    <td class="text-center" data-label="Status"><div class="lb-cell">
                         @if($b->status === 'dikembalikan')
                             <span class="lb-status done"><i class="fas fa-box-open"></i> Dikembalikan</span>
-                            <div class="small text-muted mt-1">Acc: {{ $b->penyetuju->personil->nama ?? $b->penyetuju->username ?? '' }}</div>
+                            <div class="small text-muted mt-1">Disetujui oleh: {{ $b->penyetuju->personil->nama ?? $b->penyetuju->username ?? '' }}</div>
                         @elseif($b->status === 'disetujui')
                             <span class="lb-status ok"><i class="fas fa-check-circle"></i> Disetujui</span>
                             <div class="small text-muted mt-1">{{ $b->penyetuju->personil->nama ?? $b->penyetuju->username ?? '' }}</div>
@@ -111,8 +164,8 @@
                         @else
                             <span class="lb-status wait"><i class="fas fa-clock"></i> Menunggu</span>
                         @endif
-                    </td>
-                    <td class="text-center text-nowrap">
+                    </div></td>
+                    <td class="text-center text-nowrap" data-label="Aksi"><div class="lb-cell">
                         @if($b->status === 'diajukan' && $pengelola)
                             <div class="d-inline-flex gap-1">
                                 <form method="POST" action="{{ route('peminjaman.approve', $b->logbook_peminjaman_id) }}">@csrf
@@ -123,29 +176,44 @@
                                         title="Tolak" aria-label="Tolak"><i class="fas fa-times"></i></button>
                             </div>
                         @elseif($b->status === 'diajukan' && $b->dibuat_oleh === auth()->id())
-                            <form method="POST" action="{{ route('peminjaman.batal', $b->logbook_peminjaman_id) }}" onsubmit="return confirm('Tarik catatan ini?')">@csrf
-                                <button class="btn btn-outline-secondary btn-sm lb-btn shadow-sm" title="Batalkan catatan" aria-label="Batalkan catatan"><i class="fas fa-undo"></i></button>
+                            <form method="POST" action="{{ route('peminjaman.batal', $b->logbook_peminjaman_id) }}">@csrf
+                                <button type="submit" class="btn btn-outline-secondary btn-sm lb-btn shadow-sm"
+                                        data-swal-confirm="Tarik catatan ini?" data-swal-title="Tarik Catatan?" data-swal-ok="Ya, Tarik" title="Batalkan catatan" aria-label="Batalkan catatan"><i class="fas fa-undo"></i></button>
                             </form>
                         @elseif($b->status === 'ditolak' && $pengelola)
-                            <form method="POST" action="{{ route('peminjaman.hapus', $b->logbook_peminjaman_id) }}" onsubmit="return confirm('Hapus catatan yang ditolak ini?')">@csrf
-                                <button class="btn btn-outline-danger btn-sm lb-btn shadow-sm" title="Hapus catatan" aria-label="Hapus catatan"><i class="fas fa-trash"></i></button>
+                            <form method="POST" action="{{ route('peminjaman.hapus', $b->logbook_peminjaman_id) }}">@csrf
+                                <button type="submit" class="btn btn-outline-danger btn-sm lb-btn shadow-sm"
+                                        data-swal-confirm="Hapus catatan yang ditolak ini?" data-swal-title="Hapus Catatan?" data-swal-ok="Ya, Hapus!" data-swal-danger title="Hapus catatan" aria-label="Hapus catatan"><i class="fas fa-trash"></i></button>
                             </form>
                         @else
                             <span class="text-muted">&ndash;</span>
                         @endif
-                    </td>
+                    </div></td>
                 </tr>
             @empty
-                <tr><td colspan="8" class="text-center text-muted py-4">Belum ada catatan peminjaman untuk alat ini.</td></tr>
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4 lb-empty">
+                        @if($cari !== '')
+                            Tidak ada catatan yang cocok dengan pencarian "{{ $cari }}".
+                        @else
+                            Belum ada catatan peminjaman untuk alat ini.
+                        @endif
+                    </td>
+                </tr>
             @endforelse
             </tbody>
         </table>
     </div>
+    @if($baris->hasPages())
+        <div class="px-3 py-2 border-top">
+            {{ $baris->withQueryString()->links('vendor.pagination.custom', ['size' => 'sm']) }}
+        </div>
+    @endif
 </div>
 
 @if($bisaMengisi)
 <div class="modal fade" id="modalTambah" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <form method="POST" action="{{ route('peminjaman.store', $alat->alat_id) }}" id="formLogbook">
                 @csrf
@@ -178,7 +246,7 @@
                         <div class="col-12">
                             <label class="form-label small fw-bold mb-1">Paraf <span class="text-muted fw-normal">(gambar di kotak dengan mouse / jari)</span></label>
                             <div>
-                                <canvas id="canvasParaf" width="480" height="140" style="display:block; width:480px; max-width:100%; height:140px; border:1px solid #adb5bd; border-radius:6px; background:#fff; touch-action:none;"></canvas>
+                                <canvas id="canvasParaf" width="480" height="140" style="display:block; width:480px; max-width:100%; height:auto; aspect-ratio:480/140; border:1px solid #adb5bd; border-radius:6px; background:#fff; touch-action:none;"></canvas>
                             </div>
                             <button type="button" id="hapusParaf" class="btn btn-outline-secondary btn-sm mt-1">Hapus paraf</button>
                             <input type="hidden" name="paraf" id="inputParaf">
@@ -221,6 +289,7 @@
 
 
 @push('scripts')
+@include('partials.swal-confirm')
 @if($bisaMengisi)
 <script>
 (function () {
@@ -247,7 +316,7 @@
     });
 
     document.getElementById('formLogbook').addEventListener('submit', function (e) {
-        if (!adaIsi) { e.preventDefault(); alert('Paraf wajib diisi. Gambar paraf di kotak yang tersedia.'); return; }
+        if (!adaIsi) { e.preventDefault(); Swal.fire({ title: 'Paraf Belum Diisi', text: 'Gambar paraf di kotak yang tersedia sebelum menyimpan.', icon: 'warning', confirmButtonColor: '#1b3152', confirmButtonText: 'Mengerti' }); return; }
         document.getElementById('inputParaf').value = c.toDataURL('image/png');
     });
 

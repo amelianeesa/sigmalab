@@ -8,6 +8,11 @@
     .pj-status.tersedia { background: #e6f4ea; color: #1e7a3c; border: 1px solid #b7e0c3; }
     .pj-status.dipinjam { background: #fff4d6; color: #8a6100; border: 1px solid #f3dd9a; }
     .pj-info { font-size: 0.8rem; min-height: 70px; }
+    .pagination .page-link { font-size: 0.72rem; padding: 0.2rem 0.55rem; }
+    @media (max-width: 575.98px) {
+        .pj-info { min-height: 0; }
+        .pj-head-btn { width: 100%; }
+    }
 </style>
 
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
@@ -15,7 +20,7 @@
         <h4 class="fw-bold mb-0" style="color:#1b3152;">Peminjaman Alat</h4>
         <small class="text-muted">Pilih alat untuk membuka logbook-nya, lalu isi catatan peminjaman.</small>
     </div>
-    <a href="{{ route('peminjaman.pdf-semua') }}" target="_blank" class="btn btn-sm btn-outline-secondary fw-semibold">
+    <a href="{{ route('peminjaman.pdf-semua') }}" target="_blank" class="btn btn-sm btn-outline-secondary fw-semibold pj-head-btn">
         <i class="fas fa-file-pdf me-1"></i> Cetak Semua Logbook (PDF)
     </a>
 </div>
@@ -85,4 +90,10 @@
         </div>
     @endforelse
 </div>
+
+@if($alatList->hasPages())
+    <div class="mt-3">
+        {{ $alatList->links('vendor.pagination.custom', ['size' => 'sm']) }}
+    </div>
+@endif
 @endsection

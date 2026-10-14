@@ -99,31 +99,7 @@
                 </div>
 
                 <div class="row g-2 mb-2">
-                    <div class="col-12 col-md-7">
-                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Alat Induk <span class="text-muted fw-normal">(isi jika ini adalah sub alat)</span></label>
-                        <select name="parent_id" class="form-select form-select-sm select2-basic">
-                            <option value="">— Bukan sub alat —</option>
-                            @foreach($indukList as $induk)
-                                <option value="{{ $induk->alat_id }}" {{ old('parent_id', $alat->parent_id) == $induk->alat_id ? 'selected' : '' }}>{{ $induk->nama_alat }} ({{ $induk->kode_alat }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-5">
-                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Peminjaman Alat</label>
-                        <label class="alat-pinjam-box" for="dapatDipinjam">
-                            <span class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" role="switch" name="dapat_dipinjam" value="1" id="dapatDipinjam" {{ old('dapat_dipinjam', $alat->dapat_dipinjam) ? 'checked' : '' }}>
-                            </span>
-                            <span class="alat-pinjam-text">
-                                <span class="alat-pinjam-title">Dapat dipinjam</span>
-                                <span class="alat-pinjam-hint">Tampil di menu Peminjaman Alat (workspace Non-Lab)</span>
-                            </span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="row g-2 mb-2">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Kondisi Barang</label>
                         @if($alat->kondisi_barang == 'perbaikan')
                             <input type="hidden" name="kondisi_barang" value="perbaikan">
@@ -135,7 +111,7 @@
                         </select>
                         @endif
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Status Barang</label>
                         @if($alat->kondisi_barang == 'perbaikan')
                             <input type="hidden" name="status_barang" value="idle">
@@ -146,6 +122,18 @@
                             <option value="terpakai" {{ old('status_barang', $alat->status_barang) == 'terpakai' ? 'selected' : '' }}>Terpakai</option>
                         </select>
                         @endif
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Peminjaman Alat</label>
+                        <label class="alat-pinjam-box" for="dapatDipinjam">
+                            <span class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" name="dapat_dipinjam" value="1" id="dapatDipinjam" {{ old('dapat_dipinjam', $alat->dapat_dipinjam) ? 'checked' : '' }}>
+                            </span>
+                            <span class="alat-pinjam-text">
+                                <span class="alat-pinjam-title">Dapat dipinjam</span>
+                                <span class="alat-pinjam-hint">Tampil di menu Peminjaman Alat (workspace Non-Lab)</span>
+                            </span>
+                        </label>
                     </div>
                 </div>
 
