@@ -73,6 +73,7 @@ class PengadaanController extends Controller
             strtolower(PeranPengguna::KOORDINATOR_LAB->value),
             strtolower(PeranPengguna::GA_OFFICER->value),
             strtolower(PeranPengguna::ADMIN_APLIKASI->value),
+            strtolower(PeranPengguna::PEGAWAI->value),
         ];
 
         if (!in_array($roleName, $allowedToRequest) && !str_contains($roleName, 'analis') && !str_contains($roleName, 'koor')) {
@@ -101,7 +102,9 @@ class PengadaanController extends Controller
 
         $isAdminPengaju = $roleName === strtolower(PeranPengguna::ADMIN_APLIKASI->value);
 
-        if (str_contains($roleName, 'analis') || $isAdminPengaju) {
+        $isPegawaiPengaju = $roleName === strtolower(PeranPengguna::PEGAWAI->value);
+
+        if (str_contains($roleName, 'analis') || $isAdminPengaju || $isPegawaiPengaju) {
             $statusAwal = 'menunggu_koordinator';
             $pesanSukses = 'Pengajuan berhasil dibuat dan menunggu persetujuan Koordinator Lab.';
         } else {
