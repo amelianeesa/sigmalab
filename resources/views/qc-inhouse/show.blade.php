@@ -533,11 +533,6 @@
             max-width: 42%;
         }
 
-        .res-row {
-            grid-template-columns: 56px 1fr;
-            font-size: 0.78rem;
-        }
-
         .param-table {
             min-width: 560px;
         }
@@ -598,6 +593,8 @@
                 </div>
 
                 <div class="action-wrap d-flex flex-wrap justify-content-lg-end align-items-stretch gap-2">
+
+                    <a href="{{ route('qc-inhouse.pemilihan', $batch->sampel_inhouse_id) }}" class="btn btn-outline-corporate btn-sm py-1.5 px-3 shadow-sm fw-semibold"><i class="fas fa-eye me-1"></i> Pemilihan Sampel</a>
 
                     @if(!in_array($batch->status, ['pemilihan_sampel', 'preparasi']))
                         <a href="{{ route('qc-inhouse.preparasi', $batch->sampel_inhouse_id) }}" class="btn btn-outline-corporate btn-sm py-1.5 px-3 shadow-sm fw-semibold"><i class="fas fa-eye me-1"></i> Preparasi</a>
@@ -803,74 +800,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div class="row g-2">
-        <div class="col-12">
-                <div class="card shadow-sm border-0 mb-2">
-                    <div class="card-header-sm">
-                        <h6 class="section-title"><i class="fas fa-id-card icon-corporate me-2"></i>Resource Pelaksanaan Pengujian</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="res-list">
-                            @foreach($batch->parameters as $p)
-                                @php
-                                    $firstStabilitas = $p->dataStabilitas->first();
-                                    $firstHomogen = $p->dataHomogenitas->first();
-                                    $mentah = $firstStabilitas ? $firstStabilitas->data_mentah : ($firstHomogen ? $firstHomogen->data_mentah : []);
-
-                                    $personilIds = $mentah['personil_ids'] ?? [];
-                                    $alatIds = $mentah['alat_ids'] ?? [];
-                                    $barangIds = $mentah['barang_ids'] ?? [];
-                                    $barangJumlah = $mentah['barang_jumlah'] ?? [];
-                                @endphp
-
-                                <div class="res-item">
-                                    <span class="res-param">{{ $p->parameterUji->nama_parameter }}</span>
-
-                                    <div class="res-row">
-                                        <div class="res-label">Analis</div>
-                                        <div class="res-value">
-                                            @if(count($personilIds) > 0)
-                                                {{ \App\Models\Personil::whereIn('personil_id', $personilIds)->pluck('nama')->join(', ') }}
-                                            @else
-                                                <span class="res-empty">Tidak tercatat</span>
-                                            @endif
-                                        </div>
-                                    </div>
-
-                                    <div class="res-row">
-                                        <div class="res-label">Alat</div>
-                                        <div class="res-value">
-                                            @if(count($alatIds) > 0)
-                                                {{ \App\Models\Alat::whereIn('alat_id', $alatIds)->pluck('nama_alat')->join(', ') }}
-                                            @else
-                                                <span class="res-empty">Tidak tercatat</span>
-                                            @endif
-                                        </div>
-                                    </div>
-
-                                    <div class="res-row">
-                                        <div class="res-label">Bahan</div>
-                                        <div class="res-value">
-                                            @if(count($barangIds) > 0)
-                                                @php
-                                                    $listBarang = \App\Models\Barang::whereIn('barang_id', $barangIds)->get();
-                                                @endphp
-                                                @foreach($listBarang as $bhn)
-                                                    {{ $bhn->nama_barang }} ({{ $barangJumlah[$bhn->barang_id] ?? 0 }} {{ $bhn->satuan }}){{ !$loop->last ? ', ' : '' }}
-                                                @endforeach
-                                            @else
-                                                <span class="res-empty">Tidak ada bahan tercatat</span>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
         </div>
     </div>
 </div>

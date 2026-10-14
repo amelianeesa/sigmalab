@@ -477,67 +477,171 @@
                                 <div class="tab-pane fade {{ $idx === 0 ? 'show active' : '' }}" id="pane-{{ $pid }}" role="tabpanel">
                                     <h6 class="section-title border-bottom pb-2 mb-2"><span class="step-badge">{{ $idx + 1 }}</span>Statistika Nilai Target : {{ $param->parameterUji->nama_parameter }}</h6>
 
-                                    <div class="row g-2">
-                                        <div class="col-6 col-xl-3">
-                                            <div class="stat-tile">
-                                                <div class="stat-label">Target Mean</div>
-                                                <div class="stat-value">{{ number_format($mean, $dec) }}</div>
-                                                <div class="stat-note">Ditarik dari Grand Mean Homogenitas</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-6 col-xl-3">
-                                            <div class="stat-tile">
-                                                <div class="stat-label">Target Standard Deviation</div>
-                                                <div class="stat-value">{{ number_format($sd, $dec) }}</div>
-                                                <div class="stat-note">Ditarik dari Global SD Homogenitas</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-md-6 col-xl-3">
-                                            <div class="limit-tile limit-danger">
-                                                <div class="limit-title">Control Limit (+/- 3 SD)</div>
-                                                <div class="limit-row">
-                                                    <div>
-                                                        <div class="limit-name">UCL (+3 SD)</div>
-                                                        <div class="limit-num">{{ number_format($ucl, $dec) }}</div>
+                                    @if(in_array($code, ['AFT', 'CHN']))
+                                        @php
+                                            $components = ($code === 'AFT') ? [
+                                                'IDT' => ['label' => 'IDT (Initial Deformation Temperature)', 'unit' => '°C', 'key' => 'idt', 'dec' => 0],
+                                                'ST'  => ['label' => 'ST (Softening Temperature)', 'unit' => '°C', 'key' => 'st', 'dec' => 0],
+                                                'HT'  => ['label' => 'HT (Hemispherical Temperature)', 'unit' => '°C', 'key' => 'ht', 'dec' => 0],
+                                                'FT'  => ['label' => 'FT (Fluid Temperature)', 'unit' => '°C', 'key' => 'ft', 'dec' => 0],
+                                            ] : [
+                                                'N' => ['label' => 'Nitrogen (N)', 'unit' => '% db', 'key' => 'n', 'dec' => 2],
+                                                'C' => ['label' => 'Carbon (C)', 'unit' => '% db', 'key' => 'c', 'dec' => 2],
+                                                'H' => ['label' => 'Hydrogen (H)', 'unit' => '% db', 'key' => 'h', 'dec' => 2],
+                                            ];
+                                        @endphp
+
+                                        @foreach($components as $cKey => $comp)
+                                            @php
+                                                $cVals = [];
+                                                foreach ($param->dataHomogenitas as $dh) {
+                                                    $m = $dh->data_mentah ?? [];
+                                                    if (isset($m[$comp['key'] . '_1']) && $m[$comp['key'] . '_1'] !== '') $cVals[] = floatval($m[$comp['key'] . '_1']);
+                                                    if (isset($m[$comp['key'] . '_2']) && $m[$comp['key'] . '_2'] !== '') $cVals[] = floatval($m[$comp['key'] . '_2']);
+                                                    if (empty($m[$comp['key'] . '_1']) && isset($m[$comp['key']]) && $m[$comp['key']] !== '') $cVals[] = floatval($m[$comp['key']]);
+                                                }
+                                                $cN = count($cVals);
+                                                $cMean = $cN > 0 ? array_sum($cVals) / $cN : 0;
+                                                $cVar = 0;
+                                                if ($cN > 1) {
+                                                    foreach ($cVals as $v) $cVar += pow($v - $cMean, 2);
+                                                    $cSd = sqrt($cVar / ($cN - 1));
+                                                } else {
+                                                    $cSd = 0;
+                                                }
+                                                $cUcl = round($cMean + (3 * $cSd), $comp['dec']);
+                                                $cLcl = round($cMean - (3 * $cSd), $comp['dec']);
+                                                $cUwl = round($cMean + (2 * $cSd), $comp['dec']);
+                                                $cLwl = round($cMean - (2 * $cSd), $comp['dec']);
+                                                $cMeanRound = round($cMean, $comp['dec']);
+                                                $cSdRound = round($cSd, $comp['dec']);
+                                            @endphp
+
+                                            <div class="card border mb-3 shadow-none bg-light bg-opacity-25">
+                                                <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+                                                    <span class="fw-bold text-dark"><i class="fas {{ $code === 'AFT' ? 'fa-fire text-danger' : 'fa-atom text-primary' }} me-2"></i>{{ $comp['label'] }}</span>
+                                                    <span class="badge bg-secondary">{{ $comp['unit'] }}</span>
+                                                </div>
+                                                <div class="card-body p-2">
+                                                    <div class="row g-2">
+                                                        <div class="col-6 col-xl-3">
+                                                            <div class="stat-tile">
+                                                                <div class="stat-label">Target Mean</div>
+                                                                <div class="stat-value">{{ number_format($cMeanRound, $comp['dec']) }}</div>
+                                                                <div class="stat-note">Grand Mean Homogenitas</div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-6 col-xl-3">
+                                                            <div class="stat-tile">
+                                                                <div class="stat-label">Target Standard Deviation</div>
+                                                                <div class="stat-value">{{ number_format($cSdRound, $comp['dec']) }}</div>
+                                                                <div class="stat-note">Global SD Homogenitas</div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12 col-md-6 col-xl-3">
+                                                            <div class="limit-tile limit-danger">
+                                                                <div class="limit-title">Control Limit (+/- 3 SD)</div>
+                                                                <div class="limit-row">
+                                                                    <div>
+                                                                        <div class="limit-name">UCL (+3 SD)</div>
+                                                                        <div class="limit-num">{{ number_format($cUcl, $comp['dec']) }}</div>
+                                                                    </div>
+                                                                    <div class="text-end">
+                                                                        <div class="limit-name">LCL (-3 SD)</div>
+                                                                        <div class="limit-num">{{ number_format($cLcl, $comp['dec']) }}</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12 col-md-6 col-xl-3">
+                                                            <div class="limit-tile limit-warning">
+                                                                <div class="limit-title">Warning Limit (+/- 2 SD)</div>
+                                                                <div class="limit-row">
+                                                                    <div>
+                                                                        <div class="limit-name">UWL (+2 SD)</div>
+                                                                        <div class="limit-num">{{ number_format($cUwl, $comp['dec']) }}</div>
+                                                                    </div>
+                                                                    <div class="text-end">
+                                                                        <div class="limit-name">LWL (-2 SD)</div>
+                                                                        <div class="limit-num">{{ number_format($cLwl, $comp['dec']) }}</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div class="text-end">
-                                                        <div class="limit-name">LCL (-3 SD)</div>
-                                                        <div class="limit-num">{{ number_format($lcl, $dec) }}</div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        <div class="row g-2">
+                                            <div class="col-6 col-xl-3">
+                                                <div class="stat-tile">
+                                                    <div class="stat-label">Target Mean</div>
+                                                    <div class="stat-value">{{ number_format($mean, $dec) }}</div>
+                                                    <div class="stat-note">Ditarik dari Grand Mean Homogenitas</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-xl-3">
+                                                <div class="stat-tile">
+                                                    <div class="stat-label">Target Standard Deviation</div>
+                                                    <div class="stat-value">{{ number_format($sd, $dec) }}</div>
+                                                    <div class="stat-note">Ditarik dari Global SD Homogenitas</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-3">
+                                                <div class="limit-tile limit-danger">
+                                                    <div class="limit-title">Control Limit (+/- 3 SD)</div>
+                                                    <div class="limit-row">
+                                                        <div>
+                                                            <div class="limit-name">UCL (+3 SD)</div>
+                                                            <div class="limit-num">{{ number_format($ucl, $dec) }}</div>
+                                                        </div>
+                                                        <div class="text-end">
+                                                            <div class="limit-name">LCL (-3 SD)</div>
+                                                            <div class="limit-num">{{ number_format($lcl, $dec) }}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-3">
+                                                <div class="limit-tile limit-warning">
+                                                    <div class="limit-title">Warning Limit (+/- 2 SD)</div>
+                                                    <div class="limit-row">
+                                                        <div>
+                                                            <div class="limit-name">UWL (+2 SD)</div>
+                                                            <div class="limit-num">{{ number_format($uwl, $dec) }}</div>
+                                                        </div>
+                                                        <div class="text-end">
+                                                            <div class="limit-name">LWL (-2 SD)</div>
+                                                            <div class="limit-num">{{ number_format($lwl, $dec) }}</div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-12 col-md-6 col-xl-3">
-                                            <div class="limit-tile limit-warning">
-                                                <div class="limit-title">Warning Limit (+/- 2 SD)</div>
-                                                <div class="limit-row">
-                                                    <div>
-                                                        <div class="limit-name">UWL (+2 SD)</div>
-                                                        <div class="limit-num">{{ number_format($uwl, $dec) }}</div>
-                                                    </div>
-                                                    <div class="text-end">
-                                                        <div class="limit-name">LWL (-2 SD)</div>
-                                                        <div class="limit-num">{{ number_format($lwl, $dec) }}</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    @endif
 
                                     <p class="base-note">Angka-angka ini akan digunakan sebagai patokan dasar (baseline) untuk Uji Stabilitas bulanan dan Quality Control harian.</p>
                                 </div>
                             @endforeach
                         </div>
 
-                        <div class="submit-wrap d-flex justify-content-end align-items-center gap-2 mt-3">
+                        <div class="submit-wrap d-flex justify-content-between align-items-center gap-2 mt-3 pt-2 border-top">
                             <a href="{{ route('qc-inhouse.show', $batch->sampel_inhouse_id) }}" class="btn btn-kembali btn-sm py-1.5 px-3 shadow-sm fw-semibold">
-                                <i class="fas fa-arrow-left me-1"></i> Kembali
+                                <i class="fas fa-arrow-left me-1"></i> Kembali ke Detail
                             </a>
-                            @if($batch->status === 'penetapan_target')
-                            <button type="submit" class="btn btn-corporate-blue btn-sm py-1.5 px-3 shadow-sm fw-semibold">
-                                <i class="fas fa-check-double me-1"></i> Sahkan Semua Nilai Target & Lanjut
-                            </button>
-                            @endif
+
+                            <div class="d-flex align-items-center gap-2">
+                                @if($batch->status === 'penetapan_target')
+                                    <button type="submit" class="btn btn-corporate-blue btn-sm py-1.5 px-3 shadow-sm fw-semibold">
+                                        <i class="fas fa-check-double me-1"></i> Sahkan Semua Nilai Target & Lanjut
+                                    </button>
+                                @elseif(!in_array($batch->status, ['pemilihan_sampel', 'preparasi', 'uji_homogenitas', 'gagal_homogenitas', 'penetapan_target']))
+                                    <a href="{{ route('qc-inhouse.stabilitas', $batch->sampel_inhouse_id) }}" class="btn btn-corporate-blue btn-sm py-1.5 px-3 shadow-sm fw-semibold">
+                                        Lihat Tahap 5: Stabilitas <i class="fas fa-arrow-right ms-1"></i>
+                                    </a>
+                                @endif
+                            </div>
                         </div>
                     </form>
                 </div>

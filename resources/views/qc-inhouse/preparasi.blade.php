@@ -478,15 +478,22 @@
                             </div>
                         </div>
 
-                        <div class="submit-wrap d-flex justify-content-end align-items-center gap-2 mt-3">
+                        <div class="submit-wrap d-flex justify-content-between align-items-center gap-2 mt-3 pt-2 border-top">
                             <a href="{{ route('qc-inhouse.show', $batch->sampel_inhouse_id) }}" class="btn btn-kembali btn-sm py-1.5 px-3 shadow-sm fw-semibold">
-                                <i class="fas fa-arrow-left me-1"></i> Kembali
+                                <i class="fas fa-arrow-left me-1"></i> Kembali ke Detail
                             </a>
-                            @if($batch->status === 'preparasi')
-                            <button type="submit" class="btn btn-corporate-blue btn-sm py-1.5 px-3 shadow-sm fw-semibold" id="btnSubmit">
-                                <i class="fas fa-save me-1"></i> Simpan & Lanjut Homogenitas
-                            </button>
-                            @endif
+
+                            <div class="d-flex align-items-center gap-2">
+                                @if($batch->status === 'preparasi')
+                                    <button type="submit" class="btn btn-corporate-blue btn-sm py-1.5 px-3 shadow-sm fw-semibold" id="btnSubmit">
+                                        <i class="fas fa-save me-1"></i> Simpan & Lanjut Homogenitas
+                                    </button>
+                                @elseif(!in_array($batch->status, ['pemilihan_sampel', 'preparasi']))
+                                    <a href="{{ route('qc-inhouse.homogenitas', $batch->sampel_inhouse_id) }}" class="btn btn-corporate-blue btn-sm py-1.5 px-3 shadow-sm fw-semibold">
+                                        Lihat Tahap 3: Homogenitas <i class="fas fa-arrow-right ms-1"></i>
+                                    </a>
+                                @endif
+                            </div>
                         </div>
                     </form>
                 </div>
