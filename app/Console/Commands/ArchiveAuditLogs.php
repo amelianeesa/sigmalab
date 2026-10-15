@@ -2,35 +2,51 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use Spatie\Activitylog\Models\Activity;
 use App\Models\AuditlogArchive;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Spatie\Activitylog\Models\Activity;
 
 class ArchiveAuditLogs extends Command
 {
     protected $signature = 'audit:archive';
-    protected $description = 'Memindahkan audit log lama ke tabel arsip secara berkala';
+
+    protected $description = 'Pindahkan audit log lebih dari 7 hari ke arsip dan hapus arsip lebih dari 2 tahun';
+
     public function handle()
     {
-        $threshold = Carbon::now()->subDays(7);
-        $oldLogs = Activity::where('created_at', '<', $threshold)->get();
+        $batasArsip = Carbon::now()->subDays(7);
+        $batasHapus = Carbon::now()->subYears(2);
+        $kolomArsip = array_diff(Schema::getColumnListing('auditlog_archives'), ['id']);
+        $totalDiarsip = 0;
 
-        if ($oldLogs->count() > 0) {
-            foreach ($oldLogs as $log) {
-                AuditlogArchive::create($log->toArray());
-                $log->delete();
-            }
-            $this->info("Berhasil mengarsipkan {$oldLogs->count()} log audit.");
-        } else {
-            $this->info("Tidak ada log audit yang perlu diarsip.");
+        Activity::where('created_at', '<', $batasArsip)
+            ->orderBy('id')
+            ->chunkById(500, function ($logs) use ($kolomArsip, &$totalDiarsip) {
+                $rows = $logs->map(function ($log) use ($kolomArsip) {
+                    return array_intersect_key($log->getAttributes(), array_flip($kolomArsip));
+                })->all();
+
+                DB::transaction(function () use ($rows, $logs) {
+                    DB::table('auditlog_archives')->insert($rows);
+                    Activity::whereIn('id', $logs->pluck('id'))->delete();
+                });
+
+                $totalDiarsip += count($rows);
+            });
+
+        $this->info($totalDiarsip > 0
+            ? "Berhasil mengarsipkan {$totalDiarsip} log audit."
+            : 'Tidak ada log audit yang perlu diarsip.');
+
+        $totalDihapus = AuditlogArchive::where('created_at', '<', $batasHapus)->delete();
+
+        if ($totalDihapus > 0) {
+            $this->info("Berhasil menghapus {$totalDihapus} data arsip lama (lebih dari 2 tahun).");
         }
 
-        $thresholdArchive = Carbon::now()->subDays(730);
-        $deletedCount = AuditlogArchive::where('created_at', '<', $thresholdArchive)->delete();
-
-        if ($deletedCount > 0) {
-            $this->info("Berhasil menghapus {$deletedCount} data arsip lama (> 2 tahun).");
-        }
+        return self::SUCCESS;
     }
 }

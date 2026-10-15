@@ -12,8 +12,13 @@ class AuditlogArchive extends Model
 
     protected $casts = [
         'properties' => 'array',
+        'attribute_changes' => 'array',
     ];
     public function causer()
+    {
+        return $this->morphTo();
+    }
+    public function subject()
     {
         return $this->morphTo();
     }
