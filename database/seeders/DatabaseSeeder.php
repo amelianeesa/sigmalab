@@ -24,6 +24,8 @@ class DatabaseSeeder extends Seeder
             LibraryAccessSeeder::class,
             DummyDataSeeder::class,
             TabelAngkaAcakSeeder::class,
+            BarangInventoriSeeder::class,
+            // AlatSeeder::class,
         ]);
 
         User::factory()->create([

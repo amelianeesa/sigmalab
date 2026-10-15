@@ -19,6 +19,7 @@
     <style>
         :root {
             --sidebar-width: {{ auth()->check() ? '220px' : '0' }};
+            --topbar-h: 74px;
             --sdm-50: #eef0f1;
             --sdm-500: var(--sl-primary);
             --sdm-600: var(--sl-primary);
@@ -28,22 +29,22 @@
         @php
             $useSidebar = auth()->check();
         @endphp
-        
-        #sidebar { 
-            min-width: 240px; max-width: 240px; 
-            height: 100vh; position: fixed; top: 0; left: 0; 
+
+        #sidebar {
+            min-width: 240px; max-width: 240px;
+            height: 100vh; position: fixed; top: 0; left: 0;
             background-color: #ffffff; color: #334155; z-index: 1040;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 4px 0 24px rgba(0,0,0,0.03);
             border-right: none;
         }
 
-        #content { 
+        #content {
             transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-left: {{ $useSidebar ? '240px' : '' }}; 
-            padding: 16px 18px; 
-            padding-top: 20px; 
-            min-height: 100vh; 
+            margin-left: {{ $useSidebar ? '240px' : '' }};
+            padding: 16px 18px;
+            padding-top: 94px;
+            min-height: 100vh;
         }
 
         .top-navbar {
@@ -55,8 +56,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 1020;
             min-height: 60px;
             color: #fff;
@@ -78,49 +81,49 @@
         }
 
         #sidebar-overlay { display: none; position: fixed; width: 100vw; height: 100vh; background: rgba(15,23,42,0.4); z-index: 1030; top: 0; left: 0; cursor: pointer; transition: opacity .2s ease; backdrop-filter: blur(2px); }
-        
-        #sidebar .sidebar-header { 
-            padding: 16px 16px; 
-            border-bottom: 1px solid #f1f5f9; 
+
+        #sidebar .sidebar-header {
+            padding: 16px 16px;
+            border-bottom: 1px solid #f1f5f9;
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
         #sidebar .sidebar-header:hover { background-color: #f8fafc; }
 
         #sidebar ul.components { padding: 16px 0; }
-        
-        #sidebar ul li a { 
-            padding: 10px 14px 10px 16px; 
-            font-size: 0.85rem; 
+
+        #sidebar ul li a {
+            padding: 10px 14px 10px 16px;
+            font-size: 0.85rem;
             font-weight: 500;
             display: flex; align-items: center; gap: 12px;
-            color: #64748b; 
-            text-decoration: none; 
-            transition: all 0.2s ease; 
-            border-left: 3px solid transparent; 
-            margin-right: 12px; 
-            border-radius: 0 8px 8px 0; 
+            color: #64748b;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+            margin-right: 12px;
+            border-radius: 0 8px 8px 0;
             margin-bottom: 2px;
         }
-        
-        #sidebar ul li a:hover { 
-            color: var(--sdm-600); 
-            background: rgba(26, 127, 196, 0.08); 
-            transform: translateX(4px); 
+
+        #sidebar ul li a:hover {
+            color: var(--sdm-600);
+            background: rgba(26, 127, 196, 0.08);
+            transform: translateX(4px);
         }
-        
-        #sidebar ul li.active > a { 
-            color: var(--sdm-600); 
-            background: rgba(26, 127, 196, 0.08); 
-            border-left-color: var(--sdm-600); 
-            font-weight: 600; 
+
+        #sidebar ul li.active > a {
+            color: var(--sdm-600);
+            background: rgba(26, 127, 196, 0.08);
+            border-left-color: var(--sdm-600);
+            font-weight: 600;
         }
-        
-        #sidebar ul li a i { 
-            font-size: 0.82rem; 
-            opacity: 0.75; 
+
+        #sidebar ul li a i {
+            font-size: 0.82rem;
+            opacity: 0.75;
             width: 20px;
-            margin-right: 0px; 
+            margin-right: 0px;
         }
         #sidebar ul li a:hover i, #sidebar ul li.active > a i { opacity: 1; color: var(--sdm-600); }
 
@@ -132,7 +135,6 @@
 
         .top-navbar .text-secondary { color: rgba(255,255,255,.75) !important; }
         .top-navbar .fw-bold { color: #fff !important; }
-        /* Tombol workspace aktif (Lab / Non-Lab): latar putih, teks harus gelap agar terbaca */
         .top-navbar .btn-group .btn-light { color: var(--sl-primary) !important; }
         .top-navbar .dropdown .btn {
             background: rgba(255,255,255,.12);
@@ -221,7 +223,7 @@
         #profileDropdown .dropdown-divider {
             margin: 0;
         }
-        
+
         .pagination svg, .card-body svg {
             width: 1rem !important; height: 1rem !important;
             max-width: 1rem !important; max-height: 1rem !important;
@@ -320,6 +322,7 @@
             color: #94a3b8;
             font-size: 0.85rem;
         }
+
         @media (max-width: 575.98px) {
             .top-navbar {
                 padding-left: 14px !important;
@@ -329,7 +332,6 @@
             .top-navbar .fw-bold.text-uppercase {
                 font-size: 0.95rem !important;
             }
-            /* Tombol Lab/Non-Lab tetap tampil di HP: elemen topbar dirapatkan */
             .top-navbar .gap-3 {
                 gap: 0.5rem !important;
             }
@@ -339,6 +341,7 @@
             }
             #content {
                 padding: 12px 12px !important;
+                padding-top: 70px !important;
             }
             #notifDropdown {
                 position: fixed !important;
@@ -351,7 +354,7 @@
                 max-height: 60vh;
             }
         }
-        /* Layar HP sangat sempit: sembunyikan tulisan SIGMA-LAB agar topbar tidak meluber */
+
         @media (max-width: 379.98px) {
             .top-navbar .fw-bold.text-uppercase {
                 display: none;
@@ -361,7 +364,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-    {{-- Tema ceria biru muda: harus tetap paling bawah di <head> --}}
     <link href="{{ asset('css/sigma-ceria.css') }}?v=1" rel="stylesheet">
 </head>
 

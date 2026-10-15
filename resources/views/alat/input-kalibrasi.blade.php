@@ -41,6 +41,19 @@
         box-shadow: none !important;
     }
 
+    .btn-kartu-pemeliharaan {
+        background-color: #ffc107 !important;
+        border-color: #ffc107 !important;
+        color: #212529 !important;
+    }
+    .btn-kartu-pemeliharaan:hover,
+    .btn-kartu-pemeliharaan:focus,
+    .btn-kartu-pemeliharaan:active {
+        background-color: #ffca2c !important;
+        border-color: #ffc720 !important;
+        color: #212529 !important;
+    }
+
     .select2-container--bootstrap-5 .select2-selection {
         font-size: 0.75rem !important;
         min-height: 31px !important;
@@ -73,18 +86,11 @@
 
     <div class="row justify-content-center">
         <div class="col-lg-12">
-            
-            {{-- @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show shadow-sm py-2 px-3 small" role="alert" style="font-size: 0.78rem;">
-                    <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
-                    <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif --}}
 
             <div class="card custom-card mb-3">
                 <div class="card-header text-white d-flex justify-content-between align-items-center py-2 px-3" style="background-color: var(--sl-primary) !important;">
                     <h6 class="mb-0 fw-bold text-white" style="font-size: 13px;"><i class="fas fa-info-circle me-2"></i> Informasi Alat</h6>
-                    
+
                     <div class="d-flex align-items-center gap-2">
                         <div class="dropdown">
                             <button class="btn btn-light btn-sm fw-bold dropdown-toggle shadow-sm text-dark py-0.5 px-2" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 11px;">
@@ -105,7 +111,7 @@
                         </div>
                         @auth
                         @if (Route::has('alat.pemeliharaan'))
-                            <a href="{{ route('alat.pemeliharaan', $alat->alat_id) }}" class="btn btn-primary btn-sm text-white fw-bold shadow-sm py-0.5 px-2" style="font-size: 11px;">
+                            <a href="{{ route('alat.pemeliharaan', $alat->alat_id) }}" class="btn btn-kartu-pemeliharaan btn-sm fw-bold shadow-sm py-0.5 px-2" style="font-size: 11px;">
                                 <i class="fas fa-clipboard-list me-1"></i> Kartu Pemeliharaan Harian
                             </a>
                         @endif
@@ -193,11 +199,11 @@
                                     <td class="text-start py-1" style="font-size: 0.65rem;">
                                         @php
                                             $query = $alat->evaluasiKalibrasi()->whereDate('tanggal_evaluasi', '>=', $riwayat->tgl_kalibrasi);
-                                            
+
                                             if (!empty($riwayat->tgl_akhir)) {
                                                 $query->whereDate('tanggal_evaluasi', '<=', $riwayat->tgl_akhir);
                                             }
-                                            
+
                                             $evaluasiItem = $query->latest('tanggal_evaluasi')->first();
                                         @endphp
 
@@ -292,7 +298,7 @@
                             <div class="row g-2 mb-2">
                                 <div class="col-md-12">
                                     <div class="p-2 bg-light border rounded text-muted" style="font-size: 11.5px;">
-                                        <i class="fas fa-info-circle me-1" style="color: var(--sl-primary);"></i> 
+                                        <i class="fas fa-info-circle me-1" style="color: var(--sl-primary);"></i>
                                         Evaluasi dan catatan keputusan dikelola sub menu terpusat.
                                         <a href="{{ route('evaluasi-kalibrasi.index') }}" class="text-decoration-none fw-semibold text-primary ms-1">
                                             Evaluasi Kalibrasi <i class="fas fa-external-link-alt" style="font-size: 10px;"></i>
@@ -311,7 +317,6 @@
             </div>
             @elseif(!Auth::check())
 
-            {{-- tampilan publik --}}
             <div class="card custom-card mb-3 border-secondary">
                 <div class="card-header bg-secondary text-white py-2 px-3">
                     <h6 class="mb-0 fw-bold text-white" style="font-size: 13px;"><i class="fas fa-lock me-2"></i> Form Input Pengecekan / Kalibrasi Baru</h6>
