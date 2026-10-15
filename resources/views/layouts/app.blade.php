@@ -364,7 +364,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-    {{-- Tema ceria biru muda: harus tetap paling bawah di <head> --}}
     <link href="{{ asset('css/sigma-ceria.css') }}?v=1" rel="stylesheet">
 </head>
 
