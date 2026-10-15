@@ -186,6 +186,12 @@ class QcInhouseController extends Controller
                 ]);
             }
 
+             activity()
+                ->performedOn($batch)
+                ->causedBy(Auth::user())
+                ->event('created')
+                ->log("Membuat batch sampel in-house baru: {$batch->kode_batch} ({$batch->nama_sampel})");
+
             DB::commit();
 
             return redirect()->route('qc-inhouse.preparasi', $batch->sampel_inhouse_id)
@@ -368,7 +374,7 @@ class QcInhouseController extends Controller
 
     public function storeHomogenitas(Request $request, $id)
     {
-        $batch = SampelInhouse::with('parameters')->findOrFail($id);
+        $batch = SampelInhouse::with('parameters.parameterUji')->findOrFail($id);
 
         if (!in_array($batch->status, ['uji_homogenitas', 'gagal_homogenitas'])) {
             return redirect()->route('qc-inhouse.show', $id)->with('error', 'Homogenitas tidak dapat diubah karena sampel sudah berada di tahap selanjutnya.');
@@ -390,6 +396,9 @@ class QcInhouseController extends Controller
             $semuaHomogen = true;
             $adaData = false;
 
+            $oldBatchStatus = $batch->status;
+            $diffChanges = []; 
+
             foreach ($batch->parameters as $param) {
                 $paramId = $param->id;
                 $inputData = $request->input("data_{$paramId}");
@@ -407,6 +416,13 @@ class QcInhouseController extends Controller
                         }
                     }
                 }
+                $namaParam = $param->parameterUji->nama_parameter ?? 'Param';
+
+                $oldDataRows = DataHomogenitas::where('sampel_inhouse_parameter_id', $paramId)
+                    ->get()
+                    ->keyBy('nomor_sampel');
+                $oldParamStatus = $param->status_parameter;
+                $oldFHitung = $param->f_hitung;
 
                 DataHomogenitas::where('sampel_inhouse_parameter_id', $paramId)->delete();
             
@@ -477,6 +493,43 @@ class QcInhouseController extends Controller
                         'nilai_d2' => $finalD2,
                         'mean_sampel' => $meanSampel,
                     ]);
+
+                    $oldRow = $oldDataRows->get($nomorSampel);
+                    if ($oldRow) {
+                        // 1. Cek perubahan nilai persentase hasil akhir Duplo
+                        $oldD1 = $oldRow->nilai_d1 !== null ? (float)$oldRow->nilai_d1 : null;
+                        $newD1 = $finalD1 !== null ? (float)$finalD1 : null;
+                        if ($oldD1 !== $newD1) {
+                            $diffChanges["[{$namaParam}] Botol #{$nomorSampel} - D1"] = [
+                                'old' => $oldD1 ?? '-',
+                                'attributes' => $newD1 ?? '-'
+                            ];
+                        }
+                        $oldD2 = $oldRow->nilai_d2 !== null ? (float)$oldRow->nilai_d2 : null;
+                        $newD2 = $finalD2 !== null ? (float)$finalD2 : null;
+                        if ($oldD2 !== $newD2) {
+                            $diffChanges["[{$namaParam}] Botol #{$nomorSampel} - D2"] = [
+                                'old' => $oldD2 ?? '-',
+                                'attributes' => $newD2 ?? '-'
+                            ];
+                        }
+
+                        $oldMentah = is_array($oldRow->data_mentah) ? $oldRow->data_mentah : [];
+                        $allRawKeys = array_unique(array_merge(array_keys($oldMentah), array_keys($mentahToSave)));
+                        foreach ($allRawKeys as $rk) {
+                            if (in_array($rk, ['barang_ids', 'barang_jumlah', 'personil_ids', 'personil_peran', 'alat_ids', 'nilai_db_1', 'nilai_db_2'])) continue;
+                            
+                            $oldRk = $oldMentah[$rk] ?? null;
+                            $newRk = $mentahToSave[$rk] ?? null;
+                            
+                            if ($oldRk != $newRk && ($oldRk !== null || $newRk !== null)) {
+                                $diffChanges["[{$namaParam}] Botol #{$nomorSampel} - {$rk}"] = [
+                                    'old' => ($oldRk !== null && $oldRk !== '') ? $oldRk : '-',
+                                    'attributes' => ($newRk !== null && $newRk !== '') ? $newRk : '-'
+                                ];
+                            }
+                        }
+                    }
 
 
                     if ($d1_ada && $d2_ada) {
@@ -578,6 +631,19 @@ class QcInhouseController extends Controller
                     'status_parameter' => $isHomogen ? 'homogen' : 'tidak_homogen',
                     'tanggal_homogenitas' => now(),
                 ]);
+
+                if (!$oldDataRows->isEmpty() && $oldParamStatus && $oldParamStatus !== ($isHomogen ? 'homogen' : 'tidak_homogen')) {
+                    $diffChanges["[{$namaParam}] Status Homogenitas"] = [
+                        'old' => $oldParamStatus,
+                        'attributes' => $isHomogen ? 'homogen' : 'tidak_homogen'
+                    ];
+                }
+                if (!$oldDataRows->isEmpty() && $oldFHitung !== null && (float)$oldFHitung != (float)$anova['f_hitung']) {
+                    $diffChanges["[{$namaParam}] F-Hitung"] = [
+                        'old' => round((float)$oldFHitung, 3),
+                        'attributes' => round((float)$anova['f_hitung'], 3)
+                    ];
+                }
             }
 
             if (!$adaData) {
@@ -635,6 +701,46 @@ class QcInhouseController extends Controller
                 }
             }
 
+            $isDraft = (bool) $request->input('is_draft');
+
+            if ($isDraft) {
+                $logDeskripsi = "Menyimpan draft data pengujian homogenitas batch {$batch->kode_batch}";
+            } elseif ($batch->status === 'penetapan_target') {
+                $logDeskripsi = "Menyelesaikan uji homogenitas batch {$batch->kode_batch}: LULUS HOMOGEN (Lanjut Penetapan Target)";
+            } elseif ($batch->status === 'gagal_homogenitas') {
+                $logDeskripsi = "Menyelesaikan uji homogenitas batch {$batch->kode_batch}: TIDAK HOMOGEN";
+            } else {
+                $logDeskripsi = "Memperbarui data pengujian homogenitas batch {$batch->kode_batch}";
+            }
+
+            if ($oldBatchStatus !== $batch->status) {
+                $diffChanges["Status Tahap Batch"] = [
+                    'old' => $oldBatchStatus,
+                    'attributes' => $batch->status
+                ];
+            }
+
+            $oldLogData = [];
+            $newLogData = [];
+            foreach ($diffChanges as $col => $diff) {
+                $oldLogData[$col] = $diff['old'];
+                $newLogData[$col] = $diff['attributes'];
+            }
+
+            $act = activity()
+                ->performedOn($batch)
+                ->causedBy(Auth::user())
+                ->event('updated');
+
+            if (!empty($oldLogData) || !empty($newLogData)) {
+                $act->withChanges([
+                    'old' => $oldLogData,
+                    'attributes' => $newLogData
+                ]);
+            }
+
+            $act->log($logDeskripsi);
+
             DB::commit();
 
             if ($request->ajax()) {
@@ -683,7 +789,7 @@ class QcInhouseController extends Controller
         return view('qc-inhouse.penetapan-target', compact('batch'));
     }
 
-    public function storePenetapanTarget(Request $request, $id)
+        public function storePenetapanTarget(Request $request, $id)
     {
         $batch = SampelInhouse::with('parameters')->findOrFail($id);
 
@@ -705,6 +811,12 @@ class QcInhouseController extends Controller
                 'tanggal_penetapan_target' => now(),
                 'status' => 'uji_stabilitas'
             ]);
+
+            activity()
+                ->performedOn($batch)
+                ->causedBy(Auth::user())
+                ->event('updated')
+                ->log("Mengesahkan penetapan nilai target dan batas kendali batch {$batch->kode_batch} (Lanjut ke Uji Stabilitas)");
 
             DB::commit();
             return redirect()->route('qc-inhouse.stabilitas', $id)
@@ -764,6 +876,9 @@ class QcInhouseController extends Controller
         try {
             $adaData = false;
 
+            $oldBatchStatus = $batch->status;
+            $diffChanges = [];
+
             foreach ($batch->parameters as $param) {
                 $paramId = $param->id;
                 $inputData = $request->input("data_{$paramId}");
@@ -779,6 +894,15 @@ class QcInhouseController extends Controller
                         if ($oldQty > 0) \App\Models\Barang::where('barang_id', $oldBhnId)->decrement('pengeluaran', $oldQty);
                     }
                 }
+
+                $namaParam = $param->parameterUji->nama_parameter ?? 'Param';
+
+                $oldDataRows = DataStabilitas::where('sampel_inhouse_parameter_id', $paramId)
+                    ->get()
+                    ->keyBy('nomor_pengujian');
+
+                $oldParamStatus = $param->status_parameter;
+                $oldTHitung = $param->t_hitung;
                 
                 DataStabilitas::where('sampel_inhouse_parameter_id', $paramId)->delete();
 
@@ -839,6 +963,42 @@ class QcInhouseController extends Controller
                         'nilai_d2' => $val2,
                         'mean_pengujian' => $meanPengujian,
                     ]);
+
+                    $oldRow = $oldDataRows->get($index + 1);
+                    if ($oldRow) {
+                        $oldD1 = $oldRow->nilai_d1 !== null ? (float)$oldRow->nilai_d1 : null;
+                        $newD1 = $val1 !== null ? (float)$val1 : null;
+                        if ($oldD1 !== $newD1) {
+                            $diffChanges["[{$namaParam}] Pengujian #" . ($index + 1) . " - D1"] = [
+                                'old' => $oldD1 ?? '-',
+                                'attributes' => $newD1 ?? '-'
+                            ];
+                        }
+
+                        $oldD2 = $oldRow->nilai_d2 !== null ? (float)$oldRow->nilai_d2 : null;
+                        $newD2 = $val2 !== null ? (float)$val2 : null;
+                        if ($oldD2 !== $newD2) {
+                            $diffChanges["[{$namaParam}] Pengujian #" . ($index + 1) . " - D2"] = [
+                                'old' => $oldD2 ?? '-',
+                                'attributes' => $newD2 ?? '-'
+                            ];
+                        }
+
+                        $oldMentah = is_array($oldRow->data_mentah) ? $oldRow->data_mentah : [];
+                        $newMentah = $row['mentah'] ?? [];
+                        $allRawKeys = array_unique(array_merge(array_keys($oldMentah), array_keys($newMentah)));
+                        foreach ($allRawKeys as $rk) {
+                            if (in_array($rk, ['barang_ids', 'barang_jumlah', 'personil_ids', 'personil_peran', 'alat_ids', 'nilai_db_1', 'nilai_db_2', 'tanggal_uji', 'analis'])) continue;
+                            $oldRk = $oldMentah[$rk] ?? null;
+                            $newRk = $newMentah[$rk] ?? null;
+                            if ($oldRk != $newRk && ($oldRk !== null || $newRk !== null)) {
+                                $diffChanges["[{$namaParam}] Pengujian #" . ($index + 1) . " - {$rk}"] = [
+                                    'old' => ($oldRk !== null && $oldRk !== '') ? $oldRk : '-',
+                                    'attributes' => ($newRk !== null && $newRk !== '') ? $newRk : '-'
+                                ];
+                            }
+                        }
+                    }
 
                     if ($lengkap) {
                         $isDirect = in_array(strtoupper($param->parameterUji->nama_parameter), ['IM', 'AFT', 'CHN']);
@@ -908,6 +1068,19 @@ class QcInhouseController extends Controller
                     'status_parameter' => $isStabil ? 'stabil' : 'tidak_stabil',
                     'tanggal_stabilitas' => now(),
                 ]);
+
+                if (!$oldDataRows->isEmpty() && $oldParamStatus && $oldParamStatus !== ($isStabil ? 'stabil' : 'tidak_stabil')) {
+                    $diffChanges["[{$namaParam}] Status Stabilitas"] = [
+                        'old' => $oldParamStatus,
+                        'attributes' => $isStabil ? 'stabil' : 'tidak_stabil'
+                    ];
+                }
+                if (!$oldDataRows->isEmpty() && $oldTHitung !== null && (float)$oldTHitung != (float)$tTest['t_hitung']) {
+                    $diffChanges["[{$namaParam}] T-Hitung"] = [
+                        'old' => round((float)$oldTHitung, 3),
+                        'attributes' => round((float)$tTest['t_hitung'], 3)
+                    ];
+                }
             }
 
             if (!$adaData) {
@@ -963,6 +1136,47 @@ class QcInhouseController extends Controller
             } else {
                 $batch->update(['status' => 'uji_stabilitas']);
             }
+
+            $isDraft = (bool) $request->input('is_draft');
+            if ($isDraft) {
+                $logDeskripsi = "Menyimpan draft data pengujian stabilitas batch {$batch->kode_batch}";
+            } elseif ($allStabil) {
+                $logDeskripsi = "Menyelesaikan uji stabilitas batch {$batch->kode_batch}: STABIL (Sampel Siap Digunakan)";
+            } elseif ($adaGagal) {
+                $logDeskripsi = "Menyelesaikan uji stabilitas batch {$batch->kode_batch}: TIDAK STABIL";
+            } else {
+                $logDeskripsi = "Memperbarui data pengujian stabilitas batch {$batch->kode_batch}";
+            }
+
+            if ($oldBatchStatus !== $batch->status) {
+                $diffChanges["Status Tahap Batch"] = [
+                    'old' => $oldBatchStatus,
+                    'attributes' => $batch->status
+                ];
+            }
+
+            $oldLogData = [];
+            $newLogData = [];
+            foreach ($diffChanges as $col => $diff) {
+                $oldLogData[$col] = $diff['old'];
+                $newLogData[$col] = $diff['attributes'];
+            }
+
+            $act = activity()
+                ->performedOn($batch)
+                ->causedBy(Auth::user())
+                ->event('updated');
+
+            if (!empty($oldLogData) || !empty($newLogData)) {
+                $act->withChanges([
+                    'old' => $oldLogData,
+                    'attributes' => $newLogData
+                ]);
+            }
+
+            $act->log($logDeskripsi);
+
+            DB::commit();
 
             DB::commit();
 
@@ -1037,26 +1251,28 @@ class QcInhouseController extends Controller
                 ->update(['status' => 'kadaluarsa']);
                 
             $batch->update(['status' => 'aktif']);
+            \App\Models\ParameterUji::withoutEvents(function () use ($batch) {
 
-            foreach ($batch->parameters as $param) {
-                if ($param->status_parameter === 'stabil' && $param->parameterUji) {
-                    $mean = (float) $param->mean_target;
-                    $sd = (float) $param->sd_target;
+                foreach ($batch->parameters as $param) {
+                    if ($param->status_parameter === 'stabil' && $param->parameterUji) {
+                        $mean = (float) $param->mean_target;
+                        $sd = (float) $param->sd_target;
 
-                    $param->parameterUji->update([
-                        'sampel_inhouse_id' => $batch->sampel_inhouse_id, 
-                        'nilai_acuan' => $mean,
-                        'mean' => $mean,
-                        'sd' => $sd,
-                        'batas_bawah' => $mean - (2 * $sd),
-                        'batas_atas' => $mean + (2 * $sd),
-                        'uwl_bawah' => $mean - (2 * $sd),
-                        'uwl_atas' => $mean + (2 * $sd),
-                        'lcl' => $mean - (3 * $sd),
-                        'ucl' => $mean + (3 * $sd),
-                    ]);
+                        $param->parameterUji->update([
+                            'sampel_inhouse_id' => $batch->sampel_inhouse_id, 
+                            'nilai_acuan' => $mean,
+                            'mean' => $mean,
+                            'sd' => $sd,
+                            'batas_bawah' => $mean - (2 * $sd),
+                            'batas_atas' => $mean + (2 * $sd),
+                            'uwl_bawah' => $mean - (2 * $sd),
+                            'uwl_atas' => $mean + (2 * $sd),
+                            'lcl' => $mean - (3 * $sd),
+                            'ucl' => $mean + (3 * $sd),
+                        ]);
+                    }
                 }
-            }
+            });
 
             \Illuminate\Support\Facades\DB::commit();
             return redirect()->route('qc-inhouse.show', $id)->with('success', 'Batch berhasil diaktifkan! Master Data Parameter Uji telah disinkronkan otomatis dengan target batch ini.');

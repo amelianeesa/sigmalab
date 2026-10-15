@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class SampelInhouse extends BaseModel
 {
-    use SoftDeletes, HasFactory;
+    use SoftDeletes, HasFactory, LogsActivity;
 
     protected $table = 'sampel_inhouse';
 
@@ -98,5 +100,24 @@ class SampelInhouse extends BaseModel
             'habis', 'kadaluarsa' => 'dark',
             default => 'secondary',
         };
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(function (string $eventName) {
+                $kode = $this->kode_batch ?? 'baru';
+                if ($eventName === 'updated' && $this->wasChanged('status')) {
+                    if ($this->status === 'aktif') {
+                        return "MENGAKTIFKAN batch {$kode} sebagai In-House Reference Standard resmi";
+                    }
+                    if ($this->status === 'kadaluarsa') {
+                        return "MENONAKTIFKAN batch in-house {$kode} (Status menjadi kadaluarsa)";
+                    }
+                }
+                return "Batch sampel in-house {$kode} telah di-{$eventName}";
+            });
     }
 }

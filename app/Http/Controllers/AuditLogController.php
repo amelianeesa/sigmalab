@@ -15,6 +15,9 @@ class AuditLogController extends Controller
               ->orWhere('log_name', 'auth')
               ->orWhere('subject_type', 'like', '%Alat%')
               ->orWhere('subject_type', 'like', '%RiwayatPerbaikanAlat%')
+              ->orWhere('subject_type', 'like', '%SampelInhouse%')
+              ->orWhere('subject_type', 'like', '%QcHarian%')
+              ->orWhere('subject_type', 'like', '%Crm%')
               ->orWhereNull('subject_type');
         });
     }

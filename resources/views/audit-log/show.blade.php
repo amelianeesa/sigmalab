@@ -151,15 +151,35 @@
                                     <th style="width: 35%;" class="text-success">Data Baru (After)</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                                                        <tbody>
                                 @php
                                     $properties = $bLog->attribute_changes ?? [];
                                     $oldData = $properties['old'] ?? [];
                                     $newData = $properties['attributes'] ?? [];
                                     
                                     $allKeys = array_unique(array_merge(array_keys($oldData), array_keys($newData)));
+
+                                    // Helper untuk merender nilai aman dari array bertingkat
+                                    $renderVal = function($val) {
+                                        if (is_null($val) || $val === '') return '-';
+                                        if (is_bool($val)) return $val ? 'true' : 'false';
+                                        if (is_array($val)) {
+                                            if (empty($val)) return '-';
+                                            if (array_is_list($val)) {
+                                                return implode(', ', $val);
+                                            }
+                                            $parts = [];
+                                            foreach ($val as $k => $v) {
+                                                if ($v !== null && $v !== '') {
+                                                    $parts[] = "$k: $v";
+                                                }
+                                            }
+                                            return empty($parts) ? '-' : implode(', ', $parts);
+                                        }
+                                        return (string)$val;
+                                    };
                                 @endphp
-                                
+
                                 @forelse($allKeys as $key)
                                     @php
                                         $oldVal = array_key_exists($key, $oldData) ? $oldData[$key] : '-';
@@ -167,13 +187,42 @@
                                         $isChanged = ($bLog->event === 'updated' && $oldVal != $newVal);
                                     @endphp
                                     <tr class="{{ $isChanged ? 'table-warning' : '' }}">
-                                        <td class="fw-bold">{{ $key }}</td>
-                                        <td class="{{ $isChanged ? 'text-danger fw-bold' : '' }}">
-                                            {{ is_array($oldVal) ? json_encode($oldVal) : (is_null($oldVal) ? 'NULL' : $oldVal) }}
-                                        </td>
-                                        <td class="{{ $isChanged ? 'text-success fw-bold' : '' }}">
-                                            {{ is_array($newVal) ? json_encode($newVal) : (is_null($newVal) ? 'NULL' : $newVal) }}
-                                        </td>
+                                        <td class="fw-bold" style="width: 25%;">{{ $key }}</td>
+                                        
+                                        @if(is_array($oldVal) || is_array($newVal))
+                                            @php
+                                                $oldArr = is_array($oldVal) ? $oldVal : [];
+                                                $newArr = is_array($newVal) ? $newVal : [];
+                                                
+                                                // Ambil hanya sub-key yang nilainya terisi atau berubah
+                                                $diffSubKeys = array_filter(array_unique(array_merge(array_keys($oldArr), array_keys($newArr))), function($k) use ($oldArr, $newArr, $renderVal) {
+                                                    $oldTxt = $renderVal($oldArr[$k] ?? null);
+                                                    $newTxt = $renderVal($newArr[$k] ?? null);
+                                                    return $oldTxt !== $newTxt;
+                                                });
+                                            @endphp
+                                            
+                                            <td class="{{ $isChanged ? 'text-danger fw-bold' : '' }}" style="word-break: break-all;">
+                                                @foreach($diffSubKeys as $subK)
+                                                    <div><span class="badge bg-secondary badge-custom-size">{{ $subK }}</span>: {{ $renderVal($oldArr[$subK] ?? null) }}</div>
+                                                @endforeach
+                                                @if(empty($diffSubKeys)) - @endif
+                                            </td>
+                                            
+                                            <td class="{{ $isChanged ? 'text-success fw-bold' : '' }}" style="word-break: break-all;">
+                                                @foreach($diffSubKeys as $subK)
+                                                    <div><span class="badge bg-secondary badge-custom-size">{{ $subK }}</span>: {{ $renderVal($newArr[$subK] ?? null) }}</div>
+                                                @endforeach
+                                                @if(empty($diffSubKeys)) - @endif
+                                            </td>
+                                        @else
+                                            <td class="{{ $isChanged ? 'text-danger fw-bold' : '' }}">
+                                                {{ is_null($oldVal) ? 'NULL' : $oldVal }}
+                                            </td>
+                                            <td class="{{ $isChanged ? 'text-success fw-bold' : '' }}">
+                                                {{ is_null($newVal) ? 'NULL' : $newVal }}
+                                            </td>
+                                        @endif
                                     </tr>
                                 @empty
                                     <tr>
