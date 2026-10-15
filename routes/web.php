@@ -155,7 +155,7 @@ Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawa
     Route::put('/pengadaan/{id}/batal-progres', [PengadaanController::class, 'batalProgres'])->name('pengadaan.batal-progres');
 
     // Inventori & Monitoring Ruangan
-    Route::prefix('inventori')->name('inventori.')->group(function () {
+    Route::middleware('workspace:LAB')->prefix('inventori')->name('inventori.')->group(function () {
         Route::get('/monitoring-ruangan', [MonitoringRuanganController::class, 'index'])->name('monitoring.index');
         Route::post('/monitoring-ruangan/update', [MonitoringRuanganController::class, 'updateBaris'])->name('monitoring.updateBaris');
         Route::post('/monitoring-ruangan/update-persyaratan', [MonitoringRuanganController::class, 'updatePersyaratan'])->name('monitoring.updatePersyaratan');

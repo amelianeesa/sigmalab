@@ -258,11 +258,10 @@
 </style>
 
 <div class="container-fluid dashboard-container">
-    <div class="d-flex justify-content-between align-items-center mb-2 mt-1 flex-wrap gap-2 library-header-row">
-        <div>
-            <h4 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">{{ $showArchived ? 'Arsip Dokumen Library' : 'Library Digital' }}</h4>
-            <p class="text-muted small mb-0" style="font-size: 0.72rem;">{{ $showArchived ? 'Dokumen yang disembunyikan dari daftar aktif.' : 'Daftar induk dokumen prosedur, formulir, dan instruksi kerja.' }}</p>
-        </div>
+    <x-maskot-banner nama="analist" :judul="$showArchived ? 'Arsip Dokumen Library' : 'Library Digital'"
+        :sub="$showArchived ? 'Dokumen yang disembunyikan dari daftar aktif.' : 'Daftar induk dokumen prosedur, formulir, dan instruksi kerja.'" />
+
+    <div class="d-flex justify-content-end align-items-center mb-2 mt-1 flex-wrap gap-2 library-header-row">
 
         @if($canManage)
             <div class="library-header-actions">

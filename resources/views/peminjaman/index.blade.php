@@ -15,11 +15,10 @@
     }
 </style>
 
-<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-    <div>
-        <h4 class="fw-bold mb-0" style="color:var(--sl-primary);">Peminjaman Alat</h4>
-        <small class="text-muted">Pilih alat untuk membuka logbook-nya, lalu isi catatan peminjaman.</small>
-    </div>
+<x-maskot-banner nama="sampler" judul="Peminjaman Alat"
+    sub="Pilih alat untuk membuka logbook-nya, lalu isi catatan peminjaman." />
+
+<div class="d-flex justify-content-end align-items-center mb-3 flex-wrap gap-2">
     <a href="{{ route('peminjaman.pdf-semua') }}" target="_blank" class="btn btn-sm btn-outline-secondary fw-semibold pj-head-btn">
         <i class="fas fa-file-pdf me-1"></i> Cetak Semua Logbook (PDF)
     </a>
