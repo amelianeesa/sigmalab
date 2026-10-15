@@ -523,7 +523,7 @@
             @endif
 
             @php
-                $allowedRoles = ['GA', 'Analis Lab', 'Koordinator Laboratorium', 'Admin Aplikasi', \App\Enums\PeranPengguna::GA_OFFICER->value];
+                $allowedRoles = ['GA', 'Analis Lab', 'Koordinator Laboratorium', 'Admin Aplikasi', \App\Enums\PeranPengguna::GA_OFFICER->value, \App\Enums\PeranPengguna::PEGAWAI->value];
                 $currentRole = Auth::user()->role->nama_role ?? '';
             @endphp
             @if(in_array($currentRole, $allowedRoles))
@@ -773,7 +773,7 @@
                                                     </a>
                                                 @endif
                                             </div>
-                                        @elseif(in_array($p->status, $statusProses))
+                                        @elseif(in_array($p->status, $statusProses) && $roleUser !== \App\Enums\PeranPengguna::PEGAWAI->value)
                                             <button type="button" class="btn btn-aksi btn-hijau w-100" data-bs-toggle="modal" data-bs-target="#modalTerima{{ $p->permintaan_id }}">
                                                 <i class="fas fa-camera"></i> Konfirmasi Terima
                                             </button>

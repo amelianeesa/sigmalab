@@ -283,8 +283,10 @@
 @endphp
 
 <div class="container-fluid px-4">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 mt-2">
-        <h4 class="fw-bold text-dark mb-0" style="font-size: 1rem;"><i class="fas fa-history me-1"></i> Audit Trail (Aktif)</h4>
+    <x-maskot-banner nama="laporan" judul="Audit Trail"
+        sub="Jejak aktivitas pengguna di sistem (log aktif)." />
+
+    <div class="d-flex justify-content-end align-items-center flex-wrap gap-2 mb-2 mt-2">
         <div class="d-flex gap-2">
             @if($canDelete)
                 <button type="button" id="btnHapusTerpilih" class="btn btn-sm btn-warning btn-hapus-terpilih" style="font-size: 0.75rem;" disabled>

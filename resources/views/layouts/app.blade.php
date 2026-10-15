@@ -496,11 +496,13 @@
                                     <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Evaluasi Kalibrasi
                                 </a>
                             </li>
+                            @if($isLabWs)
                             <li class="nav-item">
                                 <a class="nav-link py-1 {{ request()->routeIs('inventori.monitoring.*') ? 'text-primary fw-bold' : 'text-muted' }}" href="{{ route('inventori.monitoring.index') }}">
                                     <span style="font-size: 14px; line-height: 1;" class="me-2">•</span>Monitoring Ruangan
                                 </a>
                             </li>
+                            @endif
                         </ul>
                     </div>
                 </li>

@@ -28,6 +28,13 @@ class EvaluasiKalibrasiController extends Controller
         }
     }
 
+    private function evaluasiWorkspace()
+    {
+        return EvaluasiKalibrasi::whereHas('alat', function ($alat) {
+            $alat->withTrashed();
+        });
+    }
+
     private function terapkanFilter($query, Request $request)
     {
         if ($request->filled('keputusan')) {
@@ -52,7 +59,8 @@ class EvaluasiKalibrasiController extends Controller
 
     public function index(Request $request)
     {
-        $query = EvaluasiKalibrasi::with(['alat', 'riwayatKalibrasi', 'evaluator'])
+        $query = $this->evaluasiWorkspace()
+            ->with(['alat', 'riwayatKalibrasi', 'evaluator'])
             ->where('diarsipkan', false);
 
         $this->terapkanFilter($query, $request);
@@ -65,7 +73,8 @@ class EvaluasiKalibrasiController extends Controller
 
     public function arsip(Request $request)
     {
-        $query = EvaluasiKalibrasi::with(['alat', 'riwayatKalibrasi', 'evaluator'])
+        $query = $this->evaluasiWorkspace()
+            ->with(['alat', 'riwayatKalibrasi', 'evaluator'])
             ->where('diarsipkan', true);
 
         $this->terapkanFilter($query, $request);
@@ -80,7 +89,7 @@ class EvaluasiKalibrasiController extends Controller
     {
         $this->pastikanAdminAplikasi();
 
-        EvaluasiKalibrasi::where('evaluasi_id', $id)->firstOrFail();
+        $this->evaluasiWorkspace()->where('evaluasi_id', $id)->firstOrFail();
         EvaluasiKalibrasi::where('evaluasi_id', $id)->update(['diarsipkan' => true]);
 
         return redirect()->route('evaluasi-kalibrasi.index')
@@ -91,7 +100,7 @@ class EvaluasiKalibrasiController extends Controller
     {
         $this->pastikanAdminAplikasi();
 
-        $jumlah = EvaluasiKalibrasi::where('diarsipkan', false)->update(['diarsipkan' => true]);
+        $jumlah = EvaluasiKalibrasi::whereIn('evaluasi_id', $this->evaluasiWorkspace()->where('diarsipkan', false)->pluck('evaluasi_id'))->update(['diarsipkan' => true]);
 
         return redirect()->route('evaluasi-kalibrasi.index')
             ->with('success', $jumlah . ' data evaluasi berhasil dipindahkan ke arsip.');
@@ -101,7 +110,7 @@ class EvaluasiKalibrasiController extends Controller
     {
         $this->pastikanAdminAplikasi();
 
-        EvaluasiKalibrasi::where('evaluasi_id', $id)->firstOrFail();
+        $this->evaluasiWorkspace()->where('evaluasi_id', $id)->firstOrFail();
         EvaluasiKalibrasi::where('evaluasi_id', $id)->update(['diarsipkan' => false]);
 
         return redirect()->route('evaluasi-kalibrasi.arsip')
@@ -112,7 +121,7 @@ class EvaluasiKalibrasiController extends Controller
     {
         $this->pastikanAdminAplikasi();
 
-        $jumlah = EvaluasiKalibrasi::where('diarsipkan', true)->update(['diarsipkan' => false]);
+        $jumlah = EvaluasiKalibrasi::whereIn('evaluasi_id', $this->evaluasiWorkspace()->where('diarsipkan', true)->pluck('evaluasi_id'))->update(['diarsipkan' => false]);
 
         return redirect()->route('evaluasi-kalibrasi.arsip')
             ->with('success', $jumlah . ' data evaluasi berhasil ditampilkan kembali.');
@@ -198,7 +207,7 @@ class EvaluasiKalibrasiController extends Controller
 
     public function show($id)
     {
-        $evaluasi = EvaluasiKalibrasi::where('evaluasi_id', $id)
+        $evaluasi = $this->evaluasiWorkspace()->where('evaluasi_id', $id)
             ->with(['alat', 'riwayatKalibrasi', 'evaluator'])
             ->firstOrFail();
 
@@ -207,7 +216,7 @@ class EvaluasiKalibrasiController extends Controller
 
     public function edit($id)
     {
-        $evaluasi = EvaluasiKalibrasi::where('evaluasi_id', $id)->firstOrFail();
+        $evaluasi = $this->evaluasiWorkspace()->where('evaluasi_id', $id)->firstOrFail();
         $alatList = Alat::orderBy('nama_alat')->get();
 
         return view('evaluasi-kalibrasi.edit', compact('evaluasi', 'alatList'));
@@ -215,7 +224,7 @@ class EvaluasiKalibrasiController extends Controller
 
     public function update(Request $request, $id)
     {
-        $evaluasi = EvaluasiKalibrasi::where('evaluasi_id', $id)->firstOrFail();
+        $evaluasi = $this->evaluasiWorkspace()->where('evaluasi_id', $id)->firstOrFail();
 
         $request->validate([
             'alat_id' => 'required|exists:alat,alat_id',
@@ -277,7 +286,7 @@ class EvaluasiKalibrasiController extends Controller
 
     public function destroy($id)
     {
-        $evaluasi = EvaluasiKalibrasi::where('evaluasi_id', $id)->firstOrFail();
+        $evaluasi = $this->evaluasiWorkspace()->where('evaluasi_id', $id)->firstOrFail();
 
         if ($evaluasi->file_laporan && Storage::disk('public')->exists($evaluasi->file_laporan)) {
             Storage::disk('public')->delete($evaluasi->file_laporan);
@@ -299,7 +308,7 @@ class EvaluasiKalibrasiController extends Controller
             return back()->with('error', 'Tidak ada data yang dipilih.');
         }
 
-        $data = EvaluasiKalibrasi::whereIn('evaluasi_id', $ids)
+        $data = $this->evaluasiWorkspace()->whereIn('evaluasi_id', $ids)
             ->where('diarsipkan', true)
             ->get();
 
@@ -318,7 +327,7 @@ class EvaluasiKalibrasiController extends Controller
     {
         $this->pastikanAdminAplikasi();
 
-        $data = EvaluasiKalibrasi::where('diarsipkan', true)->get();
+        $data = $this->evaluasiWorkspace()->where('diarsipkan', true)->get();
 
         foreach ($data as $item) {
             if ($item->file_laporan && Storage::disk('public')->exists($item->file_laporan)) {
@@ -326,7 +335,7 @@ class EvaluasiKalibrasiController extends Controller
             }
         }
 
-        $jumlah = EvaluasiKalibrasi::where('diarsipkan', true)->delete();
+        $jumlah = EvaluasiKalibrasi::whereIn('evaluasi_id', $data->pluck('evaluasi_id'))->delete();
 
         return back()->with('success', $jumlah . ' data arsip evaluasi berhasil dihapus permanen.');
     }
