@@ -200,7 +200,7 @@
         font-size: 0.66rem;
         text-decoration: none;
         flex-shrink: 0;
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.35s ease;
     }
     a.tracking-step-icon:hover {
         transform: scale(1.14);
@@ -223,6 +223,26 @@
         top: 13px;
         z-index: 1;
         left: 0;
+    }
+    .tracking-step-label,
+    .tracking-step-meta {
+        transition: opacity 0.4s ease;
+    }
+    .tracking-step.anim-wait .tracking-step-icon {
+        background-color: #adb5bd !important;
+        transform: scale(0.85);
+    }
+    .tracking-step.anim-wait .tracking-step-label,
+    .tracking-step.anim-wait .tracking-step-meta {
+        opacity: 0.3;
+    }
+    .tracking-step.anim-pop .tracking-step-icon {
+        animation: trackingPop 0.45s ease;
+    }
+    @keyframes trackingPop {
+        0% { transform: scale(0.85); }
+        55% { transform: scale(1.25); }
+        100% { transform: scale(1); }
     }
 
     @media (max-width: 991.98px) {
@@ -775,6 +795,53 @@
         const select = $('#selectTracking');
         const placeholder = document.getElementById('trackingPlaceholder');
 
+        function playTrackingAnimation(item) {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            const bar = item.querySelector('.progress-bar');
+            const line = item.querySelector('.tracking-progress-line');
+            const steps = Array.from(item.querySelectorAll('.tracking-step')).filter(function (step) {
+                const icon = step.querySelector('.tracking-step-icon');
+                return icon && !icon.classList.contains('bg-secondary');
+            });
+        
+            (item._trackingTimers || []).forEach(clearTimeout);
+            item._trackingTimers = [];
+        
+            if (bar && !bar.dataset.target) bar.dataset.target = bar.style.width;
+            const targetWidth = bar ? parseFloat(bar.dataset.target) || 0 : 0;
+            const total = Math.max(600, targetWidth * 18);
+            const lineVisible = line && line.offsetParent !== null;
+            const lineRect = lineVisible ? line.getBoundingClientRect() : null;
+        
+            steps.forEach(function (step) {
+                step.classList.remove('anim-pop');
+                step.classList.add('anim-wait');
+            });
+        
+            if (bar) {
+                bar.style.transition = 'none';
+                bar.style.width = '0%';
+                void bar.offsetWidth;
+                bar.style.transition = 'width ' + total + 'ms linear';
+                bar.style.width = bar.dataset.target;
+            }
+        
+            steps.forEach(function (step, index) {
+                let delay = index * 450;
+                if (lineRect && targetWidth > 0) {
+                    const iconRect = step.querySelector('.tracking-step-icon').getBoundingClientRect();
+                    const center = iconRect.left + iconRect.width / 2 - lineRect.left;
+                    const percent = (center / lineRect.width) * 100;
+                    delay = Math.min(Math.max(percent / targetWidth, 0), 1) * total;
+                }
+                item._trackingTimers.push(setTimeout(function () {
+                    step.classList.remove('anim-wait');
+                    step.classList.add('anim-pop');
+                }, delay));
+            });
+        }
+
         function updateTracking() {
             document.querySelectorAll('.tracking-item').forEach(el => el.style.display = 'none');
 
@@ -782,7 +849,10 @@
             if (selectedId) {
                 if (placeholder) placeholder.style.display = 'none';
                 const targetEl = document.getElementById(selectedId);
-                if (targetEl) targetEl.style.display = 'block';
+                if (targetEl) {
+                    targetEl.style.display = 'block';
+                    playTrackingAnimation(targetEl);
+                }
             } else if (placeholder) {
                 placeholder.style.display = 'block';
             }

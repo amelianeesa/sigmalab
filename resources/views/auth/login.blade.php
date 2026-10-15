@@ -3,9 +3,6 @@
 
 <head>
     <meta charset="UTF-8">
-
-    {{-- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"> --}}
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - SIGMALAB Sucofindo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -54,10 +51,10 @@
 
         @media (max-width: 768px) {
             .auth-row {
-                grid-template-columns: 1fr; 
+                grid-template-columns: 1fr;
             }
             .auth-side {
-                padding: 3.5rem 1.5rem; 
+                padding: 3.5rem 1.5rem;
                 text-align: center;
                 align-items: center;
             }
@@ -230,7 +227,6 @@
             color: var(--sl-primary) !important;
         }
 
-        /* ===== Responsif Mobile ===== */
         @media (max-width: 767.98px) {
             html,
             body {
@@ -246,12 +242,13 @@
             }
 
             .container.py-4 {
-                padding-top: 1.75rem !important;
-                padding-bottom: 1.75rem !important;
+                padding: 0.6rem 0.5rem !important;
             }
 
             .auth-card {
-                max-width: 420px;
+                max-width: 480px;
+                width: 100%;
+                margin: 0 auto !important;
             }
 
             .auth-row {
@@ -260,7 +257,7 @@
             }
 
             .auth-side {
-                padding: 1.5rem 1.25rem;
+                padding: 0.9rem 1rem;
                 border-radius: 16px 16px 0 0;
                 text-align: center;
                 align-items: center;
@@ -275,8 +272,15 @@
                 max-width: 100%;
             }
 
+            .auth-side .auth-mascot {
+                max-height: 24dvh;
+                width: auto;
+                max-width: 100%;
+                object-fit: contain;
+            }
+
             .auth-form-panel {
-                padding: 1.5rem 1.25rem;
+                padding: 0.9rem 1rem;
                 border-radius: 0 0 16px 16px;
             }
 
@@ -286,39 +290,54 @@
 
             .auth-form-panel p {
                 font-size: 0.85rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .auth-form-panel .mb-3 {
+                margin-bottom: 0.6rem !important;
             }
 
             .form-label {
                 font-size: 0.85rem;
+                margin-bottom: 0.2rem;
             }
 
             .form-control,
             .form-select {
                 font-size: 1rem;
-                min-height: 42px;
-                padding: 0.5rem 0.85rem;
+                min-height: 40px;
+                padding: 0.4rem 0.85rem;
             }
 
             .btn-auth {
                 font-size: 0.95rem;
-                padding: 0.7rem 0.95rem;
+                padding: 0.55rem 0.95rem;
             }
 
-            .auth-logo-box {
-                width: 84px;
-                height: 84px;
+            .auth-logo-box,
+            .auth-logo-box.auth-logo-center {
+                width: 64px;
+                height: 64px;
+                margin: 0 auto 0.4rem;
             }
 
             .auth-logo-box img {
-                width: 84px;
-                height: 84px;
+                width: 64px;
+                height: 64px;
+            }
+
+            .auth-form-panel .text-center.mt-4 {
+                margin-top: 0.6rem !important;
+            }
+
+            .auth-footer {
+                margin-top: 0.4rem;
             }
         }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-    {{-- Tema ceria biru muda: harus tetap paling bawah di <head> --}}
     <link href="{{ asset('css/sigma-ceria.css') }}?v=1" rel="stylesheet">
 </head>
 
@@ -329,8 +348,8 @@
                 <div class="auth-side">
                     <h3>Selamat Datang !</h3>
                     <p>Masuk untuk mengakses Sistem Integrasi Manajemen Laboratorium PT Sucofindo Cilacap.</p>
-                
-                    <img class="auth-mascot" src="{{ asset('images/maskot/chemist.webp') }}" alt="" decoding="async">
+
+                    <img class="auth-mascot" src="{{ asset('images/maskot/bareng1.png') }}" alt="" decoding="async">
                 </div>
                 <div class="auth-form-panel">
                     <div class="auth-logo-box auth-logo-center">

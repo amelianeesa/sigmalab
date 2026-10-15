@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * - Peminjaman, profil, notifikasi, workspace switch, logout : akses penuh.
  *   Ditambah aksi sertifikasi & CV di modul Personil (hanya untuk data milik sendiri, dicek di controller).
+ * - Pengadaan : boleh melihat daftar, mengajukan (store), & membatalkan pengajuan sendiri. Selebihnya ditolak.
  * - Dashboard, Personil & Kompetensi, Peralatan, Inventori Barang, Library Digital,
  *   Audit Trail : BACA SAJA (GET/HEAD), tanpa halaman form tambah/ubah.
  * - Selain itu ditolak di server (deny-by-default), karena sebagian controller lama
@@ -27,6 +28,8 @@ class EnsurePegawaiTerbatas
         'sdm.kompetensi.file.upload', 'sdm.cv.upload',
         // Tambah barang/bahan (sama seperti Analis Lab). Edit, hapus & pengeluaran tetap tertutup.
         'barang.create', 'barang.store',
+        // Ajukan pengadaan barang/bahan. Pengajuan masuk ke Koordinator dulu. Persetujuan, proses, & konfirmasi terima tetap tertutup.
+        'pengadaan.store', 'pengadaan.destroy', // destroy: batalkan pengajuan sendiri (dicek di controller)
     ];
 
     /** Route yang hanya boleh dibaca (GET/HEAD). */
@@ -35,6 +38,7 @@ class EnsurePegawaiTerbatas
         'sdm.*',
         'alat.*', 'evaluasi-kalibrasi.*', 'inventori.monitoring.*',
         'barang.*',
+        'pengadaan.index',
         'library.*',
         'audit-log.*',
     ];

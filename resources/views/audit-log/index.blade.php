@@ -185,11 +185,95 @@
     }
 
     @media (max-width: 768px) {
+        .container-fluid.px-4 {
+            padding-left: 8px !important;
+            padding-right: 8px !important;
+        }
+
+        .container-fluid > .d-flex.mb-2.mt-2 {
+            margin-top: 0 !important;
+            margin-bottom: 0.35rem !important;
+            gap: 0.3rem !important;
+        }
+        .container-fluid > .d-flex.mb-2.mt-2 h4 {
+            font-size: 0.85rem !important;
+        }
+        .container-fluid > .d-flex.mb-2.mt-2 .d-flex {
+            gap: 0.3rem !important;
+        }
+        .container-fluid > .d-flex.mb-2.mt-2 .btn {
+            font-size: 0.66rem !important;
+            padding: 0.2rem 0.45rem !important;
+        }
+
+        .container-fluid .card.mb-3 {
+            margin-bottom: 0.4rem !important;
+        }
+        .container-fluid .card-body {
+            padding: 0.4rem !important;
+        }
+
+        #filter-form {
+            --bs-gutter-x: 0.4rem;
+            --bs-gutter-y: 0;
+            flex-wrap: nowrap;
+        }
+        #filter-form > .col-md-4 {
+            width: 38%;
+        }
+        #filter-form > .col-md-7 {
+            width: 47%;
+        }
+        #filter-form > .col-md-1 {
+            width: 15%;
+        }
+        #filter-form .btn {
+            padding: 0.15rem 0.3rem !important;
+        }
+
         .scroll-hint-audit {
             display: block;
+            font-size: 0.6rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .table-responsive-custom {
+            --audit-offset: 270px;
+            max-height: calc(100vh - var(--audit-offset));
+            max-height: calc(100dvh - var(--audit-offset));
+            overflow: auto;
+        }
+        .table-header-custom th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            box-shadow: inset 0 -1px 0 #2c4975;
         }
         .table th, .table td {
-            font-size: 0.65rem !important;
+            font-size: 0.62rem !important;
+            padding: 0.2rem 0.25rem !important;
+            line-height: 1.25;
+        }
+        .table .btn {
+            font-size: 0.6rem !important;
+            padding: 0 0.3rem !important;
+        }
+
+        .container-fluid .card-body > .mt-3 {
+            margin-top: 0.4rem !important;
+        }
+        .pagination {
+            margin-bottom: 0;
+        }
+        .pagination .page-link {
+            font-size: 0.65rem;
+            padding: 0.15rem 0.45rem;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        #content {
+            padding-top: 66px !important;
         }
     }
 </style>
@@ -199,8 +283,10 @@
 @endphp
 
 <div class="container-fluid px-4">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 mt-2">
-        <h4 class="fw-bold text-dark mb-0" style="font-size: 1rem;"><i class="fas fa-history me-1"></i> Audit Trail (Aktif)</h4>
+    <x-maskot-banner nama="laporan" judul="Audit Trail"
+        sub="Jejak aktivitas pengguna di sistem (log aktif)." />
+
+    <div class="d-flex justify-content-end align-items-center flex-wrap gap-2 mb-2 mt-2">
         <div class="d-flex gap-2">
             @if($canDelete)
                 <button type="button" id="btnHapusTerpilih" class="btn btn-sm btn-warning btn-hapus-terpilih" style="font-size: 0.75rem;" disabled>

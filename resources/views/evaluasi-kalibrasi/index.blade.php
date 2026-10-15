@@ -171,9 +171,8 @@
         $adaFilter = request()->filled('q') || request()->filled('tanggal');
     @endphp
 
-    <div class="mb-2">
-        <h4 class="fw-bold mb-0">Evaluasi Kalibrasi</h4>
-    </div>
+    <x-maskot-banner nama="preparator" judul="Evaluasi Kalibrasi"
+        sub="Catat dan tinjau keputusan kelayakan alat setelah kalibrasi." />
 
     <div class="evaluasi-header-actions mb-2">
         @if($isAdminAplikasi)

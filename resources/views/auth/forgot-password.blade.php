@@ -244,7 +244,7 @@
                     <h3>Lupa Password?</h3>
                     <p>Tenang, masukkan email Anda dan kami akan kirimkan link untuk membuat password baru.</p>
                 
-                    <img class="auth-mascot" src="{{ asset('images/maskot/laporan.webp') }}" alt="" decoding="async">
+                    <img class="auth-mascot" src="{{ asset('images/maskot/inspektorpria.png') }}" alt="" decoding="async">
                 </div>
                 <div class="auth-form-panel">
                     <div class="auth-logo-box auth-logo-center">
