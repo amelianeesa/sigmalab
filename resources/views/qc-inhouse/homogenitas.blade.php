@@ -1586,7 +1586,8 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 
@@ -2634,6 +2635,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const origTable = document.querySelector(`.param-table[data-code="${code}"]`);
                 if(origTable) {
                     const tableClone = origTable.cloneNode(true);
+                    const origSelects = origTable.querySelectorAll('select');
+                    tableClone.querySelectorAll('select').forEach((sel, idx) => {
+                        const o = origSelects[idx];
+                        const text = o && o.selectedIndex >= 0 ? o.options[o.selectedIndex].text : sel.value;
+                        sel.parentNode.replaceChild(document.createTextNode(text || ''), sel);
+                    });
                     tableClone.querySelectorAll('input').forEach(inp => {
                         const text = document.createTextNode(inp.value);
                         inp.parentNode.replaceChild(text, inp);
@@ -2643,13 +2650,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             if(part === 'both' || part === 'anova') {
-                modalParamSelect.value = code;
-                renderModalAnova();
+                if(!['AFT', 'CHN'].includes(code)) {
+                    modalParamSelect.value = code;
+                    renderModalAnova();
 
-                const anovaTable = document.getElementById('modalTableCombined').closest('table');
-                if(anovaTable) {
-                    const anovaClone = anovaTable.cloneNode(true);
-                    ghost.appendChild(anovaClone);
+                    const anovaTable = document.getElementById('modalTableCombined').closest('table');
+                    if(anovaTable) {
+                        const anovaClone = anovaTable.cloneNode(true);
+                        ghost.appendChild(anovaClone);
+                    }
                 }
             }
 
@@ -2743,6 +2752,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     const tableClone = origTable.cloneNode(true);
                     tableClone.style.minWidth = 'auto';
                     tableClone.querySelectorAll('input[type="hidden"]').forEach(el => el.remove());
+                    const origSelects = origTable.querySelectorAll('select');
+                    tableClone.querySelectorAll('select').forEach((sel, idx) => {
+                        const o = origSelects[idx];
+                        const text = o && o.selectedIndex >= 0 ? o.options[o.selectedIndex].text : sel.value;
+                        sel.parentNode.replaceChild(document.createTextNode(text || ''), sel);
+                    });
                     tableClone.querySelectorAll('input').forEach(inp => {
                         const text = document.createTextNode(inp.value);
                         inp.parentNode.replaceChild(text, inp);
@@ -2756,9 +2771,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             if(part === 'both' || part === 'anova') {
+                if(['AFT', 'CHN'].includes(code)) return;
                 modalParamSelect.value = code;
                 renderModalAnova();
-
                 const a = State[code].anova;
                 if(!a) return;
 
@@ -2944,53 +2959,86 @@ document.addEventListener('DOMContentLoaded', function() {
         return html;
     }
 
-    function exportToPdf(params, part) {
+    async function exportToPdf(params, part) {
         const html = buildExportHtml(params, part);
 
         const doc = new DOMParser().parseFromString(html, 'text/html');
-        const css = doc.querySelector('style') ? doc.querySelector('style').textContent : '';
+        const css = Array.from(doc.querySelectorAll('style'))
+            .map(s => s.textContent).join('\n');
         const sections = Array.from(doc.querySelectorAll('.pdf-section'));
 
         if (sections.length === 0) {
-            return Promise.reject(new Error('Tidak ada data untuk dicetak.'));
+            throw new Error('Tidak ada data untuk dicetak.');
         }
 
-        const pages = sections.map(sec => {
-            sec.classList.remove('pdf-break');
-            sec.style.pageBreakBefore = 'auto';
-            sec.style.breakBefore = 'auto';
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+        const pageW = 210, pageH = 297, margin = 10;
 
-            const wrap = document.createElement('div');
-            wrap.style.cssText = 'overflow: visible; padding-bottom: 10px;';
-            const style = document.createElement('style');
-            style.textContent = css;
-            wrap.appendChild(style);
-            wrap.appendChild(sec);
-            return wrap;
-        });
+        const stage = document.createElement('div');
+        stage.style.cssText = 'position:fixed; left:0; top:0; z-index:-1; background:#fff; overflow:visible;';
+        document.body.appendChild(stage);
 
-        const opt = {
-            margin:       [0.4, 0.4, 0.4, 0.4],
-            filename:     'Hasil_Uji_Homogenitas.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
-            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-            pagebreak:    { mode: ['css', 'legacy'] }
-        };
+        try {
+            for (let i = 0; i < sections.length; i++) {
+                const sec = sections[i];
+                const mainTable = sec.querySelector('.official-table');
+                const isWide = !!sec.querySelector('.table-wide') || !!sec.querySelector('.table-cv');
 
-        let worker = html2pdf().set(opt).from(pages[0]).toPdf();
+                let renderW = 720;
+                if (mainTable) {
+                    const cols = mainTable.querySelectorAll('thead tr:first-child th').length;
+                    renderW = isWide ? 1000 : Math.max(720, cols * 65);
+                }
 
-        for (let i = 1; i < pages.length; i++) {
-            worker = worker
-                .get('pdf')
-                .then(pdf => { pdf.addPage(); })
-                .from(pages[i])
-                .toContainer()
-                .toCanvas()
-                .toPdf();
+                sec.classList.remove('pdf-break');
+                sec.removeAttribute('style');
+                sec.style.cssText = `width:${renderW}px; box-sizing:border-box; padding:8px; background:#fff;`;
+
+                sec.querySelectorAll('input[type="hidden"]').forEach(el => el.remove());
+                sec.querySelectorAll('table').forEach(tbl => {
+                    tbl.classList.remove('text-nowrap');
+                    tbl.style.minWidth = '0';
+                    tbl.style.maxWidth = '100%';
+                    tbl.style.width = '100%';
+                });
+
+                stage.innerHTML = '';
+                const style = document.createElement('style');
+                style.textContent = css;
+                stage.appendChild(style);
+                stage.appendChild(sec);
+
+                // Tunggu logo dan gambar selesai dimuat 100% sebelum dirender
+                const imgs = Array.from(sec.querySelectorAll('img'));
+                await Promise.all(imgs.map(img => img.complete ? Promise.resolve() :
+                    new Promise(res => { img.onload = img.onerror = res; })));
+
+                const canvas = await html2canvas(sec, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    scrollX: 0,
+                    scrollY: 0,
+                    windowWidth: renderW + 40
+                });
+
+                const maxW = pageW - margin * 2;
+                const maxH = pageH - margin * 2;
+                const ratio = Math.min(maxW / canvas.width, maxH / canvas.height);
+                const w = canvas.width * ratio;
+                const h = canvas.height * ratio;
+
+                if (i > 0) pdf.addPage('a4', 'portrait');
+
+                pdf.addImage(canvas.toDataURL('image/jpeg', 0.98), 'JPEG',
+                    (pageW - w) / 2, margin, w, h);
+            }
+
+            pdf.save('Hasil_Uji_Homogenitas.pdf');
+        } finally {
+            stage.remove();
         }
-
-        return worker.save();
     }
 
     function wordifyTable(tbl, fontPt = 9, pad = 3, rowH = 0) {
@@ -3033,6 +3081,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (orig) {
                     const clone = orig.cloneNode(true);
                     clone.querySelectorAll('input[type="hidden"]').forEach(el => el.remove());
+                    const origSelects = orig.querySelectorAll('select');
+                    clone.querySelectorAll('select').forEach((sel, idx) => {
+                        const o = origSelects[idx];
+                        const text = o && o.selectedIndex >= 0 ? o.options[o.selectedIndex].text : sel.value;
+                        sel.parentNode.replaceChild(document.createTextNode(text || ''), sel);
+                    });
                     clone.querySelectorAll('input').forEach(inp => {
                         inp.parentNode.replaceChild(document.createTextNode(inp.value), inp);
                     });
@@ -3045,6 +3099,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             if (part === 'both' || part === 'anova') {
+                if (['AFT', 'CHN'].includes(code)) return; // Lewati ANOVA untuk AFT & CHN
+
                 modalParamSelect.value = code;
                 renderModalAnova();
                 const a = State[code].anova;
@@ -3325,11 +3381,25 @@ document.addEventListener('DOMContentLoaded', function() {
                             targetCb.closest('tr').querySelector('.in-qty').value = cb.closest('tr').querySelector('.in-qty').value;
                         }
                     });
-                    alert('Berhasil menyalin data dari parameter sebelumnya!');
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Berhasil menyalin data dari parameter sebelumnya!',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
                     updateResourceSummary(currentPid);
                 }
             } else {
-                alert('Ini adalah parameter pertama, tidak ada data sebelumnya yang bisa disalin.');
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'info',
+                    title: 'Ini adalah parameter pertama, tidak ada data sebelumnya yang bisa disalin.',
+                    showConfirmButton: false,
+                    timer: 2500
+                });
             }
         });
     });

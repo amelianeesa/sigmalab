@@ -801,6 +801,18 @@ class QcInhouseController extends Controller
 
                     $val1 = ($val1 === '') ? null : $val1;
                     $val2 = ($val2 === '') ? null : $val2;
+                    $namaParamUpper = strtoupper($param->parameterUji->nama_parameter ?? '');
+                    if ($namaParamUpper === 'AFT') {
+                        $val1 = isset($row['mentah']['st_1']) && $row['mentah']['st_1'] !== '' ? floatval($row['mentah']['st_1']) : null;
+                        $val2 = isset($row['mentah']['st_2']) && $row['mentah']['st_2'] !== '' ? floatval($row['mentah']['st_2']) : null;
+                    } elseif ($namaParamUpper === 'CHN') {
+                        $val1 = isset($row['mentah']['c_1']) && $row['mentah']['c_1'] !== '' ? floatval($row['mentah']['c_1']) : null;
+                        $val2 = isset($row['mentah']['c_2']) && $row['mentah']['c_2'] !== '' ? floatval($row['mentah']['c_2']) : null;
+                    }
+
+                    $val1 = ($val1 === '') ? null : $val1;
+                    $val2 = ($val2 === '') ? null : $val2;
+                    $lengkap = ($val1 !== null && $val2 !== null);
                     $lengkap = ($val1 !== null && $val2 !== null);
 
                     $meanPengujian = $lengkap ? ($val1 + $val2) / 2 : null;
@@ -829,18 +841,17 @@ class QcInhouseController extends Controller
                     ]);
 
                     if ($lengkap) {
-                        $isIM = strtoupper($param->parameterUji->nama_parameter) === 'IM';
+                        $isDirect = in_array(strtoupper($param->parameterUji->nama_parameter), ['IM', 'AFT', 'CHN']);
                         $db1 = $row['nilai_db_1'] ?? '';
                         $db2 = $row['nilai_db_2'] ?? '';
 
-                        if ($isIM) {
+                        if ($isDirect) {
                             $stabilityDataY[] = (float) $val1;
                             $stabilityDataY[] = (float) $val2;
                         } elseif ($db1 !== '' && $db2 !== '') {
                             $stabilityDataY[] = (float) $db1;
                             $stabilityDataY[] = (float) $db2;
                         }
-                        // non-IM tanpa nilai db: dilewati, jangan campur basis
                     }
                 }
 
@@ -859,7 +870,7 @@ class QcInhouseController extends Controller
                         $adb = $dh->{'nilai_' . $k};
                         if ($adb === null) continue;
                         $v = (float) $adb;
-                        if ($namaParam !== 'IM' && isset($imByNo[$dh->nomor_sampel][$k])) {
+                        if (!in_array($namaParam, ['IM', 'AFT', 'CHN']) && isset($imByNo[$dh->nomor_sampel][$k])) {
                             $im = (float) $imByNo[$dh->nomor_sampel][$k];
                             if ($im < 100) $v = (100 / (100 - $im)) * $v;
                         }

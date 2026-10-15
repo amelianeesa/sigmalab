@@ -700,6 +700,23 @@
                                                             <th>Average Result (cal/g), db</th>
                                                             <th>%db</th>
                                                         </tr>
+                                                    @elseif($code === 'AFT')
+                                                        <tr>
+                                                            <th width="15%">KODE SAMPEL</th>
+                                                            <th width="15%">ATMOSFER</th>
+                                                            <th class="bg-warning bg-opacity-25">IDT (°C)</th>
+                                                            <th class="bg-warning bg-opacity-25">ST (°C)</th>
+                                                            <th class="bg-warning bg-opacity-25">HT (°C)</th>
+                                                            <th class="bg-warning bg-opacity-25">FT (°C)</th>
+                                                        </tr>
+                                                    @elseif($code === 'CHN')
+                                                        <tr>
+                                                            <th width="15%">KODE SAMPEL</th>
+                                                            <th width="15%">WEIGHT (mg)</th>
+                                                            <th class="bg-warning bg-opacity-25">N % db</th>
+                                                            <th class="bg-warning bg-opacity-25">C % db</th>
+                                                            <th class="bg-warning bg-opacity-25">H % db</th>
+                                                        </tr>
                                                     @else
                                                         
                                                         <tr>
@@ -731,7 +748,10 @@
                                                                 <input type="hidden" class="in-db-1" name="data_{{ $pid }}[{{ $i-1 }}][nilai_db_1]">
                                                                 <input type="hidden" class="in-db-2" name="data_{{ $pid }}[{{ $i-1 }}][nilai_db_2]">
                                                             </td>
-                                                            <td class="bg-light p-1 text-center"><input type="text" class="form-control form-control-sm text-center fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][dish_1]" value="{{ $mentah['dish_1'] ?? '' }}" ></td>
+                                                            
+                                                            @if(!in_array($code, ['AFT', 'CHN']))
+                                                                <td class="bg-light p-1 text-center"><input type="text" class="form-control form-control-sm text-center fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][dish_1]" value="{{ $mentah['dish_1'] ?? '' }}" ></td>
+                                                            @endif
                                                             
                                                             @if($code === 'IM')
                                                                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_1]" value="{{ $mentah['m1_1'] ?? '' }}"></td>
@@ -770,10 +790,10 @@
                                                                 <td rowspan="2" class="align-middle out-avg-db">-</td>
                                                                 <td class="align-middle out-db-1 fw-bold text-success">-</td>
                                                             @elseif($code === 'TS')
-                                                            <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_1]" value="{{ $mentah['massa_1'] ?? '' }}"></td>
-                                                            <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" value="{{ $dh->nilai_d1 ?? '' }}"></td>
-                                                            <td rowspan="2" class="align-middle out-avg-adb fw-bold">-</td>
-                                                            <td rowspan="2" class="align-middle out-avg-db fw-bold text-success">-</td>
+                                                                <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-massa-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][massa_1]" value="{{ $mentah['massa_1'] ?? '' }}"></td>
+                                                                <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" value="{{ $dh->nilai_d1 ?? '' }}"></td>
+                                                                <td rowspan="2" class="align-middle out-avg-adb fw-bold">-</td>
+                                                                <td rowspan="2" class="align-middle out-avg-db fw-bold text-success">-</td>
                                                             @elseif($code === 'CV')
                                                                 <td><input type="text" class="form-control form-control-sm in-callid-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][callid_1]" value="{{ $mentah['callid_1'] ?? '' }}"></td>
                                                                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-weight-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][weight_1]" value="{{ $mentah['weight_1'] ?? '' }}"></td>
@@ -788,6 +808,22 @@
                                                                 <td rowspan="2" class="align-middle out-avg-adb fw-bold">-</td>
                                                                 <td rowspan="2" class="align-middle out-avg-db fw-bold">-</td>
                                                                 <td class="align-middle out-db-1 fw-bold text-success">-</td>
+                                                            @elseif($code === 'AFT')
+                                                                <td rowspan="2" class="align-middle">
+                                                                    <select class="form-select form-select-sm text-center in-aft-atmosfer" name="data_{{ $pid }}[{{ $i-1 }}][mentah][atmosfer]">
+                                                                        <option value="Reducing" {{ ($mentah['atmosfer'] ?? 'Reducing') === 'Reducing' ? 'selected' : '' }}>Reducing</option>
+                                                                        <option value="Oxidizing" {{ ($mentah['atmosfer'] ?? '') === 'Oxidizing' ? 'selected' : '' }}>Oxidizing</option>
+                                                                    </select>
+                                                                </td>
+                                                                <td><input type="number" step="1" class="form-control form-control-sm text-center in-aft-idt-1 fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][idt_1]" value="{{ $mentah['idt_1'] ?? '' }}"></td>
+                                                                <td><input type="number" step="1" class="form-control form-control-sm text-center in-aft-st-1 fw-bold text-primary" name="data_{{ $pid }}[{{ $i-1 }}][mentah][st_1]" value="{{ $mentah['st_1'] ?? '' }}"></td>
+                                                                <td><input type="number" step="1" class="form-control form-control-sm text-center in-aft-ht-1 fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][ht_1]" value="{{ $mentah['ht_1'] ?? '' }}"></td>
+                                                                <td><input type="number" step="1" class="form-control form-control-sm text-center in-aft-ft-1 fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][ft_1]" value="{{ $mentah['ft_1'] ?? '' }}"></td>
+                                                            @elseif($code === 'CHN')
+                                                                <td><input type="number" step="0.0001" class="form-control form-control-sm text-center in-chn-weight-1" name="data_{{ $pid }}[{{ $i-1 }}][mentah][weight_1]" value="{{ $mentah['weight_1'] ?? '' }}"></td>
+                                                                <td><input type="number" step="0.01" class="form-control form-control-sm text-center in-chn-n-1 fw-bold text-primary" name="data_{{ $pid }}[{{ $i-1 }}][mentah][n_1]" value="{{ $mentah['n_1'] ?? '' }}"></td>
+                                                                <td><input type="number" step="0.01" class="form-control form-control-sm text-center in-chn-c-1 fw-bold text-primary" name="data_{{ $pid }}[{{ $i-1 }}][mentah][c_1]" value="{{ $mentah['c_1'] ?? '' }}"></td>
+                                                                <td><input type="number" step="0.01" class="form-control form-control-sm text-center in-chn-h-1 fw-bold text-primary" name="data_{{ $pid }}[{{ $i-1 }}][mentah][h_1]" value="{{ $mentah['h_1'] ?? '' }}"></td>
                                                             @else
                                                                 <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-1 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d1]" value="{{ $dh->nilai_d1 ?? '' }}"></td>
                                                                 <td rowspan="2" class="align-middle out-diff">-</td>
@@ -796,7 +832,9 @@
                                                         </tr>
 
                                                         <tr class="row-duplo">
-                                                            <td class="bg-light p-1 text-center"><input type="text" class="form-control form-control-sm text-center fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][dish_2]" value="{{ $mentah['dish_2'] ?? '' }}"></td>
+                                                            @if(!in_array($code, ['AFT', 'CHN']))
+                                                                <td class="bg-light p-1 text-center"><input type="text" class="form-control form-control-sm text-center fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][dish_2]" value="{{ $mentah['dish_2'] ?? '' }}"></td>
+                                                            @endif
                                                             
                                                             @if($code === 'IM')
                                                                 <td><input type="text" inputmode="decimal" class="form-control form-control-sm in-m1-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][m1_2]" value="{{ $mentah['m1_2'] ?? '' }}"></td>
@@ -838,6 +876,16 @@
                                                                 <td><input type="text" class="form-control form-control-sm in-ts-2 bg-light border-0 text-secondary" readonly tabindex="-1"></td>
                                                                 <td class="bg-warning bg-opacity-10"><input type="text" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" readonly tabindex="-1"></td>
                                                                 <td class="align-middle out-db-2 fw-bold text-success">-</td>
+                                                            @elseif($code === 'AFT')
+                                                            <td><input type="number" step="1" class="form-control form-control-sm text-center in-aft-idt-2 fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][idt_2]" value="{{ $mentah['idt_2'] ?? '' }}"></td>
+                                                            <td><input type="number" step="1" class="form-control form-control-sm text-center in-aft-st-2 fw-bold text-primary" name="data_{{ $pid }}[{{ $i-1 }}][mentah][st_2]" value="{{ $mentah['st_2'] ?? '' }}"></td>
+                                                            <td><input type="number" step="1" class="form-control form-control-sm text-center in-aft-ht-2 fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][ht_2]" value="{{ $mentah['ht_2'] ?? '' }}"></td>
+                                                            <td><input type="number" step="1" class="form-control form-control-sm text-center in-aft-ft-2 fw-bold" name="data_{{ $pid }}[{{ $i-1 }}][mentah][ft_2]" value="{{ $mentah['ft_2'] ?? '' }}"></td>
+                                                        @elseif($code === 'CHN')
+                                                            <td><input type="number" step="0.0001" class="form-control form-control-sm text-center in-chn-weight-2" name="data_{{ $pid }}[{{ $i-1 }}][mentah][weight_2]" value="{{ $mentah['weight_2'] ?? '' }}"></td>
+                                                            <td><input type="number" step="0.01" class="form-control form-control-sm text-center in-chn-n-2 fw-bold text-primary" name="data_{{ $pid }}[{{ $i-1 }}][mentah][n_2]" value="{{ $mentah['n_2'] ?? '' }}"></td>
+                                                            <td><input type="number" step="0.01" class="form-control form-control-sm text-center in-chn-c-2 fw-bold text-primary" name="data_{{ $pid }}[{{ $i-1 }}][mentah][c_2]" value="{{ $mentah['c_2'] ?? '' }}"></td>
+                                                            <td><input type="number" step="0.01" class="form-control form-control-sm text-center in-chn-h-2 fw-bold text-primary" name="data_{{ $pid }}[{{ $i-1 }}][mentah][h_2]" value="{{ $mentah['h_2'] ?? '' }}"></td>
                                                             @else
                                                                 <td class="bg-warning bg-opacity-10"><input type="text" inputmode="decimal" class="form-control form-control-sm in-hasil-2 fw-bold bg-transparent border-0 text-center text-primary" name="data_{{ $pid }}[{{ $i-1 }}][nilai_d2]" value="{{ $dh->nilai_d2 ?? '' }}"></td>
                                                             @endif
@@ -1081,7 +1129,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 $m = $dh->data_mentah;
 
                 $v1 = isset($m['nilai_db_1']) && $m['nilai_db_1'] !== '' ? (float)$m['nilai_db_1'] : null;
-                if ($v1 === null && $pCode !== 'IM' && isset($imData[$dh->nomor_sampel]) && $dh->nilai_d1 !== null) {
+                if ($v1 === null && !in_array($pCode, ['IM', 'AFT', 'CHN']) && isset($imData[$dh->nomor_sampel]) && $dh->nilai_d1 !== null) {
                     $im1 = $imData[$dh->nomor_sampel]['d1'];
                     if ($im1 !== null && $im1 < 100) {
                         $v1 = (100 / (100 - $im1)) * (float)$dh->nilai_d1;
@@ -1090,7 +1138,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if ($v1 === null) $v1 = $dh->nilai_d1;
 
                 $v2 = isset($m['nilai_db_2']) && $m['nilai_db_2'] !== '' ? (float)$m['nilai_db_2'] : null;
-                if ($v2 === null && $pCode !== 'IM' && isset($imData[$dh->nomor_sampel]) && $dh->nilai_d2 !== null) {
+                if ($v2 === null && !in_array($pCode, ['IM', 'AFT', 'CHN']) && isset($imData[$dh->nomor_sampel]) && $dh->nilai_d2 !== null) {
                     $im2 = $imData[$dh->nomor_sampel]['d2'];
                     if ($im2 !== null && $im2 < 100) {
                         $v2 = (100 / (100 - $im2)) * (float)$dh->nilai_d2;
@@ -1510,6 +1558,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else { isComplete = false; tr2.querySelector('.in-hasil-2').value = ''; }
             }
 
+            else if(code === 'AFT') {
+                val1 = getVal(tr1.querySelector('.in-aft-st-1'));
+                val2 = getVal(tr2.querySelector('.in-aft-st-2'));
+                if(isNaN(val1) || isNaN(val2)) isComplete = false;
+            }
+            else if(code === 'CHN') {
+                val1 = getVal(tr1.querySelector('.in-chn-c-1'));
+                val2 = getVal(tr2.querySelector('.in-chn-c-2'));
+                if(isNaN(val1) || isNaN(val2)) isComplete = false;
+            }
+
             if(val1 !== null && val2 !== null && !isNaN(val1) && !isNaN(val2)) {
                 let dec = 2;
                 if(code === 'CV') dec = 0;
@@ -1623,9 +1682,9 @@ document.addEventListener('DOMContentLoaded', function() {
         let xData = rawXData[code] || [];
         let yData = [];
         if (State[code]) {
-            for(let i=0; i<State[code].data.length; i++) {
+            for(let i = 0; i < State[code].data.length; i++) {
                 let y1, y2;
-                if(code === 'IM') {
+                if(code === 'IM' || code === 'AFT' || code === 'CHN') {
                     y1 = State[code].data[i].simplo_adb;
                     y2 = State[code].data[i].duplo_adb;
                 } else {
@@ -1706,7 +1765,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (State[code]) {
             for(let i=0; i<State[code].data.length; i++) {
                 let y1, y2;
-                if(code === 'IM') {
+                if(code === 'IM' || code === 'AFT' || code === 'CHN') {
                     y1 = State[code].data[i].simplo_adb;
                     y2 = State[code].data[i].duplo_adb;
                 } else {
@@ -1794,7 +1853,9 @@ document.addEventListener('DOMContentLoaded', function() {
             'ASH': 'Ash Content',
             'VM': 'Volatile Matter',
             'TS': 'Total Sulfur',
-            'CV': 'Gross Calorific Value'
+            'CV': 'Gross Calorific Value',
+            'AFT': 'Ash Fusion Temperature',
+            'CHN': 'Ultimate Analysis (CHN)'
         };
         const paramFullName = paramNames[code] || code;
 
@@ -2262,8 +2323,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const yData = [];
         if (State[code]) {
             State[code].data.forEach(d => {
-                const y1 = code === 'IM' ? d.simplo_adb : d.simplo_db;
-                const y2 = code === 'IM' ? d.duplo_adb : d.duplo_db;
+                const isDirect = ['IM', 'AFT', 'CHN'].includes(code);
+                const y1 = isDirect ? d.simplo_adb : d.simplo_db;
+                const y2 = isDirect ? d.duplo_adb : d.duplo_db;
                 if (y1 !== null && y1 !== undefined && !isNaN(y1)) yData.push(y1);
                 if (y2 !== null && y2 !== undefined && !isNaN(y2)) yData.push(y2);
             });
