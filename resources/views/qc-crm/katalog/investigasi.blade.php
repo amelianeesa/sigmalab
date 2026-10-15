@@ -32,7 +32,7 @@
     </x-qc-breadcrumb>
 
     <h5 class="fw-bold text-danger mt-2 mb-3" style="font-size: 1.1rem;">
-        <i class="fas fa-exclamation-triangle me-2"></i>Tindakan Perbaikan (CAPA) Verifikasi Teknis Outlier
+        Tindakan Perbaikan (CAPA) Verifikasi Teknis Outlier
     </h5>
 
     <div class="row g-3">
