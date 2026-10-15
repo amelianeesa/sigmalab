@@ -317,9 +317,7 @@ class QcUjiBandingController extends Controller
                 'keterangan' => $data['keterangan'] ?? null,
             ]);
 
-            $qc->parameters()->delete();
-
-            $params = $request->input('params');
+            $params = $request->input('params', []);
             $proximateAdl = $request->input('proximate_adl');
 
             if (!empty($params[4]['selected'])) {
@@ -335,6 +333,14 @@ class QcUjiBandingController extends Controller
                     }
                 }
             }
+
+            $selectedParamIds = [];
+            foreach ($params as $paramId => $dataParams) {
+                if (!empty($dataParams['selected'])) {
+                    $selectedParamIds[] = $paramId;
+                }
+            }
+            $qc->parameters()->whereNotIn('parameter_uji_id', $selectedParamIds)->delete();
 
             foreach ($params as $paramId => $dataParams) {
                 if (empty($dataParams['selected'])) continue;
@@ -370,18 +376,14 @@ class QcUjiBandingController extends Controller
                     ? array_sum($nilaiPerPengujian) / count($nilaiPerPengujian)
                     : 0;
 
-                QcUjiBandingParameter::create([
-                    'qc_uji_banding_id' => $qc->id,
-                    'parameter_uji_id'  => $paramId,
+                $dataParamSimpan = [
                     'analis_id'  => $dataParams['mentah']['personil_ids'][0] ?? null,
                     'alat_id'    => $dataParams['mentah']['alat_ids'][0] ?? null,
                     'metode_uji' => $dataParams['metode_uji'] ?? $dataParams['std_method'] ?? null,
                     'uncertainty_lab' => $dataParams['uncertainty_lab'] ?? null,
-
                     'nilai_d1'    => $count_rows > 0 ? ($sum_d1 / $count_rows) : null,
                     'nilai_d2'    => $count_rows > 0 ? ($sum_d2 / $count_rows) : null,
                     'nilai_akhir' => $nilai_akhir,
-
                     'data_mentah' => array_merge($dataParams['mentah'] ?? [], [
                         'rows' => $rows,
                         'proximate_adl' => $proximateAdl ?? null,
@@ -390,8 +392,17 @@ class QcUjiBandingController extends Controller
                             'indicate_t', 'calorimeter_id', 'metode_uji', 'uncertainty_lab',
                         ]),
                     ]),
-                    'status_evaluasi' => 'menunggu',
-                ]);
+                ];
+
+                $paramLama = $qc->parameters()->where('parameter_uji_id', $paramId)->first();
+                if ($paramLama) {
+                    $paramLama->update($dataParamSimpan);
+                } else {
+                    $dataParamSimpan['qc_uji_banding_id'] = $qc->id;
+                    $dataParamSimpan['parameter_uji_id']  = $paramId;
+                    $dataParamSimpan['status_evaluasi']   = 'menunggu';
+                    QcUjiBandingParameter::create($dataParamSimpan);
+                }
             }
 
             DB::commit();

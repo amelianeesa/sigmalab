@@ -2520,9 +2520,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             
             for (let [k, v] of allForm.entries()) {
-                if (k === '_token' || k.startsWith(`data_${pid}[`) || k.startsWith(`resource_${pid}[`)) {
+                if (k === '_token' || k.startsWith(`data_${pid}[`) || k.startsWith(`resource_${pid}[`) || k.startsWith('referensi_im_')) {
                     formData.append(k, v);
-
                 }
             }
             formData.append('is_draft', '1');
@@ -3526,20 +3525,61 @@ document.addEventListener('DOMContentLoaded', function() {
                 summaryEl.textContent = summaryText;
             }
 
-            // Memicu perhitungan otomatis pada seluruh tabel batubara (ASH, VM, TS, CV)
             ['ASH', 'VM', 'TS', 'CV'].forEach(code => {
                 if (tablesByCode[code]) processTable(code, tablesByCode[code]);
             });
 
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'success',
-                title: 'Data referensi IM berhasil diterapkan ke seluruh pengujian!',
-                showConfirmButton: false,
-                timer: 2200
+            const formHom = document.getElementById('formHomogenitas');
+            const ajaxData = new FormData();
+            ajaxData.append('_token', document.querySelector('input[name="_token"]').value);
+            ajaxData.append('action', 'save_referensi_im');
+            ajaxData.append('referensi_im_mode', document.getElementById('in_ref_im_mode').value);
+            ajaxData.append('referensi_im_batch_id', document.getElementById('in_ref_im_batch_id').value);
+            ajaxData.append('referensi_im_manual', document.getElementById('in_ref_im_manual').value);
+            ajaxData.append('referensi_im_data', document.getElementById('in_ref_im_data').value);
+
+            btnApplyIm.disabled = true;
+            btnApplyIm.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...';
+
+            fetch(formHom.action, {
+                method: 'POST',
+                body: ajaxData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Data acuan IM berhasil diterapkan & tersimpan di database!',
+                        showConfirmButton: false,
+                        timer: 2500
+                    });
+                } else {
+                    Swal.fire('Perhatian', data.message || 'Gagal menyimpan ke database.', 'warning');
+                }
+            })
+            .catch(() => {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'warning',
+                    title: 'Diterapkan lokal, tetapi gagal simpan otomatis ke server.',
+                    showConfirmButton: false,
+                    timer: 2500
+                });
+            })
+            .finally(() => {
+                btnApplyIm.disabled = false;
+                btnApplyIm.innerHTML = '<i class="fas fa-check-circle me-1"></i> Terapkan ke Pengujian';
             });
         });
+    
     }
         const selectImBatchEl = document.getElementById('select_im_batch');
     const quickPreviewEl = document.getElementById('quick_preview_im_text');

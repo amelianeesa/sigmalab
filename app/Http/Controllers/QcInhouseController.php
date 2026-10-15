@@ -393,6 +393,19 @@ class QcInhouseController extends Controller
                 $batch->update(['data_pemilihan_sampel' => $pemilihanData]);
             }
 
+            if ($request->input('action') === 'save_referensi_im') {
+                activity()
+                    ->performedOn($batch)
+                    ->causedBy(Auth::user())
+                    ->event('updated')
+                    ->log("Menerapkan acuan Inherent Moisture (IM) untuk batch {$batch->kode_batch}");
+                DB::commit();
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Referensi IM berhasil diterapkan dan disimpan ke database.'
+                ]);
+            }
+
             $semuaHomogen = true;
             $adaData = false;
 
