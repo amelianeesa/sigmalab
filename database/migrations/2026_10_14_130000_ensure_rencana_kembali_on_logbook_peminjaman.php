@@ -5,12 +5,6 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-/**
- * Menyamakan struktur tabel logbook_peminjaman dengan kode.
- * Migration "add_tanggal_kembali_..." sudah tercatat selesai di database lama, tetapi isinya kemudian
- * diubah menjadi penambah kolom rencana_kembali, sehingga kolom itu tidak pernah terbentuk.
- * Migration ini aman dijalankan di database mana pun: hanya menambah kolom yang belum ada.
- */
 return new class extends Migration
 {
     public function up(): void
