@@ -130,4 +130,5 @@ Schedule::command('perbaikan:cek-status')->dailyAt('08:05');
 Schedule::command('barang:cek-stok')->dailyAt('08:00');
 Schedule::command('pengadaan:cek-status')->dailyAt('08:00');
 Schedule::command('barang:ingatkan-harga')->dailyAt('08:10');
-Schedule::command('audit:archive')->weekly();
+// Schedule::command('audit:archive')->weekly();
+Schedule::command('audit:archive')->dailyAt('08:30')->withoutOverlapping();
