@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class QcCrm extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $guarded = ['id'];
 
@@ -36,5 +38,38 @@ class QcCrm extends Model
     public function analis()
     {
         return $this->belongsTo(Personil::class, 'analis_id', 'personil_id'); 
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly([
+                'tanggal_uji',
+                'no_lembar_kerja',
+                'nilai_d1',
+                'nilai_d2',
+                'nilai_db_1',
+                'nilai_db_2',
+                'nilai_akhir',
+                'cert_value',
+                'cert_u',
+                'status_evaluasi',
+                'catatan',
+                'data_mentah',
+            ])
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(function (string $eventName) {
+                $param = $this->parameterUji->nama_parameter ?? 'Parameter';
+                $lot = $this->crmKatalog->nomor_lot ?? '';
+                
+                if ($this->status_evaluasi === 'draft') {
+                    return $eventName === 'updated'
+                        ? "Memperbarui draft pengujian CRM {$param} (Lot: {$lot})"
+                        : "Menyimpan draft pengujian CRM {$param} (Lot: {$lot})";
+                }
+                
+                $eval = strtoupper($this->status_evaluasi ?? 'SELESAI');
+                return "Pengujian QC CRM {$param} (Lot: {$lot}) - Evaluasi: {$eval}";
+            });
     }
 }

@@ -74,7 +74,6 @@ class QcCrmController extends Controller
                 ];
             }
         } 
-        // 2. JIKA BUKAN ERROR, TAPI LANJUTKAN DRAFT SEPERTI BIASA
         elseif ($request->has('resume') && $request->has('crm_id')) {
             $draftRows = QcCrm::where('crm_katalog_id', $request->crm_id)
                               ->where('status_evaluasi', 'draft')
@@ -177,7 +176,6 @@ class QcCrmController extends Controller
                 if (!isset($data['selected'])) continue;
                 if (!isset($sertifikatMap[$paramId])) continue;
                 
-                // Analis utama = personil pertama yang dipilih di modal
                 $personilIds = $data['personil_ids'] ?? [];
                 $analisIdPerParam = $personilIds[0] ?? null;
 
@@ -185,7 +183,6 @@ class QcCrmController extends Controller
                     throw new \Exception("Analis untuk parameter terpilih belum diatur (klik 'Atur Analis, Alat & Bahan')!");
                 }
 
-                // Simpan alat, bahan, dan peran bersama data mentah
                 $mentah = $data['mentah'] ?? [];
                 $mentah['personil_ids']   = $personilIds;
                 $mentah['personil_peran'] = $data['personil_peran'] ?? [];
@@ -276,21 +273,24 @@ class QcCrmController extends Controller
                 if (!empty($notifData)) {
                     \Illuminate\Support\Facades\DB::table('notifikasi')->insert($notifData);
                 }
+
+                activity()
+                    ->performedOn($katalog)
+                    ->causedBy(auth()->user())
+                    ->event('warning')
+                    ->log("⚠️ Terdeteksi OUTLIER pada pengujian QC CRM {$katalog->nama_produk} (Lot: {$katalog->nomor_lot}) untuk parameter: {$paramString}");
             }
 
-            // --- INI LOGIKA SMART STICKY FORM-NYA ---
             if ($request->input('action') === 'save_and_add') {
                 return redirect()->route('qc-crm.create')
                                  ->withInput($request->only(['tanggal_uji', 'no_lembar_kerja']))
                                  ->with('success', 'Pengujian botol berhasil disimpan! Silakan lanjut pilih botol berikutnya.');
             }
             
-
             if ($isDraft) {
                 return redirect()->route('qc-crm.index')->with('success', 'Draft Pengujian Harian berhasil disimpan.');
             }
 
-            
             $firstOutlier = QcCrm::where('crm_katalog_id', $katalog->id)
                 ->where('tanggal_uji', $request->tanggal_uji)
                 ->where('status_evaluasi', 'outlier')
@@ -320,8 +320,7 @@ class QcCrmController extends Controller
             return response()->json([]);
         }
 
-        // Ambil data pengujian harian (hanya yang FINAL, bukan draft)
-        $logs = QcCrm::with('analis') // <--- INI KUNCI UTAMANYA
+        $logs = QcCrm::with('analis') 
                       ->where('crm_katalog_id', $katalogId)
                       ->where('parameter_uji_id', $paramId)
                       ->whereIn('status_evaluasi', ['inlier', 'outlier'])
@@ -329,7 +328,6 @@ class QcCrmController extends Controller
                       ->orderBy('created_at', 'asc')
                       ->get();
 
-        // Ambil data sertifikat (True Value & Uncertainty)
         $sertifikat = CrmSertifikat::where('crm_katalog_id', $katalogId)
                                    ->where('parameter_uji_id', $paramId)
                                    ->first();
@@ -338,7 +336,6 @@ class QcCrmController extends Controller
             return response()->json([]);
         }
 
-        // Deteksi Trend: 7 titik berturut-turut di satu sisi True Value
         $trendWarning = null;
         $trendIndices = [];
         if ($logs->count() >= 7) {
@@ -358,7 +355,6 @@ class QcCrmController extends Controller
                 if ($allAbove || $allBelow) {
                     $trendWarning = $allAbove ? 'atas' : 'bawah';
                     $trendIndices = range($i, $i + 6);
-                    // Terus cari sampai akhir agar dapat range terluas
                 }
             }
         }
@@ -388,16 +384,12 @@ class QcCrmController extends Controller
         ])->with('success', 'Mode Edit diaktifkan. Silakan perbaiki angka pada form di bawah lalu simpan kembali.');
     }
 
-        public function investigasi($id)
+    public function investigasi($id)
     {
-        // Ambil data pengujian beserta relasinya
         $qc = \App\Models\QcCrm::with(['parameterUji', 'crmKatalog'])->findOrFail($id);
-        
-        // Cegah akses jika datanya bukan outlier
         if ($qc->status_evaluasi !== 'outlier') {
             return redirect()->route('qc-crm.index')->with('error', 'Hanya data outlier yang memerlukan investigasi.');
         }
-
         return view('qc-crm.investigasi', compact('qc'));
     }
 

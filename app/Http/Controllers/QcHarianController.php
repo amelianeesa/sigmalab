@@ -75,11 +75,22 @@ class QcHarianController extends Controller
         }
 
         $isDraft = $request->input('is_draft') == 1;
-        $draftGroupId = $isDraft ? uniqid('DRF-') : null;
+        $draftGroupId = $isDraft 
+            ? ($request->filled('old_draft_group_id') ? $request->input('old_draft_group_id') : uniqid('DRF-')) 
+            : null;
+        $selectedParamIds = [];
+        if (is_array($request->input('params'))) {
+            foreach ($request->input('params') as $pId => $pData) {
+                if (!empty($pData['selected'])) {
+                    $selectedParamIds[] = $pId;
+                }
+            }
+        }
 
-        // Jika ini adalah update dari draft lama, hapus draft lamanya dulu
         if ($request->filled('old_draft_group_id')) {
-            QcHarian::where('draft_group_id', $request->old_draft_group_id)->delete();
+            QcHarian::where('draft_group_id', $request->old_draft_group_id)
+                ->whereNotIn('parameter_uji_id', $selectedParamIds)
+                ->delete();
         }
 
         $outlierParams = [];
@@ -189,7 +200,7 @@ class QcHarianController extends Controller
                 }
             }
 
-            $qch = QcHarian::create([
+            $attributes = [
                 'sampel_inhouse_id' => $activeBatch->sampel_inhouse_id,
                 'parameter_uji_id' => $paramUji->parameter_uji_id,
                 'tanggal_uji' => $request->tanggal_uji,
@@ -208,7 +219,20 @@ class QcHarianController extends Controller
                 'status_investigasi' => $evalStatus === 'outlier' ? 'menunggu_investigasi' : 'aman',
                 'data_mentah' => $mentah,
                 'is_retest' => $isRetest,
-            ]);
+            ];
+
+            $qch = null;
+            if ($request->filled('old_draft_group_id')) {
+                $qch = QcHarian::where('draft_group_id', $request->old_draft_group_id)
+                    ->where('parameter_uji_id', $paramUji->parameter_uji_id)
+                    ->first();
+            }
+
+            if ($qch) {
+                $qch->update($attributes);
+            } else {
+                $qch = QcHarian::create($attributes);
+            }
 
             $savedCount++;
 
@@ -270,9 +294,19 @@ class QcHarianController extends Controller
                 \Illuminate\Support\Facades\DB::table('notifikasi')->insert($notifData);
             }
 
+            activity()
+                ->causedBy(auth()->user())
+                ->event('warning')
+                ->log("⚠️ Terdeteksi OUTLIER pada pengujian QC Harian batch {$activeBatch->kode_batch} untuk parameter: {$paramString}");
+
             return redirect()->route('qc-harian.index')
                 ->with('error', "PERINGATAN! Ditemukan Outlier pada pengujian: {$paramString}. Silakan selesaikan investigasi.");
         }
+
+        activity()
+            ->causedBy(auth()->user())
+            ->event('created')
+            ->log("Menyelesaikan pengujian QC Harian batch {$activeBatch->kode_batch} ({$savedCount} parameter: Inlier/Diterima)");
 
         return redirect()->route('qc-harian.index')
             ->with('success', "Data Harian QC berhasil disimpan dan dievaluasi ({$savedCount} parameter). " . implode(' | ', $results));
@@ -364,6 +398,13 @@ class QcHarianController extends Controller
             'tindakan_perbaikan' => $request->tindakan_perbaikan,
             'status_investigasi' => 'selesai_investigasi'
         ]);
+
+        $paramName = $qc->parameterUji->nama_parameter ?? 'Parameter';
+        activity()
+            ->performedOn($qc)
+            ->causedBy(auth()->user())
+            ->event('updated')
+            ->log("Menyelesaikan investigasi penyimpangan QC Harian parameter {$paramName} (Akar masalah: {$request->akar_masalah})");
 
         return redirect()->route('qc-harian.index')->with('success', 'Investigasi berhasil disimpan. Parameter telah dibuka untuk pengujian RETEST.');
     }
