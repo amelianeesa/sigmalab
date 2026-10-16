@@ -15,7 +15,7 @@
     }
 </style>
 
-<x-maskot-banner nama="sampler" judul="Peminjaman Alat"
+<x-maskot-banner nama="inspektorpria" judul="Peminjaman Alat"
     sub="Pilih alat untuk membuka logbook-nya, lalu isi catatan peminjaman." />
 
 <div class="d-flex justify-content-end align-items-center mb-3 flex-wrap gap-2">
