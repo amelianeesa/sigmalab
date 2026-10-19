@@ -258,7 +258,7 @@
 </style>
 
 <div class="container-fluid dashboard-container">
-    <x-maskot-banner nama="analist" :judul="$showArchived ? 'Arsip Dokumen Library' : 'Library Digital'"
+    <x-maskot-banner nama="bareng1" :judul="$showArchived ? 'Arsip Dokumen Library' : 'Library Digital'"
         :sub="$showArchived ? 'Dokumen yang disembunyikan dari daftar aktif.' : 'Daftar induk dokumen prosedur, formulir, dan instruksi kerja.'" />
 
     <div class="d-flex justify-content-end align-items-center mb-2 mt-1 flex-wrap gap-2 library-header-row">
