@@ -158,7 +158,7 @@
 
         #profileDropdown {
             min-width: 240px;
-            padding: 0;
+            padding: 0 !important;
             border: none;
             border-radius: 8px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
@@ -222,6 +222,36 @@
         }
         #profileDropdown .dropdown-divider {
             margin: 0;
+        }
+        #profileDropdown li {
+            display: block !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        #profileDropdown li form {
+            display: block !important;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        #profileDropdown li > .dropdown-item,
+        #profileDropdown li > form > .dropdown-item,
+        #profileDropdown li > form > button.dropdown-item {
+            display: flex !important;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            box-sizing: border-box !important;
+            text-align: left;
+        }
+        #profileDropdown li > form > button.dropdown-item.text-danger:hover,
+        #profileDropdown li > form > button.dropdown-item.text-danger:focus {
+            background: #fdf2f2 !important;
+            color: #dc3545 !important;
         }
 
         .pagination svg, .card-body svg {
