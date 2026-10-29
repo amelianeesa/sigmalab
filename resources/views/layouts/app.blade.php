@@ -157,28 +157,12 @@
         }
 
         #profileDropdown {
-            --bs-dropdown-padding-x: 0;
-            --bs-dropdown-padding-y: 0;
             min-width: 240px;
             padding: 0 !important;
             border: none;
             border-radius: 8px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
             overflow: hidden;
-        }
-        #profileDropdown > li {
-            display: block !important;
-            width: 100% !important;
-            max-width: none !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-        #profileDropdown > li > form {
-            display: block !important;
-            width: 100% !important;
-            max-width: none !important;
-            margin: 0 !important;
-            padding: 0 !important;
         }
         #profileDropdown .profile-header {
             display: flex;
@@ -219,17 +203,10 @@
         }
         #profileDropdown .dropdown-item {
             font-size: 0.8rem;
-            padding: 10px 14px !important;
-            display: flex !important;
+            padding: 8px 14px;
+            display: flex;
             align-items: center;
             gap: 8px;
-            width: 100% !important;
-            max-width: none !important;
-            margin: 0 !important;
-            border: 0 !important;
-            border-radius: 0 !important;
-            box-sizing: border-box;
-            transform: none !important;
         }
         #profileDropdown .dropdown-item i {
             width: 16px;
@@ -240,11 +217,41 @@
             color: var(--sl-primary);
         }
         #profileDropdown .dropdown-item.text-danger:hover {
-            background: rgba(220, 53, 69, 0.1);
+            background: #fdf2f2;
             color: #dc3545;
         }
         #profileDropdown .dropdown-divider {
             margin: 0;
+        }
+        #profileDropdown li {
+            display: block !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        #profileDropdown li form {
+            display: block !important;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        #profileDropdown li > .dropdown-item,
+        #profileDropdown li > form > .dropdown-item,
+        #profileDropdown li > form > button.dropdown-item {
+            display: flex !important;
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            box-sizing: border-box !important;
+            text-align: left;
+        }
+        #profileDropdown li > form > button.dropdown-item.text-danger:hover,
+        #profileDropdown li > form > button.dropdown-item.text-danger:focus {
+            background: #fdf2f2 !important;
+            color: #dc3545 !important;
         }
 
         .pagination svg, .card-body svg {

@@ -190,7 +190,7 @@
 
 <div class="container-fluid dashboard-container" style="font-size: 0.82rem;">
 
-    <x-maskot-banner nama="chemist" judul="Portal Verifikasi Mutu (QC)"
+    <x-maskot-banner nama="inspektorwanita" judul="Portal Verifikasi Mutu (QC)"
         sub="Silakan pilih pilar Quality Control yang ingin Anda kelola." />
 
     <div class="d-flex flex-column flex-md-row justify-content-md-end align-items-md-center mb-3 gap-2">

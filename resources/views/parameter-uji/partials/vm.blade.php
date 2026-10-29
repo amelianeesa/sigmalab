@@ -50,23 +50,21 @@ current() }}" method="GET" class="row g-3 align-items-end">
                         <i class="fas fa-filter"></i> Filter
                     </button>
                     @if($selectedParameter)
-                        <a href="{{ route('parameter-uji.cetak-control-chart', ['parameter_uji' => request()->route('parameter_uji') ?? $selectedParameter->parameter_uji_id, 'tanggal_mulai' => request('tanggal_mulai'), 'tanggal_akhir' => request('tanggal_akhir'), 'tab' => request('tab')]), 'tanggal_mulai' => request('tanggal_mulai'), 'tanggal_akhir' => request('tanggal_akhir')]) }}" class="btn btn-danger flex-grow-1" target="_blank">
-                            <i class="fas fa-file-pdf"></i> Cetak
-                        </a>
-                    @endif
+                    <a href="{{ route('parameter-uji.cetak-control-chart', ['parameter_uji' => request()->route('parameter_uji') ?? $selectedParameter->parameter_uji_id, 'tanggal_mulai' => request('tanggal_mulai'), 'tanggal_akhir' => request('tanggal_akhir'), 'tab' => request('tab')]) }}" class="btn btn-danger flex-grow-1" target="_blank">
+                        <i class="fas fa-file-pdf"></i> Cetak
+                    </a>
+                @endif
                 </div>
             </form>
         </div>
     </div>
 
     @if(!isset($selectedParameter) || !$selectedParameter)
-        <!-- No Parameter Selected -->
         <div class="alert alert-info shadow-sm" role="alert">
             <i class="fas fa-info-circle me-2"></i> Silakan pilih Parameter Uji terlebih dahulu untuk menampilkan Inhouse Control.
         </div>
     @else
         
-        <!-- Raw Data Logger (Duplo) -->
         <div class="card shadow mb-4 border-left-primary">
             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between bg-white">
                 <h6 class="m-0 font-weight-bold text-primary">Tabel Raw Data Logger (Duplo Testing)</h6>
@@ -126,7 +124,6 @@ current() }}" method="GET" class="row g-3 align-items-end">
                                     $isYes = is_numeric($absDiff) && $absDiff < 1.00;
                                 @endphp
                                 
-                                <!-- Dish 1 Row -->
                                 <tr>
                                     <td rowspan="2" class="align-middle fw-bold">{{ $hasil->created_at->format('d/m/Y') }}</td>
                                     <td rowspan="2" class="align-middle fw-bold">{{ $index + 1 }}</td>
@@ -164,7 +161,6 @@ current() }}" method="GET" class="row g-3 align-items-end">
                                         @endif
                                     </td>
                                 </tr>
-                                <!-- Dish 2 Row -->
                                 <tr>
                                     <td class="text-primary fw-bold">Dish 2</td>
                                     <td>{{ $M1_2 }}</td>
@@ -189,7 +185,6 @@ current() }}" method="GET" class="row g-3 align-items-end">
         @if(isset($chartData) && count($chartData['labels']) > 0 && $selectedParameter->nama_parameter !== 'Bias Test VM (Pt)')
             
                           <div class="row">
-                <!-- Limit Data Card -->
                 <div class="col-xl-3 col-md-6 mb-4">
                     <div class="card border-left-primary shadow h-100 py-2">
                         <div class="card-body">
@@ -234,7 +229,6 @@ current() }}" method="GET" class="row g-3 align-items-end">
                     </div>
                 </div>
 
-                <!-- Table Card Control Chart Limit -->
                 <div class="col-xl-9 col-md-12 mb-4">
                     <div class="card shadow h-100">
                         <div class="card-header py-3">
@@ -295,7 +289,6 @@ current() }}" method="GET" class="row g-3 align-items-end">
                 </div>
             </div>
 
-            <!-- Control Chart Card -->
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="card shadow h-100">
@@ -311,7 +304,6 @@ current() }}" method="GET" class="row g-3 align-items-end">
                 </div>
             </div>
 
-            <!-- Tabel Evaluasi Control Chart (Westgard) -->
             <div class="card shadow mb-4 border-left-info">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-info">Tabel Evaluasi Control Chart (Westgard Rules)</h6>

@@ -28,7 +28,8 @@ class DummyDataSeeder extends Seeder
             PeranPengguna::ANALIS->value,
             PeranPengguna::KOORDINATOR_LAB->value,
             PeranPengguna::ADMIN_APLIKASI->value,
-            PeranPengguna::HR_GA_OFFICER->value,
+            PeranPengguna::GA_OFFICER->value,
+            PeranPengguna::HR_OFFICER->value,
             PeranPengguna::KABID_DUKUNGAN_BISNIS->value,
             PeranPengguna::KABID_INSPEKSI->value,
         ];
@@ -44,7 +45,8 @@ class DummyDataSeeder extends Seeder
             ['username' => 'analis_tester', 'email' => 'analis@test.com', 'role' => PeranPengguna::ANALIS->value],
             ['username' => 'koordinator_tester', 'email' => 'koor@test.com', 'role' => PeranPengguna::KOORDINATOR_LAB->value],
             ['username' => 'adminaplikasi_tester', 'email' => 'adminaplikasi@test.com', 'role' => PeranPengguna::ADMIN_APLIKASI->value],
-            ['username' => 'hrga_tester', 'email' => 'hrga@test.com', 'role' => PeranPengguna::HR_GA_OFFICER->value],
+            ['username' => 'hr_tester', 'email' => 'hr@test.com', 'role' => PeranPengguna::HR_OFFICER->value],
+            ['username' => 'ga_tester', 'email' => 'ga@test.com', 'role' => PeranPengguna::GA_OFFICER->value],
             ['username' => 'kabiddukbis_tester', 'email' => 'kabiddukbis@test.com', 'role' => PeranPengguna::KABID_DUKUNGAN_BISNIS->value],
             ['username' => 'kabidinspeksi_tester', 'email' => 'kabidinspeksi@test.com', 'role' => PeranPengguna::KABID_INSPEKSI->value],
         ];

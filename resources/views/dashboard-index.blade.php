@@ -377,7 +377,7 @@
 </style>
 
 <div class="container-fluid dashboard-container">
-    <x-maskot-banner nama="laporan" judul="Monitoring Center"
+    <x-maskot-banner nama="bareng" judul="Monitoring Center"
         :sub="'Halo! Anda masuk sebagai ' . $role . '. Ini ringkasan kerja laboratorium hari ini.'" />
 
     <div class="row g-2 mb-3">
