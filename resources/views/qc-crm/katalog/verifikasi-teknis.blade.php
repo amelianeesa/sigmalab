@@ -105,11 +105,12 @@
                                 }
                             }
 
-                            // Mendapatkan baris data json
                             $rawData = $riwayat ? $riwayat->data_mentah : null;
                             $draftRows = is_string($rawData) ? json_decode($rawData, true) : $rawData;
                             if (!$draftRows || !is_array($draftRows)) {
                                 $draftRows = [[]]; 
+                            } else {
+                                $draftRows = array_values($draftRows);
                             }
 
                             // JIKA HASILNYA OUTLIER, otomatis tambah 1 baris kosong di bawahnya
@@ -348,17 +349,13 @@
                                         
                                         @foreach($draftRows as $rIndex => $mentah)
                                         @php
-                                            // Semua baris sebelum baris terakhir akan otomatis terkunci sebagai riwayat Outlier
-                                            $isHistoricalOutlier = false;
-                                            if ($rIndex < count($draftRows) - 1) {
-                                                $isHistoricalOutlier = true;
-                                            }
+                                            $isHistoricalOutlier = !$loop->last;
                                             $ro = $isHistoricalOutlier ? 'readonly tabindex="-1"' : '';
                                         @endphp
-                                        <tbody class="crm-tbody {{ $isHistoricalOutlier ? 'historical-outlier' : '' }}" data-index="{{ $rIndex }}">
+                                        <tbody class="crm-tbody {{ $isHistoricalOutlier ? 'historical-outlier' : '' }}" data-index="{{ $loop->index }}">
                                             <tr class="row-entry simplo-row" data-type="simplo">
                                                 <td rowspan="2" class="align-middle fw-bold">
-                                                    <span class="pengujian-no">{{ $rIndex + 1 }}</span>
+                                                    <span class="pengujian-no">{{ $loop->iteration }}</span>
                                                     @if($isHistoricalOutlier)
                                                         <br><span class="badge bg-danger mt-1 badge-outlier">Outlier</span>
                                                     @endif

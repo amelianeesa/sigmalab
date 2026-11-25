@@ -209,7 +209,7 @@ class QcHarianController extends Controller
                 'nilai_d2' => $d2,
                 'nilai_db_1' => $db1,
                 'nilai_db_2' => $db2,
-                'nilai_akhir' => $evalNilaiAkhir,
+                'nilai_akhir' => $evalNilaiAkhir ?? (($d1 + $d2) > 0 ? ($d1 + $d2) / 2 : 0),
                 'mean_acuan' => $meanAcuan,
                 'sd_acuan' => $sdAcuan,
                 'status_evaluasi' => $evalStatus,

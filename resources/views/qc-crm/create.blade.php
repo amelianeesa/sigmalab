@@ -112,7 +112,7 @@
     @endif
     @if($barangHabisCount > 0)
     <div class="alert alert-info alert-dismissible fade show shadow-sm py-2 ps-3 pe-5 mb-2" role="alert" style="font-size: 0.8rem;">
-        <i class="fas fa-info-circle me-1"></i> Terdapat <strong>{{ $barangHabisCount }} bahan</strong> dengan stok habis sehingga tidak dapat dipilih.
+        <i class="fas fa-info-circle me-1"></i> Terdapat <strong>{{ $barangHabisCount }} bahan</strong> dengan stok sistem 0, namun tetap dapat diisi jika barang fisik tersedia
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size: 0.65rem; padding: 0.9rem;"></button>
     </div>
     @endif
@@ -147,7 +147,7 @@
                             @if($mentah && is_array($mentah))
                                 <div class="d-flex flex-wrap gap-1 mb-2">
                                 @foreach($mentah as $key => $val)
-                                    @if($val !== null && $val !== '')
+                                    @if(!is_array($val) && $val !== null && $val !== '')
                                         <span class="badge bg-light text-dark border border-secondary" style="font-size: 0.7rem;">
                                             <span class="text-muted">{{ strtoupper(str_replace('_', ' ', $key)) }}:</span>
                                             <strong>{{ $val }}</strong>
@@ -333,12 +333,12 @@
                                                                     @foreach($barangList as $b)
                                                                     @php $stok = ($b->saldo_awal + $b->penerimaan) - $b->pengeluaran; $habis = $stok <= 0; @endphp
                                                                     <tr class="{{ $habis ? 'table-danger' : '' }}">
-                                                                        <td class="text-center align-middle"><input class="form-check-input chk-bahan" type="checkbox" name="params[{{ $pid }}][barang_ids][]" value="{{ $b->barang_id }}" data-nama="{{ $b->nama_barang }}" {{ $habis ? 'disabled' : '' }}></td>
+                                                                        <td class="text-center align-middle"><input class="form-check-input chk-bahan" type="checkbox" name="params[{{ $pid }}][barang_ids][]" value="{{ $b->barang_id }}" data-nama="{{ $b->nama_barang }}" ></td>
                                                                         <td class="align-middle"><strong>{{ $b->nama_barang }}</strong> @if($habis)<span class="badge bg-danger ms-1">Habis</span>@endif</td>
                                                                         <td class="align-middle text-muted">{{ number_format($stok, 0, ',', '.') }} {{ $b->satuan }}</td>
                                                                         <td>
                                                                             <div class="input-group input-group-sm">
-                                                                                <input type="number" step="0.01" min="0" class="form-control in-qty" name="params[{{ $pid }}][barang_jumlah][{{ $b->barang_id }}]" placeholder="0" {{ $habis ? 'disabled' : '' }}>
+                                                                                <input type="number" step="0.01" min="0" class="form-control in-qty" name="params[{{ $pid }}][barang_jumlah][{{ $b->barang_id }}]" placeholder="0">
                                                                                 <span class="input-group-text">{{ $b->satuan }}</span>
                                                                             </div>
                                                                         </td>

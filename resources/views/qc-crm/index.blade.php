@@ -629,9 +629,9 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @forelse($dataMentahList as $index => $mentah)
+                                                    @forelse($dataMentahList as $mentah)
                                                     <tr>
-                                                        <td rowspan="2" class="fw-bold bg-light">{{ $index + 1 }}</td>
+                                                        <td rowspan="2" class="fw-bold bg-light">{{ $loop->iteration }}</td>
                                                         <td class="fw-bold text-start ps-3">Simplo</td>
                                                         @if(in_array($code, ['IM','RM']))
                                                             <td>{{ $mentah['mentah']['m1_1'] ?? '-' }}</td>
