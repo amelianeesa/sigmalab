@@ -535,7 +535,6 @@
                             </button>
                         </div>
 
-                        {{-- Karakter ikut berganti sesuai kategori yang dipilih --}}
                         <div class="sl-modal-hero">
                             <p><strong>Halo! Yuk, tambah anggota tim baru</strong>Lengkapi data induk, lalu sertifikasi dan kompetensinya.</p>
                             <img id="maskotKategoriTambah" src="{{ asset('images/maskot/analist.webp') }}" alt="" decoding="async">
@@ -904,7 +903,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 
-            // Karakter di modal Tambah Personil berganti sesuai kategori
             (function () {
                 const maskotMap = {
                     chemist: 'chemist', analist: 'analist',
@@ -937,6 +935,34 @@
 
                     document.getElementById('modalBuatAkunNama').textContent =
                         personilNama;
+                });
+            }
+
+            const formBuatAkun = document.getElementById('formBuatAkun');
+            if (formBuatAkun) {
+                const tombolBuatAkun = formBuatAkun.querySelector('button[type="submit"]');
+                const labelBuatAkun = tombolBuatAkun ? tombolBuatAkun.innerHTML : '';
+
+                formBuatAkun.addEventListener('submit', function (event) {
+                    if (formBuatAkun.dataset.sedangKirim === '1') {
+                        event.preventDefault();
+                        return;
+                    }
+                    formBuatAkun.dataset.sedangKirim = '1';
+                    if (tombolBuatAkun) {
+                        tombolBuatAkun.disabled = true;
+                        tombolBuatAkun.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Memproses...';
+                    }
+                });
+
+                window.addEventListener('pageshow', function (event) {
+                    if (event.persisted) {
+                        formBuatAkun.dataset.sedangKirim = '0';
+                        if (tombolBuatAkun) {
+                            tombolBuatAkun.disabled = false;
+                            tombolBuatAkun.innerHTML = labelBuatAkun;
+                        }
+                    }
                 });
             }
 

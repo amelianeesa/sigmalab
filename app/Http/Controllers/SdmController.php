@@ -340,7 +340,10 @@ class SdmController extends Controller
 
         $personil = Personil::findOrFail($id);
 
-        abort_if($personil->user, 409, 'Personil ini sudah memiliki akun login.');
+        if ($personil->user) {
+            return redirect()->route('sdm.index')
+                ->with('error', 'Personil ' . $personil->nama . ' sudah memiliki akun login. Akun tidak dibuat ulang.');
+        }
 
         $data = $request->validate([
             'username' => 'required|string|max:50|unique:users,username',
@@ -350,27 +353,47 @@ class SdmController extends Controller
 
         $passwordSementara = Str::password(10, symbols: false);
 
-        $user = User::create([
-            'personil_id' => $personil->personil_id,
-            'username' => $data['username'],
-            'email' => $data['email'],
-            'password' => Hash::make($passwordSementara),
-            'role_id' => $data['role_id'],
-            'workspace' => User::workspaceUntukRole((int) $data['role_id'], $personil->workspace ?? null),
-            'status_aktif' => true,
-            // 'must_change_password' => true,
-        ]);
+        try {
+            $user = DB::transaction(function () use ($personil, $data, $passwordSementara) {
+                $terkunci = Personil::lockForUpdate()->findOrFail($personil->personil_id);
 
-        Mail::to($user->email)->send(new AkunLoginMail(
-            $personil->nama,
-            $user->username,
-            $user->email,
-            $passwordSementara
-        ));
+                if (User::where('personil_id', $terkunci->personil_id)->exists()) {
+                    return null;
+                }
+
+                $user = User::create([
+                    'personil_id' => $terkunci->personil_id,
+                    'username' => $data['username'],
+                    'email' => $data['email'],
+                    'password' => Hash::make($passwordSementara),
+                    'role_id' => $data['role_id'],
+                    'workspace' => User::workspaceUntukRole((int) $data['role_id'], $terkunci->workspace ?? null),
+                    'status_aktif' => true,
+                ]);
+
+                Mail::to($user->email)->send(new AkunLoginMail(
+                    $terkunci->nama,
+                    $user->username,
+                    $user->email,
+                    $passwordSementara
+                ));
+
+                return $user;
+            });
+        } catch (\Throwable $e) {
+            report($e);
+
+            return redirect()->route('sdm.index')
+                ->with('error', 'Akun login untuk ' . $personil->nama . ' gagal dibuat karena email tidak dapat dikirim atau terjadi gangguan. Tidak ada akun yang tersimpan, silakan coba lagi.');
+        }
+
+        if (!$user) {
+            return redirect()->route('sdm.index')
+                ->with('error', 'Personil ' . $personil->nama . ' sudah memiliki akun login. Akun tidak dibuat ulang.');
+        }
 
         return redirect()->route('sdm.index')->with('success', 'Akun login untuk ' . $personil->nama . ' berhasil dibuat. Password sementara telah dikirim ke email pengguna.');
     }
-
     public function forceDestroy($id)
     {
         $this->pastikanBisaKelola();
@@ -609,10 +632,12 @@ class SdmController extends Controller
 
     private function buildCompetencyMatrix(?string $kategori, string $jenisSertifikasi)
     {
-        $personil = Personil::with(['kompetensi' => function ($query) use ($jenisSertifikasi) {
-            $query->where('jenis_sertifikasi', $jenisSertifikasi)
-                ->orderByDesc('tanggal_terbit');
-        }])
+        $personil = Personil::with([
+            'kompetensi' => function ($query) use ($jenisSertifikasi) {
+                $query->where('jenis_sertifikasi', $jenisSertifikasi)
+                    ->orderByDesc('tanggal_terbit');
+            }
+        ])
             ->where('status_aktif', true)
             ->when($kategori, fn($query) => $query->where('kategori_personil', $kategori))
             ->orderBy('nama')
