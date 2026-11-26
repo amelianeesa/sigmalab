@@ -666,7 +666,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        fetch('/api/crm-katalog/' + val + '/parameters')
+        fetch(`{{ url('/api/crm-katalog') }}/${val}/parameters`)
             .then(r => r.json())
             .then(data => {
                 data.forEach(item => {
