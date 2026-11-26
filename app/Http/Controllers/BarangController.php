@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Barang;
 use App\Models\TransaksiBarang;
-use App\Mail\HargaBarangBelumAda;
-use App\Models\User;
+// use App\Mail\HargaBarangBelumAda;
+// use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
+// use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 
 class BarangController extends Controller
 {
@@ -68,12 +69,16 @@ class BarangController extends Controller
             'saldo_awal' => 'nullable|numeric',
             'penerimaan' => 'nullable|numeric',
             'pengeluaran' => 'nullable|numeric',
-            'harga_rata' => 'nullable|numeric',
+            // 'harga_rata' => 'nullable|numeric',
+            'harga_rata' => 'nullable|numeric|min:0',
             'kondisi' => 'required|in:baik,rusak',
             'tgl_exp' => 'nullable|date',
         ]);
         
         $data = $request->only(['nama_barang', 'satuan', 'kode_barang', 'minimal_stok', 'saldo_awal', 'penerimaan', 'pengeluaran', 'harga_rata', 'kondisi', 'tgl_exp']);
+        if (!$this->bisaIsiHarga()) {
+            $data['harga_rata'] = 0;
+        }
 
         $saldoAwal = $data['saldo_awal'] ?? 0;
         $penerimaan = $data['penerimaan'] ?? 0;
@@ -117,67 +122,75 @@ class BarangController extends Controller
             'saldo_awal' => 'nullable|numeric',
             'penerimaan' => 'nullable|numeric',
             'pengeluaran' => 'nullable|numeric', 
-            'harga_rata' => 'nullable|numeric',
+            // 'harga_rata' => 'nullable|numeric',
+            'harga_rata' => 'nullable|numeric|min:0',
             'kondisi' => 'required|in:baik,rusak',
             'tgl_exp' => 'nullable|date',
         ]);
 
         $data = $request->all();
 
-        $roleName = Auth::user()->role->nama_role ?? '';
-        $isAuthorizedForPricing = in_array($roleName, [
-            'HR', 
-            'Admin Aplikasi',
-            'Koordinator Laboratorium',
-            'Analis Lab'
-        ]);
+        // $roleName = Auth::user()->role->nama_role ?? '';
+        // $isAuthorizedForPricing = in_array($roleName, [
+        //     'HR', 
+        //     'Admin Aplikasi',
+        //     'Koordinator Laboratorium',
+        //     'Analis Lab'
+        // ]);
         
-        if (!$isAuthorizedForPricing) {
+        // if (!$isAuthorizedForPricing) {
+        //     $data['harga_rata'] = $barang->harga_rata;
+        // }
+
+        if (!$this->bisaIsiHarga() || !$request->filled('harga_rata')) {
             $data['harga_rata'] = $barang->harga_rata;
         }
-
+        
         $saldoAwal = $data['saldo_awal'] ?? 0;
         $penerimaan = $data['penerimaan'] ?? 0;
         $pengeluaranBaru = $data['pengeluaran'] ?? 0;
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($barang, $data, $saldoAwal, $penerimaan, $pengeluaranBaru) {
+        // \Illuminate\Support\Facades\DB::transaction(function () use ($barang, $data, $saldoAwal, $penerimaan, $pengeluaranBaru) {
+        DB::transaction(function () use ($barang, $data, $saldoAwal, $penerimaan, $pengeluaranBaru) {
+            $barang->harga_rata = $data['harga_rata'];
             
             if ($pengeluaranBaru > 0) {
                 $barang->pengeluaran += $pengeluaranBaru;
 
-                $sisaPengeluaran = $pengeluaranBaru;
-                $batches = TransaksiBarang::where('barang_id', $barang->barang_id)
-                    ->where('jumlah_penerimaan', '>', 0)
-                    ->orderBy('tgl_exp', 'asc')
-                    ->get();
+                // $sisaPengeluaran = $pengeluaranBaru;
+                // $batches = TransaksiBarang::where('barang_id', $barang->barang_id)
+                    // ->where('jumlah_penerimaan', '>', 0)
+                    // ->orderBy('tgl_exp', 'asc')
+                    // ->get();
 
-                foreach ($batches as $batch) {
-                    if ($sisaPengeluaran <= 0) break;
+                // foreach ($batches as $batch) {
+                    // if ($sisaPengeluaran <= 0) break;
 
-                    $sudahKeluarDiBatch = TransaksiBarang::where('barang_id', $barang->barang_id)
-                        ->where('tgl_exp', $batch->tgl_exp)
-                        ->sum('jumlah_pengeluaran');
+                    // $sudahKeluarDiBatch = TransaksiBarang::where('barang_id', $barang->barang_id)
+                        // ->where('tgl_exp', $batch->tgl_exp)
+                        // ->sum('jumlah_pengeluaran');
 
-                    $sisaDiBatch = $batch->jumlah_penerimaan - $sudahKeluarDiBatch;
+                    // $sisaDiBatch = $batch->jumlah_penerimaan - $sudahKeluarDiBatch;
 
-                    if ($sisaDiBatch > 0) {
-                        if ($sisaPengeluaran >= $sisaDiBatch) {
-                            $ambilDariBatch = $sisaDiBatch;
-                            $sisaPengeluaran -= $sisaDiBatch;
-                        } else {
-                            $ambilDariBatch = $sisaPengeluaran;
-                            $sisaPengeluaran = 0;
-                        }
+                    // if ($sisaDiBatch > 0) {
+                        // if ($sisaPengeluaran >= $sisaDiBatch) {
+                            // $ambilDariBatch = $sisaDiBatch;
+                            // $sisaPengeluaran -= $sisaDiBatch;
+                        // } else {
+                            // $ambilDariBatch = $sisaPengeluaran;
+                            // $sisaPengeluaran = 0;
+                        // }
 
-                        TransaksiBarang::create([
-                            'barang_id' => $barang->barang_id,
-                            'jumlah_penerimaan' => 0,
-                            'jumlah_pengeluaran' => $ambilDariBatch,
-                            'harga' => $barang->harga_rata ?? 0,
-                            'tgl_exp' => $batch->tgl_exp,
-                        ]);
-                    }
-                }
+                        // TransaksiBarang::create([
+                            // 'barang_id' => $barang->barang_id,
+                            // 'jumlah_penerimaan' => 0,
+                            // 'jumlah_pengeluaran' => $ambilDariBatch,
+                            // 'harga' => $barang->harga_rata ?? 0,
+                            // 'tgl_exp' => $batch->tgl_exp,
+                        // ]);
+                    // }
+                // }
+                $this->potongStokBatch($barang, $pengeluaranBaru);
             }
 
             $barang->nama_barang = $data['nama_barang'];
@@ -190,19 +203,35 @@ class BarangController extends Controller
             
             $barang->saldo_akhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
 
-            $nearestActiveBatch = TransaksiBarang::where('barang_id', $barang->barang_id)
-                ->whereNotNull('tgl_exp')
-                ->select('tgl_exp', \Illuminate\Support\Facades\DB::raw('SUM(jumlah_penerimaan) - SUM(jumlah_pengeluaran) as sisa_stok'))
-                ->groupBy('tgl_exp')
-                ->having('sisa_stok', '>', 0)
-                ->orderBy('tgl_exp', 'asc')
-                ->first();
+            // $nearestActiveBatch = TransaksiBarang::where('barang_id', $barang->barang_id)
+                // ->whereNotNull('tgl_exp')
+                // ->select('tgl_exp', \Illuminate\Support\Facades\DB::raw('SUM(jumlah_penerimaan) - SUM(jumlah_pengeluaran) as sisa_stok'))
+                // ->groupBy('tgl_exp')
+                // ->having('sisa_stok', '>', 0)
+                // ->orderBy('tgl_exp', 'asc')
+                // ->first();
+            $nearestActiveBatch = $this->batchAktifTerdekat($barang);
 
             $barang->tgl_exp = $nearestActiveBatch ? $nearestActiveBatch->tgl_exp : ($data['tgl_exp'] ?? $barang->tgl_exp);
             $barang->save();
         });
 
         return redirect()->route('barang.index')->with('success', 'Data barang persediaan berhasil diperbarui dan stok batch terpotong otomatis.');
+    }
+
+    public function updateHarga(Request $request, $id)
+    {
+        abort_unless($this->bisaIsiHarga(), 403, 'Hanya Admin Aplikasi dan GA yang boleh mengisi harga.');
+
+        $data = $request->validate([
+            'harga_rata' => 'required|numeric|min:0',
+        ]);
+
+        $barang = Barang::findOrFail($id);
+        $barang->harga_rata = $data['harga_rata'];
+        $barang->save();
+
+        return back()->with('success', 'Harga ' . $barang->nama_barang . ' berhasil disimpan.');
     }
 
     public function storePengeluaran(Request $request, $id)
@@ -214,54 +243,57 @@ class BarangController extends Controller
         $barang = Barang::findOrFail($id);
         $jumlahKeluarBaru = $request->jumlah_pengeluaran;
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($barang, $jumlahKeluarBaru) {
+        // \Illuminate\Support\Facades\DB::transaction(function () use ($barang, $jumlahKeluarBaru) {
+        DB::transaction(function () use ($barang, $jumlahKeluarBaru) {
             
             $barang->pengeluaran += $jumlahKeluarBaru;
             $barang->saldo_akhir = ($barang->saldo_awal + $barang->penerimaan) - $barang->pengeluaran;
             $barang->save();
 
-            $sisaPengeluaran = $jumlahKeluarBaru;
+            // $sisaPengeluaran = $jumlahKeluarBaru;
 
-            $batches = TransaksiBarang::where('barang_id', $barang->barang_id)
-                ->where('jumlah_penerimaan', '>', 0)
-                ->orderBy('tgl_exp', 'asc')
-                ->get();
+            // $batches = TransaksiBarang::where('barang_id', $barang->barang_id)
+                // ->where('jumlah_penerimaan', '>', 0)
+                // ->orderBy('tgl_exp', 'asc')
+                // ->get();
 
-            foreach ($batches as $batch) {
-                if ($sisaPengeluaran <= 0) break;
+            // foreach ($batches as $batch) {
+                // if ($sisaPengeluaran <= 0) break;
 
-                $sudahKeluarDiBatch = TransaksiBarang::where('barang_id', $barang->barang_id)
-                    ->where('tgl_exp', $batch->tgl_exp)
-                    ->sum('jumlah_pengeluaran');
+                // $sudahKeluarDiBatch = TransaksiBarang::where('barang_id', $barang->barang_id)
+                    // ->where('tgl_exp', $batch->tgl_exp)
+                    // ->sum('jumlah_pengeluaran');
 
-                $sisaDiBatch = $batch->jumlah_penerimaan - $sudahKeluarDiBatch;
+                // $sisaDiBatch = $batch->jumlah_penerimaan - $sudahKeluarDiBatch;
 
-                if ($sisaDiBatch > 0) {
-                    if ($sisaPengeluaran >= $sisaDiBatch) {
-                        $ambilDariBatch = $sisaDiBatch;
-                        $sisaPengeluaran -= $sisaDiBatch;
-                    } else {
-                        $ambilDariBatch = $sisaPengeluaran;
-                        $sisaPengeluaran = 0;
-                    }
+                // if ($sisaDiBatch > 0) {
+                    // if ($sisaPengeluaran >= $sisaDiBatch) {
+                        // $ambilDariBatch = $sisaDiBatch;
+                        // $sisaPengeluaran -= $sisaDiBatch;
+                    // } else {
+                        // $ambilDariBatch = $sisaPengeluaran;
+                        // $sisaPengeluaran = 0;
+                    // }
 
-                    TransaksiBarang::create([
-                        'barang_id' => $barang->barang_id,
-                        'jumlah_penerimaan' => 0,
-                        'jumlah_pengeluaran' => $ambilDariBatch,
-                        'harga' => $barang->harga_rata ?? 0,
-                        'tgl_exp' => $batch->tgl_exp,
-                    ]);
-                }
-            }
+                    // TransaksiBarang::create([
+                        // 'barang_id' => $barang->barang_id,
+                        // 'jumlah_penerimaan' => 0,
+                        // 'jumlah_pengeluaran' => $ambilDariBatch,
+                        // 'harga' => $barang->harga_rata ?? 0,
+                        // 'tgl_exp' => $batch->tgl_exp,
+                    // ]);
+                // }
+            // }
+            $this->potongStokBatch($barang, $jumlahKeluarBaru);
 
-            $nearestActiveBatch = TransaksiBarang::where('barang_id', $barang->barang_id)
-                ->whereNotNull('tgl_exp')
-                ->select('tgl_exp', \Illuminate\Support\Facades\DB::raw('SUM(jumlah_penerimaan) - SUM(jumlah_pengeluaran) as sisa_stok'))
-                ->groupBy('tgl_exp')
-                ->having('sisa_stok', '>', 0)
-                ->orderBy('tgl_exp', 'asc')
-                ->first();
+            // $nearestActiveBatch = TransaksiBarang::where('barang_id', $barang->barang_id)
+                // ->whereNotNull('tgl_exp')
+                // ->select('tgl_exp', \Illuminate\Support\Facades\DB::raw('SUM(jumlah_penerimaan) - SUM(jumlah_pengeluaran) as sisa_stok'))
+                // ->groupBy('tgl_exp')
+                // ->having('sisa_stok', '>', 0)
+                // ->orderBy('tgl_exp', 'asc')
+                // ->first();
+            $nearestActiveBatch = $this->batchAktifTerdekat($barang);
 
             $barang->tgl_exp = $nearestActiveBatch ? $nearestActiveBatch->tgl_exp : null;
             $barang->save();
@@ -280,7 +312,8 @@ class BarangController extends Controller
                 ->with('error', 'Data barang tidak bisa dihapus karena sisa stok masih ada (' . $saldoAkhir . ' ' . $barang->satuan . ').');
         }
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($barang) {
+        // \Illuminate\Support\Facades\DB::transaction(function () use ($barang) {
+        DB::transaction(function () use ($barang) {
             $barang->transaksiBarang()->delete();
             $barang->permintaanPengadaan()->delete();
             $barang->delete();
@@ -307,5 +340,58 @@ class BarangController extends Controller
         $pdf->setPaper('A4', 'portrait');
         
         return $pdf->stream('Laporan_Inventori_Bahan_' . $bulan . '_' . $tahun . '.pdf');
+    }
+
+    private function bisaIsiHarga(): bool
+    {
+        return in_array(Auth::user()->role->nama_role ?? '', ['Admin Aplikasi', 'GA']);
+    }
+
+    private function potongStokBatch(Barang $barang, $jumlah): void
+    {
+        $sisaPengeluaran = $jumlah;
+
+        $batches = TransaksiBarang::where('barang_id', $barang->barang_id)
+            ->where('jumlah_penerimaan', '>', 0)
+            ->orderBy('tgl_exp', 'asc')
+            ->get();
+
+        foreach ($batches as $batch) {
+            if ($sisaPengeluaran <= 0) {
+                break;
+            }
+
+            $sudahKeluarDiBatch = TransaksiBarang::where('barang_id', $barang->barang_id)
+                ->where('tgl_exp', $batch->tgl_exp)
+                ->sum('jumlah_pengeluaran');
+
+            $sisaDiBatch = $batch->jumlah_penerimaan - $sudahKeluarDiBatch;
+
+            if ($sisaDiBatch <= 0) {
+                continue;
+            }
+
+            $ambilDariBatch = min($sisaPengeluaran, $sisaDiBatch);
+            $sisaPengeluaran -= $ambilDariBatch;
+
+            TransaksiBarang::create([
+                'barang_id' => $barang->barang_id,
+                'jumlah_penerimaan' => 0,
+                'jumlah_pengeluaran' => $ambilDariBatch,
+                'harga' => $barang->harga_rata ?? 0,
+                'tgl_exp' => $batch->tgl_exp,
+            ]);
+        }
+    }
+
+    private function batchAktifTerdekat(Barang $barang)
+    {
+        return TransaksiBarang::where('barang_id', $barang->barang_id)
+            ->whereNotNull('tgl_exp')
+            ->select('tgl_exp', DB::raw('SUM(jumlah_penerimaan) - SUM(jumlah_pengeluaran) as sisa_stok'))
+            ->groupBy('tgl_exp')
+            ->having('sisa_stok', '>', 0)
+            ->orderBy('tgl_exp', 'asc')
+            ->first();
     }
 }

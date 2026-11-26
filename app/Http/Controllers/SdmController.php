@@ -28,11 +28,6 @@ class SdmController extends Controller
         );
     }
 
-    /**
-     * Sertifikasi/pelatihan dan CV boleh dikelola oleh pengelola SDM (HR, Koordinator, Admin)
-     * ATAU oleh pemilik datanya sendiri (akun yang terhubung ke personil tersebut).
-     * Data diri (nama, no. induk, jabatan, unit kerja, kategori) tetap hanya bisa diubah pengelola SDM.
-     */
     private function bisaKelolaKompetensi(Personil $personil): bool
     {
         $user = Auth::user();

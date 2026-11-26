@@ -222,7 +222,8 @@
                     <div class="col-md-4">
                         <label class="form-label fw-bold">Harga Rata-rata Tertimbang (Rp)</label>
 
-                        @if(auth()->check() && (auth()->user()->role === 'Admin Aplikasi' || auth()->user()->role === 'GA'))
+                        {{-- @if(auth()->check() && (auth()->user()->role === 'Admin Aplikasi' || auth()->user()->role === 'GA')) --}}
+                        @if(in_array(Auth::user()->role->nama_role ?? '', ['Admin Aplikasi', 'GA']))
                             <input type="number" step="any" name="harga_rata" class="form-control form-control-sm" placeholder="0" value="{{ old('harga_rata') }}">
                         @else
                             <input type="number" step="any" class="form-control form-control-sm bg-light" placeholder="0" value="0" disabled>
