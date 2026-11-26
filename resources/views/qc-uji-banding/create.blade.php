@@ -386,7 +386,7 @@
                                     <div id="collapse-cat-{{ $catId }}" class="accordion-collapse collapse" aria-labelledby="heading-cat-{{ $catId }}" data-bs-parent="#moduleAccordion">
                                         <div class="accordion-body p-4 bg-white">
 
-                                            @if($kategori === 'Determination of Carbon, Hydrogen, Nitrogen by Instrument')
+                                            @if(str_starts_with($kategori, 'Determination of Carbon, Hydrogen, Nitrogen') || $kategori === 'Ultimate Analysis')
 
                                                 @php
                                                     $pid_c = $params->where('nama_parameter', 'C')->first()->parameter_uji_id ?? 4;
