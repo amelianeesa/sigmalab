@@ -53,6 +53,8 @@
     #print-prox-header-1 th, #print-prox-header-1 td,
     #print-prox-header-2 th, #print-prox-header-2 td {
         font-weight: normal !important;
+        background-color: #ffffff !important;
+        color: #000000 !important;
     }
     
     .print-preview-a4 {
