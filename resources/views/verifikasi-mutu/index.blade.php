@@ -25,7 +25,7 @@
         color: #ffffff !important;
         border-color: #ffffff !important;
         white-space: nowrap;
-    }
+    }pe
     .table-bordered > :not(caption) > * > * {
         border-color: #dee2e6;
     }
