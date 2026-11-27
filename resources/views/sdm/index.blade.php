@@ -88,6 +88,14 @@
         .flatpickr-input {
             background-color: #fff !important;
         }
+        .sdm-col-check {
+            width: 36px;
+            text-align: center;
+        }
+        .btn-hapus-terpilih:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
         .sdm-table-wrap {
             overflow-x: auto;
@@ -211,7 +219,27 @@
 
         <div class="card mb-2 shadow-sm border-0">
             <div class="card-body p-2">
-                <form method="GET" action="{{ route('sdm.index') }}" class="mb-2">
+                @if($bisaKelola)
+                    <form id="formHapusTerpilih" action="{{ route('sdm.destroy-bulk') }}" method="POST" class="d-none">
+                        @csrf
+                        @method('DELETE')
+                        @if($showInactive)
+                            <input type="hidden" name="status" value="nonaktif">
+                        @endif
+                    </form>
+                    <form id="formHapusSemua" action="{{ route('sdm.destroy-all') }}" method="POST" class="d-none">
+                        @csrf
+                        @method('DELETE')
+                        @if($showInactive)
+                            <input type="hidden" name="status" value="nonaktif">
+                        @endif
+                        <input type="hidden" name="kategori" value="{{ $kategori }}">
+                        <input type="hidden" name="cari" value="{{ $cari }}">
+                    </form>
+                @endif
+
+                <div class="d-flex flex-wrap align-items-start gap-2 mb-2">
+                <form method="GET" action="{{ route('sdm.index') }}" class="flex-grow-1 m-0">
                     @if($showInactive)
                         <input type="hidden" name="status" value="nonaktif">
                     @endif
@@ -248,10 +276,25 @@
                     @endif
                 </form>
 
+                @if($bisaKelola)
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <button type="button" id="btnHapusTerpilih" class="btn btn-sm btn-warning btn-hapus-terpilih fw-semibold text-nowrap" style="font-size: 0.75rem;" disabled>
+                            <i class="fas fa-trash me-1"></i> Hapus Terpilih (<span id="jumlahTerpilih">0</span>)
+                        </button>
+                        <button type="button" id="btnHapusSemua" class="btn btn-sm btn-danger fw-semibold text-nowrap" style="font-size: 0.75rem;">
+                            <i class="fas fa-trash-alt me-1"></i> Hapus Semua
+                        </button>
+                    </div>
+                @endif
+                </div>
+
                 <div class="table-responsive sdm-table-wrap">
                     <table class="table table-bordered table-striped mb-0">
                         <thead>
                             <tr>
+                                @if($bisaKelola)
+                                    <th class="sdm-col-check"><input type="checkbox" id="checkAll" title="Pilih semua di halaman ini"></th>
+                                @endif
                                 <th style="width: 40px;">No.</th>
                                 <th style="width: 85px;">No. Induk</th>
                                 <th style="width: 155px;">Nama Personil</th>
@@ -275,6 +318,11 @@
                                 @endphp
 
                                 <tr>
+                                    @if($bisaKelola)
+                                        <td class="sdm-col-check">
+                                            <input type="checkbox" class="check-item" name="ids[]" value="{{ $row->personil_id }}" form="formHapusTerpilih">
+                                        </td>
+                                    @endif
                                     <td class="text-center">{{ $personil->firstItem() + $index }}</td>
 
                                     <td class="text-center">
@@ -451,7 +499,7 @@
 
                             @empty
                                 <tr>
-                                    <td colspan="11" class="text-center text-muted py-3" style="font-size: 0.75rem;">
+                                    <td colspan="{{ $bisaKelola ? 12 : 11 }}" class="text-center text-muted py-3" style="font-size: 0.75rem;">
                                         @if($kategori)
                                             Belum ada data personil {{ $showInactive ? 'nonaktif' : 'aktif' }}
                                             pada kategori
@@ -905,22 +953,88 @@
 
             (function () {
                 const maskotMap = {
-                    chemist: 'chemist', analist: 'analist',
-                    preparator: 'preparator', sampler: 'sampler'
+                    chemist: 'chemist.png', analist: 'analist.webp',
+                    preparator: 'preparator.webp', sampler: 'sampler.webp'
                 };
                 const base = @json(asset('images/maskot')) + '/';
                 const img = document.getElementById('maskotKategoriTambah');
                 const sel = $('#kategoriPersonilTambah');
                 if (!img || !sel.length) return;
                 function gantiMaskot() {
-                    const file = maskotMap[String(sel.val() || '').toLowerCase()] || 'analist';
-                    const tujuan = base + file + '.webp';
-                    if (img.src.endsWith(file + '.webp')) return;
+                    const file = maskotMap[String(sel.val() || '').toLowerCase()] || 'analist.webp';
+                    const tujuan = base + file;
+                    if (img.src.endsWith(file)) return;
                     img.classList.add('is-swapping');
                     setTimeout(function () { img.src = tujuan; img.classList.remove('is-swapping'); }, 180);
                 }
                 sel.on('change', gantiMaskot);
                 gantiMaskot();
+            })();
+
+            (function () {
+                const checkAll = document.getElementById('checkAll');
+                const btnTerpilih = document.getElementById('btnHapusTerpilih');
+                const btnSemua = document.getElementById('btnHapusSemua');
+                const labelJumlah = document.getElementById('jumlahTerpilih');
+                if (!checkAll || !btnTerpilih || !btnSemua) return;
+
+                const permanen = @json((bool) $showInactive);
+                const items = document.querySelectorAll('.check-item');
+
+                function refreshTerpilih() {
+                    const jumlah = document.querySelectorAll('.check-item:checked').length;
+                    labelJumlah.textContent = jumlah;
+                    btnTerpilih.disabled = jumlah === 0;
+                    checkAll.checked = items.length > 0 && jumlah === items.length;
+                }
+
+                checkAll.addEventListener('change', function () {
+                    items.forEach(function (item) { item.checked = checkAll.checked; });
+                    refreshTerpilih();
+                });
+
+                items.forEach(function (item) {
+                    item.addEventListener('change', refreshTerpilih);
+                });
+
+                btnTerpilih.addEventListener('click', function () {
+                    const jumlah = document.querySelectorAll('.check-item:checked').length;
+                    Swal.fire({
+                        title: permanen ? 'Hapus permanen personil terpilih?' : 'Nonaktifkan personil terpilih?',
+                        text: permanen
+                            ? jumlah + ' personil beserta CV dan sertifikasinya akan dihapus permanen dan tidak bisa dikembalikan!'
+                            : jumlah + ' personil akan dinonaktifkan beserta akun login-nya.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: permanen ? 'Ya, Hapus!' : 'Ya, Nonaktifkan!',
+                        cancelButtonText: 'Batal'
+                    }).then(function (result) {
+                        if (result.isConfirmed) {
+                            document.getElementById('formHapusTerpilih').submit();
+                        }
+                    });
+                });
+
+                btnSemua.addEventListener('click', function () {
+                    Swal.fire({
+                        title: permanen ? 'Hapus permanen SEMUA personil?' : 'Nonaktifkan SEMUA personil?',
+                        text: permanen
+                            ? 'Seluruh personil nonaktif yang sesuai filter saat ini (di semua halaman) akan dihapus permanen dan tidak bisa dikembalikan!'
+                            : 'Seluruh personil aktif yang sesuai filter saat ini (di semua halaman) akan dinonaktifkan beserta akun login-nya.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: permanen ? 'Ya, Hapus Semua!' : 'Ya, Nonaktifkan Semua!',
+                        cancelButtonText: 'Batal'
+                    }).then(function (result) {
+                        if (result.isConfirmed) {
+                            document.getElementById('formHapusSemua').submit();
+                        }
+                    });
+                });
             })();
 
             const modalBuatAkun = document.getElementById('modalBuatAkun');

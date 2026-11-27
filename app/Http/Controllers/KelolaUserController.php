@@ -132,4 +132,76 @@ class KelolaUserController extends Controller
 
         return redirect()->route('kelola-user.index')->with('success', 'Akun berhasil dihapus permanen');
     }
+
+    public function destroyBulk(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'integer|exists:users,users_id',
+        ]);
+
+        $daftar = User::whereIn('users_id', $request->ids)->get();
+
+        return $this->prosesHapusMassal($daftar);
+    }
+
+    public function destroyAll(Request $request)
+    {
+        $cari = trim((string) $request->input('cari'));
+        $roleId = $request->input('role_id');
+        $status = $request->input('status');
+
+        $daftar = User::query()
+            ->when($cari, function ($query) use ($cari) {
+                $query->where(function ($sub) use ($cari) {
+                    $sub->where('username', 'like', '%' . $cari . '%')
+                        ->orWhere('email', 'like', '%' . $cari . '%')
+                        ->orWhereHas('personil', fn ($q) => $q->where('nama', 'like', '%' . $cari . '%'));
+                });
+            })
+            ->when($roleId, fn ($query) => $query->where('role_id', $roleId))
+            ->when($status === 'aktif', fn ($query) => $query->where('status_aktif', true))
+            ->when($status === 'nonaktif', fn ($query) => $query->where('status_aktif', false))
+            ->get();
+
+        return $this->prosesHapusMassal($daftar);
+    }
+
+    private function prosesHapusMassal($daftar)
+    {
+        $dihapus = 0;
+        $dinonaktifkan = 0;
+        $dilewati = 0;
+
+        foreach ($daftar as $user) {
+            if ((int) $user->users_id === (int) Auth::id()) {
+                $dilewati++;
+                continue;
+            }
+
+            try {
+                $user->forceDelete();
+                $dihapus++;
+            } catch (\Illuminate\Database\QueryException $e) {
+                if ($e->getCode() !== '23000') {
+                    throw $e;
+                }
+
+                $user->update(['status_aktif' => false]);
+                $dinonaktifkan++;
+            }
+        }
+
+        $pesan = $dihapus . ' akun berhasil dihapus permanen.';
+
+        if ($dinonaktifkan > 0) {
+            $pesan .= ' ' . $dinonaktifkan . ' akun sudah punya riwayat transaksi sehingga hanya dinonaktifkan.';
+        }
+
+        if ($dilewati > 0) {
+            $pesan .= ' Akun Anda sendiri tidak ikut dihapus.';
+        }
+
+        return redirect()->route('kelola-user.index')->with('success', $pesan);
+    }
 }

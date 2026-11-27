@@ -88,6 +88,8 @@ Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawa
         Route::post('/', [SdmController::class, 'store'])->name('store');
         Route::post('/kategori', [SdmController::class, 'storeKategori'])->name('kategori.store');
         Route::delete('/kategori/{kode}', [SdmController::class, 'destroyKategori'])->name('kategori.destroy');
+        Route::delete('/destroy-bulk', [SdmController::class, 'destroyBulk'])->name('destroy-bulk');
+        Route::delete('/destroy-all', [SdmController::class, 'destroyAll'])->name('destroy-all');
 
         Route::get('/competency-matrix', [SdmController::class, 'competencyMatrix'])->name('competency-matrix');
         Route::get('/competency-matrix/pdf', [SdmController::class, 'competencyMatrixPdf'])->name('competency-matrix.pdf');
@@ -289,6 +291,8 @@ Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawa
 
     Route::middleware('modul:manajemen_pengguna,tambah_ubah')->group(function () {
         Route::post('kelola-user', [KelolaUserController::class, 'store'])->name('kelola-user.store');
+        Route::delete('kelola-user/destroy-bulk', [KelolaUserController::class, 'destroyBulk'])->name('kelola-user.destroy-bulk');
+        Route::delete('kelola-user/destroy-all', [KelolaUserController::class, 'destroyAll'])->name('kelola-user.destroy-all');
         Route::put('kelola-user/{id}', [KelolaUserController::class, 'update'])->name('kelola-user.update');
         Route::delete('kelola-user/{id}', [KelolaUserController::class, 'destroy'])->name('kelola-user.destroy');
     });

@@ -26,6 +26,14 @@
         font-size: 0.72rem;
         padding: 0.2rem 0.55rem;
     }
+    .col-check {
+        width: 36px;
+        text-align: center;
+    }
+    .btn-hapus-terpilih:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 </style>
 
 <div class="container-fluid px-3 pt-1 pb-2" style="font-size: 0.78rem;">
@@ -34,12 +42,18 @@
             <h4 class="fw-bold mb-0">Kelola User</h4>
             <p class="text-muted mb-0" style="font-size: 0.72rem;">Kelola akun login seluruh pengguna sistem (semua role).</p>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex flex-wrap justify-content-end gap-2">
             <a href="{{ route('sdm.index') }}" class="btn btn-outline-secondary btn-sm px-2.5 py-1 fw-semibold rounded-pill" style="font-size: 0.73rem;">
                 <i class="fas fa-arrow-left me-1"></i> Kembali
             </a>
             <button type="button" class="btn btn-dark btn-sm px-2.5 py-1 fw-semibold rounded-pill" style="font-size: 0.73rem;" data-bs-toggle="modal" data-bs-target="#modalTambahUser">
                 <i class="fas fa-user-plus me-1"></i> Tambah Akun
+            </button>
+            <button type="button" id="btnHapusTerpilih" class="btn btn-warning btn-sm px-2.5 py-1 fw-semibold rounded-pill btn-hapus-terpilih" style="font-size: 0.73rem;" disabled>
+                <i class="fas fa-trash me-1"></i> Hapus Terpilih (<span id="jumlahTerpilih">0</span>)
+            </button>
+            <button type="button" id="btnHapusSemua" class="btn btn-danger btn-sm px-2.5 py-1 fw-semibold rounded-pill" style="font-size: 0.73rem;">
+                <i class="fas fa-trash-alt me-1"></i> Hapus Semua
             </button>
         </div>
     </div>
@@ -55,6 +69,18 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+
+    <form id="formHapusTerpilih" action="{{ route('kelola-user.destroy-bulk') }}" method="POST" class="d-none">
+        @csrf
+        @method('DELETE')
+    </form>
+    <form id="formHapusSemua" action="{{ route('kelola-user.destroy-all') }}" method="POST" class="d-none">
+        @csrf
+        @method('DELETE')
+        <input type="hidden" name="cari" value="{{ $cari }}">
+        <input type="hidden" name="role_id" value="{{ $roleId }}">
+        <input type="hidden" name="status" value="{{ $status }}">
+    </form>
 
     <div class="mb-2 px-1">
         <form method="GET" action="{{ route('kelola-user.index') }}" class="row g-2 mb-3 align-items-center">
@@ -93,6 +119,7 @@
             <table class="table table-bordered table-striped align-middle text-center mb-0 bg-white shadow-sm rounded-3">
                 <thead>
                     <tr>
+                        <th class="col-check" style="background-color: var(--sl-primary) !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle;"><input type="checkbox" id="checkAll" title="Pilih semua di halaman ini"></th>
                         <th style="background-color: var(--sl-primary) !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle; width: 40px;">No.</th>
                         <th style="background-color: var(--sl-primary) !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle;">Username</th>
                         <th style="background-color: var(--sl-primary) !important; color: #ffffff !important; padding: 10px 8px; font-size: 0.7rem; text-align: center; vertical-align: middle;">Email</th>
@@ -105,6 +132,9 @@
                 <tbody>
                     @forelse($users as $index => $user)
                         <tr>
+                            <td class="col-check" style="padding: 10px 8px; vertical-align: middle;">
+                                <input type="checkbox" class="check-item" name="ids[]" value="{{ $user->users_id }}" form="formHapusTerpilih" {{ (int) $user->users_id === (int) Auth::id() ? 'disabled' : '' }}>
+                            </td>
                             <td style="font-size: 0.73rem; padding: 10px 8px; vertical-align: middle;">{{ $users->firstItem() + $index }}</td>
                             <td class="fw-bold text-start" style="font-size: 0.73rem; padding: 10px 8px; vertical-align: middle;">{{ $user->username }}</td>
                             <td style="font-size: 0.73rem; padding: 10px 8px; vertical-align: middle;">{{ $user->email }}</td>
@@ -219,7 +249,7 @@
                         </div>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-4" style="font-size: 0.73rem;">Belum ada akun yang ditemukan.</td>
+                            <td colspan="8" class="text-center text-muted py-4" style="font-size: 0.73rem;">Belum ada akun yang ditemukan.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -287,7 +317,65 @@
 
 @push('scripts')
 <script>
-    // Workspace hanya perlu dipilih untuk role non-lintas. HR, GA, Admin, Kabid otomatis Lab & Non-Lab.
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkAll = document.getElementById('checkAll');
+        const btnTerpilih = document.getElementById('btnHapusTerpilih');
+        const btnSemua = document.getElementById('btnHapusSemua');
+        const labelJumlah = document.getElementById('jumlahTerpilih');
+        const items = document.querySelectorAll('.check-item:not(:disabled)');
+
+        function refreshTerpilih() {
+            const jumlah = document.querySelectorAll('.check-item:checked').length;
+            labelJumlah.textContent = jumlah;
+            btnTerpilih.disabled = jumlah === 0;
+            checkAll.checked = items.length > 0 && jumlah === items.length;
+        }
+
+        checkAll.addEventListener('change', function () {
+            items.forEach(function (item) { item.checked = checkAll.checked; });
+            refreshTerpilih();
+        });
+
+        items.forEach(function (item) {
+            item.addEventListener('change', refreshTerpilih);
+        });
+
+        btnTerpilih.addEventListener('click', function () {
+            const jumlah = document.querySelectorAll('.check-item:checked').length;
+            Swal.fire({
+                title: 'Hapus akun terpilih?',
+                text: jumlah + ' akun akan dihapus permanen. Akun yang sudah punya riwayat transaksi hanya akan dinonaktifkan.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    document.getElementById('formHapusTerpilih').submit();
+                }
+            });
+        });
+
+        btnSemua.addEventListener('click', function () {
+            Swal.fire({
+                title: 'Hapus SEMUA akun?',
+                text: 'Seluruh akun yang sesuai filter saat ini (di semua halaman) akan dihapus permanen. Akun Anda sendiri tidak ikut dihapus.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus Semua!',
+                cancelButtonText: 'Batal'
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    document.getElementById('formHapusSemua').submit();
+                }
+            });
+        });
+    });
+
     function syncWorkspace(form) {
         var sel = form.querySelector('select.js-role'), wrap = form.querySelector('.js-ws-wrap');
         if (!sel || !wrap) return;

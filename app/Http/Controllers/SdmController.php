@@ -7,6 +7,8 @@ use App\Models\Personil;
 use App\Models\KompetensiPersonil;
 use App\Models\KategoriPersonil;
 use Carbon\Carbon;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
@@ -45,17 +47,10 @@ class SdmController extends Controller
         );
     }
 
-    public function index()
+    private function queryPersonilTersaring(bool $aktif, ?string $kategori, string $cari)
     {
-        $showInactive = request('status') === 'nonaktif';
-        $kategori = request('kategori');
-        $cari = trim((string) request('cari'));
-
-        $personil = Personil::with([
-            'kompetensi' => fn($query) => $query->orderByDesc('tanggal_terbit'),
-            'user',
-        ])
-            ->where('status_aktif', !$showInactive)
+        return Personil::query()
+            ->where('status_aktif', $aktif)
             ->when($kategori, fn($query) => $query->where('kategori_personil', $kategori))
             ->when($cari, function ($query) use ($cari) {
                 $query->where(function ($searchQuery) use ($cari) {
@@ -68,7 +63,20 @@ class SdmController extends Controller
                                 ->orWhere('no_sertifikasi', 'like', '%' . $cari . '%');
                         });
                 });
-            })
+            });
+    }
+
+    public function index()
+    {
+        $showInactive = request('status') === 'nonaktif';
+        $kategori = request('kategori');
+        $cari = trim((string) request('cari'));
+
+        $personil = $this->queryPersonilTersaring(!$showInactive, $kategori, $cari)
+            ->with([
+                'kompetensi' => fn($query) => $query->orderByDesc('tanggal_terbit'),
+                'user',
+            ])
             ->orderBy('nama')
             ->paginate(10)
             ->withQueryString();
@@ -315,6 +323,134 @@ class SdmController extends Controller
         return redirect()->route('sdm.index')->with('success', 'Data personil dinonaktifkan (Soft Delete).');
     }
 
+    public function destroyBulk(Request $request)
+    {
+        $this->pastikanBisaKelola();
+
+        $data = $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'integer',
+        ], [
+            'ids.required' => 'Pilih minimal satu personil terlebih dahulu.',
+            'ids.min' => 'Pilih minimal satu personil terlebih dahulu.',
+        ]);
+
+        $permanen = $request->input('status') === 'nonaktif';
+
+        $daftar = Personil::with('kompetensi')
+            ->where('status_aktif', $permanen ? false : true)
+            ->whereIn('personil_id', $data['ids'])
+            ->get();
+
+        return $this->prosesMassal($daftar, $permanen);
+    }
+
+    public function destroyAll(Request $request)
+    {
+        $this->pastikanBisaKelola();
+
+        $permanen = $request->input('status') === 'nonaktif';
+        $kategori = $request->input('kategori') ?: null;
+        $cari = trim((string) $request->input('cari'));
+
+        $daftar = $this->queryPersonilTersaring($permanen ? false : true, $kategori, $cari)
+            ->with('kompetensi')
+            ->get();
+
+        return $this->prosesMassal($daftar, $permanen, $kategori, $cari);
+    }
+
+    private function prosesMassal(Collection $daftar, bool $permanen, ?string $kategori = null, string $cari = '')
+    {
+        $parameter = array_filter([
+            'status' => $permanen ? 'nonaktif' : null,
+            'kategori' => $kategori,
+            'cari' => $cari !== '' ? $cari : null,
+        ]);
+
+        if ($daftar->isEmpty()) {
+            return redirect()->route('sdm.index', $parameter)
+                ->with('error', 'Tidak ada personil yang dapat diproses.');
+        }
+
+        if ($permanen) {
+            $jumlah = $this->hapusPermanen($daftar);
+
+            return redirect()->route('sdm.index', $parameter)
+                ->with('success', $jumlah . ' personil beserta CV dan sertifikasinya telah dihapus permanen.');
+        }
+
+        $idList = $daftar->pluck('personil_id')->all();
+
+        DB::transaction(function () use ($idList) {
+            Personil::whereIn('personil_id', $idList)->update(['status_aktif' => false]);
+            User::whereIn('personil_id', $idList)->update(['status_aktif' => false]);
+        });
+
+        return redirect()->route('sdm.index', $parameter)
+            ->with('success', count($idList) . ' personil berhasil dinonaktifkan beserta akun login-nya.');
+    }
+
+    private function hapusPermanen(Collection $daftar): int
+    {
+        $fileCv = [];
+        $fileSertifikat = [];
+
+        foreach ($daftar as $personil) {
+            if ($personil->file_cv) {
+                $fileCv[] = $personil->file_cv;
+            }
+        }
+
+        $fileSertifikat = KompetensiPersonil::withTrashed()
+            ->whereIn('personil_id', $daftar->pluck('personil_id'))
+            ->whereNotNull('file_sertifikat')
+            ->pluck('file_sertifikat')
+            ->all();
+
+        DB::transaction(function () use ($daftar) {
+            foreach ($daftar as $personil) {
+                DB::table('kegiatan_personil')->where('personil_id', $personil->personil_id)->delete();
+                DB::table('crm_verif_teknis_personil')->where('personil_id', $personil->personil_id)->delete();
+
+                $akunList = User::withTrashed()->where('personil_id', $personil->personil_id)->get();
+
+                foreach ($akunList as $akun) {
+                    try {
+                        $akun->forceDelete();
+                    } catch (QueryException $e) {
+                        if ($e->getCode() !== '23000') {
+                            throw $e;
+                        }
+
+                        $akun->update(['status_aktif' => false]);
+
+                        if (!$akun->trashed()) {
+                            $akun->delete();
+                        }
+                    }
+                }
+
+                $personil->kompetensi()->withTrashed()->forceDelete();
+                $personil->forceDelete();
+            }
+        });
+
+        foreach ($fileCv as $nama) {
+            if (Storage::disk('local')->exists('public/uploads/cv/' . $nama)) {
+                Storage::disk('local')->delete('public/uploads/cv/' . $nama);
+            }
+        }
+
+        foreach ($fileSertifikat as $nama) {
+            if (Storage::disk('local')->exists('public/uploads/sertifikat/' . $nama)) {
+                Storage::disk('local')->delete('public/uploads/sertifikat/' . $nama);
+            }
+        }
+
+        return $daftar->count();
+    }
+
     public function activate($id)
     {
         $this->pastikanBisaKelola();
@@ -389,22 +525,14 @@ class SdmController extends Controller
 
         return redirect()->route('sdm.index')->with('success', 'Akun login untuk ' . $personil->nama . ' berhasil dibuat. Password sementara telah dikirim ke email pengguna.');
     }
+
     public function forceDestroy($id)
     {
         $this->pastikanBisaKelola();
 
-        $personil = Personil::where('status_aktif', false)->findOrFail($id);
-        $fileCv = $personil->file_cv;
+        $personil = Personil::with('kompetensi')->where('status_aktif', false)->findOrFail($id);
 
-        DB::transaction(function () use ($personil) {
-            DB::table('kegiatan_personil')->where('personil_id', $personil->personil_id)->delete();
-
-            $personil->delete();
-        });
-
-        if ($fileCv && Storage::disk('local')->exists('public/uploads/cv/' . $fileCv)) {
-            Storage::disk('local')->delete('public/uploads/cv/' . $fileCv);
-        }
+        $this->hapusPermanen(collect([$personil]));
 
         return redirect()->route('sdm.index', ['status' => 'nonaktif'])
             ->with('success', 'Data personil beserta CV dan sertifikasinya telah dihapus permanen.');
@@ -531,7 +659,6 @@ class SdmController extends Controller
             ->with('success', 'Dokumen sertifikasi berhasil diunggah.');
     }
 
-    /** Unggah/ganti CV: pengelola SDM atau pemilik datanya sendiri. */
     public function uploadCv(Request $request, $id)
     {
         $personil = Personil::findOrFail($id);
