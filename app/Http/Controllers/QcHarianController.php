@@ -346,6 +346,136 @@ class QcHarianController extends Controller
         return view('qc-harian.create', compact('activeBatch', 'parameters', 'alatList', 'personilList', 'barangList', 'serverDraft'));
     }
 
+        public function edit($id)
+    {
+        $record = QcHarian::findOrFail($id);
+
+        if ($record->status_evaluasi === 'outlier' && $record->status_investigasi === 'selesai_investigasi') {
+            return redirect()->route('qc-harian.index')
+                ->with('error', 'Data ini sudah selesai diinvestigasi (CAPA) dan dikunci untuk menjaga keutuhan audit.');
+        }
+
+        $activeBatch = SampelInhouse::where('status', 'aktif')->latest()->first();
+        $parameters = $activeBatch->parameters()->where('status_parameter', 'stabil')->with('parameterUji')->get();
+        $alatList = \App\Models\Alat::where('kondisi_barang', 'baik')->orderBy('nama_alat')->get();
+        $personilList = \App\Models\Personil::orderBy('nama')->get();
+        $barangList = \App\Models\Barang::orderBy('nama_barang')->get();
+
+        $serverDraft = [
+            'draft_group_id' => $record->draft_group_id ?? '',
+            'tanggal_uji' => $record->tanggal_uji,
+            'nama_sampel' => $record->data_mentah['nama_sampel_uji'] ?? '',
+            'params' => [
+                $record->parameter_uji_id => [
+                    'selected' => true,
+                    'd1' => $record->nilai_d1,
+                    'd2' => $record->nilai_d2,
+                    'mentah' => $record->data_mentah ?? []
+                ]
+            ]
+        ];
+
+        $is_edit = true;
+        $editId = $record->id;
+
+        return view('qc-harian.create', compact('activeBatch', 'parameters', 'alatList', 'personilList', 'barangList', 'serverDraft', 'is_edit', 'editId'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $record = QcHarian::findOrFail($id);
+
+        if ($record->status_evaluasi === 'outlier' && $record->status_investigasi === 'selesai_investigasi') {
+            return redirect()->route('qc-harian.index')
+                ->with('error', 'Data ini sudah selesai diinvestigasi (CAPA) dan dikunci.');
+        }
+
+        $request->validate([
+            'tanggal_uji' => 'required|date',
+            'params' => 'required|array',
+        ]);
+
+        $pid = $record->parameter_uji_id;
+        $data = $request->params[$pid] ?? null;
+        if (!$data || empty($data['selected'])) {
+            return back()->with('error', 'Parameter yang sedang diedit harus tetap dicentang.');
+        }
+
+        $paramUji = ParameterUji::findOrFail($pid);
+        $d1 = (float)($data['d1'] ?? 0);
+        $d2 = (float)($data['d2'] ?? 0);
+        $db1 = null;
+        $db2 = null;
+        $val1 = $d1;
+        $val2 = $d2;
+
+        $pName = strtoupper($paramUji->nama_parameter);
+        $needsDb = in_array($pName, ['ASH', 'VM', 'CV', 'TS', 'FC']);
+
+        $mentah = $data['mentah'] ?? [];
+        $mentah['nama_sampel_uji'] = $request->nama_sampel_uji;
+
+        if ($needsDb) {
+            $im1 = (float)($data['mentah']['im_d1'] ?? 0);
+            $im2 = (float)($data['mentah']['im_d2'] ?? 0);
+            $mentah['im_d1'] = $im1;
+            $mentah['im_d2'] = $im2;
+
+            $frontendDb1 = isset($data['db1']) && $data['db1'] !== '' ? (float)$data['db1'] : null;
+            $frontendDb2 = isset($data['db2']) && $data['db2'] !== '' ? (float)$data['db2'] : null;
+
+            $db1 = $frontendDb1 ?? ($im1 < 100 ? ((100 / (100 - $im1)) * $d1) : $d1);
+            $db2 = $frontendDb2 ?? ($im2 < 100 ? ((100 / (100 - $im2)) * $d2) : $d2);
+            $val1 = $db1;
+            $val2 = $db2;
+        }
+
+        $meanAcuan = $paramUji->mean;
+        $sdAcuan = $paramUji->sd;
+        $history = QcHarian::where('sampel_inhouse_id', $record->sampel_inhouse_id)
+            ->where('parameter_uji_id', $pid)
+            ->where('status_pengujian', 'selesai')
+            ->where('id', '!=', $record->id)
+            ->orderBy('tanggal_uji', 'desc')
+            ->take(9)->get();
+
+        $eval = $this->westgard->evaluate($val1, $val2, $meanAcuan, $sdAcuan, $history);
+
+        // Hitung selisih stok bahan (kembalikan lama, potong baru)
+        $oldMentah = $record->data_mentah ?? [];
+        if (!empty($oldMentah['barang_ids']) && is_array($oldMentah['barang_ids'])) {
+            foreach ($oldMentah['barang_ids'] as $oldBid) {
+                $oldQty = (float)($oldMentah['barang_jumlah'][$oldBid] ?? 0);
+                if ($oldQty > 0) {
+                    \App\Models\Barang::where('barang_id', $oldBid)->decrement('pengeluaran', $oldQty);
+                }
+            }
+        }
+        if (!empty($mentah['barang_ids']) && is_array($mentah['barang_ids'])) {
+            foreach ($mentah['barang_ids'] as $newBid) {
+                $newQty = (float)($mentah['barang_jumlah'][$newBid] ?? 0);
+                if ($newQty > 0) {
+                    \App\Models\Barang::where('barang_id', $newBid)->increment('pengeluaran', $newQty);
+                }
+            }
+        }
+
+        $record->update([
+            'tanggal_uji' => $request->tanggal_uji,
+            'nilai_d1' => $d1,
+            'nilai_d2' => $d2,
+            'nilai_db_1' => $db1,
+            'nilai_db_2' => $db2,
+            'nilai_akhir' => $eval['nilai_akhir'],
+            'status_evaluasi' => $eval['status'],
+            'pelanggaran_rule' => $eval['rule'] ? $eval['message'] : null,
+            'status_investigasi' => $eval['status'] === 'outlier' ? 'menunggu_investigasi' : 'aman',
+            'data_mentah' => $mentah,
+        ]);
+
+        return redirect()->route('qc-harian.index')->with('success', 'Data pengujian berhasil diperbarui dan dievaluasi ulang.');
+    }
+
     public function destroyDraft($id)
     {
         $draft = QcHarian::findOrFail($id);

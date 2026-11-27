@@ -311,6 +311,129 @@ class QcCrmController extends Controller
         }
     }
 
+    public function edit($id)
+    {
+        $record = QcCrm::findOrFail($id);
+
+        if ($record->status_evaluasi === 'outlier' && $record->status_investigasi === 'selesai_investigasi') {
+            return redirect()->route('qc-crm.index', ['tab' => 'harian'])
+                ->with('error', 'Data ini sudah selesai diinvestigasi (CAPA) dan dikunci untuk menjaga keutuhan audit.');
+        }
+
+        $activeCrms = CrmKatalog::where('is_active', true)
+            ->where(function ($query) {
+                $query->whereNull('tanggal_expired')
+                      ->orWhereDate('tanggal_expired', '>=', now());
+            })
+            ->orderBy('nomor_lot')
+            ->get();
+
+        $personilList = Personil::orderBy('nama')->get();
+        $alatList = Alat::where('kondisi_barang', 'baik')->orderBy('nama_alat')->get();
+        $barangList = Barang::orderBy('nama_barang')->get();
+        $allParameters = \App\Models\ParameterUji::where('status_aktif', true)->orderBy('nama_parameter')->get();
+
+        $mentah = is_string($record->data_mentah) ? json_decode($record->data_mentah, true) : ($record->data_mentah ?? []);
+        $inputs = [];
+        foreach ($mentah as $key => $val) {
+            if (!is_array($val)) {
+                $inputs['in-' . str_replace('_', '-', $key)] = $val;
+            }
+        }
+        $inputs['in-d1'] = $record->nilai_d1;
+        $inputs['in-d2'] = $record->nilai_d2;
+        $inputs['in-db-1'] = $record->nilai_db_1;
+        $inputs['in-db-2'] = $record->nilai_db_2;
+        $inputs['in-analis-id'] = $record->analis_id;
+
+        $serverDraft = [
+            'crm_katalog_id' => $record->crm_katalog_id,
+            'tanggal_uji' => $record->tanggal_uji ? $record->tanggal_uji->format('Y-m-d') : null,
+            'analis_id' => $record->analis_id,
+            'no_lembar_kerja' => $record->no_lembar_kerja,
+            'params' => [
+                $record->parameter_uji_id => [
+                    'selected' => true,
+                    'inputs' => $inputs,
+                    'resource' => \Illuminate\Support\Arr::only($mentah, ['personil_ids', 'personil_peran', 'alat_ids', 'barang_ids', 'barang_jumlah']),
+                ]
+            ]
+        ];
+
+        $recentLogs = collect();
+        $is_edit = true;
+        $editId = $record->id;
+
+        return view('qc-crm.create', compact('activeCrms', 'personilList', 'alatList', 'barangList', 'allParameters', 'serverDraft', 'recentLogs', 'is_edit', 'editId'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $record = QcCrm::findOrFail($id);
+
+        if ($record->status_evaluasi === 'outlier' && $record->status_investigasi === 'selesai_investigasi') {
+            return redirect()->route('qc-crm.index', ['tab' => 'harian'])
+                ->with('error', 'Data ini sudah selesai diinvestigasi (CAPA) dan dikunci.');
+        }
+
+        $request->validate([
+            'tanggal_uji' => 'required|date',
+            'no_lembar_kerja' => 'required|string|max:255',
+            'params' => 'required|array',
+        ]);
+
+        $paramId = $record->parameter_uji_id;
+        $data = $request->params[$paramId] ?? null;
+        if (!$data || !isset($data['selected'])) {
+            return back()->with('error', 'Parameter yang sedang diedit harus tetap dicentang.');
+        }
+
+        $personilIds = $data['personil_ids'] ?? [];
+        $analisIdPerParam = $personilIds[0] ?? ($record->analis_id ?? auth()->user()->personil_id ?? null);
+
+        $mentah = $data['mentah'] ?? [];
+        $mentah['personil_ids']   = $personilIds;
+        $mentah['personil_peran'] = $data['personil_peran'] ?? [];
+        $mentah['alat_ids']       = $data['alat_ids'] ?? [];
+        $mentah['barang_ids']     = $data['barang_ids'] ?? [];
+        $mentah['barang_jumlah']  = $data['barang_jumlah'] ?? [];
+
+        $nilai_d1 = isset($data['d1']) ? floatval($data['d1']) : null;
+        $nilai_d2 = isset($data['d2']) ? floatval($data['d2']) : null;
+        $nilai_db_1 = isset($data['db1']) ? floatval($data['db1']) : null;
+        $nilai_db_2 = isset($data['db2']) ? floatval($data['db2']) : null;
+
+        if ($nilai_db_1 !== null && $nilai_db_2 !== null) {
+            $nilai_akhir = ($nilai_db_1 + $nilai_db_2) / 2;
+        } elseif ($nilai_d1 !== null && $nilai_d2 !== null) {
+            $nilai_akhir = ($nilai_d1 + $nilai_d2) / 2;
+        } else {
+            $nilai_akhir = null;
+        }
+
+        $batas_bawah = $record->cert_value - $record->cert_u;
+        $batas_atas = $record->cert_value + $record->cert_u;
+        $status = ($nilai_akhir >= $batas_bawah && $nilai_akhir <= $batas_atas) ? 'inlier' : 'outlier';
+
+        $record->update([
+            'tanggal_uji' => $request->tanggal_uji,
+            'no_lembar_kerja' => $request->no_lembar_kerja,
+            'analis_id' => $analisIdPerParam,
+            'nilai_d1' => $nilai_d1,
+            'nilai_d2' => $nilai_d2,
+            'nilai_db_1' => $nilai_db_1,
+            'nilai_db_2' => $nilai_db_2,
+            'nilai_akhir' => $nilai_akhir,
+            'status_evaluasi' => $status,
+            'status_investigasi' => ($status === 'outlier') ? 'menunggu_investigasi' : 'aman',
+            'data_mentah' => $mentah,
+            'catatan' => $data['catatan'] ?? null,
+        ]);
+
+        return redirect()->route('qc-crm.index', ['tab' => 'harian'])
+            ->with('success', 'Data pengujian QC CRM berhasil diperbarui dan dievaluasi ulang.');
+    }
+
     public function chartData(Request $request)
     {
         $katalogId = $request->input('crm_katalog_id');
@@ -366,22 +489,6 @@ class QcCrmController extends Controller
             'trend_warning' => $trendWarning,
             'trend_indices' => $trendIndices,
         ]);
-    }
-
-    public function edit($id)
-    {
-        $log = \App\Models\QcCrm::findOrFail($id);
-    
-        $log->status_evaluasi = 'draft';
-        $log->save();
-
-        return redirect()->route('qc-crm.create', [
-            'resume' => 1, 
-            'crm_id' => $log->crm_katalog_id
-        ])->withInput([
-            'tanggal_uji' => $log->tanggal_uji ? $log->tanggal_uji->format('Y-m-d') : null,
-            'no_lembar_kerja' => $log->no_lembar_kerja
-        ])->with('success', 'Mode Edit diaktifkan. Silakan perbaiki angka pada form di bawah lalu simpan kembali.');
     }
 
     public function investigasi($id)

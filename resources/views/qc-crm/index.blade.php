@@ -498,6 +498,22 @@
                                                         {{ $hasOutlier ? 'Uji Ulang (Retest)' : ($hasDraft ? 'Lanjut Draft' : 'Mulai Uji Verifikasi') }}
                                                     </a>
                                                 @endif
+
+                                                @elseif($r->verifikasiTeknis->isNotEmpty())
+                                                @php
+                                                    $hasCompletedCapa = $r->verifikasiTeknis
+                                                        ->where('status_evaluasi', 'outlier')
+                                                        ->where('status_investigasi', 'selesai_investigasi')
+                                                        ->isNotEmpty();
+                                                @endphp
+                                                @if(!$hasCompletedCapa)
+                                                    <a href="{{ route('crm-katalog.verifikasi-teknis.form', $r->id) }}"
+                                                       class="btn btn-sm btn-warning text-dark shadow-sm mb-1"
+                                                       style="font-size: 0.72rem;"
+                                                       title="Edit Hasil Verifikasi Teknis">
+                                                        <i class="fas fa-edit"></i> Edit Verif. Teknis
+                                                    </a>
+                                                @endif
                                             @endif
                                         </div>
                                     </td>
@@ -829,6 +845,11 @@
                                         @elseif($log->status_evaluasi === 'draft')
                                             <a href="{{ route('qc-crm.create', ['resume' => 1, 'crm_id' => $log->crm_katalog_id]) }}" class="btn btn-sm btn-warning fw-bold shadow-sm" style="font-size: 0.72rem;">
                                                 <i class="fas fa-edit me-1"></i> Lanjutkan Draft
+                                            </a>
+                                        @endif
+                                        @if($log->status_evaluasi !== 'draft' && !($log->status_evaluasi === 'outlier' && $log->status_investigasi === 'selesai_investigasi'))
+                                            <a href="{{ route('qc-crm.edit', $log->id) }}" class="btn btn-sm btn-warning text-dark ms-1 py-0 px-2 shadow-sm" title="Edit Data">
+                                                <i class="fas fa-edit"></i>
                                             </a>
                                         @endif
                                     </td>

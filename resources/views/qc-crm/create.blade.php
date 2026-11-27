@@ -191,8 +191,11 @@
     </div>
     @endif
 
-    <form action="{{ route('qc-crm.store') }}" method="POST" id="formQc" autocomplete="off">
+    <form action="{{ isset($is_edit) && $is_edit ? route('qc-crm.update', $editId) : route('qc-crm.store') }}" method="POST" id="formQc" autocomplete="off">
         @csrf
+        @if(isset($is_edit) && $is_edit)
+            @method('PUT')
+        @endif
 
         <div class="card shadow-sm border-0 mb-3">
             <div class="card-header text-white py-2 px-3" style="background-color: var(--sl-primary);">

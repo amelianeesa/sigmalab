@@ -509,6 +509,9 @@
                                     @endif
                                 </td>
                                 <td class="text-center text-nowrap">
+                                    <a href="{{ route('qc-harian.chart', $param->parameter_uji_id) }}" class="btn btn-corporate-blue btn-sm aksi-btn shadow-sm" title="Control Chart">
+                                        <i class="fas fa-chart-line me-1"></i> Control Chart
+                                    </a>
                                     @if($isLocked)
                                         @php
                                             $lockedLog = \App\Models\QcHarian::where('sampel_inhouse_id', $activeBatch->sampel_inhouse_id)
@@ -517,11 +520,9 @@
                                                 ->where('status_investigasi', 'menunggu_investigasi')
                                                 ->latest('id')->first();
                                         @endphp
-                                        <a href="{{ route('qc-harian.investigasi', $lockedLog->id) }}" class="btn btn-sm btn-outline-danger" title="Lakukan Investigasi">
+                                        <a href="{{ route('qc-harian.investigasi', $lockedLog->id) }}" class="btn btn-sm btn-outline-danger ms-1" title="Lakukan Investigasi">
                                             <i class="fas fa-search me-1"></i> Investigasi
                                         </a>
-                                    @else
-                                        <a href="{{ route('qc-harian.chart', $param->parameter_uji_id) }}" class="btn btn-corporate-blue btn-sm aksi-btn shadow-sm" title="Control Chart"><i class="fas fa-chart-line me-1"></i> Control Chart</a>
                                     @endif
                                 </td>
                             </tr>
@@ -563,6 +564,12 @@
                 @for($y = $startYear; $y <= $endYear; $y++)
                     <option value="{{ $y }}">{{ $y }}</option>
                 @endfor
+            </select>
+            <select id="filterStatus" class="form-select form-select-sm">
+                <option value="">Semua Status</option>
+                <option value="Outlier">Perlu Investigasi (Outlier)</option>
+                <option value="Selesai">Aman / Inlier</option>
+                <option value="DRAFT">Draft</option>
             </select>
         </div>
     </div>
@@ -680,6 +687,13 @@
                                                                     title="Lihat Kalkulasi">
                                                                 <i class="fas fa-calculator"></i>
                                                             </button>
+
+                                                                    @if(!($log->status_evaluasi === 'outlier' && $log->status_investigasi === 'selesai_investigasi'))
+                                                                        <a href="{{ route('qc-harian.edit', $log->id) }}" class="btn btn-sm btn-warning text-dark py-0 px-2 shadow-sm ms-1" title="Edit Data">
+                                                                            <i class="fas fa-edit"></i>
+                                                                        </a>
+                                                                    @endif
+
                                                                     @if($log->status_evaluasi === 'outlier')
                                                                         @if($log->status_investigasi === 'menunggu_investigasi')
                                                                             <a href="{{ route('qc-harian.investigasi', $log->id) }}" class="btn btn-sm btn-danger text-white py-0 px-2 shadow-sm ms-1" title="Form Investigasi">
@@ -987,9 +1001,13 @@
         $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
             let filterBulan = $('#filterBulan').val();
             let filterTahun = $('#filterTahun').val();
+            let filterStatus = $('#filterStatus').val();
             let dateStr = data[0] || ""; 
+            let statusStr = data[3] || "";
+
             if (filterBulan && !dateStr.includes(filterBulan)) return false;
             if (filterTahun && !dateStr.includes(filterTahun)) return false;
+            if (filterStatus && !statusStr.toLowerCase().includes(filterStatus.toLowerCase())) return false;
             return true;
         });
 
@@ -1012,7 +1030,7 @@
             }
         });
 
-        $('#filterBulan, #filterTahun').on('change', function() {
+        $('#filterBulan, #filterTahun, #filterStatus').on('change', function() {
             table.draw();
         });
 

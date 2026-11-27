@@ -340,6 +340,8 @@ Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawa
         Route::get('/', [QcHarianController::class, 'index'])->name('index');
         Route::get('/create', [QcHarianController::class, 'create'])->name('create');
         Route::post('/', [QcHarianController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [QcHarianController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [QcHarianController::class, 'update'])->name('update');
         Route::get('/draft/{id}/edit', [QcHarianController::class, 'editDraft'])->name('draft.edit');
         Route::delete('/draft/{id}', [QcHarianController::class, 'destroyDraft'])->name('draft.destroy');
         Route::get('/print-pdf', [QcHarianController::class, 'printPdf'])->name('print-pdf');

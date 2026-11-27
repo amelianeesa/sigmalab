@@ -58,10 +58,9 @@
                             }
                         @endphp
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link fw-bold {{ $index === 0 ? 'active' : '' }} {{ $isLulus ? 'disabled bg-light' : '' }}"
+                            <button class="nav-link fw-bold {{ $index === 0 ? 'active' : '' }}"
                                     data-bs-toggle="tab" data-bs-target="#pane-{{ $pid }}"
-                                    type="button" role="tab"
-                                    {{ $isLulus ? 'disabled' : '' }}>
+                                    type="button" role="tab">
                                 {{ $code }}
                                 @if($isLulus)
                                     <i class="fas fa-check-circle text-success ms-1" title="Sudah Lulus (Inlier)"></i>
@@ -282,7 +281,7 @@
 
                             @include('partials.modal-panduan-inhouse', ['pid' => $pid, 'code' => $code])
                             
-                            @if($isLulus)
+                            @if(false)
                                 <div class="alert alert-success m-4 py-5 text-center border-0 shadow-sm rounded">
                                     <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
                                     <h4 class="fw-bold text-dark">Parameter Sudah Lulus Verifikasi</h4>

@@ -536,8 +536,11 @@
         <i class="fas fa-plus-circle icon-corporate me-2"></i>Input Data Harian QC In-House
     </h5>
 
-    <form action="{{ route('qc-harian.store') }}" method="POST" id="formQc">
+    <form action="{{ isset($is_edit) && $is_edit ? route('qc-harian.update', $editId) : route('qc-harian.store') }}" method="POST" id="formQc">
         @csrf
+        @if(isset($is_edit) && $is_edit)
+            @method('PUT')
+        @endif
         <input type="hidden" name="is_draft" id="is_draft" value="0">
         <input type="hidden" name="old_draft_group_id" value="{{ isset($serverDraft) ? $serverDraft['draft_group_id'] : '' }}">
 

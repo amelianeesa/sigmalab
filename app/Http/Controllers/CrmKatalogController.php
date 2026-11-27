@@ -191,8 +191,8 @@ class CrmKatalogController extends Controller
     {
         $katalog = CrmKatalog::with('sertifikats.parameterUji')->findOrFail($id);
 
-        if ($katalog->status !== 'menunggu_verifikasi_teknis') {
-            return redirect()->route('crm-katalog.show', $id)->with('error', 'Botol ini belum siap atau sudah melewati tahap verifikasi teknis.');
+        if (!in_array($katalog->status, ['menunggu_verifikasi_teknis', 'aktif'])) {
+            return redirect()->route('crm-katalog.show', $id)->with('error', 'Botol ini belum siap untuk tahap verifikasi teknis.');
         }
 
         $existingData = \App\Models\CrmVerifikasiTeknis::with(['personils', 'alats', 'bahans'])
