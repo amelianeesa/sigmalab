@@ -4,6 +4,21 @@
 
 @section('content')
 <div class="container-fluid py-3">
+    <div class="container-fluid py-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2" style="font-size: 0.78rem;">
+            <li class="breadcrumb-item">
+                <a href="{{ route('dashboard') }}" class="text-decoration-none">Dashboard</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ route('verifikasi-mutu.index') }}" class="text-decoration-none">Verifikasi Mutu</a>
+            </li>
+            <li class="breadcrumb-item active fw-bold text-dark" aria-current="page">
+                Laporan Investigasi
+            </li>
+        </ol>
+    </nav>
+    
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
         <div>
             <h4 class="fw-bold mb-0 text-primary"><i class="fas fa-clipboard-list me-2"></i>Laporan Investigasi (CAPA) Outlier</h4>
