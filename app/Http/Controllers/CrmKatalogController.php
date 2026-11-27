@@ -15,6 +15,19 @@ class CrmKatalogController extends Controller
         return redirect()->route('qc-crm.index');
     }
 
+    public function archive(Request $request)
+    {
+        $ids = array_filter((array) $request->input('ids', []), 'is_numeric');
+        if (empty($ids)) {
+            return back()->with('error', 'Pilih minimal 1 botol CRM terlebih dahulu.');
+        }
+
+        $unarchive = $request->boolean('unarchive');
+        CrmKatalog::whereIn('id', $ids)->update(['is_archived' => !$unarchive]);
+
+        return back()->with('success', $unarchive ? 'Botol CRM dikeluarkan dari arsip.' : 'Botol CRM terpilih berhasil diarsipkan.');
+    }
+
     public function create()
     {
         $parameterList = ParameterUji::where('status_aktif', true)->orderBy('nama_parameter')->get();

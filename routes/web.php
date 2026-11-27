@@ -186,6 +186,7 @@ Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawa
     Route::post('crm-katalog/{id}/verifikasi-teknis', [\App\Http\Controllers\CrmKatalogController::class, 'verifikasiTeknisStore'])->name('crm-katalog.verifikasi-teknis.store');
     Route::get('crm-katalog/{katalog_id}/investigasi/{verif_id}', [\App\Http\Controllers\CrmKatalogController::class, 'investigasiVerifTeknis'])->name('crm-katalog.verifikasi-teknis.investigasi');
     Route::post('crm-katalog/{katalog_id}/investigasi/{verif_id}', [\App\Http\Controllers\CrmKatalogController::class, 'storeInvestigasiVerifTeknis'])->name('crm-katalog.verifikasi-teknis.investigasi.store');
+    Route::post('crm-katalog/archive', [CrmKatalogController::class, 'archive'])->name('crm-katalog.archive');
 
     // Pengujian Harian QC CRM
     Route::resource('qc-crm', \App\Http\Controllers\QcCrmController::class);
@@ -194,6 +195,7 @@ Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawa
     Route::get('qc-crm/{id}/investigasi', [\App\Http\Controllers\QcCrmController::class, 'investigasi'])->name('qc-crm.investigasi');
     Route::post('qc-crm/{id}/investigasi', [\App\Http\Controllers\QcCrmController::class, 'storeInvestigasi'])->name('qc-crm.investigasi.store');
     Route::get('qc-crm/{id}/investigasi/pdf', [\App\Http\Controllers\QcCrmController::class, 'cetakInvestigasiPdf'])->name('qc-crm.investigasi.pdf');
+    Route::post('qc-crm/archive', [QcCrmController::class, 'archive'])->name('qc-crm.archive');
 
     // QC Uji Banding
 
@@ -336,6 +338,8 @@ Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawa
         Route::post('/{id}/nonaktifkan', [QcInhouseController::class, 'nonaktifkan'])->name('nonaktifkan'); 
         Route::post('/{id}/investigasi', [QcInhouseController::class, 'storeInvestigasi'])->name('investigasi');
         Route::post('/{id}/preparasi-ulang', [QcInhouseController::class, 'preparasiUlang'])->name('preparasi-ulang');
+
+        Route::post('/archive', [QcInhouseController::class, 'archive'])->name('archive');
     });
 
     Route::prefix('qc-harian')->name('qc-harian.')->group(function () {
@@ -351,6 +355,7 @@ Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawa
         Route::get('/{id}/investigasi', [QcHarianController::class, 'investigasi'])->name('investigasi');
         Route::post('/{id}/investigasi', [QcHarianController::class, 'storeInvestigasi'])->name('investigasi.store');
         Route::get('/{id}/investigasi/pdf', [QcHarianController::class, 'cetakInvestigasiPdf'])->name('investigasi.pdf');
+        Route::post('/archive', [QcHarianController::class, 'archive'])->name('archive');
     });
 
     }); // end workspace:LAB (verifikasi mutu, qc-inhouse, qc-harian)

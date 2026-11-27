@@ -15,16 +15,35 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class QcCrmController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $isArsip = $request->boolean('arsip');
+
         $kegiatanList = QcCrm::with(['crmKatalog', 'parameterUji', 'analis'])
+            ->where('is_archived', $isArsip)
             ->orderBy('tanggal_uji', 'desc')
             ->orderBy('created_at', 'desc')
             ->get();
-            
-        $katalogs = CrmKatalog::with(['sertifikats.parameterUji', 'verifikasiTeknis.parameterUji', 'verifikasiTeknis.analis', 'verifikasiTeknis.personils'])->orderBy('created_at', 'desc')->get();
-        
-        return view('qc-crm.index', compact('kegiatanList', 'katalogs'));
+
+        $katalogs = CrmKatalog::with(['sertifikats.parameterUji', 'verifikasiTeknis.parameterUji', 'verifikasiTeknis.analis', 'verifikasiTeknis.personils'])
+            ->where('is_archived', $isArsip)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('qc-crm.index', compact('kegiatanList', 'katalogs', 'isArsip'));
+    }
+
+    public function archive(Request $request)
+    {
+        $ids = array_filter((array) $request->input('ids', []), 'is_numeric');
+        if (empty($ids)) {
+            return back()->with('error', 'Pilih minimal 1 data pengujian terlebih dahulu.');
+        }
+
+        $unarchive = $request->boolean('unarchive');
+        QcCrm::whereIn('id', $ids)->update(['is_archived' => !$unarchive]);
+
+        return back()->with('success', $unarchive ? 'Data pengujian dikeluarkan dari arsip.' : 'Data pengujian terpilih berhasil diarsipkan.');
     }
 
     public function create(\Illuminate\Http\Request $request)

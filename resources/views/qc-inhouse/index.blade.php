@@ -350,10 +350,28 @@
                 </div>
             </form>
 
+            <div class="d-flex justify-content-end gap-2 mb-2">
+                <form action="{{ route('qc-inhouse.archive') }}" method="POST" id="formArchiveInhouse" class="d-inline">
+                    @csrf
+                    <input type="hidden" name="unarchive" value="{{ !empty($isArsip) ? '1' : '0' }}">
+                    <div id="archive-inputs-inhouse"></div>
+                    <button type="submit" id="btnArchiveInhouse" class="btn btn-sm {{ !empty($isArsip) ? 'btn-success' : 'btn-warning text-dark' }}" disabled>
+                        <i class="fas {{ !empty($isArsip) ? 'fa-box-open' : 'fa-archive' }} me-1"></i>
+                        {{ !empty($isArsip) ? 'Keluarkan dari Arsip' : 'Arsipkan Terpilih' }}
+                    </button>
+                </form>
+                @if(!empty($isArsip))
+                    <a href="{{ route('qc-inhouse.index') }}" class="btn btn-sm btn-primary"><i class="fas fa-arrow-left me-1"></i> Data Aktif</a>
+                @else
+                    <a href="{{ route('qc-inhouse.index', ['arsip' => 1]) }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-archive me-1"></i> Lihat Arsip</a>
+                @endif
+            </div>
+
             <div class="table-responsive" id="table-container">
                 <table class="table table-bordered table-striped align-middle text-center mb-0 qc-table" style="font-size: 0.78rem;">
                     <thead class="align-middle">
                         <tr>
+                            <th style="width: 35px;"><input type="checkbox" class="form-check-input" id="checkAllInhouse"></th>
                             <th style="width: 45px;">No.</th>
                             <th style="width: 95px; max-width: 95px;">Kode Batch</th>
                             <th>Nama Sampel</th>
@@ -368,6 +386,7 @@
                     <tbody>
                         @forelse($sampels as $index => $s)
                             <tr>
+                                <td><input type="checkbox" class="form-check-input chk-inhouse" value="{{ $s->sampel_inhouse_id }}"></td>
                                 <td>{{ $sampels->firstItem() + $index }}</td>
                                 <td class="kode-batch-cell"><code class="text-dark fw-bold">{{ $s->kode_batch ?? '-' }}</code></td>
                                 <td class="text-start fw-bold">{{ $s->nama_sampel }}</td>
@@ -391,7 +410,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="text-center text-muted py-3">Belum ada data sampel In-House.</td>
+                                <td colspan="10" class="text-center text-muted py-3">Belum ada data sampel In-House.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -494,5 +513,41 @@ document.addEventListener('DOMContentLoaded', function() {
         }));
     });
 });
+
+function setupArchiveCheckbox(checkAllId, chkClass, inputContainerId, btnId) {
+    const checkAll = document.getElementById(checkAllId);
+    const container = document.getElementById(inputContainerId);
+    const btn = document.getElementById(btnId);
+    if (!checkAll || !container || !btn) return;
+
+    function sync() {
+        const checkboxes = document.querySelectorAll('.' + chkClass);
+        const checked = document.querySelectorAll('.' + chkClass + ':checked');
+        container.innerHTML = '';
+        checked.forEach(cb => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids[]';
+            input.value = cb.value;
+            container.appendChild(input);
+        });
+        btn.disabled = checked.length === 0;
+        checkAll.checked = checkboxes.length > 0 && checked.length === checkboxes.length;
+    }
+
+    checkAll.addEventListener('change', function () {
+        document.querySelectorAll('.' + chkClass).forEach(cb => {
+            cb.checked = checkAll.checked;
+        });
+        sync();
+    });
+
+    document.addEventListener('change', function (e) {
+        if (e.target.classList.contains(chkClass)) {
+            sync();
+        }
+    });
+}
+setupArchiveCheckbox('checkAllInhouse', 'chk-inhouse', 'archive-inputs-inhouse', 'btnArchiveInhouse');
 </script>
 @endsection

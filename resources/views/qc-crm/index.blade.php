@@ -408,10 +408,28 @@
                         </div>
                     </div>
 
+                    <div class="d-flex justify-content-end gap-2 mb-2">
+                        <form action="{{ route('crm-katalog.archive') }}" method="POST" id="formArchiveKatalog" class="d-inline">
+                            @csrf
+                            <input type="hidden" name="unarchive" value="{{ !empty($isArsip) ? '1' : '0' }}">
+                            <div id="archive-inputs-katalog"></div>
+                            <button type="submit" id="btnArchiveKatalog" class="btn btn-sm {{ !empty($isArsip) ? 'btn-success' : 'btn-warning text-dark' }} d-none">
+                                <i class="fas {{ !empty($isArsip) ? 'fa-box-open' : 'fa-archive' }} me-1"></i>
+                                {{ !empty($isArsip) ? 'Keluarkan dari Arsip' : 'Arsipkan Terpilih' }}
+                            </button>
+                        </form>
+                        @if(!empty($isArsip))
+                            <a href="{{ route('qc-crm.index') }}" class="btn btn-sm btn-primary"><i class="fas fa-arrow-left me-1"></i> Data Aktif</a>
+                        @else
+                            <a href="{{ route('qc-crm.index', ['arsip' => 1]) }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-archive me-1"></i> Lihat Arsip</a>
+                        @endif
+                    </div>
+
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped table-hover align-middle mb-0 table-qc table-stack" id="tableKatalog">
                             <thead>
                                 <tr>
+                                    <th class="text-center" style="width: 35px;"><input type="checkbox" class="form-check-input" id="checkAllKatalog"></th>
                                     <th>Nomor Lot / Botol</th>
                                     <th>Nama Produk</th>
                                     <th class="col-sertifikat">Sertifikat</th>
@@ -431,6 +449,7 @@
                                     data-search="{{ strtolower($r->nomor_lot . ' ' . $r->nama_produk . ' ' . $r->nomor_sertifikat) }}"
                                     data-status="{{ $r->status }}"
                                     data-expiry="{{ $state }}">
+                                    <td class="text-center"><input type="checkbox" class="form-check-input chk-katalog" value="{{ $r->id }}"></td>
                                     <td data-label="Nomor Lot"><span class="badge bg-primary">{{ $r->nomor_lot }}</span></td>
                                     <td data-label="Nama Produk" class="fw-bold">{{ $r->nama_produk }}</td>
                                     <td data-label="Sertifikat" class="col-sertifikat text-center">
@@ -783,10 +802,28 @@
                         </div>
                     </div>
 
+                <div class="d-flex justify-content-end gap-2 mb-2">
+                    <form action="{{ route('qc-crm.archive') }}" method="POST" id="formArchiveHarianCrm" class="d-inline">
+                        @csrf
+                        <input type="hidden" name="unarchive" value="{{ !empty($isArsip) ? '1' : '0' }}">
+                        <div id="archive-inputs-hariancrm"></div>
+                        <button type="submit" id="btnArchiveHarianCrm" class="btn btn-sm {{ !empty($isArsip) ? 'btn-success' : 'btn-warning text-dark' }} d-none">
+                            <i class="fas {{ !empty($isArsip) ? 'fa-box-open' : 'fa-archive' }} me-1"></i>
+                            {{ !empty($isArsip) ? 'Keluarkan dari Arsip' : 'Arsipkan Terpilih' }}
+                        </button>
+                    </form>
+                    @if(!empty($isArsip))
+                        <a href="{{ route('qc-crm.index', ['tab' => 'harian']) }}" class="btn btn-sm btn-primary"><i class="fas fa-arrow-left me-1"></i> Data Aktif</a>
+                    @else
+                        <a href="{{ route('qc-crm.index', ['tab' => 'harian', 'arsip' => 1]) }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-archive me-1"></i> Lihat Arsip</a>
+                    @endif
+                </div>
+
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped table-hover align-middle mb-0 table-qc table-stack" id="tableHarianCRM">
                             <thead>
                                 <tr>
+                                    <th class="text-center" style="width: 35px;"><input type="checkbox" class="form-check-input" id="checkAllHarianCrm"></th>
                                     <th>Tanggal Uji</th>
                                     <th>No. Lembar Kerja</th>
                                     <th>Botol CRM (Lot)</th>
@@ -800,6 +837,7 @@
                             <tbody>
                                 @foreach($kegiatanList as $log)
                                 <tr>
+                                    <td class="text-center"><input type="checkbox" class="form-check-input chk-hariancrm" value="{{ $log->id }}"></td>
                                     <td data-label="Tanggal Uji"
                                         data-order="{{ $log->tanggal_uji->format('Y-m-d') }}"
                                         data-periode="{{ $log->tanggal_uji->format('Y-m') }}">{{ $log->tanggal_uji->format('d-m-Y') }}</td>
@@ -1040,8 +1078,8 @@ $(function () {
         const filterPeriode = $('#filterPeriode').val();
 
         const rowNode    = tableHarian.row(dataIndex).node();
-        const rowPeriode = $(rowNode).find('td:eq(0)').data('periode');
-        const rowParam   = (data[3] || '').trim();
+        const rowPeriode = $(rowNode).find('td:eq(1)').data('periode');
+        const rowParam   = (data[4] || '').trim();
 
         if (filterParam && rowParam !== filterParam) return false;
         if (filterPeriode && rowPeriode !== filterPeriode) return false;
@@ -1396,5 +1434,37 @@ window.addEventListener('pageshow', function(event) {
         document.getElementById('chartTableBody').innerHTML = tbody;
     }
 })();
+
+function setupArchiveCheckbox(checkAllId, chkClass, inputContainerId, btnId) {
+    function sync() {
+        let checked = document.querySelectorAll('.' + chkClass + ':checked');
+        let container = document.getElementById(inputContainerId);
+        let btn = document.getElementById(btnId);
+        if (!container || !btn) return;
+        container.innerHTML = '';
+        checked.forEach(cb => {
+            let inp = document.createElement('input');
+            inp.type = 'hidden';
+            inp.name = 'ids[]';
+            inp.value = cb.value;
+            container.appendChild(inp);
+        });
+        btn.classList.toggle('d-none', checked.length === 0);
+    }
+    let checkAll = document.getElementById(checkAllId);
+    if (checkAll) {
+        checkAll.addEventListener('change', function() {
+            document.querySelectorAll('.' + chkClass).forEach(cb => cb.checked = this.checked);
+            sync();
+        });
+    }
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains(chkClass)) sync();
+    });
+}
+
+setupArchiveCheckbox('checkAllKatalog', 'chk-katalog', 'archive-inputs-katalog', 'btnArchiveKatalog');
+setupArchiveCheckbox('checkAllHarianCrm', 'chk-hariancrm', 'archive-inputs-hariancrm', 'btnArchiveHarianCrm');
+
 </script>
 @endsection

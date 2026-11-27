@@ -19,30 +19,63 @@ class QcHarianController extends Controller
         $this->westgard = $westgard;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $activeBatch = SampelInhouse::where('status', 'aktif')->latest()->first();
         $parameters = collect();
-        
         $groupedLogs = collect();
+        $isArsip = $request->boolean('arsip');
+        $tahunArsip = $request->input('tahun');
 
         if ($activeBatch) {
             $parameters = $activeBatch->parameters()->where('status_parameter', 'stabil')->get();
-            
-            $recentLogs = QcHarian::where('sampel_inhouse_id', $activeBatch->sampel_inhouse_id)
-                ->with(['parameterUji', 'analis'])
-                ->orderBy('tanggal_uji', 'desc')
+
+            $queryLogs = QcHarian::where('sampel_inhouse_id', $activeBatch->sampel_inhouse_id)
+                ->with(['parameterUji', 'analis']);
+
+            if ($isArsip) {
+                $queryLogs->where('is_archived', true);
+                if ($tahunArsip) {
+                    $queryLogs->whereYear('tanggal_uji', $tahunArsip);
+                }
+            } else {
+                $queryLogs->where('is_archived', false);
+            }
+
+            $recentLogs = $queryLogs->orderBy('tanggal_uji', 'desc')
                 ->orderBy('created_at', 'desc')
                 ->get();
-            
-            $groupedLogs = $recentLogs->groupBy(function($log) {
+
+            $groupedLogs = $recentLogs->groupBy(function ($log) {
                 if ($log->status_pengujian === 'draft' && $log->draft_group_id) {
-                    return 'DRAFT-' . $log->draft_group_id; 
+                    return 'DRAFT-' . $log->draft_group_id;
                 }
                 return 'SELESAI-' . $log->created_at->format('Y-m-d-H-i');
             });
         }
-        return view('qc-harian.index', compact('activeBatch', 'parameters', 'groupedLogs'));
+
+        return view('qc-harian.index', compact('activeBatch', 'parameters', 'groupedLogs', 'isArsip', 'tahunArsip'));
+    }
+
+    public function archive(Request $request)
+    {
+        $rawIds = $request->input('ids', []);
+        $ids = [];
+        foreach ((array) $rawIds as $val) {
+            foreach (explode(',', $val) as $id) {
+                if (is_numeric($id)) $ids[] = (int) $id;
+            }
+        }
+
+        if (empty($ids)) {
+            return back()->with('error', 'Pilih minimal 1 data terlebih dahulu.');
+        }
+
+        $unarchive = $request->boolean('unarchive');
+        QcHarian::whereIn('id', $ids)->update(['is_archived' => !$unarchive]);
+
+        $msg = $unarchive ? 'Data terpilih berhasil dikeluarkan dari arsip.' : 'Data terpilih berhasil diarsipkan.';
+        return back()->with('success', $msg);
     }
 
     public function create()

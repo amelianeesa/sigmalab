@@ -571,6 +571,35 @@
                 <option value="Selesai">Aman / Inlier</option>
                 <option value="DRAFT">Draft</option>
             </select>
+
+            <form action="{{ route('qc-harian.archive') }}" method="POST" id="formArchive" class="d-inline">
+                @csrf
+                <input type="hidden" name="unarchive" value="{{ !empty($isArsip) ? '1' : '0' }}">
+                <div id="archive-inputs"></div>
+                <button type="submit" id="btnArchiveSelected" class="btn btn-sm {{ !empty($isArsip) ? 'btn-success' : 'btn-warning text-dark' }} d-none text-nowrap">
+                    <i class="fas {{ !empty($isArsip) ? 'fa-box-open' : 'fa-archive' }} me-1"></i>
+                    {{ !empty($isArsip) ? 'Keluarkan dari Arsip' : 'Arsipkan Terpilih' }}
+                </button>
+            </form>
+
+            @if(!empty($isArsip))
+                <select class="form-select form-select-sm" style="width: auto;"
+                    onchange="window.location.href='{{ route('qc-harian.index', ['arsip' => 1]) }}&tahun=' + this.value">
+                    <option value="">Semua Tahun Arsip (&lt; {{ date('Y') }})</option>
+                    @for($y = date('Y') - 1; $y >= date('Y') - 5; $y--)
+                        <option value="{{ $y }}" {{ ($tahunArsip ?? '') == $y ? 'selected' : '' }}>
+                            Arsip Tahun {{ $y }}
+                        </option>
+                    @endfor
+                </select>
+                <a href="{{ route('qc-harian.index') }}" class="btn btn-sm btn-primary text-nowrap">
+                    <i class="fas fa-arrow-left me-1"></i> Data Tahun Ini ({{ date('Y') }})
+                </a>
+            @else
+                <a href="{{ route('qc-harian.index', ['arsip' => 1]) }}" class="btn btn-sm btn-outline-secondary text-nowrap">
+                    <i class="fas fa-archive me-1"></i> Lihat Arsip (&lt; {{ date('Y') }})
+                </a>
+            @endif
         </div>
     </div>
     <div class="card shadow-sm border-0">
@@ -582,6 +611,9 @@
                 <table class="table table-hover table-corporate align-middle mb-0 tbl-riwayat" id="tableRiwayat">
                     <thead>
                         <tr>
+                            <th class="text-center" style="width: 35px;">
+                                <input type="checkbox" class="form-check-input" id="checkAllArsip">
+                            </th>
                             <th class="text-center" style="width: 50px;">No</th>
                             <th class="ps-4">Tanggal Uji</th>
                             <th>Nama Sampel</th>
@@ -599,6 +631,9 @@
                                 $htmlId = \Illuminate\Support\Str::slug($groupId);
                             @endphp
                             <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" class="form-check-input chk-arsip" value="{{ $logs->pluck('id')->implode(',') }}">
+                                </td>
                                 <td class="text-center">{{ $loop->iteration }}</td>
                                 <td class="ps-4 fw-bold">{{ \Carbon\Carbon::parse($first->tanggal_uji)->format('d M Y') }}</td>
                                 <td>{{ $first->data_mentah['nama_sampel_uji'] ?? '-' }}</td>
@@ -1004,8 +1039,8 @@
             let filterBulan = $('#filterBulan').val();
             let filterTahun = $('#filterTahun').val();
             let filterStatus = $('#filterStatus').val();
-            let dateStr = data[1] || ""; 
-            let statusStr = data[4] || "";
+            let dateStr = data[2] || ""; 
+            let statusStr = data[5] || "";
 
             if (filterBulan && !dateStr.includes(filterBulan)) return false;
             if (filterTahun && !dateStr.includes(filterTahun)) return false;
@@ -1035,6 +1070,26 @@
         $('#filterBulan, #filterTahun, #filterStatus').on('change', function() {
             table.draw();
         });
+
+        function syncArchiveBtn() {
+            let checked = $('.chk-arsip:checked');
+            let container = $('#archive-inputs').empty();
+            checked.each(function() {
+                container.append(`<input type="hidden" name="ids[]" value="${$(this).val()}">`);
+            });
+            if (checked.length > 0) {
+                $('#btnArchiveSelected').removeClass('d-none');
+            } else {
+                $('#btnArchiveSelected').addClass('d-none');
+            }
+        }
+
+        $('#checkAllArsip').on('change', function() {
+            $('.chk-arsip').prop('checked', this.checked);
+            syncArchiveBtn();
+        });
+
+        $(document).on('change', '.chk-arsip', syncArchiveBtn);
 
         $('#tableRiwayat tbody').on('click', 'button.btn-expand', function () {
             let tr = $(this).closest('tr');

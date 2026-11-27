@@ -51,7 +51,10 @@ class QcInhouseController extends Controller
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
+        $isArsip = $request->boolean('arsip');
+
         $query = \App\Models\SampelInhouse::with(['parameters', 'pembuat'])
+            ->where('is_archived', $isArsip)
             ->orderByRaw("CASE WHEN status = 'aktif' THEN 1 ELSE 2 END")
             ->latest();
 
@@ -72,7 +75,20 @@ class QcInhouseController extends Controller
 
         $sampels = $query->paginate(10);
 
-        return view('qc-inhouse.index', compact('sampels'));
+        return view('qc-inhouse.index', compact('sampels', 'isArsip'));
+    }
+
+    public function archive(Request $request)
+    {
+        $ids = array_filter((array) $request->input('ids', []), 'is_numeric');
+        if (empty($ids)) {
+            return back()->with('error', 'Pilih minimal 1 sampel terlebih dahulu.');
+        }
+
+        $unarchive = $request->boolean('unarchive');
+        SampelInhouse::whereIn('sampel_inhouse_id', $ids)->update(['is_archived' => !$unarchive]);
+
+        return back()->with('success', $unarchive ? 'Sampel berhasil dikeluarkan dari arsip.' : 'Sampel terpilih berhasil diarsipkan.');
     }
 
     public function create()
