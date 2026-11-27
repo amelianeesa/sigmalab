@@ -155,6 +155,7 @@ Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawa
     Route::middleware('workspace:LAB')->prefix('inventori')->name('inventori.')->group(function () {
         Route::get('/monitoring-ruangan', [MonitoringRuanganController::class, 'index'])->name('monitoring.index');
         Route::post('/monitoring-ruangan/update', [MonitoringRuanganController::class, 'updateBaris'])->name('monitoring.updateBaris');
+        Route::post('/monitoring-persyaratan', [MonitoringRuanganController::class, 'updatePersyaratan'])->name('updatePersyaratan');
         Route::post('/monitoring-ruangan/update-persyaratan', [MonitoringRuanganController::class, 'updatePersyaratan'])->name('monitoring.updatePersyaratan');
         Route::get('/monitoring-ruangan/export-pdf', [MonitoringRuanganController::class, 'exportPdf'])->name('monitoring.exportPdf');
         Route::post('/monitoring-ruangan/kalibrasi/{alatId}', [MonitoringRuanganController::class, 'storeTitikKalibrasi'])->name('monitoring.storeKalibrasi');

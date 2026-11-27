@@ -106,6 +106,44 @@
         align-items: center;
     }
 
+    .dashboard-container .tabel-monitoring td.paraf-col {
+        min-width: 130px;
+        max-width: 160px;
+        white-space: normal !important;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        line-height: 1.25;
+    }
+
+    .label-syarat {
+        width: 160px;
+    }
+    .group-syarat .input-syarat {
+        width: 90px;
+    }
+
+    @media (max-width: 768px) {
+        .label-syarat {
+            width: 100%;
+        }
+        .group-syarat {
+            width: 100%;
+        }
+        .group-syarat .input-syarat {
+            flex: 1 1 0;
+            width: auto !important;
+            min-width: 0 !important;
+        }
+        .peringatan-syarat {
+            width: 100%;
+            display: block;
+        }
+        .btn-simpan-syarat {
+            width: 100%;
+            padding: 6px 10px !important;
+        }
+    }
+
     .dashboard-container .tabel-monitoring thead th,
     .dashboard-container .tabel-monitoring thead th:first-child {
         background-color: #1e88d6 !important;
@@ -601,25 +639,44 @@
                 <div class="col-md-2">
                     <button type="submit" class="btn text-white btn-sm w-100 py-1 shadow-sm" style="font-size: 0.72rem; background-color: var(--sl-primary);"><i class="fas fa-search me-1"></i> Tampilkan</button>
                 </div>
-
-                <input type="hidden" name="persyaratan_suhu" id="hiddenPersyaratanSuhu" value="{{ $persyaratanSuhu }}">
-                <input type="hidden" name="persyaratan_kelembaban" id="hiddenPersyaratanKelembaban" value="{{ $persyaratanKelembaban }}">
             </form>
 
             <hr class="my-2">
             @include('monitoring_ruangan.peralatan-ruangan')
-            <div class="row text-secondary small align-items-center" style="font-size: 0.72rem;">
-                <div class="col-md-12">
-                    <div class="d-flex align-items-center gap-2 mb-1">
-                        <strong style="width: 160px;">Persyaratan Suhu:</strong>
-                        <input type="text" id="inputPersyaratanSuhu" value="{{ $persyaratanSuhu }}" class="form-control form-control-sm w-50 py-0.5" placeholder="Otomatis dari acuan suhu" style="font-size: 0.72rem;" {{ !$canManage ? 'readonly' : '' }}>
+            @if($ruangan)
+            <form method="POST" action="{{ route('inventori.monitoring.updatePersyaratan') }}" class="text-secondary small" style="font-size: 0.72rem;">
+                @csrf
+                <input type="hidden" name="nama_ruangan" value="{{ $ruangan }}">
+                <input type="hidden" name="bulan" value="{{ $bulan }}">
+                <input type="hidden" name="tahun" value="{{ $tahun }}">
+
+                <input type="hidden" name="alat_id" value="{{ $alatId }}">
+
+                @foreach([
+                    ['Persyaratan Suhu', 'suhu', '°C', $batasAcuan['suhuMin'], $batasAcuan['suhuMax']],
+                    ['Persyaratan Kelembaban', 'kelembaban', '%', $batasAcuan['lembapMin'], $batasAcuan['lembapMax']],
+                ] as [$judul, $nama, $satuan, $acuanMin, $acuanMax])
+                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap baris-syarat">
+                        <strong class="label-syarat">{{ $judul }}:</strong>
+                        <div class="d-flex align-items-center gap-2 group-syarat">
+                            <input type="text" inputmode="decimal" autocomplete="off" name="{{ $nama }}_min" value="{{ old($nama . '_min', $persyaratan?->{$nama . '_min'}) }}" class="form-control form-control-sm text-center input-syarat" data-acuan-min="{{ $acuanMin }}" data-acuan-max="{{ $acuanMax }}" placeholder="Min" style="font-size: 0.72rem;" {{ !$canManage ? 'readonly' : '' }}>
+                            <span>-</span>
+                            <input type="text" inputmode="decimal" autocomplete="off" name="{{ $nama }}_max" value="{{ old($nama . '_max', $persyaratan?->{$nama . '_max'}) }}" class="form-control form-control-sm text-center input-syarat" data-acuan-min="{{ $acuanMin }}" data-acuan-max="{{ $acuanMax }}" placeholder="Max" style="font-size: 0.72rem;" {{ !$canManage ? 'readonly' : '' }}>
+                            <span>{{ $satuan }}</span>
+                        </div>
+                        <small class="text-danger fw-bold peringatan-syarat d-none" style="font-size: 0.68rem;"></small>
                     </div>
-                    <div class="d-flex align-items-center gap-2 mb-0">
-                        <strong style="width: 160px;">Persyaratan Kelembaban:</strong>
-                        <input type="text" id="inputPersyaratanKelembaban" value="{{ $persyaratanKelembaban }}" class="form-control form-control-sm w-50 py-0.5" placeholder="Otomatis dari acuan humidity" style="font-size: 0.72rem;" {{ !$canManage ? 'readonly' : '' }}>
-                    </div>
-                </div>
-            </div>
+                @endforeach
+
+                @if($canManage)
+                    <button type="submit" class="btn text-white btn-sm py-1 px-3 mt-1 shadow-sm btn-simpan-syarat" style="font-size: 0.72rem; background-color: var(--sl-primary);">
+                        <i class="fas fa-save me-1"></i> Simpan Persyaratan
+                    </button>
+                @endif
+            </form>
+            @else
+                <small class="text-muted" style="font-size: 0.72rem;">Isi nama ruangan lalu klik Tampilkan untuk melihat persyaratan ruangan.</small>
+            @endif
         </div>
     </div>
 
@@ -661,8 +718,8 @@
                             <th class="py-1 bg-white" style="width: 60px;">Diterima</th>
                             <th class="py-1 bg-white" style="width: 60px;">Ditolak</th>
 
-                            <th class="py-1 bg-sesi-pagi" style="width: 110px;">1</th>
-                            <th class="py-1 bg-sesi-sore" style="width: 110px;">2</th>
+                            <th class="py-1 bg-sesi-pagi" style="width: 130px; min-width: 130px;">1</th>
+                            <th class="py-1 bg-sesi-sore" style="width: 130px; min-width: 130px;">2</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -678,10 +735,10 @@
                             $row = $monitoringData[$tgl] ?? null;
                             $sudahAdaData = $row ? true : false;
 
-                            $isS1Out = ($minTemp !== null && $row?->suhu_pembacaan_1 !== null && ($row->suhu_pembacaan_1 < $minTemp || $row->suhu_pembacaan_1 > $maxTemp));
-                            $isS2Out = ($minTemp !== null && $row?->suhu_pembacaan_2 !== null && ($row->suhu_pembacaan_2 < $minTemp || $row->suhu_pembacaan_2 > $maxTemp));
-                            $isH1Out = ($minHum !== null && $row?->kelembaban_pembacaan_1 !== null && ($row->kelembaban_pembacaan_1 < $minHum || $row->kelembaban_pembacaan_1 > $maxHum));
-                            $isH2Out = ($minHum !== null && $row?->kelembaban_pembacaan_2 !== null && ($row->kelembaban_pembacaan_2 < $minHum || $row->kelembaban_pembacaan_2 > $maxHum));
+                            $isS1Out = ($minTemp !== null && $row?->suhu_pembacaan_1 !== null && ($row->suhu_pembacaan_1 < $minTemp || $row->suhu_pembacaan_1 > $maxTemp)) || $persyaratan?->suhuDiLuar($row?->suhu_pembacaan_1);
+                            $isS2Out = ($minTemp !== null && $row?->suhu_pembacaan_2 !== null && ($row->suhu_pembacaan_2 < $minTemp || $row->suhu_pembacaan_2 > $maxTemp)) || $persyaratan?->suhuDiLuar($row?->suhu_pembacaan_2);
+                            $isH1Out = ($minHum !== null && $row?->kelembaban_pembacaan_1 !== null && ($row->kelembaban_pembacaan_1 < $minHum || $row->kelembaban_pembacaan_1 > $maxHum)) || $persyaratan?->kelembabanDiLuar($row?->kelembaban_pembacaan_1);
+                            $isH2Out = ($minHum !== null && $row?->kelembaban_pembacaan_2 !== null && ($row->kelembaban_pembacaan_2 < $minHum || $row->kelembaban_pembacaan_2 > $maxHum)) || $persyaratan?->kelembabanDiLuar($row?->kelembaban_pembacaan_2);
                         @endphp
                         <tr class="align-middle">
                             <form action="{{ route('inventori.monitoring.updateBaris') }}" method="POST" id="form-tgl-{{ $tgl }}" class="m-0 p-0 form-monitoring" data-sudah-ada="{{ $sudahAdaData ? 'true' : 'false' }}">
@@ -691,9 +748,6 @@
                                 <input type="hidden" name="tahun" value="{{ $tahun }}">
                                 <input type="hidden" name="nama_ruangan" value="{{ $ruangan }}">
                                 <input type="hidden" name="tanggal" value="{{ $tgl }}">
-
-                                <input type="hidden" name="persyaratan_suhu" class="row-persyaratan-suhu" value="{{ $persyaratanSuhu ?: $otomatisSuhu }}">
-                                <input type="hidden" name="persyaratan_kelembaban" class="row-persyaratan-kelembaban" value="{{ $persyaratanKelembaban ?: $otomatisKelembaban }}">
 
                                 <td class="fw-bold bg-light">{{ $tgl }}</td>
 
@@ -744,11 +798,11 @@
                                     <input class="form-check-input" type="radio" name="status" value="Ditolak" {{ ($row?->status == 'Ditolak') ? 'checked' : '' }} {{ !$canManage ? 'disabled' : '' }}>
                                 </td>
 
-                                <td class="bg-sesi-pagi text-center small fw-bold text-dark text-truncate" style="max-width: 65px;" title="{{ $row?->paraf_1 }}">
+                                <td class="bg-sesi-pagi text-center small fw-bold text-dark paraf-col" title="{{ $row?->paraf_1 }}">
                                     {{ $row?->paraf_1 ?? '-' }}
                                 </td>
 
-                                <td class="bg-sesi-sore text-center small fw-bold text-dark text-truncate" style="max-width: 65px;" title="{{ $row?->paraf_2 }}">
+                                <td class="bg-sesi-sore text-center small fw-bold text-dark paraf-col" title="{{ $row?->paraf_2 }}">
                                     {{ $row?->paraf_2 ?? '-' }}
                                 </td>
 
@@ -815,8 +869,6 @@
     });
 
     $(document).ready(function() {
-        const namaBulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-
         $(document).on('input', 'input[inputmode="decimal"]', function() {
             let v = this.value.replace(/,/g, '.').replace(/[^0-9.\-]/g, '');
             let neg = v.charAt(0) === '-';
@@ -856,42 +908,6 @@
                 wrap.find('.select2-container--above').removeClass('select2-container--above').addClass('select2-container--below');
             });
         }
-
-        function updateRentangOtomatis() {
-            let suhuVals = [];
-            $('#tabelTemperature tbody tr').each(function() {
-                let cellText = $(this).find('td:eq(0)').text().trim();
-                let val = parseFloat(cellText);
-                if (!isNaN(val)) suhuVals.push(val);
-            });
-
-            if (suhuVals.length > 0) {
-                let minSuhu = Math.min(...suhuVals);
-                let maxSuhu = Math.max(...suhuVals);
-                let textSuhu = minSuhu + ' - ' + maxSuhu + ' °C';
-                $('#inputPersyaratanSuhu').val(textSuhu);
-                $('#hiddenPersyaratanSuhu').val(textSuhu);
-                $('.row-persyaratan-suhu').val(textSuhu);
-            }
-
-            let humVals = [];
-            $('#tabelHumidity tbody tr').each(function() {
-                let cellText = $(this).find('td:eq(0)').text().trim();
-                let val = parseFloat(cellText);
-                if (!isNaN(val)) humVals.push(val);
-            });
-
-            if (humVals.length > 0) {
-                let minHum = Math.min(...humVals);
-                let maxHum = Math.max(...humVals);
-                let textHum = minHum + ' - ' + maxHum + ' %';
-                $('#inputPersyaratanKelembaban').val(textHum);
-                $('#hiddenPersyaratanKelembaban').val(textHum);
-                $('.row-persyaratan-kelembaban').val(textHum);
-            }
-        }
-
-        updateRentangOtomatis();
 
         function getTitikAcuan(kategoriTable) {
             let points = [];
@@ -937,94 +953,69 @@
             return hasil.toFixed(2);
         }
 
+        const syarat = @json($batasSyarat);
+
+        function periksaInput(tgl, jenis, sesi, titik, min, max) {
+            const input = $('.input-' + jenis + '-' + sesi + '[data-tgl="' + tgl + '"]');
+            const teks = $('#' + jenis + '-terkoreksi-' + sesi + '-text-' + tgl);
+            const hidden = $('#' + jenis + '-terkoreksi-' + sesi + '-input-' + tgl);
+            const nilai = parseFloat(input.val());
+            const ada = !isNaN(nilai);
+            const luarAcuan = ada && titik.length > 0 && (nilai < titik[0].x || nilai > titik[titik.length - 1].x);
+            const luarSyarat = ada && ((min !== null && nilai < min) || (max !== null && nilai > max));
+
+            input.toggleClass('input-luar-batas text-danger fw-bold', luarAcuan || luarSyarat);
+            input.attr('title', luarAcuan ? 'Di luar titik acuan' : (luarSyarat ? 'Di luar persyaratan ruangan' : ''));
+            teks.toggleClass('text-danger fw-bold', luarAcuan);
+
+            if (luarAcuan) {
+                teks.text('-');
+                hidden.val('');
+            }
+        }
+
         function cekBatasPersyaratan(tgl) {
-            let pointsSuhu = getTitikAcuan('#tabelTemperature');
-            let pointsHum = getTitikAcuan('#tabelHumidity');
+            const titikSuhu = getTitikAcuan('#tabelTemperature');
+            const titikLembap = getTitikAcuan('#tabelHumidity');
 
-            let inputS1 = $('.input-suhu-1[data-tgl="' + tgl + '"]');
-            let valS1 = parseFloat(inputS1.val());
-            let textS1 = $('#suhu-terkoreksi-1-text-' + tgl);
-            let hidS1 = $('#suhu-terkoreksi-1-input-' + tgl);
-
-            if (!isNaN(valS1) && pointsSuhu.length > 0) {
-                let minEq = pointsSuhu[0].x;
-                let maxEq = pointsSuhu[pointsSuhu.length - 1].x;
-                if (valS1 < minEq || valS1 > maxEq) {
-                    inputS1.addClass('input-luar-batas text-danger fw-bold');
-                    textS1.text('-').addClass('text-danger fw-bold').removeClass('text-primary');
-                    hidS1.val('');
-                } else {
-                    inputS1.removeClass('input-luar-batas text-danger fw-bold');
-                    textS1.removeClass('text-danger fw-bold').addClass('text-primary');
-                }
-            } else {
-                inputS1.removeClass('input-luar-batas text-danger fw-bold');
-            }
-
-            let inputS2 = $('.input-suhu-2[data-tgl="' + tgl + '"]');
-            let valS2 = parseFloat(inputS2.val());
-            let textS2 = $('#suhu-terkoreksi-2-text-' + tgl);
-            let hidS2 = $('#suhu-terkoreksi-2-input-' + tgl);
-
-            if (!isNaN(valS2) && pointsSuhu.length > 0) {
-                let minEq = pointsSuhu[0].x;
-                let maxEq = pointsSuhu[pointsSuhu.length - 1].x;
-                if (valS2 < minEq || valS2 > maxEq) {
-                    inputS2.addClass('input-luar-batas text-danger fw-bold');
-                    textS2.text('-').addClass('text-danger fw-bold').removeClass('text-success');
-                    hidS2.val('');
-                } else {
-                    inputS2.removeClass('input-luar-batas text-danger fw-bold');
-                    textS2.removeClass('text-danger fw-bold').addClass('text-success');
-                }
-            } else {
-                inputS2.removeClass('input-luar-batas text-danger fw-bold');
-            }
-
-            let inputH1 = $('.input-lembap-1[data-tgl="' + tgl + '"]');
-            let valH1 = parseFloat(inputH1.val());
-            let textH1 = $('#lembap-terkoreksi-1-text-' + tgl);
-            let hidH1 = $('#lembap-terkoreksi-1-input-' + tgl);
-
-            if (!isNaN(valH1) && pointsHum.length > 0) {
-                let minEq = pointsHum[0].x;
-                let maxEq = pointsHum[pointsHum.length - 1].x;
-                if (valH1 < minEq || valH1 > maxEq) {
-                    inputH1.addClass('input-luar-batas text-danger fw-bold');
-                    textH1.text('-').addClass('text-danger fw-bold').removeClass('text-primary');
-                    hidH1.val('');
-                } else {
-                    inputH1.removeClass('input-luar-batas text-danger fw-bold');
-                    textH1.removeClass('text-danger fw-bold').addClass('text-primary');
-                }
-            } else {
-                inputH1.removeClass('input-luar-batas text-danger fw-bold');
-            }
-
-            let inputH2 = $('.input-lembap-2[data-tgl="' + tgl + '"]');
-            let valH2 = parseFloat(inputH2.val());
-            let textH2 = $('#lembap-terkoreksi-2-text-' + tgl);
-            let hidH2 = $('#lembap-terkoreksi-2-input-' + tgl);
-
-            if (!isNaN(valH2) && pointsHum.length > 0) {
-                let minEq = pointsHum[0].x;
-                let maxEq = pointsHum[pointsHum.length - 1].x;
-                if (valH2 < minEq || valH2 > maxEq) {
-                    inputH2.addClass('input-luar-batas text-danger fw-bold');
-                    textH2.text('-').addClass('text-danger fw-bold').removeClass('text-success');
-                    hidH2.val('');
-                } else {
-                    inputH2.removeClass('input-luar-batas text-danger fw-bold');
-                    textH2.removeClass('text-danger fw-bold').addClass('text-success');
-                }
-            } else {
-                inputH2.removeClass('input-luar-batas text-danger fw-bold');
-            }
+            [1, 2].forEach(function(sesi) {
+                periksaInput(tgl, 'suhu', sesi, titikSuhu, syarat.suhuMin, syarat.suhuMax);
+                periksaInput(tgl, 'lembap', sesi, titikLembap, syarat.lembapMin, syarat.lembapMax);
+            });
         }
 
         for (let i = 1; i <= 31; i++) {
             cekBatasPersyaratan(i);
         }
+
+        function cekSyarat(baris) {
+            const inputs = baris.find('.input-syarat');
+            const acuanMin = parseFloat(inputs.first().attr('data-acuan-min'));
+            const acuanMax = parseFloat(inputs.first().attr('data-acuan-max'));
+            const peringatan = baris.find('.peringatan-syarat');
+            let adaLuar = false;
+
+            inputs.each(function() {
+                const nilai = parseFloat($(this).val());
+                const luar = !isNaN(nilai) && !isNaN(acuanMin) && !isNaN(acuanMax) && (nilai < acuanMin || nilai > acuanMax);
+                $(this).toggleClass('input-luar-batas text-danger fw-bold', luar);
+                if (luar) adaLuar = true;
+            });
+
+            if (adaLuar) {
+                peringatan.text('Di luar titik acuan kalibrasi (' + acuanMin + ' - ' + acuanMax + ')').removeClass('d-none');
+            } else {
+                peringatan.text('').addClass('d-none');
+            }
+        }
+
+        $('.baris-syarat').each(function() {
+            cekSyarat($(this));
+        });
+
+        $(document).on('input', '.input-syarat', function() {
+            cekSyarat($(this).closest('.baris-syarat'));
+        });
 
         $(document).on('input', '.input-suhu-1, .input-suhu-2, .input-lembap-1, .input-lembap-2', function() {
             let tgl = $(this).data('tgl');
@@ -1098,31 +1089,6 @@
 
         $(document).on('click', '.hapus-baris', function() {
             $(this).closest('tr').remove();
-        });
-
-        $('#inputPersyaratanSuhu').on('input', function() {
-            let val = $(this).val();
-            $('#hiddenPersyaratanSuhu').val(val);
-            $('.row-persyaratan-suhu').val(val);
-        });
-
-        $('#inputPersyaratanKelembaban').on('input', function() {
-            let val = $(this).val();
-            $('#hiddenPersyaratanKelembaban').val(val);
-            $('.row-persyaratan-kelembaban').val(val);
-        });
-
-        $('#selectAlat').on('change', function() {
-            let sekarang = new Date();
-
-            $('#filterForm input[name="nama_ruangan"]').val('');
-            $('#inputPersyaratanSuhu').val('');
-            $('#hiddenPersyaratanSuhu').val('');
-            $('#inputPersyaratanKelembaban').val('');
-            $('#hiddenPersyaratanKelembaban').val('');
-
-            $('#selectBulan').val(namaBulan[sekarang.getMonth()]).trigger('change');
-            $('#filterForm input[name="tahun"]').val(sekarang.getFullYear());
         });
     });
 </script>
