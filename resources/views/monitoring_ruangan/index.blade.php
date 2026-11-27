@@ -142,6 +142,14 @@
             width: 100%;
             padding: 6px 10px !important;
         }
+
+        .dashboard-container {
+            padding: 4px 4px !important;
+        }
+
+        .dashboard-container .card-body {
+            padding: 8px 6px !important;
+        }
     }
 
     .dashboard-container .tabel-monitoring thead th,

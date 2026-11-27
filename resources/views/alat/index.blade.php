@@ -64,6 +64,21 @@
         font-size: 0.72rem;
         padding: 0.2rem 0.55rem;
     }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 4px 4px !important;
+        }
+
+        .dashboard-container .card-body {
+            padding: 8px 6px !important;
+        }
+
+        .dashboard-container .alert {
+            margin-left: 0;
+            margin-right: 0;
+        }
+    }
 </style>
 
 <div class="container-fluid dashboard-container" style="font-size: 0.82rem;">
