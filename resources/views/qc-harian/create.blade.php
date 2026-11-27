@@ -1001,6 +1001,14 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="mt-3 p-3 border rounded bg-light">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold small text-primary"><i class="fas fa-chart-line me-1"></i> Live Preview Control Chart ({{ $code }})</span>
+                            <span id="preview-badge-{{ $pid }}" class="badge bg-secondary">Menunggu Input...</span>
+                        </div>
+                        <canvas id="preview-chart-{{ $pid }}" height="75"></canvas>
+                    </div>
                     @endforeach
                 </div>
             </div>
@@ -1031,6 +1039,7 @@
     </form>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -1274,6 +1283,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
+            if (typeof updateLiveChart === 'function' && !isNaN(evalVal)) {
+                updateLiveChart(pid, evalVal);
+            }
+
             if(window.location.href.includes('qc-harian')) {
                 const trAvg = tbody.querySelector('.tr-avg');
                 if(trAvg) {
@@ -1337,6 +1350,76 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
+
+    const chartHistories = @json($chartHistories ?? []);
+    const liveCharts = {};
+
+    Object.keys(chartHistories).forEach(pid => {
+        const ctx = document.getElementById('preview-chart-' + pid);
+        if (!ctx || typeof Chart === 'undefined') return;
+
+        const h = chartHistories[pid];
+        const labels = [...h.labels, 'Preview'];
+        const dataVals = [...h.values, null];
+        const n = labels.length;
+
+        liveCharts[pid] = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Hasil Uji',
+                        data: dataVals,
+                        borderColor: '#0d6efd',
+                        backgroundColor: '#0d6efd',
+                        pointRadius: dataVals.map((_, idx) => idx === n - 1 ? 6 : 4),
+                        pointBackgroundColor: dataVals.map(() => '#0d6efd'),
+                        tension: 0.1
+                    },
+                    { label: 'Mean', data: Array(n).fill(h.mean), borderColor: '#198754', borderWidth: 1.5, pointRadius: 0 },
+                    { label: '+2SD', data: Array(n).fill(h.mean + 2 * h.sd), borderColor: '#ffc107', borderDash: [5, 5], borderWidth: 1, pointRadius: 0 },
+                    { label: '-2SD', data: Array(n).fill(h.mean - 2 * h.sd), borderColor: '#ffc107', borderDash: [5, 5], borderWidth: 1, pointRadius: 0 },
+                    { label: '+3SD', data: Array(n).fill(h.mean + 3 * h.sd), borderColor: '#dc3545', borderDash: [3, 3], borderWidth: 1, pointRadius: 0 },
+                    { label: '-3SD', data: Array(n).fill(h.mean - 3 * h.sd), borderColor: '#dc3545', borderDash: [3, 3], borderWidth: 1, pointRadius: 0 }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { ticks: { font: { size: 10 } } }, x: { ticks: { font: { size: 10 } } } }
+            }
+        });
+    });
+
+    window.updateLiveChart = function(pid, val) {
+        const chart = liveCharts[pid];
+        const h = chartHistories[pid];
+        if (!chart || !h || isNaN(val)) return;
+
+        const ds = chart.data.datasets[0];
+        const lastIdx = ds.data.length - 1;
+        ds.data[lastIdx] = val;
+
+        const diff = Math.abs(val - h.mean);
+        const badge = document.getElementById('preview-badge-' + pid);
+        let color = '#198754'; // Hijau (Inlier)
+
+        if (h.sd > 0) {
+            if (diff > 3 * h.sd) {
+                color = '#dc3545'; // Merah (Outlier)
+                if (badge) { badge.className = 'badge bg-danger'; badge.textContent = 'Preview: OUTLIER (>3SD)'; }
+            } else if (diff > 2 * h.sd) {
+                color = '#ffc107'; // Kuning (Warning)
+                if (badge) { badge.className = 'badge bg-warning text-dark'; badge.textContent = 'Preview: WARNING (2-3SD)'; }
+            } else {
+                if (badge) { badge.className = 'badge bg-success'; badge.textContent = 'Preview: INLIER (Aman)'; }
+            }
+        }
+
+        ds.pointBackgroundColor[lastIdx] = color;
+        chart.update('none');
+    };
 
     document.querySelectorAll('.param-table input').forEach(input => {
         input.addEventListener('input', function() {

@@ -57,9 +57,26 @@ class QcHarianController extends Controller
         $personilList = \App\Models\Personil::orderBy('nama')->get();
         $barangList = \App\Models\Barang::orderBy('nama_barang')->get();
         
-        
+        $chartHistories = [];
+        foreach ($parameters as $param) {
+            $pid = $param->parameter_uji_id;
+            $logs = QcHarian::where('sampel_inhouse_id', $activeBatch->sampel_inhouse_id)
+                ->where('parameter_uji_id', $pid)
+                ->where('status_pengujian', 'selesai')
+                ->orderBy('tanggal_uji', 'asc')
+                ->orderBy('created_at', 'asc')
+                ->take(15)
+                ->get();
 
-        return view('qc-harian.create', compact('activeBatch', 'parameters', 'alatList', 'personilList', 'barangList'));
+            $chartHistories[$pid] = [
+                'mean'   => (float) ($param->parameterUji->mean ?? 0),
+                'sd'     => (float) ($param->parameterUji->sd ?? 0),
+                'labels' => $logs->map(fn($l) => \Carbon\Carbon::parse($l->tanggal_uji)->format('d/m'))->values(),
+                'values' => $logs->map(fn($l) => (float) $l->nilai_akhir)->values(),
+            ];
+        }
+
+        return view('qc-harian.create', compact('activeBatch', 'parameters', 'alatList', 'personilList', 'barangList', 'chartHistories'));
     }
 
         public function store(Request $request)
@@ -346,7 +363,7 @@ class QcHarianController extends Controller
         return view('qc-harian.create', compact('activeBatch', 'parameters', 'alatList', 'personilList', 'barangList', 'serverDraft'));
     }
 
-        public function edit($id)
+    public function edit($id)
     {
         $record = QcHarian::findOrFail($id);
 
@@ -378,7 +395,26 @@ class QcHarianController extends Controller
         $is_edit = true;
         $editId = $record->id;
 
-        return view('qc-harian.create', compact('activeBatch', 'parameters', 'alatList', 'personilList', 'barangList', 'serverDraft', 'is_edit', 'editId'));
+        $chartHistories = [];
+        foreach ($parameters as $param) {
+            $pid = $param->parameter_uji_id;
+            $logs = QcHarian::where('sampel_inhouse_id', $activeBatch->sampel_inhouse_id)
+                ->where('parameter_uji_id', $pid)
+                ->where('status_pengujian', 'selesai')
+                ->orderBy('tanggal_uji', 'asc')
+                ->orderBy('created_at', 'asc')
+                ->take(15)
+                ->get();
+
+            $chartHistories[$pid] = [
+                'mean'   => (float) ($param->parameterUji->mean ?? 0),
+                'sd'     => (float) ($param->parameterUji->sd ?? 0),
+                'labels' => $logs->map(fn($l) => \Carbon\Carbon::parse($l->tanggal_uji)->format('d/m'))->values(),
+                'values' => $logs->map(fn($l) => (float) $l->nilai_akhir)->values(),
+            ];
+        }
+
+        return view('qc-harian.create', compact('activeBatch', 'parameters', 'alatList', 'personilList', 'barangList', 'serverDraft', 'is_edit', 'editId', 'chartHistories'));
     }
 
     public function update(Request $request, $id)

@@ -582,6 +582,7 @@
                 <table class="table table-hover table-corporate align-middle mb-0 tbl-riwayat" id="tableRiwayat">
                     <thead>
                         <tr>
+                            <th class="text-center" style="width: 50px;">No</th>
                             <th class="ps-4">Tanggal Uji</th>
                             <th>Nama Sampel</th>
                             <th>Analis</th>
@@ -598,6 +599,7 @@
                                 $htmlId = \Illuminate\Support\Str::slug($groupId);
                             @endphp
                             <tr>
+                                <td class="text-center">{{ $loop->iteration }}</td>
                                 <td class="ps-4 fw-bold">{{ \Carbon\Carbon::parse($first->tanggal_uji)->format('d M Y') }}</td>
                                 <td>{{ $first->data_mentah['nama_sampel_uji'] ?? '-' }}</td>
                                 <td>{{ $first->analis ? $first->analis->username : '-' }}</td>
@@ -1002,8 +1004,8 @@
             let filterBulan = $('#filterBulan').val();
             let filterTahun = $('#filterTahun').val();
             let filterStatus = $('#filterStatus').val();
-            let dateStr = data[0] || ""; 
-            let statusStr = data[3] || "";
+            let dateStr = data[1] || ""; 
+            let statusStr = data[4] || "";
 
             if (filterBulan && !dateStr.includes(filterBulan)) return false;
             if (filterTahun && !dateStr.includes(filterTahun)) return false;
