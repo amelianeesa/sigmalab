@@ -220,6 +220,8 @@ Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawa
     Route::get('aft-kalibrasi', [QcUjiBandingController::class, 'aftKalibrasiList'])->name('aft.kalibrasi.list');
     Route::get('aft-kalibrasi/{id}', [QcUjiBandingController::class, 'aftKalibrasiShow'])->name('aft.kalibrasi.show');
 
+    Route::get('/laporan-investigasi', [\App\Http\Controllers\LaporanInvestigasiController::class, 'index'])
+        ->name('laporan-investigasi.index');
     }); // end workspace:LAB (parameter uji, CRM, QC uji banding)
 
     // Library

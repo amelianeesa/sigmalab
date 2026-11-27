@@ -194,7 +194,10 @@
         sub="Silakan pilih pilar Quality Control yang ingin Anda kelola." />
 
     <div class="d-flex flex-column flex-md-row justify-content-md-end align-items-md-center mb-3 gap-2">
-        <div class="d-grid d-md-flex">
+        <div class="d-grid d-md-flex gap-2">
+            <a href="{{ route('laporan-investigasi.index') }}" class="btn btn-outline-danger btn-sm py-1.5 px-3 shadow-sm fw-semibold" style="font-size: 0.8rem;">
+                <i class="fas fa-clipboard-list me-1"></i> Laporan Investigasi (CAPA)
+            </a>
             <a href="{{ route('parameter-uji.index') }}" class="btn btn-outline-secondary btn-sm py-1.5 px-3 shadow-sm fw-semibold" style="font-size: 0.8rem;">
                 <i class="fas fa-cogs me-1"></i> Master Parameter Uji
             </a>
