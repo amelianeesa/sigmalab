@@ -279,10 +279,11 @@
                         $idAlat = $alatAktif->alat_id ?? $alatAktif->id;
                         $hasAnyKalibrasi = isset($titikKalibrasiList) && count($titikKalibrasiList) > 0;
 
-                        $tglKalibVal = $alatAktif->tanggal_kalibrasi ?? date('Y-m-d');
-                        $tglExpVal   = $alatAktif->tanggal_expired ?? date('Y-m-d');
+                        $tglKalibVal = $kalibrasiTerakhir?->tgl_kalibrasi ? \Carbon\Carbon::parse($kalibrasiTerakhir->tgl_kalibrasi)->format('Y-m-d') : '';
+                        $tglExpVal   = $kalibrasiTerakhir?->tgl_akhir ? \Carbon\Carbon::parse($kalibrasiTerakhir->tgl_akhir)->format('Y-m-d') : '';
 
-                        $isExpired   = $alatAktif->tanggal_expired && \Carbon\Carbon::now()->gt($alatAktif->tanggal_expired);
+                        $isExpired        = $tglExpVal !== '' && $tglExpVal < date('Y-m-d');
+                        $kalibrasiLengkap = $tglKalibVal !== '' && $tglExpVal !== '';
                     @endphp
                     <form action="{{ route('inventori.monitoring.storeKalibrasi', $idAlat) }}" method="POST">
                         @csrf
@@ -296,7 +297,7 @@
                                     <label class="form-label fw-bold text-secondary mb-1" style="font-size: 10px;"><i class="fas fa-hourglass-end text-danger me-1"></i> MASA BERLAKU (EXPIRED DATE)</label>
                                     <div class="input-group input-group-sm">
                                         <input type="date" name="tanggal_expired" value="{{ $tglExpVal }}" class="form-control form-control-sm bg-light fw-bold text-dark py-1" style="font-size: 0.75rem;" readonly>
-                                        @if($alatAktif->tanggal_expired)
+                                        @if($tglExpVal !== '')
                                             @if($isExpired)
                                                 <span class="badge bg-danger d-flex align-items-center px-2" style="font-size: 9px;"><i class="fas fa-exclamation-triangle me-1"></i> EXPIRED</span>
                                             @else
@@ -306,6 +307,11 @@
                                     </div>
                                 </div>
                             </div>
+                            @if(!$kalibrasiLengkap)
+                                <small class="text-danger d-block mt-1" style="font-size: 10px;">
+                                    <i class="fas fa-exclamation-circle me-1"></i> Data kalibrasi alat ini belum lengkap. <a href="{{ route('alat.input-kalibrasi', $idAlat) }}" class="fw-bold">Input data kalibrasi</a>
+                                </small>
+                            @endif
                         </div>
 
                         <div class="row g-2">
@@ -418,7 +424,7 @@
 
                         @if($canManage)
                         <div class="mt-2 text-end">
-                            <button type="submit" class="btn btn-success btn-sm px-3 py-1 fw-bold" style="font-size: 0.72rem;"><i class="fas fa-save me-1"></i> Simpan Titik Acuan</button>
+                            <button type="submit" class="btn btn-success btn-sm px-3 py-1 fw-bold" style="font-size: 0.72rem;" {{ !$kalibrasiLengkap ? 'disabled' : '' }}><i class="fas fa-save me-1"></i> Simpan Titik Acuan</button>
                         </div>
                         @endif
                     </form>
@@ -601,6 +607,7 @@
             </form>
 
             <hr class="my-2">
+            @include('monitoring_ruangan.peralatan-ruangan')
             <div class="row text-secondary small align-items-center" style="font-size: 0.72rem;">
                 <div class="col-md-12">
                     <div class="d-flex align-items-center gap-2 mb-1">
@@ -1108,7 +1115,7 @@
         $('#selectAlat').on('change', function() {
             let sekarang = new Date();
 
-            $('input[name="nama_ruangan"]').val('');
+            $('#filterForm input[name="nama_ruangan"]').val('');
             $('#inputPersyaratanSuhu').val('');
             $('#hiddenPersyaratanSuhu').val('');
             $('#inputPersyaratanKelembaban').val('');

@@ -70,7 +70,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Nama Barang / Alat <span class="text-danger">*</span></label>
+                        <label class="form-label small fw-bold mb-1" style="font-size: 11.5px;">Nama Alat <span class="text-danger">*</span></label>
                         <input type="text" name="nama_alat" class="form-control form-control-sm @error('nama_alat') is-invalid @enderror" placeholder="mis. Sulfur Analyzer" value="{{ old('nama_alat') }}" required>
                         @error('nama_alat') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>

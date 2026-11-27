@@ -9,6 +9,9 @@ use App\Models\Alat;
 use App\Models\TitikKalibrasi;
 use App\Services\KalibrasiService;
 use App\Models\DokumenReferensiRuangan;
+use App\Models\PeralatanRuangan;
+use App\Models\RiwayatKalibrasi;
+use Carbon\Carbon;
 
 class MonitoringRuanganController extends Controller
 {
@@ -32,6 +35,10 @@ class MonitoringRuanganController extends Controller
         if ($alatId){
             $alatAktif = Alat::where('alat_id', $alatId)->first();
         }
+
+        $kalibrasiTerakhir = $alatAktif
+            ? RiwayatKalibrasi::where('alat_id', $alatAktif->alat_id)->latest('tgl_kalibrasi')->first()
+            : null;
 
         $bulan = $request->input('bulan', 'Januari');
         $tahun = $request->input('tahun', date('Y'));
@@ -85,9 +92,14 @@ class MonitoringRuanganController extends Controller
         ->where('tahun', $tahun)
         ->get();
 
+        $peralatanList = !empty($ruangan)
+            ? PeralatanRuangan::where('nama_ruangan', trim($ruangan))->orderBy('nama_peralatan')->get()
+            : collect();
+
         return view('monitoring_ruangan.index', compact(
             'daftarAlat', 
             'alatAktif', 
+            'kalibrasiTerakhir',
             'bulan', 
             'tahun', 
             'ruangan', 
@@ -96,6 +108,7 @@ class MonitoringRuanganController extends Controller
             'persyaratanSuhu', 
             'persyaratanKelembaban',
             'dokumenList',
+            'peralatanList',
             'titikKalibrasiList',
             'otomatisSuhu', 
             'otomatisKelembaban'
@@ -104,13 +117,14 @@ class MonitoringRuanganController extends Controller
 
     public function storeTitikKalibrasi(Request $request, $alatId)
     {
-        $request->validate([
-            'tanggal_kalibrasi' => 'required|date',
-            'tanggal_expired' => 'required|date|after_or_equal:tanggal_kalibrasi',
-        ]);
+        $kalibrasiTerakhir = RiwayatKalibrasi::where('alat_id', $alatId)->latest('tgl_kalibrasi')->first();
 
-        $tglKalibrasi = $request->tanggal_kalibrasi;
-        $tglExpired = $request->tanggal_expired;
+        if (!$kalibrasiTerakhir?->tgl_kalibrasi || !$kalibrasiTerakhir?->tgl_akhir) {
+            return redirect()->back()->with('error', 'Lengkapi data kalibrasi alat ini terlebih dahulu di menu Alat & Kalibrasi.');
+        }
+
+        $tglKalibrasi = Carbon::parse($kalibrasiTerakhir->tgl_kalibrasi)->format('Y-m-d');
+        $tglExpired = Carbon::parse($kalibrasiTerakhir->tgl_akhir)->format('Y-m-d');
 
         if ($request->has('humidity_equipment')) {
             foreach ($request->humidity_equipment as $index => $eq) {

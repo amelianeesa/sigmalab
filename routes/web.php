@@ -17,6 +17,7 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuditLogArchiveController;
 use App\Http\Controllers\HakAksesController;
 use App\Http\Controllers\MonitoringRuanganController;
+use App\Http\Controllers\PeralatanRuanganController;
 use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\EvaluasiKalibrasiController;
 use App\Http\Controllers\PerbaikanAlatController;
@@ -58,14 +59,11 @@ Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawa
     Route::get('/alat/{id}/export-excel', [AlatController::class, 'exportExcel'])->name('alat.export-excel');
     Route::get('/alat/{id}/export-word', [AlatController::class, 'exportWord'])->name('alat.export-word');
 
-    // HANYA UNTUK DEVELOPMENT: login sebagai role lain tanpa password. Jangan aktif di production.
+    // HANYA UNTUK DEVELOPMENT: login sebagai role lain tanpa password
     if (app()->environment('local')) {
         Route::post('/switch-role', [RoleSwitcherController::class, 'switchRole'])->name('switch-role');
     }
 
-    // Route::resource('evaluasi-kalibrasi', EvaluasiKalibrasiController::class)->parameters([
-    //     'evaluasi-kalibrasi' => 'evaluasi'
-    // ]);
     Route::prefix('evaluasi-kalibrasi')->name('evaluasi-kalibrasi.')->group(function () {
         Route::get('arsip', [EvaluasiKalibrasiController::class, 'arsip'])->name('arsip');
         Route::patch('arsipkan-semua', [EvaluasiKalibrasiController::class, 'arsipkanSemua'])->name('arsipkan-semua');
@@ -80,7 +78,6 @@ Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawa
         'evaluasi-kalibrasi' => 'evaluasi'
     ]);
     
-
     Route::get('/profil', [ProfilController::class, 'index'])->name('profil.index');
     Route::put('/profil/password', [ProfilController::class, 'updatePassword'])->name('profil.password.update');
 
@@ -154,7 +151,7 @@ Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawa
     Route::put('/pengadaan/{id}/update-progres', [PengadaanController::class, 'updateProgres'])->name('pengadaan.update-progres');
     Route::put('/pengadaan/{id}/batal-progres', [PengadaanController::class, 'batalProgres'])->name('pengadaan.batal-progres');
 
-    // Inventori & Monitoring Ruangan
+    // Monitoring Ruangan
     Route::middleware('workspace:LAB')->prefix('inventori')->name('inventori.')->group(function () {
         Route::get('/monitoring-ruangan', [MonitoringRuanganController::class, 'index'])->name('monitoring.index');
         Route::post('/monitoring-ruangan/update', [MonitoringRuanganController::class, 'updateBaris'])->name('monitoring.updateBaris');
@@ -165,6 +162,9 @@ Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawa
         Route::post('/monitoring-ruangan/upload-referensi', [MonitoringRuanganController::class, 'uploadReferensi'])->name('monitoring.uploadReferensi');
         Route::put('/monitoring-ruangan/referensi/{id}', [MonitoringRuanganController::class, 'updateReferensi'])->name('monitoring.updateReferensi');
         Route::delete('/monitoring-ruangan/referensi/{id}', [MonitoringRuanganController::class, 'destroyReferensi'])->name('monitoring.destroyReferensi');
+        Route::post('/monitoring-ruangan/peralatan', [PeralatanRuanganController::class, 'store'])->name('monitoring.storePeralatan');
+        Route::put('/monitoring-ruangan/peralatan/{id}', [PeralatanRuanganController::class, 'update'])->name('monitoring.updatePeralatan');
+        Route::delete('/monitoring-ruangan/peralatan/{id}', [PeralatanRuanganController::class, 'destroy'])->name('monitoring.destroyPeralatan');
     });
 
     Route::middleware('workspace:LAB')->group(function () {
@@ -194,8 +194,6 @@ Route::middleware(['auth', 'force.password.change', 'workspace.resolve', 'pegawa
     Route::get('qc-crm/{id}/investigasi', [\App\Http\Controllers\QcCrmController::class, 'investigasi'])->name('qc-crm.investigasi');
     Route::post('qc-crm/{id}/investigasi', [\App\Http\Controllers\QcCrmController::class, 'storeInvestigasi'])->name('qc-crm.investigasi.store');
     Route::get('qc-crm/{id}/investigasi/pdf', [\App\Http\Controllers\QcCrmController::class, 'cetakInvestigasiPdf'])->name('qc-crm.investigasi.pdf');
-
-    // QC Uji Banding
 
     // QC Uji Banding & Toleransi
     Route::get('qc-uji-banding/master-toleransi', [ParameterToleransiController::class, 'index'])->name('master.toleransi.index');
